@@ -12,12 +12,76 @@
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
+@theme {
+  /* colors setup */
+  --color-secondary01: #d3f2fb;
+  --color-secondary02: #baecfb;
+  --color-secondary03: #88e1fb;
+  --color-secondary04: #6edbfb;
+  --color-secondary05: #3cd0fb;
+  --color-primary01: #070220;
+  --color-primary02: #120554;
+  --color-primary03: #1e0887;
+  --color-primary04: #290cba;
+  --color-primary05: #340fed;
+  --color-accent01: #e89582;
+  --color-accent02: #e86f54;
+  --color-accent03: #e94925;
+  --color-accent04: #e8360e;
+  --color-accent05: #4d180c;
+  --color-neutral01: #ffffff;
+  --color-neutral02: #f2f2f2;
+  --color-neutral03: #cccccc;
+  --color-neutral04: #999999;
+  --color-neutral05: #4d4d4d;
+  --color-neutral06: #e8e6f3;
+
+  --text-h1: 36px;
+  --text-h2: 24px;
+  --text-h3: 20px;
+  --text-h4: 16px;
+  --text-h5: 14px;
+  --text-h6: 12px;
+  --text-p1: 16px;
+  --text-h1-1: 32px;
+
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+@layer base {
+  h1 {
+    font-size: var(--text-h1);
+  }
+
+  h2 {
+    font-size: var(--text-h2);
+  }
+
+  h3 {
+    font-size: var(--text-h3);
+  }
+
+  h4 {
+    font-size: var(--text-h4);
+  }
+  h5 {
+    font-size: var(--text-h5);
+  }
+
+  h6 {
+    font-size: var(--text-h6);
+  }
+}
+
+/* @media (prefers-color-scheme: dark) {
   :root {
     --background: #0a0a0a;
     --foreground: #ededed;
   }
-}
+} */
 
 body {
   background: var(--background);
