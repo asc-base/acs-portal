@@ -1,5 +1,5 @@
 import { IExample } from "@/interface/example";
-const BASE_URL = "https://jsonplaceholder.typicode.com1";
+const BASE_URL = "https://jsonplaceholder.typicode.com";
 
 export const getExampleData = async (): Promise<IExample[] | Error> => {
   const response = await fetch(`${BASE_URL}/posts`);
