@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@plugin "tailwindcss-jun-layout";
 
 :root {
   --background: #ffffff;

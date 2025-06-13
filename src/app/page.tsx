@@ -4,7 +4,7 @@ import { Button } from "@mui/material";
 export default function Home() {
   return (
     <div>
-      <div>
+      <div className="jun-layout">
         <h1 className="text-accent02 font-bold">Hello World</h1>
       </div>
       <Button className="!bg-accent01">
