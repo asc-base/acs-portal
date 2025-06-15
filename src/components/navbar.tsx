@@ -9,7 +9,7 @@ import Link from "next/link";
 
 const MenuBar = () => {
   const menuItems = [
-    { name: "สมัคร", href: "/" },
+    { name: "สมัครเรียน", href: "/" },
     { name: "หลักสูตร", href: "/about" },
     { name: "ผลงานนักศึกษา", href: "/curriculum" },
     { name: "ทำเนียบรุ่น", href: "/news" },
