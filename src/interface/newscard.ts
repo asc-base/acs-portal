@@ -1,5 +1,5 @@
 export interface NewsCardProps {
   title: string;
-  createAt: string;
+  createdAt: string;
   image: string;
 }
