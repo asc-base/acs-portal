@@ -43,7 +43,7 @@ const sidebarItems = [
     },
 ];
 
-export const EdgeSidebarAdmin = () => {
+export const EdgeSidebarAdmin = ({username} : {username : string}) => {
     const pathname = usePathname();
 
     return (
@@ -51,7 +51,7 @@ export const EdgeSidebarAdmin = () => {
             <div>
                 <div className="flex items-center gap-x-4 px-8 py-4">
                     <AccountCircleRoundedIcon fontSize="large" className=" text-neutral05 " />
-                    <h3>Admin01</h3>
+                    <h3>{username}</h3>
                 </div>
                 <nav>
                     <ul className="flex flex-col gap-y-2">
@@ -66,7 +66,7 @@ export const EdgeSidebarAdmin = () => {
                                     >
                                         <span
                                             className={`transition-colors text-[20px]
-                                            ${isActive ? "text-primary04" : "text-neutral03 group-hover:text-primary04"}`}
+                                            ${isActive ? "text-primary04" : "text-neutral04 group-hover:text-primary04"}`}
                                         >
                                             {item.icon}
                                         </span>
@@ -87,11 +87,11 @@ export const EdgeSidebarAdmin = () => {
             <div className="mt-auto">
                 <Link
                     href="/logout"
-                    className="flex items-center gap-x-4 px-8 h-[44px] hover:bg-gray-100 group"
+                    className="flex items-center gap-x-4 px-8 h-[44px] hover:bg-neutral02 group"
                     
                 >
                     <LogoutIcon className="text-neutral03 group-hover:text-accent04 text-[20px]" />
-                    <h4 className="text-neutral05 group-hover:text-red-500">ออกจากระบบ</h4>
+                    <h4 className="text-neutral05 group-hover:text-accent04">ออกจากระบบ</h4>
                 </Link>
             </div>
         </aside>
