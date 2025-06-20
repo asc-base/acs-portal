@@ -64,12 +64,12 @@ export const EdgeSidebarAdmin = ({username} : {username : string}) => {
                                         className={`flex items-center gap-x-4 px-8 transition-colors group h-[44px]                               
                                         ${isActive ? "bg-primary04/10 border-l-4 border-primary04 " : "hover:bg-neutral02"}`}
                                     >
-                                        <span
-                                            className={`transition-colors text-[20px]
+                                        <h3
+                                            className={`transition-colors 
                                             ${isActive ? "text-primary04" : "text-neutral04 group-hover:text-primary04"}`}
                                         >
                                             {item.icon}
-                                        </span>
+                                        </h3>
 
                                         <h4
                                             className={`transition-colors
@@ -90,7 +90,7 @@ export const EdgeSidebarAdmin = ({username} : {username : string}) => {
                     className="flex items-center gap-x-4 px-8 h-[44px] hover:bg-neutral02 group"
                     
                 >
-                    <LogoutIcon className="text-neutral03 group-hover:text-accent04 text-[20px]" />
+                    <h3><LogoutIcon className="text-neutral04 group-hover:text-accent04"/></h3>
                     <h4 className="text-neutral05 group-hover:text-accent04">ออกจากระบบ</h4>
                 </Link>
             </div>
