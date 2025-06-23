@@ -13,32 +13,32 @@ import { usePathname } from "next/navigation";
 const sidebarItems = [
     {
         name: "ข้อมูลนักศึกษา",
-        href: "/students",
+        href: "/admin/students",
         icon: <PersonIcon />
     },
     {
         name: "ข้อมูลอาจารย์",
-        href: "/professors",
+        href: "/admin/professors",
         icon: <HailIcon />
     },
     {
         name: "ข้อมูลผลงาน",
-        href: "/works",
+        href: "/admin/works",
         icon: <DescriptionIcon />
     },
     {
         name: "จัดการข่าวสาร",
-        href: "/news",
+        href: "/admin/news",
         icon: <NewspaperIcon />
     },
     {
         name: "จัดการรายวิชา",
-        href: "/courses",
+        href: "/admin/courses",
         icon: <MenuBookIcon />
     },
     {
         name: "จัดการฝึกงาน",
-        href: "/internships",
+        href: "/admin/internships",
         icon: <WorkIcon />
     },
 ];
