@@ -17,7 +17,7 @@ export const getNews = async (): Promise<News[] | Error> => {
 export const getNewsById = async (id: string): Promise<News| Error> => {
   const response = await fetch(`${BASE_URL}/news/${id}`);
   if (!response.ok) {
-      return new Error("Failed to fetch example data");
+      return new Error("Failed to fetch news by ID");
     }
     const data: News = await response.json();
     return data;
@@ -65,16 +65,4 @@ export const deleteNews = async (id: string): Promise<true | Error> => {
   }
 
   return true;
-};
-
-
-export const getAllNews = async (): Promise<News[] | Error> => {
-  const response = await fetch(`${BASE_URL}/news`);
-  
-  if (!response.ok) {
-    return new Error("Failed to fetch all news");
-  }
-
-  const data: News[] = await response.json();
-  return data;
 };
