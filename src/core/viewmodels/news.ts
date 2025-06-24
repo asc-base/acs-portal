@@ -43,7 +43,7 @@ export const updateNews = async (
   return true;
 };
 
-export const DeleteNews = async (id: string): Promise<true | Error> => {
+export const deleteNewsViewModel = async (id: string): Promise<true | Error> => {
   const result = await deleteNews(id);
   if (result instanceof Error) {
     console.error("Error deleting news:", result);

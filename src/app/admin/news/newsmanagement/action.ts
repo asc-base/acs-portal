@@ -1,7 +1,7 @@
 "use server";
 
 import { News } from "@/interface/news";
-import { fetchNewsById, createNews, updateNews, DeleteNews} from "@/core/viewmodels/news";
+import { fetchNewsById, createNews, updateNews} from "@/core/viewmodels/news";
 
 export async function getNewsById(id: string) {
   try {
