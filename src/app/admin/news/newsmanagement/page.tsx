@@ -4,6 +4,8 @@ import { useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
 import { getNewsById, postNews, patchNews } from "./action";
 import { News } from "@/interface/news";
+import { Category } from "@/interface/type";
+import { fetchCategories } from "@/core/viewmodels/type";
 
 function isNews(data: unknown): data is News {
   return (
@@ -20,7 +22,7 @@ export default function NewsForm() {
 
   const isEditMode = pathSegments.length === 4;
   const newsId = isEditMode ? pathSegments[3] : null;
-  const [categories, setCategories] = useState<{ id: number; name: string }[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
 
   const [form, setForm] = useState<News>({
     title: "",
@@ -100,6 +102,20 @@ export default function NewsForm() {
       alert("เกิดข้อผิดพลาดในการบันทึกข้อมูลข่าวสาร");
     }
   };
+
+  
+  useEffect(() => {
+    const loadCategories = async () => {
+      try {
+        const data = await fetchCategories();
+        setCategories(data);
+      } catch (error) {
+        console.error("Error loading categories:", error);
+      }
+    };
+
+     loadCategories();
+  }, []);
 
 
   return (
