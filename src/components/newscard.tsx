@@ -10,16 +10,17 @@ export const NewsCard: FC<NewsCardProps> = (props) => {
   const { title, createdAt, image, isAdmin = false, onEdit, onDelete} = props;
   return (
     <Card
+      className="s!hadow-[1px_2px_3px_0px_#07022012,_0px_-1px_3px_0px_#07022012]"
       sx={{
         display: "flex",
         height: isAdmin ? "414px" : "370px",
-        width: "320px",
-        maxWidth: "360px",
+        width: "100%",
+       
         flexDirection: "column",
         gap: 1,
         borderRadius: "8px",
         padding: 3,
-        boxShadow: 6,
+       
       }}
     >
       <div style={{ display: "flex", justifyContent: "center" }}>
@@ -28,7 +29,7 @@ export const NewsCard: FC<NewsCardProps> = (props) => {
             position: "relative",
             height: "240px",
             width: "100%",
-            maxWidth: "320px",
+         
             borderRadius: "12px",
             overflow: "hidden",
           }}
@@ -41,7 +42,9 @@ export const NewsCard: FC<NewsCardProps> = (props) => {
           />
         </div>
       </div>
-      <h3 style={{ fontWeight: "bold", margin: 0 }}>{title}</h3>
+      <div>
+        <h3 style={{ fontWeight: "bold", margin: 0 }} className="line-clamp-2">{title}</h3>
+      </div>
       <h6 style={{ margin: 0 }}>{createdAt}</h6>
 
       {isAdmin && (

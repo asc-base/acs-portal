@@ -6,7 +6,7 @@ const ReviewCard: FC<ReviewCardProps> = (props) => {
   return (
     <Card
       sx={{ maxWidth: 346 }}
-      className="!gap-8 !rounded-2xl !p-8 !shadow-[1px_2px_3px_0px_#07022012,_0px_-1px_3px_0px_#07022012]"
+      className="!gap-8 !rounded-2xl !p-4 !shadow-[1px_2px_3px_0px_#07022012,_0px_-1px_3px_0px_#07022012]"
     >
       <CardContent className="flex flex-col gap-8">
         <div className="flex flex-col items-center gap-4">

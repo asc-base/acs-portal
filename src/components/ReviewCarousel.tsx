@@ -34,17 +34,29 @@ export const ReviewCarousel: React.FC<CarouselReviewProps> = ({
     }
   }, [autoPlay, autoPlayInterval, groupReviewsList.length]);
 
+  useEffect(() => {
+    if (autoPlay && items.length > 1) {
+      const interval = setInterval(() => {
+        setCurrentIndex((prev) =>
+          prev === items.length - 1 ? 0 : prev + 1,
+        );
+      }, autoPlayInterval);
+      return () => clearInterval(interval);
+    }
+  }, [autoPlay, autoPlayInterval, items.length]);
+
   const goToSlide = (index: number) => setCurrentIndex(index);
 
   if (!items.length) return null;
 
   return (
-    <div className={`relative mx-auto w-full max-w-6xl`}>
+   <div>
+     <div className={`relative mx-auto w-full max-w-6xl max-sm:hidden`}>
       {/* Main Carousel Container */}
-      <div className="relative h-[496px] overflow-hidden rounded-sm max-xl:h-[199px] max-sm:h-[189px]">
+      <div className="relative overflow-hidden rounded-sm ">
         {/* Slides Container */}
         <div
-          className="flex h-full transition-transform duration-700 ease-in-out"
+          className="flex h-full transition-transform duration-700 ease-in-out "
           style={{ transform: `translateX(-${currentIndex * 100}%)` }}
         >
           {groupReviewsList.map((item, index) => (
@@ -100,5 +112,52 @@ export const ReviewCarousel: React.FC<CarouselReviewProps> = ({
         </div>
       )}
     </div>
+     <div className={`relative mx-auto w-full max-w-6xl sm:hidden`}>
+      {/* Main Carousel Container */}
+      <div className="relative overflow-hidden rounded-sm">
+        {/* Slides Container */}
+        <div
+          className="flex h-full transition-transform duration-700 ease-in-out "
+          style={{ transform: `translateX(-${currentIndex * 100}%)` }}
+        >
+          {items.map((item, index) => (
+            <div key={index} className="relative h-full w-full flex-shrink-0">
+              <div className="grid h-full grid-cols-1 gap-4 p-6">
+                {/* Review Card 1 */}
+                <ReviewCard
+                  imageUrl={item.imageUrl}
+                  quote={item.quote}
+                  description={item.description}
+                  name={item.name}
+                  title={item.title}
+                />
+
+                {/* Review Card 2 */}
+              
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Indicator Dots */}
+      {showIndicators && items.length > 1 && (
+        <div className="mt-3 flex items-center justify-center space-x-3">
+          {items.map((_, index) => (
+            <button
+              key={index}
+              onClick={() => goToSlide(index)}
+              className={`transition-all duration-300 ${
+                index === currentIndex
+                  ? "bg-primary02 h-2 w-2 rounded-full"
+                  : "bg-neutral06 h-2 w-2 rounded-full hover:scale-125"
+              }`}
+              aria-label={`Go to slide ${index + 1}`}
+            />
+          ))}
+        </div>
+      )}
+    </div>
+   </div>
   );
 };

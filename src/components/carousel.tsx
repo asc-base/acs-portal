@@ -29,7 +29,7 @@ export const Carousel: React.FC<CarouselProps> = ({
       className={`relative mx-auto w-full max-w-6xl `}
     >
       {/* Main Carousel Container */}
-      <div className="relative  overflow-hidden rounded-sm bg-gray-900 shadow-2xl h-[496px] max-xl:h-[199px] max-sm:h-[189px]">
+      <div className="relative  overflow-hidden rounded-sm bg-gray-900 shadow-2xl h-[496px] max-xl:h-[199px] max-sm:h-[189px] w-full">
         {/* Slides Container */}
         <div
           className="flex h-full transition-transform duration-700 ease-in-out"
