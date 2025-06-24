@@ -7,7 +7,7 @@ import ModeEditOutlineOutlinedIcon from '@mui/icons-material/ModeEditOutlineOutl
 import DeleteOutlineOutlinedIcon from '@mui/icons-material/DeleteOutlineOutlined';
 
 export const NewsCard: FC<NewsCardProps> = (props) => {
-  const { title, createAt, image, isAdmin = false, onEdit, onDelete} = props;
+  const { title, createdAt, image, isAdmin = false, onEdit, onDelete} = props;
   return (
     <Card
       sx={{
@@ -42,7 +42,7 @@ export const NewsCard: FC<NewsCardProps> = (props) => {
         </div>
       </div>
       <h3 style={{ fontWeight: "bold", margin: 0 }}>{title}</h3>
-      <h6 style={{ margin: 0 }}>{createAt}</h6>
+      <h6 style={{ margin: 0 }}>{createdAt}</h6>
 
       {isAdmin && (
         <div className="flex gap-2 mt-auto">
