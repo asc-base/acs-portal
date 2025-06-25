@@ -107,7 +107,7 @@ export default function NewsForm() {
   useEffect(() => {
     const loadCategories = async () => {
       try {
-        const data = await fetchCategories();
+        const data = await fetchCategories("news");
         setCategories(data);
       } catch (error) {
         console.error("Error loading categories:", error);
@@ -120,10 +120,10 @@ export default function NewsForm() {
 
   return (
     <div className="p-8">
-      <h3 className="text-lg font-bold mb-4">ข้อมูลข่าวสาร</h3>
+      <h3 className="font-bold mb-4">ข้อมูลข่าวสาร</h3>
 
       <div className="flex gap-4 h-[284px]">
-        <div className="w-1/3 flex items-center justify-center bg-neutral02 relative aspect-square">
+        <div className="w-1/3 flex items-center justify-center bg-neutral02 relative">
           {form.image ? (
             <img
               src={form.image}
@@ -149,25 +149,25 @@ export default function NewsForm() {
           )}
         </div>
 
-        <div className="w-2/3 flex flex-col gap-7 text-neutral04">
-          <label>
-            <h4>หัวข้อ</h4>
+        <div className="w-2/3 flex flex-col gap-7 ">
+          <label className="group">
+            <h4 className="text-neutral04 group-hover:text-primary03 group-focus-within:text-primary03">หัวข้อ</h4>
             <input
               type="text"
               name="title"
               value={form.title}
               onChange={handleChange}
-              className="border rounded-sm w-full p-2 h-[44px] focus:border-2 focus:border-primary03 focus:outline-none mt-1"
+              className="border border-neutral04 rounded-sm w-full p-2 h-[44px] group-hover:border-primary03 focus:border-3 focus:border-primary03 focus:outline-none mt-1"
             />
           </label>
 
-          <label>
-            <h4>หมวดหมู่</h4>
+          <label className="group">
+            <h4 className="text-neutral04 group-hover:text-primary03 group-focus-within:text-primary03">หมวดหมู่</h4>
             <select
               name="categoryId"
               value={form.categoryId}
               onChange={handleChange}
-              className="border rounded-sm w-full p-2 h-[44px] focus:border-2 focus:border-primary03 focus:outline-none mt-1"
+              className="border border-neutral04 rounded-sm w-full p-2 h-[44px] group-hover:border-primary03 focus:border-3 focus:border-primary03 focus:outline-none mt-1"
             >
               <option value={0}>เลือกหมวดหมู่</option>
               {categories.map((categories) => (
@@ -179,48 +179,48 @@ export default function NewsForm() {
           </label>
 
           <div className="flex gap-2">
-            <label className="flex-1">
-              <h4>วันที่เริ่มต้น</h4>
+            <label className="flex-1 group">
+              <h4 className="text-neutral04 group-hover:text-primary03 group-focus-within:text-primary03">วันที่เริ่มต้น</h4>
               <input
                 type="date"
                 name="startDate"
                 value={form.startDate}
                 onChange={handleChange}
-                className="border rounded-sm w-full p-2 h-[44px] focus:border-2 focus:border-primary03 focus:outline-none mt-1"
+                className="border border-neutral04 rounded-sm w-full p-2 h-[44px] group-hover:border-primary03 focus:border-3 focus:border-primary03 focus:outline-none mt-1"
               />
             </label>
 
-            <label className="flex-1">
-              <h4>วันที่ครบกำหนด</h4>
+            <label className="flex-1 group">
+              <h4 className="text-neutral04 group-hover:text-primary03 group-focus-within:text-primary03">วันที่ครบกำหนด</h4>
               <input
                 type="date"
                 name="endDate"
                 value={form.endDate}
                 onChange={handleChange}
-                className="border rounded-sm w-full p-2 h-[44px] focus:border-2 focus:border-primary03 focus:outline-none mt-1"
+                className="border border-neutral04 rounded-sm w-full p-2 h-[44px] group-hover:border-primary03 focus:border-3 focus:border-primary03 focus:outline-none mt-1"
               />
             </label>
           </div>
         </div>
       </div>
 
-      <div className="my-6 text-neutral04">
-        <label>
-          <h4> รายละเอียด</h4>
+      <div className="my-6">
+        <label className="group">
+          <h4 className="text-neutral04 group-hover:text-primary03 group-focus-within:text-primary03"> รายละเอียด</h4>
           <textarea
             name="detail"
             value={form.detail}
             onChange={handleChange}
-            className="border rounded-sm w-full p-2 h-[100px] focus:border-2 focus:border-primary03 focus:outline-none"
+            className="border border-neutral04 rounded-sm w-full p-2 h-[100px] group-hover:border-primary03 focus:border-3 focus:border-primary03 focus:outline-none"
           />
         </label>
       </div>
 
       <div className="mt-4 flex justify-end gap-2">
-        <button className="border border-primary03 w-[212px] h-[44px] rounded-sm text-primary03 font-bold" onClick={() => window.history.back()}>
+        <button className="border border-primary03 w-[212px] h-[44px] rounded-sm text-primary03 font-bold hover:border-none hover:bg-primary06 hover:text-primary03" onClick={() => window.history.back()}>
           ยกเลิก
         </button>
-        <button className="bg-primary02 w-[212px] h-[44px] rounded-sm text-white font-bold" onClick={handleSubmit}>
+        <button className="bg-primary02 w-[212px] h-[44px] rounded-sm text-neutral01 font-bold hover:bg-primary03 " onClick={handleSubmit}>
           บันทึกข้อมูล
         </button>
       </div>

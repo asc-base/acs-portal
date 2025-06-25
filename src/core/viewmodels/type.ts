@@ -1,8 +1,8 @@
 import { getCategories } from "../models/type";
 
-export const fetchCategories = async () => {
+export const fetchCategories = async (type:string) => {
     try {
-        const result = await getCategories();
+        const result = await getCategories(type);
         if (result instanceof Error) throw result;
         return result;
     }
