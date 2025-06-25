@@ -10,7 +10,7 @@ export const NewsCard: FC<NewsCardProps> = (props) => {
   const { title, createdAt, image, isAdmin = false, onEdit, onDelete} = props;
   return (
     <Card
-      className="s!hadow-[1px_2px_3px_0px_#07022012,_0px_-1px_3px_0px_#07022012]"
+      className="!shadow-[1px_2px_3px_0px_#07022012,_0px_-1px_3px_0px_#07022012]"
       sx={{
         display: "flex",
         height: isAdmin ? "414px" : "370px",
