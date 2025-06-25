@@ -1,5 +1,5 @@
 import { News } from "@/interface/news";
-const BASE_URL = "https://jsonplaceholder.typicode.com";
+const BASE_URL = "http://localhost:8000";
 
 
 export const getNews = async (): Promise<News[] | Error> => {
