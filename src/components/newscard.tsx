@@ -6,6 +6,22 @@ import { Card } from "@mui/material";
 import ModeEditOutlineOutlinedIcon from '@mui/icons-material/ModeEditOutlineOutlined';
 import DeleteOutlineOutlinedIcon from '@mui/icons-material/DeleteOutlineOutlined';
 
+function formatThaiDate(isoDate: string): string {
+  const date = new Date(isoDate);
+  const thaiMonths = [
+    "มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน",
+    "พฤษภาคม", "มิถุนายน", "กรกฎาคม", "สิงหาคม",
+    "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม"
+  ];
+
+  const day = date.getDate();
+  const month = thaiMonths[date.getMonth()];
+  const year = date.getFullYear() + 543;
+
+  return `${day} ${month} ${year}`;
+}
+
+
 export const NewsCard: FC<NewsCardProps> = (props) => {
   const { title, createdAt, image, isAdmin = false, onEdit, onDelete} = props;
   return (
@@ -45,8 +61,7 @@ export const NewsCard: FC<NewsCardProps> = (props) => {
       <div>
         <h3 style={{ fontWeight: "bold", margin: 0 }} className="line-clamp-2">{title}</h3>
       </div>
-      <h6 style={{ margin: 0 }}>{createdAt}</h6>
-
+       <h6 style={{ margin: 0 }}>{formatThaiDate(createdAt)}</h6>
       {isAdmin && (
         <div className="flex gap-2 mt-auto">
         <button 
