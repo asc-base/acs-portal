@@ -9,7 +9,6 @@ export const getNews = async (page: number , pageSize : number): Promise<News[] 
     return new Error("Failed to fetch all news");
   }
 
-  const data: News[] = await response.json();
-  return data;
+  const data = await response.json();
+  return data.data;
 };
-
