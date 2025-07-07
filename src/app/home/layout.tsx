@@ -1,6 +1,7 @@
 "use client";
 import { ReactNode } from "react";
 import { NavbarMain } from "@/components/navbar";
+import { Footer } from "@/components/footer";
 
 const layout = ({ children }: Readonly<{ children: ReactNode }>) => {
   return (
@@ -10,7 +11,7 @@ const layout = ({ children }: Readonly<{ children: ReactNode }>) => {
       </header>
       <main className="jun-content">{children}</main>
       <footer className="jun-footer">
-        <h3>footer is here</h3>
+        <Footer />
       </footer>
     </div>
   );
