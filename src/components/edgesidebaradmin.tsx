@@ -7,6 +7,7 @@ import NewspaperIcon from '@mui/icons-material/Newspaper';
 import MenuBookIcon from '@mui/icons-material/MenuBook';
 import WorkIcon from '@mui/icons-material/Work';
 import LogoutIcon from "@mui/icons-material/Logout";
+import BookmarkIcon from '@mui/icons-material/Bookmark';
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
@@ -35,6 +36,11 @@ const sidebarItems = [
         name: "จัดการรายวิชา",
         href: "/admin/courses",
         icon: <MenuBookIcon />
+    },
+    {
+        name: "จัดการหลักสูตร",
+        href: "/admin/curriculum",
+        icon: <BookmarkIcon />
     },
     {
         name: "จัดการฝึกงาน",
