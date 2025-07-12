@@ -1,158 +1,240 @@
 "use client";
-import React from 'react'
-import { useState } from 'react'
+import React, { useState } from 'react';
+import {
+    TextField,
+    Button,
+    Box,
+    Typography,
+    IconButton,
+    Stack
+} from '@mui/material';
+import AddIcon from '@mui/icons-material/Add';
 
 const Courses = () => {
-
     const courseCategories = [
         { id: 1, name: 'CSS' },
         { id: 2, name: 'LNG' },
         { id: 3, name: 'GEN' },
         { id: 4, name: 'STD' },
-    ]
+    ];
 
-    const [prerequisite, setprerequisite] = useState([{ prerequisite: '' }])
+    const [prerequisite, setPrerequisite] = useState([{ prerequisite: '' }]);
 
     const handleAddPrerequisiteCourse = () => {
-        setprerequisite([...prerequisite, { prerequisite: '' }])
-    }
+        setPrerequisite([...prerequisite, { prerequisite: '' }]);
+    };
 
     const handlePrerequisiteCourseChange = (index: number, value: string) => {
         const updated = prerequisite.map((course, idx) =>
             idx === index ? { ...course, prerequisite: value } : course
-        )
-        setprerequisite(updated)
-    }
+        );
+        setPrerequisite(updated);
+    };
+
+    const handleReset = () => {
+        setPrerequisite([{ prerequisite: '' }]);
+        const form = document.querySelector('form') as HTMLFormElement;
+        if (form) form.reset();
+    };
+
+    const handleSubmit = async (e: React.MouseEvent<HTMLButtonElement>) => {
+        e.preventDefault();
+        const form = document.querySelector('form') as HTMLFormElement;
+        const formData = new FormData(form);
+        const data = {
+            courseCategory: formData.get('courseCategory'),
+            courseCode: formData.get('courseId'),
+            credits: formData.get('credits'),
+            englishName: formData.get('courseNameEn'),
+            thaiName: formData.get('courseNameTh'),
+            learningDetail: formData.get('learningDetail'),
+            prerequisite: prerequisite.map(course => course.prerequisite)
+        };
+
+        try {
+            const response = await fetch('/api/courses', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data)
+            });
+
+            if (response.ok) {
+                const result = await response.json();
+                console.log('Success:', result);
+                form.reset();
+                setPrerequisite([{ prerequisite: '' }]);
+            } else {
+                console.error('Error:', response.statusText);
+            }
+        } catch (error) {
+            console.error('Error:', error);
+        }
+    };
 
     return (
-        <div className='p-8'>
-            <div className="mt-3"></div>
-            <h2><b>ข้อมูลรายวิชา</b></h2>
-            <form action="submit" className="mt-3 opacity-50">
-                <div className='flex gap-8 mb-8'>
-                    <div className='flex-1'>
-                        <label className='block'>กลุ่มวิชา</label>
-                        <input
+        <Box p={4}>
+            <Typography variant="h5" fontWeight="bold" gutterBottom>
+                ข้อมูลรายวิชา
+            </Typography>
+            <Box
+                component="form"
+                action="submit"
+                sx={{ mt: 2, opacity: 0.5 }}
+                autoComplete="off"
+            >
+                <Stack direction={{ xs: 'column', md: 'row' }} spacing={3} mb={3}>
+                    <Box sx={{ flex: 1 }}>
+                        <Typography variant="body2" color="text.secondary" mb={0.5}>
+                            กลุ่มวิชา
+                        </Typography>
+                        <TextField
                             name="courseCategory"
-                            type="text"
-                            list="courseCategories"
-                            className='w-full rounded-md border-2 border-gray-500 p-2 mt-1 bg-gray-100'
-                            placeholder='input'
-                            autoComplete="off"
+                            select
+                            SelectProps={{ native: true }}
+                            fullWidth
                             required
-                        />
-                        <datalist id="courseCategories">
+                            defaultValue=""
+                        >
+                            <option value="" disabled>input</option>
                             {courseCategories.map(category => (
                                 <option key={category.id} value={category.name}>
                                     {category.name}
                                 </option>
                             ))}
-                        </datalist>
-                    </div>
-                    <div className='flex-1'>
-                        <label className='block'>รหัสวิชา</label>
-                        <input name='courseId' type="text" className='w-full rounded-md border-2 border-gray-500 p-2 my-1' placeholder='input' />
-                    </div>
-                    <div className='flex-1'>
-                        <label className='block'>หน่วยกิต</label>
-                        <input name='credits' type="text" className='w-full rounded-md border-2 border-gray-500 p-2 my-1' placeholder='input' />
-                    </div>
-                </div>
-                <div className='flex-1 mb-8'>
-                    <label className='block'>ชื่อวิชาภาษาอังกฤษ</label>
-                    <input name='courseNameEn' type="text" className='w-full rounded-md border-2 border-gray-500 p-2 my-1' placeholder='input' />
-                </div>
-                <div className='flex-1 mb-8'>
-                    <label className='block'>ชื่อวิชาภาษาไทย</label>
-                    <input name='courseNameTh' type="text" className='w-full rounded-md border-2 border-gray-500 p-2 my-1' placeholder='input' />
-                </div>
-                <div className='flex-1 mb-8'>
-                    <label className='block'>ลักษณะการเรียน</label>
-                    <textarea name='learningDetail' className='w-full rounded-md border-2 border-gray-500 p-2 my-1 h-50' placeholder='input'></textarea>
-                </div>
-            </form><div className="flex items-center justify-between mt-8 mb-2">
-                <h2><b>รายวิชาบังคับ</b></h2>
-                <button
-                    type="button"
-                    className="rounded-full border border-[#120554] text-[#120554] w-8 h-8 flex items-center justify-center text-xl hover:bg-blue-100"
+                        </TextField>
+                    </Box>
+                    <Box sx={{ flex: 1 }}>
+                        <Typography variant="body2" color="text.secondary" mb={0.5}>
+                            รหัสวิชา
+                        </Typography>
+                        <TextField
+                            name="courseId"
+                            fullWidth
+                            variant="outlined"
+                            margin="none"
+                            placeholder="input"
+                        />
+                    </Box>
+                    <Box sx={{ flex: 1 }}>
+                        <Typography variant="body2" color="text.secondary" mb={0.5}>
+                            หน่วยกิต
+                        </Typography>
+                        <TextField
+                            name="credits"
+                            fullWidth
+                            variant="outlined"
+                            margin="none"
+                            placeholder="input"
+                        />
+                    </Box>
+                </Stack>
+                <Box mb={2}>
+                    <Typography variant="body2" color="text.secondary" mb={0.5}>
+                        ชื่อวิชาภาษาอังกฤษ
+                    </Typography>
+                    <TextField
+                        name="courseNameEn"
+                        fullWidth
+                        variant="outlined"
+                        margin="none"
+                        placeholder="input"
+                    />
+                </Box>
+                <Box mb={2}>
+                    <Typography variant="body2" color="text.secondary" mb={0.5}>
+                        ชื่อวิชาภาษาไทย
+                    </Typography>
+                    <TextField
+                        name="courseNameTh"
+                        fullWidth
+                        variant="outlined"
+                        margin="none"
+                        placeholder="input"
+                    />
+                </Box>
+                <Box mb={2}>
+                    <Typography variant="body2" color="text.secondary" mb={0.5}>
+                        ลักษณะการเรียน
+                    </Typography>
+                    <TextField
+                        name="learningDetail"
+                        fullWidth
+                        variant="outlined"
+                        margin="none"
+                        placeholder="input"
+                        multiline
+                        minRows={3}
+                    />
+                </Box>
+            </Box>
+            <Box display="flex" alignItems="center" justifyContent="space-between" mt={6} mb={2}>
+                <Typography variant="h6" fontWeight="bold">
+                    รายวิชาบังคับ
+                </Typography>
+                <IconButton
+                    color="primary"
                     onClick={handleAddPrerequisiteCourse}
-                    aria-label="เพิ่มรายวิชาบังคับ"
+                    sx={{
+                        border: '1px solid #120554',
+                        color: '#120554',
+                        backgroundColor: '#fff',
+                        '&:hover': { backgroundColor: '#e3e8fd' }
+                    }}
                 >
-                    +
-                </button>
-            </div>
-            <div className="mb-4">
+                    <AddIcon />
+                </IconButton>
+            </Box>
+            <Box mb={4}>
                 {prerequisite.map((course, idx) => (
-                    <div key={idx} className="mb-3">
-                        <label className="block text-gray-500 text-sm mb-1">
+                    <Box key={idx} mb={2}>
+                        <Typography variant="body2" color="text.secondary" mb={0.5}>
                             {idx + 1}. รหัสวิชาและชื่อวิชา
-                        </label>
-                        <input
-                            type="text"
-                            className="w-full rounded-md border-2 border-gray-300 p-2"
+                        </Typography>
+                        <TextField
+                            fullWidth
+                            variant="outlined"
                             placeholder="Input"
                             value={course.prerequisite}
                             onChange={e => handlePrerequisiteCourseChange(idx, e.target.value)}
                         />
-                    </div>
+                    </Box>
                 ))}
-            </div>
-            <div className="flex gap-4 justify-end">
-                <button
-                    className="border border-[#120554] text-[#120554] px-8 py-2 rounded-md bg-white"
-                    type="button"
-                    onClick={() => {
-                        const form = document.querySelector('form') as HTMLFormElement;
-                        if (form) form.reset();
-                        setprerequisite([{ prerequisite: '' }]);
+            </Box>
+            <Box display="flex" gap={2} justifyContent="flex-end">
+                <Button
+                    variant="outlined"
+                    color="primary"
+                    onClick={handleReset}
+                    sx={{
+                        borderColor: '#120554',
+                        color: '#120554',
+                        backgroundColor: '#fff',
+                        px: 4,
+                        py: 1.5,
+                        fontWeight: 'bold'
                     }}
                 >
-                    <b>ยกเลิก</b>
-                </button>
-                <button
-                    className="bg-[#120554] text-white px-8 py-2 rounded-md"
-                    type="button"
-                    onClick={async (e) => {
-                        e.preventDefault();
-                        const form = document.querySelector('form') as HTMLFormElement;
-                        const formData = new FormData(form);
-                        const data = {
-                            courseCategory: formData.get('courseCategory'),
-                            courseCode: formData.get('courseId'),
-                            credits: formData.get('credits'),
-                            englishName: formData.get('courseNameEn'),
-                            thaiName: formData.get('courseNameTh'),
-                            learningDetail: formData.get('learningDetail'),
-                            prerequisite: prerequisite.map(course => course.prerequisite)
-                        };
-
-                        try {
-                            const response = await fetch('/api/courses', {
-                                method: 'POST',
-                                headers: {
-                                    'Content-Type': 'application/json',
-                                },
-                                body: JSON.stringify(data)
-                            });
-
-                            if (response.ok) {
-                                const result = await response.json();
-                                console.log('Success:', result);
-                                form.reset();
-                                setprerequisite([{ prerequisite: '' }]);
-                            } else {
-                                console.error('Error:', response.statusText);
-                            }
-                        } catch (error) {
-                            console.error('Error:', error);
-                        }
+                    ยกเลิก
+                </Button>
+                <Button
+                    variant="contained"
+                    sx={{
+                        backgroundColor: '#120554',
+                        color: '#fff',
+                        px: 4,
+                        py: 1.5,
+                        fontWeight: 'bold',
+                        '&:hover': { backgroundColor: '#0e0444' }
                     }}
+                    onClick={handleSubmit}
                 >
-                    <b>บันทึกข้อมูล</b>
-                </button>
-            </div>
-        </div>
-    )
-}
+                    บันทึกข้อมูล
+                </Button>
+            </Box>
+        </Box>
+    );
+};
 
-export default Courses
+export default Courses;
