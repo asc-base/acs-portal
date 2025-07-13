@@ -12,7 +12,7 @@ export const fetchNews = async (page: number, pageSize: number) => {
     }
 };
 
-export const useDeleteNews = async (id: string, token: string) => {
+export const UseDeleteNews = async (id: string, token: string) => {
     try {
         const result = await deleteNews(id, token);
         if (result instanceof Error) throw result;
