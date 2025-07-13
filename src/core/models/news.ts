@@ -18,7 +18,7 @@ export const deleteNews = async (id: string, token: string): Promise<News | Erro
     method: "DELETE",
     headers: {
       "Content-Type": "application/json",
-      "Authorixation": `Bearer ${token}`
+      "Authorization": `Bearer ${token}`
     },
   }
   )
