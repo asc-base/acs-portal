@@ -1,8 +1,8 @@
 import { getNews } from "@/core/models/news"; 
 
-export const fetchNews = async (page: number, pageSize: number) => {
+export const fetchNews = async (page: number, pageSize: number, category: string) => {
     try {
-        const result = await getNews(page,pageSize);
+        const result = await getNews(page, pageSize, category);
         if (result instanceof Error) throw result;
         return result;
     }
