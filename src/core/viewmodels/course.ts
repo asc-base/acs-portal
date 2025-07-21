@@ -1,9 +1,9 @@
 import { createCourse } from "../models/course";
 import { Course } from "@/interface/course";
 
-export const fetchCreateCourse = async (course: Course): Promise<Course | Error> => {
+export const fetchCreateCourse = async (course: Course, token: string): Promise<Course | Error> => {
     try {
-        const result = await createCourse(course);
+        const result = await createCourse(course, token);
         if (result instanceof Error) throw result;
         return result;
     } catch (error) {
