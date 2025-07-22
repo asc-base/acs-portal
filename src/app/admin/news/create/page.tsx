@@ -15,6 +15,8 @@ import { useForm, SubmitHandler, Controller } from "react-hook-form";
 import { fetchCategories } from "@/core/viewmodels/type";
 import { Category } from "@/interface/type";
 import Image from "next/image";
+import { ICreateNews } from "@/interface/news";
+import { createNewsAction } from "./action";
 
 const VisuallyHiddenInput = styled("input")({
   clip: "rect(0 0 0 0)",
@@ -28,22 +30,13 @@ const VisuallyHiddenInput = styled("input")({
   width: 1,
 });
 
-interface FormData {
-  title: string;
-  categoryId: number;
-  startDate: string;
-  dueDate: string | null;
-  detail: string;
-  image: FileList;
-}
-
 const CreateNewsPage = () => {
   const {
     register,
     handleSubmit,
     control,
     formState: { errors },
-  } = useForm<FormData>({
+  } = useForm<ICreateNews>({
     defaultValues: {
       title: "",
       categoryId: 0,
@@ -67,8 +60,10 @@ const CreateNewsPage = () => {
     }
   };
 
-  const onSubmit: SubmitHandler<FormData> = (data) => {
-    console.log("Form data submitted:", data);
+  const onSubmit: SubmitHandler<ICreateNews> = (data) => {
+    if (selectedFile) {
+      createNewsAction(data, selectedFile);
+    }
   };
 
   useEffect(() => {
@@ -103,7 +98,6 @@ const CreateNewsPage = () => {
                 <VisuallyHiddenInput
                   type="file"
                   accept="image/*"
-                  {...register("image", { required: "กรุณาเลือกไฟล์ภาพ" })}
                   onChange={handleFileChange}
                 />
                 อัปโหลดรูปภาพ
