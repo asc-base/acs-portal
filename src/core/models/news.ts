@@ -9,7 +9,7 @@ export const getNews = async (page: number , pageSize : number , category : stri
   }
 
   const data = await response.json();
-  return data.data.rows;
+  return data.data;
 };
 
 export const deleteNews = async (id: string, token: string): Promise<News | Error> => {

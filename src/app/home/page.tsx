@@ -12,7 +12,7 @@ import ExpandLessSharpIcon from "@mui/icons-material/ExpandLessSharp";
 import { NewsCard } from "@/components/newscard";
 import { StudentCard } from "@/components/studentcard";
 import { News } from "@/interface/news";
-import { fetchNews } from "@/core/viewmodels/news";
+import { getNews } from "./action";
 
 const page = () => {
   const description =
@@ -78,9 +78,9 @@ const page = () => {
     const fetchAllNews = async () => {
       try {
         const [news, achievements, studentActi] = await Promise.all([
-          fetchNews(1, 3, "ข่าวและกิจกรรม"),
-          fetchNews(1, 3, "ความสำเร็จ"),
-          fetchNews(1, 3, "งานกิจกรรมนักศึกษา"),
+          getNews(1, 3, "ข่าวและกิจกรรม"),
+          getNews(1, 3, "ความสำเร็จ"),
+          getNews(1, 3, "งานกิจกรรมนักศึกษา"),
         ]);
         setNews(news);
         setAchievements(achievements);
