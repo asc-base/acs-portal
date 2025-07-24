@@ -1,5 +1,6 @@
 "use client";
 import React from "react";
+import { useState, useEffect } from "react";
 import hero from "../../../public/hero.jpg";
 import { HeroCard } from "@/components/herocard";
 import { ReviewCarousel } from "@/components/ReviewCarousel";
@@ -8,9 +9,10 @@ import { Container, Typography } from "@mui/material";
 import { ActivityCard } from "@/components/activitycard";
 import { Carousel } from "@/components/carousel";
 import ExpandLessSharpIcon from "@mui/icons-material/ExpandLessSharp";
-import News from "./news/page";
 import { NewsCard } from "@/components/newscard";
 import { StudentCard } from "@/components/studentcard";
+import { News } from "@/interface/news";
+import { getNews } from "./action";
 
 const page = () => {
   const description =
@@ -67,6 +69,34 @@ const page = () => {
     "/logoacs.png",
     "/logoacs.png",
   ];
+
+  const [news, setNews] = useState<News[]>([]);
+  const [achievements, setAchievements] = useState<News[]>([]);
+  const [studentActi, setStudentActi] = useState<News[]>([]);
+
+  useEffect(() => {
+    const fetchAllNews = async () => {
+      try {
+        const [news, achievements, studentActi] = await Promise.all([
+          getNews(1, 3, "ข่าวและกิจกรรม"),
+          getNews(1, 3, "ความสำเร็จ"),
+          getNews(1, 3, "งานกิจกรรมนักศึกษา"),
+        ]);
+        setNews(news);
+        setAchievements(achievements);
+        setStudentActi(studentActi);
+      } catch (error) {
+        console.error("Error loading news:", error);
+        setNews([]);
+        setAchievements([]);
+        setStudentActi([]);
+      }
+    };
+
+    fetchAllNews();
+
+  }, []);
+
 
   return (
     <>
@@ -130,22 +160,21 @@ const page = () => {
                 </a>
               </div>
               <div className="grid gap-3 max-xl:grid-cols-2 max-sm:grid-cols-1 xl:grid-rows-2">
-                <NewsCard
-                  title="ข่าวสารและกิจกรรม ข่าวสารและกิจกรรม ข่าวสารและกิจกรรม ข่าวสารและกิจกรรม ข่าวสารและกิจกรรม ข่าวสารและกิจกรรม ข่าวสารและกิจกรรม"
-                  createdAt="12/12/2023"
-                  image="/logoacs.png"
-                  isAdmin={false}
-                  onEdit={() => console.log("Edit clicked")}
-                  onDelete={() => console.log("Delete clicked")}
-                />
-                <NewsCard
-                  title="ประกาศสำคัญ"
-                  createdAt="15/12/2023"
-                  image="/logoacs.png"
-                  isAdmin={false}
-                  onEdit={() => console.log("Edit clicked")}
-                  onDelete={() => console.log("Delete clicked")}
-                />
+                {news.length > 0 ? (
+                  news.map((item) => (
+                    <NewsCard
+                      key={item.id}
+                      title={item.title}
+                      createdAt={item.startDate}
+                      image={item.image ?? ""}
+                      isAdmin={false}
+                      onEdit={() => console.log("Edit", item.id)}
+                      onDelete={() => console.log("Delete", item.id)}
+                    />
+                  ))
+                ) : (
+                  <p>ไม่มีข่าว</p>
+                )}
               </div>
             </div>
             <div className="flex w-full flex-col gap-6">
@@ -162,22 +191,21 @@ const page = () => {
                 </a>
               </div>
               <div className="grid gap-3 max-xl:grid-cols-2 max-sm:grid-cols-1 xl:grid-rows-2">
-                <NewsCard
-                  title="ข่าวสารและกิจกรรม"
-                  createdAt="12/12/2023"
-                  image="/logoacs.png"
-                  isAdmin={false}
-                  onEdit={() => console.log("Edit clicked")}
-                  onDelete={() => console.log("Delete clicked")}
-                />
-                <NewsCard
-                  title="ประกาศสำคัญ"
-                  createdAt="15/12/2023"
-                  image="/logoacs.png"
-                  isAdmin={false}
-                  onEdit={() => console.log("Edit clicked")}
-                  onDelete={() => console.log("Delete clicked")}
-                />
+                {achievements.length > 0 ? (
+                  achievements.map((item) => (
+                    <NewsCard
+                      key={item.id}
+                      title={item.title}
+                      createdAt={item.startDate}
+                      image={item.image ?? ""}
+                      isAdmin={true}
+                      onEdit={() => console.log("Edit", item.id)}
+                      onDelete={() => console.log("Delete", item.id)}
+                    />
+                  ))
+                ) : (
+                  <p>ไม่มีข่าว</p>
+                )}
               </div>
             </div>
             <div className="flex w-full flex-col gap-6">
@@ -194,22 +222,21 @@ const page = () => {
                 </a>
               </div>
               <div className="grid gap-3 max-xl:grid-cols-2 max-sm:grid-cols-1 xl:grid-rows-2">
-                <NewsCard
-                  title="ข่าวสารและกิจกรรม"
-                  createdAt="12/12/2023"
-                  image="/logoacs.png"
-                  isAdmin={false}
-                  onEdit={() => console.log("Edit clicked")}
-                  onDelete={() => console.log("Delete clicked")}
-                />
-                <NewsCard
-                  title="ประกาศสำคัญ"
-                  createdAt="15/12/2023"
-                  image="/logoacs.png"
-                  isAdmin={false}
-                  onEdit={() => console.log("Edit clicked")}
-                  onDelete={() => console.log("Delete clicked")}
-                />
+                {studentActi.length > 0 ? (
+                  studentActi.map((item) => (
+                    <NewsCard
+                      key={item.id}
+                      title={item.title}
+                      createdAt={item.startDate}
+                      image={item.image ?? ""}
+                      isAdmin={true}
+                      onEdit={() => console.log("Edit", item.id)}
+                      onDelete={() => console.log("Delete", item.id)}
+                    />
+                  ))
+                ) : (
+                  <p>ไม่มีข่าว</p>
+                )}
               </div>
             </div>
           </div>
