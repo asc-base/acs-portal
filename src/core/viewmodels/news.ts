@@ -11,7 +11,6 @@ export const fetchNews = async (page: number, pageSize: number) => {
     return [];
   }
 };
-
 export const CreateNews = async (
   newsData: ICreateNews,
   token: string,
