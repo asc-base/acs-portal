@@ -3,13 +3,14 @@ import React, { useState } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { TextField, Button, FormLabel } from "@mui/material";
 import Image from "next/image";
+import { createCurriculumAction } from "./action";
 
-interface FormData {
+type FormData = {
   title: string;
   year: string;
-  link: string;
-  detail: string;
-  image: FileList;
+  fileUrl: string;
+  description: string;
+  image: string;
 }
 
 const CreateCurriculumPage = () => {
@@ -25,16 +26,20 @@ const CreateCurriculumPage = () => {
     const file = event.target.files?.[0] || null;
     if (file) {
       setSelectedFile(file);
-      console.log("Selected file:", file);
     } else {
       setSelectedFile(null);
     }
   };
 
-  const onSubmit: SubmitHandler<FormData> = (data) => {
-    console.log("Form data submitted:", data);
-
+  const onSubmit: SubmitHandler<FormData> = async (data) => {
+    try {
+      const result = await createCurriculumAction(data);
+      console.log("Form data submitted:", result);
+    } catch (error) {
+      console.error("Submit failed:", error);
+    }
   };
+
 
   return (
     <form className="space-y-4 p-8" onSubmit={handleSubmit(onSubmit)}>
@@ -77,11 +82,11 @@ const CreateCurriculumPage = () => {
 
         <div className="col-span-2 flex flex-col">
           <div className="group">
-             <h4 className={`mb-1 transition-colors duration-200 ${errors.title
-                ? "text-accent04"
-                : "text-neutral04 group-hover:text-primary03 group-focus-within:text-primary03"
+            <h4 className={`mb-1 transition-colors duration-200 ${errors.title
+              ? "text-accent04"
+              : "text-neutral04 group-hover:text-primary03 group-focus-within:text-primary03"
               }`}>
-             หัวข้อ
+              หัวข้อ
             </h4>
             <TextField
               {...register("title", { required: "กรุณากรอกหัวข้อหลักสูตร" })}
@@ -94,9 +99,9 @@ const CreateCurriculumPage = () => {
           </div>
 
           <div className="group">
-             <h4 className={`mb-1 transition-colors duration-200 ${errors.year
-                ? "text-accent04"
-                : "text-neutral04 group-hover:text-primary03 group-focus-within:text-primary03"
+            <h4 className={`mb-1 transition-colors duration-200 ${errors.year
+              ? "text-accent04"
+              : "text-neutral04 group-hover:text-primary03 group-focus-within:text-primary03"
               }`}>
               ปีการศึกษา
             </h4>
@@ -111,40 +116,40 @@ const CreateCurriculumPage = () => {
           </div>
 
           <div className="group">
-            <h4 className={`mb-1 transition-colors duration-200 ${errors.link
-                ? "text-accent04"
-                : "text-neutral04 group-hover:text-primary03 group-focus-within:text-primary03"
+            <h4 className={`mb-1 transition-colors duration-200 ${errors.fileUrl
+              ? "text-accent04"
+              : "text-neutral04 group-hover:text-primary03 group-focus-within:text-primary03"
               }`}>
               ลิงก์ (กรุณาแนบลิงก์ Google Drive)
             </h4>
             <TextField
-              {...register("link", { required: "กรุณาแนบลิงก์" })}
+              {...register("fileUrl", { required: "กรุณาแนบลิงก์" })}
               variant="outlined"
               size="medium"
-              error={!!errors.link}
+              error={!!errors.fileUrl}
               fullWidth
-              helperText={errors.link?.message}
+              helperText={errors.fileUrl?.message}
             />
           </div>
         </div>
       </div>
 
       <div className="group">
-            <h4 className={`mb-1 transition-colors duration-200 ${errors.detail
-                ? "text-accent04"
-                : "text-neutral04 group-hover:text-primary03 group-focus-within:text-primary03"
-              }`}>
-              รายละเอียด
-            </h4>
+        <h4 className={`mb-1 transition-colors duration-200 ${errors.description
+          ? "text-accent04"
+          : "text-neutral04 group-hover:text-primary03 group-focus-within:text-primary03"
+          }`}>
+          รายละเอียด
+        </h4>
         <TextField
-          {...register("detail", { required: "กรุณากรอกรายละเอียดหลักสูตร" })}
+          {...register("description", { required: "กรุณากรอกรายละเอียดหลักสูตร" })}
           variant="outlined"
           size="medium"
           fullWidth
           multiline
           rows={6}
-          error={!!errors.detail}
-          helperText={errors.detail?.message}
+          error={!!errors.description}
+          helperText={errors.description?.message}
         />
       </div>
 

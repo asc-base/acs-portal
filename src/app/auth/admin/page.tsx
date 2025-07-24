@@ -3,8 +3,8 @@ import React from "react";
 import IMAGE from "../../../../public/ImageLoginAdmin.svg";
 import Image from "next/image";
 import { Button, TextField } from "@mui/material";
-import { AuthAdmin } from "@/core/viewmodels/auth";
 import { useForm, SubmitHandler } from "react-hook-form";
+import { handleAdminLogin } from "./action";
 
 const AuthAdminPage = () => {
   type FormData = {
@@ -19,7 +19,7 @@ const AuthAdminPage = () => {
   } = useForm<FormData>();
 
   const onSubmit: SubmitHandler<FormData> = async (data) => {
-    const result = await AuthAdmin(data);
+    const result = await handleAdminLogin(data);
     if (!result) {
       console.error("Login failed");
     }
@@ -30,7 +30,7 @@ const AuthAdminPage = () => {
     <div className="min-h-screen">
       <div className="grid h-screen grid-cols-1 md:grid-cols-2">
         <div className="flex h-full justify-center">
-          <Image src={IMAGE} alt="Login Image" />
+          <Image src={IMAGE} alt="Login Image" fill />
         </div>
         <div className="flex h-full">
           <div className="container mx-auto flex w-full flex-col items-center justify-center gap-y-4 px-10">
