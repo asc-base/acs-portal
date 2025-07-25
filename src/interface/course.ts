@@ -5,4 +5,5 @@ export interface Course {
     courseNameEn: string;
     credits: string;
     typeCourseId: number;
+    preCourses: { courseId: number;  courseNameEn: string }[];
 }
