@@ -1,5 +1,5 @@
 "use server";
-import { UseDeleteNews } from "@/core/viewmodels/news";
+import { DeleteNews } from "@/core/viewmodels/news";
 import { cookies } from "next/headers";
 
 export async function deleteNews(id: string) {
@@ -11,7 +11,7 @@ export async function deleteNews(id: string) {
             throw new Error("No authentication token found");
         }
 
-        const data = await UseDeleteNews(id, token);
+        const data = await DeleteNews(id, token);
         return data;
     }
     catch (error) {
