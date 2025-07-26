@@ -1,9 +1,9 @@
 import { getNews, createNews, deleteNews } from "@/core/models/news";
 import { ICreateNews } from "@/interface/news";
 
-export const fetchNews = async (page: number, pageSize: number) => {
+export const fetchNews = async (page: number, pageSize: number, category: string) => {
   try {
-    const result = await getNews(page, pageSize);
+    const result = await getNews(page, pageSize, category);
     if (result instanceof Error) throw result;
     return result;
   } catch (error) {
@@ -40,7 +40,7 @@ export const CreateNews = async (
   }
 };
 
-export const useDeleteNews = async (id: string, token: string) => {
+export const DeleteNews = async (id: string, token: string) => {
   try {
     const result = await deleteNews(id, token);
     if (result instanceof Error) throw result;

@@ -17,9 +17,10 @@ export const createNews = async (news: FormData, token: string) => {
 export const getNews = async (
   page: number,
   pageSize: number,
-): Promise<News[] | Error> => {
+  category: string,
+) => {
   const response = await fetch(
-    `${API_URL}/news?page=${page}&pageSize=${pageSize}`,
+    `${API_URL}/news?page=${page}&pageSize=${pageSize}&category=${category}`,
   );
 
   if (!response.ok) {
