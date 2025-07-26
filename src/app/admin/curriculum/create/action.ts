@@ -3,10 +3,10 @@ import { CreateCurriculum } from "@/core/viewmodels/curriculum";
 import { Curriculum } from "@/interface/curriculum";
 import { cookies } from "next/headers";
 
-export async function createCurriculumAction( data: Curriculum) {
+export async function createCurriculumAction(data: Curriculum) {
     try {
         const cookieStore = await cookies();
-        const token = cookieStore.get("token")?.value;
+        const token = cookieStore.get("access_token")?.value;
 
         if (!token) {
             throw new Error("No authentication token found");
@@ -20,5 +20,3 @@ export async function createCurriculumAction( data: Curriculum) {
         throw error;
     }
 }
-
-
