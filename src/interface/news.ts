@@ -15,3 +15,10 @@ export interface ICreateNews {
   dueDate: string | null;
   detail: string;
 }
+
+export interface IGetNews {
+  rows: News[];
+  totalRecords: number;
+  page: number;
+  pageSize: number;
+}
