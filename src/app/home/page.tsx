@@ -154,10 +154,12 @@ const page = () => {
                 >
                   ข่าวสารและกิจกรรม
                 </Typography>
-                <a href="/news" className="!text-h6 !text-primary01">
+                {/* <a href="/news" className="!text-h6 !text-primary01"> */}
+                <p className="!text-h6 !text-primary01">
                   ดูทั้งหมด{" "}
                   <ExpandLessSharpIcon className="!text-primary01 rotate-90 transform" />
-                </a>
+                </p>
+                {/* </a> */}
               </div>
               <div className="grid gap-3 max-xl:grid-cols-2 max-sm:grid-cols-1 xl:grid-rows-2">
                 {news.length > 0 ? (
@@ -185,10 +187,12 @@ const page = () => {
                 >
                   ความสำเร็จสาขาวิชา
                 </Typography>
-                <a href="/news" className="!text-h6 !text-primary01">
+                {/* <a href="/news" className="!text-h6 !text-primary01"> */}
+                <p className="!text-h6 !text-primary01">
                   ดูทั้งหมด{" "}
                   <ExpandLessSharpIcon className="!text-primary01 rotate-90 transform" />
-                </a>
+                </p>
+                {/* </a> */}
               </div>
               <div className="grid gap-3 max-xl:grid-cols-2 max-sm:grid-cols-1 xl:grid-rows-2">
                 {achievements.length > 0 ? (
@@ -216,10 +220,12 @@ const page = () => {
                 >
                   งานกิจกรรมนักศึกษา
                 </Typography>
-                <a href="/news" className="!text-h6 !text-primary01">
+                {/* <a href="/news" className="!text-h6 !text-primary01"> */}
+                <p className="!text-h6 !text-primary01">
                   ดูทั้งหมด{" "}
                   <ExpandLessSharpIcon className="!text-primary01 rotate-90 transform" />
-                </a>
+                </p>
+                {/* </a> */}
               </div>
               <div className="grid gap-3 max-xl:grid-cols-2 max-sm:grid-cols-1 xl:grid-rows-2">
                 {studentActi.length > 0 ? (
@@ -250,10 +256,12 @@ const page = () => {
                 >
                   ผลงานนักศึกษาตามรายวิชา
                 </Typography>
-                <a href="/news" className="!text-h6 !text-primary01">
+                {/* <a href="/news" className="!text-h6 !text-primary01"> */}
+                <p className="!text-h6 !text-primary01">
                   ดูทั้งหมด{" "}
                   <ExpandLessSharpIcon className="!text-primary01 rotate-90 transform" />
-                </a>
+                </p>
+                {/* </a> */}
               </div>
             </div>
 
