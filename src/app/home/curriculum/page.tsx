@@ -1,7 +1,9 @@
 "use client";
+import React, { useEffect, useState } from "react";
 import { CurriculumCard } from "@/components/curriculumcard";
 import hero from "../../../../public/hero.jpg";
 import businesssubject from "../../../../public/businesssubject.png";
+import specificsubject from "../../../../public/specificsubject.png";
 import comscisubject from "../../../../public/comscisubject.png";
 import coresubject from "../../../../public/coresubject.png";
 import datascisubject from "../../../../public/datascisubject.png";
@@ -13,46 +15,40 @@ import {
   CardContent,
   Button,
 } from "@mui/material";
+import { useTheme } from "@mui/material/styles";
+import useMediaQuery from "@mui/material/useMediaQuery";
 import Image from "next/image";
 
+interface TypeCourse {
+  name: string;
+  description: string;
+}
+
 const Curriculum = () => {
-  const subjectGropsData = [
-    {
-      icon: coresubject,
-      title: "กลุ่มวิชาเฉพาะ-ประเทศวิชาแกน",
-      description:
-        "การเรียนดมียิงนักคิดคิดคิดดีว่อง รีเลวิฟพรรคดี ต่องอขเอว์รี อินเหลวงรรรมการธีใสใฝ่ดี ดิไถดี บาเองแสพคื่อมแบียืนเดิกพิจอดี้ชนะ",
-      link: "/กลุ่มวิชาเฉพาะ-ประเทศวิชาแกน",
-    },
-    {
-      icon: comscisubject,
-      title: "กลุ่มวิชาเฉพาะ-ประเทศวิชาเฉพาะด้าน",
-      description:
-        "การเรียนดมียิงนักคิดคิดคิดดีว่อง รีเลวิฟพรรคดี ต่องอขเอว์รี อินเหลวงรรรมการธีใสใฝ่ดี ดิไถดี บาเองแสพคื่อมแบียืนเดิกพิจอดี้ชนะ",
-      link: "/กลุ่มวิชาเฉพาะ-ประเทศวิชาเฉพาะด้าน",
-    },
-    {
-      icon: coresubject,
-      title: "กลุ่มวิชาวิทยาการคอมพิวเตอร์",
-      description:
-        "การเรียนดมียิงนักคิดคิดคิดดีว่อง รีเลวิฟพรรคดี ต่องอขเอว์รี อินเหลวงรรรมการธีใสใฝ่ดี ดิไถดี บาเองแสพคื่อมแบียืนเดิกพิจอดี้ชนะ",
-      link: "/กลุ่มวิชาวิทยาการคอมพิวเตอร์",
-    },
-    {
-      icon: datascisubject,
-      title: "กลุ่มวิชาวิทยาศาสตร์ข้อมูล",
-      description:
-        "การเรียนดมียิงนักคิดคิดคิดดีว่อง รีเลวิฟพรรคดี ต่องอขเอว์รี อินเหลวงรรรมการธีใสใฝ่ดี ดิไถดี บาเองแสพคื่อมแบียืนเดิกพิจอดี้ชนะ",
-      link: "/กลุ่มวิชาวิทยาศาสตร์ข้อมูล",
-    },
-    {
-      icon: businesssubject,
-      title: "กลุ่มวิชารุรกิจดิจิทัล",
-      description:
-        "การเรียนดมียิงนักคิดคิดคิดดีว่อง รีเลวิฟพรรคดี ต่องอขเอว์รี อินเหลวงรรรมการธีใสใฝ่ดี ดิไถดี บาเองแสพคื่อมแบียืนเดิกพิจอดี้ชนะ",
-      link: "/กลุ่มวิชารุรกิจดิจิทัล",
-    },
+  const [typeCourse, settypeCourse] = useState<TypeCourse[]>([]);
+  const theme = useTheme();
+  const isMdUp = useMediaQuery(theme.breakpoints.up("md"));
+
+  const imagesAndLinks = [
+    { src: coresubject, alt: "Core Subject", link: "#" },
+    { src: specificsubject, alt: "Specific Subject", link: "#" },
+    { src: businesssubject, alt: "Business Subject", link: "#" },
+    { src: comscisubject, alt: "Computer Science Subject", link: "#" },
+    { src: datascisubject, alt: "Data Science Subject", link: "#" },
   ];
+
+  useEffect(() => {
+    const fetchtypeCourse = async () => {
+      try {
+        const res = await fetch("http://localhost:8000/typecourse");
+        const data = await res.json();
+        settypeCourse(data.data);
+      } catch (error) {
+        console.error("Failed to fetch type course:", error);
+      }
+    };
+    fetchtypeCourse();
+  }, []);
 
   return (
     <Container maxWidth="lg">
@@ -63,6 +59,7 @@ const Curriculum = () => {
             flexDirection: { xs: "column", md: "row" },
             gap: 3,
             alignItems: "stretch",
+            padding: 4,
           }}
         >
           <Box sx={{ flex: 1 }}>
@@ -111,119 +108,144 @@ const Curriculum = () => {
               md: "repeat(3, 1fr)",
             },
             gap: 4,
-            mb: 4,
+            justifyContent: "center",
           }}
         >
-          {subjectGropsData.slice(0, 3).map((group, index) => (
-            <Card
-              key={index}
-              sx={{
-                textAlign: "center",
-                p: 3,
-                height: "100%",
-                display: "flex",
-                flexDirection: "column",
-              }}
-            >
-              <CardContent
-                sx={{ flexGrow: 1, display: "flex", flexDirection: "column" }}
+          {typeCourse.slice(0, isMdUp ? 3 : 2).map((group, index) => {
+            const imageData = imagesAndLinks[index] || {
+              src: hero,
+              alt: group.name,
+              link: "#",
+            };
+            return (
+              <Card
+                key={index}
+                sx={{
+                  border: "none",
+                  boxShadow: "none",
+                  textAlign: "center",
+                  p: 3,
+                  height: "100%",
+                  display: "flex",
+                  flexDirection: "column",
+                }}
               >
-                <Box sx={{ mb: 2, display: "flex", justifyContent: "center" }}>
-                  <Image
-                    src={group.icon}
-                    alt={group.title}
-                    width={80}
-                    height={80}
-                    style={{ objectFit: "contain" }}
-                  />
-                </Box>
-                <Typography
-                  variant="h6"
-                  component="h3"
-                  sx={{ fontWeight: "bold", mb: 2 }}
+                <CardContent
+                  sx={{ flexGrow: 1, display: "flex", flexDirection: "column" }}
                 >
-                  {group.title}
-                </Typography>
-                <Typography
-                  variant="body2"
-                  sx={{ color: "text.secondary", mb: 3, flexGrow: 1 }}
-                >
-                  {group.description}
-                </Typography>
-                <Button
-                  variant="outlined"
-                  href={group.link}
-                  sx={{
-                    alignSelf: "center",
-                    px: 4,
-                    py: 1,
-                  }}
-                >
-                  ดูรายวิชา
-                </Button>
-              </CardContent>
-            </Card>
-          ))}
+                  <Box
+                    sx={{ mb: 2, display: "flex", justifyContent: "center" }}
+                  >
+                    <Image
+                      src={imageData.src}
+                      alt={imageData.alt}
+                      width={80}
+                      height={80}
+                      style={{ objectFit: "contain" }}
+                    />
+                  </Box>
+                  <Typography
+                    variant="h6"
+                    component="h3"
+                    sx={{ fontWeight: "bold", mb: 2 }}
+                  >
+                    {group.name}
+                  </Typography>
+                  <Typography
+                    variant="body2"
+                    sx={{ color: "text.secondary", mb: 3, flexGrow: 1 }}
+                  >
+                    {group.description}
+                  </Typography>
+                  <Button
+                    variant="outlined"
+                    href={imageData.link}
+                    sx={{
+                      alignSelf: "center",
+                      px: 4,
+                      py: 1,
+                    }}
+                  >
+                    ดูรายวิชา
+                  </Button>
+                </CardContent>
+              </Card>
+            );
+          })}
         </Box>
+      </Box>
 
+      <Box sx={{ py: 4 }}>
         <Box
           sx={{
-            display: "flex",
-            justifyContent: "center",
+            display: "grid",
+            gridTemplateColumns: {
+              xs: "1fr",
+              sm: "repeat(2, 1fr)",
+              md: "repeat(2, 2fr)",
+            },
             gap: 4,
           }}
         >
-          {subjectGropsData.slice(3, 5).map((group, index) => (
-            <Card
-              key={index + 3}
-              sx={{
-                textAlign: "center",
-                p: 3,
-                width: { xs: "100%", md: "300px" },
-                maxWidth: "300px",
-                display: "flex",
-                flexDirection: "column",
-              }}
-            >
-              <CardContent
-                sx={{ flexGrow: 1, display: "flex", flexDirection: "column" }}
+          {typeCourse.slice(isMdUp ? 3 : 2, 5).map((group, index) => {
+            const imageData = imagesAndLinks[index + (isMdUp ? 3 : 2)] || {
+              src: hero,
+              alt: group.name,
+              link: "#",
+            };
+            return (
+              <Card
+                key={index + (isMdUp ? 3 : 2)}
+                sx={{
+                  border: "none",
+                  boxShadow: "none",
+                  textAlign: "center",
+                  p: 3,
+                  height: "100%",
+                }}
               >
-                <Box sx={{ mb: 2, display: "flex", justifyContent: "center" }}>
-                  <Image
-                    src={group.icon}
-                    alt={group.title}
-                    width={80}
-                    height={80}
-                    style={{ objectFit: "contain" }}
-                  />
-                </Box>
-                <Typography
-                  variant="h6"
-                  component="h3"
-                  sx={{ fontWeight: "bold", mb: 2 }}
+                <CardContent
+                  sx={{ flexGrow: 1, display: "flex", flexDirection: "column" }}
                 >
-                  {group.title}
-                </Typography>
-                <Typography
-                  variant="body2"
-                  sx={{ color: "text.secondary", mb: 3, flexGrow: 1 }}
-                >
-                  {group.description}
-                </Typography>
-                <Button
-                  variant="outlined"
-                  href={group.link}
-                  sx={{
-                    alignSelf: "center",
-                    px: 4,
-                    py: 1,
-                  }}
-                >
-                  ดูรายวิชา
-                </Button>
-              </CardContent>
-            </Card>
-          ))}
+                  <Box
+                    sx={{ mb: 2, display: "flex", justifyContent: "center" }}
+                  >
+                    <Image
+                      src={imageData.src}
+                      alt={imageData.alt}
+                      width={80}
+                      height={80}
+                      style={{ objectFit: "contain" }}
+                    />
+                  </Box>
+                  <Typography
+                    variant="h6"
+                    component="h3"
+                    sx={{ fontWeight: "bold", mb: 2 }}
+                  >
+                    {group.name}
+                  </Typography>
+                  <Typography
+                    variant="body2"
+                    sx={{ color: "text.secondary", mb: 3, flexGrow: 1 }}
+                  >
+                    {group.description}
+                  </Typography>
+                  <Button
+                    variant="outlined"
+                    href={imageData.link}
+                    sx={{
+                      alignSelf: "center",
+                      px: 4,
+                      py: 1,
+                    }}
+                  >
+                    ดูรายวิชา
+                  </Button>
+                </CardContent>
+              </Card>
+            );
+          })}
         </Box>
       </Box>
     </Container>
