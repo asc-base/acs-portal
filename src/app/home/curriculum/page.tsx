@@ -1,10 +1,11 @@
 "use client";
+import React, { useEffect, useState } from "react";
 import { CurriculumCard } from "@/components/curriculumcard";
 import hero from "../../../../public/hero.jpg";
-import businesssubject from "../../../../public/businesssubject.png";
+import busunesssubject from "../../../../public/busunesssubject.png";
 import comscisubject from "../../../../public/comscisubject.png";
 import coresubject from "../../../../public/coresubject.png";
-import datascisubject from "../../../../public/datascisubject.png";
+import datasubject from "../../../../public/datasubject.png";
 import {
   Box,
   Container,
@@ -13,46 +14,30 @@ import {
   CardContent,
   Button,
 } from "@mui/material";
-import Image from "next/image";
+// import Image from "next/image";
+
+interface TypeCourse {
+  name: string;
+  description: string;
+}
 
 const Curriculum = () => {
-  const subjectGropsData = [
-    {
-      icon: coresubject,
-      title: "กลุ่มวิชาเฉพาะ-ประเทศวิชาแกน",
-      description:
-        "การเรียนดมียิงนักคิดคิดคิดดีว่อง รีเลวิฟพรรคดี ต่องอขเอว์รี อินเหลวงรรรมการธีใสใฝ่ดี ดิไถดี บาเองแสพคื่อมแบียืนเดิกพิจอดี้ชนะ",
-      link: "/กลุ่มวิชาเฉพาะ-ประเทศวิชาแกน",
-    },
-    {
-      icon: comscisubject,
-      title: "กลุ่มวิชาเฉพาะ-ประเทศวิชาเฉพาะด้าน",
-      description:
-        "การเรียนดมียิงนักคิดคิดคิดดีว่อง รีเลวิฟพรรคดี ต่องอขเอว์รี อินเหลวงรรรมการธีใสใฝ่ดี ดิไถดี บาเองแสพคื่อมแบียืนเดิกพิจอดี้ชนะ",
-      link: "/กลุ่มวิชาเฉพาะ-ประเทศวิชาเฉพาะด้าน",
-    },
-    {
-      icon: coresubject,
-      title: "กลุ่มวิชาวิทยาการคอมพิวเตอร์",
-      description:
-        "การเรียนดมียิงนักคิดคิดคิดดีว่อง รีเลวิฟพรรคดี ต่องอขเอว์รี อินเหลวงรรรมการธีใสใฝ่ดี ดิไถดี บาเองแสพคื่อมแบียืนเดิกพิจอดี้ชนะ",
-      link: "/กลุ่มวิชาวิทยาการคอมพิวเตอร์",
-    },
-    {
-      icon: datascisubject,
-      title: "กลุ่มวิชาวิทยาศาสตร์ข้อมูล",
-      description:
-        "การเรียนดมียิงนักคิดคิดคิดดีว่อง รีเลวิฟพรรคดี ต่องอขเอว์รี อินเหลวงรรรมการธีใสใฝ่ดี ดิไถดี บาเองแสพคื่อมแบียืนเดิกพิจอดี้ชนะ",
-      link: "/กลุ่มวิชาวิทยาศาสตร์ข้อมูล",
-    },
-    {
-      icon: businesssubject,
-      title: "กลุ่มวิชารุรกิจดิจิทัล",
-      description:
-        "การเรียนดมียิงนักคิดคิดคิดดีว่อง รีเลวิฟพรรคดี ต่องอขเอว์รี อินเหลวงรรรมการธีใสใฝ่ดี ดิไถดี บาเองแสพคื่อมแบียืนเดิกพิจอดี้ชนะ",
-      link: "/กลุ่มวิชารุรกิจดิจิทัล",
-    },
-  ];
+
+  const [typeCourse, settypeCourse] = useState<TypeCourse[]>([]);
+
+  useEffect(() => {
+    const fetchtypeCourse = async () => {
+      try {
+        const res = await fetch("http://localhost:8000/typecourse");
+        const data = await res.json();
+        settypeCourse(data.data);
+      } catch (error) {
+        console.error("Failed to fetch type course:", error);
+      }
+    };
+    fetchtypeCourse();
+  }, []);
+
 
   return (
     <Container maxWidth="lg">
@@ -63,6 +48,7 @@ const Curriculum = () => {
             flexDirection: { xs: "column", md: "row" },
             gap: 3,
             alignItems: "stretch",
+            padding: 4,
           }}
         >
           <Box sx={{ flex: 1 }}>
@@ -111,10 +97,9 @@ const Curriculum = () => {
               md: "repeat(3, 1fr)",
             },
             gap: 4,
-            mb: 4,
           }}
         >
-          {subjectGropsData.slice(0, 3).map((group, index) => (
+          {typeCourse.slice(0, 3).map((group, index) => (
             <Card
               key={index}
               sx={{
@@ -129,20 +114,20 @@ const Curriculum = () => {
                 sx={{ flexGrow: 1, display: "flex", flexDirection: "column" }}
               >
                 <Box sx={{ mb: 2, display: "flex", justifyContent: "center" }}>
-                  <Image
-                    src={group.icon}
-                    alt={group.title}
+                  {/* <Image
+                    src={group.name}
+                    alt={group.name}
                     width={80}
                     height={80}
                     style={{ objectFit: "contain" }}
-                  />
+                  /> */}
                 </Box>
                 <Typography
                   variant="h6"
                   component="h3"
                   sx={{ fontWeight: "bold", mb: 2 }}
                 >
-                  {group.title}
+                  {group.name}
                 </Typography>
                 <Typography
                   variant="body2"
@@ -152,7 +137,7 @@ const Curriculum = () => {
                 </Typography>
                 <Button
                   variant="outlined"
-                  href={group.link}
+                  href={"#"}
                   sx={{
                     alignSelf: "center",
                     px: 4,
@@ -165,7 +150,9 @@ const Curriculum = () => {
             </Card>
           ))}
         </Box>
+      </Box>
 
+      <Box sx={{ py: 4 }}>
         <Box
           sx={{
             display: "flex",
@@ -173,14 +160,13 @@ const Curriculum = () => {
             gap: 4,
           }}
         >
-          {subjectGropsData.slice(3, 5).map((group, index) => (
+          {typeCourse.slice(3, 5).map((group, index) => (
             <Card
               key={index + 3}
               sx={{
                 textAlign: "center",
                 p: 3,
-                width: { xs: "100%", md: "300px" },
-                maxWidth: "300px",
+                height: "100%",
                 display: "flex",
                 flexDirection: "column",
               }}
@@ -189,20 +175,20 @@ const Curriculum = () => {
                 sx={{ flexGrow: 1, display: "flex", flexDirection: "column" }}
               >
                 <Box sx={{ mb: 2, display: "flex", justifyContent: "center" }}>
-                  <Image
-                    src={group.icon}
-                    alt={group.title}
+                  {/* <Image
+                    src={group.name}
+                    alt={group.name}
                     width={80}
                     height={80}
                     style={{ objectFit: "contain" }}
-                  />
+                  /> */}
                 </Box>
                 <Typography
                   variant="h6"
                   component="h3"
                   sx={{ fontWeight: "bold", mb: 2 }}
                 >
-                  {group.title}
+                  {group.name}
                 </Typography>
                 <Typography
                   variant="body2"
@@ -212,7 +198,7 @@ const Curriculum = () => {
                 </Typography>
                 <Button
                   variant="outlined"
-                  href={group.link}
+                  href={"#"}
                   sx={{
                     alignSelf: "center",
                     px: 4,
