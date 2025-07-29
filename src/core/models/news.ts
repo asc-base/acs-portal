@@ -1,5 +1,5 @@
 import { API_URL } from "@/config/config";
-import { News } from "@/interface/news";
+import { IGetNews, News } from "@/interface/news";
 
 export const createNews = async (news: FormData, token: string) => {
   const response = await fetch(`${API_URL}/news`, {
@@ -18,7 +18,7 @@ export const getNews = async (
   page: number,
   pageSize: number,
   category: string,
-) => {
+): Promise<IGetNews | Error> => {
   const response = await fetch(
     `${API_URL}/news?page=${page}&pageSize=${pageSize}&category=${category}`,
   );

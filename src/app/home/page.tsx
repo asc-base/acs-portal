@@ -82,9 +82,9 @@ const page = () => {
           getNews(1, 3, "ความสำเร็จ"),
           getNews(1, 3, "งานกิจกรรมนักศึกษา"),
         ]);
-        setNews(news);
-        setAchievements(achievements);
-        setStudentActi(studentActi);
+        setNews(news.rows);
+        setAchievements(achievements.rows);
+        setStudentActi(studentActi.rows);
       } catch (error) {
         console.error("Error loading news:", error);
         setNews([]);
