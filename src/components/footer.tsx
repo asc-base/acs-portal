@@ -56,61 +56,102 @@ export const Footer = () => {
 
                 <div className="w-full lg:flex-[2] flex flex-wrap gap-4 overflow-hidden break-words">
                     <div className="flex flex-col flex-1 min-w-[100px]">
-                        <Link href="/">
+                        <Link href="/home">
                             <h4 className="text-secondary01 font-bold">สมัครเรียน</h4>
                         </Link>
-                        <Link href="/about">
-                            <h4 className="text-secondary01 font-bold">หลักสูตร</h4>
-                        </Link>
-                        <Link href="#"><h5 className="text-neutral01">หลักสูตรใหม่ พ.ศ2565</h5></Link>
-                        <Link href="#"><h5 className="text-neutral01">หลักสูตร พ.ศ.2560</h5></Link>
+                        {/* <Link href="/about"> */}
+                        <h4 className="text-secondary01 font-bold">หลักสูตร</h4>
+                        {/* </Link>
+                        <Link href="#">*/}
+                        <h5 className="text-neutral01">หลักสูตรใหม่ พ.ศ2565</h5>
+                        {/*</Link> */}
+                        {/* <Link href="#"> */}
+                        <h5 className="text-neutral01">หลักสูตร พ.ศ.2560</h5>
+                        {/* </Link> */}
                     </div>
 
                     <div className="flex flex-col flex-1 min-w-[150px]">
                         <h4 className="text-secondary01 font-bold whitespace-nowrap">ข่าวสารและกิจกรรม</h4>
-                        <Link href="#"><h5 className="text-neutral01">ประชาสัมพันธ์</h5></Link>
-                        <Link href="#"><h5 className="text-neutral01">ความสำเร็จภาควิชา</h5></Link>
-                        <Link href="#"><h5 className="text-neutral01">งานกิจกรรมนักศึกษา</h5></Link>
+                        {/* <Link href="#"> */}
+                        <h5 className="text-neutral01">ประชาสัมพันธ์</h5>
+                        {/* </Link>
+                        <Link href="#"> */}
+                        <h5 className="text-neutral01">ความสำเร็จภาควิชา</h5>
+                        {/* </Link>
+                        <Link href="#"> */}
+                        <h5 className="text-neutral01">งานกิจกรรมนักศึกษา</h5>
+                        {/* </Link> */}
                     </div>
 
                     <div className="flex flex-col flex-1 min-w-[120px]">
-                        <Link href="/curriculum">
-                            <h4 className="text-secondary01 font-bold whitespace-nowrap">ผลงานนักศึกษา</h4>
-                        </Link>
-                        <Link href="/news">
-                            <h4 className="text-secondary01 font-bold">ทำเนียบรุ่น</h4>
-                        </Link>
-                        <Link href="#">
-                            <h4 className="text-secondary01 font-bold">เกี่ยวกับเรา</h4>
-                        </Link>
-                        <Link href="#"><h5 className="text-neutral01">คณาจารย์</h5></Link>
-                        <Link href="#"><h5 className="text-neutral01">ประวัติสาขา</h5></Link>
-                        <Link href="#"><h5 className="text-neutral01">บรรยากาศในสาขา</h5></Link>
+                        {/*
+                         <Link
+                            href="#"*/}
+                        <h4 className="text-secondary01 font-bold whitespace-nowrap">ผลงานนักศึกษา</h4>
+                        {/* </Link>
+                         <Link
+                            href="#" */}
+                        <h4 className="text-secondary01 font-bold">ทำเนียบรุ่น</h4>
+                        {/* </Link>
+                         <Link
+                            href="#" */}
+                        <h4 className="text-secondary01 font-bold">เกี่ยวกับเรา</h4>
+                        {/* </Link>
+                         <Link
+                            href="#" */}
+                        <h5 className="text-neutral01">คณาจารย์</h5>
+                        {/* </Link>
+                         <Link
+                            href="#" */}
+                        <h5 className="text-neutral01">ประวัติสาขา</h5>
+                        {/* </Link>
+                         <Link
+                            href="#" */}
+                        <h5 className="text-neutral01">บรรยากาศในสาขา</h5>
+                        {/* </Link> */}
                     </div>
 
                     <div className="flex flex-col flex-1 min-w-[220px]">
                         <h4 className="text-secondary01 font-bold whitespace-nowrap">เว็บไซต์หลักของมหาวิทยาลัย</h4>
-                        <Link href="https://www.leb2.org/">
+                        <Link
+                            href="https://www.leb2.org/"
+                            target="_blank"
+                            rel="noopener noreferrer">
                             <h5 className="text-neutral01">LEB2</h5>
                         </Link>
-                        <Link href="https://sinfo.kmutt.ac.th/">
+                        <Link
+                            href="https://sinfo.kmutt.ac.th/"
+                            target="_blank"
+                            rel="noopener noreferrer">
                             <h5 className="text-neutral01">New Acis</h5>
                         </Link>
-                        <Link href="https://www.kmutt.ac.th/">
+                        <Link
+                            href="https://www.kmutt.ac.th/"
+                            target="_blank"
+                            rel="noopener noreferrer">
                             <h5 className="text-neutral01">มหาวิทยาลัย</h5>
                         </Link>
-                        <Link href="https://sola.pr.kmutt.ac.th/homesola/">
+                        <Link
+                            href="https://sola.pr.kmutt.ac.th/homesola/"
+                            target="_blank"
+                            rel="noopener noreferrer">
                             <h5 className="text-neutral01">Sola.Kmutt</h5>
                         </Link>
-                        <Link href="https://science.kmutt.ac.th/สำนักงานคณะบดีฯ/">
+                        <Link
+                            href="https://science.kmutt.ac.th/สำนักงานคณะบดีฯ/"
+                            target="_blank"
+                            rel="noopener noreferrer">
                             <h5 className="text-neutral01">สำนักงานคณบดี</h5>
                         </Link>
-                        <Link href="https://math.kmutt.ac.th/">
+                        <Link
+                            href="https://math.kmutt.ac.th/"
+                            target="_blank"
+                            rel="noopener noreferrer">
                             <h5 className="text-neutral01">ภาควิชาคณิตศาสตร์</h5>
                         </Link>
                     </div>
                 </div>
             </div>
-        </div>
+        </div >
     );
 };

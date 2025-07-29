@@ -21,10 +21,10 @@ const MenuBar = () => {
     <div className="bg-neutral01 p-1">
       <ul className="text-primary01 container mx-auto flex w-full items-center justify-between">
         {menuItems.map((item) => (
-          <li key={item.name}>
-            <Link className="hover:text-accent04" href={item.href}>
-              {item.name}
-            </Link>
+          <li key={item.name} className="hover:text-accent04">
+            {/* <Link  href={item.href}> */}
+            {item.name}
+            {/* </Link> */}
           </li>
         ))}
       </ul>
