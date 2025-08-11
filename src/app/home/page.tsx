@@ -11,10 +11,10 @@ import { Carousel } from "@/components/carousel";
 import ExpandLessSharpIcon from "@mui/icons-material/ExpandLessSharp";
 import { NewsCard } from "@/components/newscard";
 import { StudentCard } from "@/components/studentcard";
-import { News } from "@/interface/news";
+import { INews } from "@/interface/news";
 import { getNews } from "./action";
 
-const page = () => {
+const MainPage = () => {
   const description =
     "คณะวิทยาศาสตร์ ภาควิชาคณิตศาสตร์/มหาวิทยาลัยเทคโนโลยีพระจอมเกล้าธนบุรี";
 
@@ -70,9 +70,9 @@ const page = () => {
     "/logoacs.png",
   ];
 
-  const [news, setNews] = useState<News[]>([]);
-  const [achievements, setAchievements] = useState<News[]>([]);
-  const [studentActi, setStudentActi] = useState<News[]>([]);
+  const [news, setNews] = useState<INews[]>([]);
+  const [achievements, setAchievements] = useState<INews[]>([]);
+  const [studentActi, setStudentActi] = useState<INews[]>([]);
 
   useEffect(() => {
     const fetchAllNews = async () => {
@@ -82,9 +82,13 @@ const page = () => {
           getNews(1, 3, "ความสำเร็จ"),
           getNews(1, 3, "งานกิจกรรมนักศึกษา"),
         ]);
-        setNews(news.rows);
-        setAchievements(achievements.rows);
-        setStudentActi(studentActi.rows);
+        setNews(Array.isArray(news) ? news : news.rows || []);
+        setAchievements(
+          Array.isArray(achievements) ? achievements : achievements.rows || [],
+        );
+        setStudentActi(
+          Array.isArray(studentActi) ? studentActi : studentActi.rows || [],
+        );
       } catch (error) {
         console.error("Error loading news:", error);
         setNews([]);
@@ -94,9 +98,9 @@ const page = () => {
     };
 
     fetchAllNews();
-
   }, []);
 
+  console.log(news);
 
   return (
     <>
@@ -247,7 +251,7 @@ const page = () => {
             </div>
           </div>
 
-          <div className="flex w-full justify-between gap-6 flex-col">
+          <div className="flex w-full flex-col justify-between gap-6">
             <div className="flex w-full flex-col gap-6">
               <div className="flex w-full justify-between">
                 <Typography
@@ -265,7 +269,7 @@ const page = () => {
               </div>
             </div>
 
-            <div className="grid w-full grid-cols-3 gap-6 max-sm:grid-cols-2 ">
+            <div className="grid w-full grid-cols-3 gap-6 max-sm:grid-cols-2">
               <StudentCard
                 title="CSS 122"
                 description="Introduction to Computer Networks and Security"
@@ -307,7 +311,7 @@ const page = () => {
           <div>
             <Typography
               variant="h1"
-              className="!text-h2 max-xl:!text-h3 !text-accent04 !font-bold text-center"
+              className="!text-h2 max-xl:!text-h3 !text-accent04 text-center !font-bold"
             >
               สารจากคณาจารย์และนักศึกษาเก่า
             </Typography>
@@ -321,10 +325,9 @@ const page = () => {
             </div>
           </div>
         </Container>
-
       </div>
     </>
   );
 };
 
-export default page;
+export default MainPage;

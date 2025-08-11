@@ -1,4 +1,4 @@
-export interface News {
+export interface INews {
   id: number;
   title: string;
   categoryId: number;
@@ -17,7 +17,7 @@ export interface ICreateNews {
 }
 
 export interface IGetNews {
-  rows: News[];
+  rows: INews[];
   totalRecords: number;
   page: number;
   pageSize: number;

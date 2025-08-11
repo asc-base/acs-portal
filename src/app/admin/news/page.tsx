@@ -1,32 +1,65 @@
 "use client";
-
-import { useState, useEffect } from "react";
-import { News } from "@/interface/news";
 import { fetchNews } from "@/core/viewmodels/news";
-import { NewsCard } from "@/components/newscard";
 import { TextField, Button, InputAdornment } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import FilterListIcon from "@mui/icons-material/FilterList";
 import SearchIcon from "@mui/icons-material/Search";
 import Link from "next/link";
+import { INews } from "@/interface/news";
+import { NewsCard } from "@/components/newscard";
+import { useEffect, useState, useRef } from "react";
 
 export default function NewsAdminPage() {
-  const [news, setNews] = useState<News[]>([]);
+  const [news, setNews] = useState<INews[]>([]);
+  const [totalRecords, setTotalRecords] = useState(0);
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(false);
+  const pageSize = 10;
+  const loadMoreRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const getNews = async (page: number, pageSize: number) => {
+    const fetchData = async () => {
       try {
-        const data = await fetchNews(page, pageSize);
-        setNews(data);
-        console.log("News : ", data);
+        const response = await fetchNews(page, pageSize, "");
+        if (Array.isArray(response)) {
+          setNews([]);
+          setTotalRecords(0);
+        } else {
+          setNews(response.rows);
+          setTotalRecords(response.totalRecords);
+          if (page * pageSize < response.totalRecords) {
+            setHasMore(true);
+          }
+        }
       } catch (error) {
-        console.error("Error loading news:", error);
-        setNews([]);
+        console.error("Failed to fetch news:", error);
       }
     };
+    fetchData();
+  }, [page]);
 
-    getNews(1, 10);
-  }, []);
+  useEffect(() => {
+    if (!hasMore) return;
+
+    const observer = new IntersectionObserver((entries) => {
+      if (entries[0].isIntersecting) {
+        setPage((prev) => prev + 1);
+      }
+    });
+
+    const currentRef = loadMoreRef.current;
+    if (currentRef) {
+      observer.observe(currentRef);
+    }
+
+    return () => {
+      if (currentRef) {
+        observer.unobserve(currentRef);
+      }
+    };
+  }, [hasMore]);
+
+  console.log("News data:", news);
 
   return (
     <div className="min-h-screen p-6">
@@ -118,8 +151,8 @@ export default function NewsAdminPage() {
       </div>
 
       <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-        {news.length > 0 ? (
-          news.map((item) => (
+        {totalRecords > 0 && !hasMore ? (
+          news.map((item: INews) => (
             <NewsCard
               key={item.id}
               title={item.title}
@@ -131,7 +164,9 @@ export default function NewsAdminPage() {
             />
           ))
         ) : (
-          <p>ไม่มีข่าว</p>
+          <div className="col-span-3 text-center text-gray-500">
+            ไม่มีข่าวสาร
+          </div>
         )}
       </div>
     </div>

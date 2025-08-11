@@ -1,5 +1,6 @@
 import { API_URL } from "@/config/config";
-import { IGetNews, News } from "@/interface/news";
+import { INews } from "@/interface/news";
+import { Pageable } from "@/interface/response";
 
 export const createNews = async (news: FormData, token: string) => {
   const response = await fetch(`${API_URL}/news`, {
@@ -18,23 +19,20 @@ export const getNews = async (
   page: number,
   pageSize: number,
   category: string,
-): Promise<IGetNews | Error> => {
+): Promise<Pageable<INews>> => {
   const response = await fetch(
     `${API_URL}/news?page=${page}&pageSize=${pageSize}&category=${category}`,
   );
 
   if (!response.ok) {
-    return new Error("Failed to fetch all news");
+    throw new Error("Failed to fetch all news");
   }
 
   const data = await response.json();
   return data.data;
 };
 
-export const deleteNews = async (
-  id: string,
-  token: string,
-): Promise<News | Error> => {
+export const deleteNews = async (id: string, token: string): Promise<INews> => {
   const response = await fetch(`${API_URL}/news/${id}`, {
     method: "DELETE",
     headers: {
@@ -44,7 +42,7 @@ export const deleteNews = async (
   });
 
   if (!response.ok) {
-    return new Error("Failed to delete news");
+    throw new Error("Failed to delete news");
   }
 
   const data = await response.json();

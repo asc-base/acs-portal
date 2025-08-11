@@ -5,8 +5,10 @@ import Image from "next/image";
 import { Button, TextField } from "@mui/material";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { handleAdminLogin } from "./action";
+import { useRouter } from "next/navigation";
 
 const AuthAdminPage = () => {
+  const router = useRouter();
   type FormData = {
     email: string;
     password: string;
@@ -20,9 +22,14 @@ const AuthAdminPage = () => {
 
   const onSubmit: SubmitHandler<FormData> = async (data) => {
     const result = await handleAdminLogin(data);
-    if (!result) {
+    if (!result.success) {
       console.error("Login failed");
     }
+
+    if (result.redirect) {
+      router.push(result.redirect);
+    }
+
     console.log("Login successful", result);
   };
 

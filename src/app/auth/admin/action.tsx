@@ -11,11 +11,20 @@ export const handleAdminLogin = async (data: {
     if (!result) {
       throw new Error("Login failed");
     }
+
     console.log("Login successful", result);
     (await cookies()).set("access_token", result.data.msg);
-    return result;
+    return {
+      success: true,
+      message: "Login successful",
+      redirect: "/admin/news",
+      data: result.data,
+    };
   } catch (error) {
     console.error("Error during admin login:", error);
-    return null;
+    return {
+      success: false,
+      message: "Login failed",
+    };
   }
 };
