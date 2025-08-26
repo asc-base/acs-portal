@@ -14,7 +14,7 @@ export interface IProfessor {
     image: string
 }
 
-export interface ICreateNews {
+export interface ICreateProfessor {
     firstNameTh: string;
     lastNameTh: string;
     firstNameEn: string;
