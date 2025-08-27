@@ -6,11 +6,11 @@ export interface IProfessor {
     lastNameEn: string;
     email: string;
     majorPositionId: number;
-    academecpositionId: number;
+    academicPositionId: number;
     profRoom: string;
     IsPassword: boolean;
-    expertFeild: string[];
-    education: string[];
+    expertFields: string[];
+    educations: string[];
     image: string
 }
 
@@ -21,9 +21,9 @@ export interface ICreateProfessor {
     lastNameEn: string;
     email: string;
     majorPositionId: number;
-    academecpositionId: number;
+    academicPositionId: number;
     profRoom: string;
     IsPassword: boolean;
-    expertFeild: string[];
-    education: string[];
+    expertFields: string[];
+    educations: string[];
 }
