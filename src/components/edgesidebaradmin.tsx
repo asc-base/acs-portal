@@ -8,6 +8,7 @@ import MenuBookIcon from '@mui/icons-material/MenuBook';
 import WorkIcon from '@mui/icons-material/Work';
 import LogoutIcon from "@mui/icons-material/Logout";
 import BookmarkIcon from '@mui/icons-material/Bookmark';
+import CampaignIcon from '@mui/icons-material/Campaign';
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
@@ -26,6 +27,11 @@ const sidebarItems = [
         name: "ข้อมูลผลงาน",
         href: "/admin/works",
         icon: <DescriptionIcon />
+    },
+    {
+        name: "ข่าวประชาสัมพันธ์",
+        href: "/admin/announcement",
+        icon: <CampaignIcon />
     },
     {
         name: "จัดการข่าวสาร",
