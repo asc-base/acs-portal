@@ -111,17 +111,8 @@ const CreateProfessorPage = () => {
                     alt="Preview"
                     width={300}
                     height={300}
-                    style={{ objectFit: "cover", width: "auto", height: "auto" }}
+                      style={{ objectFit: "cover"}}
                     className="bg-neutral02 h-full w-full object-cover"
-                  />
-                  <Image
-                    alt=""
-                    src="/uploadimage.png"
-                    width={50}
-                    height={50}
-                    style={{ width: "auto", height: "auto" }}
-                    className="bg-neutral02 rounded-full"
-                    priority
                   />
                 </div>
               ) : (
@@ -144,8 +135,8 @@ const CreateProfessorPage = () => {
               <Image
                 alt="Uploaded file"
                 src="/uploadimage.png"
-                width={50}
-                height={50}
+                width={40}
+                height={40}
                 style={{ width: "auto", height: "auto" }}
                 className="bg-neutral02 rounded-full absolute bottom-0 right-2 p-2"
                 priority
