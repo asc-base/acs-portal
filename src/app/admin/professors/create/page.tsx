@@ -10,9 +10,6 @@ import { styled } from "@mui/material/styles";
 import AddIcon from '@mui/icons-material/Add';
 import { useState } from "react";
 import Image from "next/image";
-import { ICreateProfessor } from '@/interface/professor';
-import { createProfessorAction } from './action';
-import { SubmitHandler, useForm } from 'react-hook-form';
 
 const VisuallyHiddenInput = styled("input")({
   clip: "rect(0 0 0 0)",
@@ -85,17 +82,9 @@ const CreateProfessorPage = () => {
     setExpertField(updatedExpertField);
   };
 
-  const { handleSubmit } = useForm<ICreateProfessor>();
-
-  const onSubmit: SubmitHandler<ICreateProfessor> = (data) => {
-    if (selectedFile) {
-      createProfessorAction({ ...data }, selectedFile);
-    }
-  };
-
 
   return (
-    <form className="space-y-4 p-8" onSubmit={handleSubmit(onSubmit)}>
+    <form className="space-y-4 p-8">
       <div>
         <Typography variant="h6" fontWeight="bold">
           ข้อมูลส่วนตัว
