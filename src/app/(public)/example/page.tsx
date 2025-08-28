@@ -1,5 +1,5 @@
 import React from "react";
-import { getExampleData } from "@/app/home/example/action";
+import { getExampleData } from "@/app/(public)/example/action";
 
 export default async function Example() {
   const result = await getExampleData();

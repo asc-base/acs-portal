@@ -16,7 +16,7 @@ import { fetchCategories } from "@/core/viewmodels/type";
 import { Category } from "@/interface/type";
 import Image from "next/image";
 import { ICreateNews } from "@/interface/news";
-import { createNewsAction } from "./action";
+import { createNewsAction } from "./create/action";
 
 const VisuallyHiddenInput = styled("input")({
   clip: "rect(0 0 0 0)",
