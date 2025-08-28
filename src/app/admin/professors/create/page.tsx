@@ -42,8 +42,6 @@ const CreateProfessorPage = () => {
 
   const levelId = ["B.Sc", "M.Sc", "Ph.D"];
 
-  const expertFields = [{ id: 1, field: 'Computer Science' }, { id: 2, field: 'Software Engineering' }, { id: 3, field: 'Data Science' }, { id: 4, field: 'Artificial Intelligence' }, { id: 5, field: 'Cyber Security' }];
-
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -77,7 +75,7 @@ const CreateProfessorPage = () => {
 
   const handleExpertFieldChange = (index: number, value: string) => {
     const updatedExpertField = expertField.map((field, idx) =>
-      idx === index ? { field: value } : field
+      idx === index ? { ...field, field: value } : field
     );
     setExpertField(updatedExpertField);
   };
@@ -113,7 +111,7 @@ const CreateProfessorPage = () => {
                     alt="Preview"
                     width={300}
                     height={300}
-                    style={{ objectFit: "cover", width: "auto", height: "auto" }} 
+                    style={{ objectFit: "cover", width: "auto", height: "auto" }}
                     className="bg-neutral02 h-full w-full object-cover"
                   />
                   <Image
@@ -360,26 +358,19 @@ const CreateProfessorPage = () => {
           </IconButton>
         </div>
 
-        {expertField.map((field, index) => (
-          <TextField
-            key={index}
-            select
-            label="สาขาที่เชี่ยวชาญ"
-            variant="outlined"
-            fullWidth
-            className="flex-[2]"
-            slotProps={{ select: { native: true } }}
-            defaultValue=""
-            sx={{ marginBottom: "24px" }}
-            onChange={(e) => handleExpertFieldChange(index, e.target.value)}
-          >
-            <option value="" disabled></option>
-            {expertFields.map((field) => (
-              <option key={field.id} value={field.field}>
-                {field.field}
-              </option>
-            ))}
-          </TextField>
+        {expertField.map((field, idx) => (
+          <div key={idx}>
+            <Typography variant="body2" color="text.secondary" mb={0.5}>
+              input
+            </Typography>
+            <TextField
+              fullWidth
+              variant="outlined"
+              placeholder="Input"
+              value={field.field}
+              onChange={e => handleExpertFieldChange(idx, e.target.value)}
+            />
+          </div>
         ))}
       </div>
       <div className="flex flex-row justify-end gap-x-4">
