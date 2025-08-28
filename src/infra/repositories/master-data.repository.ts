@@ -25,9 +25,10 @@ export class MasterDataRepository implements IMasterDataRepository {
   }
 
   async getMasterDataListType(type: string): Promise<ApiResponse<IType[]>> {
-    const response = await this.http.get<ApiResponse<IType[]>>(
-      `/v1/master-data/type/list?type=${type}`,
-    );
+    const url = type
+      ? `/v1/master-data/type/list?type=${type}`
+      : `/v1/master-data/type/list`;
+    const response = await this.http.get<ApiResponse<IType[]>>(url);
     return response;
   }
 }
