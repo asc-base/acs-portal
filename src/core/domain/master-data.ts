@@ -1,9 +1,9 @@
 export interface MasterData {
   majorPositions: Position[];
-  types: EducationLevel[];
+  types: IType[];
   roles: Role[];
   typeCourses: EducationLevel[];
-  listTypes: EducationLevel[];
+  listTypes: IType[];
   educationLevels: EducationLevel[];
   academicPositions: Position[];
 }
@@ -28,4 +28,11 @@ export interface EducationLevel {
 export interface Role {
   id: number;
   name: string;
+}
+
+export interface IType {
+  id: number;
+  name: string;
+  createdDate: Date;
+  updatedDate: Date;
 }

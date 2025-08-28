@@ -1,6 +1,6 @@
 import { IMasterDataRepository } from "@/core/ports/master-data.repository";
 import { ApiResponse } from "@/interface/response";
-import { MasterData } from "@/core/domain/master-data";
+import { MasterData, IType } from "@/core/domain/master-data";
 import { HttpHelper } from "@/lib/http";
 
 export class MasterDataRepository implements IMasterDataRepository {
@@ -15,6 +15,19 @@ export class MasterDataRepository implements IMasterDataRepository {
   async getMasterData(): Promise<ApiResponse<MasterData>> {
     const response =
       await this.http.get<ApiResponse<MasterData>>(`/v1/master-data`);
+    return response;
+  }
+
+  async getMasterDataType(): Promise<ApiResponse<IType[]>> {
+    const response =
+      await this.http.get<ApiResponse<IType[]>>(`/v1/master-data/type`);
+    return response;
+  }
+
+  async getMasterDataListType(type: string): Promise<ApiResponse<IType[]>> {
+    const response = await this.http.get<ApiResponse<IType[]>>(
+      `/v1/master-data/type/list?type=${type}`,
+    );
     return response;
   }
 }
