@@ -9,4 +9,5 @@ export interface INewsRepository {
   ): Promise<ApiResponse<Pageable<INews>>>;
   getNewsById(id: string): Promise<ApiResponse<INews>>;
   updateNews(id: string, news: Partial<INews>): Promise<ApiResponse<INews>>;
+  deleteNews(id: string, token: string): Promise<ApiResponse<INews>>;
 }
