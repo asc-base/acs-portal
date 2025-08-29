@@ -9,5 +9,7 @@ export interface INews {
   dueDate: null;
   createdBy: number;
   updatedBy: number;
+  createdDate: Date;
+  updatedDate: Date;
   category: Category;
 }

@@ -5,5 +5,6 @@ export interface INewsRepository {
   getNews(
     page: number,
     pageSize: number,
+    title?: string,
   ): Promise<ApiResponse<Pageable<INews>>>;
 }

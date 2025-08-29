@@ -1,12 +1,16 @@
 "use client";
 import { NewsCardProps } from "@/interface/newscard";
 import { FC } from "react";
-import Image from "next/image";
-import { Card } from "@mui/material";
-import ModeEditOutlineOutlinedIcon from "@mui/icons-material/ModeEditOutlineOutlined";
+import {
+  Button,
+  Card,
+  CardContent,
+  CardMedia,
+  CardActions,
+} from "@mui/material";
 import DeleteOutlineOutlinedIcon from "@mui/icons-material/DeleteOutlineOutlined";
 
-function formatThaiDate(isoDate: string): string {
+function formatThaiDate(isoDate: Date): string {
   const date = new Date(isoDate);
   const thaiMonths = [
     "มกราคม",
@@ -31,63 +35,40 @@ function formatThaiDate(isoDate: string): string {
 }
 
 export const NewsCard: FC<NewsCardProps> = (props) => {
-  const { title, createdAt, image, isAdmin = false, onEdit, onDelete } = props;
+  const { news, onDelete } = props;
+
   return (
-    <Card
-      className="!shadow-[1px_2px_3px_0px_#07022012,_0px_-1px_3px_0px_#07022012]"
-      sx={{
-        display: "flex",
-        height: isAdmin ? "414px" : "370px",
-        width: "100%",
-
-        flexDirection: "column",
-        gap: 1,
-        borderRadius: "8px",
-        padding: 3,
-      }}
-    >
-      <div style={{ display: "flex", justifyContent: "center" }}>
-        <div
-          style={{
-            position: "relative",
-            height: "240px",
-            width: "100%",
-
-            borderRadius: "12px",
-            overflow: "hidden",
-          }}
-        >
-          <Image
-            src={image}
-            alt={title}
-            style={{ width: "100%", objectFit: "cover" }}
-            fill
-          />
-        </div>
+    <Card className="w-80 rounded-3xl">
+      {/* Link ครอบเฉพาะส่วนที่เป็น clickable */}
+      <div className="h-60 w-80 overflow-hidden rounded-3xl">
+        <CardMedia
+          component="img"
+          height="100%"
+          width="100%"
+          image={news.image}
+          alt={news.title}
+        />
       </div>
-      <div>
-        <h3 style={{ fontWeight: "bold", margin: 0 }} className="line-clamp-2">
-          {title}
-        </h3>
-      </div>
-      <h6 style={{ margin: 0 }}>{formatThaiDate(createdAt)}</h6>
-      {isAdmin && (
-        <div className="mt-auto flex gap-2">
-          <button
-            onClick={onEdit}
-            className="border-neutral04 text-neutral05 flex h-[28px] w-1/2 items-center justify-center gap-x-3 rounded-sm border"
-          >
-            <ModeEditOutlineOutlinedIcon fontSize="small" />
-            แก้ไข
-          </button>
-          <button
-            onClick={onDelete}
-            className="border-neutral04 text-neutral05 flex h-[28px] w-1/2 items-center justify-center gap-x-3 rounded-sm border"
+      <CardContent>
+        <h3 className="line-clamp-1">{news.title}</h3>
+        <h4 className="line-clamp-2">
+          {formatThaiDate(new Date(news.startDate))}
+          {news.dueDate ? ` - ${formatThaiDate(new Date(news.dueDate))}` : ""}
+        </h4>
+      </CardContent>
+
+      {onDelete && (
+        <CardActions>
+          <Button
+            size="small"
+            variant="outlined"
+            fullWidth
+            onClick={onDelete} // ป้องกันไปชน Link
           >
             <DeleteOutlineOutlinedIcon fontSize="small" />
             ลบ
-          </button>
-        </div>
+          </Button>
+        </CardActions>
       )}
     </Card>
   );

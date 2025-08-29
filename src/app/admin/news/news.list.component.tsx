@@ -1,14 +1,85 @@
 "use client";
 import { INews } from "@/core/domain/news";
+import { useEffect, useState } from "react";
+import { NewsCard } from "@/components/newscard";
+import { Pagination } from "@mui/material";
+import { newsService } from "@/infra/container";
+import Link from "next/link";
 
-const NewsListComponent = (initValue: { news: INews[] }) => {
-  const news = initValue.news;
+interface PropsNewsListComponent {
+  news: INews[];
+  totalRecords: number;
+  page?: number;
+  pageSize: number;
+}
+
+const NewsListComponent = (initValue: PropsNewsListComponent) => {
+  const [news, setNews] = useState<INews[]>(initValue.news);
+  const [page, setPage] = useState<number>(initValue.page || 1);
+  const [loading, setLoading] = useState<boolean>(false);
+
+  const [totalRecords, setTotalRecords] = useState<number>(
+    initValue.totalRecords,
+  );
+
+  useEffect(() => {
+    const fetchNews = async () => {
+      try {
+        setLoading(true);
+        const { rows, totalRecords } = await newsService.getNews(
+          page,
+          initValue.pageSize,
+        );
+        setNews(rows);
+        setTotalRecords(totalRecords);
+      } catch (error) {
+        console.error("Error fetching news:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchNews();
+  }, [page, initValue.pageSize]);
+
+  useEffect(() => {
+    setPage(initValue.page || 1);
+  }, [initValue.page]);
+
+  if (loading) {
+    return <h1>loading</h1>;
+  }
 
   return (
     <>
-      {news.map((item: INews) => (
-        <div key={item.id}>{item.title}</div>
-      ))}
+      <div className="flex min-h-screen w-full flex-col bg-gray-50 p-6">
+        <div className="mx-auto w-full max-w-7xl">
+          <div className="mb-8 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {news.map((item) => (
+              <Link
+                key={item.id}
+                href={`/admin/news/${item.id}`}
+                className="transition-transform hover:scale-105"
+              >
+                <NewsCard
+                  news={item}
+                  onDelete={() => console.log("Delete", item.id)}
+                />
+              </Link>
+            ))}
+          </div>
+          <div className="flex justify-center">
+            <Pagination
+              shape="rounded"
+              count={Math.ceil(totalRecords / initValue.pageSize)}
+              page={page}
+              onChange={(_event, value) => setPage(value)}
+              color="primary"
+              size="large"
+            />
+          </div>
+        </div>
+      </div>
     </>
   );
 };
