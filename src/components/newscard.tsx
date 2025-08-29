@@ -35,7 +35,7 @@ function formatThaiDate(isoDate: Date): string {
 }
 
 export const NewsCard: FC<NewsCardProps> = (props) => {
-  const { news, onDelete } = props;
+  const { news, onDelete, onEdit } = props;
 
   return (
     <Card className="w-80 rounded-3xl">
@@ -57,19 +57,20 @@ export const NewsCard: FC<NewsCardProps> = (props) => {
         </h4>
       </CardContent>
 
-      {onDelete && (
-        <CardActions>
-          <Button
-            size="small"
-            variant="outlined"
-            fullWidth
-            onClick={onDelete} // ป้องกันไปชน Link
-          >
+      <CardActions>
+        {onEdit && (
+          <Button size="small" variant="outlined" fullWidth onClick={onEdit}>
+            <DeleteOutlineOutlinedIcon fontSize="small" />
+            แก้ไข
+          </Button>
+        )}
+        {onDelete && (
+          <Button size="small" variant="outlined" fullWidth onClick={onDelete}>
             <DeleteOutlineOutlinedIcon fontSize="small" />
             ลบ
           </Button>
-        </CardActions>
-      )}
+        )}
+      </CardActions>
     </Card>
   );
 };

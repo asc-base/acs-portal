@@ -6,4 +6,5 @@ export interface NewsCardProps {
     image: string;
   };
   onDelete?: () => void;
+  onEdit?: () => void;
 }

@@ -4,7 +4,8 @@ import { useEffect, useState } from "react";
 import { NewsCard } from "@/components/newscard";
 import { Pagination } from "@mui/material";
 import { newsService } from "@/infra/container";
-import Link from "next/link";
+import { ConfirmModal } from "@/components/modal/confirm";
+import { useRouter } from "next/navigation";
 
 interface PropsNewsListComponent {
   news: INews[];
@@ -17,10 +18,13 @@ const NewsListComponent = (initValue: PropsNewsListComponent) => {
   const [news, setNews] = useState<INews[]>(initValue.news);
   const [page, setPage] = useState<number>(initValue.page || 1);
   const [loading, setLoading] = useState<boolean>(false);
-
+  const [openModal, setOpenModal] = useState<boolean>(false);
+  const [deleteNews, setDeleteNews] = useState<INews | null>(null);
   const [totalRecords, setTotalRecords] = useState<number>(
     initValue.totalRecords,
   );
+
+  const router = useRouter();
 
   useEffect(() => {
     const fetchNews = async () => {
@@ -50,22 +54,33 @@ const NewsListComponent = (initValue: PropsNewsListComponent) => {
     return <h1>loading</h1>;
   }
 
+  const handleEdit = (id: number) => {
+    router.push(`/admin/news/${id}`);
+  };
+
+  const onDeleteModel = (newsItem: INews) => {
+    setOpenModal(true);
+    setDeleteNews(newsItem);
+  };
+
+  const handleDelete = () => {
+    if (deleteNews) {
+      console.log("Delete news:", deleteNews);
+    }
+  };
+
   return (
     <>
       <div className="flex min-h-screen w-full flex-col bg-gray-50 p-6">
         <div className="mx-auto w-full max-w-7xl">
           <div className="mb-8 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {news.map((item) => (
-              <Link
+              <NewsCard
                 key={item.id}
-                href={`/admin/news/${item.id}`}
-                className="transition-transform hover:scale-105"
-              >
-                <NewsCard
-                  news={item}
-                  onDelete={() => console.log("Delete", item.id)}
-                />
-              </Link>
+                news={item}
+                onDelete={() => onDeleteModel(item)}
+                onEdit={() => handleEdit(item.id)}
+              />
             ))}
           </div>
           <div className="flex justify-center">
@@ -80,6 +95,13 @@ const NewsListComponent = (initValue: PropsNewsListComponent) => {
           </div>
         </div>
       </div>
+      <ConfirmModal
+        open={openModal}
+        onClose={() => setOpenModal(false)}
+        onConfirm={() => handleDelete()}
+        category={"ข่าว"}
+        title={deleteNews?.title}
+      />
     </>
   );
 };
