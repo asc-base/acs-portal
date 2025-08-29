@@ -6,7 +6,7 @@ export interface INews {
   image: string;
   detail: string;
   startDate: Date;
-  dueDate: null;
+  dueDate: Date | null;
   createdBy: number;
   updatedBy: number;
   createdDate: Date;

@@ -2,18 +2,11 @@
 
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
-import {
-  Typography,
-  Container,
-  CircularProgress,
-  Stack,
-  Breadcrumbs,
-  Link,
-} from "@mui/material";
+import { Typography, Container, Stack, Breadcrumbs, Link } from "@mui/material";
 import CourseCard from "@/components/coursecard";
 import { Course } from "@/interface/course";
 import { getCourse } from "./action";
-import KeyboardDoubleArrowRightIcon from '@mui/icons-material/KeyboardDoubleArrowRight';
+import KeyboardDoubleArrowRightIcon from "@mui/icons-material/KeyboardDoubleArrowRight";
 
 const CoursebyCategoryPage = () => {
   const params = useParams();
@@ -29,7 +22,7 @@ const CoursebyCategoryPage = () => {
       try {
         const courses = await getCourse(1, 100, typeCourse);
         setCourses(courses);
-        console.log("Course:", courses)
+        console.log("Course:", courses);
       } catch (error) {
         console.error("Error loading course:", error);
         setCourses([]);
@@ -41,10 +34,12 @@ const CoursebyCategoryPage = () => {
     loadCourses();
   }, [typeCourse]);
 
-
   return (
-    <Container sx={{ p: 4}}>
-       <Breadcrumbs aria-label="breadcrumb" separator={<KeyboardDoubleArrowRightIcon fontSize="small" />}>
+    <Container sx={{ p: 4 }}>
+      <Breadcrumbs
+        aria-label="breadcrumb"
+        separator={<KeyboardDoubleArrowRightIcon fontSize="small" />}
+      >
         <Link underline="hover" color="inherit" href="/">
           หน้าหลัก
         </Link>
@@ -54,11 +49,11 @@ const CoursebyCategoryPage = () => {
         <Typography color="inherit">{typeCourse}</Typography>
       </Breadcrumbs>
 
-      <h2>{typeCourse}จำนวน {courses.length} วิชา</h2>
+      <h2>
+        {typeCourse}จำนวน {courses.length} วิชา
+      </h2>
 
-      {!loading&& courses.length === 0 && (
-        <h2>ไม่พบรายวิชาในประเภทนี้</h2>
-      )}
+      {!loading && courses.length === 0 && <h2>ไม่พบรายวิชาในประเภทนี้</h2>}
 
       <Stack spacing={2} mt={2}>
         {courses.map((course) => (

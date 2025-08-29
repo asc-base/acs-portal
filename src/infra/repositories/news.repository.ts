@@ -26,4 +26,20 @@ export class NewsRepository implements INewsRepository {
     const response = await this.http.get<ApiResponse<Pageable<INews>>>(url);
     return response;
   }
+
+  async getNewsById(id: string): Promise<ApiResponse<INews>> {
+    const response = await this.http.get<ApiResponse<INews>>(`/v1/news/${id}`);
+    return response;
+  }
+
+  async updateNews(
+    id: string,
+    news: Partial<INews>,
+  ): Promise<ApiResponse<INews>> {
+    const response = await this.http.put<ApiResponse<INews>>(
+      `/v1/news/${id}`,
+      news,
+    );
+    return response;
+  }
 }

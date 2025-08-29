@@ -8,4 +8,14 @@ export class NewsService {
     const response = await this.newsRepository.getNews(page, pageSize);
     return response.data;
   }
+
+  async getNewsById(id: string): Promise<INews> {
+    const response = await this.newsRepository.getNewsById(id);
+    return response.data;
+  }
+
+  async updateNews(id: string, news: Partial<INews>): Promise<INews> {
+    const response = await this.newsRepository.updateNews(id, news);
+    return response.data;
+  }
 }
