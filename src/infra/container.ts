@@ -4,8 +4,9 @@ import { MasterDataRepository } from "./repositories/master-data.repository";
 import { MasterDataService } from "@/core/service/master-data.service";
 import { AuthRepository } from "./repositories/auth.repository";
 import { AuthService } from "@/core/service/auth.service";
+import { API_URL } from "@/config/config";
 
-export const baseUrl = "http://localhost:8000/api";
+export const baseUrl = String(API_URL);
 
 const newsRepository = new NewsRepository(baseUrl);
 export const newsService = new NewsService(newsRepository);
