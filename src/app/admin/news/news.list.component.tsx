@@ -94,6 +94,9 @@ const NewsListComponent = (initValue: PropsNewsListComponent) => {
             />
           </div>
         </div>
+        <div>
+          <h2 className="jun-footer">Total News Articles: {totalRecords}</h2>
+        </div>
       </div>
       <ConfirmModal
         open={openModal}

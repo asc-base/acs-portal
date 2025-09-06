@@ -1,5 +1,3 @@
-// ไม่มี "use client"
-import * as React from "react";
 import ClientThemeProvider from "./ClientThemeProvider";
 
 /**

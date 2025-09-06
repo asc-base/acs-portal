@@ -1,13 +1,8 @@
-"use client"
-import React from 'react'
-import {
-  Button,
-  TextField,
-  Typography,
-  IconButton
-} from "@mui/material";
+"use client";
+import React from "react";
+import { Button, TextField, Typography, IconButton } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import AddIcon from '@mui/icons-material/Add';
+import AddIcon from "@mui/icons-material/Add";
 import { useState } from "react";
 import Image from "next/image";
 
@@ -24,19 +19,18 @@ const VisuallyHiddenInput = styled("input")({
 });
 
 const CreateProfessorPage = () => {
-
   const majorPositions = [
     {
-      positionTh: 'ผู้ช่วยศาสตราจารย์',
-      positionEn: 'Assistant Professor',
+      positionTh: "ผู้ช่วยศาสตราจารย์",
+      positionEn: "Assistant Professor",
     },
     {
-      positionTh: 'รองศาสตราจารย์',
-      positionEn: 'Associate Professor',
+      positionTh: "รองศาสตราจารย์",
+      positionEn: "Associate Professor",
     },
     {
-      positionTh: 'ศาสตราจารย์',
-      positionEn: 'Professor',
+      positionTh: "ศาสตราจารย์",
+      positionEn: "Professor",
     },
   ];
 
@@ -54,32 +48,30 @@ const CreateProfessorPage = () => {
     }
   };
 
-  const [education, setEducation] = useState([{ level: '', major: '', university: '' }]);
+  const [education, setEducation] = useState([
+    { level: "", major: "", university: "" },
+  ]);
 
   const handleAddEducation = () => {
-    setEducation([...education, { level: '', major: '', university: '' }]);
+    setEducation([...education, { level: "", major: "", university: "" }]);
   };
 
-  const handleEducationChange = (index: number, field: string, value: string) => {
+  const handleEducationChange = (
+    index: number,
+    field: string,
+    value: string,
+  ) => {
     const updatedEducation = education.map((edu, idx) =>
-      idx === index ? { ...edu, [field]: value } : edu
+      idx === index ? { ...edu, [field]: value } : edu,
     );
     setEducation(updatedEducation);
   };
 
-  const [expertField, setExpertField] = useState([{ field: '' }]);
+  const [expertField, setExpertField] = useState([{ field: "" }]);
 
   const handleAddExpertField = () => {
-    setExpertField([...expertField, { field: '' }]);
+    setExpertField([...expertField, { field: "" }]);
   };
-
-  const handleExpertFieldChange = (index: number, value: string) => {
-    const updatedExpertField = expertField.map((field, idx) =>
-      idx === index ? { ...field, field: value } : field
-    );
-    setExpertField(updatedExpertField);
-  };
-
 
   return (
     <form className="space-y-4 p-8">
@@ -87,21 +79,21 @@ const CreateProfessorPage = () => {
         <Typography variant="h6" fontWeight="bold">
           ข้อมูลส่วนตัว
         </Typography>
-        <div className="flex flex-row gap-x-8 items-center mt-6 mb-16">
+        <div className="mt-6 mb-16 flex flex-row items-center gap-x-8">
           <div className="relative inline-block">
             <Button
               component="label"
-              className="flex h-41 w-41 items-center justify-center rounded-full overflow-hidden p-0 min-w-0"
+              className="flex h-41 w-41 min-w-0 items-center justify-center overflow-hidden rounded-full p-0"
               sx={{
-                borderRadius: '50%',
-                width: '176px',
-                height: '176px',
+                borderRadius: "50%",
+                width: "176px",
+                height: "176px",
                 padding: 0,
                 minWidth: 0,
-                backgroundColor: '#F2F2F2',
-                '&:hover': {
-                  backgroundColor: '#E2E2E2'
-                }
+                backgroundColor: "#F2F2F2",
+                "&:hover": {
+                  backgroundColor: "#E2E2E2",
+                },
               }}
             >
               {selectedFile ? (
@@ -111,7 +103,7 @@ const CreateProfessorPage = () => {
                     alt="Preview"
                     width={300}
                     height={300}
-                      style={{ objectFit: "cover"}}
+                    style={{ objectFit: "cover" }}
                     className="bg-neutral02 h-full w-full object-cover"
                   />
                 </div>
@@ -138,12 +130,15 @@ const CreateProfessorPage = () => {
                 width={40}
                 height={40}
                 style={{ width: "auto", height: "auto" }}
-                className="bg-neutral02 rounded-full absolute bottom-0 right-2 p-2"
+                className="bg-neutral02 absolute right-2 bottom-0 rounded-full p-2"
                 priority
               />
             )}
           </div>
-          <div className="flex flex-col flex-1 justify-between" style={{ height: '176px' }}>
+          <div
+            className="flex flex-1 flex-col justify-between"
+            style={{ height: "176px" }}
+          >
             <div className="flex flex-row gap-x-4">
               <TextField
                 select
@@ -217,9 +212,8 @@ const CreateProfessorPage = () => {
               />
             </div>
           </div>
-
         </div>
-        <div className='flex flex-col flex-1 justify-between gap-y-8'>
+        <div className="flex flex-1 flex-col justify-between gap-y-8">
           <div className="flex flex-row gap-x-4">
             <TextField
               label="เบอร์โทร"
@@ -269,10 +263,10 @@ const CreateProfessorPage = () => {
             color="primary"
             onClick={handleAddEducation}
             sx={{
-              border: '1px solid #120554',
-              color: '#120554',
-              backgroundColor: '#fff',
-              '&:hover': { backgroundColor: '#e3e8fd' }
+              border: "1px solid #120554",
+              color: "#120554",
+              backgroundColor: "#fff",
+              "&:hover": { backgroundColor: "#e3e8fd" },
             }}
           >
             <AddIcon />
@@ -291,7 +285,9 @@ const CreateProfessorPage = () => {
                 className="flex-[2]"
                 SelectProps={{ native: true }}
                 value={edu.level}
-                onChange={(e) => handleEducationChange(index, 'level', e.target.value)}
+                onChange={(e) =>
+                  handleEducationChange(index, "level", e.target.value)
+                }
                 sx={{ marginBottom: 0 }}
               >
                 <option value="" disabled></option>
@@ -307,7 +303,9 @@ const CreateProfessorPage = () => {
                 fullWidth
                 className="flex-[4]"
                 value={edu.major}
-                onChange={(e) => handleEducationChange(index, 'major', e.target.value)}
+                onChange={(e) =>
+                  handleEducationChange(index, "major", e.target.value)
+                }
               />
               <TextField
                 label="มหาวิทยาลัย"
@@ -315,7 +313,9 @@ const CreateProfessorPage = () => {
                 fullWidth
                 className="flex-[4]"
                 value={edu.university}
-                onChange={(e) => handleEducationChange(index, 'university', e.target.value)}
+                onChange={(e) =>
+                  handleEducationChange(index, "university", e.target.value)
+                }
               />
             </div>
           ))}
@@ -338,10 +338,10 @@ const CreateProfessorPage = () => {
           <IconButton
             color="primary"
             sx={{
-              border: '1px solid #120554',
-              color: '#120554',
-              backgroundColor: '#fff',
-              '&:hover': { backgroundColor: '#e3e8fd' }
+              border: "1px solid #120554",
+              color: "#120554",
+              backgroundColor: "#fff",
+              "&:hover": { backgroundColor: "#e3e8fd" },
             }}
             onClick={handleAddExpertField}
           >
@@ -359,17 +359,12 @@ const CreateProfessorPage = () => {
               variant="outlined"
               placeholder="Input"
               value={field.field}
-              onChange={e => handleExpertFieldChange(idx, e.target.value)}
             />
           </div>
         ))}
       </div>
       <div className="flex flex-row justify-end gap-x-4">
-        <Button
-          variant="outlined"
-          size="large"
-          onClick={() => window.location.href = '/admin/professors'}
-        >
+        <Button variant="outlined" size="large">
           ยกเลิก
         </Button>
         <Button type="submit" variant="contained" size="large">
@@ -377,7 +372,7 @@ const CreateProfessorPage = () => {
         </Button>
       </div>
     </form>
-  )
-}
+  );
+};
 
-export default CreateProfessorPage
+export default CreateProfessorPage;
