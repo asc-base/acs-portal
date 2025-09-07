@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect, FC } from "react";
 import Image from "next/image";
 import { CarouselProps } from "@/interface/carousel";
+import Link from "next/link";
 
-export const Carousel: React.FC<CarouselProps> = ({
+export const Carousel: FC<CarouselProps> = ({
   items,
   autoPlay = false,
   autoPlayInterval = 3000,
@@ -25,11 +26,9 @@ export const Carousel: React.FC<CarouselProps> = ({
   if (!items.length) return null;
 
   return (
-    <div
-      className={`relative mx-auto w-full max-w-6xl `}
-    >
+    <div className={`relative mx-auto w-full max-w-6xl`}>
       {/* Main Carousel Container */}
-      <div className="relative  overflow-hidden rounded-sm bg-gray-900 shadow-2xl h-[496px] max-xl:h-[199px] max-sm:h-[189px] w-full">
+      <div className="relative h-[496px] w-full overflow-hidden rounded-sm bg-gray-900 shadow-2xl max-xl:h-[199px] max-sm:h-[189px]">
         {/* Slides Container */}
         <div
           className="flex h-full transition-transform duration-700 ease-in-out"
@@ -37,12 +36,14 @@ export const Carousel: React.FC<CarouselProps> = ({
         >
           {items.map((item, index) => (
             <div key={index} className="relative h-full w-full flex-shrink-0">
-              <Image
-                className="object-cover"
-                src={item}
-                alt={`Slide ${index + 1}`}
-                fill
-              />
+              <Link href={`/news/${item?.news?.id}`}>
+                <Image
+                  className="object-cover"
+                  src={item?.news?.image}
+                  alt={`Slide ${index + 1}`}
+                  fill
+                />
+              </Link>
             </div>
           ))}
         </div>
@@ -68,4 +69,3 @@ export const Carousel: React.FC<CarouselProps> = ({
     </div>
   );
 };
-

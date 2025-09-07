@@ -79,13 +79,6 @@ const HomePage = ({
     setNewsActivityStudentActive(index);
   };
 
-  const mockdata = [
-    "/logoacs.png",
-    "/logoacs.png",
-    "/logoacs.png",
-    "/logoacs.png",
-  ];
-
   return (
     <>
       <div>
@@ -114,7 +107,7 @@ const HomePage = ({
                 <h1 className="text-accent04 font-bold">ประชาสัมพันธ์สำคัญ</h1>
                 <div className="h-full">
                   <Carousel
-                    items={mockdata}
+                    items={initNewsMedia || []}
                     autoPlay
                     autoPlayInterval={3000}
                     showIndicators
