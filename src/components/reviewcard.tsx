@@ -21,7 +21,7 @@ const ReviewCard: FC<ReviewCardProps> = (props) => {
             variant="h3"
             className="!text-h3 max-xl:!text-h4 !text-primary03 !text-center !font-bold"
           >
-            "{props.quote}"
+            {props.quote}
           </Typography>
         </div>
         <div>

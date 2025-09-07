@@ -2,7 +2,7 @@
 import React from "react";
 import { ReactNode } from "react";
 import { ThemeProvider } from "@mui/material/styles";
-import Theme from "@/app/theme";
+import { Theme } from "@/app/theme";
 
 const Layout = ({ children }: Readonly<{ children: ReactNode }>) => {
   return (

@@ -1,20 +1,13 @@
 import { Card, CardContent, CardMedia, Typography } from "@mui/material";
 import React, { FC } from "react";
-import { useRouter } from "next/navigation";
 import { StudentCardProps } from "@/interface/studentcard";
 
 export const StudentCard: FC<StudentCardProps> = (props) => {
-  const router = useRouter();
-
-  const handleCardClick = () => {
-    router.push(`${props.router}`);
-  };
-
   return (
     <Card
       sx={{ maxWidth: 362 }}
       className="!cursor-pointer !rounded-2xl !shadow-[2px_2px_3px_0px_#0702201A]"
-    // onClick={handleCardClick}
+      // onClick={handleCardClick}
     >
       <CardMedia
         className="h-[180px] max-xl:h-[156px]"

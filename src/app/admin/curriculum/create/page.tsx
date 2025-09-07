@@ -1,7 +1,7 @@
 "use client";
 import React, { useState } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
-import { TextField, Button, FormLabel } from "@mui/material";
+import { TextField, Button } from "@mui/material";
 import Image from "next/image";
 import { createCurriculumAction } from "./action";
 
@@ -11,7 +11,7 @@ type FormData = {
   fileUrl: string;
   description: string;
   image: string;
-}
+};
 
 const CreateCurriculumPage = () => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -40,18 +40,17 @@ const CreateCurriculumPage = () => {
     }
   };
 
-
   return (
     <form className="space-y-4 p-8" onSubmit={handleSubmit(onSubmit)}>
       <h3 className="font-bold">เพิ่มหลักสูตร</h3>
       <div className="grid grid-cols-3 gap-x-6 gap-y-2">
-        <div className="col-span-1 flex flex-col items-center justify-center relative bg-neutral02 rounded-md">
+        <div className="bg-neutral02 relative col-span-1 flex flex-col items-center justify-center rounded-md">
           {selectedFile && (
             <Image
               src={URL.createObjectURL(selectedFile)}
               alt="Preview"
               fill
-              className="object-cover rounded-md"
+              className="rounded-md object-cover"
               unoptimized
             />
           )}
@@ -60,19 +59,19 @@ const CreateCurriculumPage = () => {
             type="file"
             accept="image/*"
             onChange={handleFileChange}
-            className="absolute inset-0 opacity-0 cursor-pointer"
+            className="absolute inset-0 cursor-pointer opacity-0"
           />
 
-          <div className="absolute z-10 rounded-xs pointer-events-none font-bold">
+          <div className="pointer-events-none absolute z-10 rounded-xs font-bold">
             <Button
               variant="contained"
               size="large"
               sx={{
-                border: '1px solid var(--color-neutral05)',
-                backgroundColor: 'var(--color-neutral02)',
-                color: 'var(--color-neutral05)',
-                boxShadow: 'none',
-                fontWeight: 'bold'
+                border: "1px solid var(--color-neutral05)",
+                backgroundColor: "var(--color-neutral02)",
+                color: "var(--color-neutral05)",
+                boxShadow: "none",
+                fontWeight: "bold",
               }}
             >
               อัปโหลดรูปภาพ
@@ -82,10 +81,13 @@ const CreateCurriculumPage = () => {
 
         <div className="col-span-2 flex flex-col">
           <div className="group">
-            <h4 className={`mb-1 transition-colors duration-200 ${errors.title
-              ? "text-accent04"
-              : "text-neutral04 group-hover:text-primary03 group-focus-within:text-primary03"
-              }`}>
+            <h4
+              className={`mb-1 transition-colors duration-200 ${
+                errors.title
+                  ? "text-accent04"
+                  : "text-neutral04 group-hover:text-primary03 group-focus-within:text-primary03"
+              }`}
+            >
               หัวข้อ
             </h4>
             <TextField
@@ -99,10 +101,13 @@ const CreateCurriculumPage = () => {
           </div>
 
           <div className="group">
-            <h4 className={`mb-1 transition-colors duration-200 ${errors.year
-              ? "text-accent04"
-              : "text-neutral04 group-hover:text-primary03 group-focus-within:text-primary03"
-              }`}>
+            <h4
+              className={`mb-1 transition-colors duration-200 ${
+                errors.year
+                  ? "text-accent04"
+                  : "text-neutral04 group-hover:text-primary03 group-focus-within:text-primary03"
+              }`}
+            >
               ปีการศึกษา
             </h4>
             <TextField
@@ -116,10 +121,13 @@ const CreateCurriculumPage = () => {
           </div>
 
           <div className="group">
-            <h4 className={`mb-1 transition-colors duration-200 ${errors.fileUrl
-              ? "text-accent04"
-              : "text-neutral04 group-hover:text-primary03 group-focus-within:text-primary03"
-              }`}>
+            <h4
+              className={`mb-1 transition-colors duration-200 ${
+                errors.fileUrl
+                  ? "text-accent04"
+                  : "text-neutral04 group-hover:text-primary03 group-focus-within:text-primary03"
+              }`}
+            >
               ลิงก์ (กรุณาแนบลิงก์ Google Drive)
             </h4>
             <TextField
@@ -135,14 +143,19 @@ const CreateCurriculumPage = () => {
       </div>
 
       <div className="group">
-        <h4 className={`mb-1 transition-colors duration-200 ${errors.description
-          ? "text-accent04"
-          : "text-neutral04 group-hover:text-primary03 group-focus-within:text-primary03"
-          }`}>
+        <h4
+          className={`mb-1 transition-colors duration-200 ${
+            errors.description
+              ? "text-accent04"
+              : "text-neutral04 group-hover:text-primary03 group-focus-within:text-primary03"
+          }`}
+        >
           รายละเอียด
         </h4>
         <TextField
-          {...register("description", { required: "กรุณากรอกรายละเอียดหลักสูตร" })}
+          {...register("description", {
+            required: "กรุณากรอกรายละเอียดหลักสูตร",
+          })}
           variant="outlined"
           size="medium"
           fullWidth
@@ -153,17 +166,26 @@ const CreateCurriculumPage = () => {
         />
       </div>
 
-
       <div className="flex justify-end gap-2">
-        <Button variant="outlined" color="primary" size="large" className="w-[212px]">
+        <Button
+          variant="outlined"
+          color="primary"
+          size="large"
+          className="w-[212px]"
+        >
           ยกเลิก
         </Button>
-        <Button type="submit" variant="contained" color="primary" size="large" className="w-[212px]">
+        <Button
+          type="submit"
+          variant="contained"
+          color="primary"
+          size="large"
+          className="w-[212px]"
+        >
           บันทึกข้อมูล
         </Button>
       </div>
     </form>
-
   );
 };
 
