@@ -10,7 +10,6 @@ export const Carousel: FC<CarouselProps> = ({
   showIndicators = true,
 }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
-  console.log("Carousel items:", items);
 
   useEffect(() => {
     if (autoPlay && items.length > 1) {

@@ -27,8 +27,6 @@ const HomePage = ({
   const [newsCompleteActive, setNewsCompleteActive] = useState(0);
   const [newsActivityStudentActive, setNewsActivityStudentActive] = useState(0);
 
-  console.log(initNewsMedia);
-
   const handleNextNewsActivity = () => {
     setNewsActivityActive(
       (prevItem) => (prevItem + 1) % initNewsActivity.length,
