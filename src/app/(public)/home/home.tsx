@@ -88,7 +88,9 @@ const HomePage = ({
           <div className="flex flex-col gap-y-3">
             <div className="grid grid-cols-2 gap-12">
               <div>
-                <h1 className="text-accent04 font-bold">ข่าวกิจกรรม</h1>
+                <h2 className="text-accent04 items-baseline font-bold">
+                  ข่าวกิจกรรม
+                </h2>
                 <div className="flex flex-col gap-y-3">
                   {initNewsActivity.slice(0, 4).map((item) => (
                     <Link key={item.id} href={`/news/${item.id}`}>
@@ -102,7 +104,9 @@ const HomePage = ({
                 </div>
               </div>
               <div>
-                <h1 className="text-accent04 font-bold">ประชาสัมพันธ์สำคัญ</h1>
+                <h2 className="text-accent04 items-baseline font-bold">
+                  ประชาสัมพันธ์สำคัญ
+                </h2>
                 <div className="h-full">
                   <Carousel
                     items={initNewsMedia || []}
