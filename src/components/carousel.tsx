@@ -39,7 +39,7 @@ export const Carousel: FC<CarouselProps> = ({
               <Link href={`/news/${item?.news?.id}`}>
                 <Image
                   className="object-cover"
-                  src={item?.news?.image}
+                  src={item?.image}
                   alt={`Slide ${index + 1}`}
                   fill
                 />
