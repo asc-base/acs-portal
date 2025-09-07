@@ -4,6 +4,7 @@ import { INews } from "@/core/domain/news";
 import Image from "next/image";
 import { NewsCard } from "@/components/newscard";
 import Link from "next/link";
+import { Breadcrumbs } from "@mui/material";
 
 interface NewsInfoProps {
   newsInfo: INews;
@@ -22,6 +23,15 @@ const NewsInfoComponent = ({ newsInfo, recommendNews }: NewsInfoProps) => {
   return (
     <>
       <div className="px container mx-auto px-16 py-8">
+        <Breadcrumbs aria-label="breadcrumb" separator=">>" className="mb-4">
+          <Link href="/">หน้าหลัก</Link>
+          <Link
+            href={`/news?category=${newsInfo.category.name}&page=1&pageSize=12`}
+          >
+            {newsInfo.category.name}
+          </Link>
+          {newsInfo.title && <span>{newsInfo.title}</span>}
+        </Breadcrumbs>
         <div>
           <div className="h-96 w-full overflow-hidden rounded-xl">
             <Image
