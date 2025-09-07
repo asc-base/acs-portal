@@ -6,6 +6,7 @@ export interface INewsRepository {
     page: number,
     pageSize: number,
     title?: string,
+    category?: string,
   ): Promise<ApiResponse<Pageable<INews>>>;
   getNewsById(id: string): Promise<ApiResponse<INews>>;
   updateNews(id: string, news: Partial<INews>): Promise<ApiResponse<INews>>;

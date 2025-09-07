@@ -16,8 +16,9 @@ export class NewsRepository implements INewsRepository {
     page: number,
     pageSize: number,
     title?: string,
+    category?: string,
   ): Promise<ApiResponse<Pageable<INews>>> {
-    let url = `/v1/news?page=${page}&pageSize=${pageSize}`;
+    let url = `/v1/news?page=${page}&pageSize=${pageSize}&category=${encodeURIComponent(category || "")}`;
 
     if (title && title !== "") {
       url += `&title=${encodeURIComponent(title)}`;

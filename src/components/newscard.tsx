@@ -16,7 +16,7 @@ export const NewsCard: FC<NewsCardProps> = (props) => {
   const date = `${new Date(news.startDate).getDate()} ${new Date(
     news.startDate,
   ).toLocaleString("th-TH", {
-    month: "short",
+    month: "long",
   })} ${new Date(news.startDate).getFullYear() + 543}`;
 
   return (

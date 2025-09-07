@@ -1,12 +1,17 @@
 import React from "react";
 import HomePage from "./home";
+import { newsService } from "@/infra/container";
 
-const MainPage = () => {
+const MainPage = async () => {
+  const initNewsActivity = await newsService.getNews(1, 6);
+  const initNewsComplete = await newsService.getNews(1, 6);
+  const initNewsActivityStudent = await newsService.getNews(1, 6);
+
   return (
     <HomePage
-      initNewsActivity={[]}
-      initNewsComplete={[]}
-      initNewsActivityStudent={[]}
+      initNewsActivity={initNewsActivity.rows}
+      initNewsComplete={initNewsComplete.rows}
+      initNewsActivityStudent={initNewsActivityStudent.rows}
     />
   );
 };
