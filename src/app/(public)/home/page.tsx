@@ -7,11 +7,14 @@ const MainPage = async () => {
   const initNewsComplete = await newsService.getNews(1, 6);
   const initNewsActivityStudent = await newsService.getNews(1, 6);
 
+  const initNewsMedia = await newsService.getNewsMedias("newshigtlight");
+
   return (
     <HomePage
       initNewsActivity={initNewsActivity.rows}
       initNewsComplete={initNewsComplete.rows}
       initNewsActivityStudent={initNewsActivityStudent.rows}
+      initNewsMedia={initNewsMedia}
     />
   );
 };

@@ -1,5 +1,5 @@
 import { INewsRepository } from "@/core/ports/news.repository";
-import { INews } from "@/core/domain/news";
+import { INews, INewsMedia } from "@/core/domain/news";
 import { HttpHelper } from "@/lib/http";
 import { ApiResponse, Pageable } from "@/interface/response";
 
@@ -50,6 +50,13 @@ export class NewsRepository implements INewsRepository {
       {
         Authorization: `Bearer ${token}`,
       },
+    );
+    return response;
+  }
+
+  async getNewsMedias(type: string): Promise<ApiResponse<INewsMedia[]>> {
+    const response = await this.http.get<ApiResponse<INewsMedia[]>>(
+      `/v1/news/news-media?type=${type}&page=1&pageSize=6`,
     );
     return response;
   }

@@ -13,3 +13,16 @@ export interface INews {
   updatedDate: Date;
   category: Category;
 }
+
+export interface INewsMedia {
+  id: number;
+  image: string;
+  newsId: number;
+  typeId: number;
+  createdAt: Date;
+  updatedAt: Date;
+  createdBy: number;
+  updatedBy: number;
+  news: INews;
+  type: Category;
+}
