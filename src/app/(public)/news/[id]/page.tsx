@@ -2,7 +2,13 @@ import React from "react";
 import NewsInfoComponent from "./newsinfo.component";
 import { newsService } from "@/infra/container";
 
-const page = async ({ params }: { params: { id: string } }) => {
+interface PageProps {
+  params: Promise<{
+    id: string;
+  }>;
+}
+
+const page = async ({ params }: PageProps) => {
   const { id } = await params;
 
   const newsInfo = await newsService.getNewsById(id);

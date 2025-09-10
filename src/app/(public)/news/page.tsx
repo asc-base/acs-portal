@@ -2,19 +2,24 @@ import React from "react";
 import { newsService } from "@/infra/container";
 import NewsListComponents from "./news.list.components";
 
-const page = async ({
-  searchParams,
-}: {
-  searchParams: { category?: string; page?: number; pageSize?: number };
-}) => {
+interface PageProps {
+  searchParams: Promise<{
+    category?: string;
+    page?: number;
+    pageSize?: number;
+  }>;
+}
+
+const page = async ({ searchParams }: PageProps) => {
+  const resolvedSearchParams = await searchParams;
   const { rows, totalRecords, pageSize, page } = await newsService.getNews(
-    searchParams.page || 1,
-    searchParams.pageSize || 12,
+    resolvedSearchParams.page || 1,
+    resolvedSearchParams.pageSize || 12,
     "",
-    searchParams.category || "",
+    resolvedSearchParams.category || "",
   );
 
-  console.log(searchParams.category);
+  console.log(resolvedSearchParams.category);
 
   return (
     <NewsListComponents
@@ -22,7 +27,7 @@ const page = async ({
       totalRecords={totalRecords}
       pageSize={pageSize}
       page={page}
-      category={searchParams.category || ""}
+      category={resolvedSearchParams.category || ""}
     />
   );
 };

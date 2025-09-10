@@ -20,13 +20,22 @@ export class HttpHelper {
       ...options,
     };
 
-    const response = await fetch(fullUrl, config);
+    try {
+      const response = await fetch(fullUrl, config);
 
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+      if (!response.ok) {
+        throw new Error(
+          `HTTP error! status: ${response.status} - ${response.statusText} for URL: ${fullUrl}`,
+        );
+      }
+
+      return response.json();
+    } catch (error) {
+      if (error instanceof Error) {
+        throw new Error(`Failed to fetch ${fullUrl}: ${error.message}`);
+      }
+      throw new Error(`Failed to fetch ${fullUrl}: Unknown error`);
     }
-
-    return response.json();
   }
 
   async get<T>(url: string, headers?: HeadersInit): Promise<T> {

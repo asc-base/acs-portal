@@ -28,12 +28,14 @@ const HomePage = ({
   const [newsActivityStudentActive, setNewsActivityStudentActive] = useState(0);
 
   const handleNextNewsActivity = () => {
+    if (initNewsActivity.length === 0) return;
     setNewsActivityActive(
       (prevItem) => (prevItem + 1) % initNewsActivity.length,
     );
   };
 
   const handlePrevNewsActivity = () => {
+    if (initNewsActivity.length === 0) return;
     setNewsActivityActive(
       (prevItem) =>
         (prevItem - 1 + initNewsActivity.length) % initNewsActivity.length,
@@ -45,12 +47,14 @@ const HomePage = ({
   };
 
   const handleNextNewsComplete = () => {
+    if (initNewsComplete.length === 0) return;
     setNewsCompleteActive(
       (prevItem) => (prevItem + 1) % initNewsComplete.length,
     );
   };
 
   const handlePrevNewsComplete = () => {
+    if (initNewsComplete.length === 0) return;
     setNewsCompleteActive(
       (prevItem) =>
         (prevItem - 1 + initNewsComplete.length) % initNewsComplete.length,
@@ -62,12 +66,14 @@ const HomePage = ({
   };
 
   const handleNextNewsActivityStudent = () => {
+    if (initNewsActivityStudent.length === 0) return;
     setNewsActivityStudentActive((prevItem) =>
       prevItem >= initNewsActivityStudent.length - 1 ? 0 : prevItem + 1,
     );
   };
 
   const handlePrevNewsActivityStudent = () => {
+    if (initNewsActivityStudent.length === 0) return;
     setNewsActivityStudentActive((prevItem) =>
       prevItem === 0 ? initNewsActivityStudent.length - 1 : prevItem - 1,
     );
@@ -92,15 +98,21 @@ const HomePage = ({
                   ข่าวกิจกรรม
                 </h2>
                 <div className="flex flex-col gap-y-3">
-                  {initNewsActivity.slice(0, 4).map((item) => (
-                    <Link key={item.id} href={`/news/${item.id}`}>
-                      <ActivityCard
-                        key={item.id}
-                        title={item.title}
-                        date={item.startDate}
-                      />
-                    </Link>
-                  ))}
+                  {initNewsActivity.length > 0 ? (
+                    initNewsActivity.slice(0, 4).map((item) => (
+                      <Link key={item.id} href={`/news/${item.id}`}>
+                        <ActivityCard
+                          key={item.id}
+                          title={item.title}
+                          date={item.startDate}
+                        />
+                      </Link>
+                    ))
+                  ) : (
+                    <div className="p-4 text-gray-500">
+                      ไม่มีข่าวกิจกรรมในขณะนี้
+                    </div>
+                  )}
                 </div>
               </div>
               <div>
@@ -125,30 +137,38 @@ const HomePage = ({
               activeIndex={newsActivityActive}
               handleSetActiveIndex={handleSetNewsActivity}
             >
-              {initNewsActivity &&
-                Array.from({ length: 3 }, (_, i) => {
-                  const index =
-                    (newsActivityActive + i) % initNewsActivity.length;
-                  const news = initNewsActivity[index];
-                  return (
-                    <div
-                      key={`${news.id}-${i}`}
-                      className="transform transition-all duration-300 ease-in-out hover:scale-105 hover:shadow-lg"
-                      style={{
-                        opacity: 1,
-                        transform: "translateX(0)",
-                        transitionDelay: `${i * 100}ms`,
-                      }}
-                    >
-                      <Link
-                        href={`/news/${news.id}`}
-                        className="w-fit transition-colors duration-200 ease-in-out"
+              {initNewsActivity && initNewsActivity.length > 0 ? (
+                Array.from(
+                  { length: Math.min(3, initNewsActivity.length) },
+                  (_, i) => {
+                    const index =
+                      (newsActivityActive + i) % initNewsActivity.length;
+                    const news = initNewsActivity[index];
+                    return (
+                      <div
+                        key={`${news.id}-${i}`}
+                        className="transform transition-all duration-300 ease-in-out hover:scale-105 hover:shadow-lg"
+                        style={{
+                          opacity: 1,
+                          transform: "translateX(0)",
+                          transitionDelay: `${i * 100}ms`,
+                        }}
                       >
-                        <NewsCard news={news} />
-                      </Link>
-                    </div>
-                  );
-                })}
+                        <Link
+                          href={`/news/${news.id}`}
+                          className="w-fit transition-colors duration-200 ease-in-out"
+                        >
+                          <NewsCard news={news} />
+                        </Link>
+                      </div>
+                    );
+                  },
+                )
+              ) : (
+                <div className="p-4 text-center text-gray-500">
+                  ไม่มีข่าวสารในขณะนี้
+                </div>
+              )}
             </NewsCarouselComponent>
             <NewsCarouselComponent
               title="ความสำเร็จสาขาวิชา"
@@ -158,30 +178,38 @@ const HomePage = ({
               activeIndex={newsCompleteActive}
               handleSetActiveIndex={handleSetNewsComplete}
             >
-              {initNewsComplete &&
-                Array.from({ length: 3 }, (_, i) => {
-                  const index =
-                    (newsCompleteActive + i) % initNewsComplete.length;
-                  const news = initNewsComplete[index];
-                  return (
-                    <div
-                      key={`${news.id}-${i}`}
-                      className="transform transition-all duration-300 ease-in-out hover:scale-105 hover:shadow-lg"
-                      style={{
-                        opacity: 1,
-                        transform: "translateX(0)",
-                        transitionDelay: `${i * 100}ms`,
-                      }}
-                    >
-                      <Link
-                        href={`/news/${news.id}`}
-                        className="w-fit transition-colors duration-200 ease-in-out"
+              {initNewsComplete && initNewsComplete.length > 0 ? (
+                Array.from(
+                  { length: Math.min(3, initNewsComplete.length) },
+                  (_, i) => {
+                    const index =
+                      (newsCompleteActive + i) % initNewsComplete.length;
+                    const news = initNewsComplete[index];
+                    return (
+                      <div
+                        key={`${news.id}-${i}`}
+                        className="transform transition-all duration-300 ease-in-out hover:scale-105 hover:shadow-lg"
+                        style={{
+                          opacity: 1,
+                          transform: "translateX(0)",
+                          transitionDelay: `${i * 100}ms`,
+                        }}
                       >
-                        <NewsCard news={news} />
-                      </Link>
-                    </div>
-                  );
-                })}
+                        <Link
+                          href={`/news/${news.id}`}
+                          className="w-fit transition-colors duration-200 ease-in-out"
+                        >
+                          <NewsCard news={news} />
+                        </Link>
+                      </div>
+                    );
+                  },
+                )
+              ) : (
+                <div className="p-4 text-center text-gray-500">
+                  ไม่มีข่าวสารในขณะนี้
+                </div>
+              )}
             </NewsCarouselComponent>
             <NewsCarouselComponent
               title="งานกิจกรรมนักศึกษา"
@@ -191,31 +219,39 @@ const HomePage = ({
               activeIndex={newsActivityStudentActive}
               handleSetActiveIndex={handleSetNewsActivityStudent}
             >
-              {initNewsActivityStudent &&
-                Array.from({ length: 3 }, (_, i) => {
-                  const index =
-                    (newsActivityStudentActive + i) %
-                    initNewsActivityStudent.length;
-                  const news = initNewsActivityStudent[index];
-                  return (
-                    <div
-                      key={`${news.id}-${i}`}
-                      className="transform transition-all duration-300 ease-in-out hover:scale-105 hover:shadow-lg"
-                      style={{
-                        opacity: 1,
-                        transform: "translateX(0)",
-                        transitionDelay: `${i * 100}ms`,
-                      }}
-                    >
-                      <Link
-                        href={`/news/${news.id}`}
-                        className="w-fit transition-colors duration-200 ease-in-out"
+              {initNewsActivityStudent && initNewsActivityStudent.length > 0 ? (
+                Array.from(
+                  { length: Math.min(3, initNewsActivityStudent.length) },
+                  (_, i) => {
+                    const index =
+                      (newsActivityStudentActive + i) %
+                      initNewsActivityStudent.length;
+                    const news = initNewsActivityStudent[index];
+                    return (
+                      <div
+                        key={`${news.id}-${i}`}
+                        className="transform transition-all duration-300 ease-in-out hover:scale-105 hover:shadow-lg"
+                        style={{
+                          opacity: 1,
+                          transform: "translateX(0)",
+                          transitionDelay: `${i * 100}ms`,
+                        }}
                       >
-                        <NewsCard news={news} />
-                      </Link>
-                    </div>
-                  );
-                })}
+                        <Link
+                          href={`/news/${news.id}`}
+                          className="w-fit transition-colors duration-200 ease-in-out"
+                        >
+                          <NewsCard news={news} />
+                        </Link>
+                      </div>
+                    );
+                  },
+                )
+              ) : (
+                <div className="p-4 text-center text-gray-500">
+                  ไม่มีข่าวสารในขณะนี้
+                </div>
+              )}
             </NewsCarouselComponent>
           </div>
         </div>
