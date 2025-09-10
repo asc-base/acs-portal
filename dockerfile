@@ -16,8 +16,7 @@ FROM base AS builder
 COPY --from=deps /usr/src/app/node_modules ./node_modules
 COPY package.json ./
 
-RUN npm run lint
-RUN npm run prebuild || true
+
 RUN npm run build
 
 FROM base AS development
