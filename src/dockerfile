@@ -19,7 +19,7 @@ COPY --from=deps /usr/src/app/node_modules ./node_modules
 COPY package.json ./
 
 
-RUN npm run prebuild || true
+# RUN npm run prebuild || true
 RUN npm run build
 
 
@@ -43,3 +43,5 @@ COPY --chown=node:node --from=prod-deps /usr/src/app/node_modules ./node_modules
 COPY --chown=node:node --from=builder   /usr/src/app/dist        ./
 COPY --chown=node:node package.json ./
 
+
+CMD [ "npm", "run", "start" ]
