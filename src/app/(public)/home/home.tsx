@@ -86,7 +86,7 @@ const HomePage = ({
         />
         <div className="container mx-auto my-2.5 px-3.5">
           <div className="flex flex-col gap-y-3">
-            <div className="grid grid-cols-2 gap-12">
+            <div className="flex flex-col-reverse md:grid md:grid-cols-2">
               <div>
                 <h2 className="text-accent04 items-baseline font-bold">
                   ข่าวกิจกรรม

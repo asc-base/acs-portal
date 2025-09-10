@@ -45,7 +45,7 @@ export const NewsCarouselComponent = ({
           </Button>
         </div>
         <div>
-          <div className="grid grid-cols-1 gap-4 p-4 transition-all duration-300 ease-in-out md:grid-cols-3">
+          <div className="grid grid-cols-1 gap-4 p-4 transition-all duration-300 ease-in-out md:grid-cols-2 lg:grid-cols-3">
             {children}
           </div>
           <div className="flex justify-center gap-x-3">
