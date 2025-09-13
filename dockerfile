@@ -15,8 +15,8 @@ FROM base AS builder
 
 COPY --from=deps /usr/src/app/node_modules ./node_modules
 # Copy configuration files first
-COPY next.config.ts tsconfig.json postcss.config.mjs eslint.config.mjs ./
-COPY package.json ./
+COPY next.config.ts tsconfig.json postcss.config.mjs eslint.config.mjs next-env.d.ts ./
+COPY package.json package-lock.json ./
 # Copy source code
 COPY src ./src
 COPY public ./public
