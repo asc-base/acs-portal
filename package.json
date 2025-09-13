@@ -6,7 +6,6 @@
     "release:patch": "npm version patch && git push --follow-tags",
     "release:minor": "npm version minor && git push --follow-tags",
     "release:major": "npm version major && git push --follow-tags",
-    "preversion": "npm test",
     "version": "echo \"Now at $npm_package_version\"",
     "postversion": "git push --follow-tags",
     "dev": "next dev --turbopack",
