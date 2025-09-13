@@ -10,12 +10,13 @@ RUN npm ci
 
 COPY . .
 
+RUN npm run build
+
 FROM base AS production
 
 COPY --from=builder /usr/src/app/package*.json ./
 RUN npm ci --omit=dev
-COPY --from=builder /usr/src/app/.next ./next
-COPY --from=builder /usr/src/app/package*.json ./
+COPY --from=builder /usr/src/app/.next ./.next
 
 EXPOSE 3000
 
