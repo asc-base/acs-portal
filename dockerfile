@@ -6,15 +6,16 @@ FROM base AS builder
 
 COPY package.json package-lock.json ./
 
-RUN npm ci --omit=dev
+RUN npm ci
 
 COPY . .
 
 FROM base AS production
 
-COPY --from=builder /usr/src/app/node_modules ./node_modules
 COPY --from=builder /usr/src/app/package*.json ./
-COPY --from=builder /usr/src/app .
+RUN npm ci --omit=dev
+COPY --from=builder /usr/src/app/.next ./next
+COPY --from=builder /usr/src/app/package*.json ./
 
 EXPOSE 3000
 
