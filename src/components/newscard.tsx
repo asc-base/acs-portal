@@ -1,45 +1,54 @@
+"use client";
 import { NewsCardProps } from "@/interface/newscard";
 import { FC } from "react";
-import Image from "next/image";
-import { Card } from "@mui/material";
+import {
+  Button,
+  Card,
+  CardContent,
+  CardMedia,
+  CardActions,
+} from "@mui/material";
+import DeleteOutlineOutlinedIcon from "@mui/icons-material/DeleteOutlineOutlined";
 
 export const NewsCard: FC<NewsCardProps> = (props) => {
-  const { title, createAt, image } = props;
+  const { news, onDelete, onEdit } = props;
+
+  const date = `${new Date(news.startDate).getDate()} ${new Date(
+    news.startDate,
+  ).toLocaleString("th-TH", {
+    month: "long",
+  })} ${new Date(news.startDate).getFullYear() + 543}`;
+
   return (
-    <Card
-      sx={{
-        display: "flex",
-        height: "370px",
-        width: "320px",
-        maxWidth: "360px",
-        flexDirection: "column",
-        gap: 1,
-        borderRadius: "8px",
-        padding: 3,
-        boxShadow: 6,
-      }}
-    >
-      <div style={{ display: "flex", justifyContent: "center" }}>
-        <div
-          style={{
-            position: "relative",
-            height: "240px",
-            width: "100%",
-            maxWidth: "320px",
-            borderRadius: "16px",
-            overflow: "hidden",
-          }}
-        >
-          <Image
-            src={image}
-            alt={title}
-            style={{ width: "100%", objectFit: "cover" }}
-            fill
-          />
-        </div>
+    <Card className="w-80 rounded-3xl">
+      <div className="h-60 w-80 overflow-hidden rounded-3xl">
+        <CardMedia
+          component="img"
+          height="100%"
+          width="100%"
+          image={news.image}
+          alt={news.title}
+        />
       </div>
-      <h3 style={{ fontWeight: "bold", margin: 0 }}>{title}</h3>
-      <p style={{ margin: 0 }}>{createAt}</p>
+      <CardContent>
+        <h3 className="line-clamp-1">{news.title}</h3>
+        <h4 className="line-clamp-2">{date}</h4>
+      </CardContent>
+
+      <CardActions>
+        {onEdit && (
+          <Button size="small" variant="contained" fullWidth onClick={onEdit}>
+            <DeleteOutlineOutlinedIcon fontSize="small" />
+            ดูข้อมูล
+          </Button>
+        )}
+        {onDelete && (
+          <Button size="small" variant="outlined" fullWidth onClick={onDelete}>
+            <DeleteOutlineOutlinedIcon fontSize="small" />
+            ลบ
+          </Button>
+        )}
+      </CardActions>
     </Card>
   );
 };

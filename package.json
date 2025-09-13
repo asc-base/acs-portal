@@ -1,8 +1,13 @@
 {
   "name": "acs-fe",
-  "version": "0.1.0",
+  "version": "2.3.0",
   "private": true,
   "scripts": {
+    "release:patch": "npm version patch && git push --follow-tags",
+    "release:minor": "npm version minor && git push --follow-tags",
+    "release:major": "npm version major && git push --follow-tags",
+    "version": "echo \"Now at $npm_package_version\"",
+    "postversion": "git push --follow-tags",
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
@@ -10,13 +15,19 @@
   },
   "dependencies": {
     "@emotion/react": "^11.14.0",
-    "@emotion/styled": "^11.14.0",
-    "@mui/icons-material": "^7.1.1",
-    "@mui/material": "^7.1.1",
+    "@emotion/styled": "^11.14.1",
+    "@hookform/resolvers": "^5.2.1",
+    "@mui/icons-material": "^7.3.1",
+    "@mui/joy": "^5.0.0-beta.52",
+    "@mui/material": "^7.3.1",
+    "@mui/x-date-pickers": "^8.10.2",
+    "dayjs": "^1.11.15",
     "next": "15.3.3",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "tailwindcss-jun-layout": "^0.8.1"
+    "react-hook-form": "^7.62.0",
+    "tailwindcss-jun-layout": "^0.8.1",
+    "zod": "^4.1.5"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",

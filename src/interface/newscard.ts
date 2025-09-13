@@ -1,5 +1,10 @@
 export interface NewsCardProps {
-  title: string;
-  createdAt: string;
-  image: string;
+  news: {
+    title: string;
+    startDate: Date;
+    dueDate?: Date | null;
+    image: string;
+  };
+  onDelete?: () => void;
+  onEdit?: () => void;
 }
