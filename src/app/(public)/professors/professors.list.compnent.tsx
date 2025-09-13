@@ -107,15 +107,14 @@ const professorsMock: IProfessor[] = [
 const ProfessorsListComponent = () => {
   return (
     <div className="container mx-auto px-16 py-5">
-
       <div className="flex flex-col items-start justify-start gap-2">
-        <Breadcrumbs aria-label="breadcrumb" separator=">>">
+        <Breadcrumbs aria-label="breadcrumb" separator=">>" className="!text-h6 !mb-2">
           <Link href="/">หน้าหลัก</Link>
           <p>เกี่ยวกับเรา</p>
           <p>อาจารย์และเจ้าหน้าที่</p>
         </Breadcrumbs>
       </div>
-      <h2 className="mb-4 lg:mb-6 text-primary02">อาจารย์และเจ้าหน้าที่</h2>
+      <div className="mb-4 lg:mb-6 text-h4 lg:text-h2 text-primary02">อาจารย์และเจ้าหน้าที่</div>
 
       {professorsMock.length === 0 ? (
         <div className="flex flex-col items-center justify-center w-full">
