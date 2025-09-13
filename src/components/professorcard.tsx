@@ -6,7 +6,7 @@ import { ProfessorCardProps } from "@/interface/professorcard";
 
 export const ProfessorCard: FC<ProfessorCardProps> = (props) => {
     return (
-        <Card className="!h-[356px] lg:!h-[340px] cursor-pointer !rounded-2xl"
+        <Card className="!w-[312px] lg:!w-[268px] h-auto lg:!h-[340px] cursor-pointer !rounded-2xl"
         >
             <CardMedia
                 sx={{
