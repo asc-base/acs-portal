@@ -1,7 +1,7 @@
 "use client";
 import React from "react";
 import { ProfessorCard } from "@/components/professorcard";
-import { ProfessorCardProps } from "@/interface/professorcard";
+// import { ProfessorCardProps } from "@/interface/professorcard";
 import { Breadcrumbs } from "@mui/material";
 import Link from "next/link";
 import { IProfessor } from "@/core/domain/professor";
@@ -24,7 +24,7 @@ const professorsMock: IProfessor[] = [
     createdBy: 1,
     updatedBy: 1,
     createdDate: new Date("2025-07-23T12:44:38.101Z"),
-    updatedDate: new Date("2025-07-23T12:44:38.101Z")
+    updatedDate: new Date("2025-07-23T12:44:38.101Z"),
   },
   {
     id: 2,
@@ -43,7 +43,7 @@ const professorsMock: IProfessor[] = [
     createdBy: 1,
     updatedBy: 1,
     createdDate: new Date("2025-07-23T12:44:38.101Z"),
-    updatedDate: new Date("2025-07-23T12:44:38.101Z")
+    updatedDate: new Date("2025-07-23T12:44:38.101Z"),
   },
   {
     id: 3,
@@ -62,7 +62,7 @@ const professorsMock: IProfessor[] = [
     createdBy: 1,
     updatedBy: 1,
     createdDate: new Date("2025-07-23T12:44:38.101Z"),
-    updatedDate: new Date("2025-07-23T12:44:38.101Z")
+    updatedDate: new Date("2025-07-23T12:44:38.101Z"),
   },
   {
     id: 4,
@@ -81,7 +81,7 @@ const professorsMock: IProfessor[] = [
     createdBy: 1,
     updatedBy: 1,
     createdDate: new Date("2025-07-23T12:44:38.101Z"),
-    updatedDate: new Date("2025-07-23T12:44:38.101Z")
+    updatedDate: new Date("2025-07-23T12:44:38.101Z"),
   },
   {
     id: 5,
@@ -100,14 +100,13 @@ const professorsMock: IProfessor[] = [
     createdBy: 1,
     updatedBy: 1,
     createdDate: new Date("2025-07-23T12:44:38.101Z"),
-    updatedDate: new Date("2025-07-23T12:44:38.101Z")
+    updatedDate: new Date("2025-07-23T12:44:38.101Z"),
   },
 ];
 
 const ProfessorsListComponent = () => {
   return (
     <div className="container mx-auto px-16 py-5">
-
       <div className="flex flex-col items-start justify-start gap-2">
         <Breadcrumbs aria-label="breadcrumb" separator=">>">
           <Link href="/">หน้าหลัก</Link>
@@ -115,14 +114,14 @@ const ProfessorsListComponent = () => {
           <p>อาจารย์และเจ้าหน้าที่</p>
         </Breadcrumbs>
       </div>
-      <h2 className="mb-4 lg:mb-6 text-primary02">อาจารย์และเจ้าหน้าที่</h2>
+      <h2 className="text-primary02 mb-4 lg:mb-6">อาจารย์และเจ้าหน้าที่</h2>
 
       {professorsMock.length === 0 ? (
-        <div className="flex flex-col items-center justify-center w-full">
+        <div className="flex w-full flex-col items-center justify-center">
           <p className="text-gray-500">ไม่มีข้อมูลอาจารย์</p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
           {professorsMock.map((item) => (
             <Link key={item.id} href={`/professors/${item.id}`}>
               <ProfessorCard {...item} />
