@@ -4,9 +4,11 @@ import { ProfessorCard } from "@/components/professorcard";
 import { ProfessorCardProps } from "@/interface/professorcard";
 import { Breadcrumbs } from "@mui/material";
 import Link from "next/link";
+import { IProfessor } from "@/core/domain/professor";
 
-const professorsMock: ProfessorCardProps[] = [
+const professorsMock: IProfessor[] = [
   {
+    id: 1,
     firstNameTh: "ดร.สมชาย",
     lastNameTh: "ใจดี",
     firstNameEn: "Somchai",
@@ -14,8 +16,18 @@ const professorsMock: ProfessorCardProps[] = [
     profRoom: "SCL 607",
     email: "somchai@example.com",
     image: "/logoacs.png",
+    majorPositionId: 1,
+    academicPositionId: 2,
+    IsPassword: false,
+    expertFields: [],
+    educations: [],
+    createdBy: 1,
+    updatedBy: 1,
+    createdDate: new Date("2025-07-23T12:44:38.101Z"),
+    updatedDate: new Date("2025-07-23T12:44:38.101Z")
   },
   {
+    id: 2,
     firstNameTh: "ดร.สมชาย",
     lastNameTh: "ใจดี",
     firstNameEn: "Somchai",
@@ -23,8 +35,18 @@ const professorsMock: ProfessorCardProps[] = [
     profRoom: "SCL 607",
     email: "somchai@example.com",
     image: "/logoacs.png",
+    majorPositionId: 1,
+    academicPositionId: 2,
+    IsPassword: false,
+    expertFields: [],
+    educations: [],
+    createdBy: 1,
+    updatedBy: 1,
+    createdDate: new Date("2025-07-23T12:44:38.101Z"),
+    updatedDate: new Date("2025-07-23T12:44:38.101Z")
   },
   {
+    id: 3,
     firstNameTh: "ดร.สมชาย",
     lastNameTh: "ใจดี",
     firstNameEn: "Somchai",
@@ -32,8 +54,18 @@ const professorsMock: ProfessorCardProps[] = [
     profRoom: "SCL 607",
     email: "somchai@example.com",
     image: "/logoacs.png",
+    majorPositionId: 1,
+    academicPositionId: 2,
+    IsPassword: false,
+    expertFields: [],
+    educations: [],
+    createdBy: 1,
+    updatedBy: 1,
+    createdDate: new Date("2025-07-23T12:44:38.101Z"),
+    updatedDate: new Date("2025-07-23T12:44:38.101Z")
   },
   {
+    id: 4,
     firstNameTh: "ดร.สมชาย",
     lastNameTh: "ใจดี",
     firstNameEn: "Somchai",
@@ -41,8 +73,18 @@ const professorsMock: ProfessorCardProps[] = [
     profRoom: "SCL 607",
     email: "somchai@example.com",
     image: "/logoacs.png",
+    majorPositionId: 1,
+    academicPositionId: 2,
+    IsPassword: false,
+    expertFields: [],
+    educations: [],
+    createdBy: 1,
+    updatedBy: 1,
+    createdDate: new Date("2025-07-23T12:44:38.101Z"),
+    updatedDate: new Date("2025-07-23T12:44:38.101Z")
   },
   {
+    id: 5,
     firstNameTh: "ดร.สมชาย",
     lastNameTh: "ใจดี",
     firstNameEn: "Somchai",
@@ -50,12 +92,21 @@ const professorsMock: ProfessorCardProps[] = [
     profRoom: "SCL 607",
     email: "somchai@example.com",
     image: "/logoacs.png",
+    majorPositionId: 1,
+    academicPositionId: 2,
+    IsPassword: false,
+    expertFields: [],
+    educations: [],
+    createdBy: 1,
+    updatedBy: 1,
+    createdDate: new Date("2025-07-23T12:44:38.101Z"),
+    updatedDate: new Date("2025-07-23T12:44:38.101Z")
   },
 ];
 
 const ProfessorsListComponent = () => {
   return (
-    <div className="container mx-auto px-12 lg:px-16 py-8">
+    <div className="container mx-auto px-16 py-5">
 
       <div className="flex flex-col items-start justify-start gap-2">
         <Breadcrumbs aria-label="breadcrumb" separator=">>">
@@ -72,12 +123,9 @@ const ProfessorsListComponent = () => {
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {professorsMock.map((prof, index) => (
-            <Link
-              key={index}
-              href={`/professors/${prof.firstNameTh.toLowerCase()}`}
-            >
-              <ProfessorCard {...prof} />
+          {professorsMock.map((item) => (
+            <Link key={item.id} href={`/professors/${item.id}`}>
+              <ProfessorCard {...item} />
             </Link>
           ))}
         </div>
