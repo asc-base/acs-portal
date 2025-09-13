@@ -8,14 +8,13 @@ FROM base AS deps
 COPY package.json package-lock.json ./
 
 RUN --mount=type=cache,target=/root/.npm \
-    npm ci --ignore-scripts
+    npm ci 
 
 
 FROM base AS builder
 
 COPY --from=deps /usr/src/app/node_modules ./node_modules
-COPY package.json ./
-
+COPY . .
 
 RUN npm run build
 
@@ -26,19 +25,24 @@ COPY --from=deps /usr/src/app/node_modules ./node_modules
 
 COPY . .
 
-CMD ["npm", "run", "start"]
+EXPOSE 3000
+
+CMD ["npm", "run", "dev"]
 
 
 FROM base AS prod-deps
 COPY package.json package-lock.json ./
 RUN --mount=type=cache,target=/root/.npm \
-    npm ci --omit=dev --ignore-scripts
+    npm ci --omit=dev 
 
 FROM base AS production
 ENV NODE_ENV=production
 USER node
 
 COPY --chown=node:node --from=prod-deps /usr/src/app/node_modules ./node_modules
-COPY --chown=node:node --from=builder   /usr/src/app/dist        ./
+COPY --chown=node:node --from=builder   /usr/src/app/.next        ./.next
+COPY --chown=node:node --from=builder   /usr/src/app/public       ./public
+COPY --chown=node:node --from=builder   /usr/src/app/next.config.ts ./next.config.ts
 COPY --chown=node:node package.json ./
+
 CMD ["npm", "run", "start"]
