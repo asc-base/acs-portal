@@ -1,23 +1,23 @@
-FROM node:24.5.0-alpine AS base
+# Use the official Node.js 22 image as the base image
+FROM node:22-alpine
 
-WORKDIR /usr/src/app
+# Set the working directory
+WORKDIR /app
 
-FROM base AS builder
-
+# Copy package.json and package-lock.json
 COPY package.json package-lock.json ./
 
-RUN npm ci
+# Install dependencies
+RUN npm install
 
+# Copy the rest of the application code
 COPY . .
 
+# Build the Next.js application
 RUN npm run build
 
-FROM base AS production
-
-COPY --from=builder /usr/src/app/package*.json ./
-RUN npm ci --omit=dev
-COPY --from=builder /usr/src/app/. .
-
+# Expose the port the app runs on
 EXPOSE 3000
 
-CMD [ "npm","start" ]
+# Start the Next.js application
+CMD ["npm", "start"]
