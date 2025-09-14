@@ -1,5 +1,5 @@
 import { IProfessorRepository } from "@/core/ports/professor.repository";
-import { IProfessor } from "@/interface/professor";
+import { IProfessor } from "@/core/domain/professor";
 import { HttpHelper } from "@/lib/http";
 import { ApiResponse } from "@/interface/response";
 
