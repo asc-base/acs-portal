@@ -16,3 +16,6 @@ export const authService = new AuthService(authRepository);
 
 const masterDataRepository = new MasterDataRepository(baseUrl);
 export const masterDataService = new MasterDataService(masterDataRepository);
+
+const professorRepository = new MasterDataRepository(baseUrl);
+export const professorService = new MasterDataService(professorRepository);
