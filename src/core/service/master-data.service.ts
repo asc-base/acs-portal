@@ -18,4 +18,9 @@ export class MasterDataService {
       await this.masterDataRepository.getMasterDataListType(type);
     return response.data;
   }
+  async getMasterDataTypeCourse() {
+    const response =
+      await this.masterDataRepository.getMasterDataTypeCourse();
+    return response.data;
+  }
 }
