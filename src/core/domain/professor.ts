@@ -1,19 +1,14 @@
+import { User } from "./user";
+import { Position } from "./master-data";
+import { ExpertField } from "./expert-field";
+import { Education } from "./education";
+
 export interface IProfessor {
     id: number;
-    firstNameTh: string;
-    lastNameTh: string;
-    firstNameEn: string;
-    lastNameEn: string;
-    email: string;
-    majorPositionId: number;
-    academicPositionId: number;
+    user: User;
+    majorPositions: Position;
+    academicPositions: Position;
     profRoom: string;
-    IsPassword: boolean;
-    expertFields: string[];
-    educations: string[];
-    image: string;
-    createdBy: number;
-    updatedBy: number;
-    createdDate: Date;
-    updatedDate: Date;
+    expertFields: ExpertField[];
+    educations: Education[];
 }
