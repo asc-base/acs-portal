@@ -9,28 +9,28 @@ export const ProfessorCard: FC<ProfessorCardProps> = (props) => {
         <Card className="!h-[356px] lg:!h-[340px] cursor-pointer !rounded-2xl"
         >
             <CardMedia
-                sx={{
+                   sx={{
                     height: 180,
                     backgroundSize: "cover",
                     backgroundPosition: "center",
                 }}
                 component="img"
-                image={props.image}
-                alt={`${props.firstNameTh} ${props.lastNameTh}`}
+                image={props.user.imageUrl}
+                alt={`${props.user.firstNameTh} ${props.user.lastNameTh}`}
             />
             <CardContent className="flex flex-col text-center">
                 <Typography className="!text-h3 lg:!text-h2 !font-bold !text-primary01">
-                    {props.firstNameTh} {props.lastNameTh}
+                    {props.user.firstNameTh} {props.user.lastNameTh}
                 </Typography>
                 <Typography className="!text-h3 lg:!text-h2 !font-bold !text-primary01">
-                    {props.firstNameEn} {props.lastNameEn}
+                    {props.user.firstNameEn} {props.user.lastNameEn}
                 </Typography>
 
                 <Typography className="!text-h4 lg:!text-h5 !text-primary01">
                     <ApartmentIcon fontSize="small" className="!text-neutral04" /> {props.profRoom}
                 </Typography>
                 <Typography className="!text-h4 lg:!text-h5 !text-primary01">
-                    <span><MailOutlineIcon fontSize="small" className="!text-neutral04" /> {props.email}</span>
+                    <span><MailOutlineIcon fontSize="small" className="!text-neutral04" /> {props.user.email}</span>
                 </Typography>
             </CardContent>
         </Card>
