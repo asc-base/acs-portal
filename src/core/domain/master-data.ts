@@ -36,3 +36,11 @@ export interface IType {
   createdDate: Date;
   updatedDate: Date;
 }
+
+export interface TypeCourse {
+  id: number;
+  name: string;
+  description: string;
+  createdDate: Date;
+  updatedDate: Date;
+}
