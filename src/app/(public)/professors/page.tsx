@@ -1,11 +1,28 @@
 import React from "react";
 import ProfessorsListComponent from "./professors.list.compnent";
+import { professorService } from "@/infra/container";
 
-const page = () => {
+interface PageProps {
+  searchParams: Promise<{
+    page?: number;
+    pageSize?: number;
+  }>;
+}
+
+const page = async ({ searchParams }: PageProps) => {
+  const resolvedSearchParams = await searchParams;
+
+  const { rows, pageSize, page } = await professorService.getProfessors(
+    resolvedSearchParams.page || 1,
+    resolvedSearchParams.pageSize || 12
+  );
+
   return (
-    <div>
-      <ProfessorsListComponent />
-    </div>
+    <ProfessorsListComponent
+      professors={rows}
+      pageSize={pageSize}
+      page={page}
+    />
   );
 };
 
