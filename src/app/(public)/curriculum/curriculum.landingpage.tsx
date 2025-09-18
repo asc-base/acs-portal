@@ -1,0 +1,72 @@
+"use client";
+import React, { useState, useEffect } from "react";
+import Link from "next/link";
+import { ICurriculum } from "@/core/domain/curriculum";
+import { CurriculumCard } from "@/components/curriculumcard";
+import TypeCourseListComponents from "./typecourse.list.components";
+import { TypeCourse } from "@/core/domain/master-data";
+import { Breadcrumbs, CircularProgress } from "@mui/material";
+
+interface CurriculumListComponentProps {
+  curriculum: ICurriculum[];
+  typeCourse: TypeCourse[];
+}
+
+const CurriculumListComponents = ({
+  curriculum,
+  typeCourse,
+}: CurriculumListComponentProps) => {
+  const [focusCurriculum, setFocusCurriculum] = useState(curriculum[0]?.id);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const year = curriculum.find(c => c.id === focusCurriculum)?.year;
+
+  useEffect(() => {
+    if (!focusCurriculum) return;
+    setIsLoading(true);
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [focusCurriculum, typeCourse]);
+
+  return (
+    <div className="flex flex-col gap-2">
+      <Breadcrumbs aria-label="breadcrumb" separator=">>" className="mb-4">
+        <Link href="/">หน้าหลัก</Link>
+        <p>หลักสูตร</p>
+      </Breadcrumbs>
+
+      <div className="flex flex-col md:flex-row gap-2 mb-10">
+        {curriculum.map((item) => (
+          <CurriculumCard
+            key={item.id}
+            rows={item}
+            focusCurriculum={focusCurriculum}
+            setFocusCurriculum={setFocusCurriculum}
+          />
+        ))}
+      </div>
+
+      <div className="text-center mb-6">
+        <h1 className="font-bold text-primary01">
+          รายวิชาตามหลักสูตรปี พ.ศ. {isLoading ? "..." : year}
+        </h1>
+        <h4 className="text-primary01">
+          รายการวิชาทั้งหมดจากหลักสูตรปี {isLoading ? "..." : year}
+        </h4>
+      </div>
+
+      <div className="flex justify-center">
+        {isLoading ? (
+          <CircularProgress/>
+        ) : (
+          <TypeCourseListComponents typeCourse={typeCourse} />
+        )}
+      </div>
+    </div>
+  );
+};
+
+export default CurriculumListComponents;
