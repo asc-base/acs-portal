@@ -13,10 +13,7 @@ interface ProfessorsListComponentsProps {
 
 const ProfessorsListComponent = ({
   professors,
-  pageSize,
-  page,
 }: ProfessorsListComponentsProps) => {
-  
   return (
     <div className="container mx-auto px-16 py-5">
       <div className="flex flex-col items-start justify-start gap-2">
