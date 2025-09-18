@@ -1,5 +1,6 @@
 import { Button } from "@mui/material";
 import Image from "next/image";
+import Link from "next/link";
 import { FC } from "react";
 
 const typeCourseImage = [
@@ -31,13 +32,13 @@ export const TypeCourseComponent: FC<TypeCourseProps> = ({ name, description, in
       <h2 className="mt-2 mb-2 text-primary01">{name}</h2>
       <h5 className="mb-4 text-primary01 text-sm">{description}</h5>
       <Button
-        href="#"
         variant="outlined"
-        target="_blank"
         rel="noopener noreferrer"
         className="border-primary03 text-primary03"
       >
-        ดูรายวิชา
+        <Link href="#" target="_blank">
+          ดูรายวิชา
+        </Link>
       </Button>
     </div>
   );
