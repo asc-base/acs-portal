@@ -1,4 +1,4 @@
-export interface Curriculum {
+export interface ICurriculum {
   id: number;
   title: string;
   year: string;

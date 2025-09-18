@@ -1,6 +1,7 @@
 import { ApiResponse } from "@/interface/response";
-import { Curriculum } from "../domain/curriculum";
+import { ICurriculum } from "../domain/curriculum";
+import { Pageable } from "@/interface/response";
 
 export interface ICurriculumRepository {
-  getCurriculum(): Promise<ApiResponse<Curriculum[]>>;
+  getCurriculum(): Promise<ApiResponse<Pageable<ICurriculum>>>;
 }
