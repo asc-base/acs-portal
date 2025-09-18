@@ -13,7 +13,7 @@ const TypeCourseListComponents = ({ typeCourse }: TypeCourseListComponentProps) 
             {typeCourse.map((item, idx) => (
                 <div
                     key={item.id}
-                    className="w-full sm:w-1/2 md:w-1/3 box-border"
+                    className="w-full sm:w-1/2 lg:w-1/3 box-border"
                 >
                     <TypeCourseComponent
                         name={item.name}
