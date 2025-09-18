@@ -8,12 +8,13 @@ import {
   useTheme,
   useMediaQuery,
 } from "@mui/material";
+import Link from "next/link";
 import { ICurriculum } from "@/core/domain/curriculum";
 
 interface ICurriculumCard {
   curriculum: ICurriculum;
   focusCurriculum: number;
-  setFocusCurriculum: (id: number) => void;
+  setFocusCurriculum?: () => void;
 }
 
 export const CurriculumCard: FC<ICurriculumCard> = ({
@@ -29,7 +30,7 @@ export const CurriculumCard: FC<ICurriculumCard> = ({
 
   return (
     <Card
-      onClick={() => setFocusCurriculum(id)}
+      onClick={setFocusCurriculum}
       sx={{
         display: "flex",
         borderRadius: 4,
@@ -61,7 +62,7 @@ export const CurriculumCard: FC<ICurriculumCard> = ({
       <CardContent
         sx={{
           flex: 1,
-          backgroundColor: isFocused? "var(--color-primary01)" : "var(--color-neutral03)",
+          backgroundColor: isFocused ? "var(--color-primary01)" : "var(--color-neutral03)",
           color: "var(--color-neutral01)",
           p: 3,
           display: "flex",
@@ -80,21 +81,24 @@ export const CurriculumCard: FC<ICurriculumCard> = ({
             {description || "ปีการศึกษา 2565 - ปีการศึกษา 2570"}
           </p>
         </Box>
-          <Button
-            variant="outlined"
+        <Button
+          variant="outlined"
+          sx={{
+            border: `1px solid ${isFocused ? "var(--color-secondary02)" : "var(--color-primary01)"}`,
+            color: isFocused ? "var(--color-secondary02)" : "var(--color-primary01)",
+            alignSelf: "flex-end",
+            px: 3,
+            py: 1.5,
+          }}
+        >
+          <Link
             href={fileUrl}
             target="_blank"
             rel="noopener noreferrer"
-            sx={{
-              border: `1px solid ${isFocused ? "var(--color-secondary02)" : "var(--color-primary01)"}`,
-              color: isFocused? "var(--color-secondary02)" : "var(--color-primary01)",
-              alignSelf: "flex-end",
-              px: 3,
-              py: 1.5,
-            }}
           >
             อ่านรายละเอียดเพิ่มเติม
-          </Button>
+          </Link>
+        </Button>
       </CardContent>
     </Card>
   );

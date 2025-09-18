@@ -16,10 +16,8 @@ const CurriculumListComponents = ({
   curriculum,
   typeCourse,
 }: CurriculumListComponentProps) => {
-  const [focusCurriculum, setFocusCurriculum] = useState(curriculum[0]?.id);
+  const [focusCurriculum, setFocusCurriculum] = useState<ICurriculum>(curriculum[0]);
   const [isLoading, setIsLoading] = useState(false);
-
-  const year = curriculum.find(c => c.id === focusCurriculum)?.year;
 
   useEffect(() => {
     if (!focusCurriculum) return;
@@ -30,6 +28,10 @@ const CurriculumListComponents = ({
 
     return () => clearTimeout(timer);
   }, [focusCurriculum, typeCourse]);
+
+  const handleSelectFocusCurriculum = (curriculum: ICurriculum) => {
+    setFocusCurriculum(curriculum);
+  }
 
   return (
     <div className="flex flex-col gap-2">
@@ -43,18 +45,18 @@ const CurriculumListComponents = ({
           <CurriculumCard
           key={item.id}
           curriculum={item}
-          focusCurriculum={focusCurriculum}
-          setFocusCurriculum={setFocusCurriculum}
+          focusCurriculum={focusCurriculum.id}
+          setFocusCurriculum={() => handleSelectFocusCurriculum(item)} 
           />
         ))}
       </div>
 
       <div className="text-center mb-6">
         <h1 className="font-bold text-primary01">
-          รายวิชาตามหลักสูตรปี พ.ศ. {isLoading ? "..." : year}
+          รายวิชาตามหลักสูตรปี พ.ศ. {isLoading ? "..." : focusCurriculum.year}
         </h1>
         <h4 className="text-primary01">
-          รายการวิชาทั้งหมดจากหลักสูตรปี {isLoading ? "..." : year}
+          รายการวิชาทั้งหมดจากหลักสูตรปี {isLoading ? "..." : focusCurriculum.year}
         </h4>
       </div>
       <div className="flex justify-center">
