@@ -25,16 +25,3 @@ export const CreateCurriculumModel = async (data: Curriculum,  token: string) =>
   const result = await response.json();
   return result;
 };
-
-export const GetCurriculum = async (): Promise<Curriculum[]> => {
-  const response = await fetch(
-    `${API_URL}/curriculum`,
-  );
-
-  if (!response.ok) {
-    throw new Error("Failed to fetch all curriculum");
-  }
-
-  const data = await response.json();
-  return data.data;
-};
