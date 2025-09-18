@@ -1,9 +1,7 @@
+import { User } from "./user";
+
 export interface ProfessorCardProps {
-  firstNameTh: string;
-  lastNameTh: string;
-  firstNameEn: string;
-  lastNameEn: string;
+  id: Number;
+  user: User;
   profRoom: string;
-  email: string;
-  image: string;
 }
