@@ -3,7 +3,7 @@ import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { ICurriculum } from "@/core/domain/curriculum";
 import { CurriculumCard } from "@/components/curriculumcard";
-import TypeCourseListComponents from "./typecourse.list.components";
+import { TypeCourseComponent } from "@/components/typecourse.component";
 import { TypeCourse } from "@/core/domain/master-data";
 import { Breadcrumbs, CircularProgress } from "@mui/material";
 
@@ -41,10 +41,10 @@ const CurriculumListComponents = ({
       <div className="flex flex-col md:flex-row gap-2 mb-10">
         {curriculum.map((item) => (
           <CurriculumCard
-            key={item.id}
-            rows={item}
-            focusCurriculum={focusCurriculum}
-            setFocusCurriculum={setFocusCurriculum}
+          key={item.id}
+          curriculum={item}
+          focusCurriculum={focusCurriculum}
+          setFocusCurriculum={setFocusCurriculum}
           />
         ))}
       </div>
@@ -57,12 +57,24 @@ const CurriculumListComponents = ({
           รายการวิชาทั้งหมดจากหลักสูตรปี {isLoading ? "..." : year}
         </h4>
       </div>
-
       <div className="flex justify-center">
         {isLoading ? (
-          <CircularProgress/>
+          <CircularProgress />
         ) : (
-          <TypeCourseListComponents typeCourse={typeCourse} />
+          <div className="flex flex-wrap justify-center mx-auto">
+            {typeCourse.map((item, idx) => (
+              <div
+                key={item.id}
+                className="w-full sm:w-1/2 lg:w-1/3 box-border"
+              >
+                <TypeCourseComponent
+                  name={item.name}
+                  description={item.description}
+                  index={idx}
+                />
+              </div>
+            ))}
+          </div>
         )}
       </div>
     </div>

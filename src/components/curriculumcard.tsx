@@ -8,28 +8,23 @@ import {
   useTheme,
   useMediaQuery,
 } from "@mui/material";
+import { ICurriculum } from "@/core/domain/curriculum";
 
 interface ICurriculumCard {
-  rows: {
-    id: number;
-    year: string;
-    description: string;
-    image: string;
-    fileUrl: string;
-  };
+  curriculum: ICurriculum;
   focusCurriculum: number;
   setFocusCurriculum: (id: number) => void;
 }
 
 export const CurriculumCard: FC<ICurriculumCard> = ({
-  rows,
+  curriculum,
   focusCurriculum,
   setFocusCurriculum,
 }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
 
-  const { id, year, description, image, fileUrl } = rows;
+  const { id, year, description, image, fileUrl } = curriculum;
   const isFocused = focusCurriculum === id;
 
   return (
