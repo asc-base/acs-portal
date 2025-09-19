@@ -7,6 +7,8 @@ import { AuthRepository } from "./repositories/auth.repository";
 import { AuthService } from "@/core/service/auth.service";
 import { CurriculumRepository } from "./repositories/curriculum.repository";
 import { CurriculumService } from "@/core/service/curriculum.service";
+import { CourseRepository } from "./repositories/course.repository";
+import { CourseService } from "@/core/service/course.service";
 
 export const baseUrl = `${API_URL}/api`;
 
@@ -21,3 +23,6 @@ export const masterDataService = new MasterDataService(masterDataRepository);
 
 const curriculumRepository = new CurriculumRepository(baseUrl);
 export const curriculumService = new CurriculumService(curriculumRepository);
+
+const courseRepository = new CourseRepository(baseUrl);
+export const courseService = new CourseService(courseRepository);
