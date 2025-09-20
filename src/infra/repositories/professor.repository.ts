@@ -16,7 +16,7 @@ export class ProfessorRepository implements IProfessorRepository {
         page: number,
         pageSize: number,
       ): Promise<ApiResponse<Pageable<IProfessor>>> {
-        let url = `/v1/professors?page=${page}&pageSize=${pageSize}`;
+        const url = `/v1/professors?page=${page}&pageSize=${pageSize}`;
     
         const response = await this.http.get<ApiResponse<Pageable<IProfessor>>>(url);
         return response;

@@ -1,6 +1,6 @@
 import { EducationLevel } from "./master-data";
 
-export interface Education {
+export interface IEducation {
     education:  string;
     university: string;
     level:      EducationLevel;
