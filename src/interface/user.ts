@@ -3,7 +3,7 @@ export interface InputLogin {
   password: string;
 }
 
-export interface User {
+export interface IUser {
   id: number;
   email: string;
   firstNameTh: string;
