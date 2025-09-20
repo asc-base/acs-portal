@@ -13,7 +13,7 @@ const MenuBar = () => {
   const menuItems = [
     { id: 1, label: "หน้าหลัก", href: "/", submenu: [] },
     { id: 2, label: "สมัครเรียน", href: "", submenu: [] },
-    { id: 3, label: "หลักสูตร", href: "", submenu: [] },
+    { id: 3, label: "หลักสูตร", href: "/curriculum", submenu: [] },
     {
       id: 4,
       label: "ประชาสัมพันธ์",
