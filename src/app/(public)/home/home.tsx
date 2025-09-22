@@ -5,7 +5,7 @@ import React from "react";
 import heroImage from "../../../../public/hero.jpg";
 import { NewsCard } from "@/components/newscard";
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { NewsCarouselComponent } from "@/components/news.carousel.component";
 import { ActivityCard } from "@/components/activitycard";
 import { Carousel } from "@/components/carousel";
@@ -83,6 +83,34 @@ const HomePage = ({
     setNewsActivityStudentActive(index);
   };
 
+  const [itemsToShow, setItemsToShow] = useState(4);
+  const [newsItemsToShow, setNewsItemsToShow] = useState(3);
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const handleResize = () => {
+      const width = window.innerWidth;
+
+      setIsMobile(width < 768);
+
+      if (width < 768) {
+        setItemsToShow(4);
+        setNewsItemsToShow(1);
+      } else if (width < 1024) {
+        setItemsToShow(2);
+        setNewsItemsToShow(2);
+      } else {
+        setItemsToShow(4);
+        setNewsItemsToShow(3);
+      }
+    };
+
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+
   return (
     <>
       <div>
@@ -90,16 +118,16 @@ const HomePage = ({
           image={heroImage}
           description="คณะวิทยาศาสตร์ ภาควิชาคณิตศาสตร์/มหาวิทยาลัยเทคโนโลยีพระจอมเกล้าธนบุรี"
         />
-        <div className="container mx-auto my-2.5 px-3.5">
-          <div className="flex flex-col gap-y-3">
-            <div className="flex flex-col-reverse md:grid md:grid-cols-2">
+        <div className="container mx-auto my-2.5 px-3.5 py-4">
+          <div className="flex flex-col gap-y-6">
+            <div className="flex flex-col-reverse md:grid md:grid-cols-2 gap-x-6 gap-y-6">
               <div>
-                <h2 className="text-accent04 items-baseline font-bold">
-                  ข่าวกิจกรรม
-                </h2>
+                <h3 className="lg:text-[32px] text-accent04 items-baseline font-bold mb-3">
+                  งานกิจกรรมเร็ว ๆ นี้
+                </h3>
                 <div className="flex flex-col gap-y-3">
                   {initNewsActivity.length > 0 ? (
-                    initNewsActivity.slice(0, 4).map((item) => (
+                    initNewsActivity.slice(0, itemsToShow).map((item) => (
                       <Link key={item.id} href={`/news/${item.id}`}>
                         <ActivityCard
                           key={item.id}
@@ -116,9 +144,9 @@ const HomePage = ({
                 </div>
               </div>
               <div>
-                <h2 className="text-accent04 items-baseline font-bold">
+                <h3 className="lg:text-[32px] text-accent04 items-baseline font-bold mb-3">
                   ประชาสัมพันธ์สำคัญ
-                </h2>
+                </h3>
                 <div className="h-full">
                   <Carousel
                     items={initNewsMedia || []}
@@ -136,10 +164,11 @@ const HomePage = ({
               handlePrevNews={handlePrevNewsActivity}
               activeIndex={newsActivityActive}
               handleSetActiveIndex={handleSetNewsActivity}
+              isMobile={isMobile}
             >
               {initNewsActivity && initNewsActivity.length > 0 ? (
                 Array.from(
-                  { length: Math.min(3, initNewsActivity.length) },
+                  { length: Math.min(newsItemsToShow, initNewsActivity.length) },
                   (_, i) => {
                     const index =
                       (newsActivityActive + i) % initNewsActivity.length;
@@ -177,10 +206,11 @@ const HomePage = ({
               handlePrevNews={handlePrevNewsComplete}
               activeIndex={newsCompleteActive}
               handleSetActiveIndex={handleSetNewsComplete}
+              isMobile={isMobile}
             >
               {initNewsComplete && initNewsComplete.length > 0 ? (
                 Array.from(
-                  { length: Math.min(3, initNewsComplete.length) },
+                  { length: Math.min(newsItemsToShow, initNewsComplete.length) },
                   (_, i) => {
                     const index =
                       (newsCompleteActive + i) % initNewsComplete.length;
@@ -218,10 +248,11 @@ const HomePage = ({
               handlePrevNews={handlePrevNewsActivityStudent}
               activeIndex={newsActivityStudentActive}
               handleSetActiveIndex={handleSetNewsActivityStudent}
+              isMobile={isMobile}
             >
               {initNewsActivityStudent && initNewsActivityStudent.length > 0 ? (
                 Array.from(
-                  { length: Math.min(3, initNewsActivityStudent.length) },
+                  { length: Math.min(newsItemsToShow, initNewsActivityStudent.length) },
                   (_, i) => {
                     const index =
                       (newsActivityStudentActive + i) %

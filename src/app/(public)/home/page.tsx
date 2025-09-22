@@ -13,9 +13,9 @@ const MainPage = async () => {
       initNewsActivityStudent,
       initNewsMedia,
     ] = await Promise.all([
-      newsService.getNews(1, 6).catch(() => ({ rows: [] })),
-      newsService.getNews(1, 6).catch(() => ({ rows: [] })),
-      newsService.getNews(1, 6).catch(() => ({ rows: [] })),
+      newsService.getNews(1, 6,"", "ข่าวและกิจกรรม").catch(() => ({ rows: [] })),
+      newsService.getNews(1, 6,"", "ความสำเร็จ" ).catch(() => ({ rows: [] })),
+      newsService.getNews(1, 6,"", "งานกิจกรรมนักศึกษา").catch(() => ({ rows: [] })),
       newsService.getNewsMedias("newshigtlight").catch(() => []),
     ]);
 
