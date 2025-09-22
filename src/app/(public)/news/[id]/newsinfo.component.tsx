@@ -43,10 +43,10 @@ const NewsInfoComponent = ({ newsInfo, recommendNews }: NewsInfoProps) => {
               className="h-full w-full object-cover"
             />
           </div>
-          <div className="flex flex-col gap-4 py-8">
+          <div className="flex flex-col gap-4 py-8 w-full">
             <h4>{date}</h4>
             <h2 className="font-bold">{newsInfo?.title}</h2>
-            <h3>{newsInfo.detail}</h3>
+            <h3 className="break-words whitespace-pre-wrap">{newsInfo.detail}</h3>
           </div>
         </div>
         <div className="flex flex-col gap-4 py-8">
