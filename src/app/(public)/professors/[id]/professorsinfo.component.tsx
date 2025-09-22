@@ -31,27 +31,27 @@ const ProfessorsInfoComponent = ({ professorsInfo }: ProfessorsInfoProps) => {
 
                     <div className="lg:col-span-3 flex flex-col gap-6 min-w-[312px] ">
 
-                        <Card className="!rounded-2xl px-6 py-2">
-                            <CardContent>
+                        <div className="rounded-2xl px-6 py-4 shadow-md ">
+                            <div>
                                 <h3 className="font-bold mb-2">
                                     ประวัติการศึกษา
                                 </h3>
-                               {professorsInfo.educations?.length ?  (
+                                {professorsInfo.educations?.length ? (
                                     <ul className="list-disc pl-6 text-h4">
                                         {professorsInfo.educations.map((edu,idx) => (
                                             <li key={idx}>
-                                                {edu.level?.level}({edu.education}),{edu.university}
+                                                {edu.level?.level}({edu.education}), {edu.university}
                                             </li>
                                         ))}
                                     </ul>
                                 ) : (
-                                    <Typography>-</Typography>
+                                    <p>-</p>
                                 )}
-                            </CardContent>
-                        </Card>
+                            </div>
+                        </div>
 
-                        <Card className="!rounded-2xl px-6 py-2">
-                            <CardContent>
+                        <div className="rounded-2xl px-6 py-4 shadow-md mt-4">
+                            <div>
                                 <h3 className="font-bold mb-2">
                                     สาขาวิชาที่เชี่ยวชาญ
                                 </h3>
@@ -62,11 +62,10 @@ const ProfessorsInfoComponent = ({ professorsInfo }: ProfessorsInfoProps) => {
                                         ))}
                                     </ul>
                                 ) : (
-                                    <Typography>-</Typography>
+                                    <p>-</p>
                                 )}
-                            </CardContent>
-                        </Card>
-
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
