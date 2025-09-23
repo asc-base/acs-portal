@@ -14,7 +14,7 @@ const ProfessorsInfoComponent = ({ professorsInfo }: ProfessorsInfoProps) => {
 
     return (
         <>
-            <div className="container mx-auto px-16 py-5">
+            <div className="container mx-auto px-6 lg:px-16 py-5">
                 <Breadcrumbs aria-label="breadcrumb" separator=">>" className="mb-4">
                     <Link href="/">หน้าหลัก</Link>
                     <p>เกี่ยวกับเรา</p>
@@ -24,14 +24,14 @@ const ProfessorsInfoComponent = ({ professorsInfo }: ProfessorsInfoProps) => {
                     </span>
                 </Breadcrumbs>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 py-6 ">
-                    <div>
+                <div className="flex flex-col md:flex-row gap-4 lg:gap-6 py-6 items-center md:items-start">
+                    <div className="md:basis-1/5">
                         <ProfessorCard {...professorsInfo} />
                     </div>
 
-                    <div className="lg:col-span-3 flex flex-col gap-6 min-w-[312px] ">
+                    <div className="md:basis-4/5 flex flex-col gap-2 lg:gap-4 min-w-[312px] ">
 
-                        <div className="rounded-2xl px-6 py-4 shadow-md ">
+                        <div className="rounded-2xl px-12 py-8 shadow-md">
                             <div>
                                 <h3 className="font-bold mb-2">
                                     ประวัติการศึกษา
@@ -50,7 +50,7 @@ const ProfessorsInfoComponent = ({ professorsInfo }: ProfessorsInfoProps) => {
                             </div>
                         </div>
 
-                        <div className="rounded-2xl px-6 py-4 shadow-md mt-4">
+                        <div className="rounded-2xl px-12 py-8 shadow-md">
                             <div>
                                 <h3 className="font-bold mb-2">
                                     สาขาวิชาที่เชี่ยวชาญ
