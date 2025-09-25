@@ -13,7 +13,6 @@ interface NewsCarouselComponentProps {
   activeIndex: number;
   handleSetActiveIndex: (index: number) => void;
   title: string;
-  isMobile: boolean;
 }
 
 export const NewsCarouselComponent = ({
@@ -24,7 +23,6 @@ export const NewsCarouselComponent = ({
   activeIndex,
   handleSetActiveIndex,
   title,
-  isMobile,
 }: NewsCarouselComponentProps) => {
   return (
     <div>
@@ -41,43 +39,33 @@ export const NewsCarouselComponent = ({
         </Link>
       </div>
       <div className="flex items-center justify-between">
-        {!isMobile && (
-          <div className="flex items-center justify-between">
-            <Button onClick={handlePrevNews}>
-              <ArrowBackIosIcon fontSize="large" />
-            </Button>
-          </div>
-        )}
-
-        <div className={isMobile ? "flex-1" : ""}>
-          <div className="my-3 transition-all duration-300 ease-in-out">
-            {React.Children.count(children) === 1 ? (
-              <div className="flex justify-center">{children}</div>
-            ) : (
-              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {children}
-              </div>
-            )}
-          </div>
-          {!isMobile && (
-            <div className="flex justify-center gap-x-3">
-              {news.map((_, index) => (
-                <div
-                  onClick={() => handleSetActiveIndex(index)}
-                  key={index}
-                  className={`${index === activeIndex ? "bg-primary02" : "bg-gray-300"} h-[8px] w-[36px] cursor-pointer rounded-xs transition-colors duration-300 ease-in-out`}
-                ></div>
-              ))}
-            </div>
-          )}
+        <div className="hidden sm:flex items-center justify-between">
+          <Button onClick={handlePrevNews}>
+            <ArrowBackIosIcon fontSize="large" />
+          </Button>
         </div>
-        {!isMobile && (
-          <div className="flex items-center justify-between">
-            <Button onClick={handleNextNews}>
-              <ArrowForwardIosIcon fontSize="large" />
-            </Button>
+        <div className="w-full">
+          <div className=" flex justify-center gap-4 my-3 transition-all duration-300 ease-in-out
+              [&>*:nth-child(n+2)]:hidden
+              md:[&>*:nth-child(n+3)]:block
+              lg:[&>*:nth-child(n+2)]:block">
+            {children}
           </div>
-        )}
+          <div className="hidden sm:flex justify-center gap-x-3">
+            {news.map((_, index) => (
+              <div
+                onClick={() => handleSetActiveIndex(index)}
+                key={index}
+                className={`${index === activeIndex ? "bg-primary02" : "bg-primary06"} h-[8px] w-[36px] cursor-pointer rounded-xs transition-colors duration-300 ease-in-out`}
+              ></div>
+            ))}
+          </div>
+        </div>
+        <div className="hidden sm:flex items-center justify-between">
+          <Button onClick={handleNextNews}>
+            <ArrowForwardIosIcon fontSize="large" />
+          </Button>
+        </div>
       </div>
     </div>
   );

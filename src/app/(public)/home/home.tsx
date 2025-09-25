@@ -83,32 +83,6 @@ const HomePage = ({
     setNewsActivityStudentActive(index);
   };
 
-  const [itemsToShow, setItemsToShow] = useState(4);
-  const [newsItemsToShow, setNewsItemsToShow] = useState(3);
-  const [isMobile, setIsMobile] = useState(false);
-
-  useEffect(() => {
-    const handleResize = () => {
-      const width = window.innerWidth;
-
-      setIsMobile(width < 768);
-
-      if (width < 768) {
-        setItemsToShow(4);
-        setNewsItemsToShow(1);
-      } else if (width < 1024) {
-        setItemsToShow(2);
-        setNewsItemsToShow(2);
-      } else {
-        setItemsToShow(4);
-        setNewsItemsToShow(3);
-      }
-    };
-
-    handleResize();
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
 
 
   return (
@@ -125,9 +99,12 @@ const HomePage = ({
                 <h3 className="lg:text-[32px] text-accent04 items-baseline font-bold mb-3">
                   งานกิจกรรมเร็ว ๆ นี้
                 </h3>
-                <div className="flex flex-col gap-y-3">
+                <div className="flex flex-col gap-y-3   
+                [&>*:nth-child(n+5)]:hidden 
+                md:[&>*:nth-child(n+3)]:hidden
+                lg:[&>*:nth-child(n+3)]:block">
                   {initNewsActivity.length > 0 ? (
-                    initNewsActivity.slice(0, itemsToShow).map((item) => (
+                    initNewsActivity.slice(0, 4).map((item) => (
                       <Link key={item.id} href={`/news/${item.id}`}>
                         <ActivityCard
                           key={item.id}
@@ -164,11 +141,10 @@ const HomePage = ({
               handlePrevNews={handlePrevNewsActivity}
               activeIndex={newsActivityActive}
               handleSetActiveIndex={handleSetNewsActivity}
-              isMobile={isMobile}
             >
               {initNewsActivity && initNewsActivity.length > 0 ? (
                 Array.from(
-                  { length: Math.min(newsItemsToShow, initNewsActivity.length) },
+                  { length: Math.min(3, initNewsActivity.length) },
                   (_, i) => {
                     const index =
                       (newsActivityActive + i) % initNewsActivity.length;
@@ -206,11 +182,10 @@ const HomePage = ({
               handlePrevNews={handlePrevNewsComplete}
               activeIndex={newsCompleteActive}
               handleSetActiveIndex={handleSetNewsComplete}
-              isMobile={isMobile}
             >
               {initNewsComplete && initNewsComplete.length > 0 ? (
                 Array.from(
-                  { length: Math.min(newsItemsToShow, initNewsComplete.length) },
+                  { length: Math.min(3, initNewsComplete.length) },
                   (_, i) => {
                     const index =
                       (newsCompleteActive + i) % initNewsComplete.length;
@@ -248,11 +223,10 @@ const HomePage = ({
               handlePrevNews={handlePrevNewsActivityStudent}
               activeIndex={newsActivityStudentActive}
               handleSetActiveIndex={handleSetNewsActivityStudent}
-              isMobile={isMobile}
             >
               {initNewsActivityStudent && initNewsActivityStudent.length > 0 ? (
                 Array.from(
-                  { length: Math.min(newsItemsToShow, initNewsActivityStudent.length) },
+                  { length: Math.min(3, initNewsActivityStudent.length) },
                   (_, i) => {
                     const index =
                       (newsActivityStudentActive + i) %
