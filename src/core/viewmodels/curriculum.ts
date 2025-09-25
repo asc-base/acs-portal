@@ -1,4 +1,4 @@
-import { CreateCurriculumModel } from "../models/curriculum";
+import { CreateCurriculumModel} from "../models/curriculum";
 import { Curriculum } from "@/interface/curriculum";
 
 export const CreateCurriculum = async (data: Curriculum, token: string) => {

@@ -1,0 +1,5 @@
+export interface TypeCourse {
+    id: number;
+    name: string;
+    description: string;
+}

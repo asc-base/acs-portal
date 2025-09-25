@@ -1,109 +1,54 @@
-import Image, { StaticImageData } from "next/image";
+import Image from "next/image";
 import { FC } from "react";
 import {
   Card,
   CardContent,
-  Typography,
   Button,
   Box,
   useTheme,
   useMediaQuery,
 } from "@mui/material";
+import Link from "next/link";
+import { ICurriculum } from "@/core/domain/curriculum";
 
 interface ICurriculumCard {
-  year: string;
-  description: string;
-  image: StaticImageData;
-  downloadLink?: string;
+  curriculum: ICurriculum;
+  focusCurriculum: number;
+  setFocusCurriculum?: () => void;
 }
 
 export const CurriculumCard: FC<ICurriculumCard> = ({
-  year,
-  description,
-  image,
-  downloadLink,
+  curriculum,
+  focusCurriculum,
+  setFocusCurriculum,
 }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
 
+  const { id, year, description, image, fileUrl } = curriculum;
+  const isFocused = focusCurriculum === id;
+
   return (
     <Card
+      onClick={setFocusCurriculum}
       sx={{
         display: "flex",
-        flexDirection: isMobile ? "column" : "row",
-        borderRadius: 2,
+        borderRadius: 4,
         overflow: "hidden",
         boxShadow: 3,
-        minHeight: isMobile ? "auto" : 300,
+        height: 248,
+        width: "100%",
+        maxWidth: 552,
+        mx: "auto",
+        cursor: "pointer",
       }}
     >
-      <CardContent
-        sx={{
-          flex: isMobile ? "none" : 1,
-          backgroundColor: "#1a1a3e",
-          color: "white",
-          order: isMobile ? 2 : 1,
-          p: 3,
-          display: "flex",
-          flexDirection: "column",
-          justifyContent: "center",
-        }}
-      >
-        <Typography
-          variant= "h6"
-          gutterBottom
-          sx={{
-            fontWeight: "bold",
-            color: "white",
-            mb: 2,
-          }}
-        >
-          หลักสูตรใหม่ปี พ.ศ. {year}
-        </Typography>
-
-        <Typography
-          variant="body1"
-          sx={{
-            lineHeight: 1.6,
-            color: "#e0e0e0",
-            mb: 3,
-            fontSize: isMobile ? "16px" : "18px",
-          }}
-        >
-          {description}
-        </Typography>
-
-        {downloadLink && (
-          <Button
-            variant="outlined"
-            href={downloadLink}
-            target="_blank"
-            rel="noopener noreferrer"
-            sx={{
-              borderColor: "white",
-              color: "white",
-              alignSelf: "flex-start",
-              px: 3,
-              py: 1.5,
-              "&:hover": {
-                backgroundColor: "white",
-                color: "#1a1a3e",
-                borderColor: "white",
-              },
-            }}
-          >
-            อ่านรายละเอียดเพิ่มเติม
-          </Button>
-        )}
-      </CardContent>
-
       <Box
         sx={{
-          width: isMobile ? "100%" : "50%",
-          height: isMobile ? 200 : "auto",
           position: "relative",
-          order: isMobile ? 1 : 2,
-          minHeight: isMobile ? 200 : 300,
+          width: isMobile ? 0 : 200,
+          height: isMobile ? 200 : "auto",
+          flexShrink: 0,
         }}
       >
         <Image
@@ -113,6 +58,48 @@ export const CurriculumCard: FC<ICurriculumCard> = ({
           style={{ objectFit: "cover" }}
         />
       </Box>
+
+      <CardContent
+        sx={{
+          flex: 1,
+          backgroundColor: isFocused ? "var(--color-primary01)" : "var(--color-neutral03)",
+          color: "var(--color-neutral01)",
+          p: 3,
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "space-between",
+        }}
+      >
+        <Box>
+          <p className="!text-h2 font-bold mb-2">
+            หลักสูตรใหม่ปี พ.ศ. {year}
+          </p>
+          <p className="!text-h4">
+            สำหรับนักศึกษา
+          </p>
+          <p className="!text-h4">
+            {description || "ปีการศึกษา 2565 - ปีการศึกษา 2570"}
+          </p>
+        </Box>
+        <Button
+          variant="outlined"
+          sx={{
+            border: `1px solid ${isFocused ? "var(--color-secondary02)" : "var(--color-primary01)"}`,
+            color: isFocused ? "var(--color-secondary02)" : "var(--color-primary01)",
+            alignSelf: "flex-end",
+            px: 3,
+            py: 1.5,
+          }}
+        >
+          <Link
+            href={fileUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            อ่านรายละเอียดเพิ่มเติม
+          </Link>
+        </Button>
+      </CardContent>
     </Card>
   );
 };

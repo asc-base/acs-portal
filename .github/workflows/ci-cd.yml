@@ -2,7 +2,6 @@ name: CI - Build & Push to GHCR
 
 on:
   push:
-    branches: [main, development, testci]
     tags:
       - "v*" # เช่น v1.0.0
 
