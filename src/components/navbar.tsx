@@ -42,7 +42,7 @@ const MenuBar = () => {
       label: "เกี่ยวกับเรา",
       href: "",
       submenu: [
-        { id: 1, label: "ทำเนียบรุ่น", href: "" },
+        { id: 1, label: "ทำเนียบรุ่น", href: "/classbook" },
         { id: 2, label: "บุคลากร", href: "" },
       ],
     },
