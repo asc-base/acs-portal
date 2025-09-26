@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import LOGOACS from "../../public/logoacs.png";
 import FacebookRoundedIcon from "@mui/icons-material/FacebookRounded";
+import InstagramIcon from '@mui/icons-material/Instagram';
 import YouTubeIcon from "@mui/icons-material/YouTube";
 
 export const Footer = () => {
@@ -11,7 +12,7 @@ export const Footer = () => {
       href: "https://www.facebook.com/profile.php?id=100086247692906",
     },
     {
-      icon: <Image src="/instagram.png" alt="instagrams" width={24} height={24} />,
+      icon: <InstagramIcon/>,
       href: "https://www.instagram.com/dek_warmkid/",
     },
     {
