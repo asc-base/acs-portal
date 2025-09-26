@@ -19,13 +19,13 @@ export default function Page() {
           หน้าหลัก
         </Link>
         <span className="mx-1">&gt;&gt;</span>
-        <span className="text-[var(--color-neutral04)]">ทำเนียบรุ่น</span>
+        <span className="text-neutral04">ทำเนียบรุ่น</span>
       </div>
 
       {/* Title */}
       <Typography
         variant="h3"
-        className="!mt-3 !mb-6 text-left !font-extrabold text-[#000000]"
+        className="!mt-3 !mb-6 text-left !font-extrabold text-black"
         sx={{
           fontSize: { xs: 16, sm: 20, md: 24, lg: 28 },
         }}
