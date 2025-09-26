@@ -14,7 +14,7 @@ const MOCK_ITEMS = [
 export default function Page() {
   return (
     <main className="container mx-auto px-6 py-6 xl:px-8">
-      <div className="mb-1 text-sm text-[var(--color-neutral04)]">
+      <div className="mb-1 text-sm text-neutral04">
         <Link href="/home" className="cursor-pointer hover:underline">
           หน้าหลัก
         </Link>
@@ -25,7 +25,7 @@ export default function Page() {
       {/* Title */}
       <Typography
         variant="h3"
-        className="!mt-3 !mb-6 text-left !font-extrabold text-black"
+          className="!mt-3 !mb-6 text-left !font-extrabold text-black"
         sx={{
           fontSize: { xs: 16, sm: 20, md: 24, lg: 28 },
         }}
