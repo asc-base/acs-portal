@@ -18,7 +18,7 @@ export function ClassbookCard({
 }: ClassbookCardProps) {
   const Card = (
     <div
-      className="relative isolate overflow-hidden rounded-xl border border-gray-200 bg-[var(--color-neutral01)] transition-transform duration-300 ease-in-out hover:-translate-y-1"
+      className="relative isolate overflow-hidden rounded-xl border border-gray-200 bg-neutral01 transition-transform duration-300 ease-in-out hover:-translate-y-1"
       style={{ boxShadow: "1px 2px 3px 0 rgba(7, 2, 32, 0.07)" }}
       role="figure"
       aria-label={title}
@@ -43,7 +43,7 @@ export function ClassbookCard({
           }}
         >
           {/* ข้อความ: ซ้าย & กึ่งกลางแนวตั้ง + responsive font */}
-          <p className="text-[12px] leading-tight font-normal text-[var(--color-neutral01)] sm:text-[14px] md:text-[18px] lg:text-[22px]">
+          <p className="text-[12px] leading-tight font-normal text-neutral01 sm:text-[14px] md:text-[18px] lg:text-[22px]">
             {title}
           </p>
         </div>

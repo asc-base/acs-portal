@@ -14,12 +14,12 @@ const MOCK_ITEMS = [
 export default function Page() {
   return (
     <main className="container mx-auto px-6 py-6 xl:px-8">
-      <div className="mb-1 text-sm text-[var(--color-neutral04)]">
+      <div className="mb-1 text-sm text-neutral04">
         <Link href="/home" className="cursor-pointer hover:underline">
           หน้าหลัก
         </Link>
         <span className="mx-1">&gt;&gt;</span>
-        <span className="text-[var(--color-neutral04)]">ทำเนียบรุ่น</span>
+        <span className="text-neutral04">ทำเนียบรุ่น</span>
       </div>
 
       {/* Title */}
