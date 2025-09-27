@@ -77,7 +77,7 @@ const ProfileForm = () => {
             <h3 className="font-bold text-primary01">ข้อมูลส่วนตัว</h3>
             <form onSubmit={handleSubmit}>
                 {/* Section 1 */}
-                <div className="flex flex-row items-center gap-x-10">
+                <div className="flex flex-col md:flex-row items-center gap-x-10">
                     {/* Profile Image */}
                     <div className="mt-6 mb-16 flex flex-row items-center gap-x-8">
                         <div className="relative inline-block">
@@ -126,7 +126,7 @@ const ProfileForm = () => {
 
                     {/* Personal Info */}
                     <div className="flex flex-col gap-4 w-full text-neutral04">
-                        <div className="flex flex-row gap-4">
+                        <div className="flex md:flex-row gap-4">
                             <div className="w-1/2">
                                 <h4>รหัสนักศึกษา</h4>
                                 <TextField value="66090500403" disabled fullWidth className="bg-neutral02" />
@@ -138,7 +138,7 @@ const ProfileForm = () => {
                                 <h6 className="text-xs text-gray-500">*ต้องการแก้ไขติดต่อแอดมิน</h6>
                             </div>
                         </div>
-                        <div className="flex flex-row gap-4">
+                        <div className="flex md:flex-row gap-4">
                             <div className="w-1/2">
                                 <h4>ชื่อ - นามสกุล (ภาษาไทย)</h4>
                                 <TextField value="ณัฐนิชา อนันต์พอร์ดพล" disabled fullWidth className="bg-neutral02" />
@@ -155,7 +155,7 @@ const ProfileForm = () => {
 
                 {/* Section 2: Social Links */}
                 <div className="flex flex-col gap-4 mt-6 text-neutral04">
-                    <div className="flex flex-row gap-4">
+                    <div className="flex md:flex-row gap-4">
                         <div className="w-1/2 group">
                             <h4 className="group-focus-within:text-primary03">Github</h4>
                             <TextField
@@ -222,7 +222,7 @@ const ProfileForm = () => {
                         </div>
                     </div>
 
-                    <div className="flex flex-row gap-4">
+                    <div className="flex md:flex-row gap-4">
                         <div className="w-1/2 group">
                             <h4 className="group-focus-within:text-primary03">Facebook</h4>
                             <TextField
