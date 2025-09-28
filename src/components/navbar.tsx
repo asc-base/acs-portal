@@ -68,7 +68,7 @@ const MenuBar = () => {
               <div className="block md:flex flex-col w-auto">
                 <Button
                   onClick={() => onOpenSubMenu(item.id)}
-                  className="flex w-full items-center justify-between text-left !px-0"
+                  className="flex w-full items-center justify-between text-left !px-0  md:pointer-events-none md:cursor-default"
                 >
                   <p className="text-base font-bold flex-1 text-left">{item.label}</p>
                   {isOpenSubMenu === item.id ? <KeyboardArrowUpIcon className="ml-auto"/> :<KeyboardArrowDownIcon className="ml-auto" />}
