@@ -331,6 +331,7 @@ const ProfileForm = ({user}: userProps) => {
                                     render={({ field }) => (
                                         <TextField
                                             {...field}
+                                            value={field.value ?? ""}
                                             placeholder="กรอกชื่อโปรเจกต์..."
                                             fullWidth
                                             variant="outlined"
