@@ -3,12 +3,9 @@ import { Typography } from "@mui/material";
 import Link from "next/link";
 
 const MOCK_ITEMS = [
-  { title: "รุ่นที่ 17 ปีการศึกษา 2562", imageSrc: "/classbook.jpg" },
-  { title: "รุ่นที่ 17 ปีการศึกษา 2562", imageSrc: "/classbook.jpg" },
-  { title: "รุ่นที่ 17 ปีการศึกษา 2562", imageSrc: "/classbook.jpg" },
-  { title: "รุ่นที่ 17 ปีการศึกษา 2562", imageSrc: "/classbook.jpg" },
-  { title: "รุ่นที่ 17 ปีการศึกษา 2562", imageSrc: "/classbook.jpg" },
-  { title: "รุ่นที่ 17 ปีการศึกษา 2562", imageSrc: "/classbook.jpg" },
+  { id: 1, firstYearAcademic: "2562", image: "/classbook.jpg", classof: "17", },
+  { id: 2, firstYearAcademic: "2563", image: "/classbook.jpg", classof: "18", },
+  { id: 3, firstYearAcademic: "2564", image: "/classbook.jpg", classof: "19", }
 ];
 
 export default function Page() {
@@ -36,12 +33,12 @@ export default function Page() {
       {/* Grid 2 คอลัมน์ (Desktop) / 1 คอลัมน์ (Mobile) */}
       <div className="grid gap-6 md:gap-8 xl:grid-cols-2">
         {MOCK_ITEMS.map((item, i) => (
-          <ClassbookCard
-            key={i}
-            {...item}
-            priority={i < 2}
-            href={`/classbook/#`}
-          />
+          <Link key={item.id} href={`/students?page=1&pageSize=12&classBookId=${item.id}`}>
+            <ClassbookCard
+              {...item}
+              priority={i < 2}
+            />
+          </Link>
         ))}
       </div>
     </main>
