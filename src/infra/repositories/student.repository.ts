@@ -1,0 +1,25 @@
+import { IStudentRepository } from "@/core/ports/student.repository";
+import { IStudent } from "@/core/domain/student";
+import { HttpHelper } from "@/lib/http";
+import { ApiResponse, Pageable } from "@/interface/response";
+
+export class StudentRepository implements IStudentRepository {
+    private http: HttpHelper;
+    private baseUrl: string;
+
+    constructor(baseUrl: string) {
+        this.baseUrl = baseUrl;
+        this.http = new HttpHelper(this.baseUrl);
+    }
+
+    async getStudents(
+        page: number,
+        pageSize: number,
+        classBookId: number,
+    ): Promise<ApiResponse<Pageable<IStudent>>> {
+        let url = `/v1/students?page=${page}&pageSize=${pageSize}&classBookId=${classBookId}`;
+
+        const response = await this.http.get<ApiResponse<Pageable<IStudent>>>(url);
+        return response;
+    }
+}
