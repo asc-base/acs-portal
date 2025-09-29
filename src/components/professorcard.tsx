@@ -6,7 +6,7 @@ import { ProfessorCardProps } from "@/interface/professorcard";
 
 export const ProfessorCard: FC<ProfessorCardProps> = (props) => {
     return (
-        <Card className="!w-[312px] lg:!w-[268px] h-auto lg:!h-[340px] cursor-pointer !rounded-2xl"
+        <Card className="!w-[312px] lg:!w-[268px] h-full max-h-[350px] lg:!h-[340px] !rounded-2xl"
         >
             <CardMedia
                    sx={{
@@ -18,11 +18,11 @@ export const ProfessorCard: FC<ProfessorCardProps> = (props) => {
                 image={props.user.imageUrl}
                 alt={`${props.user.firstNameTh} ${props.user.lastNameTh}`}
             />
-            <CardContent className="flex flex-col text-center">
-                <Typography className="!text-h3 lg:!text-h2 !font-bold !text-primary01">
+            <CardContent className="flex flex-col text-center justify-center items-center h-[160px]">
+                <Typography className="!text-h3 !font-bold !text-primary01">
                     {props.user.firstNameTh} {props.user.lastNameTh}
                 </Typography>
-                <Typography className="!text-h3 lg:!text-h2 !font-bold !text-primary01">
+                <Typography className="!text-h3 !font-bold !text-primary01">
                     {props.user.firstNameEn} {props.user.lastNameEn}
                 </Typography>
 

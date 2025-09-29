@@ -25,7 +25,7 @@ export default function Page() {
       {/* Title */}
       <Typography
         variant="h3"
-        className="!mt-3 !mb-6 text-left !font-extrabold text-[#000000]"
+          className="!mt-3 !mb-6 text-left !font-extrabold text-black"
         sx={{
           fontSize: { xs: 16, sm: 20, md: 24, lg: 28 },
         }}

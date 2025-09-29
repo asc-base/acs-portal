@@ -45,7 +45,7 @@ const NewsListComponents = ({
         </div>
       ) : (
         <div className="flex w-full flex-col items-center justify-center gap-5">
-          <div className="grid w-full grid-cols-1 justify-items-center gap-4 sm:grid-cols-2 md:grid-cols-3">
+          <div className="grid w-full grid-cols-1 justify-items-center gap-4 md:grid-cols-2 lg:grid-cols-3">
             {news.map((item) => (
               <Link key={item.id} href={`/news/${item.id}`}>
                 <NewsCard news={item} />
