@@ -48,7 +48,7 @@ export const StudentModal: React.FC<StudentModalProps> = ({ student, Open, onClo
               <img
                 src={student.user.imageUrl}
                 alt={`${student.user.firstNameTh} ${student.user.lastNameTh}`}
-                className="w-[96px] md:w-[256px] lg:w-[360px] h-auto rounded-full md:rounded-xl object-cover "
+                className="w-[96px] md:w-[256px] lg:w-[360px] h-auto min-h-[380px] rounded-full md:rounded-xl object-cover "
               />
             </div>
 
@@ -57,7 +57,7 @@ export const StudentModal: React.FC<StudentModalProps> = ({ student, Open, onClo
                 {student.user.firstNameTh} {student.user.lastNameTh}
               </Typography>
               <Typography className="!text-h5 md:!text-h4 lg:!text-h3 !text-primary01">
-                {student.user.nickName} {student.studentId} รุ่น {student.classOf}
+                {student.user.nickName} {student.studentId} รุ่น {student.classBook.classof}
               </Typography>
 
               <div className="flex gap-2 flex-wrap">
@@ -72,10 +72,10 @@ export const StudentModal: React.FC<StudentModalProps> = ({ student, Open, onClo
                     <FacebookIcon sx={{ fontSize: { xs: 16, sm: 24, md: 24, lg: 32 } }} />
                   </IconButton>
                 )}
-                {student.linkedin && (
+                {student.linkin && (
                   <IconButton
                     component="a"
-                    href={student.linkedin}
+                    href={student.linkin}
                     target="_blank"
                     rel="noopener noreferrer"
                     sx={{ p: 0, color: 'var(--color-neutral04)' }}
@@ -94,10 +94,10 @@ export const StudentModal: React.FC<StudentModalProps> = ({ student, Open, onClo
                     <GitHubIcon sx={{ fontSize: { xs: 16, sm: 24, md: 24, lg: 32 } }} />
                   </IconButton>
                 )}
-                {student.instagram && (
+                {student.instragram && (
                   <IconButton
                     component="a"
-                    href={student.instagram}
+                    href={student.instragram}
                     target="_blank"
                     rel="noopener noreferrer"
                     sx={{ p: 0, color: 'var(--color-neutral04)' }}
