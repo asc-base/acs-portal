@@ -12,7 +12,7 @@ export class StudentRepository implements IStudentRepository {
     this.http = new HttpHelper(this.baseUrl);
   }
 
-  async getStudentById(id: string): Promise<ApiResponse<IStudent>> {
+  async getStudentByUserId(id: string): Promise<ApiResponse<IStudent>> {
     const response = await this.http.get<ApiResponse<IStudent>>(`/v1/students/by-user?userId=${id}`);
     return response;
   }
