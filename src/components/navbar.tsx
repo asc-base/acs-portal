@@ -36,7 +36,7 @@ const MenuBar = () => {
         },
       ],
     },
-    { id: 5, label: "ผลงานนักศึกษา", href: "", submenu: [] },
+    { id: 5, label: "ผลงานนักศึกษา", href: "/project", submenu: [] },
     {
       id: 6,
       label: "เกี่ยวกับเรา",
