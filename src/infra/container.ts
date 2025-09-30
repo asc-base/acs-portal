@@ -36,4 +36,3 @@ export const professorService = new ProfessorService(professorRepository);
 
 const studentRepository = new StudentRepository(baseUrl);
 export const studentService = new StudentService(studentRepository);
-

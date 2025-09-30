@@ -9,6 +9,7 @@ import LinkedInIcon from '@mui/icons-material/LinkedIn';
 import InstagramIcon from '@mui/icons-material/Instagram';
 import Image from "next/image";
 import { useForm, Controller } from "react-hook-form";
+import { IStudent } from "@/core/domain/student";
 
 const VisuallyHiddenInput = styled("input")({
     clip: "rect(0 0 0 0)",
@@ -24,39 +25,32 @@ const VisuallyHiddenInput = styled("input")({
 
 interface FormData {
     github: string;
-    linkedin: string;
+    linkin: string;
     facebook: string;
-    instagram: string;
-    projects: { projectName: string }[];
-    file: File | null;
+    instragram: string;
+    projects: { title: string }[];
+    file: string | File | null;
 }
 
-interface userData {
-    studentId:string;
-    nickname:string;
-    fullNameTh:string;
-    fullNameEn:string;
+interface ProfileFormProps {
+  studentData: IStudent;
 }
 
-interface userProps {
-    user:userData;
-}
-
-const ProfileForm = ({user}: userProps) => {
+const ProfileForm = ({ studentData }: ProfileFormProps) => {
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
     const [projects, setProject] = useState<string[]>([]);
     const { handleSubmit, control, setValue } = useForm<FormData>({
         defaultValues: {
-            github: "",
-            linkedin: "",
-            facebook: "",
-            instagram: "",
-            projects: [],
-            file: null,
+            github: studentData?.github || "",
+            linkin: studentData?.linkin || "",
+            facebook: studentData?.facebook || "",
+            instragram: studentData?.instragram || "",
+            projects: studentData?.projects?.map((project) => ({ title: project.title })) || [],
+            file: studentData?.user?.imageUrl || null,
         },
     });
 
-    const { studentId, nickname, fullNameTh, fullNameEn} = user;
+    const { nickName, firstNameTh, firstNameEn, lastNameTh, lastNameEn } = studentData?.user ?? {};
 
     const handleAddProject = () => {
         setProject(prev => [...prev, ""]);
@@ -96,16 +90,19 @@ const ProfileForm = ({user}: userProps) => {
                                 }}
                             >
                                 {selectedFile ? (
-                                    <div className="h-full w-full">
-                                        <Image
-                                            src={URL.createObjectURL(selectedFile)}
-                                            alt="Preview"
-                                            width={300}
-                                            height={300}
-                                            style={{ objectFit: "cover" }}
-                                            className="bg-neutral02 h-full w-full object-cover"
-                                        />
-                                    </div>
+                                    <Image
+                                        src={URL.createObjectURL(selectedFile)}
+                                        alt="Preview"
+                                        width={300}
+                                        height={300}
+                                    />
+                                ) : studentData?.user?.imageUrl !== "" ? (
+                                    <Image
+                                        src={studentData.user.imageUrl}
+                                        alt="Profile"
+                                        width={300}
+                                        height={300}
+                                    />
                                 ) : (
                                     <Image
                                         alt="Upload"
@@ -130,24 +127,24 @@ const ProfileForm = ({user}: userProps) => {
                         <div className="flex flex-col md:flex-row gap-4">
                             <div className="md:w-1/2">
                                 <h4>รหัสนักศึกษา</h4>
-                                <TextField value={studentId} disabled fullWidth className="bg-neutral02" />
+                                <TextField value={studentData.studentId} disabled fullWidth className="bg-neutral02" />
                                 <h6 className="text-xs text-gray-500">*ต้องการแก้ไขติดต่อแอดมิน</h6>
                             </div>
                             <div className="md:w-1/2">
                                 <h4>ชื่อเล่น</h4>
-                                <TextField value={nickname} disabled fullWidth className="bg-neutral02" />
+                                <TextField value={nickName} disabled fullWidth className="bg-neutral02" />
                                 <h6 className="text-xs text-gray-500">*ต้องการแก้ไขติดต่อแอดมิน</h6>
                             </div>
                         </div>
                         <div className="flex flex-col md:flex-row gap-4">
                             <div className="md:w-1/2">
                                 <h4>ชื่อ - นามสกุล (ภาษาไทย)</h4>
-                                <TextField value={fullNameTh} disabled fullWidth className="bg-neutral02" />
+                                <TextField value={`${firstNameTh} ${lastNameTh}`} disabled fullWidth className="bg-neutral02" />
                                 <h6 className="text-xs text-gray-500">*ต้องการแก้ไขติดต่อแอดมิน</h6>
                             </div>
                             <div className="md:w-1/2">
                                 <h4>ชื่อ - นามสกุล (ภาษาอังกฤษ)</h4>
-                                <TextField value={fullNameEn} disabled fullWidth className="bg-neutral02" />
+                                <TextField value={`${firstNameEn} ${lastNameEn}`} disabled fullWidth className="bg-neutral02" />
                                 <h6 className="text-xs text-gray-500">*ต้องการแก้ไขติดต่อแอดมิน</h6>
                             </div>
                         </div>
@@ -195,14 +192,14 @@ const ProfileForm = ({user}: userProps) => {
                             />
                         </div>
                         <div className="md:w-1/2 group">
-                            <h4 className="group-focus-within:text-primary03">LinkedIn</h4>
+                            <h4 className="group-focus-within:text-primary03">LinkIn</h4>
                             <Controller
-                                name="linkedin"
+                                name="linkin"
                                 control={control}
                                 render={({ field }) => (
                                     <TextField
                                         {...field}
-                                        placeholder="https://www.linkedin.com/in/"
+                                        placeholder="https://www.linkin.com/in/"
                                         fullWidth
                                         variant="outlined"
                                         sx={{
@@ -273,14 +270,14 @@ const ProfileForm = ({user}: userProps) => {
                             />
                         </div>
                         <div className="md:w-1/2 group">
-                            <h4 className="group-focus-within:text-primary03">Instagram</h4>
+                            <h4 className="group-focus-within:text-primary03">Instragram</h4>
                             <Controller
-                                name="instagram"
+                                name="instragram"
                                 control={control}
                                 render={({ field }) => (
                                     <TextField
                                         {...field}
-                                        placeholder="https://instagram.com/"
+                                        placeholder="https://instragram.com/"
                                         fullWidth
                                         variant="outlined"
                                         sx={{
@@ -322,11 +319,11 @@ const ProfileForm = ({user}: userProps) => {
                 </div>
                 {
                     projects.map((_, index) => (
-                        <div key={index+1}>
-                            <h4 className="text-sm font-medium text-gray-600 min-w-[60px]">{index+1}.</h4>
+                        <div key={index + 1}>
+                            <h4 className="text-sm font-medium text-gray-600 min-w-[60px]">{index + 1}.</h4>
                             <div className="flex flex-row item-center">
                                 <Controller
-                                    name={`projects.${index}.projectName`}
+                                    name={`projects.${index}.title`}
                                     control={control}
                                     render={({ field }) => (
                                         <TextField

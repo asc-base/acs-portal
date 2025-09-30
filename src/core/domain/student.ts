@@ -12,4 +12,3 @@ export interface IStudent {
     github?: string | null;
     projects: IProject[];
 }
-
