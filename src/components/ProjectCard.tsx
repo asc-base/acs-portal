@@ -23,7 +23,7 @@ function ProjectCardBase({ data }: ProjectCardProps) {
       <div className="p-3 pb-2">
         <div className="relative w-full overflow-hidden rounded-xl aspect-[16/9]">
           <Image
-            src={imageUrl || "/projectcard.png"}
+            src={imageUrl}
             alt={title}
             fill
             className="object-cover"
