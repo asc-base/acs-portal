@@ -7,4 +7,6 @@ export interface IStudentRepository {
     pageSize: number,
     classBookId: number,
   ): Promise<ApiResponse<Pageable<IStudent>>>;
+  getStudentByUserId(id:number):Promise<ApiResponse<IStudent>>;
 }
+

@@ -22,4 +22,9 @@ export class StudentRepository implements IStudentRepository {
         const response = await this.http.get<ApiResponse<Pageable<IStudent>>>(url);
         return response;
     }
+    async getStudentByUserId(id: number): Promise<ApiResponse<IStudent>> {
+    const response = await this.http.get<ApiResponse<IStudent>>(`/v1/students/by-user?userId=${id}`);
+    return response;
+  }
 }
+
