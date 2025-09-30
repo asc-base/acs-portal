@@ -7,11 +7,10 @@ export interface IStudent {
     user: IUser;
     description: string;
     yearOfFirstAdmission: string;
-    linkedin: string;
+    linkin: string;
     facebook: string;
-    instagram: string;
+    instragram: string;
     github: string;
     classOf: string;
     projects: IProject[];
 }
-
