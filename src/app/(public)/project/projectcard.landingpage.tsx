@@ -5,14 +5,16 @@ import Link from "next/link";
 import { Typography, IconButton, Tooltip } from "@mui/material";
 import ImportExportIcon from "@mui/icons-material/ImportExport";
 import FilterListRoundedIcon from "@mui/icons-material/FilterListRounded";
-import { ProjectCard, Project } from "@/components/ProjectCard";
+import type { Project } from "@/core/domain/project";
+import { ProjectCard } from "@/components/ProjectCard";
 
 const MOCK_PROJECTS: Project[] = Array.from({ length: 12 }).map((_, i) => ({
   id: i + 1,
   title: "โปรเจกต์ที่มีชื่อเสนอวา The Name of Project which is so long",
   category: "Educational",
   subcategory: "Web Application",
-  imageUrl: "/projectcard.png",
+  // ใช้รูปจาก URL ภายนอก (16:9 ประมาณ 800x450)
+  imageUrl: `https://picsum.photos/id/${(i + 10) % 100}/800/450`,
   team: [{ name: "Alice" }, { name: "Bob" }, { name: "Charlie" }],
 }));
 
@@ -25,7 +27,7 @@ export default function ProjectPage() {
   const projects = React.useMemo(
     () =>
       [...MOCK_PROJECTS].sort((a, b) =>
-        order === "desc" ? b.id - a.id : a.id - b.id,
+        order === "desc" ? b.id - a.id : a.id - b.id
       ),
     [order],
   );
@@ -39,11 +41,8 @@ export default function ProjectPage() {
     setOrder((prev) => (prev === "desc" ? "asc" : "desc"));
   };
 
-  const labelText = firstClick
-    ? "จัดเรียงตาม"
-    : order === "desc"
-      ? "ล่าสุด"
-      : "เก่าสุด";
+  const labelText =
+    firstClick ? "จัดเรียงตาม" : order === "desc" ? "ล่าสุด" : "เก่าสุด";
 
   return (
     <main className="container mx-auto px-6 py-6 xl:px-8">
@@ -76,9 +75,7 @@ export default function ProjectPage() {
               sx={{ p: 0.5 }}
             >
               <FilterListRoundedIcon
-                className={
-                  order === "asc" ? "text-neutral05" : "text-neutral04"
-                }
+                className={order === "asc" ? "text-neutral05" : "text-neutral04"}
                 sx={{ fontSize: 24 }}
               />
             </IconButton>
