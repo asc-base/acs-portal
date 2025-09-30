@@ -11,3 +11,9 @@ export interface Project {
   imageUrl: string;
   team: TeamMember[];
 }
+
+export interface IProject {
+    id: number;
+    title: string;
+}
+
