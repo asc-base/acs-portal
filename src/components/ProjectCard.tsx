@@ -15,7 +15,7 @@ function ProjectCardBase({ data }: ProjectCardProps) {
 
   return (
     <Link
-      href={`/projects/${id}`}
+      href={`/project/${id}`}
       aria-label={title}
       className="group block w-full rounded-2xl border border-neutral03 bg-white shadow-[0_0_0_1px_rgba(0,0,0,0.03),0_4px_14px_rgba(0,0,0,0.06)] hover:shadow-[0_0_0_1px_rgba(0,0,0,0.05),0_6px_18px_rgba(0,0,0,0.10)] transition focus:outline-none focus:ring-2 focus:ring-primary01/40"
     >
