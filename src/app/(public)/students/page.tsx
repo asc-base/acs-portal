@@ -12,7 +12,7 @@ interface PageProps {
 
 const page = async ({ searchParams }: PageProps) => {
     const resolvedSearchParams = await searchParams;
-    const { rows, pageSize, page } = await studentService.getStudents(
+    const { rows, pageSize, page ,totalRecords} = await studentService.getStudents(
         resolvedSearchParams.page || 1,
         resolvedSearchParams.pageSize || 12,
         resolvedSearchParams.classBookId || 1,
@@ -21,6 +21,7 @@ const page = async ({ searchParams }: PageProps) => {
     return (
         <StudentsListComponent
             students={rows}
+            totalRecords={totalRecords}
             pageSize={pageSize}
             page={page}
             classBookId={resolvedSearchParams.classBookId || 1}
