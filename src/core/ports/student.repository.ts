@@ -1,6 +1,12 @@
-import { ApiResponse } from "@/interface/response";
+import { ApiResponse, Pageable } from "@/interface/response";
 import { IStudent } from "../domain/student";
 
 export interface IStudentRepository {
-    getStudentByUserId(id:number):Promise<ApiResponse<IStudent>>;
+  getStudents(
+    page: number,
+    pageSize: number,
+    classBookId: number,
+  ): Promise<ApiResponse<Pageable<IStudent>>>;
+  getStudentByUserId(id:number):Promise<ApiResponse<IStudent>>;
 }
+

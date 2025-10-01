@@ -1,12 +1,10 @@
 import { IUser } from "./user";
 export interface StudentCardProps {
     id: number;
-    studentId:string;
+    studentId: string;
     user: IUser;
-    description: string;
-    yearOfFirstAdmission:string;
-    linkedin:string;
-    facebook: string;
-    instagram: string;
-    github: string;
+    linkin?: string | null;
+    facebook?: string | null;
+    instragram?: string | null;
+    github?: string | null;
 }
