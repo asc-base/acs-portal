@@ -1,5 +1,5 @@
 import React from "react";
-import ProjectCardLandingPage from "./projectcard.landingpage";
+import ProjectCardLandingPage from "./projectcard";
 const Page = async () => {
 
   return (

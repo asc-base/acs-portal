@@ -5,10 +5,10 @@ import Link from "next/link";
 import { Typography, IconButton, Tooltip } from "@mui/material";
 import ImportExportIcon from "@mui/icons-material/ImportExport";
 import FilterListRoundedIcon from "@mui/icons-material/FilterListRounded";
-import type { Project } from "@/core/domain/project";
+import type { IProject } from "@/core/domain/project"; // ✅ ใช้ IProject
 import { ProjectCard } from "@/components/ProjectCard";
 
-const MOCK_PROJECTS: Project[] = Array.from({ length: 12 }).map((_, i) => ({
+const MOCK_PROJECTS: IProject[] = Array.from({ length: 12 }).map((_, i) => ({
   id: i + 1,
   title: "โปรเจกต์ที่มีชื่อเสนอวา The Name of Project which is so long",
   category: "Educational",

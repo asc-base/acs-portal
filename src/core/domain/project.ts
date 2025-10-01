@@ -3,7 +3,7 @@ export interface TeamMember {
   avatarUrl?: string;
 }
 
-export interface Project {
+export interface IProject {
   id: number;
   title: string;
   category: string;
@@ -11,9 +11,3 @@ export interface Project {
   imageUrl: string;
   team: TeamMember[];
 }
-
-export interface IProject {
-    id: number;
-    title: string;
-}
-

@@ -4,10 +4,10 @@ import { memo } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Avatar, AvatarGroup } from "@mui/material";
-import type { Project } from "@/core/domain/project"; //
+import type { IProject } from "@/core/domain/project";
 
 export interface ProjectCardProps {
-  readonly data: Project;
+  data: IProject; 
 }
 
 function ProjectCardBase({ data }: ProjectCardProps) {
