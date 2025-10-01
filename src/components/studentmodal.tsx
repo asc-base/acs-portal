@@ -48,7 +48,7 @@ export const StudentModal: React.FC<StudentModalProps> = ({ student, Open, onClo
               <img
                 src={student.user.imageUrl}
                 alt={`${student.user.firstNameTh} ${student.user.lastNameTh}`}
-                className="w-[96px] md:w-[256px] lg:w-[360px] h-auto rounded-full md:rounded-xl object-cover "
+                className="w-[96px] h-[96px] md:w-[256px] md:h-[256px] lg:w-[360px] lg:h-[380px] rounded-full md:rounded-xl object-cover "
               />
             </div>
 
@@ -57,7 +57,7 @@ export const StudentModal: React.FC<StudentModalProps> = ({ student, Open, onClo
                 {student.user.firstNameTh} {student.user.lastNameTh}
               </Typography>
               <Typography className="!text-h5 md:!text-h4 lg:!text-h3 !text-primary01">
-                {student.user.nickName} {student.studentId} รุ่น {student.classOf}
+                {student.user.nickName} {student.studentId} รุ่น {student.classBook.classof}
               </Typography>
 
               <div className="flex gap-2 flex-wrap">
@@ -72,10 +72,10 @@ export const StudentModal: React.FC<StudentModalProps> = ({ student, Open, onClo
                     <FacebookIcon sx={{ fontSize: { xs: 16, sm: 24, md: 24, lg: 32 } }} />
                   </IconButton>
                 )}
-                {student.linkedin && (
+                {student.linkin && (
                   <IconButton
                     component="a"
-                    href={student.linkedin}
+                    href={student.linkin}
                     target="_blank"
                     rel="noopener noreferrer"
                     sx={{ p: 0, color: 'var(--color-neutral04)' }}
@@ -94,10 +94,10 @@ export const StudentModal: React.FC<StudentModalProps> = ({ student, Open, onClo
                     <GitHubIcon sx={{ fontSize: { xs: 16, sm: 24, md: 24, lg: 32 } }} />
                   </IconButton>
                 )}
-                {student.instagram && (
+                {student.instragram && (
                   <IconButton
                     component="a"
-                    href={student.instagram}
+                    href={student.instragram}
                     target="_blank"
                     rel="noopener noreferrer"
                     sx={{ p: 0, color: 'var(--color-neutral04)' }}
@@ -115,7 +115,22 @@ export const StudentModal: React.FC<StudentModalProps> = ({ student, Open, onClo
             </Typography>
 
 
-            {student.projects.length === 0 ? (
+            {/* Mock title project in course*/}
+            <ul className="list-disc pl-6 max-h-[450px] overflow-y-auto px-4 pr-2 text-h5 md:text-h4">
+              <li>Parking management program “Peter Parking” from Database and Object-Oriented Programming courses as a Project Manager and UI/UX Designer.</li>
+              <li>Web E-commerce semester project (from Web Programming course) as a Full-stack Developer</li>
+              <li>
+                Mobile Application “X-culture” (from Software Engineering course) as a Project Manager</li>
+              <li>Website for Digital Illustration Portfolio and Marketplace (Senior Project collaboration with Dek-D interactive Co.,Ltd) as a Project manager, Business Analyst and UX/UI Designer</li>
+              <li>IdentityV Wiki” as a Project manager, UX/UI Designer and Swift Developer (from Mobile application development course)</li>
+              <li>DD Coach” Website (Internship project At Dek-D interactive Co.,Ltd) as a UX/UI Designer.</li>
+              <li>IdentityV Wiki” as a Project manager, UX/UI Designer and Swift </li>
+              
+            </ul>
+
+            {/* Show project titel that come from real data */}
+
+            {/* {student.projects.length === 0 ? (
               <Typography className="text-gray-500 !text-h5 md:!text-h4">
                 ไม่พบโปรเจกต์
               </Typography>
@@ -129,7 +144,8 @@ export const StudentModal: React.FC<StudentModalProps> = ({ student, Open, onClo
                   </li>
                 ))}
               </ul>
-            )}
+            )} */}
+
           </div>
         </div>
       </Box>

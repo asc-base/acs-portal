@@ -4,15 +4,17 @@ import Image from "next/image";
 import Link from "next/link";
 
 export type ClassbookCardProps = {
-  title: string;
-  imageSrc: string;
+  image: string;
+  classof: string;
+  firstYearAcademic: string;
   priority?: boolean;
   href?: string; // ทำให้การ์ดเป็นลิงก์
 };
 
 export function ClassbookCard({
-  title,
-  imageSrc,
+  image,
+  classof,
+  firstYearAcademic,
   priority,
   href,
 }: ClassbookCardProps) {
@@ -21,13 +23,13 @@ export function ClassbookCard({
       className="relative isolate overflow-hidden rounded-xl border border-gray-200 bg-neutral01 transition-transform duration-300 ease-in-out hover:-translate-y-1"
       style={{ boxShadow: "1px 2px 3px 0 rgba(7, 2, 32, 0.07)" }}
       role="figure"
-      aria-label={title}
+      aria-label={`รุ่นที่ ${classof} ปีการศึกษา ${firstYearAcademic}`}
     >
       {/* รูปภาพ */}
       <div className="relative aspect-[16/9]">
         <Image
-          src={imageSrc}
-          alt={title}
+          src={image}
+          alt={`รุ่นที่ ${classof} ปีการศึกษา ${firstYearAcademic}`}
           fill
           priority={priority}
           className="object-cover"
@@ -44,7 +46,7 @@ export function ClassbookCard({
         >
           {/* ข้อความ: ซ้าย & กึ่งกลางแนวตั้ง + responsive font */}
           <p className="text-[12px] leading-tight font-normal text-neutral01 sm:text-[14px] md:text-[18px] lg:text-[22px]">
-            {title}
+            {`รุ่นที่ ${classof} ปีการศึกษา ${firstYearAcademic}`}
           </p>
         </div>
       </div>
@@ -56,7 +58,7 @@ export function ClassbookCard({
     <Link
       href={href}
       className="block cursor-pointer rounded-xl focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
-      aria-label={title}
+       aria-label={`รุ่นที่ ${classof} ปีการศึกษา ${firstYearAcademic}`}
     >
       {Card}
     </Link>

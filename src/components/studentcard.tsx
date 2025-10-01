@@ -54,10 +54,10 @@ export const StudentCard: FC<StudentCardProps> = (props) => {
                 <FacebookIcon fontSize="small" />
               </IconButton>
             )}
-            {props.linkedin && (
+            {props.linkin && (
               <IconButton
                 component="a"
-                href={props.linkedin}
+                href={props.linkin}
                 target="_blank"
                 rel="noopener noreferrer"
                 sx={{ p: '2px', color: 'var(--color-neutral05)' }}
@@ -66,10 +66,10 @@ export const StudentCard: FC<StudentCardProps> = (props) => {
                 <LinkedInIcon fontSize="small" />
               </IconButton>
             )}
-            {props.instagram && (
+            {props.instragram && (
               <IconButton
                 component="a"
-                href={props.instagram}
+                href={props.instragram}
                 target="_blank"
                 rel="noopener noreferrer"
                 sx={{ p: '2px', color: 'var(--color-neutral05)' }}

@@ -1,16 +1,14 @@
 import { IUser } from "./user";
 import { IProject } from "./project";
-
+import { IClassBook } from "./classbook";
 export interface IStudent {
     id: number;
     studentId: string;
     user: IUser;
-    description: string;
-    yearOfFirstAdmission: string;
-    linkin: string;
-    facebook: string;
-    instragram: string;
-    github: string;
-    classOf: string;
+    classBook: IClassBook;
+    linkin?: string | null;
+    facebook?: string | null;
+    instragram?: string | null;
+    github?: string | null;
     projects: IProject[];
 }
