@@ -5,6 +5,6 @@ export interface IUser {
     lastNameTh: string;
     firstNameEn: string;
     lastNameEn: string;
-    nickName: string;
+    nickName?: string;
     imageUrl: string;
 }

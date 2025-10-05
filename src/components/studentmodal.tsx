@@ -7,8 +7,9 @@ import LinkedInIcon from '@mui/icons-material/LinkedIn';
 import InstagramIcon from '@mui/icons-material/Instagram';
 import GitHubIcon from '@mui/icons-material/GitHub';
 import CloseIcon from '@mui/icons-material/Close';
-import { Tabs, Tab, Typography } from '@mui/material';
+import { Typography } from '@mui/material';
 import { IStudent } from '@/interface/student';
+import Image from 'next/image';
 
 interface StudentModalProps {
   student: IStudent;
@@ -45,9 +46,11 @@ export const StudentModal: React.FC<StudentModalProps> = ({ student, Open, onClo
         <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 pt-6 ">
           <div className="flex flex-row md:flex-col items-center gap-3 p-4 md:p-0 shadow-lg md:shadow-none rounded-lg">
             <div>
-              <img
+              <Image
                 src={student.user.imageUrl}
                 alt={`${student.user.firstNameTh} ${student.user.lastNameTh}`}
+                width={360}
+                height={380}
                 className="w-[96px] h-[96px] md:w-[256px] md:h-[256px] lg:w-[360px] lg:h-[380px] rounded-full md:rounded-xl object-cover "
               />
             </div>
@@ -125,7 +128,7 @@ export const StudentModal: React.FC<StudentModalProps> = ({ student, Open, onClo
               <li>IdentityV Wiki” as a Project manager, UX/UI Designer and Swift Developer (from Mobile application development course)</li>
               <li>DD Coach” Website (Internship project At Dek-D interactive Co.,Ltd) as a UX/UI Designer.</li>
               <li>IdentityV Wiki” as a Project manager, UX/UI Designer and Swift </li>
-              
+
             </ul>
 
             {/* Show project titel that come from real data */}
