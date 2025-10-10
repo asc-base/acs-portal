@@ -9,6 +9,7 @@ import type { IProject } from "@/core/domain/project";
 import { ProjectCard } from "@/components/ProjectCard";
 import { FilterList } from "@/components/filterlist";
 import FilterAltIcon from '@mui/icons-material/FilterAlt';
+import { filterListprops } from "@/core/domain/filterlist";
 
 const MOCK_PROJECTS: IProject[] = Array.from({ length: 6 }).map((_, i) => ({
   id: i + 1,
@@ -22,10 +23,12 @@ const MOCK_PROJECTS: IProject[] = Array.from({ length: 6 }).map((_, i) => ({
 
 type Order = "asc" | "desc";
 
-export default function ProjectPage() {
+
+
+export default function ProjectPage({ type, field, category, course}: filterListprops) {
   const [order, setOrder] = React.useState<Order>("desc");
   const [firstClick, setFirstClick] = React.useState(true);
-  const [openFilters, setOpenFilters] = React.useState(false)
+  const [openFilters, setOpenFilters] = React.useState(false);
 
   const projects = React.useMemo(
     () =>
@@ -48,20 +51,30 @@ export default function ProjectPage() {
     firstClick ? "จัดเรียงตาม" : order === "desc" ? "ล่าสุด" : "เก่าสุด";
 
   return (
-    <main>
+    <main className="flex mb-0">
       {/* FilterList modal */}
       <Dialog open={openFilters} onClose={() => setOpenFilters(false)} fullWidth maxWidth="sm">
         <div className="fixed top-0 left-0">
-          <FilterList />
+          <FilterList
+            type={type}
+            field={field}
+            category={category}
+            course={course}
+
+          />
         </div>
       </Dialog>
 
-      <div className="flex w-full">
-        {/* Sidebar สำหรับ desktop ≥1280px */}
-        <div className="hidden lg:block w-60">
-          <FilterList />
+      <div className="hidden lg:block w-60">
+          <FilterList
+            type={type}
+            field={field}
+            category={category}
+            course={course}
+          />
         </div>
 
+      <div className="flex w-full">
         <div className="flex-1 px-4 py-5">
           {/* breadcrumb */}
           <div className="flex flex-col items-start justify-start gap-2">

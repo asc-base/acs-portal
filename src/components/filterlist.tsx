@@ -2,53 +2,13 @@ import { useState } from "react";
 import { Checkbox, FormControlLabel, FormGroup, Typography, IconButton } from "@mui/material";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
+import { filterListprops } from "@/core/domain/filterlist";
 
-export const FilterList = () => {
-    const [openTypes, setOpenTypes] = useState(false);
-    const [openSubjects, setOpenSubjects] = useState(false);
+export const FilterList = ({type , field, category, course} : filterListprops) => {
+    const [openFileds, setOpenFileds] = useState(false);
+    const [openCourses, setOpenCourses] = useState(false);
     const [openCategories, setOpenCategories] = useState(false);
-    const [openWorkTypes, setOpenWorkTypes] = useState(false);
-
-    const types = [
-        "Artificial intelligence",
-        "Network",
-        "Cloud computing",
-        "Security",
-        "Computer Architecture",
-        "Software Engineering",
-        "Computational Theory",
-        "GIS",
-        "Game Design",
-        "Data Science and analytics",
-        "Data Structures and Algorithms",
-    ];
-
-    const subjects = [
-        "CSS123 Software Enginerring",
-        "CSS123 Introduction to Network",
-        "CSS124 Web Programming",
-        "CSS122 Capstone Project",
-        "CSS115 Mobile Application",
-        "CSS457 Object Oriented Programming",
-        "Senior Project",
-    ];
-
-    const categories = [
-        "Educational",
-        "Medical",
-        "Research",
-        "Business",
-        "Game",
-        "Agricultural",
-    ];
-
-    const workTypes = [
-        "Research",
-        "Web Application",
-        "Mobile Application",
-        "Internet Of Things",
-        "UX / UI",
-    ];
+    const [openTypes, setOpenTypes] = useState(false);
 
     const renderSubmenu = (title: string, open: boolean, toggle: () => void, items: string[]) => (
         <div className="flex flex-col">
@@ -72,7 +32,7 @@ export const FilterList = () => {
     );
 
     return (
-        <aside className="w-72 md:w-62 bg-white shadow-md pt-6 pl-4 overflow-y-scroll h-screen">
+        <aside className="w-72 md:w-62 bg-white shadow-md pt-6 pl-4 overflow-y-scroll h-full">
             <FormGroup>
                 <h4>ค้นหาผลงานตามชั้นปี</h4>
                 <div className="grid grid-cols-2">
@@ -81,10 +41,10 @@ export const FilterList = () => {
                     <FormControlLabel control={<Checkbox />} label="ปี3" />
                     <FormControlLabel control={<Checkbox />} label="ปี4" />
                 </div>
-                {renderSubmenu("ค้นหาผลงานตามประเภท", openTypes, () => setOpenTypes(!openTypes), types)}
-                {renderSubmenu("ค้นหาผลงานตามรายวิชา", openSubjects, () => setOpenSubjects(!openSubjects), subjects)}
-                {renderSubmenu("หมวดหมู่", openCategories, () => setOpenCategories(!openCategories), categories)}
-                {renderSubmenu("ประเภทของชิ้นงาน", openWorkTypes, () => setOpenWorkTypes(!openWorkTypes), workTypes)}
+                {renderSubmenu("ค้นหาผลงานตามประเภท", openFileds, () => setOpenFileds(!openFileds),field.map((field) => field.name) )}
+                {renderSubmenu("ค้นหาผลงานตามรายวิชา", openCourses, () => setOpenCourses(!openCourses), course.map((course) => `${course.courseId} ${course.courseNameTh}`))}
+                {renderSubmenu("หมวดหมู่", openCategories, () => setOpenCategories(!openCategories), category.map((category) => category.name))}
+                {renderSubmenu("ประเภทของชิ้นงาน", openTypes, () => setOpenTypes(!openTypes), type.map((type) => type.name))}
             </FormGroup>
         </aside>
     );

@@ -5,19 +5,15 @@ export class CourseService {
     constructor(private courseRepository: ICourseRepository) { }
 
     async getCourse(
-        page: number,
-        pageSize: number,
-        prerequisite: boolean,
-        curriculumId: number,
-        typecourseId: number,
+        params: {
+            page?: number;
+            pageSize?: number;
+            prerequisite?: boolean;
+            curriculumId?: number;
+            typecourseId?: number;
+        }
     ): Promise<Pageable<ICourse>> {
-        const response = await this.courseRepository.getCourse(
-            page,
-            pageSize,
-            prerequisite,
-            curriculumId,
-            typecourseId,
-        );
+        const response = await this.courseRepository.getCourse(params);
         return response.data;
     }
 }
