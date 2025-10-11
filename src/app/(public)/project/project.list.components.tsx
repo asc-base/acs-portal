@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { FC } from "react";
 import Link from "next/link";
 import { Typography, IconButton, Tooltip, Breadcrumbs } from "@mui/material";
 import ImportExportIcon from "@mui/icons-material/ImportExport";
@@ -8,38 +8,33 @@ import FilterListRoundedIcon from "@mui/icons-material/FilterListRounded";
 import type { IProject } from "@/core/domain/project";
 import { ProjectCard } from "@/components/ProjectCard";
 import { useState } from "react";
-
-const MOCK_PROJECTS: IProject[] = Array.from({ length: 12 }).map((_, i) => ({
-  id: i + 1,
-  title: "โปรเจกต์ที่มีชื่อเสนอวา The Name of Project which is so long",
-  category: "Educational",
-  subcategory: "Web Application",
-  // ใช้รูปจาก URL ภายนอก (16:9 ประมาณ 800x450)
-  imageUrl: `https://picsum.photos/id/${(i + 10) % 100}/800/450`,
-  team: [{ name: "Alice" }, { name: "Bob" }, { name: "Charlie" }],
-}));
+import { useRouter } from "next/navigation";
 
 type Order = "asc" | "desc";
 
-export default function ProjectPage() {
+interface ProjectPageProps {
+  projects: IProject[];
+  totalRecords?: number;
+  sortBy?: string;
+  sortOrder?: Order;
+}
+
+const ProjectPage: FC<ProjectPageProps> = ({
+  projects,
+  totalRecords,
+  sortBy,
+}) => {
+  const router = useRouter();
   const [order, setOrder] = useState<Order>("desc");
   const [firstClick, setFirstClick] = useState(true);
 
-  const projects = React.useMemo(
-    () =>
-      [...MOCK_PROJECTS].sort((a, b) =>
-        order === "desc" ? b.id - a.id : a.id - b.id,
-      ),
-    [order],
-  );
-
   const toggleOrder = () => {
-    if (firstClick) {
-      setOrder("asc");
-      setFirstClick(false);
-      return;
-    }
-    setOrder((prev) => (prev === "desc" ? "asc" : "desc"));
+    const newOrder = order === "asc" ? "desc" : "asc";
+    router.push(
+      `/project?sortBy=${sortBy || "createdAt"}&sortOrder=${newOrder}`,
+    );
+    setOrder(newOrder);
+    if (firstClick) setFirstClick(false);
   };
 
   const labelText = firstClick
@@ -64,7 +59,7 @@ export default function ProjectPage() {
           className="!text-primary01 !font-medium"
           sx={{ fontSize: { xs: 13, sm: 14, md: 16, lg: 18 }, lineHeight: 1.2 }}
         >
-          จำนวน {projects.length} ชิ้นงาน
+          จำนวน {totalRecords} ชิ้นงาน
         </Typography>
 
         {/* <1280px: ICON */}
@@ -105,10 +100,12 @@ export default function ProjectPage() {
 
       {/* grid */}
       <div className="grid gap-6 md:grid-cols-2 md:gap-8 xl:grid-cols-3">
-        {projects.map((p) => (
-          <ProjectCard key={p.id} data={p} />
+        {projects.map((project) => (
+          <ProjectCard key={project.id} data={project} />
         ))}
       </div>
     </main>
   );
-}
+};
+
+export default ProjectPage;

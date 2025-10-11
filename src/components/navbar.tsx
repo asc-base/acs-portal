@@ -4,7 +4,7 @@ import LOGO from "../../public/kmuttlogo.png";
 import LOGOACS from "../../public/logoacs.png";
 import FacebookRoundedIcon from "@mui/icons-material/FacebookRounded";
 import YouTubeIcon from "@mui/icons-material/YouTube";
-import AccountCircleRoundedIcon from "@mui/icons-material/AccountCircleRounded";
+// import AccountCircleRoundedIcon from "@mui/icons-material/AccountCircleRounded";
 import Link from "next/link";
 import { Button } from "@mui/material";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
@@ -22,7 +22,12 @@ const MenuBar = () => {
   }
   const menuItems = [
     { id: 1, label: "หน้าหลัก", href: "/", submenu: [] },
-    { id: 2, label: "สมัครเรียน", href: "", submenu: [] },
+    {
+      id: 2,
+      label: "สมัครเรียน",
+      href: "https://www.kmutt.ac.th/",
+      submenu: [],
+    },
     { id: 3, label: "หลักสูตร", href: "/curriculum", submenu: [] },
     {
       id: 4,
@@ -46,7 +51,12 @@ const MenuBar = () => {
         },
       ],
     },
-    { id: 5, label: "ผลงานนักศึกษา", href: "/project", submenu: [] },
+    {
+      id: 5,
+      label: "ผลงานนักศึกษา",
+      href: "/project?sortBy=createdAt&sortOrder=desc",
+      submenu: [],
+    },
     {
       id: 6,
       label: "เกี่ยวกับเรา",
@@ -158,8 +168,8 @@ export const NavbarMain = () => {
       href: "https://www.youtube.com/@acs.kmutt",
     },
     {
-      icon: <AccountCircleRoundedIcon />,
-      href: "https://www.kmutt.ac.th",
+      icon: <h4>เข้าสู่ระบบ</h4>,
+      href: "#",
     },
   ];
 

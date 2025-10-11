@@ -13,6 +13,8 @@ import { ProfessorRepository } from "./repositories/professor.repository";
 import { ProfessorService } from "@/core/service/professor.service";
 import { StudentRepository } from "./repositories/student.repository";
 import { StudentService } from "@/core/service/student.service";
+import { ProjectRepository } from "./repositories/project.repository";
+import { ProjectService } from "@/core/service/project.service";
 
 export const baseUrl = `${API_URL}/api`;
 
@@ -36,3 +38,6 @@ export const professorService = new ProfessorService(professorRepository);
 
 const studentRepository = new StudentRepository(baseUrl);
 export const studentService = new StudentService(studentRepository);
+
+const projectRepository = new ProjectRepository(baseUrl);
+export const projectService = new ProjectService(projectRepository);

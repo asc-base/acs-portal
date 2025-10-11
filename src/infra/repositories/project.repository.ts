@@ -1,0 +1,32 @@
+import { IProjectRepository } from "@/core/ports/project.repository";
+import { IProject, QueryProject } from "@/core/domain/project";
+import { Pageable } from "@/interface/response";
+import { HttpHelper } from "@/lib/http";
+import { ApiResponse } from "@/interface/response";
+
+export class ProjectRepository implements IProjectRepository {
+  private http: HttpHelper;
+  private baseUrl: string;
+
+  constructor(baseUrl: string) {
+    this.baseUrl = baseUrl;
+    this.http = new HttpHelper(this.baseUrl);
+  }
+
+  async getProjects(
+    query: QueryProject,
+  ): Promise<ApiResponse<Pageable<IProject>>> {
+    const { page, pageSize, sortBy = "createdAt", sortOrder = "desc" } = query;
+
+    const params = new URLSearchParams();
+    if (page !== undefined) params.append("page", page.toString());
+    if (pageSize !== undefined) params.append("pageSize", pageSize.toString());
+    params.append("sortBy", sortBy);
+    params.append("sortOrder", sortOrder);
+
+    const queryString = params.toString() ? `?${params.toString()}` : "";
+    const url = `/v1/projects${queryString}`;
+    const response = await this.http.get<ApiResponse<Pageable<IProject>>>(url);
+    return response;
+  }
+}
