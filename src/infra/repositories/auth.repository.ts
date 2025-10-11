@@ -21,13 +21,20 @@ export class AuthRepository implements IAuthRepository {
     return response;
   }
 
-  async getUserData(token: string): Promise<ApiResponse<IUser>>{
-    const response =await this.http.get<ApiResponse<IUser>>(
-      `/v1/auth/me`,
-      {
-       Authorization: `Bearer ${token}`,
-      }
+  async getUserData(token: string): Promise<ApiResponse<IUser>> {
+    const response = await this.http.get<ApiResponse<IUser>>(`/v1/auth/me`, {
+      Authorization: `Bearer ${token}`,
+    });
+    return response;
+  }
+
+  async LoginV2(data: LoginRequest): Promise<ApiResponse<any>> {
+    const response = await this.http.post<ApiResponse<any>>(
+      `/v2/auth/login`,
+      data,
     );
+    console.log("response", response);
+
     return response;
   }
 }

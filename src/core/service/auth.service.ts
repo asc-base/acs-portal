@@ -9,4 +9,8 @@ export class AuthService {
     const response = await this.authRepository.getUserData(token);
     return response.data;
   }
+
+  async LoginV2(data: { email: string; password: string }) {
+    return this.authRepository.LoginV2(data);
+  }
 }

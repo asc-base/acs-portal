@@ -13,8 +13,19 @@ export class CurriculumRepository implements ICurriculumRepository {
     this.http = new HttpHelper(this.baseUrl);
   }
 
-  async getCurriculum(): Promise<ApiResponse<Pageable<ICurriculum>>> {
-    const response = await this.http.get<ApiResponse<Pageable<ICurriculum>>>(`/v1/curriculum`);
+  async getCurriculum(
+    page: number,
+    pageSize: number,
+    sortBy?: string,
+    sortOrder?: "asc" | "desc",
+  ): Promise<ApiResponse<Pageable<ICurriculum>>> {
+    const url =
+      `/v1/curriculum?page=${page}&pageSize=${pageSize}` +
+      (sortBy ? `&sortBy=${sortBy}` : "") +
+      (sortOrder ? `&sortOrder=${sortOrder}` : "");
+
+    const response =
+      await this.http.get<ApiResponse<Pageable<ICurriculum>>>(url);
     return response;
   }
 }

@@ -2,11 +2,12 @@
 
 import React from "react";
 import Link from "next/link";
-import { Typography, IconButton, Tooltip } from "@mui/material";
+import { Typography, IconButton, Tooltip, Breadcrumbs } from "@mui/material";
 import ImportExportIcon from "@mui/icons-material/ImportExport";
 import FilterListRoundedIcon from "@mui/icons-material/FilterListRounded";
 import type { IProject } from "@/core/domain/project";
 import { ProjectCard } from "@/components/ProjectCard";
+import { useState } from "react";
 
 const MOCK_PROJECTS: IProject[] = Array.from({ length: 12 }).map((_, i) => ({
   id: i + 1,
@@ -21,13 +22,13 @@ const MOCK_PROJECTS: IProject[] = Array.from({ length: 12 }).map((_, i) => ({
 type Order = "asc" | "desc";
 
 export default function ProjectPage() {
-  const [order, setOrder] = React.useState<Order>("desc");
-  const [firstClick, setFirstClick] = React.useState(true);
+  const [order, setOrder] = useState<Order>("desc");
+  const [firstClick, setFirstClick] = useState(true);
 
   const projects = React.useMemo(
     () =>
       [...MOCK_PROJECTS].sort((a, b) =>
-        order === "desc" ? b.id - a.id : a.id - b.id
+        order === "desc" ? b.id - a.id : a.id - b.id,
       ),
     [order],
   );
@@ -41,19 +42,20 @@ export default function ProjectPage() {
     setOrder((prev) => (prev === "desc" ? "asc" : "desc"));
   };
 
-  const labelText =
-    firstClick ? "จัดเรียงตาม" : order === "desc" ? "ล่าสุด" : "เก่าสุด";
+  const labelText = firstClick
+    ? "จัดเรียงตาม"
+    : order === "desc"
+      ? "ล่าสุด"
+      : "เก่าสุด";
 
   return (
     <main className="container mx-auto px-6 py-6 xl:px-8">
       {/* breadcrumb */}
-      <div className="text-neutral04 mb-1 text-sm">
-        <Link href="/home" className="cursor-pointer hover:underline">
-          หน้าหลัก
-        </Link>
-        <span className="mx-1">&gt;&gt;</span>
-        <span className="text-neutral04">ทำเนียบรุ่น</span>
-      </div>
+      <Breadcrumbs aria-label="breadcrumb" separator=">>" className="mb-4">
+        <Link href="/">หน้าหลัก</Link>
+        <p>ประชาสัมพันธ์</p>
+        <p>ผลงานนักศึกษา</p>
+      </Breadcrumbs>
 
       {/* header */}
       <div className="mb-4 flex items-center justify-between">
@@ -75,7 +77,9 @@ export default function ProjectPage() {
               sx={{ p: 0.5 }}
             >
               <FilterListRoundedIcon
-                className={order === "asc" ? "text-neutral05" : "text-neutral04"}
+                className={
+                  order === "asc" ? "text-neutral05" : "text-neutral04"
+                }
                 sx={{ fontSize: 24 }}
               />
             </IconButton>
