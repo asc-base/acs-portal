@@ -48,7 +48,6 @@ const ProjectPage: FC<ProjectPageProps> = ({
       {/* breadcrumb */}
       <Breadcrumbs aria-label="breadcrumb" separator=">>" className="mb-4">
         <Link href="/">หน้าหลัก</Link>
-        <p>ประชาสัมพันธ์</p>
         <p>ผลงานนักศึกษา</p>
       </Breadcrumbs>
 
@@ -101,7 +100,14 @@ const ProjectPage: FC<ProjectPageProps> = ({
       {/* grid */}
       <div className="grid gap-6 md:grid-cols-2 md:gap-8 xl:grid-cols-3">
         {projects.map((project) => (
-          <ProjectCard key={project.id} data={project} />
+          <Link
+            key={project.id}
+            href={`/project/${project.id}`}
+            aria-label={project.title}
+            className="group border-neutral03 focus:ring-primary01/40 block w-full rounded-2xl border bg-white shadow-[0_0_0_1px_rgba(0,0,0,0.03),0_4px_14px_rgba(0,0,0,0.06)] transition hover:shadow-[0_0_0_1px_rgba(0,0,0,0.05),0_6px_18px_rgba(0,0,0,0.10)] focus:ring-2 focus:outline-none"
+          >
+            <ProjectCard key={project.id} data={project} />
+          </Link>
         ))}
       </div>
     </main>

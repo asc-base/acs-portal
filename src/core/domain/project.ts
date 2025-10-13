@@ -1,7 +1,6 @@
-export interface TeamMember {
-  name: string;
-  avatarUrl?: string;
-}
+import { IStudent } from "./student";
+import { ListType } from "@/interface/type";
+import { ICourse } from "./course";
 
 export interface IProject {
   id: number;
@@ -13,7 +12,11 @@ export interface IProject {
   document: string;
   figma: string;
   youtube: string;
-  // projectAssets: any[];
+  projectAssets: IProjectAssets[];
+  projectMembers: IStudent[];
+  projectCategories: ListType[];
+  projectFields: ListType[];
+  projectCourses: ICourse[];
   createdAt: Date;
   updatedAt: Date;
   deletedAt: null;
@@ -26,4 +29,15 @@ export interface QueryProject {
   pageSize?: number;
   sortBy?: string;
   sortOrder?: "asc" | "desc";
+}
+
+export interface IProjectAssets {
+  id: number;
+  projectId: number;
+  asset: string;
+  createdAt: Date;
+  updatedAt: Date;
+  deletedAt: null;
+  createdBy: number;
+  updatedBy: number;
 }

@@ -161,11 +161,11 @@ export const NavbarMain = () => {
   const linkIcons = [
     {
       icon: <FacebookRoundedIcon />,
-      href: "https://www.facebook.com/acs.kmutt",
+      href: "https://www.facebook.com/profile.php?id=100086247692906",
     },
     {
       icon: <YouTubeIcon />,
-      href: "https://www.youtube.com/@acs.kmutt",
+      href: "https://www.youtube.com/@ACSOfficial_KMUTT",
     },
     {
       icon: <h4>เข้าสู่ระบบ</h4>,
