@@ -1,15 +1,7 @@
 import { ApiResponse } from "@/interface/response";
 import { Pageable } from "@/interface/response";
-import { ICourse } from "../domain/course";
+import { ICourse, QueryCourse } from "../domain/course";
 
 export interface ICourseRepository {
-    getCourse(
-        params: {
-            page?: number;
-            pageSize?: number;
-            prerequisite?: boolean;
-            curriculumId?: number;
-            typecourseId?: number;
-        }
-    ): Promise<ApiResponse<Pageable<ICourse>>>
+  getCourse(query: QueryCourse): Promise<ApiResponse<Pageable<ICourse>>>;
 }

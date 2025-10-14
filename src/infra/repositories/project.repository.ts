@@ -16,13 +16,40 @@ export class ProjectRepository implements IProjectRepository {
   async getProjects(
     query: QueryProject,
   ): Promise<ApiResponse<Pageable<IProject>>> {
-    const { page, pageSize, sortBy = "createdAt", sortOrder = "desc" } = query;
+    const {
+      page,
+      pageSize,
+      sortBy = "createdAt",
+      sortOrder = "desc",
+      fields,
+      categories,
+      types,
+      courses,
+      classBooks,
+    } = query;
 
     const params = new URLSearchParams();
     if (page !== undefined) params.append("page", page.toString());
     if (pageSize !== undefined) params.append("pageSize", pageSize.toString());
     params.append("sortBy", sortBy);
     params.append("sortOrder", sortOrder);
+
+    // Add filter parameters
+    if (fields && fields.length > 0) {
+      params.append("fields", fields.join(","));
+    }
+    if (categories && categories.length > 0) {
+      params.append("categories", categories.join(","));
+    }
+    if (types && types.length > 0) {
+      params.append("types", types.join(","));
+    }
+    if (courses && courses.length > 0) {
+      params.append("courses", courses.join(","));
+    }
+    if (classBooks && classBooks.length > 0) {
+      params.append("classBooks", classBooks.join(","));
+    }
 
     const queryString = params.toString() ? `?${params.toString()}` : "";
     const url = `/v1/projects${queryString}`;

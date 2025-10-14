@@ -174,7 +174,7 @@ export const NavbarMain = () => {
   ];
 
   return (
-    <nav className="text-neutral01 bg-primary01 min-h-12 w-full shadow-md">
+    <nav className="text-neutral01 bg-primary01 relative min-h-12 w-full shadow-md">
       <div className="flex h-full w-full items-center justify-between px-5 md:px-10">
         <div className="flex h-full items-center gap-x-4">
           {isOpen ? (

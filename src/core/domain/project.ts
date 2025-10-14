@@ -29,6 +29,11 @@ export interface QueryProject {
   pageSize?: number;
   sortBy?: string;
   sortOrder?: "asc" | "desc";
+  fields?: number[];
+  categories?: number[];
+  types?: number[];
+  courses?: number[];
+  classBooks?: number[];
 }
 
 export interface IProjectAssets {
