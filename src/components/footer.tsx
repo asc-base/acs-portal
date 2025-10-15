@@ -1,30 +1,30 @@
 import Image from "next/image";
 import Link from "next/link";
 import LOGOACS from "../../public/logoacs.png";
-// import FacebookRoundedIcon from "@mui/icons-material/FacebookRounded";
+import FacebookRoundedIcon from "@mui/icons-material/FacebookRounded";
+import InstagramIcon from '@mui/icons-material/Instagram';
 import YouTubeIcon from "@mui/icons-material/YouTube";
-import MailOutlineIcon from "@mui/icons-material/MailOutline";
 
 export const Footer = () => {
   const linkIcons = [
     {
-      icon: <YouTubeIcon />,
-      href: "https://www.facebook.com/acs.kmutt",
+      icon: <FacebookRoundedIcon />,
+      href: "https://www.facebook.com/profile.php?id=100086247692906",
+    },
+    {
+      icon: <InstagramIcon/>,
+      href: "https://www.instagram.com/dek_warmkid/",
     },
     {
       icon: <YouTubeIcon />,
-      href: "https://www.youtube.com/@acs.kmutt",
+      href: "https://www.youtube.com/@ACSOfficial_KMUTT",
     },
-    {
-      icon: <MailOutlineIcon />,
-      href: "#",
-    },
+
   ];
 
   return (
-    <div className="bg-primary01 px-6 py-8 text-white md:px-12">
+    <div className="bg-primary01 px-6 py-8 text-white md:px-12 mt-0">
       <div className="flex flex-col flex-wrap gap-4 lg:flex-row">
-        {/* Section 1: Logo + Contact */}
         <div className="flex w-full flex-col items-start md:flex-row lg:flex-1">
           <div className="flex min-w-[120px] flex-col gap-4 pb-5">
             <Image src={LOGOACS} alt="ACS Logo" width={107} height={96.12} />
@@ -42,8 +42,8 @@ export const Footer = () => {
             </div>
           </div>
 
-          <div className="w-full md:flex-1">
-            <h4 className="text-secondary01 font-bold">ติดต่อเรา</h4>
+          <div className="w-full md:flex-1 md:ml-10">
+            <h4 className="text-secondary01 font-bold mb-2">ติดต่อเรา</h4>
             <h5 className="text-neutral01 leading-relaxed whitespace-nowrap">
               ภาควิชาคณิตศาสตร์ คณะวิทยาศาสตร์ <br />
               มหาวิทยาลัยเทคโนโลยีพระจอมเกล้าธนบุรี
@@ -58,14 +58,14 @@ export const Footer = () => {
         </div>
 
         <div className="flex w-full flex-wrap gap-4 overflow-hidden break-words lg:flex-[2]">
-          <div className="flex min-w-[100px] flex-1 flex-col">
+          <div className="flex min-w-[100px] flex-1 flex-col gap-2">
             <Link href="/home">
               <h4 className="text-secondary01 font-bold">สมัครเรียน</h4>
             </Link>
-            {/* <Link href="/about"> */}
-            <h4 className="text-secondary01 font-bold">หลักสูตร</h4>
-            {/* </Link>
-                        <Link href="#">*/}
+            <Link href="/curriculum">
+              <h4 className="text-secondary01 font-bold">หลักสูตร</h4>
+            </Link>
+            {/*           <Link href="#">*/}
             <h5 className="text-neutral01">หลักสูตรใหม่ พ.ศ2565</h5>
             {/*</Link> */}
             {/* <Link href="#"> */}
@@ -73,22 +73,22 @@ export const Footer = () => {
             {/* </Link> */}
           </div>
 
-          <div className="flex min-w-[150px] flex-1 flex-col">
+          <div className="flex min-w-[150px] flex-1 flex-col gap-2">
             <h4 className="text-secondary01 font-bold whitespace-nowrap">
               ข่าวสารและกิจกรรม
             </h4>
-            {/* <Link href="#"> */}
-            <h5 className="text-neutral01">ประชาสัมพันธ์</h5>
-            {/* </Link>
-                        <Link href="#"> */}
-            <h5 className="text-neutral01">ความสำเร็จภาควิชา</h5>
-            {/* </Link>
-                        <Link href="#"> */}
+            <Link href="/news?category=ข่าวสารและกิจกรรม&page=1&pageSize=12">
+              <h5 className="text-neutral01">ประชาสัมพันธ์</h5>
+            </Link>
+                      <Link href="/news?category=ความสำเร็จสาขาวิชา&page=1&pageSize=12">
+            <h5 className="text-neutral01">ความสำเร็จสาขาวิชา</h5>
+             </Link>
+                       <Link href="/news?category=งานกิจกรรมนักศึกษา&page=1&pageSize=12">
             <h5 className="text-neutral01">งานกิจกรรมนักศึกษา</h5>
-            {/* </Link> */}
+          </Link>
           </div>
 
-          <div className="flex min-w-[120px] flex-1 flex-col">
+          <div className="flex min-w-[120px] flex-1 flex-col gap-2">
             {/*
                          <Link
                             href="#"*/}
@@ -118,7 +118,7 @@ export const Footer = () => {
             {/* </Link> */}
           </div>
 
-          <div className="flex min-w-[220px] flex-1 flex-col">
+          <div className="flex min-w-[220px] flex-1 flex-col gap-2">
             <h4 className="text-secondary01 font-bold whitespace-nowrap">
               เว็บไซต์หลักของมหาวิทยาลัย
             </h4>

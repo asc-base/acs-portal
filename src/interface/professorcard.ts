@@ -1,7 +1,7 @@
-import { User } from "./user";
+import { IUser } from "./user";
 
 export interface ProfessorCardProps {
-  id: Number;
-  user: User;
+  id: number;
+  user: IUser;
   profRoom: string;
 }

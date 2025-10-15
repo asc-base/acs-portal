@@ -21,18 +21,18 @@ interface TypeCourseProps {
 
 export const TypeCourseComponent: FC<TypeCourseProps> = ({curriculumId, typeCourseId, name, description, index }) => {
   return (
-    <div className="flex flex-col items-center justify-center text-center mb-10">
-      <div className="w-[120px] h-[120px]">
+    <div className="mb-10 flex flex-col items-center justify-center text-center">
+      <div className="h-[120px] w-[120px]">
         <Image
           src={typeCourseImage[index].src}
           alt={name}
           width={100}
           height={100}
-          className="object-contain h-full w-full"
+          className="h-full w-full object-contain"
         />
       </div>
-      <h2 className="mt-2 mb-2 text-primary01">{name}</h2>
-      <h5 className="mb-4 text-primary01 text-sm">{description}</h5>
+      <h2 className="text-primary01 mt-2 mb-2">{name}</h2>
+      <h5 className="text-primary01 mb-4 text-sm">{description}</h5>
       <Button
         variant="outlined"
         rel="noopener noreferrer"
@@ -44,5 +44,4 @@ export const TypeCourseComponent: FC<TypeCourseProps> = ({curriculumId, typeCour
       </Button>
     </div>
   );
-
 };

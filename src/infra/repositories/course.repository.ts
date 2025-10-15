@@ -1,27 +1,33 @@
 import { ICourseRepository } from "@/core/ports/course.repository";
-import { ICourse } from "@/core/domain/course";
+import { ICourse, QueryCourse } from "@/core/domain/course";
 import { HttpHelper } from "@/lib/http";
 import { ApiResponse, Pageable } from "@/interface/response";
 
 export class CourseRepository implements ICourseRepository {
-    private http: HttpHelper;
-    private baseUrl: string;
+  private http: HttpHelper;
+  private baseUrl: string;
 
-    constructor(baseUrl: string) {
-        this.baseUrl = baseUrl;
-        this.http = new HttpHelper(this.baseUrl);
-    }
+  constructor(baseUrl: string) {
+    this.baseUrl = baseUrl;
+    this.http = new HttpHelper(this.baseUrl);
+  }
 
-    async getCourse(
-        page: number,
-        pageSize: number,
-        prerequisite: boolean,
-        curriculumId: number,
-        typecourseId: number,
-    ): Promise<ApiResponse<Pageable<ICourse>>> {
-        const url = `/v1/course?page=${page}&pageSize=${pageSize}&prerequisite=${prerequisite}&curriculumId=${curriculumId}&typecourseId=${typecourseId}`;
+  async getCourse(query: QueryCourse): Promise<ApiResponse<Pageable<ICourse>>> {
+    const params = new URLSearchParams();
 
-        const response = await this.http.get<ApiResponse<Pageable<ICourse>>>(url);
-        return response;
-    }
+    if (query.page !== undefined) params.append("page", query.page.toString());
+    if (query.pageSize !== undefined)
+      params.append("pageSize", query.pageSize.toString());
+    if (query.prerequisite !== undefined)
+      params.append("prerequisite", String(query.prerequisite));
+    if (query.curriculumId !== undefined)
+      params.append("curriculumId", query.curriculumId.toString());
+    if (query.typecourseId !== undefined)
+      params.append("typecourseId", query.typecourseId.toString());
+
+    const url = `/v1/course?${params.toString()}`;
+
+    const response = await this.http.get<ApiResponse<Pageable<ICourse>>>(url);
+    return response;
+  }
 }
