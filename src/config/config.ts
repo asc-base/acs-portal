@@ -1,5 +1,4 @@
-export const API_URL =
-  process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
+export const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 // Warn if API_URL is not set in production
 if (!process.env.NEXT_PUBLIC_API_URL && process.env.NODE_ENV === "production") {
