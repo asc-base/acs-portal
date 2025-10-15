@@ -8,8 +8,6 @@ const Page = async () => {
     sortOrder: "desc",
   });
 
-  console.log(rows);
-
   return (
     <div className="container mx-auto px-0 py-5 md:px-16 lg:px-0">
       <ClassBookLandingPage classBooks={rows} />
