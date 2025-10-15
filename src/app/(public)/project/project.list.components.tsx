@@ -1,59 +1,55 @@
 "use client";
 
-import React from "react";
+import React, { FC } from "react";
 import Link from "next/link";
-import { Typography, IconButton, Tooltip } from "@mui/material";
+import { Typography, IconButton, Tooltip, Breadcrumbs } from "@mui/material";
 import ImportExportIcon from "@mui/icons-material/ImportExport";
 import FilterListRoundedIcon from "@mui/icons-material/FilterListRounded";
 import type { IProject } from "@/core/domain/project";
 import { ProjectCard } from "@/components/ProjectCard";
-
-const MOCK_PROJECTS: IProject[] = Array.from({ length: 12 }).map((_, i) => ({
-  id: i + 1,
-  title: "โปรเจกต์ที่มีชื่อเสนอวา The Name of Project which is so long",
-  category: "Educational",
-  subcategory: "Web Application",
-  // ใช้รูปจาก URL ภายนอก (16:9 ประมาณ 800x450)
-  imageUrl: `https://picsum.photos/id/${(i + 10) % 100}/800/450`,
-  team: [{ name: "Alice" }, { name: "Bob" }, { name: "Charlie" }],
-}));
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 
 type Order = "asc" | "desc";
 
-export default function ProjectPage() {
-  const [order, setOrder] = React.useState<Order>("desc");
-  const [firstClick, setFirstClick] = React.useState(true);
+interface ProjectPageProps {
+  projects: IProject[];
+  totalRecords?: number;
+  sortBy?: string;
+  sortOrder?: Order;
+}
 
-  const projects = React.useMemo(
-    () =>
-      [...MOCK_PROJECTS].sort((a, b) =>
-        order === "desc" ? b.id - a.id : a.id - b.id
-      ),
-    [order],
-  );
+const ProjectPage: FC<ProjectPageProps> = ({
+  projects,
+  totalRecords,
+  sortBy,
+}) => {
+  const router = useRouter();
+  const [order, setOrder] = useState<Order>("desc");
+  const [firstClick, setFirstClick] = useState(true);
 
   const toggleOrder = () => {
-    if (firstClick) {
-      setOrder("asc");
-      setFirstClick(false);
-      return;
-    }
-    setOrder((prev) => (prev === "desc" ? "asc" : "desc"));
+    const newOrder = order === "asc" ? "desc" : "asc";
+    router.push(
+      `/project?sortBy=${sortBy || "createdAt"}&sortOrder=${newOrder}`,
+    );
+    setOrder(newOrder);
+    if (firstClick) setFirstClick(false);
   };
 
-  const labelText =
-    firstClick ? "จัดเรียงตาม" : order === "desc" ? "ล่าสุด" : "เก่าสุด";
+  const labelText = firstClick
+    ? "จัดเรียงตาม"
+    : order === "desc"
+      ? "ล่าสุด"
+      : "เก่าสุด";
 
   return (
     <main className="container mx-auto px-6 py-6 xl:px-8">
       {/* breadcrumb */}
-      <div className="text-neutral04 mb-1 text-sm">
-        <Link href="/home" className="cursor-pointer hover:underline">
-          หน้าหลัก
-        </Link>
-        <span className="mx-1">&gt;&gt;</span>
-        <span className="text-neutral04">ทำเนียบรุ่น</span>
-      </div>
+      <Breadcrumbs aria-label="breadcrumb" separator=">>" className="mb-4">
+        <Link href="/">หน้าหลัก</Link>
+        <p>ผลงานนักศึกษา</p>
+      </Breadcrumbs>
 
       {/* header */}
       <div className="mb-4 flex items-center justify-between">
@@ -62,7 +58,7 @@ export default function ProjectPage() {
           className="!text-primary01 !font-medium"
           sx={{ fontSize: { xs: 13, sm: 14, md: 16, lg: 18 }, lineHeight: 1.2 }}
         >
-          จำนวน {projects.length} ชิ้นงาน
+          จำนวน {totalRecords} ชิ้นงาน
         </Typography>
 
         {/* <1280px: ICON */}
@@ -75,7 +71,9 @@ export default function ProjectPage() {
               sx={{ p: 0.5 }}
             >
               <FilterListRoundedIcon
-                className={order === "asc" ? "text-neutral05" : "text-neutral04"}
+                className={
+                  order === "asc" ? "text-neutral05" : "text-neutral04"
+                }
                 sx={{ fontSize: 24 }}
               />
             </IconButton>
@@ -101,10 +99,19 @@ export default function ProjectPage() {
 
       {/* grid */}
       <div className="grid gap-6 md:grid-cols-2 md:gap-8 xl:grid-cols-3">
-        {projects.map((p) => (
-          <ProjectCard key={p.id} data={p} />
+        {projects.map((project) => (
+          <Link
+            key={project.id}
+            href={`/project/${project.id}`}
+            aria-label={project.title}
+            className="group border-neutral03 focus:ring-primary01/40 block w-full rounded-2xl border bg-white shadow-[0_0_0_1px_rgba(0,0,0,0.03),0_4px_14px_rgba(0,0,0,0.06)] transition hover:shadow-[0_0_0_1px_rgba(0,0,0,0.05),0_6px_18px_rgba(0,0,0,0.10)] focus:ring-2 focus:outline-none"
+          >
+            <ProjectCard key={project.id} data={project} />
+          </Link>
         ))}
       </div>
     </main>
   );
-}
+};
+
+export default ProjectPage;

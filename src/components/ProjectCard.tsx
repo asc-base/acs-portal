@@ -2,28 +2,30 @@
 
 import { memo } from "react";
 import Image from "next/image";
-import Link from "next/link";
 import { Avatar, AvatarGroup } from "@mui/material";
 import type { IProject } from "@/core/domain/project";
 
 export interface ProjectCardProps {
-  data: IProject; 
+  data: IProject;
 }
 
 function ProjectCardBase({ data }: ProjectCardProps) {
-  const { id, title, category, subcategory, imageUrl, team } = data;
+  const {
+    id,
+    title,
+    thumbnail,
+    projectMembers,
+    projectCategories,
+    projectFields,
+  } = data;
 
   return (
-    <Link
-      href={`/project/${id}`}
-      aria-label={title}
-      className="group block w-full rounded-2xl border border-neutral03 bg-white shadow-[0_0_0_1px_rgba(0,0,0,0.03),0_4px_14px_rgba(0,0,0,0.06)] hover:shadow-[0_0_0_1px_rgba(0,0,0,0.05),0_6px_18px_rgba(0,0,0,0.10)] transition focus:outline-none focus:ring-2 focus:ring-primary01/40"
-    >
+    <>
       {/* media */}
       <div className="p-3 pb-2">
-        <div className="relative w-full overflow-hidden rounded-xl aspect-[16/9]">
+        <div className="relative aspect-[16/9] w-full overflow-hidden rounded-xl">
           <Image
-            src={imageUrl}
+            src={thumbnail}
             alt={title}
             fill
             className="object-cover"
@@ -36,11 +38,11 @@ function ProjectCardBase({ data }: ProjectCardProps) {
 
       {/* content */}
       <div className="px-4 pb-4">
-        <p className="text-[14px] text-neutral04 font-medium">
-          {category} / {subcategory}
+        <p className="text-neutral04 text-[14px] font-medium">
+          {projectCategories[0]?.name} / {projectFields[0]?.name}
         </p>
 
-        <h3 className="mt-1 text-[16px] font-extrabold text-primary01 leading-snug line-clamp-2">
+        <h3 className="text-primary01 mt-1 line-clamp-2 text-[16px] leading-snug font-extrabold">
           {title}
         </h3>
 
@@ -48,14 +50,16 @@ function ProjectCardBase({ data }: ProjectCardProps) {
         <div className="mt-3 flex justify-start">
           <AvatarGroup
             max={3}
-            sx={{ "& .MuiAvatar-root": { width: 28, height: 28, fontSize: 12 } }}
+            sx={{
+              "& .MuiAvatar-root": { width: 28, height: 28, fontSize: 12 },
+            }}
           >
-            {team.slice(0, 3).map((m, i) => (
+            {projectMembers.slice(0, 3).map((member, i) => (
               <Avatar
-                key={`${m.name}-${i}`}
-                alt={m.name}
+                key={`${member.id}-${i}`}
+                alt={member.studentId}
                 src={
-                  m.avatarUrl ??
+                  member.user.imageUrl ??
                   `https://i.pravatar.cc/80?img=${(i + id) % 70}`
                 }
                 imgProps={{ referrerPolicy: "no-referrer" }}
@@ -64,7 +68,7 @@ function ProjectCardBase({ data }: ProjectCardProps) {
           </AvatarGroup>
         </div>
       </div>
-    </Link>
+    </>
   );
 }
 

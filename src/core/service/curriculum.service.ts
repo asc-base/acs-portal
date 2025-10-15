@@ -4,8 +4,18 @@ import { Pageable } from "@/interface/response";
 export class CurriculumService {
   constructor(private curriculumRepository: ICurriculumRepository) {}
 
-  async getCurriculum(): Promise<Pageable<ICurriculum>> {
-    const response = await this.curriculumRepository.getCurriculum();
+  async getCurriculum(
+    page: number,
+    pageSize: number,
+    sortBy?: string,
+    sortOrder?: "asc" | "desc",
+  ): Promise<Pageable<ICurriculum>> {
+    const response = await this.curriculumRepository.getCurriculum(
+      page,
+      pageSize,
+      sortBy,
+      sortOrder,
+    );
     return response.data;
   }
 }

@@ -5,4 +5,5 @@ import { IUser } from "../domain/user";
 export interface IAuthRepository {
   LoginAdmin(data: LoginRequest): Promise<ApiResponse<AuthResponse>>;
   getUserData(token: string): Promise<ApiResponse<IUser>>;
+  LoginV2(data: LoginRequest): Promise<ApiResponse<IUser>>;
 }

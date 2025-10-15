@@ -38,7 +38,7 @@ export default function ResetPasswordAuthLandingPage() {
     mode: "onChange",
   });
 
-  const onSubmit = async (data: FormValues) => {
+  const onSubmit = async () => {
     try {
       await new Promise((r) => setTimeout(r, 400)); // MOCK
       alert("เปลี่ยนรหัสผ่านสำเร็จ (Mock)");
