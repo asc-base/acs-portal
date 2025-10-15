@@ -3,6 +3,10 @@ import { curriculumService } from "@/infra/container";
 import CurriculumListComponents from "./curriculum.landingpage";
 import { masterDataService } from "@/infra/container";
 
+// Force this route to be dynamic to avoid build-time prerender fetches
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 const Page = async () => {
   const { rows } = await curriculumService.getCurriculum(1, 2, "year", "desc");
 
