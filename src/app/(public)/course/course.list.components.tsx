@@ -60,7 +60,7 @@ const CourseListComponents = ({
             > */}
       {course.map((item) => (
         <CourseCard
-          key={item.courseId}
+          key={item.id}
           courseId={item.courseId}
           courseNameEn={item.courseNameEn}
           courseNameTh={item.courseNameTh}
@@ -72,7 +72,6 @@ const CourseListComponents = ({
           courseDetail={item.courseDetail}
         />
       ))}
-      {/* </InfiniteScroll> */}
     </div>
   );
 };

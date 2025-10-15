@@ -16,7 +16,9 @@ const CurriculumListComponents = ({
   curriculum,
   typeCourse,
 }: CurriculumListComponentProps) => {
-  const [focusCurriculum, setFocusCurriculum] = useState<ICurriculum>(curriculum[0]);
+  const [focusCurriculum, setFocusCurriculum] = useState<ICurriculum>(
+    curriculum[0],
+  );
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
@@ -31,7 +33,7 @@ const CurriculumListComponents = ({
 
   const handleSelectFocusCurriculum = (curriculum: ICurriculum) => {
     setFocusCurriculum(curriculum);
-  }
+  };
 
   return (
     <div className="flex flex-col gap-2">
@@ -40,36 +42,39 @@ const CurriculumListComponents = ({
         <p>หลักสูตร</p>
       </Breadcrumbs>
 
-      <div className="flex flex-col md:flex-row gap-2 mb-10">
+      <div className="mb-10 flex flex-col gap-2 md:flex-row">
         {curriculum.map((item) => (
           <CurriculumCard
-          key={item.id}
-          curriculum={item}
-          focusCurriculum={focusCurriculum.id}
-          setFocusCurriculum={() => handleSelectFocusCurriculum(item)} 
+            key={item.id}
+            curriculum={item}
+            focusCurriculum={focusCurriculum.id}
+            setFocusCurriculum={() => handleSelectFocusCurriculum(item)}
           />
         ))}
       </div>
 
-      <div className="text-center mb-6">
-        <h1 className="font-bold text-primary01">
+      <div className="mb-6 text-center">
+        <h1 className="text-primary01 font-bold">
           รายวิชาตามหลักสูตรปี พ.ศ. {isLoading ? "..." : focusCurriculum.year}
         </h1>
         <h4 className="text-primary01">
-          รายการวิชาทั้งหมดจากหลักสูตรปี {isLoading ? "..." : focusCurriculum.year}
+          รายการวิชาทั้งหมดจากหลักสูตรปี{" "}
+          {isLoading ? "..." : focusCurriculum.year}
         </h4>
       </div>
       <div className="flex justify-center">
         {isLoading ? (
           <CircularProgress />
         ) : (
-          <div className="flex flex-wrap justify-center mx-auto">
+          <div className="mx-auto flex flex-wrap justify-center">
             {typeCourse.map((item, idx) => (
               <div
                 key={item.id}
-                className="w-full sm:w-1/2 lg:w-1/3 box-border"
+                className="box-border w-full sm:w-1/2 lg:w-1/3"
               >
                 <TypeCourseComponent
+                  curriculumId={focusCurriculum.id}
+                  typeCourseId={item.id}
                   name={item.name}
                   description={item.description}
                   index={idx}

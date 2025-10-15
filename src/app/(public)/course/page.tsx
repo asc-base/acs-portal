@@ -15,13 +15,10 @@ interface PageProps {
 
 const page = async ({ searchParams }: PageProps) => {
   const resolvedSearchParams = await searchParams;
-  const { rows, totalRecords } = await courseService.getCourse(
-    resolvedSearchParams.page || 1,
-    resolvedSearchParams.pageSize || 12,
-    resolvedSearchParams.prerequisite,
-    resolvedSearchParams.curriculumId,
-    resolvedSearchParams.typeCourseId,
-  );
+  const { rows, totalRecords } = await courseService.getCourse({
+    curriculumId: resolvedSearchParams.curriculumId,
+    typecourseId: resolvedSearchParams.typeCourseId,
+  });
 
   return (
     <CourseListComponents
