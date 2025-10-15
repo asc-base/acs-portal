@@ -9,4 +9,9 @@ export class ProjectService {
     const response = await this.projectRepository.getProjects(query);
     return response.data;
   }
+
+  async getProjectById(id: string): Promise<IProject> {
+    const response = await this.projectRepository.getProjectById(id);
+    return response.data;
+  }
 }

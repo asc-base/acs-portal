@@ -9,9 +9,9 @@ import {
 import { FilterList } from "@/components/filterlist";
 import { parseProjectFilters } from "@/lib/filter-utils";
 
-interface PageProps {
-  // Next.js provides searchParams as a plain object, not a Promise
-  searchParams?: {
+// Update Page props to match Next.js (searchParams is a Promise in Next.js 15)
+interface LocalPageProps {
+  searchParams?: Promise<{
     sortBy?: string;
     sortOrder?: "asc" | "desc";
     page?: number;
@@ -21,11 +21,11 @@ interface PageProps {
     types?: string;
     courses?: string;
     classBooks?: string;
-  };
+  }>;
 }
 
-const Page = async ({ searchParams }: PageProps) => {
-  const resolvedSearchParams = searchParams || {};
+const Page = async ({ searchParams }: LocalPageProps) => {
+  const resolvedSearchParams = (await searchParams) || {};
 
   // Parse filter parameters using utility function
   const filterParams = parseProjectFilters(resolvedSearchParams);

@@ -28,8 +28,8 @@ export class AuthRepository implements IAuthRepository {
     return response;
   }
 
-  async LoginV2(data: LoginRequest): Promise<ApiResponse<any>> {
-    const response = await this.http.post<ApiResponse<any>>(
+  async LoginV2(data: LoginRequest): Promise<ApiResponse<IUser>> {
+    const response = await this.http.post<ApiResponse<IUser>>(
       `/v2/auth/login`,
       data,
     );

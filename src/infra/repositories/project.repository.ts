@@ -56,4 +56,10 @@ export class ProjectRepository implements IProjectRepository {
     const response = await this.http.get<ApiResponse<Pageable<IProject>>>(url);
     return response;
   }
+
+  async getProjectById(id: string): Promise<ApiResponse<IProject>> {
+    const url = `/v1/projects/${id}`;
+    const response = await this.http.get<ApiResponse<IProject>>(url);
+    return response;
+  }
 }
