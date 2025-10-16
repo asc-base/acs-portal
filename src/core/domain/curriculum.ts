@@ -5,3 +5,10 @@ export interface ICurriculum {
   description: string;
   image: string;
 }
+
+export interface QueryCurriculum {
+  page?: number;
+  pageSize?: number;
+  sortBy?: string;
+  sortOrder?: "asc" | "desc";
+}

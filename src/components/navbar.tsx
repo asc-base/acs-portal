@@ -28,7 +28,12 @@ const MenuBar = () => {
       href: "https://www.kmutt.ac.th/",
       submenu: [],
     },
-    { id: 3, label: "หลักสูตร", href: "/curriculum", submenu: [] },
+    {
+      id: 3,
+      label: "หลักสูตร",
+      href: "/curriculum?sortBy=year&sortOrder=desc",
+      submenu: [],
+    },
     {
       id: 4,
       label: "ประชาสัมพันธ์",
@@ -69,7 +74,7 @@ const MenuBar = () => {
   ];
 
   return (
-    <div className="bg-neutral01 p-1 px-5 font-bold md:px-0">
+    <div className="bg-neutral01 text-primary01 p-1 px-5 font-bold md:px-0">
       <ul className="text-primary01 container mx-auto flex w-full flex-col justify-around sm:flex-row md:items-center">
         {menuItems.map((item) => (
           <li key={item.id} className="group relative w-full py-1 md:w-auto">

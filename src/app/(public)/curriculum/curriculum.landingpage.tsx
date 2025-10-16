@@ -35,6 +35,14 @@ const CurriculumListComponents = ({
     setFocusCurriculum(curriculum);
   };
 
+  if (!curriculum || curriculum.length === 0) {
+    return (
+      <div className="flex h-screen items-center justify-center">
+        No curriculum available.
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-col gap-2">
       <Breadcrumbs aria-label="breadcrumb" separator=">>" className="mb-4">
@@ -55,11 +63,11 @@ const CurriculumListComponents = ({
 
       <div className="mb-6 text-center">
         <h1 className="text-primary01 font-bold">
-          รายวิชาตามหลักสูตรปี พ.ศ. {isLoading ? "..." : focusCurriculum.year}
+          รายวิชาตามหลักสูตรปี พ.ศ. {isLoading ? "..." : focusCurriculum?.year}
         </h1>
         <h4 className="text-primary01">
           รายการวิชาทั้งหมดจากหลักสูตรปี{" "}
-          {isLoading ? "..." : focusCurriculum.year}
+          {isLoading ? "..." : focusCurriculum?.year}
         </h4>
       </div>
       <div className="flex justify-center">
@@ -73,7 +81,7 @@ const CurriculumListComponents = ({
                 className="box-border w-full sm:w-1/2 lg:w-1/3"
               >
                 <TypeCourseComponent
-                  curriculumId={focusCurriculum.id}
+                  curriculumId={focusCurriculum?.id}
                   typeCourseId={item.id}
                   name={item.name}
                   description={item.description}
