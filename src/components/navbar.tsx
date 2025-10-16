@@ -25,7 +25,7 @@ const MenuBar = () => {
     {
       id: 2,
       label: "สมัครเรียน",
-      href: "https://www.kmutt.ac.th/",
+      href: "https://admission.kmutt.ac.th/",
       submenu: [],
     },
     {
