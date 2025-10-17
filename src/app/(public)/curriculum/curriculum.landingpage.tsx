@@ -35,6 +35,8 @@ const CurriculumListComponents = ({
     setFocusCurriculum(curriculum);
   };
 
+  console.log("curriculum", curriculum);
+
   if (!curriculum || curriculum.length === 0) {
     return (
       <div className="flex h-screen items-center justify-center">

@@ -171,7 +171,7 @@ const HomePage = ({
               )}
             </NewsCarouselComponent>
             <NewsCarouselComponent
-              title="ความสำเร็จสาขาวิชา"
+              title="ความสำเร็จนักศึกษา"
               news={initNewsComplete}
               handleNextNews={handleNextNewsComplete}
               handlePrevNews={handlePrevNewsComplete}

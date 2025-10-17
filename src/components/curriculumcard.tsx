@@ -26,7 +26,7 @@ export const CurriculumCard: FC<ICurriculumCard> = ({
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
 
-  const { id, year, description, image, fileUrl } = curriculum;
+  const { id, year, description, imageUrl, fileUrl } = curriculum;
   const isFocused = focusCurriculum === id;
 
   return (
@@ -53,12 +53,12 @@ export const CurriculumCard: FC<ICurriculumCard> = ({
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          backgroundColor: !image ? "var(--color-neutral02)" : "transparent",
+          backgroundColor: !imageUrl ? "var(--color-neutral02)" : "transparent",
         }}
       >
-        {image ? (
+        {imageUrl ? (
           <Image
-            src={image}
+            src={imageUrl}
             alt={`Curriculum ${year}`}
             fill
             style={{ objectFit: "cover" }}

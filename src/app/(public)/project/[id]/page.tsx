@@ -8,6 +8,9 @@ interface PageProps {
 const Page = async ({ params }: PageProps) => {
   const { id } = await params;
   const info = await projectService.getProjectById(id);
+
+  console.log(info);
+
   return <ProjectInfoComponent project={info} />;
 };
 

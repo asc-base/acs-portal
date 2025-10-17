@@ -27,13 +27,13 @@ const ProjectInfoComponent: FC<ProjectInfoProps> = ({ project }) => {
 
   const handlePrev = () => {
     setIndex((prev) =>
-      prev === 0 ? project.projectAssets.length - 1 : prev - 1,
+      prev === 0 ? project?.projectAssets?.length - 1 : prev - 1,
     );
   };
 
   const handleNext = () => {
     setIndex((prev) =>
-      prev === project.projectAssets.length - 1 ? 0 : prev + 1,
+      prev === project?.projectAssets?.length - 1 ? 0 : prev + 1,
     );
   };
 
@@ -41,11 +41,14 @@ const ProjectInfoComponent: FC<ProjectInfoProps> = ({ project }) => {
     const result = [];
     for (let i = 0; i < 3; i++) {
       result.push(
-        project.projectAssets[(index + i) % project.projectAssets.length].asset,
+        project?.projectAssets?.[(index + i) % project?.projectAssets?.length]
+          ?.asset,
       );
     }
     return result;
   };
+
+  console.log(project);
 
   return (
     <div className="container mx-auto px-16 py-5">
@@ -62,7 +65,7 @@ const ProjectInfoComponent: FC<ProjectInfoProps> = ({ project }) => {
       {/*Image banner*/}
       <div className="mb-4">
         <Image
-          src={project.thumbnail}
+          src={project?.thumbnail}
           alt="Image"
           width={1152}
           height={400}
@@ -72,10 +75,11 @@ const ProjectInfoComponent: FC<ProjectInfoProps> = ({ project }) => {
       {/*Project detail*/}
       <div className="mb-4">
         <h5>
-          {project.projectCategories[0].name} / {project.projectFields[1].name}
+          {project?.projectCategories[0].name} /{" "}
+          {project?.projectFields[1].name}
         </h5>
         <h2 className="font-bold">{project?.title}</h2>
-        <h4>{project.detail}</h4>
+        <h4>{project?.detail}</h4>
       </div>
       {/*Presentaion section*/}
       <div className="flex flex-col justify-around md:flex-row">
@@ -92,7 +96,7 @@ const ProjectInfoComponent: FC<ProjectInfoProps> = ({ project }) => {
             {/*Main*/}
             <Image
               src={
-                project.projectAssets[index].asset ??
+                project?.projectAssets[index]?.asset ??
                 "https://via.placeholder.com/550x200"
               }
               alt="main"
@@ -132,25 +136,25 @@ const ProjectInfoComponent: FC<ProjectInfoProps> = ({ project }) => {
             href={project.github ?? "#"}
             className="text-primary05 break-all underline"
           >
-            <p>{project.github ?? "N/A"}</p>
+            <p>{project?.github ?? "N/A"}</p>
           </Link>
         </div>
         <div className="flex flex-row">
           <h4>Presentation: </h4>
           <Link
-            href={project.presentation ?? "#"}
+            href={project?.presentation ?? "#"}
             className="text-primary05 break-all underline"
           >
-            <p>{project.presentation ?? "N/A"}</p>
+            <p>{project?.presentation ?? "N/A"}</p>
           </Link>
         </div>
         <div className="flex flex-row">
           <h4>Document: </h4>
           <Link
-            href={project.document ?? "#"}
+            href={project?.document ?? "#"}
             className="text-primary05 break-all underline"
           >
-            <p>{project.document ?? "N/A"}</p>
+            <p>{project?.document ?? "N/A"}</p>
           </Link>
         </div>
         <div className="flex flex-row">
