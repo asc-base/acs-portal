@@ -197,8 +197,20 @@ export const NavbarMain = () => {
             </div>
           ) : (
             <div className="flex min-h-20 items-center gap-x-4">
-              <Image src={LOGO} alt="KMUTT Logo" width={50} height={50} />
-              <Image src={LOGOACS} alt="ACS Logo" width={48} height={40} />
+              <Image
+                src={LOGO}
+                alt="KMUTT Logo"
+                width={50}
+                height={50}
+                priority
+              />
+              <Image
+                src={LOGOACS}
+                alt="ACS Logo"
+                width={48}
+                height={40}
+                priority
+              />
               <div>
                 {majorName.split("/").map((part, index) => (
                   <h5 key={index}>{part}</h5>
