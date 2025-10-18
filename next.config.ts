@@ -3,6 +3,7 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   /* config options here */
   images: {
+    // Remote patterns for external images
     remotePatterns: [
       {
         protocol: "https",

@@ -1,7 +1,6 @@
 "use client";
 import Image from "next/image";
-import LOGO from "../../public/kmuttlogo.png";
-import LOGOACS from "../../public/logoacs.png";
+// Use Next/Image with unoptimized to bypass Sharp for these specific local assets
 import FacebookRoundedIcon from "@mui/icons-material/FacebookRounded";
 import YouTubeIcon from "@mui/icons-material/YouTube";
 // import AccountCircleRoundedIcon from "@mui/icons-material/AccountCircleRounded";
@@ -198,18 +197,20 @@ export const NavbarMain = () => {
           ) : (
             <div className="flex min-h-20 items-center gap-x-4">
               <Image
-                src={LOGO}
+                src="/kmuttlogo.png"
                 alt="KMUTT Logo"
                 width={50}
                 height={50}
                 priority
+                unoptimized
               />
               <Image
-                src={LOGOACS}
+                src="/logoacs.png"
                 alt="ACS Logo"
                 width={48}
                 height={40}
                 priority
+                unoptimized
               />
               <div>
                 {majorName.split("/").map((part, index) => (
