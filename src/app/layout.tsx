@@ -1,18 +1,8 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+// Removed Google Fonts to avoid network timeouts during build
 import "./globals.css";
 import UniversalThemeProvider from "@/components/providers/mui/UniversalThemeProvider";
 import appIcon from "./logoacs-nonbg.png";
-
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
 
 export const metadata: Metadata = {
   title: "ACS KMUTT",
@@ -30,9 +20,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
+      <body className="antialiased">
         <UniversalThemeProvider>{children}</UniversalThemeProvider>
       </body>
     </html>
