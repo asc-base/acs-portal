@@ -6,6 +6,11 @@ import { classBookService } from "@/infra/container";
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
+export const metadata = {
+  title: "หลักสูตร | ACS website",
+  description: "Applied Computer Science KMUTT official website",
+};
+
 const Page = async () => {
   const { rows } = await classBookService.getClassBooks({
     sortBy: "createdAt",

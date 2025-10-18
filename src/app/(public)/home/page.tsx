@@ -5,6 +5,11 @@ import { newsService } from "@/infra/container";
 // Force dynamic rendering to avoid build-time API calls
 export const dynamic = "force-dynamic";
 
+export const metadata = {
+  title: "ACS website",
+  description: "Applied Computer Science KMUTT official website",
+};
+
 const MainPage = async () => {
   try {
     const [
