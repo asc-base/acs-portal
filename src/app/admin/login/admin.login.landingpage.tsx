@@ -115,7 +115,7 @@ export default function AdminLoginLandingPage() {
                                 placeholder="อีเมล"
                                 requiredMark
                                 inputProps={{
-                                    inputMode: "numeric",
+                                    inputMode: "email",
                                 }}
                                 aria-invalid={!!errors.email}
                             />
