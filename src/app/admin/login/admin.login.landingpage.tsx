@@ -112,7 +112,7 @@ export default function AdminLoginLandingPage() {
                                 name="email"
                                 control={control}
                                 label="อีเมล"
-                                placeholder="เช่น 67000000001"
+                                placeholder="อีเมล"
                                 requiredMark
                                 inputProps={{
                                     inputMode: "numeric",
