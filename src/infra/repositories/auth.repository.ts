@@ -12,10 +12,24 @@ export class AuthRepository implements IAuthRepository {
   }
 
   async LoginAdmin(data: LoginRequest): Promise<ApiResponse<AuthResponse>> {
-    const response = await this.http.post<ApiResponse<AuthResponse>>(
+    return this.http.post<ApiResponse<AuthResponse>>(
       `/v1/auth/login-admin`,
-      data,
+      data
     );
-    return response;
+  }
+
+  async createCredentailForgetPassowrd(
+    payload: { email: string }
+  ): Promise<ApiResponse<{ message?: string }>> {
+    return this.http.post<ApiResponse<{ message?: string }>>(
+      `/v1/auth/forget-password`,
+      payload
+    );
+  }
+
+  async requestPasswordReset(
+    payload: { email: string }
+  ): Promise<ApiResponse<{ message?: string }>> {
+    return this.createCredentailForgetPassowrd(payload);
   }
 }
