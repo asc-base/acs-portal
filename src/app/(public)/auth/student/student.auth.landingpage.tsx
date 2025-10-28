@@ -185,7 +185,7 @@ export default function StudentAuthLandingPage() {
                     />
                   )}
                 />
-                <a href="#" className="text-sm text-gray-600 hover:underline">
+                <a href="forgetpassword" className="text-sm text-gray-600 hover:underline">
                   ลืมรหัสผ่าน ?
                 </a>
               </div>
