@@ -2,7 +2,7 @@ import Image, { StaticImageData } from "next/image";
 import { FC } from "react";
 
 interface IHeroCard {
-  image: StaticImageData;
+  image: StaticImageData | string;
   description?: string;
 }
 
@@ -14,6 +14,8 @@ export const HeroCard: FC<IHeroCard> = (props) => {
         loading="lazy"
         src={image}
         alt="Hero Image"
+        width={800}
+        height={600}
         className="absolute h-full w-full object-cover blur-[2px]"
       />
       <div className="absolute inset-0 flex flex-col items-center justify-center text-center text-white">

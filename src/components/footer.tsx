@@ -23,7 +23,7 @@ export const Footer = () => {
   ];
 
   return (
-    <div className="bg-primary01 px-6 py-8 text-white md:px-12">
+    <div className="bg-primary01 px-6 py-8 text-white md:px-12 mt-0">
       <div className="flex flex-col flex-wrap gap-4 lg:flex-row">
         <div className="flex w-full flex-col items-start md:flex-row lg:flex-1">
           <div className="flex min-w-[120px] flex-col gap-4 pb-5">

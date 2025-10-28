@@ -4,6 +4,5 @@ export interface Course {
     courseDetail: string;
     courseNameEn: string;
     credits: string;
-    typeCourseId: number;
-    preCourses: { courseId: number;  courseNameEn: string }[];
+    preCourses: { courseId: string;  courseNameEn: string }[];
 }

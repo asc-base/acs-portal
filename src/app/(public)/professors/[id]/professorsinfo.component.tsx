@@ -4,7 +4,6 @@ import { IProfessor } from "@/core/domain/professor";
 import { ProfessorCard } from "@/components/professorcard";
 import Link from "next/link";
 import { Breadcrumbs } from "@mui/material";
-import { Card, CardContent, Typography } from "@mui/material"
 
 interface ProfessorsInfoProps {
     professorsInfo: IProfessor;
