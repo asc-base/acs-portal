@@ -37,4 +37,21 @@ export class AuthRepository implements IAuthRepository {
 
     return response;
   }
+
+  async createCredentailForgetPassowrd(payload: {
+    email: string;
+  }): Promise<ApiResponse<{ message?: string }>> {
+    const response = await this.http.post<ApiResponse<{ message?: string }>>(
+      `/v1/auth/forget-password`,
+      payload,
+    );
+    return response;
+  }
+
+  async requestPasswordReset(payload: {
+    email: string;
+  }): Promise<ApiResponse<{ message?: string }>> {
+    const response = await this.createCredentailForgetPassowrd(payload);
+    return response;
+  }
 }
