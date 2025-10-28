@@ -5,7 +5,7 @@ import React from "react";
 import heroImage from "../../../../public/hero.jpg";
 import { NewsCard } from "@/components/newscard";
 import Link from "next/link";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { NewsCarouselComponent } from "@/components/news.carousel.component";
 import { ActivityCard } from "@/components/activitycard";
 import { Carousel } from "@/components/carousel";
@@ -83,8 +83,6 @@ const HomePage = ({
     setNewsActivityStudentActive(index);
   };
 
-
-
   return (
     <>
       <div>
@@ -94,15 +92,12 @@ const HomePage = ({
         />
         <div className="container mx-auto my-2.5 px-3.5 py-4">
           <div className="flex flex-col gap-y-6">
-            <div className="flex flex-col-reverse md:grid md:grid-cols-2 gap-x-6 gap-y-6">
+            <div className="flex flex-col-reverse gap-x-6 gap-y-6 md:grid md:grid-cols-2">
               <div>
-                <h3 className="lg:text-[32px] text-accent04 items-baseline font-bold mb-3">
+                <h3 className="text-accent04 mb-3 items-baseline font-bold lg:text-[32px]">
                   งานกิจกรรมเร็ว ๆ นี้
                 </h3>
-                <div className="flex flex-col gap-y-3   
-                [&>*:nth-child(n+5)]:hidden 
-                md:[&>*:nth-child(n+3)]:hidden
-                lg:[&>*:nth-child(n+3)]:block">
+                <div className="flex flex-col gap-y-3 md:[&>*:nth-child(n+3)]:hidden lg:[&>*:nth-child(n+3)]:block [&>*:nth-child(n+5)]:hidden">
                   {initNewsActivity.length > 0 ? (
                     initNewsActivity.slice(0, 4).map((item) => (
                       <Link key={item.id} href={`/news/${item.id}`}>
@@ -121,7 +116,7 @@ const HomePage = ({
                 </div>
               </div>
               <div>
-                <h3 className="lg:text-[32px] text-accent04 items-baseline font-bold mb-3">
+                <h3 className="text-accent04 mb-3 items-baseline font-bold lg:text-[32px]">
                   ประชาสัมพันธ์สำคัญ
                 </h3>
                 <div className="h-full">
@@ -176,7 +171,7 @@ const HomePage = ({
               )}
             </NewsCarouselComponent>
             <NewsCarouselComponent
-              title="ความสำเร็จสาขาวิชา"
+              title="ความสำเร็จนักศึกษา"
               news={initNewsComplete}
               handleNextNews={handleNextNewsComplete}
               handlePrevNews={handlePrevNewsComplete}

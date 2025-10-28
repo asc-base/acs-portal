@@ -15,13 +15,11 @@ import { useForm, Controller } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { RHFTextField } from "@/components/form/RHFTextField";
+import { authService } from "@/infra/container";
 
 const Schema = z.object({
-  studentId: z
-    .string()
-    .trim()
-    .regex(/^\d{11}$/, "รหัสนักศึกษาต้องเป็นตัวเลข 11 หลัก"),
-  password: z.string().min(6, "รหัสผ่านอย่างน้อย 6 ตัวอักษร"),
+  email: z.string().trim(),
+  password: z.string().min(1, "รหัสผ่านอย่างน้อย 6 ตัวอักษร"),
   remember: z.boolean(),
 });
 type FormValues = z.infer<typeof Schema>;
@@ -33,11 +31,11 @@ export default function StudentAuthLandingPage() {
     control,
     handleSubmit,
     formState: { errors },
-    reset,
+    // reset,
     setError,
   } = useForm<FormValues>({
     resolver: zodResolver(Schema),
-    defaultValues: { studentId: "", password: "", remember: true },
+    defaultValues: { email: "", password: "", remember: true },
     mode: "onChange",
     reValidateMode: "onChange",
   });
@@ -45,12 +43,26 @@ export default function StudentAuthLandingPage() {
   const onSubmit = async (data: FormValues) => {
     try {
       await new Promise((r) => setTimeout(r, 400)); // mock
-      if (data.studentId === "00000000000") {
-        setError("studentId", { type: "manual", message: "ไม่พบบัญชีผู้ใช้" });
+      if (data.email === "00000000000") {
+        setError("email", { type: "manual", message: "ไม่พบบัญชีผู้ใช้" });
         return;
       }
-      alert(`Mock Login สำเร็จ\nSID: ${data.studentId}`);
-      reset({ studentId: "", password: "", remember: data.remember });
+
+      const loginRequest = {
+        email: data.email,
+        password: data.password,
+      };
+
+      const reps = await authService.LoginV2(loginRequest);
+
+      console.log("reps", reps);
+
+      // await authService.LoginV2(loginRequest);
+
+      console.log("Login with", data);
+
+      // alert(`Mock Login สำเร็จ\nEmail: ${data.email}`);
+      // reset({ email: "", password: "", remember: data.remember });
     } catch {
       setError("password", {
         type: "manual",
@@ -111,17 +123,15 @@ export default function StudentAuthLandingPage() {
               noValidate
             >
               <RHFTextField<FormValues>
-                name="studentId"
+                name="email"
                 control={control}
                 label="รหัสนักศึกษา"
                 placeholder="เช่น 67000000001"
                 requiredMark
                 inputProps={{
                   inputMode: "numeric",
-                  pattern: "\\d{11}",
-                  maxLength: 11,
                 }}
-                aria-invalid={!!errors.studentId}
+                aria-invalid={!!errors.email}
               />
 
               <RHFTextField<FormValues>
@@ -175,7 +185,7 @@ export default function StudentAuthLandingPage() {
                     />
                   )}
                 />
-                <a href="#" className="text-sm text-gray-600 hover:underline">
+                <a href="forgetpassword" className="text-sm text-gray-600 hover:underline">
                   ลืมรหัสผ่าน ?
                 </a>
               </div>

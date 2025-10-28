@@ -3,5 +3,12 @@ export interface ICurriculum {
   year: string;
   fileUrl: string;
   description: string;
-  image: string;
+  imageUrl: string;
+}
+
+export interface QueryCurriculum {
+  page?: number;
+  pageSize?: number;
+  sortBy?: string;
+  sortOrder?: "asc" | "desc";
 }
