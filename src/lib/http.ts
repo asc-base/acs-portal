@@ -1,3 +1,18 @@
+export class HttpError extends Error {
+  constructor(
+    message: string,
+    public status: number,
+    public data?: unknown,
+  ) {
+    super(message);
+    this.name = "HttpError";
+  }
+
+  isUnauthorized(): boolean {
+    return this.status === 401;
+  }
+}
+
 export class HttpHelper {
   constructor(
     private baseUrl: string = "",
@@ -74,23 +89,35 @@ export class HttpHelper {
       if (!res.ok) {
         // พยายามอ่าน error body
         let details = "";
+        let errorData = null;
         try {
           const ct = res.headers.get("content-type") || "";
-          details = ct.includes("application/json")
-            ? JSON.stringify(await res.json())
-            : await res.text();
+          if (ct.includes("application/json")) {
+            errorData = await res.json();
+            details = JSON.stringify(errorData);
+          } else {
+            details = await res.text();
+          }
         } catch {
           /* ignore */
         }
-        throw new Error(
+
+        // Create custom error with status and data
+        const error = new HttpError(
           `HTTP ${res.status} ${res.statusText} @ ${fullUrl}${
             details ? ` | ${details}` : ""
           }`,
+          res.status,
+          errorData,
         );
+        throw error;
       }
 
       return await this.parseResponse<Resp>(res);
     } catch (err) {
+      if (err instanceof HttpError) {
+        throw err; // Re-throw HttpError as-is to preserve status and data
+      }
       if (err instanceof Error && err.name === "AbortError") {
         throw new Error(`Request timeout @ ${fullUrl}`);
       }

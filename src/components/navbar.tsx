@@ -5,12 +5,13 @@ import YouTubeIcon from "@mui/icons-material/YouTube";
 import Link from "next/link";
 import { Button } from "@mui/material";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
-import { useState } from "react";
+import { useState, useEffect, useMemo } from "react";
 import MenuIcon from "@mui/icons-material/Menu";
 import CloseIcon from "@mui/icons-material/Close";
 import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
 import { useAuthStore } from "@/store/auth";
 import UserIcon from "@mui/icons-material/Person";
+import { IUser } from "@/core/domain/user";
 
 const MenuBar = () => {
   const [isOpenSubMenu, setIsOpenSubMenu] = useState(0);
@@ -159,37 +160,68 @@ const MenuBar = () => {
 
 export const NavbarMain = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const [isHydrated, setIsHydrated] = useState(false);
   const user = useAuthStore((state) => state.user);
+  const [userAuth, setUserAuth] = useState<IUser | null>(null);
+
+  useEffect(() => {
+    // Handle hydration for persisted store
+    setIsHydrated(true);
+  }, []);
+
+  useEffect(() => {
+    if (isHydrated) {
+      setUserAuth(user);
+      // Debug log to verify store updates
+      console.log("Navbar: User state changed:", user);
+    }
+  }, [user, isHydrated]);
 
   const majorName = "วิทยาการคอมพิวเตอร์ประยุกต์/Applied Computer Science";
 
-  const linkIcons = [
-    {
-      icon: <FacebookRoundedIcon />,
-      href: "https://www.facebook.com/profile.php?id=100086247692906",
-    },
-    {
-      icon: <YouTubeIcon />,
-      href: "https://www.youtube.com/@ACSOfficial_KMUTT",
-    },
-    {
-      icon: user ? <UserIcon /> : <h4>เข้าสู่ระบบ</h4>,
-      href: user ? "/profile" : "/auth/student",
-    },
-  ];
+  const linkIcons = useMemo(
+    () => [
+      {
+        icon: <FacebookRoundedIcon />,
+        href: "https://www.facebook.com/profile.php?id=100086247692906",
+      },
+      {
+        icon: <YouTubeIcon />,
+        href: "https://www.youtube.com/@ACSOfficial_KMUTT",
+      },
+      {
+        icon: userAuth ? (
+          <div className="flex items-center gap-2">
+            <UserIcon />
+          </div>
+        ) : (
+          <h4>เข้าสู่ระบบ</h4>
+        ),
+        href: userAuth ? "/profile" : "/auth/student",
+      },
+    ],
+    [userAuth],
+  );
 
   return (
-    <nav className="text-neutral01 bg-primary01 relative min-h-12 w-full shadow-md">
+    <nav
+      key={`navbar-${userAuth?.id || "guest"}`}
+      className="text-neutral01 bg-primary01 relative min-h-12 w-full shadow-md"
+    >
       <div className="flex h-full w-full items-center justify-between px-5 md:px-10">
         <div className="flex h-full items-center gap-x-4">
           {isOpen ? (
             <div className="flex min-h-20 items-center gap-x-4">
               {linkIcons.map((link, index) => (
                 <Link
-                  key={index}
+                  key={`mobile-${index}-${userAuth?.id || "guest"}`}
                   href={link.href}
-                  target="_blank"
-                  rel="noopener noreferrer"
+                  target={link.href.startsWith("http") ? "_blank" : "_self"}
+                  rel={
+                    link.href.startsWith("http")
+                      ? "noopener noreferrer"
+                      : undefined
+                  }
                 >
                   {link.icon}
                 </Link>
@@ -224,10 +256,12 @@ export const NavbarMain = () => {
         <div className="hidden items-center gap-x-4 md:flex">
           {linkIcons.map((link, index) => (
             <Link
-              key={index}
+              key={`${index}-${userAuth?.id || "guest"}`}
               href={link.href}
-              target="_blank"
-              rel="noopener noreferrer"
+              target={link.href.startsWith("http") ? "_blank" : "_self"}
+              rel={
+                link.href.startsWith("http") ? "noopener noreferrer" : undefined
+              }
             >
               {link.icon}
             </Link>
