@@ -1,6 +1,6 @@
 "use client";
 
-import * as React from "react";
+import { useState } from "react";
 import Image from "next/image";
 import {
   Button,
@@ -16,6 +16,8 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { RHFTextField } from "@/components/form/RHFTextField";
 import { authService } from "@/infra/container";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 const Schema = z.object({
   email: z.string().trim(),
@@ -25,7 +27,8 @@ const Schema = z.object({
 type FormValues = z.infer<typeof Schema>;
 
 export default function StudentAuthLandingPage() {
-  const [showPwd, setShowPwd] = React.useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const router = useRouter();
 
   const {
     control,
@@ -55,14 +58,9 @@ export default function StudentAuthLandingPage() {
 
       const reps = await authService.LoginV2(loginRequest);
 
-      console.log("reps", reps);
-
-      // await authService.LoginV2(loginRequest);
-
-      console.log("Login with", data);
-
-      // alert(`Mock Login สำเร็จ\nEmail: ${data.email}`);
-      // reset({ email: "", password: "", remember: data.remember });
+      if (reps.status && reps.statusCode === 200) {
+        router.push("/home");
+      }
     } catch {
       setError("password", {
         type: "manual",
@@ -139,7 +137,7 @@ export default function StudentAuthLandingPage() {
                 control={control}
                 label="รหัสผ่าน"
                 placeholder="********"
-                type={showPwd ? "text" : "password"}
+                type={showPassword ? "text" : "password"}
                 aria-invalid={!!errors.password}
                 sx={{
                   "& .MuiOutlinedInput-notchedOutline": {
@@ -157,11 +155,13 @@ export default function StudentAuthLandingPage() {
                   endAdornment: (
                     <InputAdornment position="end">
                       <IconButton
-                        aria-label={showPwd ? "ซ่อนรหัสผ่าน" : "แสดงรหัสผ่าน"}
-                        onClick={() => setShowPwd((s) => !s)}
+                        aria-label={
+                          showPassword ? "ซ่อนรหัสผ่าน" : "แสดงรหัสผ่าน"
+                        }
+                        onClick={() => setShowPassword((s) => !s)}
                         edge="end"
                       >
-                        {showPwd ? <VisibilityOff /> : <Visibility />}
+                        {showPassword ? <VisibilityOff /> : <Visibility />}
                       </IconButton>
                     </InputAdornment>
                   ),
@@ -185,9 +185,11 @@ export default function StudentAuthLandingPage() {
                     />
                   )}
                 />
-                <a href="forgetpassword" className="text-sm text-gray-600 hover:underline">
-                  ลืมรหัสผ่าน ?
-                </a>
+                <Link href="/auth/forget-password">
+                  <span className="text-sm text-gray-600 hover:underline">
+                    ลืมรหัสผ่าน ?
+                  </span>
+                </Link>
               </div>
 
               <Button

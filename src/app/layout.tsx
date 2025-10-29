@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import UniversalThemeProvider from "@/components/providers/mui/UniversalThemeProvider";
 import appIcon from "./logoacs-nonbg.png";
+import InitialLoader from "@/components/InitialLoader";
 
 export const metadata: Metadata = {
   title: "ACS KMUTT",
@@ -21,7 +22,9 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className="antialiased">
-        <UniversalThemeProvider>{children}</UniversalThemeProvider>
+        <UniversalThemeProvider>
+          <InitialLoader>{children}</InitialLoader>
+        </UniversalThemeProvider>
       </body>
     </html>
   );

@@ -1,20 +1,21 @@
 import { ApiResponse } from "@/interface/response";
-import { LoginRequest, AuthResponse } from "../domain/auth";
+import {
+  LoginRequest,
+  AuthResponse,
+  ResetPasswordPayload,
+} from "../domain/auth";
 import { IUser } from "../domain/user";
-
-export type ForgetPasswordPayload = { email: string };
-export type ForgetPasswordResponse = { message?: string };
+import { ForgetPasswordPayload, ForgetPasswordResponse } from "../domain/auth";
 
 export interface IAuthRepository {
   LoginAdmin(data: LoginRequest): Promise<ApiResponse<AuthResponse>>;
   getUserData(token: string): Promise<ApiResponse<IUser>>;
   LoginV2(data: LoginRequest): Promise<ApiResponse<IUser>>;
-
   createCredentailForgetPassowrd(
     payload: ForgetPasswordPayload,
   ): Promise<ApiResponse<ForgetPasswordResponse>>;
-
-  requestPasswordReset?(
-    payload: ForgetPasswordPayload,
+  resetPassword(
+    data: ResetPasswordPayload,
   ): Promise<ApiResponse<ForgetPasswordResponse>>;
+  getUser(): Promise<IUser | null>;
 }

@@ -1,27 +1,25 @@
 "use client";
-
-import * as React from "react";
+import { useState } from "react";
 import Image from "next/image";
 import { Button, Typography } from "@mui/material";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { RHFTextField } from "@/components/form/RHFTextField";
+import { authService } from "@/infra/container";
+import { ForgetPasswordSchema } from "@/core/schema/auth";
 
 /* ===== Schema & Types ===== */
-const Schema = z.object({
-  email: z.string().min(1, "กรุณากรอกอีเมล").email("รูปแบบอีเมลไม่ถูกต้อง"),
-});
+const Schema = ForgetPasswordSchema;
 type FormValues = z.infer<typeof Schema>;
 
 export default function ForgetPasswordAuthLandingPage() {
-  const [submitting, setSubmitting] = React.useState(false);
-  const [message, setMessage] = React.useState<string | null>(null);
+  const [submitting, setSubmitting] = useState(false);
+  const [message, setMessage] = useState<string | null>(null);
   const {
     control,
     handleSubmit,
     reset,
-    setError,
     formState: { errors },
   } = useForm<FormValues>({
     resolver: zodResolver(Schema),
@@ -33,27 +31,17 @@ export default function ForgetPasswordAuthLandingPage() {
     setMessage(null);
     setSubmitting(true);
     try {
-      const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8000/api";
-      const res = await fetch(`${API_BASE}/v1/auth/forget-password`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: data.email }),
-        cache: "no-store",
+      const response = await authService.createCredentailForgetPassowrd({
+        email: data.email,
       });
-
-      // กัน user enumeration: แสดงข้อความกลางเสมอ
-      if (!res.ok) throw new Error(await res.text());
-
-      const json = await res.json().catch(() => ({}));
-      setMessage(
-        json?.message ??
-          "ถ้าอีเมลนี้อยู่ในระบบ เราได้ส่งลิงก์สำหรับรีเซ็ตรหัสผ่านไปให้แล้ว โปรดตรวจสอบกล่องจดหมายหรือสแปม"
-      );
-      reset();
-    } catch {
-      setError("email", { type: "manual", message: "ไม่สามารถดำเนินการได้ กรุณาลองใหม่อีกครั้ง" });
-    } finally {
-      setSubmitting(false);
+      if (!response.status) {
+        setMessage(
+          "ระบบได้ส่งรหัสผ่านชั่วคราวไปยังอีเมลของคุณแล้ว โปรดตรวจสอบอีเมล",
+        );
+        reset();
+      }
+    } catch (error) {
+      console.log(error);
     }
   };
 
@@ -77,7 +65,10 @@ export default function ForgetPasswordAuthLandingPage() {
           <Typography
             variant="h5"
             className="mt-6 text-center !font-semibold text-[var(--color-primary01)]"
-            sx={{ fontSize: { xs: "18px", sm: "20px", md: "24px", lg: "28px" }, lineHeight: 1.4 }}
+            sx={{
+              fontSize: { xs: "18px", sm: "20px", md: "24px", lg: "28px" },
+              lineHeight: 1.4,
+            }}
           >
             กรอกอีเมลของคุณ
           </Typography>
@@ -105,7 +96,9 @@ export default function ForgetPasswordAuthLandingPage() {
             </div>
 
             {message ? (
-              <p className="mt-3 rounded-xl bg-green-50 p-3 text-sm text-green-800">{message}</p>
+              <p className="mt-3 rounded-xl bg-green-50 p-3 text-sm text-green-800">
+                {message}
+              </p>
             ) : null}
           </form>
         </div>

@@ -1,9 +1,7 @@
 "use client";
 import Image from "next/image";
-// Use Next/Image with unoptimized to bypass Sharp for these specific local assets
 import FacebookRoundedIcon from "@mui/icons-material/FacebookRounded";
 import YouTubeIcon from "@mui/icons-material/YouTube";
-// import AccountCircleRoundedIcon from "@mui/icons-material/AccountCircleRounded";
 import Link from "next/link";
 import { Button } from "@mui/material";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
@@ -11,6 +9,8 @@ import { useState } from "react";
 import MenuIcon from "@mui/icons-material/Menu";
 import CloseIcon from "@mui/icons-material/Close";
 import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
+import { useAuthStore } from "@/store/auth";
+import UserIcon from "@mui/icons-material/Person";
 
 const MenuBar = () => {
   const [isOpenSubMenu, setIsOpenSubMenu] = useState(0);
@@ -159,6 +159,7 @@ const MenuBar = () => {
 
 export const NavbarMain = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const user = useAuthStore((state) => state.user);
 
   const majorName = "วิทยาการคอมพิวเตอร์ประยุกต์/Applied Computer Science";
 
@@ -172,8 +173,8 @@ export const NavbarMain = () => {
       href: "https://www.youtube.com/@ACSOfficial_KMUTT",
     },
     {
-      icon: <h4>เข้าสู่ระบบ</h4>,
-      href: "#",
+      icon: user ? <UserIcon /> : <h4>เข้าสู่ระบบ</h4>,
+      href: user ? "/profile" : "/auth/student",
     },
   ];
 

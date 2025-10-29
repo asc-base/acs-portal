@@ -1,5 +1,9 @@
 import { IAuthRepository } from "@/core/ports/auth.repository";
-import { AuthResponse, LoginRequest } from "@/core/domain/auth";
+import {
+  AuthResponse,
+  ForgetPasswordResponse,
+  LoginRequest,
+} from "@/core/domain/auth";
 import { HttpHelper } from "@/lib/http";
 import { ApiResponse } from "@/interface/response";
 import { IUser } from "@/interface/user";
@@ -48,10 +52,27 @@ export class AuthRepository implements IAuthRepository {
     return response;
   }
 
-  async requestPasswordReset(payload: {
-    email: string;
-  }): Promise<ApiResponse<{ message?: string }>> {
-    const response = await this.createCredentailForgetPassowrd(payload);
+  async resetPassword(payload: {
+    refferenceCode: string;
+    password: string;
+  }): Promise<ApiResponse<ForgetPasswordResponse>> {
+    const response = await this.http.post<ApiResponse<ForgetPasswordResponse>>(
+      `/v1/auth/reset-password`,
+      payload,
+    );
     return response;
+  }
+
+  async getUser(): Promise<IUser | null> {
+    try {
+      const response = await this.http.get<ApiResponse<IUser>>(`/v2/auth/me`);
+      if (response.data) {
+        return response.data;
+      }
+      return null;
+    } catch (error) {
+      console.error("Error fetching user:", error);
+      return null;
+    }
   }
 }

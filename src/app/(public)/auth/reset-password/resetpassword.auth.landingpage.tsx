@@ -1,6 +1,6 @@
 "use client";
 
-import * as React from "react";
+import { useState } from "react";
 import Image from "next/image";
 import { Button, Typography, IconButton, InputAdornment } from "@mui/material";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
@@ -8,23 +8,22 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { RHFTextField } from "@/components/form/RHFTextField";
+import { ResetPasswordSchema } from "@/core/schema/auth";
+import { authService } from "@/infra/container";
+import { useRouter } from "next/navigation";
 
-/* ===== Schema & Types ===== */
-const Schema = z
-  .object({
-    password: z.string().min(6, "รหัสผ่านอย่างน้อย 6 ตัวอักษร"),
-    confirmPassword: z.string().min(6, "ยืนยันรหัสผ่านอย่างน้อย 6 ตัวอักษร"),
-  })
-  .refine((v) => v.password === v.confirmPassword, {
-    message: "รหัสผ่านไม่ตรงกัน",
-    path: ["confirmPassword"],
-  });
+interface ResetPasswordAuthLandingPageProps {
+  referenceCode: string;
+}
 
-type FormValues = z.infer<typeof Schema>;
+type FormValues = z.infer<typeof ResetPasswordSchema>;
 
-export default function ResetPasswordAuthLandingPage() {
-  const [showPwd, setShowPwd] = React.useState(false);
-  const [showPwd2, setShowPwd2] = React.useState(false);
+export default function ResetPasswordAuthLandingPage({
+  referenceCode,
+}: ResetPasswordAuthLandingPageProps) {
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const router = useRouter();
 
   const {
     control,
@@ -33,16 +32,20 @@ export default function ResetPasswordAuthLandingPage() {
     reset,
     setError,
   } = useForm<FormValues>({
-    resolver: zodResolver(Schema),
+    resolver: zodResolver(ResetPasswordSchema),
     defaultValues: { password: "", confirmPassword: "" },
     mode: "onChange",
   });
 
-  const onSubmit = async () => {
+  const onSubmit = async (formData: FormValues) => {
     try {
-      await new Promise((r) => setTimeout(r, 400)); // MOCK
-      alert("เปลี่ยนรหัสผ่านสำเร็จ (Mock)");
+      await authService.resetPassword({
+        refferenceCode: referenceCode,
+        password: formData.password,
+      });
+      alert("เปลี่ยนรหัสผ่านสำเร็จ");
       reset();
+      router.push("/auth/login");
     } catch {
       setError("password", {
         type: "manual",
@@ -91,17 +94,19 @@ export default function ResetPasswordAuthLandingPage() {
               control={control}
               label="รหัสผ่านใหม่"
               placeholder="xxxxxxxxxxxxxxxxxx"
-              type={showPwd ? "text" : "password"}
+              type={showPassword ? "text" : "password"}
               aria-invalid={!!errors.password}
               InputProps={{
                 endAdornment: (
                   <InputAdornment position="end">
                     <IconButton
-                      aria-label={showPwd ? "ซ่อนรหัสผ่าน" : "แสดงรหัสผ่าน"}
-                      onClick={() => setShowPwd((s) => !s)}
+                      aria-label={
+                        showPassword ? "ซ่อนรหัสผ่าน" : "แสดงรหัสผ่าน"
+                      }
+                      onClick={() => setShowPassword((s) => !s)}
                       edge="end"
                     >
-                      {showPwd ? <VisibilityOff /> : <Visibility />}
+                      {showPassword ? <VisibilityOff /> : <Visibility />}
                     </IconButton>
                   </InputAdornment>
                 ),
@@ -113,17 +118,19 @@ export default function ResetPasswordAuthLandingPage() {
               control={control}
               label="ยืนยันรหัสผ่านใหม่"
               placeholder="xxxxxxxxxxxxxxxxxx"
-              type={showPwd2 ? "text" : "password"}
+              type={showConfirmPassword ? "text" : "password"}
               aria-invalid={!!errors.confirmPassword}
               InputProps={{
                 endAdornment: (
                   <InputAdornment position="end">
                     <IconButton
-                      aria-label={showPwd2 ? "ซ่อนรหัสผ่าน" : "แสดงรหัสผ่าน"}
-                      onClick={() => setShowPwd2((s) => !s)}
+                      aria-label={
+                        showConfirmPassword ? "ซ่อนรหัสผ่าน" : "แสดงรหัสผ่าน"
+                      }
+                      onClick={() => setShowConfirmPassword((s) => !s)}
                       edge="end"
                     >
-                      {showPwd2 ? <VisibilityOff /> : <Visibility />}
+                      {showConfirmPassword ? <VisibilityOff /> : <Visibility />}
                     </IconButton>
                   </InputAdornment>
                 ),

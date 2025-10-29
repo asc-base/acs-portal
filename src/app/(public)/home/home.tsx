@@ -9,6 +9,7 @@ import { useState } from "react";
 import { NewsCarouselComponent } from "@/components/news.carousel.component";
 import { ActivityCard } from "@/components/activitycard";
 import { Carousel } from "@/components/carousel";
+import { useAuthStore } from "@/store/auth";
 
 interface HomePageProps {
   initNewsActivity: INews[];
@@ -26,6 +27,10 @@ const HomePage = ({
   const [newsActivityActive, setNewsActivityActive] = useState(0);
   const [newsCompleteActive, setNewsCompleteActive] = useState(0);
   const [newsActivityStudentActive, setNewsActivityStudentActive] = useState(0);
+
+  const user = useAuthStore((state) => state.user);
+
+  console.log("user in home page:", user);
 
   const handleNextNewsActivity = () => {
     if (initNewsActivity.length === 0) return;
