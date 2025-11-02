@@ -2,15 +2,16 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { ClassBookAdminCard } from "@/components/classbookadmincard";
-import PaginationComponent from "@/components/pagination";
 import { IClassBook } from "@/core/domain/classbook";
-import { MenuItem, Select, SelectChangeEvent, Button } from "@mui/material";
+import { MenuItem, Select, SelectChangeEvent, Button, Pagination,} from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import DoneIcon from "@mui/icons-material/Done";
 import AddIcon from "@mui/icons-material/Add";
 import SearchIcon from "@mui/icons-material/Search";
-import CloseIcon from '@mui/icons-material/Close';
-
+import CloseIcon from "@mui/icons-material/Close";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
 
 interface ClassBookListComponentsProps {
   classbooks: IClassBook[];
@@ -19,6 +20,12 @@ interface ClassBookListComponentsProps {
   page: number;
 }
 
+const searchSchema = z.object({
+  classOf: z.string().optional(),
+});
+
+type SearchForm = z.infer<typeof searchSchema>;
+
 const ClassBookListComponents = ({
   classbooks,
   totalRecords,
@@ -26,12 +33,15 @@ const ClassBookListComponents = ({
   page,
 }: ClassBookListComponentsProps) => {
   const router = useRouter();
-  const [searchClassOf, setSearch] = useState("");
   const [sortBy, setSortBy] = useState("desc");
 
-  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearch(e.target.value);
-    console.log("Search Classof:", e.target.value);
+  const { register, handleSubmit, reset } = useForm<SearchForm>({
+    resolver: zodResolver(searchSchema),
+  });
+
+  const onSubmit = (data: SearchForm) => {
+    console.log("Search classOf:", data.classOf);
+    reset();
   };
 
   const handleSortBy = (e: SelectChangeEvent) => {
@@ -39,43 +49,40 @@ const ClassBookListComponents = ({
     console.log("Sort by:", e.target.value);
   };
 
-  const clearSearch = () => {
-    setSearch("");
-  };
-
    const handleClickAddClassBook = () => {
     router.push("/admin/classbook/create");
   };
+
   const handleNextPage = (currentPage: number) => {
-    router.push(`/admin/classbook?page=${currentPage}&pageSize=${pageSize}`);
+    router.push(
+      `/admin/classbook?page=${currentPage}&pageSize=${pageSize}`
+    );
   };
 
   return (
-    <div className="min-h-screen p-8 pb-24">
+    <div className="min-h-screen px-8 py-5">
       <div className="mb-6 flex items-center justify-between">
         <h3 className="font-bold text-lg">ข้อมูลนักศึกษา</h3>
 
         <div className="flex items-center gap-3">
-          <div className="relative">
+          <form onSubmit={handleSubmit(onSubmit)} className="relative">
             <div className="absolute left-2 top-1/2 -translate-y-1/2 text-neutral04">
               <SearchIcon className="h-5 w-5" />
             </div>
             <input
               type="text"
               placeholder="ค้นหา"
-              value={searchClassOf}
-              onChange={handleSearch}
+              {...register("classOf")}
               className="border w-[280px] h-[44px] rounded-sm pl-10 border-neutral04 text-h4"
             />
-            {searchClassOf && (
               <button
-                onClick={clearSearch}
+                type="button"
+                onClick={() => reset()}
                 className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
               >
                 <CloseIcon fontSize="small" />
               </button>
-            )}
-          </div>
+          </form>
 
           <Select
             onChange={handleSortBy}
@@ -149,23 +156,25 @@ const ClassBookListComponents = ({
         </div>
       </div>
 
-      <div className="grid grid-cols-3 gap-6">
-        {classbooks.map((classbook) => (
-          <ClassBookAdminCard
-            key={classbook.id}
-            classbook={classbook}
-            onView={() => router.push(`/admin/classbook/${classbook.id}`)}
-            onDelete={() => console.log("Delete succeed:", classbook.id)}
-          />
-        ))}
-      </div>
-
-      <div className="fixed bottom-0 w-[calc(100%-20rem)] bg-white py-2">
-        <PaginationComponent
+      <div className="flex w-full flex-col items-center justify-center gap-10">
+        <div className="grid w-full justify-items-center grid-cols-3 gap-6">
+          {classbooks.map((classbook) => (
+            <ClassBookAdminCard
+              key={classbook.id}
+              classbook={classbook}
+              onView={() => router.push(`/admin/classbook/${classbook.id}`)}
+              onDelete={() => console.log("Delete succeed:", classbook.id)}
+            />
+          ))}
+        </div>
+        
+        <Pagination
+          shape="rounded"
+          count={Math.ceil(totalRecords / pageSize)}
           page={page}
-          pageSize={pageSize}
-          totalRecords={totalRecords}
-          onChangePage={handleNextPage}
+          onChange={(_, currentPage) => handleNextPage(currentPage)}
+          color="primary"
+          size="large"
         />
       </div>
     </div>
