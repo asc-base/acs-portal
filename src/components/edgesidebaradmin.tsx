@@ -15,7 +15,7 @@ import { usePathname } from "next/navigation";
 const sidebarItems = [
     {
         name: "ข้อมูลนักศึกษา",
-        href: "/admin/students",
+        href: "/admin/classbook",
         icon: <PersonIcon />
     },
     {

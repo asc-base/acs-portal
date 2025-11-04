@@ -8,8 +8,6 @@ import { StudentCard } from "@/components/studentcard";
 import { IStudent } from "@/core/domain/student";
 import { StudentModal } from "@/components/studentmodal";
 import { useRouter } from "next/navigation";
-import ArrowBackIcon from "@mui/icons-material/ArrowBack";
-import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import { IClassBook } from "@/core/domain/classbook";
 
 interface StudentsListComponentsProps {
@@ -74,7 +72,7 @@ const StudentsListComponent = ({
           </div>
         ) : (
           <div>
-            <div className="ml-4 lg:ml-12">
+            <div className="ml-4 lg:ml-12 mb-10">
               <div className="grid grid-cols-2 gap-y-4 md:grid-cols-4 lg:grid-cols-4 lg:gap-y-6">
                 {students.map((item) => (
                   <div key={item.id} onClick={() => handleOpen(item)}>
@@ -83,36 +81,16 @@ const StudentsListComponent = ({
                 ))}
               </div>
             </div>
-
-            <div className="relative mt-6 flex items-center">
-              <button
-                onClick={() => handleNextPage(page - 1)}
-                disabled={page === 1}
-                className="hover:text-primary03 disabled:text-neutral04 absolute left-2 flex items-center gap-1 px-2 py-1 disabled:cursor-not-allowed sm:left-0"
-              >
-                <ArrowBackIcon fontSize="small" /> ก่อนหน้า
-              </button>
-
-              <div className="flex flex-1 justify-center px-4">
-                <Pagination
-                  shape="rounded"
-                  count={Math.ceil(totalRecords / pageSize)}
-                  page={page}
-                  onChange={(_, currentPage) => handleNextPage(currentPage)}
-                  color="primary"
-                  size="large"
-                  hidePrevButton
-                  hideNextButton
-                />
-              </div>
-
-              <button
-                onClick={() => handleNextPage(page + 1)}
-                disabled={page === Math.ceil(totalRecords / pageSize)}
-                className="hover:text-primary03 disabled:text-neutral04 absolute right-2 flex items-center gap-1 px-2 py-1 disabled:cursor-not-allowed sm:right-0"
-              >
-                ถัดไป <ArrowForwardIcon fontSize="small" />
-              </button>
+              
+            <div className="flex items-center justify-center">
+            <Pagination
+              shape="rounded"
+              count={Math.ceil(totalRecords / pageSize)}
+              page={page}
+              onChange={(_, currentPage) => handleNextPage(currentPage)}
+              color="primary"
+              size="large"
+            />
             </div>
           </div>
         )}
