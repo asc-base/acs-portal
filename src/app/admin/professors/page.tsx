@@ -1,5 +1,5 @@
 import { professorService } from "@/infra/container";
-import ProfessorTableComponent from "./professors.table";
+import ProfessorLandingpage from "./professors.landingpage";
 
 interface PageProps {
   searchParams: Promise<{
@@ -20,7 +20,7 @@ const page = async ({ searchParams }: PageProps) => {
   const { rows, totalRecords, pageSize, page } =
     await professorService.getProfessors(query);
   return (
-    <ProfessorTableComponent
+    <ProfessorLandingpage
       professor={rows}
       totalRecords={totalRecords}
       pageSize={pageSize}
