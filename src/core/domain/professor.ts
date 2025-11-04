@@ -7,8 +7,18 @@ export interface IProfessor {
     id: number;
     user: IUser;
     majorPositions: Position;
-    academicPositions: Position;
+    academicPosition: Position;
     profRoom: string;
     expertFields: IExpertField[];
     educations: IEducation[];
+    phone:string;
+}
+
+export interface QueryProfessor {
+  page?: number;
+  pageSize?: number;
+  educations?: string;
+  expertFields?: string;
+  majorPosition?: string;
+  academicPosition?: string;
 }
