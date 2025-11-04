@@ -1,8 +1,8 @@
-import React, { Suspense } from "react";
+import React from "react";
 import ProjectList from "./project.list.components";
 import {
   projectService,
-  classBookService,
+  // classBookService,
   masterDataService,
   courseService,
 } from "@/infra/container";
@@ -33,45 +33,26 @@ const Page = async ({ searchParams }: LocalPageProps) => {
   const { rows: ProjectRows, totalRecords: recordProjects } =
     await projectService.getProjects(filterParams);
 
+  // const categories = await masterDataService.getMasterDataListType();
+  const categories = await masterDataService.getMasterDataListType("category");
+  const fields = await masterDataService.getMasterDataListType("field");
+  const types = await masterDataService.getMasterDataListType("type");
+  const courses = await courseService.getCourse({ curriculumId: 1 });
+
   console.log("Search Params:", resolvedSearchParams);
   console.log("Filter Params:", filterParams);
 
-  const { rows: classBooks } = await classBookService.getClassBooks({
-    page: 1,
-    pageSize: 4,
-    sortBy: "classof",
-    sortOrder: "desc",
-  });
-
-  const fields = await masterDataService.getMasterDataListType("field");
-  const categories = await masterDataService.getMasterDataListType("category");
-  const type = await masterDataService.getMasterDataListType("type");
-  const { rows: courses } = await courseService.getCourse({
-    curriculumId: 1,
-  });
-
   return (
     <div className="jun-layout">
-      <div className="jun-edgeSidebar jun-edgeSidebar-drawer jun-edgeSidebar-permanent-autoCollapse-2xl relative z-0 hidden lg:block">
-        <div className="jun-edgeContent">
-          <Suspense
-            fallback={
-              <div className="p-4 text-sm text-gray-500">Loading filters…</div>
-            }
-          >
-            <FilterList
-              type={type}
-              field={fields}
-              category={categories}
-              course={courses}
-              classBooks={classBooks}
-            />
-          </Suspense>
-        </div>
-      </div>
       <div className="jun-content">
         <ProjectList projects={ProjectRows} totalRecords={recordProjects} />
       </div>
+      <FilterList
+        categories={categories}
+        fields={fields}
+        types={types}
+        courses={courses.rows}
+      />
     </div>
   );
 };

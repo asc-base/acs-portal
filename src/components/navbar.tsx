@@ -115,7 +115,7 @@ const MenuBar = () => {
                   ))}
                 </ul>
 
-                <ul className="absolute top-full left-0 z-10 hidden min-w-48 overflow-hidden rounded-xl bg-white shadow-lg md:group-hover:block">
+                <ul className="absolute top-full left-0 z-50 hidden min-w-48 overflow-hidden rounded-xl bg-white shadow-lg md:group-hover:block">
                   {item.submenu.map((subItem) => (
                     <li
                       key={subItem.id}
