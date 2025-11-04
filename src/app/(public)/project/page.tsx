@@ -52,7 +52,7 @@ const Page = async ({ searchParams }: LocalPageProps) => {
 
   return (
     <div className="jun-layout">
-      <div className="jun-edgeSidebar relative z-0">
+      <div className="jun-edgeSidebar jun-edgeSidebar-drawer jun-edgeSidebar-permanent-autoCollapse-2xl relative z-0 hidden lg:block">
         <div className="jun-edgeContent">
           <Suspense
             fallback={
