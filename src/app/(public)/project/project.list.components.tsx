@@ -9,6 +9,8 @@ import type { IProject } from "@/core/domain/project";
 import { ProjectCard } from "@/components/ProjectCard";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import TuneIcon from "@mui/icons-material/Tune";
+import { triggerEdgeDrawer } from "tailwindcss-jun-layout";
 
 type Order = "asc" | "desc";
 
@@ -65,6 +67,21 @@ const ProjectPage: FC<ProjectPageProps> = ({
         <div className="xl:hidden">
           <Tooltip title={labelText}>
             <IconButton
+              onClick={() => triggerEdgeDrawer()}
+              aria-label="toggle sort"
+              aria-pressed={order === "asc"}
+              sx={{ p: 0.5 }}
+              className="jun-edgeCollapseTrigger"
+            >
+              <TuneIcon
+                className="jun-edgeCollapsed-visible"
+                sx={{ fontSize: 24 }}
+              />
+            </IconButton>
+          </Tooltip>
+
+          <Tooltip title={labelText}>
+            <IconButton
               onClick={toggleOrder}
               aria-label="toggle sort"
               aria-pressed={order === "asc"}
@@ -80,7 +97,6 @@ const ProjectPage: FC<ProjectPageProps> = ({
           </Tooltip>
         </div>
 
-        {/* ≥1280px: TOGGLE BUTTON */}
         <button
           type="button"
           onClick={toggleOrder}
