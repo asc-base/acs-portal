@@ -5,7 +5,6 @@ interface PageProps {
   searchParams: Promise<{
     page?: number;
     pageSize?: number;
-    academicPosition?: string;
   }>;
 }
 
