@@ -17,6 +17,13 @@ export const Theme = createTheme({
         },
       },
     },
+    MuiTypography: {
+      styleOverrides: {
+        root: {
+          color: "#070220",
+        },
+      },
+    },
     MuiTextField: {
       styleOverrides: {
         root: {

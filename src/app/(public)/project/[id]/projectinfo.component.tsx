@@ -75,8 +75,12 @@ const ProjectInfoComponent: FC<ProjectInfoProps> = ({ project }) => {
       {/*Project detail*/}
       <div className="mb-4">
         <h5>
-          {project?.projectCategories[0].name} /{" "}
-          {project?.projectFields[1].name}
+          {project?.projectCategories?.[0]?.name &&
+          project?.projectFields?.[0]?.name
+            ? `${project.projectCategories[0].name} / ${project.projectFields[0].name}`
+            : project?.projectCategories?.[0]?.name ||
+              project?.projectFields?.[0]?.name ||
+              "Uncategorized"}
         </h5>
         <h2 className="font-bold">{project?.title}</h2>
         <h4>{project?.detail}</h4>

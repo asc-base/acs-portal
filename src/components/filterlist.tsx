@@ -6,6 +6,7 @@ import ExpandLessIcon from "@mui/icons-material/ExpandLess";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { ICourse } from "@/core/domain/course";
 import Checkbox from "@mui/material/Checkbox";
+import { IClassBook } from "@/core/domain/classbook";
 
 interface FilterComponentProps {
   header: string;
@@ -18,6 +19,7 @@ interface FilterListProps {
   fields: IType[];
   types: IType[];
   courses: ICourse[];
+  classBooks: IClassBook[];
 }
 
 const FilterComponent = ({ header, list, searchBy }: FilterComponentProps) => {
@@ -105,7 +107,7 @@ export const FilterList = ({
   courses,
 }: FilterListProps) => {
   return (
-    <aside className="jun-edgeSidebar jun-edgeSidebar-drawer md:jun-edgeSidebar-permanent jun-edgeSidebar-collapsed-w-[180px] jun-edgeSidebar-permanent-autoCollapse-xl z-0">
+    <aside className="jun-edgeSidebar jun-edgeSidebar-drawer lg:jun-edgeSidebar-permanent jun-edgeSidebar-collapsed-w-[180px] jun-edgeSidebar-permanent-autoCollapse-xl z-0">
       <div className="jun-edgeContent">
         <div className="flex h-full max-h-screen flex-col gap-y-4 overflow-y-auto bg-white p-4 pt-[6rem] pb-32 md:min-h-0 md:pt-4 md:pb-4">
           <FilterComponent
@@ -126,7 +128,7 @@ export const FilterList = ({
           <FilterComponent
             header="ประเภทของชิ้นงาน"
             list={types}
-            searchBy="type"
+            searchBy="types"
           />
         </div>
       </div>
