@@ -9,6 +9,7 @@ import { useState, useEffect, useMemo } from "react";
 import MenuIcon from "@mui/icons-material/Menu";
 import CloseIcon from "@mui/icons-material/Close";
 import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
+import FilterListIcon from "@mui/icons-material/FilterList";
 import { useAuthStore } from "@/store/auth";
 import UserIcon from "@mui/icons-material/Person";
 import { IUser } from "@/core/domain/user";
@@ -210,6 +211,18 @@ export const NavbarMain = () => {
     >
       <div className="flex h-full w-full items-center justify-between px-5 md:px-10">
         <div className="flex h-full items-center gap-x-4">
+          {/* Drawer trigger button for mobile */}
+          <button
+            className="jun-edgeDrawerTrigger p-2 md:hidden"
+            onClick={() => {
+              // The jun-layout library will handle the click event
+              const event = new CustomEvent("triggerEdgeDrawer");
+              document.dispatchEvent(event);
+            }}
+          >
+            <FilterListIcon />
+          </button>
+
           {isOpen ? (
             <div className="flex min-h-20 items-center gap-x-4">
               {linkIcons.map((link, index) => (

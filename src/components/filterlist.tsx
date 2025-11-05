@@ -105,28 +105,30 @@ export const FilterList = ({
   courses,
 }: FilterListProps) => {
   return (
-    <aside className="jun-edgeSidebar jun-edgeSidebar-drawer md:jun-edgeSidebar-permanent jun-edgeSidebar-collapsed-w-[180px] jun-edgeSidebar-permanent-autoCollapse-xl h-auto">
-      <div className="px-5 py-3">
-        <FilterComponent
-          header="ค้นหาตามรายวิชา"
-          list={courses}
-          searchBy="course"
-        />
-        <FilterComponent
-          header="ค้นหาผลงานตามประเภท"
-          list={fields}
-          searchBy="fields"
-        />
-        <FilterComponent
-          header="ค้นหาตามหมวดหมู่"
-          list={categories}
-          searchBy="categories"
-        />
-        <FilterComponent
-          header="ประเภทของชิ้นงาน"
-          list={types}
-          searchBy="type"
-        />
+    <aside className="jun-edgeSidebar jun-edgeSidebar-drawer md:jun-edgeSidebar-permanent jun-edgeSidebar-collapsed-w-[180px] jun-edgeSidebar-permanent-autoCollapse-xl z-0">
+      <div className="jun-edgeContent">
+        <div className="flex h-full max-h-screen flex-col gap-y-4 overflow-y-auto bg-white p-4 pt-[6rem] pb-32 md:min-h-0 md:pt-4 md:pb-4">
+          <FilterComponent
+            header="ค้nหาตามรายวิชา"
+            list={courses}
+            searchBy="course"
+          />
+          <FilterComponent
+            header="ค้นหาผลงานตามประเภท"
+            list={fields}
+            searchBy="fields"
+          />
+          <FilterComponent
+            header="ค้นหาตามหมวดหมู่"
+            list={categories}
+            searchBy="categories"
+          />
+          <FilterComponent
+            header="ประเภทของชิ้นงาน"
+            list={types}
+            searchBy="type"
+          />
+        </div>
       </div>
     </aside>
   );
