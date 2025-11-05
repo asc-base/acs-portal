@@ -29,11 +29,11 @@ export interface QueryProject {
   pageSize?: number;
   sortBy?: string;
   sortOrder?: "asc" | "desc";
-  fields?: number[];
-  categories?: number[];
-  types?: number[];
-  courses?: number[];
-  classBooks?: number[];
+  fields?: string[];
+  categories?: string[];
+  types?: string[];
+  courses?: string[];
+  classBooks?: string[];
 }
 
 export interface IProjectAssets {

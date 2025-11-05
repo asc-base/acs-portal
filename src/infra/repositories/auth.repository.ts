@@ -7,6 +7,7 @@ import {
 import { HttpHelper } from "@/lib/http";
 import { ApiResponse } from "@/interface/response";
 import { IUser } from "@/interface/user";
+import { authErrorHandler } from "@/lib/auth-error-handler";
 
 export class AuthRepository implements IAuthRepository {
   private http: HttpHelper;
@@ -64,15 +65,12 @@ export class AuthRepository implements IAuthRepository {
   }
 
   async getUser(): Promise<IUser | null> {
-    try {
+    return authErrorHandler.withAuthErrorHandling(async () => {
       const response = await this.http.get<ApiResponse<IUser>>(`/v2/auth/me`);
       if (response.data) {
         return response.data;
       }
       return null;
-    } catch (error) {
-      console.error("Error fetching user:", error);
-      return null;
-    }
+    });
   }
 }

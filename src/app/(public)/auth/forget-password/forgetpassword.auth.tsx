@@ -91,7 +91,7 @@ export default function ForgetPasswordAuthLandingPage() {
                 disabled={submitting}
                 className="!h-12 w-full !bg-[var(--color-primary02)] !text-base !normal-case shadow-md hover:!bg-[#1b1361] md:w-1/2"
               >
-                {submitting ? "กำลังส่ง..." : "ส่งรหัสผ่าน"}
+                รับรหัสผ่านชั่วคราว
               </Button>
             </div>
 

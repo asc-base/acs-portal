@@ -1,15 +1,11 @@
 import React from "react";
-// import ProfileForm from "./profileform";
-// import { studentService } from "@/infra/container";
+import ProfileForm from "./profileform";
 
 const page = async () => {
-  // const studentData = await studentService.getSrudentByUserId(1);
-
   return (
     <>
-      <h1>coming soon</h1>
+      <ProfileForm />
     </>
-    // <ProfileForm studentData={studentData} />
   );
 };
 

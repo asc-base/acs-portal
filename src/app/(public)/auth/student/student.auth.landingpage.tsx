@@ -18,6 +18,7 @@ import { RHFTextField } from "@/components/form/RHFTextField";
 import { authService } from "@/infra/container";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useAuthStore } from "@/store/auth";
 
 const Schema = z.object({
   email: z.string().trim(),
@@ -29,6 +30,7 @@ type FormValues = z.infer<typeof Schema>;
 export default function StudentAuthLandingPage() {
   const [showPassword, setShowPassword] = useState(false);
   const router = useRouter();
+  const setUser = useAuthStore((state) => state.setUser);
 
   const {
     control,
@@ -58,8 +60,17 @@ export default function StudentAuthLandingPage() {
 
       const reps = await authService.LoginV2(loginRequest);
 
-      if (reps.status && reps.statusCode === 200) {
+      if (reps.status && reps.statusCode === 200 && reps.data) {
+        // Store user data in the auth store
+        setUser(reps.data);
+        console.log("Login successful, user stored in auth store:", reps.data);
         router.push("/home");
+      } else {
+        console.log("Login failed:", reps);
+        setError("password", {
+          type: "manual",
+          message: "ข้อมูลการเข้าสู่ระบบไม่ถูกต้อง",
+        });
       }
     } catch {
       setError("password", {
