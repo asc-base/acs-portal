@@ -23,7 +23,7 @@ const ProfessorTableComponent = ({
   const router = useRouter();
 
   const handleEdit = (professorId: number) => {
-    router.push(`/admin/professors/edit/${professorId}`);
+    router.push(`/admin/professors/update/${professorId}`);
   };
 
   const handleDelete = (professorId: number) => {

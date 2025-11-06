@@ -6,7 +6,7 @@ import { IEducation } from "./education";
 export interface IProfessor {
     id: number;
     user: IUser;
-    majorPositions: Position;
+    majorPosition: Position;
     academicPosition: Position;
     profRoom: string;
     expertFields: IExpertField[];
