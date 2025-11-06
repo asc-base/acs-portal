@@ -162,7 +162,7 @@ const ClassBookListComponents = ({
             <ClassBookAdminCard
               key={classbook.id}
               classbook={classbook}
-              onView={() => router.push(`/admin/classbook/${classbook.id}`)}
+              onView={() => router.push(`/admin/students?page=1&pageSize=12&classBookId=${classbook.id}`)}
               onDelete={() => console.log("Delete succeed:", classbook.id)}
             />
           ))}
