@@ -9,12 +9,12 @@ export const ProfessorCard: FC<ProfessorCardProps> = (props) => {
     <div className="h-full w-full max-w-[280px] overflow-hidden rounded-2xl shadow-lg">
       <CardMedia
         sx={{
-          height: "auto",
+          height: "200px",
           width: "100%",
-          aspectRatio: "4/3",
           backgroundSize: "cover",
-          backgroundPosition: "top",
-          objectPosition: "top",
+          backgroundPosition: "center",
+          objectFit: "cover",
+          objectPosition: "center",
         }}
         component="img"
         image={props.user.imageUrl}
