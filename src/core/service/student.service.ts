@@ -1,20 +1,12 @@
 import { IStudentRepository } from "../ports/student.repository";
-import { IStudent } from "../domain/student";
+import { IStudent, QueryStudent } from "../domain/student";
 import { Pageable } from "@/interface/response";
 
 export class StudentService {
   constructor(private studentRepository: IStudentRepository) {}
 
-  async getStudents(
-    page: number,
-    pageSize: number,
-    classBookId: number,
-  ): Promise<Pageable<IStudent>> {
-    const response = await this.studentRepository.getStudents(
-      page,
-      pageSize,
-      classBookId,
-    );
+  async getStudents(query: QueryStudent): Promise<Pageable<IStudent>> {
+    const response = await this.studentRepository.getStudents(query);
     return response.data;
   }
   

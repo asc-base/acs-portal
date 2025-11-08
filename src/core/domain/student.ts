@@ -12,3 +12,13 @@ export interface IStudent {
     github?: string | null;
     projects: IProject[];
 }
+
+export interface QueryStudent
+{
+    page: number,
+    pageSize: number,
+    classBookId: number,
+    search?: string,
+    sortBy?: string,
+    sortOrder?: "asc" | "desc";
+}

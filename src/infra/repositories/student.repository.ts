@@ -1,5 +1,5 @@
 import { IStudentRepository } from "@/core/ports/student.repository";
-import { IStudent } from "@/core/domain/student";
+import { IStudent, QueryStudent } from "@/core/domain/student";
 import { HttpHelper } from "@/lib/http";
 import { ApiResponse, Pageable } from "@/interface/response";
 
@@ -13,11 +13,26 @@ export class StudentRepository implements IStudentRepository {
   }
 
   async getStudents(
-    page: number,
-    pageSize: number,
-    classBookId: number,
+    query: QueryStudent
   ): Promise<ApiResponse<Pageable<IStudent>>> {
-    const url = `/v1/students?page=${page}&pageSize=${pageSize}&classBookId=${classBookId}`;
+    const searchParams = new URLSearchParams({
+      page: query.page?.toString() || "1",
+      pageSize: query.pageSize?.toString() || "10",
+      classBookId: query.classBookId.toString(),
+    });
+    if (query.search) {
+      searchParams.append("search", query.search);
+    }
+    
+    if (query.sortBy) {
+      searchParams.append("sortBy", query.sortBy);
+    }
+
+    if (query.sortOrder) {
+      searchParams.append("sortOrder", query.sortOrder);
+    }
+
+    const url = `/v1/students?${searchParams.toString()}`;
 
     const response = await this.http.get<ApiResponse<Pageable<IStudent>>>(url);
     return response;
