@@ -54,8 +54,10 @@ const Page = async ({ searchParams }: LocalPageProps) => {
     page: 1,
     pageSize: 4,
     sortBy: "firstYearAcademic",
-    sortOrder: "asc",
+    sortOrder: "desc",
   });
+
+  const revertedClassBooks = classBooks.rows.slice();
 
   return (
     <div className="jun-layout">
@@ -66,7 +68,7 @@ const Page = async ({ searchParams }: LocalPageProps) => {
         />
       </div>
       <FilterList
-        classBooks={classBooks.rows}
+        classBooks={revertedClassBooks}
         categories={categories}
         fields={fields}
         types={types}
