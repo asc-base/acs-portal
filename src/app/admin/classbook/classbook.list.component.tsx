@@ -1,8 +1,7 @@
 "use client";
-import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { ClassBookAdminCard } from "@/components/classbookadmincard";
-import { IClassBook } from "@/core/domain/classbook";
+import { IClassBook, QueryClassBook } from "@/core/domain/classbook";
 import { MenuItem, Select, SelectChangeEvent, Button, Pagination,} from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import DoneIcon from "@mui/icons-material/Done";
@@ -18,6 +17,7 @@ interface ClassBookListComponentsProps {
   totalRecords: number;
   pageSize: number;
   page: number;
+  sortOrder?: string;
 }
 
 const searchSchema = z.object({
@@ -31,32 +31,41 @@ const ClassBookListComponents = ({
   totalRecords,
   pageSize,
   page,
+  sortOrder,
 }: ClassBookListComponentsProps) => {
   const router = useRouter();
-  const [sortBy, setSortBy] = useState("desc");
 
   const { register, handleSubmit, reset } = useForm<SearchForm>({
     resolver: zodResolver(searchSchema),
   });
+
+  const SearchClassBookUrl = (query: Partial<QueryClassBook>) => {
+    const params = new URLSearchParams({
+      page: query.page?.toString() || page.toString(),
+      pageSize: query.pageSize?.toString() || pageSize.toString(),
+      sortBy: "createdAt",
+      sortOrder: query.sortOrder ?? sortOrder ?? "desc",
+    });
+    return `/admin/classbook?${params.toString()}`;
+  };
 
   const onSubmit = (data: SearchForm) => {
     console.log("Search classOf:", data.classOf);
     reset();
   };
 
-  const handleSortBy = (e: SelectChangeEvent) => {
-    setSortBy(e.target.value);
-    console.log("Sort by:", e.target.value);
+  const handleSortOrder = (event: SelectChangeEvent) => {
+    const newSortOrder = event.target.value as "asc" | "desc";
+    router.push(SearchClassBookUrl({ sortOrder: newSortOrder }));
   };
 
-   const handleClickAddClassBook = () => {
+
+  const handleClickAddClassBook = () => {
     router.push("/admin/classbook/create");
   };
 
   const handleNextPage = (currentPage: number) => {
-    router.push(
-      `/admin/classbook?page=${currentPage}&pageSize=${pageSize}`
-    );
+    router.push(SearchClassBookUrl({ page: currentPage }));
   };
 
   return (
@@ -85,9 +94,9 @@ const ClassBookListComponents = ({
           </form>
 
           <Select
-            onChange={handleSortBy}
+            onChange={handleSortOrder}
             size="small"
-            value={sortBy}
+            value={sortOrder}
             displayEmpty
             renderValue={() => "จัดเรียงตาม"}
             sx={{
@@ -117,7 +126,7 @@ const ClassBookListComponents = ({
               }}
             >
               ใหม่สุดไปเก่าสุด
-              {sortBy === "desc" && <DoneIcon fontSize="small" />}
+              {sortOrder === "desc" && <DoneIcon fontSize="small" />}
             </MenuItem>
 
             <MenuItem
@@ -131,7 +140,7 @@ const ClassBookListComponents = ({
               }}
             >
               เก่าสุดไปใหม่สุด
-              {sortBy === "asc" && <DoneIcon fontSize="small" />}
+               {sortOrder === "asc" && <DoneIcon fontSize="small" />}
             </MenuItem>
           </Select>
 
@@ -162,7 +171,8 @@ const ClassBookListComponents = ({
             <ClassBookAdminCard
               key={classbook.id}
               classbook={classbook}
-              onView={() => router.push(`/admin/students?page=1&pageSize=12&classBookId=${classbook.id}`)}
+              onEdit={() => router.push(`/admin/students/edit/${classbook.id}`)}
+              onView={() => router.push(`/admin/students?page=1&pageSize=10&classBookId=${classbook.id}`)}
               onDelete={() => console.log("Delete succeed:", classbook.id)}
             />
           ))}
