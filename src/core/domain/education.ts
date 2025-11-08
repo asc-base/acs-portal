@@ -9,3 +9,9 @@ export interface IEducation {
     createdBy:  number;
     updatedBy:  number;
 }
+
+export interface IUpdateEducation {
+    education:  string;
+    university: string;
+    level:      EducationLevel;
+}

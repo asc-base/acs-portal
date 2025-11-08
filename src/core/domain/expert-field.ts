@@ -4,3 +4,7 @@ export interface IExpertField {
     createdDate: Date;
     updatedDate: Date;
 }
+
+export interface IUpdateExpertField {
+    field?: string;
+}

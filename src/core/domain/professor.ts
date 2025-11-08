@@ -1,7 +1,7 @@
 import { IUser } from "./user";
 import { Position } from "./master-data";
-import { IExpertField } from "./expert-field";
-import { IEducation } from "./education";
+import { IExpertField ,IUpdateExpertField } from "./expert-field";
+import { IEducation , IUpdateEducation} from "./education";
 
 export interface IProfessor {
     id: number;
@@ -11,6 +11,17 @@ export interface IProfessor {
     profRoom: string;
     expertFields: IExpertField[];
     educations: IEducation[];
+    phone:string;
+}
+
+export interface IUpdateProfessor {
+    id: number;
+    user: IUser;
+    majorPosition: Position;
+    academicPosition: Position;
+    profRoom: string;
+    expertFields: IUpdateExpertField[];
+    educations: IUpdateEducation[];
     phone:string;
 }
 

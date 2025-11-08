@@ -6,11 +6,14 @@ import AddIcon from "@mui/icons-material/Add";
 import Image from "next/image";
 import { useForm, Controller } from "react-hook-form";
 import { IProfessor } from "@/core/domain/professor";
-import { IExpertField } from "@/core/domain/expert-field";
-import { IEducation } from "@/core/domain/education";
+import { IUpdateExpertField } from "@/core/domain/expert-field";
+import { IUpdateEducation } from "@/core/domain/education";
 import { EducationLevel, Position } from "@/core/domain/master-data";
-import { CheckBox, Delete } from "@mui/icons-material";
+import { Delete } from "@mui/icons-material";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
 
+// 🔹 ซ่อน input file
 const VisuallyHiddenInput = styled("input")({
   clip: "rect(0 0 0 0)",
   clipPath: "inset(50%)",
@@ -29,40 +32,67 @@ interface ProfessorFormComponentProps {
   educationLevel: EducationLevel[];
 }
 
+const Schema = z.object({
+  firstNameTh: z.string().min(1, "กรุณากรอกชื่อ (ภาษาไทย)"),
+  lastNameTh: z.string().min(1, "กรุณากรอกนามสกุล (ภาษาไทย)"),
+  firstNameEn: z.string().min(1, "กรุณากรอกชื่อ (ภาษาอังกฤษ)"),
+  lastNameEn: z.string().min(1, "กรุณากรอกนามสกุล (ภาษาอังกฤษ)"),
+  majorPositionTh: z.string().min(1, "กรุณาเลือกตำแหน่ง (ไทย)"),
+  majorPositionEn: z.string().min(1, "กรุณาเลือกตำแหน่ง (อังกฤษ)"),
+  phone: z.string().regex(/^[0-9]{9,10}$/, "กรุณากรอกเบอร์โทรให้ถูกต้อง"),
+  email: z.string().email("รูปแบบอีเมลไม่ถูกต้อง"),
+  academicPosition: z.string().optional(),
+  profRoom: z.string().optional(),
+  imageURL: z.string().optional(),
+  expertFields: z.array(z.string().min(1, "สาขาที่เชี่ยวชาญต้องไม่ว่าง")),
+  educations: z.array(
+    z.object({
+      level: z.string().min(1, "กรุณาเลือกระดับการศึกษา"),
+      education: z.string().min(1, "กรุณากรอกชื่อสาขา"),
+      university: z.string().min(1, "กรุณากรอกชื่อมหาวิทยาลัย"),
+    }),
+  ),
+});
+
+type FormValues = z.infer<typeof Schema>;
+
 const ProfessorFormComponent = ({
   professor,
   majorPosition,
   educationLevel,
 }: ProfessorFormComponentProps) => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [originalImage, setOriginalImage] = useState<string | null>(null);
-  const [education, setEducation] = useState<IEducation[]>([]);
-  const [expertField, setExpertField] = useState<IExpertField[]>([]);
+  const [education, setEducation] = useState<IUpdateEducation[]>([]);
+  const [expertField, setExpertField] = useState<IUpdateExpertField[]>([]);
   const [isEdit, setIsEdit] = useState(false);
-
-  const { control, handleSubmit, reset, getValues } =
-    useForm<Partial<IProfessor>>();
-
-  const [originalData, setOriginalData] = useState<{
-    formData: Partial<IProfessor>;
-    image: string | null;
-  }>({
-    formData: {},
-    image: null,
+  const { control, handleSubmit, reset } = useForm<FormValues>({
+    resolver: zodResolver(Schema),
   });
 
   useEffect(() => {
-    if (professor) {
-      reset(professor);
-      setEducation(professor.educations || []);
-      setExpertField(professor.expertFields || []);
-      setOriginalImage(professor.user?.imageUrl || null);
+    reset({
+      firstNameTh: professor.user.firstNameTh || "",
+      lastNameTh: professor.user.lastNameTh || "",
+      firstNameEn: professor.user.firstNameEn || "",
+      lastNameEn: professor.user.lastNameEn || "",
+      majorPositionTh: professor.majorPosition?.positionTh || "",
+      majorPositionEn: professor.majorPosition?.positionEn || "",
+      phone: professor.phone || "",
+      email: professor.user.email || "",
+      academicPosition: professor.academicPosition?.positionTh || "",
+      profRoom: professor.profRoom || "",
+      imageURL: professor.user.imageUrl || "",
+      expertFields: professor.expertFields?.map((f) => f.field) || [],
+      educations:
+        professor.educations?.map((e) => ({
+          level: e.level?.level || "",
+          education: e.education || "",
+          university: e.university || "",
+        })) || [],
+    });
 
-      setOriginalData({
-        formData: professor,
-        image: professor.user?.imageUrl || null,
-      });
-    }
+    setEducation(professor.educations || []);
+    setExpertField(professor.expertFields || []);
   }, [professor, reset]);
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -76,63 +106,30 @@ const ProfessorFormComponent = ({
       {
         education: "",
         university: "",
-        level: { id: 0, level: "" } as EducationLevel,
-        createdDate: new Date(),
-        updatedDate: new Date(),
-        createdBy: 0,
-        updatedBy: 0,
+        level: educationLevel[0],
       },
     ]);
   };
 
   const handleAddExpertField = () => {
-    setExpertField([
-      ...expertField,
-      {
-        id: 0,
-        field: "",
-        createdDate: new Date(),
-        updatedDate: new Date(),
-      },
-    ]);
+    setExpertField([...expertField, { field: "" }]);
   };
 
   const handleCancel = () => {
-    reset(originalData.formData, { keepDefaultValues: false });
-    setEducation(structuredClone(originalData.formData.educations || []));
-    setExpertField(structuredClone(originalData.formData.expertFields || []));
+    reset();
+    setEducation(professor.educations);
+    setExpertField(professor.expertFields);
     setSelectedFile(null);
-    setOriginalImage(originalData.image);
     setIsEdit(false);
   };
 
-  const onSubmit = (data: Partial<IProfessor>) => {
-    data.educations = education;
-    data.expertFields = expertField;
+  const onSubmit = (data: FormValues) => {
     const formData = new FormData();
+    formData.append("data", JSON.stringify(data));
+    if (selectedFile) formData.append("image", selectedFile);
 
-    Object.entries(data).forEach(([key, value]) => {
-      if (key === "educations" || key === "expertFields") {
-        formData.append(key, JSON.stringify(value));
-      } else if (typeof value === "object" && value !== null) {
-        formData.append(key, JSON.stringify(value));
-      } else if (value !== undefined && value !== null) {
-        formData.append(key, String(value));
-      }
-    });
-
-    if (selectedFile) {
-      formData.append("image", selectedFile);
-    }
-
-    const jsonData = Object.fromEntries(formData.entries());
-    console.log(JSON.stringify(jsonData, null));
-
+    console.log(JSON.stringify(data, null, 2));
     setIsEdit(false);
-    setOriginalData({
-      formData: getValues(),
-      image: selectedFile ? URL.createObjectURL(selectedFile) : originalImage,
-    });
   };
 
   return (
@@ -141,63 +138,68 @@ const ProfessorFormComponent = ({
         ข้อมูลส่วนตัว
       </Typography>
 
-      {/* ---------- รูปภาพ ---------- */}
+      {/*รูปภาพ*/}
       <div className="mt-6 mb-16 flex flex-row items-center gap-x-8">
-        <div className="flex flex-col gap-y-2">
-          <div className="relative inline-block">
-            <Button
-              component="label"
-              className="flex h-41 w-41 min-w-0 items-center justify-center overflow-hidden rounded-full p-0"
-              sx={{
-                borderRadius: "50%",
-                width: "176px",
-                height: "176px",
-                padding: 0,
-                minWidth: 0,
-                backgroundColor: "#F2F2F2",
-                "&:hover": { backgroundColor: "#E2E2E2" },
-              }}
-              disabled={!isEdit}
-            >
-              {selectedFile ? (
-                <Image
-                  src={URL.createObjectURL(selectedFile)}
-                  alt="Preview"
-                  width={300}
-                  height={300}
-                  style={{ objectFit: "cover" }}
-                  className="h-full w-full rounded-full"
-                />
-              ) : originalImage ? (
-                <Image
-                  src={originalImage}
-                  alt="Profile"
-                  width={300}
-                  height={300}
-                  style={{ objectFit: "cover" }}
-                  className="h-full w-full rounded-full"
-                />
-              ) : (
-                <Image
-                  alt="Upload"
-                  src="/uploadimage.png"
-                  width={70}
-                  height={70}
-                  style={{ width: "auto", height: "auto" }}
-                  priority
-                />
-              )}
-              <VisuallyHiddenInput
-                type="file"
-                accept="image/*"
-                onChange={handleFileChange}
+        <div className="relative inline-block">
+          <Button
+            component="label"
+            className="flex h-41 w-41 min-w-0 items-center justify-center overflow-hidden rounded-full p-0"
+            sx={{
+              borderRadius: "50%",
+              width: "176px",
+              height: "176px",
+              padding: 0,
+              minWidth: 0,
+              backgroundColor: "#F2F2F2",
+              "&:hover": { backgroundColor: "#E2E2E2" },
+            }}
+            disabled={!isEdit}
+          >
+            {selectedFile ? (
+              <Image
+                src={URL.createObjectURL(selectedFile)}
+                alt="Preview"
+                width={300}
+                height={300}
+                style={{ objectFit: "cover" }}
+                className="h-full w-full rounded-full"
               />
-            </Button>
-          </div>
-          <div className="flex flex-row">
-            <CheckBox />
-            Generate password
-          </div>
+            ) : professor.user.imageUrl ? (
+              <Image
+                src={professor.user.imageUrl}
+                alt="Profile"
+                width={300}
+                height={300}
+                style={{ objectFit: "cover" }}
+                className="h-full w-full rounded-full"
+              />
+            ) : (
+              <Image
+                alt="Upload"
+                src="/uploadimage.png"
+                width={70}
+                height={70}
+                style={{ width: "auto", height: "auto" }}
+                priority
+              />
+            )}
+            <VisuallyHiddenInput
+              type="file"
+              accept="image/*"
+              onChange={handleFileChange}
+            />
+          </Button>
+          {isEdit && (
+            <div className="absolute right-2 bottom-0 rounded-full bg-white p-1 shadow">
+              <Image
+                src="/uploadimage.png"
+                alt="Edit"
+                width={24}
+                height={24}
+                className="cursor-pointer"
+              />
+            </div>
+          )}
         </div>
 
         {/*ชื่อ นามสกุล*/}
@@ -207,7 +209,7 @@ const ProfessorFormComponent = ({
         >
           <div className="flex flex-row gap-x-4">
             <Controller
-              name="majorPosition.positionTh"
+              name="majorPositionTh"
               control={control}
               render={({ field }) => (
                 <TextField
@@ -229,7 +231,7 @@ const ProfessorFormComponent = ({
               )}
             />
             <Controller
-              name="user.firstNameTh"
+              name="firstNameTh"
               control={control}
               render={({ field }) => (
                 <TextField
@@ -242,7 +244,7 @@ const ProfessorFormComponent = ({
               )}
             />
             <Controller
-              name="user.lastNameTh"
+              name="lastNameTh"
               control={control}
               render={({ field }) => (
                 <TextField
@@ -258,7 +260,7 @@ const ProfessorFormComponent = ({
 
           <div className="mt-4 flex flex-row gap-x-4">
             <Controller
-              name="majorPosition.positionEn"
+              name="majorPositionEn"
               control={control}
               render={({ field }) => (
                 <TextField
@@ -280,7 +282,7 @@ const ProfessorFormComponent = ({
               )}
             />
             <Controller
-              name="user.firstNameEn"
+              name="firstNameEn"
               control={control}
               render={({ field }) => (
                 <TextField
@@ -293,7 +295,7 @@ const ProfessorFormComponent = ({
               )}
             />
             <Controller
-              name="user.lastNameEn"
+              name="lastNameEn"
               control={control}
               render={({ field }) => (
                 <TextField
@@ -326,7 +328,7 @@ const ProfessorFormComponent = ({
           )}
         />
         <Controller
-          name="user.email"
+          name="email"
           control={control}
           render={({ field }) => (
             <TextField
@@ -343,7 +345,7 @@ const ProfessorFormComponent = ({
 
       <div className="flex flex-row gap-x-4">
         <Controller
-          name="academicPosition.positionTh"
+          name="academicPosition"
           control={control}
           render={({ field }) => (
             <TextField
