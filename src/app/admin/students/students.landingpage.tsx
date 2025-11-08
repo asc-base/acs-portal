@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import React, { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Pagination} from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
@@ -10,18 +10,22 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import StudentTableComponents from "./students.table.component";
 import { IStudent } from "@/core/domain/student";
 import { IClassBook } from "@/core/domain/classbook";
+import { QueryStudent } from "@/core/domain/student";
 
-interface StudentsLandindPageProps {
+interface StudentsLandingPageProps {
   students: IStudent[];
   totalRecords: number;
   pageSize: number;
   page: number;
   classBookId: number;
-  classBook: IClassBook | null;
+  classBook: IClassBook;
+  search?: string;
+  sortBy?: string;
+  sortOrder?: "asc" | "desc";
 }
 
 const searchSchema = z.object({
-  query: z.string().optional(),
+  search: z.string().optional(),
 });
 
 type SearchForm = z.infer<typeof searchSchema>;
@@ -32,23 +36,50 @@ const StudentsLandingpage = ({
   pageSize,
   page,
   classBook,
-  classBookId
-}: StudentsLandindPageProps) => {
+  classBookId,
+  search,
+  sortBy,
+  sortOrder,
+}: StudentsLandingPageProps) => {
   const router = useRouter();
 
-  const { register, handleSubmit, reset } = useForm<SearchForm>({
+  const { register, reset, watch } = useForm<SearchForm>({
     resolver: zodResolver(searchSchema),
+    defaultValues: { search },
   });
 
-  const onSubmit = (data: SearchForm) => {
-    console.log("Search:", data.query);
-    reset();
+  const watchedSearch = watch("search");
+
+  const SearchStudentUrl = (query: Partial<QueryStudent>) => {
+    const params = new URLSearchParams({
+      page: query.page?.toString() || page.toString(),
+      pageSize: query.pageSize?.toString() || pageSize.toString(),
+      classBookId: query.classBookId?.toString() || classBookId.toString(),
+      search: query.search ?? watchedSearch ?? "",
+      sortBy: query.sortBy ?? sortBy ?? "studentId",
+      sortOrder: query.sortOrder ?? sortOrder ?? "desc",
+    });
+
+    return `/admin/students?${params.toString()}`;
   };
 
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      router.push(SearchStudentUrl({ page: 1, search: watchedSearch }));
+    }, 300);
+
+    return () => clearTimeout(handler);
+  }, [watchedSearch]);
+
   const handleNextPage = (currentPage: number) => {
-    router.push(
-      `/admin/students?page=${currentPage}&pageSize=${pageSize}classBookId=${classBookId}`,
-    );
+    router.push(SearchStudentUrl({ page: currentPage }));
+  };
+
+  const handleSort = (newSortBy: string) => {
+    const newSortOrder =
+      sortBy === newSortBy && sortOrder === "desc" ? "asc" : "desc";
+    router.push(SearchStudentUrl({ sortBy: newSortBy, sortOrder: newSortOrder }));
   };
 
   return (
@@ -58,14 +89,14 @@ const StudentsLandingpage = ({
           ข้อมูลนักศึกษา <span>{`>> รุ่นที่ ${classBook?.classof}`}</span>
         </h3>
         <div className="flex gap-2">
-          <form onSubmit={handleSubmit(onSubmit)} className="relative">
+          <form className="relative">
             <div className="text-neutral04 absolute top-1/2 left-2 -translate-y-1/2">
               <SearchIcon className="h-5 w-5" />
             </div>
             <input
               type="text"
               placeholder="ค้นหา"
-              {...register("query")}
+              {...register("search")}
               className="border-neutral04 text-h4 h-[44px] w-[280px] rounded-sm border pl-10"
             />
             <button
@@ -78,7 +109,14 @@ const StudentsLandingpage = ({
           </form>
         </div>
       </div>
-      <StudentTableComponents students={students} />
+
+      <StudentTableComponents
+        students={students}
+        onSort={handleSort}
+        sortBy={sortBy}
+        sortOrder={sortOrder}
+      />
+
       <div className="mt-4 flex justify-center">
         <Pagination
           shape="rounded"

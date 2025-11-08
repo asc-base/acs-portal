@@ -14,14 +14,21 @@ import {
 import { Edit, Delete } from "@mui/icons-material";
 import { useRouter } from "next/navigation";
 import { IStudent } from "@/core/domain/student";
+import { ArrowDownward, ArrowUpward } from "@mui/icons-material";
 
 interface StudentTableComponentsProps {
   students: IStudent[];
+  onSort: (sortBy: string) => void;
+  sortBy?: string;
+  sortOrder?: "asc" | "desc";
 }
 
 const StudentTableComponents = ({
- students
-}: StudentTableComponentsProps ) => {
+  students,
+  onSort,
+  sortBy,
+  sortOrder,
+}: StudentTableComponentsProps) => {
   const router = useRouter();
 
   const handleEdit = (studentId: number) => {
@@ -41,11 +48,47 @@ const StudentTableComponents = ({
               <h3 className="font-bold">รูปภาพ</h3>
             </TableCell>
             <TableCell align="center">
-              <h3 className="font-bold">รหัสนักศึกษา</h3>
+              <div className="flex items-center justify-center gap-1">
+                <h3 className="font-bold">รหัสนักศึกษา</h3>
+                <IconButton
+                  size="small"
+                  onClick={() => onSort("studentId")}
+
+                >
+                  {sortBy === "studentId" ? (
+                    sortOrder === "asc" ? (
+                      <ArrowUpward fontSize="small" sx={{ color: "var(--color-primary01)" }} />
+                    ) : (
+                      <ArrowDownward fontSize="small" sx={{ color: "var(--color-primary01)" }} />
+                    )
+                  ) : (
+                    <ArrowDownward fontSize="small" sx={{ color: "var(--color-neutral04)" }} />
+                  )}
+                </IconButton>
+              </div>
             </TableCell>
+
+
             <TableCell align="center">
-              <h3 className="font-bold">ชื่อ นามสกุล</h3>
+              <div className="flex items-center justify-center gap-1">
+                <h3 className="font-bold">ชื่อ นามสกุล</h3>
+                <IconButton
+                  size="small"
+                  onClick={() => onSort("firstNameTh")}
+                >
+                  {sortBy === "firstNameTh" ? (
+                    sortOrder === "asc" ? (
+                      <ArrowUpward fontSize="small" sx={{ color: "var(--color-primary01)" }} />
+                    ) : (
+                      <ArrowDownward fontSize="small" sx={{ color: "var(--color-primary01)" }} />
+                    )
+                  ) : (
+                    <ArrowDownward fontSize="small" sx={{ color: "var(--color-neutral04)" }} />
+                  )}
+                </IconButton>
+              </div>
             </TableCell>
+
             <TableCell align="center">
               <h3 className="font-bold">ชื่อเล่น</h3>
             </TableCell>
