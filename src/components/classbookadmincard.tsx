@@ -7,12 +7,14 @@ import {
   CardContent,
   CardMedia,
   CardActions,
+  IconButton
 } from "@mui/material";
 import DeleteOutlineOutlinedIcon from "@mui/icons-material/DeleteOutlineOutlined";
 import VisibilityOutlinedIcon from "@mui/icons-material/VisibilityOutlined";
+import EditIcon from '@mui/icons-material/Edit';
 
 export const ClassBookAdminCard: FC<ClassBookCardProps> = (props) => {
-  const { classbook, onView, onDelete } = props;
+  const { classbook, onView, onDelete, onEdit } = props;
 
   return (
     <Card className="w-[362px] h-[420px] !rounded-xl lg:!rounded-2xl">
@@ -34,12 +36,19 @@ export const ClassBookAdminCard: FC<ClassBookCardProps> = (props) => {
       </div>
 
       <CardContent className="!px-6">
-        <h3 className="font-bold mb-2">
-          รุ่น {classbook.classof}
-        </h3>
-        <h6>
-          ปีการศึกษา {classbook.firstYearAcademic}
-        </h6>
+        <div className="flex justify-between items-start">
+          <div>
+            <h3 className="font-bold mb-2">
+              รุ่น {classbook.classof}
+            </h3>
+            <h6>
+              ปีการศึกษา {classbook.firstYearAcademic}
+            </h6>
+          </div>
+          <IconButton onClick={onEdit}>
+            <EditIcon className="cursor-pointer text-primary03"/>
+          </IconButton>
+        </div>
       </CardContent>
 
       <CardActions className="flex gap-2 !px-6 !pt-0">
