@@ -13,10 +13,12 @@ export default async function Page({ params }: PageProps) {
   const masterData = await masterDataService.getMasterData();
   const majorPositions = masterData.majorPositions;
   const educationLevel = masterData.educationLevels;
+  const academicPosition = masterData.academicPositions;
 
   return (
     <ProfessorFormComponent
       professor={professor}
+      academicPosition={academicPosition}
       majorPosition={majorPositions}
       educationLevel={educationLevel}
     />

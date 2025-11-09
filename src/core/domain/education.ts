@@ -13,5 +13,5 @@ export interface IEducation {
 export interface IUpdateEducation {
     education:  string;
     university: string;
-    level:      EducationLevel;
+    level:      number;
 }
