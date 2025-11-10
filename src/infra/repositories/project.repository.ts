@@ -3,7 +3,6 @@ import { IProject, QueryProject } from "@/core/domain/project";
 import { Pageable } from "@/interface/response";
 import { HttpHelper } from "@/lib/http";
 import { ApiResponse } from "@/interface/response";
-
 export class ProjectRepository implements IProjectRepository {
   private http: HttpHelper;
   private baseUrl: string;

@@ -6,5 +6,6 @@ export interface IExpertField {
 }
 
 export interface IUpdateExpertField {
+    id: number;
     field?: string;
 }

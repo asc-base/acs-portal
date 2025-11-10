@@ -1,6 +1,7 @@
 import { EducationLevel } from "./master-data";
 
 export interface IEducation {
+    id: number;
     education:  string;
     university: string;
     level:      EducationLevel;
@@ -11,6 +12,13 @@ export interface IEducation {
 }
 
 export interface IUpdateEducation {
+    id:number;
+    education:  string;
+    university: string;
+    level:      number;
+}
+
+export interface INewEducation {
     education:  string;
     university: string;
     level:      number;

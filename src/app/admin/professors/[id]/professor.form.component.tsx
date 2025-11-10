@@ -5,12 +5,13 @@ import { styled } from "@mui/material/styles";
 import AddIcon from "@mui/icons-material/Add";
 import Image from "next/image";
 import { useForm, Controller, useFieldArray } from "react-hook-form";
-import { IProfessor } from "@/core/domain/professor";
+import { IProfessor, IUpdateProfessor } from "@/core/domain/professor";
 import { EducationLevel, Position } from "@/core/domain/master-data";
 import { Delete } from "@mui/icons-material";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import MenuItem from "@mui/material/MenuItem";
+import { professorService } from "@/infra/container";
 
 const VisuallyHiddenInput = styled("input")({
   clip: "rect(0 0 0 0)",
@@ -45,6 +46,7 @@ const Schema = z.object({
   imageURL: z.string().optional(),
   educations: z.array(
     z.object({
+      id: z.number().optional(),
       level: z.number().min(1, "กรุณาเลือกระดับการศึกษา"),
       education: z.string().min(1, "กรุณากรอกชื่อสาขา"),
       university: z.string().min(1, "กรุณากรอกชื่อมหาวิทยาลัย"),
@@ -52,6 +54,7 @@ const Schema = z.object({
   ),
   expertFields: z.array(
     z.object({
+      id: z.number().optional(),
       field: z.string().min(1, "กรุณากรอกสาขาที่เชี่ยวชาญ"),
     }),
   ),
@@ -119,12 +122,17 @@ const ProfessorFormComponent = ({
       imageURL: professor.user.imageUrl || "",
       educations:
         professor.educations?.map((e) => ({
+          id: e.id,
           level: e.level?.id ?? "",
           education: e.education || "",
           university: e.university || "",
         })) || [],
+
       expertFields:
-        professor.expertFields?.map((f) => ({ field: f.field })) || [],
+        professor.expertFields?.map((f) => ({
+          id: f.id,
+          field: f.field,
+        })) || [],
     });
   }, [professor, reset]);
 
@@ -140,11 +148,74 @@ const ProfessorFormComponent = ({
   };
 
   const onSubmit = (data: FormValues) => {
+    const originalEducations = professor.educations || [];
+    const originalExperts = professor.expertFields || [];
+
+    const formEducations = data.educations.map((e) => ({
+      id: e.id ?? 0,
+      education: e.education,
+      university: e.university,
+      level: e.level,
+    }));
+
+    const existingEducationIds = originalEducations.map((e) => e.id);
+    const newEducation = formEducations
+      .filter((e) => !e.id)
+      .map((e) => ({
+        education: e.education,
+        university: e.university,
+        level: e.level,
+      }));
+    const updatedEducation = formEducations.filter(
+      (e) => e.id && existingEducationIds.includes(e.id),
+    );
+    const deleteEducationIds = originalEducations
+      .filter((e) => !formEducations.some((f) => f.id === e.id))
+      .map((e) => e.id);
+
+    const formExperts = data.expertFields.map((f) => ({
+      id: f.id ?? 0,
+      field: f.field,
+    }));
+    const existingExpertIds = originalExperts.map((f) => f.id);
+    const newExpertFields = formExperts
+      .filter((f) => !f.id)
+      .map((f) => f.field);
+    const updatedExpertFields = formExperts.filter(
+      (f) => f.id && existingExpertIds.includes(f.id),
+    );
+    const deleteExpertFieldsIds = originalExperts
+      .filter((f) => !formExperts.some((ff) => ff.id === f.id))
+      .map((f) => f.id);
+
+    const updateData: IUpdateProfessor = {
+      id: professor.id,
+      academicPositionId: data.academicPosition,
+      majorPositionId: data.majorPositionTh,
+      profRoom: data.profRoom,
+      phone: data.phone,
+      firstNameTh: data.firstNameTh,
+      lastNameTh: data.lastNameTh,
+      firstNameEn: data.firstNameEn,
+      lastNameEn: data.lastNameEn,
+      mail: data.email,
+
+      newExpertFields,
+      updatedExpertFields,
+      deleteExpertFieldsIds,
+
+      newEducation,
+      updatedEducation,
+      deleteEducationIds,
+    };
+
     const formData = new FormData();
-    formData.append("data", JSON.stringify(data));
+    formData.append("data", JSON.stringify(updateData));
     if (selectedFile) formData.append("image", selectedFile);
 
-    console.log("Data : ", JSON.stringify(data, null, 2));
+    console.log("Update Data:", updateData);
+
+    professorService.updateProfessor(updateData, professor.id.toString());
     setIsEdit(false);
   };
 
