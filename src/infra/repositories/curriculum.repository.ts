@@ -20,7 +20,9 @@ export class CurriculumRepository implements ICurriculumRepository {
       page: query.page?.toString() || "1",
       pageSize: query.pageSize?.toString() || "10",
     });
-
+    if (query.search) {
+      searchParams.append("search", query.search);
+    }
     if (query.sortBy) {
       searchParams.append("sortBy", query.sortBy);
     }
