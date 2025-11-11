@@ -30,8 +30,8 @@ export class NewsService {
     return response.data;
   }
 
-  async getNewsMedias(type: string): Promise<INewsMedia[]> {
-    const response = await this.newsRepository.getNewsMedias(type);
+  async getNewsMedias(type: string ,page: number,pageSize: number,): Promise<INewsMedia[]> {
+    const response = await this.newsRepository.getNewsMedias(type , page , pageSize);
     return response.data;
   }
 }
