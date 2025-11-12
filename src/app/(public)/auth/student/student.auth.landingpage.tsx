@@ -89,9 +89,9 @@ export default function StudentAuthLandingPage() {
 
   return (
     // <lg = 1 คอลัมน์ (ซ่อนรูป) | >=lg = 2 คอลัมน์
-    <main className="grid min-h-screen w-screen grid-cols-1 overflow-x-hidden bg-white lg:grid-cols-2">
+    <main className="grid min-h-screen w-screen grid-cols-1 overflow-x-hidden bg-[var(--background)] lg:grid-cols-2">
       {/* LEFT: แสดงเฉพาะเมื่อ >= lg */}
-      <section className="relative hidden h-full w-full bg-[#F3F0FF] lg:block">
+      <section className="relative hidden h-full w-full bg-[var(--background)] lg:block">
         <Image
           src="/ImageLoginAdmin.svg"
           alt="Student illustration"
@@ -107,7 +107,7 @@ export default function StudentAuthLandingPage() {
           <div className="mx-auto w-full max-w-[520px]">
             <Typography
               variant="h3"
-              className="text-left !leading-tight !font-extrabold text-[#2A179C]"
+              className="text-left !leading-tight !font-extrabold text-[var(--color-primary02)]"
               sx={{
                 // xs=มือถือ, sm=เล็ก, md=แท็บเล็ต, lg=เดสก์ท็อป
                 fontSize: { xs: 28, sm: 32, md: 40, lg: 48 },
@@ -118,7 +118,7 @@ export default function StudentAuthLandingPage() {
             </Typography>
 
             <p
-              className="mt-2 text-left text-[#2F27B3]"
+              className="mt-2 text-left text-[var(--color-primary03)]"
               style={{
                 fontSize: "14px", // มือถือ
               }}
@@ -207,7 +207,7 @@ export default function StudentAuthLandingPage() {
                 type="submit"
                 variant="contained"
                 fullWidth
-                className="!h-12 !bg-[#1E156B] !text-base !normal-case shadow-md hover:!bg-[#1b1361]"
+                className="!h-12 !bg-[var(--color-primary02)] !text-base !normal-case shadow-md hover:!bg-[#1b1361]"
               >
                 เข้าสู่ระบบ
               </Button>
