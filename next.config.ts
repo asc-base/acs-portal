@@ -2,7 +2,9 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   /* config options here */
+
   images: {
+    // Remote patterns for external images
     remotePatterns: [
       {
         protocol: "https",
@@ -17,6 +19,13 @@ const nextConfig: NextConfig = {
         pathname: "/**",
       },
       {
+        protocol: "https",
+        hostname: "picsum.photos",
+        port: "",
+        pathname: "/**",
+      },
+      {
+      
         protocol: "https",
         hostname: "eooprolugtkiztqsnvdl.supabase.co",
         port: "",

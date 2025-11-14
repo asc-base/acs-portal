@@ -1,81 +1,151 @@
-export class HttpHelper {
-  private baseUrl: string;
-  private defaultHeaders: HeadersInit;
-
-  constructor(baseUrl: string = "", defaultHeaders: HeadersInit = {}) {
-    this.baseUrl = baseUrl;
-    this.defaultHeaders = {
-      "Content-Type": "application/json",
-      ...defaultHeaders,
-    };
+export class HttpError extends Error {
+  constructor(
+    message: string,
+    public status: number,
+    public data?: unknown,
+  ) {
+    super(message);
+    this.name = "HttpError";
   }
 
-  private async request<T>(url: string, options: RequestInit = {}): Promise<T> {
-    const fullUrl = this.baseUrl + url;
+  isUnauthorized(): boolean {
+    return this.status === 401;
+  }
+}
+
+export class HttpHelper {
+  constructor(
+    private baseUrl: string = "",
+    private defaultHeaders: HeadersInit = {},
+  ) {}
+
+  private joinUrl(path: string) {
+    if (!this.baseUrl) return path;
+    const slash = this.baseUrl.endsWith("/") || path.startsWith("/") ? "" : "/";
+    const trimmed =
+      this.baseUrl.endsWith("/") && path.startsWith("/") ? path.slice(1) : path;
+    return `${this.baseUrl}${slash}${trimmed}`;
+  }
+
+  private isJsonLike(body: unknown) {
+    return (
+      body !== undefined &&
+      !(body instanceof FormData) &&
+      !(body instanceof Blob) &&
+      !(body instanceof ArrayBuffer)
+    );
+  }
+
+  private async parseResponse<T>(res: Response): Promise<T> {
+    const ct = res.headers.get("content-type") || "";
+    if (ct.includes("application/json")) {
+      return (await res.json()) as T;
+    }
+    // ถ้า BE ไม่ส่ง JSON กลับ (เช่น 204) ให้ส่ง null/undefined
+    // หรือโยนข้อความดิบกลับไปถ้าจำเป็น
+    const text = await res.text();
+    return text as unknown as T;
+  }
+
+  private async request<Resp, Req = unknown>(
+    url: string,
+    options: Omit<RequestInit, "body"> & { body?: Req } = {},
+  ): Promise<Resp> {
+    const fullUrl = this.joinUrl(url);
+
+    const headers: Record<string, string> = {
+      ...this.defaultHeaders,
+      ...(options.headers || {}),
+    } as Record<string, string>;
+
+    let body: BodyInit | undefined;
+    if (this.isJsonLike(options.body)) {
+      headers["Content-Type"] = headers["Content-Type"] || "application/json";
+      body = JSON.stringify(options.body);
+    } else {
+      // FormData/Blob/ArrayBuffer → ห้ามตั้ง Content-Type เอง
+      body = options.body as BodyInit | undefined;
+      if (body instanceof FormData && "Content-Type" in headers) {
+        delete headers["Content-Type"];
+      }
+    }
+
+    // ใส่ timeout กันแฮงก์
+    const ac = new AbortController();
+    const timeout = setTimeout(() => ac.abort(), 20_000);
+
     const config: RequestInit = {
-      headers: {
-        ...this.defaultHeaders,
-        ...options.headers,
-      },
+      credentials: "include", // สำคัญสำหรับคุกกี้
       ...options,
+      headers,
+      body,
+      signal: ac.signal,
     };
 
     try {
-      const response = await fetch(fullUrl, config);
+      const res = await fetch(fullUrl, config);
+      clearTimeout(timeout);
 
-      if (!response.ok) {
-        throw new Error(
-          `HTTP error! status: ${response.status} - ${response.statusText} for URL: ${fullUrl}`,
+      if (!res.ok) {
+        // พยายามอ่าน error body
+        let details = "";
+        let errorData = null;
+        try {
+          const ct = res.headers.get("content-type") || "";
+          if (ct.includes("application/json")) {
+            errorData = await res.json();
+            details = JSON.stringify(errorData);
+          } else {
+            details = await res.text();
+          }
+        } catch {
+          /* ignore */
+        }
+
+        // Create custom error with status and data
+        const error = new HttpError(
+          `HTTP ${res.status} ${res.statusText} @ ${fullUrl}${
+            details ? ` | ${details}` : ""
+          }`,
+          res.status,
+          errorData,
         );
+        throw error;
       }
 
-      return response.json();
-    } catch (error) {
-      if (error instanceof Error) {
-        throw new Error(`Failed to fetch ${fullUrl}: ${error.message}`);
+      return await this.parseResponse<Resp>(res);
+    } catch (err) {
+      if (err instanceof HttpError) {
+        throw err; // Re-throw HttpError as-is to preserve status and data
+      }
+      if (err instanceof Error && err.name === "AbortError") {
+        throw new Error(`Request timeout @ ${fullUrl}`);
+      }
+      if (err instanceof Error) {
+        throw new Error(`Failed to fetch ${fullUrl}: ${err.message}`);
       }
       throw new Error(`Failed to fetch ${fullUrl}: Unknown error`);
     }
   }
 
-  async get<T>(url: string, headers?: HeadersInit): Promise<T> {
-    return this.request<T>(url, { method: "GET", headers });
+  get<Resp>(url: string, headers?: HeadersInit) {
+    return this.request<Resp>(url, { method: "GET", headers });
   }
 
-  async post<T>(
-    url: string,
-    body?: unknown,
-    headers?: HeadersInit,
-  ): Promise<T> {
-    return this.request<T>(url, {
-      method: "POST",
-      body: JSON.stringify(body),
-      headers,
-    });
+  post<Resp, Req = unknown>(url: string, body?: Req, headers?: HeadersInit) {
+    return this.request<Resp, Req>(url, { method: "POST", body, headers });
   }
 
-  async put<T>(url: string, body?: unknown, headers?: HeadersInit): Promise<T> {
-    return this.request<T>(url, {
-      method: "PUT",
-      body: JSON.stringify(body),
-      headers,
-    });
+  put<Resp, Req = unknown>(url: string, body?: Req, headers?: HeadersInit) {
+    return this.request<Resp, Req>(url, { method: "PUT", body, headers });
   }
 
-  async delete<T>(url: string, headers?: HeadersInit): Promise<T> {
-    return this.request<T>(url, { method: "DELETE", headers });
+  patch<Resp, Req = unknown>(url: string, body?: Req, headers?: HeadersInit) {
+    return this.request<Resp, Req>(url, { method: "PATCH", body, headers });
   }
 
-  async patch<T>(
-    url: string,
-    body?: unknown,
-    headers?: HeadersInit,
-  ): Promise<T> {
-    return this.request<T>(url, {
-      method: "PATCH",
-      body: JSON.stringify(body),
-      headers,
-    });
+  delete<Resp>(url: string, headers?: HeadersInit) {
+    return this.request<Resp>(url, { method: "DELETE", headers });
   }
 }
 

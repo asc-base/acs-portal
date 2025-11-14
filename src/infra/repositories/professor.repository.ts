@@ -2,6 +2,7 @@ import { IProfessorRepository } from "@/core/ports/professor.repository";
 import { IProfessor } from "@/core/domain/professor";
 import { HttpHelper } from "@/lib/http";
 import { ApiResponse, Pageable } from "@/interface/response";
+import { QueryProfessor } from "@/core/domain/professor";
 
 export class ProfessorRepository implements IProfessorRepository {
   private http: HttpHelper;
@@ -12,12 +13,34 @@ export class ProfessorRepository implements IProfessorRepository {
     this.http = new HttpHelper(this.baseUrl);
   }
 
-  async getProfessors(
-        page: number,
-        pageSize: number,
-      ): Promise<ApiResponse<Pageable<IProfessor>>> {
-        const url = `/v1/professors?page=${page}&pageSize=${pageSize}`;
-    
+  async getProfessors(query: QueryProfessor): Promise<ApiResponse<Pageable<IProfessor>>> {
+        const {
+      page,
+      pageSize,
+      educations,
+      expertFields,
+      majorPosition,
+      academicPosition,
+    } = query;
+
+    const params = new URLSearchParams();
+    if (page !== undefined) params.append("page", page.toString());
+    if (pageSize !== undefined) params.append("pageSize", pageSize.toString());
+
+        if (educations && educations.length > 0) {
+      params.append("educations", educations);
+    }
+    if (expertFields && expertFields.length > 0) {
+      params.append("expertFields", expertFields);
+    }
+    if (majorPosition && majorPosition.length > 0) {
+      params.append("majorPosition", majorPosition);
+    }
+    if (academicPosition && academicPosition.length > 0) {
+      params.append("academicPosition", academicPosition);
+    }
+        const queryString = params.toString() ? `?${params.toString()}` : "";
+        const url = `/v1/professors${queryString}`;
         const response = await this.http.get<ApiResponse<Pageable<IProfessor>>>(url);
         return response;
       }

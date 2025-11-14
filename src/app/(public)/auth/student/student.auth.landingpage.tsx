@@ -1,6 +1,6 @@
 "use client";
 
-import * as React from "react";
+import { useState } from "react";
 import Image from "next/image";
 import {
   Button,
@@ -15,29 +15,32 @@ import { useForm, Controller } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { RHFTextField } from "@/components/form/RHFTextField";
+import { authService } from "@/infra/container";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useAuthStore } from "@/store/auth";
 
 const Schema = z.object({
-  studentId: z
-    .string()
-    .trim()
-    .regex(/^\d{11}$/, "รหัสนักศึกษาต้องเป็นตัวเลข 11 หลัก"),
-  password: z.string().min(6, "รหัสผ่านอย่างน้อย 6 ตัวอักษร"),
+  email: z.string().trim(),
+  password: z.string().min(1, "รหัสผ่านอย่างน้อย 6 ตัวอักษร"),
   remember: z.boolean(),
 });
 type FormValues = z.infer<typeof Schema>;
 
 export default function StudentAuthLandingPage() {
-  const [showPwd, setShowPwd] = React.useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const router = useRouter();
+  const setUser = useAuthStore((state) => state.setUser);
 
   const {
     control,
     handleSubmit,
     formState: { errors },
-    reset,
+    // reset,
     setError,
   } = useForm<FormValues>({
     resolver: zodResolver(Schema),
-    defaultValues: { studentId: "", password: "", remember: true },
+    defaultValues: { email: "", password: "", remember: true },
     mode: "onChange",
     reValidateMode: "onChange",
   });
@@ -45,12 +48,30 @@ export default function StudentAuthLandingPage() {
   const onSubmit = async (data: FormValues) => {
     try {
       await new Promise((r) => setTimeout(r, 400)); // mock
-      if (data.studentId === "00000000000") {
-        setError("studentId", { type: "manual", message: "ไม่พบบัญชีผู้ใช้" });
+      if (data.email === "00000000000") {
+        setError("email", { type: "manual", message: "ไม่พบบัญชีผู้ใช้" });
         return;
       }
-      alert(`Mock Login สำเร็จ\nSID: ${data.studentId}`);
-      reset({ studentId: "", password: "", remember: data.remember });
+
+      const loginRequest = {
+        email: data.email,
+        password: data.password,
+      };
+
+      const reps = await authService.LoginV2(loginRequest);
+
+      if (reps.status && reps.statusCode === 200 && reps.data) {
+        // Store user data in the auth store
+        setUser(reps.data);
+        console.log("Login successful, user stored in auth store:", reps.data);
+        router.push("/home");
+      } else {
+        console.log("Login failed:", reps);
+        setError("password", {
+          type: "manual",
+          message: "ข้อมูลการเข้าสู่ระบบไม่ถูกต้อง",
+        });
+      }
     } catch {
       setError("password", {
         type: "manual",
@@ -111,17 +132,15 @@ export default function StudentAuthLandingPage() {
               noValidate
             >
               <RHFTextField<FormValues>
-                name="studentId"
+                name="email"
                 control={control}
                 label="รหัสนักศึกษา"
                 placeholder="เช่น 67000000001"
                 requiredMark
                 inputProps={{
                   inputMode: "numeric",
-                  pattern: "\\d{11}",
-                  maxLength: 11,
                 }}
-                aria-invalid={!!errors.studentId}
+                aria-invalid={!!errors.email}
               />
 
               <RHFTextField<FormValues>
@@ -129,7 +148,7 @@ export default function StudentAuthLandingPage() {
                 control={control}
                 label="รหัสผ่าน"
                 placeholder="********"
-                type={showPwd ? "text" : "password"}
+                type={showPassword ? "text" : "password"}
                 aria-invalid={!!errors.password}
                 sx={{
                   "& .MuiOutlinedInput-notchedOutline": {
@@ -147,11 +166,13 @@ export default function StudentAuthLandingPage() {
                   endAdornment: (
                     <InputAdornment position="end">
                       <IconButton
-                        aria-label={showPwd ? "ซ่อนรหัสผ่าน" : "แสดงรหัสผ่าน"}
-                        onClick={() => setShowPwd((s) => !s)}
+                        aria-label={
+                          showPassword ? "ซ่อนรหัสผ่าน" : "แสดงรหัสผ่าน"
+                        }
+                        onClick={() => setShowPassword((s) => !s)}
                         edge="end"
                       >
-                        {showPwd ? <VisibilityOff /> : <Visibility />}
+                        {showPassword ? <VisibilityOff /> : <Visibility />}
                       </IconButton>
                     </InputAdornment>
                   ),
@@ -175,9 +196,11 @@ export default function StudentAuthLandingPage() {
                     />
                   )}
                 />
-                <a href="#" className="text-sm text-[#49454F] hover:underline">
-                  ลืมรหัสผ่าน ?
-                </a>
+                <Link href="/auth/forget-password">
+                  <span className="text-sm text-gray-600 hover:underline">
+                    ลืมรหัสผ่าน ?
+                  </span>
+                </Link>
               </div>
 
               <Button

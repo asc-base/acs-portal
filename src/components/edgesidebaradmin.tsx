@@ -15,8 +15,9 @@ import { usePathname } from "next/navigation";
 const sidebarItems = [
     {
         name: "ข้อมูลนักศึกษา",
-        href: "/admin/students",
-        icon: <PersonIcon />
+        href: "/admin/classbook",
+        icon: <PersonIcon />,
+        activePaths: ["/admin/students"],
     },
     {
         name: "ข้อมูลอาจารย์",
@@ -68,7 +69,9 @@ export const EdgeSidebarAdmin = ({username} : {username : string}) => {
                 <nav>
                     <ul className="flex flex-col gap-y-2">
                         {sidebarItems.map((item) => {
-                            const isActive = pathname === item.href;
+                               const isActive =
+                                item.activePaths?.some((path) => pathname.startsWith(path)) ||
+                                pathname.startsWith(item.href);
                             return (
                                 <li key={item.name}>
                                     <Link
@@ -100,9 +103,9 @@ export const EdgeSidebarAdmin = ({username} : {username : string}) => {
                 <Link
                     href="/logout"
                     className="flex items-center gap-x-4 px-8 h-[44px] hover:bg-neutral02 group"
-                    
+
                 >
-                    <h3><LogoutIcon className="text-neutral04 group-hover:text-accent04"/></h3>
+                    <h3><LogoutIcon className="text-neutral04 group-hover:text-accent04" /></h3>
                     <h4 className="text-neutral05 group-hover:text-accent04">ออกจากระบบ</h4>
                 </Link>
             </div>

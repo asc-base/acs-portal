@@ -1,11 +1,11 @@
 import React from "react";
-import ResetPasswordAuthLandingPage from "./resetpassword.auth.landingpage";
+import AdminLoginLandingPage from "./admin.login.landingpage";
 
 export default function Page() {
   // ไม่มีการเรียกหลังบ้าน ใส่ UI-only
   return (
     <div className="w-full">
-      <ResetPasswordAuthLandingPage />
+      <AdminLoginLandingPage />
     </div>
   );
 }

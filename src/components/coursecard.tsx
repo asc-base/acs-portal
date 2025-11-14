@@ -15,41 +15,46 @@ const CourseCard: React.FC<Course> = ({
   credits,
   courseDetail
 }) => {
+
   return (
     <Accordion
       sx={{
         backgroundColor: "var(--color-neutral02)",
         padding: 2,
-        borderRadius: 2,
+        borderRadius: 4,
         border: "none",
         "&.Mui-expanded": {
           backgroundColor: "var(--color-neutral01)",
-          border: "1px solid var(--color-neutral03)"
+          border: "1px solid var(--color-neutral03)",
         },
+        marginBottom: 4
       }}
     >
       <AccordionSummary
         expandIcon={<ExpandMoreIcon />}
         sx={{
           alignItems: "flex-start",
-          '& .MuiAccordionSummary-content': {
+          "& .MuiAccordionSummary-content": {
             margin: 0,
           },
-          '& .MuiAccordionSummary-content.Mui-expanded': {
+          "& .MuiAccordionSummary-content.Mui-expanded": {
             margin: 0,
           },
-
         }}
       >
-        <Box display="flex" flexDirection="column">
-          <h2>{courseId} {courseNameEn}</h2>
+        <Box display="flex" flexDirection="column" marginBottom={2}>
+          <h2>
+            {courseId} {courseNameEn}
+          </h2>
           <h3>
             <span className="font-bold">ชื่อภาษาไทย :</span> {courseNameTh}
           </h3>
           {Array.isArray(preCourses) && preCourses.length > 0 && (
             <h3>
               <span className="font-bold">วิชาบังคับก่อน :</span>{" "}
-              {preCourses.map((p) => `${p.courseId} ${p.courseNameEn}`).join(", ")}
+              {preCourses
+                .map((p) => `${p.courseId} ${p.courseNameEn}`)
+                .join(", ")}
             </h3>
           )}
           <h3>
@@ -58,11 +63,11 @@ const CourseCard: React.FC<Course> = ({
         </Box>
       </AccordionSummary>
 
-      <AccordionDetails sx={{ pt: 0 }}>
-        <h4>{courseDetail}</h4>
+      <AccordionDetails>
+          <h3 className="max-h-50 overflow-y-scroll whitespace-pre-wrap break-words leading-relaxed">{courseDetail}</h3>
       </AccordionDetails>
     </Accordion>
   );
-};
+}
 
 export default CourseCard;

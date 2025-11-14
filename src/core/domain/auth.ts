@@ -13,3 +13,15 @@ export interface LoginRequest {
 export interface AuthResponse {
   msg: string;
 }
+export interface ForgetPasswordPayload {
+  email: string;
+}
+
+export interface ForgetPasswordResponse {
+  message?: string;
+}
+
+export interface ResetPasswordPayload {
+  refferenceCode: string;
+  password: string;
+}

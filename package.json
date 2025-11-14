@@ -1,8 +1,9 @@
 {
   "name": "acs-fe",
-  "version": "2.3.1",
+  "version": "2.5.13",
   "private": true,
   "scripts": {
+    "prepare": "husky install",
     "release:patch": "npm version patch && git push --follow-tags",
     "release:minor": "npm version minor && git push --follow-tags",
     "release:major": "npm version major && git push --follow-tags",
@@ -22,12 +23,14 @@
     "@mui/material": "^7.3.1",
     "@mui/x-date-pickers": "^8.10.2",
     "dayjs": "^1.11.15",
-    "next": "15.3.3",
+    "next": "^15.5.4",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-hook-form": "^7.62.0",
+    "react-infinite-scroll-component": "^6.1.0",
     "tailwindcss-jun-layout": "^0.8.1",
-    "zod": "^4.1.5"
+    "zod": "^4.1.5",
+    "zustand": "^5.0.8"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
@@ -37,6 +40,7 @@
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "15.3.3",
+    "husky": "^9.1.7",
     "prettier": "^3.5.3",
     "prettier-plugin-tailwindcss": "^0.6.12",
     "tailwindcss": "^4",
