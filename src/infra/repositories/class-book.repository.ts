@@ -14,11 +14,12 @@ export class ClassBookRepository implements IClassBookRepository {
   async getClassBooks(
     query: QueryClassBook,
   ): Promise<ApiResponse<Pageable<IClassBook>>> {
-    const { page, pageSize, sortBy = "createdAt", sortOrder = "desc" } = query;
+    const { page, pageSize, sortBy = "createdAt", sortOrder = "desc", search } = query;
 
     const params = new URLSearchParams();
     if (page !== undefined) params.append("page", page.toString());
     if (pageSize !== undefined) params.append("pageSize", pageSize.toString());
+    if (search) {params.append("search", search);}
     params.append("sortBy", sortBy);
     params.append("sortOrder", sortOrder);
 
