@@ -1,5 +1,6 @@
 export const API_URL = (() => {
-  const raw = process.env.NEXT_PUBLIC_API_URL || process.env.API_URL;
+  const raw =
+    process.env.NEXT_PUBLIC_API_URL || "https://acs-dev.service.narutchai.com";
   // Normalize common bad values and empty strings
   if (!raw || raw === "undefined" || raw === "null") {
     return "http://localhost:8080";
@@ -15,6 +16,6 @@ if (
   process.env.NODE_ENV === "production"
 ) {
   console.warn(
-    "Warning: NEXT_PUBLIC_API_URL is missing or invalid. Falling back to http://localhost:8080.",
+    "Warning: NEXT_PUBLIC_API_URL is missing or invalid. Falling back to https://acs-dev.service.narutchai.com.",
   );
 }

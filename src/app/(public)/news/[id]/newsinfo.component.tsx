@@ -33,7 +33,7 @@ const NewsInfoComponent = ({ newsInfo, recommendNews }: NewsInfoProps) => {
           {newsInfo.title && <span>{newsInfo.title}</span>}
         </Breadcrumbs>
         <div>
-          <div className="h-96 w-full overflow-hidden rounded-xl">
+          <div className="aspect-video w-full overflow-hidden rounded-xl">
             <Image
               src={newsInfo?.image}
               alt={newsInfo?.title}
@@ -43,10 +43,12 @@ const NewsInfoComponent = ({ newsInfo, recommendNews }: NewsInfoProps) => {
               className="h-full w-full object-cover"
             />
           </div>
-          <div className="flex flex-col gap-4 py-8 w-full">
+          <div className="flex w-full flex-col gap-4 py-8">
             <h4>{date}</h4>
             <h2 className="font-bold">{newsInfo?.title}</h2>
-            <h3 className="break-words whitespace-pre-wrap">{newsInfo.detail}</h3>
+            <h3 className="break-words whitespace-pre-wrap">
+              {newsInfo.detail}
+            </h3>
           </div>
         </div>
         <div className="flex flex-col gap-4 py-8">

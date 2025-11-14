@@ -23,7 +23,7 @@ function ProjectCardBase({ data }: ProjectCardProps) {
     <>
       {/* media */}
       <div className="p-3 pb-2">
-        <div className="relative aspect-[16/9] w-full overflow-hidden rounded-xl">
+        <div className="relative aspect-[4/3] w-full overflow-hidden rounded-xl">
           <Image
             src={thumbnail}
             alt={title}

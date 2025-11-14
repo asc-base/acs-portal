@@ -41,6 +41,8 @@ export const Carousel: FC<CarouselProps> = ({
                   src={item?.image}
                   alt={`Slide ${index + 1}`}
                   fill
+                  sizes="(max-width: 640px) 100vw, (max-width: 1280px) 100vw, 1152px"
+                  priority={index === 0}
                 />
               </Link>
             </div>
