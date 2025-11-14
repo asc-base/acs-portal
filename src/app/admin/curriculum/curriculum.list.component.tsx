@@ -43,10 +43,12 @@ const CurriculumListComponents = ({
   const watchedSearch = watch("search");
 
   const SearchCurriculumUrl = (query: Partial<QueryCurriculum>) => {
+    const searchYear = (query.search ?? watchedSearch ?? "").replace(/\D/g, "");
+    
     const params = new URLSearchParams({
       page: query.page?.toString() || page.toString(),
       pageSize: query.pageSize?.toString() || pageSize.toString(),
-      search: query.search ?? watchedSearch ?? "",
+      search: searchYear,
     });
 
     return `/admin/curriculum?${params.toString()}`;
