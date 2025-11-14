@@ -14,11 +14,11 @@ interface PageProps {
 const page = async ({ searchParams }: PageProps) => {
   const resolvedSearchParams = await searchParams;
   const { rows, pageSize, page, totalRecords } =
-    await studentService.getStudents(
-      resolvedSearchParams.page || 1,
-      resolvedSearchParams.pageSize || 12,
-      resolvedSearchParams.classBookId || 1,
-    );
+    await studentService.getStudents({
+      page: resolvedSearchParams.page || 1,
+      pageSize: resolvedSearchParams.pageSize || 10,
+      classBookId: resolvedSearchParams.classBookId || 1,
+    });
 
   const classBook = await classBookService.getClassBookById(
     resolvedSearchParams.classBookId || 1,
