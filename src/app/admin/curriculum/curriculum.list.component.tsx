@@ -35,12 +35,13 @@ const CurriculumListComponents = ({
 }: CurriculumListComponentsProps) => {
   const router = useRouter();
 
+  const searchField = "search";
   const { register, reset, watch } = useForm<SearchForm>({
     resolver: zodResolver(searchSchema),
-    defaultValues: { search },
+    defaultValues: { [searchField]: search },
   });
 
-  const watchedSearch = watch("search");
+  const watchedSearch = watch(searchField);
 
   const SearchCurriculumUrl = (query: Partial<QueryCurriculum>) => {
     const searchYear = (query.search ?? watchedSearch ?? "").replace(/\D/g, "");
@@ -86,18 +87,18 @@ const CurriculumListComponents = ({
             <input
               type="text"
               placeholder="ค้นหา"
-              {...register("search")}
+              {...register(searchField)}
               className="border w-[280px] h-[44px] rounded-sm pl-10 border-neutral04 text-h4"
             />
-            {watch("search") && (
               <button
                 type="button"
-                onClick={() => reset({ search: "" })}
-                className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                onClick={() => reset({ [searchField]: "" })}
+                disabled={!watchedSearch}
+                className={`absolute right-2 top-1/2 -translate-y-1/2 text-neutral05 ${!watchedSearch ? "cursor-not-allowed opacity-50" : "cursor-pointer hover:text-primary01"
+                  }`}
               >
                 <CloseIcon fontSize="small" />
               </button>
-            )}
           </form>
 
           <Button

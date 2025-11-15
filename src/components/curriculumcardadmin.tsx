@@ -15,9 +15,9 @@ import { ICurriculum } from "@/core/domain/curriculum";
 
 interface CurriculumAdminCardProps {
   curriculum: ICurriculum;
-  onView?: () => void;
-  onDelete?: () => void;
-  onEdit?: () => void;
+  onView: () => void;
+  onDelete: () => void;
+  onEdit: () => void;
 }
 
 export const CurriculumAdminCard: FC<CurriculumAdminCardProps> = (props) => {
