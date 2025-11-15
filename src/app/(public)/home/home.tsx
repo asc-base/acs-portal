@@ -10,6 +10,7 @@ import { NewsCarouselComponent } from "@/components/news.carousel.component";
 import { ActivityCard } from "@/components/activitycard";
 import { Carousel } from "@/components/carousel";
 import { useAuthStore } from "@/store/auth";
+import { API_URL } from "@/config/config";
 
 interface HomePageProps {
   initNewsActivity: INews[];
@@ -27,6 +28,8 @@ const HomePage = ({
   const [newsActivityActive, setNewsActivityActive] = useState(0);
   const [newsCompleteActive, setNewsCompleteActive] = useState(0);
   const [newsActivityStudentActive, setNewsActivityStudentActive] = useState(0);
+
+  console.log("API_URL:", API_URL);
 
   const user = useAuthStore((state) => state.user);
 

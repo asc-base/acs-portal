@@ -1,7 +1,7 @@
 "use client";
 import React, { useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Pagination} from "@mui/material";
+import { Pagination } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
 import CloseIcon from "@mui/icons-material/Close";
 import { useForm } from "react-hook-form";
@@ -63,7 +63,6 @@ const StudentsLandingpage = ({
     return `/admin/students?${params.toString()}`;
   };
 
-
   useEffect(() => {
     const handler = setTimeout(() => {
       router.push(SearchStudentUrl({ page: 1, search: watchedSearch }));
@@ -79,7 +78,9 @@ const StudentsLandingpage = ({
   const handleSort = (newSortBy: string) => {
     const newSortOrder =
       sortBy === newSortBy && sortOrder === "desc" ? "asc" : "desc";
-    router.push(SearchStudentUrl({ sortBy: newSortBy, sortOrder: newSortOrder }));
+    router.push(
+      SearchStudentUrl({ sortBy: newSortBy, sortOrder: newSortOrder }),
+    );
   };
 
   return (
