@@ -38,13 +38,12 @@ const ClassBookListComponents = ({
 }: ClassBookListComponentsProps) => {
   const router = useRouter();
 
-  const searchField = "search";
   const { register, reset, watch } = useForm<SearchForm>({
     resolver: zodResolver(searchSchema),
-    defaultValues: { [searchField]: search },
+    defaultValues: { search },
   });
 
-  const watchedSearch = watch(searchField);
+  const watchedSearch = watch("search");
   
   const SearchClassBookUrl = (query: Partial<QueryClassBook>) => {
     const searchClassOf = (query.search ?? watchedSearch ?? "").replace(/\D/g, "");
@@ -94,12 +93,12 @@ const ClassBookListComponents = ({
             <input
               type="text"
               placeholder="ค้นหารุ่น"
-              {...register(searchField)}
+              {...register("search")}
               className="border w-[280px] h-[44px] rounded-sm pl-10 border-neutral04 text-h4"
             />
               <button
                 type="button"
-                onClick={() => reset({ [searchField]: "" })}
+                onClick={() => reset({ search : "" })}
                 disabled={!watchedSearch}
                 className={`absolute right-2 top-1/2 -translate-y-1/2 text-neutral05 ${!watchedSearch ? "cursor-not-allowed opacity-50" : "cursor-pointer hover:text-primary01"
                   }`}

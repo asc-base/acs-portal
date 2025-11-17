@@ -43,13 +43,12 @@ const StudentsLandingpage = ({
 }: StudentsLandingPageProps) => {
   const router = useRouter();
 
-  const searchField = "search";
   const { register, reset, watch } = useForm<SearchForm>({
     resolver: zodResolver(searchSchema),
-    defaultValues: { [searchField]: search },
+    defaultValues: { search },
   });
 
-  const watchedSearch = watch(searchField);
+  const watchedSearch = watch("search");
 
   const SearchStudentUrl = (query: Partial<QueryStudent>) => {
     const params = new URLSearchParams({
@@ -97,12 +96,12 @@ const StudentsLandingpage = ({
             <input
               type="text"
               placeholder="ค้นหา"
-              {...register(searchField)}
+              {...register("search")}
               className="border-neutral04 text-h4 h-[44px] w-[280px] rounded-sm border pl-10"
             />
               <button
                 type="button"
-                onClick={() => reset({ [searchField]: "" })}
+                onClick={() => reset({ search : "" })}
                 disabled={!watchedSearch}
                 className={`absolute right-2 top-1/2 -translate-y-1/2 text-neutral05 ${!watchedSearch ? "cursor-not-allowed opacity-50" : "cursor-pointer hover:text-primary01"
                   }`}
