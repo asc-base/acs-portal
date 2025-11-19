@@ -15,7 +15,7 @@ const page = async ({ searchParams }: PageProps) => {
       pageSize: resolvedSearchParams.pageSize || 10,
       sortBy: "createdAt",
       sortOrder: resolvedSearchParams.sortOrder ?? "desc",
-  
+      search : resolvedSearchParams.search ?? "",
     };
   const { rows, totalRecords, pageSize, page } = await classBookService.getClassBooks(query);
   return (

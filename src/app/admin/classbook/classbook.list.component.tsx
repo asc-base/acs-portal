@@ -11,6 +11,7 @@ import CloseIcon from "@mui/icons-material/Close";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useEffect } from "react";
 
 interface ClassBookListComponentsProps {
   classbooks: IClassBook[];
@@ -18,10 +19,11 @@ interface ClassBookListComponentsProps {
   pageSize: number;
   page: number;
   sortOrder?: string;
+  search?: string;
 }
 
 const searchSchema = z.object({
-  classOf: z.string().optional(),
+  search: z.string().optional(),
 });
 
 type SearchForm = z.infer<typeof searchSchema>;
@@ -32,27 +34,37 @@ const ClassBookListComponents = ({
   pageSize,
   page,
   sortOrder,
+  search
 }: ClassBookListComponentsProps) => {
   const router = useRouter();
 
-  const { register, handleSubmit, reset } = useForm<SearchForm>({
+  const { register, reset, watch } = useForm<SearchForm>({
     resolver: zodResolver(searchSchema),
+    defaultValues: { search },
   });
 
+  const watchedSearch = watch("search");
+  
   const SearchClassBookUrl = (query: Partial<QueryClassBook>) => {
+    const searchClassOf = (query.search ?? watchedSearch ?? "").replace(/\D/g, "");
+
     const params = new URLSearchParams({
       page: query.page?.toString() || page.toString(),
       pageSize: query.pageSize?.toString() || pageSize.toString(),
       sortBy: "createdAt",
       sortOrder: query.sortOrder ?? sortOrder ?? "desc",
+      search: searchClassOf,
     });
     return `/admin/classbook?${params.toString()}`;
   };
 
-  const onSubmit = (data: SearchForm) => {
-    console.log("Search classOf:", data.classOf);
-    reset();
-  };
+  useEffect(() => {
+    const handler = setTimeout(() => {
+    router.push(SearchClassBookUrl({ page: 1, search: watchedSearch }));
+  }, 300);
+  
+    return () => clearTimeout(handler);
+  }, [watchedSearch]);
 
   const handleSortOrder = (event: SelectChangeEvent) => {
     const newSortOrder = event.target.value as "asc" | "desc";
@@ -74,20 +86,22 @@ const ClassBookListComponents = ({
         <h3 className="font-bold text-lg">ข้อมูลนักศึกษา</h3>
 
         <div className="flex items-center gap-3">
-          <form onSubmit={handleSubmit(onSubmit)} className="relative">
+          <form className="relative">
             <div className="absolute left-2 top-1/2 -translate-y-1/2 text-neutral04">
               <SearchIcon className="h-5 w-5" />
             </div>
             <input
               type="text"
-              placeholder="ค้นหา"
-              {...register("classOf")}
+              placeholder="ค้นหารุ่น"
+              {...register("search")}
               className="border w-[280px] h-[44px] rounded-sm pl-10 border-neutral04 text-h4"
             />
               <button
                 type="button"
-                onClick={() => reset()}
-                className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                onClick={() => reset({ search : "" })}
+                disabled={!watchedSearch}
+                className={`absolute right-2 top-1/2 -translate-y-1/2 text-neutral05 ${!watchedSearch ? "cursor-not-allowed opacity-50" : "cursor-pointer hover:text-primary01"
+                  }`}
               >
                 <CloseIcon fontSize="small" />
               </button>
@@ -96,7 +110,7 @@ const ClassBookListComponents = ({
           <Select
             onChange={handleSortOrder}
             size="small"
-            value={sortOrder}
+            value={sortOrder ?? "desc"}
             displayEmpty
             renderValue={() => "จัดเรียงตาม"}
             sx={{
