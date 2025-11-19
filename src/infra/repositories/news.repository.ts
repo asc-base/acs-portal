@@ -54,9 +54,9 @@ export class NewsRepository implements INewsRepository {
     return response;
   }
 
-  async getNewsMedias(type: string): Promise<ApiResponse<INewsMedia[]>> {
+  async getNewsMedias(type: string,page: number,pageSize: number,): Promise<ApiResponse<INewsMedia[]>> {
     const response = await this.http.get<ApiResponse<INewsMedia[]>>(
-      `/v1/news/news-media?type=${type}&page=1&pageSize=6`,
+      `/v1/news/news-media?type=${type}&page=${page}&pageSize=${pageSize}`,
     );
     return response;
   }

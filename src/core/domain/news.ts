@@ -26,3 +26,9 @@ export interface INewsMedia {
   news: INews;
   type: Category;
 }
+
+export interface newsInformationPageProps {
+  newsInformation: INewsMedia[];
+  type: string;
+  pageSize: number;
+}

@@ -11,5 +11,5 @@ export interface INewsRepository {
   getNewsById(id: string): Promise<ApiResponse<INews>>;
   updateNews(id: string, news: Partial<INews>): Promise<ApiResponse<INews>>;
   deleteNews(id: string, token: string): Promise<ApiResponse<INews>>;
-  getNewsMedias(type: string): Promise<ApiResponse<INewsMedia[]>>;
+  getNewsMedias(type: string,page: number,pageSize: number,): Promise<ApiResponse<INewsMedia[]>>;
 }
