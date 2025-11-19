@@ -1,5 +1,5 @@
 import { ApiResponse, Pageable } from "@/interface/response";
-import { IProfessor } from "../domain/professor";
+import { IProfessor , IUpdateProfessor } from "../domain/professor";
 import { QueryProfessor } from "../domain/professor";
 
 export interface IProfessorRepository {
@@ -7,4 +7,5 @@ export interface IProfessorRepository {
        query: QueryProfessor
       ): Promise<ApiResponse<Pageable<IProfessor>>>;
     getProfessorById(id: string): Promise<ApiResponse<IProfessor>>;
+    updateProfessor(data: IUpdateProfessor , id:string):Promise<ApiResponse<IProfessor>>
 }
