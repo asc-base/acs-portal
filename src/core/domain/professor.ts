@@ -1,17 +1,36 @@
 import { IUser } from "./user";
 import { Position } from "./master-data";
-import { IExpertField } from "./expert-field";
-import { IEducation } from "./education";
+import { IExpertField ,IUpdateExpertField } from "./expert-field";
+import { IEducation , IUpdateEducation , INewEducation } from "./education";
 
 export interface IProfessor {
     id: number;
     user: IUser;
-    majorPositions: Position;
+    majorPosition: Position;
     academicPosition: Position;
     profRoom: string;
     expertFields: IExpertField[];
     educations: IEducation[];
     phone:string;
+}
+
+export interface IUpdateProfessor {
+    id: number;
+    academicPositionId: number;
+    majorPositionId: number;
+    profRoom: string;
+    phone: string;
+    firstNameTh: string;
+    lastNameTh: string;
+    firstNameEn: string;
+    lastNameEn: string;
+    mail: string;
+    newExpertFields: string[];
+    updatedExpertFields: IUpdateExpertField[];
+    deleteExpertFieldsIds: number[];
+    newEducation: INewEducation[];
+    updatedEducation: IUpdateEducation[];
+    deleteEducationIds: number[];
 }
 
 export interface QueryProfessor {

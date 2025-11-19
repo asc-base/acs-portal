@@ -41,7 +41,7 @@ export default function AdminLoginLandingPage() {
         password: data.password,
       };
 
-      const response = await authService.LoginAdmin(loginRequest);
+      const response = await authService.LoginV2(loginRequest);
 
       console.log("form data", loginRequest);
 

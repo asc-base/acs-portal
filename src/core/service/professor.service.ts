@@ -1,5 +1,5 @@
 import { IProfessorRepository } from "../ports/professor.repository";
-import { IProfessor } from "../domain/professor";
+import { IProfessor , IUpdateProfessor } from "../domain/professor";
 import { Pageable } from "@/interface/response";
 import { QueryProfessor } from "../domain/professor";
 
@@ -18,6 +18,11 @@ export class ProfessorService {
 
   async getProfessorById(id: string): Promise<IProfessor> {
     const response = await this.professorRepository.getProfessorById(id);
+    return response.data;
+  }
+
+  async updateProfessor(data: IUpdateProfessor , id:string): Promise<IProfessor> {
+    const response = await this.professorRepository.updateProfessor(data,id);
     return response.data;
   }
 }
