@@ -15,7 +15,8 @@ const MainPage = async () => {
     initNewsActivity,
     initNewsComplete,
     initNewsActivityStudent,
-    initNewsMedia,
+    initAnnoucement,
+    initNewsHighlight,
   ] = await Promise.all([
     newsService
       .getNews(1, 6, "", "ข่าวสารและกิจกรรม")
@@ -26,7 +27,8 @@ const MainPage = async () => {
     newsService
       .getNews(1, 6, "", "งานกิจกรรมนักศึกษา")
       .catch(() => ({ rows: [] })),
-    newsService.getNewsMedias("newshigtlight").catch(() => []),
+    newsService.getNewsMedias("announcement", 1, 6).catch(() => []),
+    newsService.getNewsMedias("newshighlight", 1, 5).catch(() => []),
   ]);
 
   return (
@@ -34,7 +36,8 @@ const MainPage = async () => {
       initNewsActivity={initNewsActivity.rows || []}
       initNewsComplete={initNewsComplete.rows || []}
       initNewsActivityStudent={initNewsActivityStudent.rows || []}
-      initNewsMedia={initNewsMedia || []}
+      initAnnoucement={initAnnoucement || []}
+      initNewsHighlight={initNewsHighlight || []}
     />
   );
 };
