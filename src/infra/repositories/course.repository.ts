@@ -24,7 +24,14 @@ export class CourseRepository implements ICourseRepository {
       params.append("curriculumId", query.curriculumId.toString());
     if (query.typecourseId !== undefined)
       params.append("typecourseId", query.typecourseId.toString());
+    if (query.search !== undefined) 
+      params.append("search", query.search.toString());
+    if (query.sortBy !== undefined)
+      params.append("sortBy", query.sortBy.toString());
+    if (query.sortOrder !== undefined)
+      params.append("sortOrder", query.sortOrder.toString());
 
+    
     const url = `/v1/course?${params.toString()}`;
 
     const response = await this.http.get<ApiResponse<Pageable<ICourse>>>(url);
