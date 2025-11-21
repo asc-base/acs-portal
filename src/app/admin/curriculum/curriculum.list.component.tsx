@@ -128,7 +128,7 @@ const CurriculumListComponents = ({
               key={curriculum.id}
               curriculum={curriculum}
               onEdit={() => router.push(`/admin/curriculum/edit/${curriculum.id}`)}
-              onView={() => router.push(`/admin/course?page=1&pageSize=10&curriculumId=${curriculum.id}`)}
+              onView={() => router.push(`/admin/courses?prerequisite=false&page=1&pageSize=10&curriculumId=${curriculum.id}`)}
               onDelete={() => console.log("Delete succeed:", curriculum.id)}
             />
           ))}
