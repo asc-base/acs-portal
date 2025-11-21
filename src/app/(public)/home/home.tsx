@@ -11,7 +11,7 @@ import { ActivityCard } from "@/components/activitycard";
 import { Carousel } from "@/components/carousel";
 import { useAuthStore } from "@/store/auth";
 import { API_URL } from "@/config/config";
-import NewsHighlightColossal from "@/components/newshighlightcolossal";
+import NewsHighlightCarousel from "@/components/newshighlightcarousel";
 
 interface HomePageProps {
   initNewsActivity: INews[];
@@ -141,7 +141,7 @@ const HomePage = ({
                 </div>
               </div>
             </div>
-            <NewsHighlightColossal newsHighlight={initNewsHighlight || []} />
+            <NewsHighlightCarousel newsHighlight={initNewsHighlight || []} />
             <NewsCarouselComponent
               title="ข่าวสารและกิจกรรม"
               news={initNewsActivity}

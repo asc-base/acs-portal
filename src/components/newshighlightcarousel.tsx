@@ -5,13 +5,13 @@ import Image from "next/image";
 import { INewsMedia } from "@/core/domain/news";
 import { useState, useEffect } from "react";
 
-interface NewsHighlightColossalProps {
+interface NewsHighlightCarouselProps {
   newsHighlight: INewsMedia[];
 }
 
-const NewsHighlightColossal = ({
+const NewsHighlightCarousel = ({
   newsHighlight,
-}: NewsHighlightColossalProps) => {
+}: NewsHighlightCarouselProps) => {
   const [rePositionNews, setPositions] = useState(newsHighlight);
 
   useEffect(() => {
@@ -91,4 +91,4 @@ const NewsHighlightColossal = ({
   );
 };
 
-export default NewsHighlightColossal;
+export default NewsHighlightCarousel;
