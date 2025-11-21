@@ -6,4 +6,6 @@ export interface ICurriculumRepository {
   getCurriculum(
     query: QueryCurriculum,
   ): Promise<ApiResponse<Pageable<ICurriculum>>>;
+  
+  getCurriculumById(id: number): Promise<ApiResponse<ICurriculum> | null>;
 }
