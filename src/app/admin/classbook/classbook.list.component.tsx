@@ -2,7 +2,13 @@
 import { useRouter } from "next/navigation";
 import { ClassBookAdminCard } from "@/components/classbookadmincard";
 import { IClassBook, QueryClassBook } from "@/core/domain/classbook";
-import { MenuItem, Select, SelectChangeEvent, Button, Pagination,} from "@mui/material";
+import {
+  MenuItem,
+  Select,
+  SelectChangeEvent,
+  Button,
+  Pagination,
+} from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import DoneIcon from "@mui/icons-material/Done";
 import AddIcon from "@mui/icons-material/Add";
@@ -11,7 +17,7 @@ import CloseIcon from "@mui/icons-material/Close";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useEffect } from "react";
+import { useEffect, useCallback } from "react";
 
 interface ClassBookListComponentsProps {
   classbooks: IClassBook[];
@@ -34,7 +40,7 @@ const ClassBookListComponents = ({
   pageSize,
   page,
   sortOrder,
-  search
+  search,
 }: ClassBookListComponentsProps) => {
   const router = useRouter();
 
@@ -44,33 +50,38 @@ const ClassBookListComponents = ({
   });
 
   const watchedSearch = watch("search");
-  
-  const SearchClassBookUrl = (query: Partial<QueryClassBook>) => {
-    const searchClassOf = (query.search ?? watchedSearch ?? "").replace(/\D/g, "");
 
-    const params = new URLSearchParams({
-      page: query.page?.toString() || page.toString(),
-      pageSize: query.pageSize?.toString() || pageSize.toString(),
-      sortBy: "createdAt",
-      sortOrder: query.sortOrder ?? sortOrder ?? "desc",
-      search: searchClassOf,
-    });
-    return `/admin/classbook?${params.toString()}`;
-  };
+  const SearchClassBookUrl = useCallback(
+    (query: Partial<QueryClassBook>) => {
+      const searchClassOf = (query.search ?? watchedSearch ?? "").replace(
+        /\D/g,
+        "",
+      );
+
+      const params = new URLSearchParams({
+        page: query.page?.toString() || page.toString(),
+        pageSize: query.pageSize?.toString() || pageSize.toString(),
+        sortBy: "createdAt",
+        sortOrder: query.sortOrder ?? sortOrder ?? "desc",
+        search: searchClassOf,
+      });
+      return `/admin/classbook?${params.toString()}`;
+    },
+    [page, pageSize, sortOrder, watchedSearch],
+  );
 
   useEffect(() => {
     const handler = setTimeout(() => {
-    router.push(SearchClassBookUrl({ page: 1, search: watchedSearch }));
-  }, 300);
-  
+      router.push(SearchClassBookUrl({ page: 1, search: watchedSearch }));
+    }, 300);
+
     return () => clearTimeout(handler);
-  }, [watchedSearch]);
+  }, [watchedSearch, SearchClassBookUrl, router]);
 
   const handleSortOrder = (event: SelectChangeEvent) => {
     const newSortOrder = event.target.value as "asc" | "desc";
     router.push(SearchClassBookUrl({ sortOrder: newSortOrder }));
   };
-
 
   const handleClickAddClassBook = () => {
     router.push("/admin/classbook/create");
@@ -83,28 +94,31 @@ const ClassBookListComponents = ({
   return (
     <div className="min-h-screen px-8 py-5">
       <div className="mb-6 flex items-center justify-between">
-        <h3 className="font-bold text-lg">ข้อมูลนักศึกษา</h3>
+        <h3 className="text-lg font-bold">ข้อมูลนักศึกษา</h3>
 
         <div className="flex items-center gap-3">
           <form className="relative">
-            <div className="absolute left-2 top-1/2 -translate-y-1/2 text-neutral04">
+            <div className="text-neutral04 absolute top-1/2 left-2 -translate-y-1/2">
               <SearchIcon className="h-5 w-5" />
             </div>
             <input
               type="text"
               placeholder="ค้นหารุ่น"
               {...register("search")}
-              className="border w-[280px] h-[44px] rounded-sm pl-10 border-neutral04 text-h4"
+              className="border-neutral04 text-h4 h-[44px] w-[280px] rounded-sm border pl-10"
             />
-              <button
-                type="button"
-                onClick={() => reset({ search : "" })}
-                disabled={!watchedSearch}
-                className={`absolute right-2 top-1/2 -translate-y-1/2 text-neutral05 ${!watchedSearch ? "cursor-not-allowed opacity-50" : "cursor-pointer hover:text-primary01"
-                  }`}
-              >
-                <CloseIcon fontSize="small" />
-              </button>
+            <button
+              type="button"
+              onClick={() => reset({ search: "" })}
+              disabled={!watchedSearch}
+              className={`text-neutral05 absolute top-1/2 right-2 -translate-y-1/2 ${
+                !watchedSearch
+                  ? "cursor-not-allowed opacity-50"
+                  : "hover:text-primary01 cursor-pointer"
+              }`}
+            >
+              <CloseIcon fontSize="small" />
+            </button>
           </form>
 
           <Select
@@ -154,7 +168,7 @@ const ClassBookListComponents = ({
               }}
             >
               เก่าสุดไปใหม่สุด
-               {sortOrder === "asc" && <DoneIcon fontSize="small" />}
+              {sortOrder === "asc" && <DoneIcon fontSize="small" />}
             </MenuItem>
           </Select>
 
@@ -180,18 +194,22 @@ const ClassBookListComponents = ({
       </div>
 
       <div className="flex w-full flex-col items-center justify-center gap-10">
-        <div className="grid w-full justify-items-center grid-cols-3 gap-6">
+        <div className="grid w-full grid-cols-3 justify-items-center gap-6">
           {classbooks.map((classbook) => (
             <ClassBookAdminCard
               key={classbook.id}
               classbook={classbook}
               onEdit={() => router.push(`/admin/students/edit/${classbook.id}`)}
-              onView={() => router.push(`/admin/students?page=1&pageSize=10&classBookId=${classbook.id}`)}
+              onView={() =>
+                router.push(
+                  `/admin/students?page=1&pageSize=10&classBookId=${classbook.id}`,
+                )
+              }
               onDelete={() => console.log("Delete succeed:", classbook.id)}
             />
           ))}
         </div>
-        
+
         <Pagination
           shape="rounded"
           count={Math.ceil(totalRecords / pageSize)}

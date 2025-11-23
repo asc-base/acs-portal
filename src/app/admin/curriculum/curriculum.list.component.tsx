@@ -1,7 +1,7 @@
 "use client";
-import React, { useEffect } from "react";
+import React, { useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { Button, Pagination, } from "@mui/material";
+import { Button, Pagination } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import SearchIcon from "@mui/icons-material/Search";
 import CloseIcon from "@mui/icons-material/Close";
@@ -42,18 +42,23 @@ const CurriculumListComponents = ({
 
   const watchedSearch = watch("search");
 
-  const SearchCurriculumUrl = (query: Partial<QueryCurriculum>) => {
-    const searchYear = (query.search ?? watchedSearch ?? "").replace(/\D/g, "");
-    
-    const params = new URLSearchParams({
-      page: query.page?.toString() || page.toString(),
-      pageSize: query.pageSize?.toString() || pageSize.toString(),
-      search: searchYear,
-    });
+  const SearchCurriculumUrl = useCallback(
+    (query: Partial<QueryCurriculum>) => {
+      const searchYear = (query.search ?? watchedSearch ?? "").replace(
+        /\D/g,
+        "",
+      );
 
-    return `/admin/curriculum?${params.toString()}`;
-  };
+      const params = new URLSearchParams({
+        page: query.page?.toString() || page.toString(),
+        pageSize: query.pageSize?.toString() || pageSize.toString(),
+        search: searchYear,
+      });
 
+      return `/admin/curriculum?${params.toString()}`;
+    },
+    [watchedSearch, page, pageSize],
+  );
 
   useEffect(() => {
     const handler = setTimeout(() => {
@@ -61,8 +66,7 @@ const CurriculumListComponents = ({
     }, 300);
 
     return () => clearTimeout(handler);
-  }, [watchedSearch]);
-
+  }, [watchedSearch, router, SearchCurriculumUrl]);
 
   const handleClickAddClassBook = () => {
     router.push(`/admin/curriculum/create`);
@@ -72,32 +76,34 @@ const CurriculumListComponents = ({
     router.push(SearchCurriculumUrl({ page: currentPage }));
   };
 
-
   return (
     <div className="min-h-screen px-8 py-5">
       <div className="mb-6 flex items-center justify-between">
-        <h3 className="font-bold text-lg">จัดการหลักสูตร</h3>
+        <h3 className="text-lg font-bold">จัดการหลักสูตร</h3>
 
         <div className="flex items-center gap-4">
           <form className="relative">
-            <div className="absolute left-2 top-1/2 -translate-y-1/2 text-neutral04">
+            <div className="text-neutral04 absolute top-1/2 left-2 -translate-y-1/2">
               <SearchIcon className="h-5 w-5" />
             </div>
             <input
               type="text"
               placeholder="ค้นหา"
               {...register("search")}
-              className="border w-[280px] h-[44px] rounded-sm pl-10 border-neutral04 text-h4"
+              className="border-neutral04 text-h4 h-[44px] w-[280px] rounded-sm border pl-10"
             />
-              <button
-                type="button"
-                onClick={() => reset({ search : "" })}
-                disabled={!watchedSearch}
-                className={`absolute right-2 top-1/2 -translate-y-1/2 text-neutral05 ${!watchedSearch ? "cursor-not-allowed opacity-50" : "cursor-pointer hover:text-primary01"
-                  }`}
-              >
-                <CloseIcon fontSize="small" />
-              </button>
+            <button
+              type="button"
+              onClick={() => reset({ search: "" })}
+              disabled={!watchedSearch}
+              className={`text-neutral05 absolute top-1/2 right-2 -translate-y-1/2 ${
+                !watchedSearch
+                  ? "cursor-not-allowed opacity-50"
+                  : "hover:text-primary01 cursor-pointer"
+              }`}
+            >
+              <CloseIcon fontSize="small" />
+            </button>
           </form>
 
           <Button
@@ -122,13 +128,19 @@ const CurriculumListComponents = ({
       </div>
 
       <div className="flex w-full flex-col items-center justify-center gap-10">
-        <div className="grid w-full justify-items-center grid-cols-3 gap-6">
+        <div className="grid w-full grid-cols-3 justify-items-center gap-6">
           {curriculums.map((curriculum) => (
             <CurriculumAdminCard
               key={curriculum.id}
               curriculum={curriculum}
-              onEdit={() => router.push(`/admin/curriculum/edit/${curriculum.id}`)}
-              onView={() => router.push(`/admin/courses?prerequisite=false&page=1&pageSize=10&curriculumId=${curriculum.id}`)}
+              onEdit={() =>
+                router.push(`/admin/curriculum/edit/${curriculum.id}`)
+              }
+              onView={() =>
+                router.push(
+                  `/admin/courses?prerequisite=false&page=1&pageSize=10&curriculumId=${curriculum.id}`,
+                )
+              }
               onDelete={() => console.log("Delete succeed:", curriculum.id)}
             />
           ))}

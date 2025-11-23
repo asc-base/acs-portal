@@ -2,6 +2,8 @@ import React from "react";
 import { newsService } from "@/infra/container";
 import NewshighlightLandingpage from "./newshighlight.landingpage";
 
+export const dynamic = "force-dynamic";
+
 const page = async () => {
   const pageSize = 5;
   const type = "newshighlight";

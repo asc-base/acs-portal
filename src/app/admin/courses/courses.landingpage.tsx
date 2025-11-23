@@ -1,7 +1,13 @@
 "use client";
-import React, { useEffect } from "react";
+import React, { useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { MenuItem, Select, SelectChangeEvent, Button, Pagination, } from "@mui/material";
+import {
+  MenuItem,
+  Select,
+  SelectChangeEvent,
+  Button,
+  Pagination,
+} from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
 import AddIcon from "@mui/icons-material/Add";
 import CloseIcon from "@mui/icons-material/Close";
@@ -20,7 +26,7 @@ interface CoursesLandingPageProps {
   pageSize: number;
   page: number;
   curriculumId: number;
-  typeCourses: TypeCourse[],
+  typeCourses: TypeCourse[];
   typecourseId?: number;
   search?: string;
   sortBy?: string;
@@ -54,22 +60,25 @@ const CoursesLandingpage = ({
 
   const watchedSearch = watch("search");
 
-  const SearchCourseUrl = (query: Partial<QueryCourse>) => {
-    const params = new URLSearchParams({
-      page: query.page?.toString() || page.toString(),
-      pageSize: query.pageSize?.toString() || pageSize.toString(),
-      curriculumId: (query.curriculumId ?? curriculumId).toString(),
-      search: query.search ?? watchedSearch ?? "",
-      sortBy: query.sortBy ?? sortBy ?? "courseId",
-      sortOrder: query.sortOrder ?? sortOrder ?? "desc",
-    });
+  const SearchCourseUrl = useCallback(
+    (query: Partial<QueryCourse>) => {
+      const params = new URLSearchParams({
+        page: query.page?.toString() || page.toString(),
+        pageSize: query.pageSize?.toString() || pageSize.toString(),
+        curriculumId: (query.curriculumId ?? curriculumId).toString(),
+        search: query.search ?? watchedSearch ?? "",
+        sortBy: query.sortBy ?? sortBy ?? "courseId",
+        sortOrder: query.sortOrder ?? sortOrder ?? "desc",
+      });
 
-    if (query.typecourseId !== undefined) {
-      params.set("typecourseId", query.typecourseId.toString());
-    }
+      if (query.typecourseId !== undefined) {
+        params.set("typecourseId", query.typecourseId.toString());
+      }
 
-    return `/admin/courses?${params.toString()}`;
-  };
+      return `/admin/courses?${params.toString()}`;
+    },
+    [page, pageSize, curriculumId, watchedSearch, sortBy, sortOrder],
+  );
 
   useEffect(() => {
     const handler = setTimeout(() => {
@@ -77,7 +86,7 @@ const CoursesLandingpage = ({
     }, 300);
 
     return () => clearTimeout(handler);
-  }, [watchedSearch]);
+  }, [SearchCourseUrl, router, watchedSearch]);
 
   const handleNextPage = (currentPage: number) => {
     router.push(SearchCourseUrl({ page: currentPage }));
@@ -101,13 +110,11 @@ const CoursesLandingpage = ({
     router.push(SearchCourseUrl({ page: 1, typecourseId }));
   };
 
-
   return (
     <div className="p-6">
       <div className="mb-4 flex items-center justify-between">
         <h3 className="font-bold">ข้อมูลรายวิชา</h3>
         <div className="flex gap-2">
-
           <form className="relative">
             <div className="text-neutral04 absolute top-1/2 left-2 -translate-y-1/2">
               <SearchIcon className="h-5 w-5" />
@@ -122,10 +129,11 @@ const CoursesLandingpage = ({
               type="button"
               onClick={() => reset({ search: "" })}
               disabled={!watchedSearch}
-              className={`absolute right-2 top-1/2 -translate-y-1/2 text-neutral05 ${!watchedSearch
-                ? "cursor-not-allowed opacity-50"
-                : "cursor-pointer hover:text-primary01"
-                }`}
+              className={`text-neutral05 absolute top-1/2 right-2 -translate-y-1/2 ${
+                !watchedSearch
+                  ? "cursor-not-allowed opacity-50"
+                  : "hover:text-primary01 cursor-pointer"
+              }`}
             >
               <CloseIcon fontSize="small" />
             </button>
@@ -167,7 +175,6 @@ const CoursesLandingpage = ({
               }}
             >
               ทั้งหมด
-
             </MenuItem>
 
             {typeCourses.map((typeCourse) => (
@@ -183,7 +190,6 @@ const CoursesLandingpage = ({
                 {typeCourse.name}
               </MenuItem>
             ))}
-
           </Select>
 
           <Button
@@ -204,7 +210,6 @@ const CoursesLandingpage = ({
             <AddIcon />
             เพิ่มรายวิชาใหม่
           </Button>
-
         </div>
       </div>
 

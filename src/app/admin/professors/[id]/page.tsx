@@ -4,7 +4,7 @@ import { masterDataService } from "@/infra/container";
 import ProfessorFormComponent from "./professor.form.component";
 
 interface PageProps {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }
 
 export default async function Page({ params }: PageProps) {

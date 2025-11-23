@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect } from "react";
+import React, { useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { Pagination } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
@@ -50,18 +50,21 @@ const StudentsLandingpage = ({
 
   const watchedSearch = watch("search");
 
-  const SearchStudentUrl = (query: Partial<QueryStudent>) => {
-    const params = new URLSearchParams({
-      page: query.page?.toString() || page.toString(),
-      pageSize: query.pageSize?.toString() || pageSize.toString(),
-      classBookId: query.classBookId?.toString() || classBookId.toString(),
-      search: query.search ?? watchedSearch ?? "",
-      sortBy: query.sortBy ?? sortBy ?? "studentId",
-      sortOrder: query.sortOrder ?? sortOrder ?? "desc",
-    });
+  const SearchStudentUrl = useCallback(
+    (query: Partial<QueryStudent>) => {
+      const params = new URLSearchParams({
+        page: query.page?.toString() || page.toString(),
+        pageSize: query.pageSize?.toString() || pageSize.toString(),
+        classBookId: query.classBookId?.toString() || classBookId.toString(),
+        search: query.search ?? watchedSearch ?? "",
+        sortBy: query.sortBy ?? sortBy ?? "studentId",
+        sortOrder: query.sortOrder ?? sortOrder ?? "desc",
+      });
 
-    return `/admin/students?${params.toString()}`;
-  };
+      return `/admin/students?${params.toString()}`;
+    },
+    [page, pageSize, classBookId, watchedSearch, sortBy, sortOrder],
+  );
 
   useEffect(() => {
     const handler = setTimeout(() => {
@@ -69,7 +72,7 @@ const StudentsLandingpage = ({
     }, 300);
 
     return () => clearTimeout(handler);
-  }, [watchedSearch]);
+  }, [SearchStudentUrl, router, watchedSearch]);
 
   const handleNextPage = (currentPage: number) => {
     router.push(SearchStudentUrl({ page: currentPage }));
@@ -100,15 +103,18 @@ const StudentsLandingpage = ({
               {...register("search")}
               className="border-neutral04 text-h4 h-[44px] w-[280px] rounded-sm border pl-10"
             />
-              <button
-                type="button"
-                onClick={() => reset({ search : "" })}
-                disabled={!watchedSearch}
-                className={`absolute right-2 top-1/2 -translate-y-1/2 text-neutral05 ${!watchedSearch ? "cursor-not-allowed opacity-50" : "cursor-pointer hover:text-primary01"
-                  }`}
-              >
-                <CloseIcon fontSize="small" />
-              </button>
+            <button
+              type="button"
+              onClick={() => reset({ search: "" })}
+              disabled={!watchedSearch}
+              className={`text-neutral05 absolute top-1/2 right-2 -translate-y-1/2 ${
+                !watchedSearch
+                  ? "cursor-not-allowed opacity-50"
+                  : "hover:text-primary01 cursor-pointer"
+              }`}
+            >
+              <CloseIcon fontSize="small" />
+            </button>
           </form>
         </div>
       </div>
