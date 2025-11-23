@@ -11,20 +11,24 @@ import { ActivityCard } from "@/components/activitycard";
 import { Carousel } from "@/components/carousel";
 import { useAuthStore } from "@/store/auth";
 import { API_URL } from "@/config/config";
+import NewsHighlightCarousel from "@/components/newshighlightcarousel";
 
 interface HomePageProps {
   initNewsActivity: INews[];
   initNewsComplete: INews[];
   initNewsActivityStudent: INews[];
-  initNewsMedia?: INewsMedia[];
+  initAnnoucement?: INewsMedia[];
+  initNewsHighlight?: INewsMedia[];
 }
 
 const HomePage = ({
   initNewsActivity,
   initNewsComplete,
   initNewsActivityStudent,
-  initNewsMedia,
+  initAnnoucement,
+  initNewsHighlight,
 }: HomePageProps) => {
+  console.log(initAnnoucement, initNewsHighlight);
   const [newsActivityActive, setNewsActivityActive] = useState(0);
   const [newsCompleteActive, setNewsCompleteActive] = useState(0);
   const [newsActivityStudentActive, setNewsActivityStudentActive] = useState(0);
@@ -129,7 +133,7 @@ const HomePage = ({
                 </h3>
                 <div className="h-full">
                   <Carousel
-                    items={initNewsMedia || []}
+                    items={initAnnoucement || []}
                     autoPlay
                     autoPlayInterval={3000}
                     showIndicators
@@ -137,6 +141,7 @@ const HomePage = ({
                 </div>
               </div>
             </div>
+            <NewsHighlightCarousel newsHighlight={initNewsHighlight || []} />
             <NewsCarouselComponent
               title="ข่าวสารและกิจกรรม"
               news={initNewsActivity}
