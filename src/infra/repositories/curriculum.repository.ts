@@ -37,4 +37,10 @@ export class CurriculumRepository implements ICurriculumRepository {
       await this.http.get<ApiResponse<Pageable<ICurriculum>>>(url);
     return response;
   }
+
+  async getCurriculumById(id: number): Promise<ApiResponse<ICurriculum> | null> {
+    const url = `/v1/curriculum/${id}`;
+    const response = await this.http.get<ApiResponse<ICurriculum>>(url);
+    return response;
+  }
 }

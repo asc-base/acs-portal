@@ -4,7 +4,6 @@ import PersonIcon from "@mui/icons-material/Person";
 import HailIcon from "@mui/icons-material/Hail";
 import DescriptionIcon from "@mui/icons-material/Description";
 import NewspaperIcon from "@mui/icons-material/Newspaper";
-import MenuBookIcon from "@mui/icons-material/MenuBook";
 import WorkIcon from "@mui/icons-material/Work";
 import LogoutIcon from "@mui/icons-material/Logout";
 import BookmarkIcon from "@mui/icons-material/Bookmark";
@@ -46,14 +45,10 @@ const sidebarItems = [
     icon: <NewspaperIcon />,
   },
   {
-    name: "จัดการรายวิชา",
-    href: "/admin/courses",
-    icon: <MenuBookIcon />,
-  },
-  {
     name: "จัดการหลักสูตร",
     href: "/admin/curriculum",
     icon: <BookmarkIcon />,
+    activePaths: ["/admin/courses"],
   },
   {
     name: "จัดการฝึกงาน",
