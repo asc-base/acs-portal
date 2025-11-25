@@ -1,6 +1,7 @@
 import React from "react";
 import HomePage from "./home";
 import { newsService } from "@/infra/container";
+import { API_URL } from "@/config/config";
 
 // Force dynamic rendering to avoid build-time API calls
 export const dynamic = "force-dynamic";
@@ -30,6 +31,8 @@ const MainPage = async () => {
     newsService.getNewsMedias("announcement", 1, 6).catch(() => []),
     newsService.getNewsMedias("newshighlight", 1, 5).catch(() => []),
   ]);
+
+  console.log("base url is", API_URL);
 
   return (
     <HomePage
