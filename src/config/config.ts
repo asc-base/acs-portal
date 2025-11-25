@@ -1,7 +1,2 @@
-export const API_URL = (() => {
-  const raw = process.env.API_URL || "https://acs-dev.service.narutchai.com";
-  if (!raw || raw === "undefined" || raw === "null") {
-    return "https://acs-dev.service.narutchai.com";
-  }
-  return raw;
-})();
+export const API_URL =
+  process.env.API_URL || "https://acs-dev.service.narutchai.com";
