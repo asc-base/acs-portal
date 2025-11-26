@@ -1,6 +1,8 @@
 import { professorService } from "@/infra/container";
 import ProfessorLandingpage from "./professors.landingpage";
 
+export const dynamic = "force-dynamic";
+
 interface PageProps {
   searchParams: Promise<{
     page?: number;

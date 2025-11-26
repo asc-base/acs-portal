@@ -3,6 +3,8 @@ import { professorService } from "@/infra/container";
 import { masterDataService } from "@/infra/container";
 import ProfessorFormComponent from "./professor.form.component";
 
+export const dynamic = "force-dynamic";
+
 interface PageProps {
   params: Promise<{ id: string }>;
 }

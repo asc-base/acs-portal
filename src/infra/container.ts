@@ -2,7 +2,6 @@ import { NewsRepository } from "./repositories/news.repository";
 import { NewsService } from "@/core/service/news.service";
 import { MasterDataRepository } from "./repositories/master-data.repository";
 import { MasterDataService } from "@/core/service/master-data.service";
-import { getRuntimeConfig } from "@/config/config";
 import { AuthRepository } from "./repositories/auth.repository";
 import { AuthService } from "@/core/service/auth.service";
 import { CurriculumRepository } from "./repositories/curriculum.repository";
@@ -18,7 +17,10 @@ import { ProjectService } from "@/core/service/project.service";
 import { ClassBookRepository } from "./repositories/class-book.repository";
 import { ClassBookService } from "@/core/service/class-book.service";
 
-export const API_URL = (await getRuntimeConfig()).apiUrl;
+// Use process.env directly in server-side code (container.ts is server-only)
+// The /api/config endpoint is only for client-side usage
+export const API_URL =
+  process.env.API_URL || "https://acs-dev.service.narutchai.com";
 
 export const baseUrl = `${API_URL}/api`;
 

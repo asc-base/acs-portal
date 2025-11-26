@@ -1,4 +1,4 @@
-import { API_URL } from "@/config/config";
+import { API_URL } from "@/infra/container";
 import { Course } from "@/interface/course";
 
 export const createCourse = async (
@@ -22,13 +22,14 @@ export const createCourse = async (
   return data;
 };
 
-
 export const getCourse = async (
   page: number,
   pageSize: number,
- searchByTypeCourse:string
+  searchByTypeCourse: string,
 ): Promise<Course[] | Error> => {
-  const response = await fetch(`${API_URL}/course?page=${page}&pageSize=${pageSize}&searchByTypeCourse=${searchByTypeCourse}`,);
+  const response = await fetch(
+    `${API_URL}/course?page=${page}&pageSize=${pageSize}&searchByTypeCourse=${searchByTypeCourse}`,
+  );
 
   if (!response.ok) {
     return new Error("Failed to fetch Course");
