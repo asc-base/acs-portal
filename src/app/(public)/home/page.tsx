@@ -1,7 +1,7 @@
 import React from "react";
 import HomePage from "./home";
 import { newsService } from "@/infra/container";
-import { API_URL } from "@/config/config";
+import { API_URL } from "@/infra/container";
 
 // Force dynamic rendering to avoid build-time API calls
 export const dynamic = "force-dynamic";

@@ -10,7 +10,7 @@ import { NewsCarouselComponent } from "@/components/news.carousel.component";
 import { ActivityCard } from "@/components/activitycard";
 import { Carousel } from "@/components/carousel";
 import { useAuthStore } from "@/store/auth";
-import { API_URL } from "@/config/config";
+import { API_URL } from "@/infra/container";
 // import NewsHighlightCarousel from "@/components/newshighlightcarousel";
 
 interface HomePageProps {

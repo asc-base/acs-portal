@@ -2,7 +2,7 @@ import { NewsRepository } from "./repositories/news.repository";
 import { NewsService } from "@/core/service/news.service";
 import { MasterDataRepository } from "./repositories/master-data.repository";
 import { MasterDataService } from "@/core/service/master-data.service";
-import { API_URL } from "@/config/config";
+import { getRuntimeConfig } from "@/config/config";
 import { AuthRepository } from "./repositories/auth.repository";
 import { AuthService } from "@/core/service/auth.service";
 import { CurriculumRepository } from "./repositories/curriculum.repository";
@@ -17,6 +17,8 @@ import { ProjectRepository } from "./repositories/project.repository";
 import { ProjectService } from "@/core/service/project.service";
 import { ClassBookRepository } from "./repositories/class-book.repository";
 import { ClassBookService } from "@/core/service/class-book.service";
+
+export const API_URL = (await getRuntimeConfig()).apiUrl;
 
 export const baseUrl = `${API_URL}/api`;
 
