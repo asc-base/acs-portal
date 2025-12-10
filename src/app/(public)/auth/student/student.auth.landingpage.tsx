@@ -15,10 +15,11 @@ import { useForm, Controller } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { RHFTextField } from "@/components/form/RHFTextField";
-import { authService } from "@/infra/container";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/store/auth";
+import { AuthRepository } from "@/infra/repositories/auth.repository";
+import { AuthService } from "@/core/service/auth.service";
 
 const Schema = z.object({
   email: z.string().trim(),
@@ -27,10 +28,19 @@ const Schema = z.object({
 });
 type FormValues = z.infer<typeof Schema>;
 
-export default function StudentAuthLandingPage() {
+interface StudentAuthLandingPageProps {
+  apiBase: string;
+}
+
+export default function StudentAuthLandingPage({
+  apiBase,
+}: StudentAuthLandingPageProps) {
   const [showPassword, setShowPassword] = useState(false);
   const router = useRouter();
   const setUser = useAuthStore((state) => state.setUser);
+
+  const authRepository = new AuthRepository(apiBase);
+  const authService = new AuthService(authRepository);
 
   const {
     control,
