@@ -20,6 +20,7 @@ import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/store/auth";
 import { AuthRepository } from "@/infra/repositories/auth.repository";
 import { AuthService } from "@/core/service/auth.service";
+import { useMemo } from "react";
 
 const Schema = z.object({
   email: z.string().trim(),
@@ -39,8 +40,12 @@ export default function StudentAuthLandingPage({
   const router = useRouter();
   const setUser = useAuthStore((state) => state.setUser);
 
-  const authRepository = new AuthRepository(apiBase);
-  const authService = new AuthService(authRepository);
+  const authService = useMemo(() => {
+    const authRepository = new AuthRepository(apiBase);
+    return new AuthService(authRepository);
+  }, [apiBase]);
+
+  console.log("API URL", apiBase);
 
   const {
     control,
