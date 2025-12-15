@@ -1,10 +1,12 @@
 import StudentAuthLandingPage from "./student.auth.landingpage";
-import { API_URL } from "@/infra/container";
+import { baseUrl } from "@/infra/container";
+
+export const dynamic = "force-dynamic";
 
 export default function Page() {
   return (
     <div className="w-full">
-      <StudentAuthLandingPage apiBase={API_URL} />
+      <StudentAuthLandingPage apiBase={baseUrl} />
     </div>
   );
 }
