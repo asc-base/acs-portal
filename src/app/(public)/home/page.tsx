@@ -41,6 +41,7 @@ const MainPage = async () => {
       initNewsActivityStudent={initNewsActivityStudent.rows || []}
       initAnnoucement={initAnnoucement || []}
       initNewsHighlight={initNewsHighlight || []}
+      apibase={API_URL}
     />
   );
 };

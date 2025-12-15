@@ -10,7 +10,6 @@ import { NewsCarouselComponent } from "@/components/news.carousel.component";
 import { ActivityCard } from "@/components/activitycard";
 import { Carousel } from "@/components/carousel";
 import { useAuthStore } from "@/store/auth";
-import { API_URL } from "@/infra/container";
 // import NewsHighlightCarousel from "@/components/newshighlightcarousel";
 
 interface HomePageProps {
@@ -19,6 +18,7 @@ interface HomePageProps {
   initNewsActivityStudent: INews[];
   initAnnoucement?: INewsMedia[];
   initNewsHighlight?: INewsMedia[];
+  apibase: string;
 }
 
 const HomePage = ({
@@ -27,13 +27,14 @@ const HomePage = ({
   initNewsActivityStudent,
   initAnnoucement,
   initNewsHighlight,
+  apibase,
 }: HomePageProps) => {
   console.log(initAnnoucement, initNewsHighlight);
   const [newsActivityActive, setNewsActivityActive] = useState(0);
   const [newsCompleteActive, setNewsCompleteActive] = useState(0);
   const [newsActivityStudentActive, setNewsActivityStudentActive] = useState(0);
 
-  console.log("API_URL:", API_URL);
+  console.log("API_URL:", apibase);
 
   const user = useAuthStore((state) => state.user);
 
