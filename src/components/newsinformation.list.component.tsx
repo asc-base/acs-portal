@@ -1,12 +1,15 @@
 "use client";
 import { AnnouncementCard } from "@/components/announcementcard";
 import { newsInformationPageProps } from "@/core/domain/news";
+import { useRouter } from "next/navigation";
 
 const NewsInformationListComponent = ({
   newsInformation,
   type,
   pageSize,
 }: newsInformationPageProps) => {
+  const router = useRouter();
+
   return (
     <div className="min-h-screen p-6">
       <div className="mb-6 flex items-center gap-1">
@@ -20,7 +23,17 @@ const NewsInformationListComponent = ({
 
       <div className="grid max-w-7xl grid-cols-3 justify-start gap-6">
         {new Array(pageSize).fill(null).map((_, index) => (
-          <div key={index} className="cursor-pointer">
+          <div
+            key={index}
+            className="cursor-pointer"
+            onClick={() =>
+              router.push(
+                newsInformation[index]?.id
+                  ? `/admin/${type}/${newsInformation[index]?.id}`
+                  : `/admin/${type}/create`,
+              )
+            }
+          >
             <AnnouncementCard
               title={newsInformation[index]?.news?.title || ""}
               image={newsInformation[index]?.image || ""}

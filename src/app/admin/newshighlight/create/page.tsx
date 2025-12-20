@@ -1,4 +1,4 @@
-import AnnouncementForm from "./announcement.form";
+import NewsHighlightForm from "./newshighlight.form";
 import { baseUrl } from "@/infra/container";
 
 export const dynamic = "force-dynamic";
@@ -6,7 +6,7 @@ export const dynamic = "force-dynamic";
 export default function Page() {
   return (
     <div className="w-full">
-      <AnnouncementForm apiBase={baseUrl} />
+      <NewsHighlightForm apiBase={baseUrl} />
     </div>
   );
 }
