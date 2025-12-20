@@ -1,62 +1,151 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { Button, Slider } from "@mui/material";
-import ImageIcon from '@mui/icons-material/Image';
 import Image from "next/image";
+import ImageIcon from "@mui/icons-material/Image";
 
 interface CropImageCardProps {
   file: File;
-  onUploadComplete: (croppedFile: File) => void;
+  onUploadComplete: (result: { file: File }) => void;
   onCancel: () => void;
 }
 
-export const CropImageCard = ({ file, onUploadComplete, onCancel }: CropImageCardProps) => {
+export const CropImageCard = ({
+  file,
+  onUploadComplete,
+  onCancel,
+}: CropImageCardProps) => {
   const [zoom, setZoom] = useState(1);
+  const [processing, setProcessing] = useState(false);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const imgElementRef = useRef<HTMLImageElement | null>(null);
 
-  const handleConfirm = () => {
-    onUploadComplete(file);
+  useEffect(() => {
+    if (!file) return;
+
+    const url = URL.createObjectURL(file);
+    setPreviewUrl(url);
+
+    const img = new window.Image();
+    img.src = url;
+    img.onload = () => {
+      imgElementRef.current = img as HTMLImageElement;
+    };
+  }, [file]);
+
+  const revokePreviewUrl = () => {
+    if (previewUrl) {
+      URL.revokeObjectURL(previewUrl);
+      setPreviewUrl(null);
+    }
+  };
+
+  const handleConfirm = async () => {
+    if (processing || !imgElementRef.current) return;
+    setProcessing(true);
+
+    try {
+      const img = imgElementRef.current;
+      const targetWidth = 590;
+      const targetHeight = 440;
+
+      const canvas = document.createElement("canvas");
+      canvas.width = targetWidth;
+      canvas.height = targetHeight;
+      const ctx = canvas.getContext("2d");
+      if (!ctx) {
+        setProcessing(false);
+        return;
+      }
+
+      // ตั้งค่าความคมชัดให้สูงที่สุดเท่าที่ Browser จะทำได้
+      ctx.imageSmoothingEnabled = true;
+      ctx.imageSmoothingQuality = "high";
+
+      const imgRatio = img.width / img.height;
+      const containerRatio = targetWidth / targetHeight;
+
+      let drawW, drawH;
+      if (imgRatio > containerRatio) {
+        drawW = targetWidth;
+        drawH = targetWidth / imgRatio;
+      } else {
+        drawH = targetHeight;
+        drawW = targetHeight * imgRatio;
+      }
+      const zoomedW = drawW * zoom;
+      const zoomedH = drawH * zoom;
+
+      const x = (targetWidth - zoomedW) / 2;
+      const y = (targetHeight - zoomedH) / 2;
+
+      ctx.fillRect(0, 0, targetWidth, targetHeight);
+      ctx.drawImage(img, x, y, zoomedW, zoomedH);
+
+      canvas.toBlob(
+        (blob) => {
+          if (blob) {
+            const resultFile = new File([blob], file.name, {
+              type: "image/jpeg",
+            });
+            onUploadComplete({ file: resultFile });
+          }
+          revokePreviewUrl();
+          setProcessing(false);
+        },
+        "image/jpeg",
+        1,
+      );
+    } catch (err) {
+      console.error("Crop error:", err);
+      setProcessing(false);
+    }
+  };
+
+  const handleCancel = () => {
+    revokePreviewUrl();
+    onCancel();
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen">
-      <div className="bg-neutral01 w-170 h-197 rounded-xl flex flex-col items-center justify-between p-6">
-        <h2 className="font-bold text-neutral05 mb-4">Crop Photo</h2>
-        <div className="h-110 w-147.5 overflow-hidden bg-gray-100 rounded-md">
-          <div
-            style={{
-              transform: `scale(${zoom})`,
-              transformOrigin: "center",
-            }}
-            className="w-full h-full flex justify-center items-center mb-6"
-          >
+    <div className="flex min-h-screen items-center justify-center">
+      <div className="bg-neutral01 flex flex-col items-center rounded-xl p-6">
+        <h2 className="mb-4 font-bold">Crop Photo</h2>
+
+        <div className="relative h-[440px] w-[590px] overflow-hidden rounded-md bg-gray-100">
+          {previewUrl && (
             <Image
-              src={URL.createObjectURL(file)}
+              src={previewUrl}
               alt="Crop Preview"
-              width={590}
-              height={440}
+              fill
+              priority
               className="object-contain"
+              style={{
+                transform: `scale(${zoom})`,
+                transformOrigin: "center",
+              }}
             />
-          </div>
+          )}
         </div>
 
-        <div className="flex flex-row w-[80%] items-center mb-6 gap-x-2">
+        <div className="mt-6 flex w-[80%] items-center gap-x-2">
           <ImageIcon fontSize="small" />
           <Slider
             min={1}
             max={3}
             step={0.1}
             value={zoom}
-            onChange={(_, value) => setZoom(value as number)}
+            onChange={(_, v) => setZoom(v as number)}
           />
           <ImageIcon fontSize="large" />
         </div>
 
-        <div className="flex flex-row w-full justify-center align-bottom gap-x-4 mt-6">
-          <Button variant="outlined" color="primary" size="large" onClick={onCancel}>
+        <div className="mt-6 flex gap-x-4">
+          <Button variant="outlined" onClick={handleCancel}>
             ยกเลิก
           </Button>
-          <Button variant="contained" color="primary" size="large" onClick={handleConfirm}>
+          <Button variant="contained" onClick={handleConfirm}>
             ยืนยัน
           </Button>
         </div>
