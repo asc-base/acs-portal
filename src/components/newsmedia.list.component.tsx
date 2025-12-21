@@ -4,7 +4,7 @@ import { newsMediaPageProps } from "@/core/domain/news";
 import { useRouter } from "next/navigation";
 
 const NewsMediaListComponent = ({
-  newsMedia,
+  newsInformation,
   type,
   pageSize,
 }: newsMediaPageProps) => {
@@ -28,15 +28,15 @@ const NewsMediaListComponent = ({
             className="cursor-pointer"
             onClick={() =>
               router.push(
-                newsMedia[index]?.id
-                  ? `/admin/${type}/${newsMedia[index]?.id}`
+                newsInformation[index]?.id
+                  ? `/admin/${type}/${newsInformation[index]?.id}`
                   : `/admin/${type}/create`,
               )
             }
           >
             <AnnouncementCard
-              title={newsMedia[index]?.news?.title || ""}
-              image={newsMedia[index]?.image || ""}
+              title={newsInformation[index]?.news?.title || ""}
+              image={newsInformation[index]?.image || ""}
             />
           </div>
         ))}
