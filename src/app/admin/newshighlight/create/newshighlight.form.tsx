@@ -1,5 +1,5 @@
 "use client";
-import { NewsMediaForm } from "@/components/newsMediaForm";
+import { NewsMediaForm } from "@/components/newsmediaform";
 
 interface StudentAuthLandingPageProps {
   apiBase: string;

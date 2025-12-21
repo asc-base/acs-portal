@@ -3,13 +3,13 @@ import NewsMediaListComponent from "@/components/newsmedia.list.component";
 import { newsMediaPageProps } from "@/core/domain/news";
 
 const NewshighlightLandingpage = ({
-  newsMedia,
+  newsInformation,
   type,
   pageSize,
 }: newsMediaPageProps) => {
   return (
     <NewsMediaListComponent
-      newsMedia={newsMedia}
+      newsInformation={newsInformation}
       type={type}
       pageSize={pageSize}
     />
