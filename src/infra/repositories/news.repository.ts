@@ -60,4 +60,12 @@ export class NewsRepository implements INewsRepository {
     );
     return response;
   }
+
+  async createNewsMedia(type: string, data: FormData) : Promise<ApiResponse<INewsMedia>> {
+    const response = await this.http.post<ApiResponse<INewsMedia>>(
+      `/v1/news/news-media/${type}`,
+      data,
+    );
+    return response;
+  }
 }

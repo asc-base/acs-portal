@@ -42,4 +42,12 @@ export class NewsService {
     );
     return response.data;
   }
+
+  async createNewsMedia(type: string, data: FormData): Promise<INewsMedia> {
+    const response = await this.newsRepository.createNewsMedia(
+      type,
+      data
+    );
+    return response.data;
+  }
 }
