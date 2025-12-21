@@ -26,7 +26,7 @@ const sidebarItems = [
   },
   {
     name: "ข้อมูลผลงาน",
-    href: "/admin/works",
+    href: "/admin/projects",
     icon: <DescriptionIcon />,
   },
   {
