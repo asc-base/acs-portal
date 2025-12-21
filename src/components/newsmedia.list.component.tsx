@@ -1,13 +1,13 @@
 "use client";
 import { AnnouncementCard } from "@/components/announcementcard";
-import { newsInformationPageProps } from "@/core/domain/news";
+import { newsMediaPageProps } from "@/core/domain/news";
 import { useRouter } from "next/navigation";
 
-const NewsInformationListComponent = ({
-  newsInformation,
+const NewsMediaListComponent = ({
+  newsMedia,
   type,
   pageSize,
-}: newsInformationPageProps) => {
+}: newsMediaPageProps) => {
   const router = useRouter();
 
   return (
@@ -28,15 +28,15 @@ const NewsInformationListComponent = ({
             className="cursor-pointer"
             onClick={() =>
               router.push(
-                newsInformation[index]?.id
-                  ? `/admin/${type}/${newsInformation[index]?.id}`
+                newsMedia[index]?.id
+                  ? `/admin/${type}/${newsMedia[index]?.id}`
                   : `/admin/${type}/create`,
               )
             }
           >
             <AnnouncementCard
-              title={newsInformation[index]?.news?.title || ""}
-              image={newsInformation[index]?.image || ""}
+              title={newsMedia[index]?.news?.title || ""}
+              image={newsMedia[index]?.image || ""}
             />
           </div>
         ))}
@@ -45,4 +45,4 @@ const NewsInformationListComponent = ({
   );
 };
 
-export default NewsInformationListComponent;
+export default NewsMediaListComponent;
