@@ -9,7 +9,6 @@ const page = async () => {
   const type = "announcement";
 
   const newsInformation = await newsService.getNewsMedias(type, 1, pageSize);
-  console.log(newsInformation);
   return (
     <>
       <AnnouncementLandingpage
