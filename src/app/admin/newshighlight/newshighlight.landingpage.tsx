@@ -1,15 +1,15 @@
 "use client";
-import NewsInformationListComponent from "@/components/newsinformation.list.component";
-import { newsInformationPageProps } from "@/core/domain/news";
+import NewsMediaListComponent from "@/components/newsmedia.list.component";
+import { newsMediaPageProps } from "@/core/domain/news";
 
 const NewshighlightLandingpage = ({
-  newsInformation,
+  newsMedia,
   type,
   pageSize,
-}: newsInformationPageProps) => {
+}: newsMediaPageProps) => {
   return (
-    <NewsInformationListComponent
-      newsInformation={newsInformation}
+    <NewsMediaListComponent
+      newsMedia={newsMedia}
       type={type}
       pageSize={pageSize}
     />
