@@ -1,6 +1,6 @@
 "use client";
 import { useRouter } from "next/navigation";
-import { ClassBookAdminCard } from "@/components/classbookadmincard";
+import { AdminCard } from "@/components/adminCard";
 import { IClassBook, QueryClassBook } from "@/core/domain/classbook";
 import {
   MenuItem,
@@ -196,9 +196,10 @@ const ClassBookListComponents = ({
       <div className="flex w-full flex-col items-center justify-center gap-10">
         <div className="grid w-full grid-cols-3 justify-items-center gap-6">
           {classbooks.map((classbook) => (
-            <ClassBookAdminCard
+            <AdminCard
               key={classbook.id}
-              classbook={classbook}
+              type="classBook"
+              data={classbook}
               onEdit={() => router.push(`/admin/students/edit/${classbook.id}`)}
               onView={() =>
                 router.push(

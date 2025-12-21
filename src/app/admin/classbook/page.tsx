@@ -1,6 +1,6 @@
 import React from "react";
 import { classBookService } from "@/infra/container";
-import ClassBookListComponentsProps from "./classbook.list.component";
+import ClassBookListComponents from "./classbook.list.component";
 import { QueryClassBook } from "@/core/domain/classbook";
 
 export const dynamic = "force-dynamic";
@@ -22,7 +22,7 @@ const page = async ({ searchParams }: PageProps) => {
   const { rows, totalRecords, pageSize, page } =
     await classBookService.getClassBooks(query);
   return (
-    <ClassBookListComponentsProps
+    <ClassBookListComponents
       classbooks={rows}
       totalRecords={totalRecords}
       pageSize={pageSize}
