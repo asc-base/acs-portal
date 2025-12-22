@@ -1,13 +1,13 @@
 "use client";
 import { AnnouncementCard } from "@/components/announcementcard";
-import { newsMediaPageProps } from "@/core/domain/news";
+import { newsInformationPageProps } from "@/core/domain/news";
 import { useRouter } from "next/navigation";
 
-const NewsMediaListComponent = ({
+const NewsInformationListComponent = ({
   newsInformation,
   type,
   pageSize,
-}: newsMediaPageProps) => {
+}: newsInformationPageProps) => {
   const router = useRouter();
 
   return (
@@ -45,4 +45,4 @@ const NewsMediaListComponent = ({
   );
 };
 
-export default NewsMediaListComponent;
+export default NewsInformationListComponent;

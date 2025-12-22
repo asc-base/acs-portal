@@ -1,6 +1,5 @@
-import React from "react";
 import { newsService } from "@/infra/container";
-import AnnouncementLandingpage from "./announcement.landingpage";
+import NewsMediaListComponent from "@/components/newsinformation.list.component";
 
 export const dynamic = "force-dynamic";
 
@@ -11,13 +10,11 @@ const page = async () => {
   const newsInformation = await newsService.getNewsMedias(type, 1, pageSize);
   console.log(newsInformation);
   return (
-    <>
-      <AnnouncementLandingpage
-        newsInformation={newsInformation}
-        type={type}
-        pageSize={pageSize}
-      />
-    </>
+    <NewsMediaListComponent
+      newsInformation={newsInformation}
+      type={type}
+      pageSize={pageSize}
+    />
   );
 };
 
