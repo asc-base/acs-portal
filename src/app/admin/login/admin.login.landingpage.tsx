@@ -8,7 +8,9 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { RHFTextField } from "@/components/form/RHFTextField";
-import { authService } from "@/infra/container";
+import { AuthRepository } from "@/infra/repositories/auth.repository";
+import { AuthService } from "@/core/service/auth.service";
+import { useMemo } from "react";
 import { useRouter } from "next/navigation";
 
 const Schema = z.object({
@@ -17,9 +19,22 @@ const Schema = z.object({
 });
 type FormValues = z.infer<typeof Schema>;
 
-export default function AdminLoginLandingPage() {
+interface AdminLoginLandingPageProps {
+  apiBase: string;
+}
+
+export default function AdminLoginLandingPage({
+  apiBase,
+}: AdminLoginLandingPageProps) {
   const router = useRouter();
   const [showPwd, setShowPwd] = React.useState(false);
+
+  const authService = useMemo(() => {
+    const authRepository = new AuthRepository(apiBase);
+    return new AuthService(authRepository);
+  }, [apiBase]);
+
+  console.log("API URL", apiBase);
 
   const {
     control,
