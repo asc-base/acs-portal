@@ -1,4 +1,4 @@
-import AnnouncementForm from "./announcement.form";
+import { NewsInformationForm } from "@/components/newsinformationform";
 import { baseUrl } from "@/infra/container";
 
 export const dynamic = "force-dynamic";
@@ -6,7 +6,7 @@ export const dynamic = "force-dynamic";
 export default function Page() {
   return (
     <div className="w-full">
-      <AnnouncementForm apiBase={baseUrl} />
+      <NewsInformationForm type="announcement" apiBase={baseUrl} />
     </div>
   );
 }
