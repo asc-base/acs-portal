@@ -7,7 +7,7 @@ import ImageIcon from "@mui/icons-material/Image";
 
 interface CropImageCardProps {
   file: File;
-  onUploadComplete: (result: { file: File }) => void;
+  onUploadComplete: (file: File) => void;
   onCancel: () => void;
 }
 
@@ -89,7 +89,7 @@ export const CropImageCard = ({
             const resultFile = new File([blob], file.name, {
               type: "image/jpeg",
             });
-            onUploadComplete({ file: resultFile });
+            onUploadComplete(resultFile);
           }
           revokePreviewUrl();
           setProcessing(false);
