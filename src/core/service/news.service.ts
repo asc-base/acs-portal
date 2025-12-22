@@ -1,7 +1,7 @@
 import { Pageable } from "@/interface/response";
 import { INews } from "../domain/news";
 import { INewsRepository } from "../ports/news.repository";
-import { INewsMedia } from "../domain/news";
+import { INewsInformation } from "../domain/news";
 export class NewsService {
   constructor(private newsRepository: INewsRepository) {}
 
@@ -30,12 +30,12 @@ export class NewsService {
     return response.data;
   }
 
-  async getNewsMedias(
+  async getNewsInformations(
     type: string,
     page: number,
     pageSize: number,
-  ): Promise<INewsMedia[]> {
-    const response = await this.newsRepository.getNewsMedias(
+  ): Promise<INewsInformation[]> {
+    const response = await this.newsRepository.getNewsInformations(
       type,
       page,
       pageSize,

@@ -7,7 +7,11 @@ const page = async () => {
   const pageSize = 6;
   const type = "announcement";
 
-  const newsInformation = await newsService.getNewsMedias(type, 1, pageSize);
+  const newsInformation = await newsService.getNewsInformations(
+    type,
+    1,
+    pageSize,
+  );
   console.log(newsInformation);
   return (
     <NewsMediaListComponent
