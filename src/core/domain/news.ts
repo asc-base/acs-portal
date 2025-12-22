@@ -14,7 +14,7 @@ export interface INews {
   category: Category;
 }
 
-export interface INewsMedia {
+export interface INewsInformation {
   id: number;
   image: string;
   newsId: number;
@@ -27,8 +27,8 @@ export interface INewsMedia {
   type: Category;
 }
 
-export interface newsMediaPageProps {
-  newsInformation: INewsMedia[];
+export interface newsInformationPageProps {
+  newsInformation: INewsInformation[];
   type: string;
   pageSize: number;
 }

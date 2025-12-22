@@ -11,7 +11,7 @@ import { NewsRepository } from "@/infra/repositories/news.repository";
 import { NewsService } from "@/core/service/news.service";
 import { useRouter } from "next/navigation";
 
-interface NewsMediaFormProps {
+interface NewsInformationFormProps {
   type: string;
   apiBase: string;
 }
@@ -28,7 +28,10 @@ const Schema = z.object({
 
 type FormValues = z.infer<typeof Schema>;
 
-export const NewsMediaForm = ({ type, apiBase }: NewsMediaFormProps) => {
+export const NewsInformationForm = ({
+  type,
+  apiBase,
+}: NewsInformationFormProps) => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [croppedFile, setCroppedFile] = useState<File | null>(null);
   const [open, setOpen] = useState(false);
@@ -64,7 +67,7 @@ export const NewsMediaForm = ({ type, apiBase }: NewsMediaFormProps) => {
       formData.append("image", data.image);
       formData.append("newsId", data.newsId.toString());
 
-      const response = await newsService.createNewsMedia(type, formData);
+      const response = await newsService.createNewsInformation(type, formData);
       if (response) {
         router.push(`/admin/${type}`);
       } else {
