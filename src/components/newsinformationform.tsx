@@ -91,10 +91,10 @@ export const NewsInformationForm = ({
     setOpen(true);
   };
 
-  const handleUploadComplete = (result: { file: File }) => {
-    setCroppedFile(result.file);
+  const handleUploadComplete = (file: File) => {
+    setCroppedFile(file);
 
-    setValue("image", result.file, {
+    setValue("image", file, {
       shouldValidate: true,
       shouldDirty: true,
     });
