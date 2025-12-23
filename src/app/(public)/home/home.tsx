@@ -144,7 +144,7 @@ const HomePage = ({
             </div>
             {/* <NewsHighlightCarousel newsHighlight={initNewsHighlight || []} /> */}
             <NewsCarouselComponent
-              title="ข่าวสารและกิจกรรม"
+              title="ข่าวประชาสัมพันธ์"
               news={initNewsActivity}
               handleNextNews={handleNextNewsActivity}
               handlePrevNews={handlePrevNewsActivity}
