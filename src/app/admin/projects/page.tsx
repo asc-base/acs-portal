@@ -1,29 +1,29 @@
 import React from "react";
-import { classBookService } from "@/infra/container";
-import ClassBookListComponents from "./classbook.list.component";
-import { QueryClassBook } from "@/core/domain/classbook";
+import { projectService } from "@/infra/container";
+import ProjectListComponents from "./project.list.component";
+import { QueryProject } from "@/core/domain/project";
 
 export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
 interface PageProps {
-  searchParams: Promise<QueryClassBook>;
+  searchParams: Promise<QueryProject>;
 }
 
 const page = async ({ searchParams }: PageProps) => {
   const resolvedSearchParams = await searchParams;
 
-  const query: QueryClassBook = {
+  const query: QueryProject = {
     page: resolvedSearchParams.page || 1,
     pageSize: resolvedSearchParams.pageSize || 10,
     sortBy: "createdAt",
     sortOrder: resolvedSearchParams.sortOrder ?? "desc",
     search: resolvedSearchParams.search ?? "",
   };
-  const { rows, totalRecords, pageSize, page } =
-    await classBookService.getClassBooks(query);
+  const { rows, totalRecords, pageSize, page } = await projectService.getProjects(query);
   return (
-    <ClassBookListComponents
-      classbooks={rows}
+    <ProjectListComponents
+      projects={rows}
       totalRecords={totalRecords}
       pageSize={pageSize}
       page={page}
@@ -33,3 +33,4 @@ const page = async ({ searchParams }: PageProps) => {
 };
 
 export default page;
+
