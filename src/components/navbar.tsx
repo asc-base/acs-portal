@@ -42,8 +42,8 @@ const MenuBar = () => {
       submenu: [
         {
           id: 1,
-          label: "ข่าวสารและกิจกรรม",
-          href: "/news?category=ข่าวสารและกิจกรรม&page=1&pageSize=12",
+          label: "ข่าวประชาสัมพันธ์",
+          href: "/news?category=ข่าวประชาสัมพันธ์&page=1&pageSize=12",
         },
         {
           id: 2,

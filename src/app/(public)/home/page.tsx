@@ -20,7 +20,7 @@ const MainPage = async () => {
     initNewsHighlight,
   ] = await Promise.all([
     newsService
-      .getNews(1, 6, "", "ข่าวสารและกิจกรรม")
+      .getNews(1, 6, "", "ข่าวประชาสัมพันธ์")
       .catch(() => ({ rows: [] })),
     newsService
       .getNews(1, 6, "", "ความสำเร็จนักศึกษา")
