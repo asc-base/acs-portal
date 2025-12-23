@@ -1,7 +1,6 @@
 "use client";
 import { useRouter } from "next/navigation";
 import { AdminCard } from "@/components/adminCard";
-import { IClassBook, QueryClassBook } from "@/core/domain/classbook";
 import {
   MenuItem,
   Select,
@@ -18,9 +17,10 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect, useCallback } from "react";
+import { IProject, QueryProject } from "@/core/domain/project";
 
-interface ClassBookListComponentsProps {
-  classbooks: IClassBook[];
+interface ProjectListComponentsProps {
+  projects: IProject[];
   totalRecords: number;
   pageSize: number;
   page: number;
@@ -34,14 +34,14 @@ const searchSchema = z.object({
 
 type SearchForm = z.infer<typeof searchSchema>;
 
-const ClassBookListComponents = ({
-  classbooks,
+const ProjectListComponents = ({
+  projects,
   totalRecords,
   pageSize,
   page,
   sortOrder,
   search,
-}: ClassBookListComponentsProps) => {
+}: ProjectListComponentsProps) => {
   const router = useRouter();
 
   const { register, reset, watch } = useForm<SearchForm>({
@@ -51,50 +51,45 @@ const ClassBookListComponents = ({
 
   const watchedSearch = watch("search");
 
-  const SearchClassBookUrl = useCallback(
-    (query: Partial<QueryClassBook>) => {
-      const searchClassOf = (query.search ?? watchedSearch ?? "").replace(
-        /\D/g,
-        "",
-      );
-
+  const SearchProjectUrl = useCallback(
+    (query: Partial<QueryProject>) => {
       const params = new URLSearchParams({
-        page: query.page?.toString() || page.toString(),
-        pageSize: query.pageSize?.toString() || pageSize.toString(),
+        page: (query.page ?? page ?? 1).toString(),
+        pageSize: (query.pageSize ?? pageSize ?? 10).toString(),
         sortBy: "createdAt",
         sortOrder: query.sortOrder ?? sortOrder ?? "desc",
-        search: searchClassOf,
+        search: query.search ?? watchedSearch ?? "",
       });
-      return `/admin/classbook?${params.toString()}`;
+      return `/admin/projects?${params.toString()}`;
     },
     [page, pageSize, sortOrder, watchedSearch],
   );
 
   useEffect(() => {
     const handler = setTimeout(() => {
-      router.push(SearchClassBookUrl({ page: 1, search: watchedSearch }));
+      router.push(SearchProjectUrl({ page: 1, search: watchedSearch }));
     }, 300);
 
     return () => clearTimeout(handler);
-  }, [watchedSearch, SearchClassBookUrl, router]);
+  }, [watchedSearch, SearchProjectUrl, router]);
 
   const handleSortOrder = (event: SelectChangeEvent) => {
     const newSortOrder = event.target.value as "asc" | "desc";
-    router.push(SearchClassBookUrl({ sortOrder: newSortOrder }));
+    router.push(SearchProjectUrl({ sortOrder: newSortOrder }));
   };
 
-  const handleClickAddClassBook = () => {
-    router.push("/admin/classbook/create");
+  const handleClickAddProject = () => {
+    router.push("/admin/projects/create");
   };
 
   const handleNextPage = (currentPage: number) => {
-    router.push(SearchClassBookUrl({ page: currentPage }));
+    router.push(SearchProjectUrl({ page: currentPage }));
   };
 
   return (
     <div className="min-h-screen px-8 py-5">
       <div className="mb-6 flex items-center justify-between">
-        <h3 className="text-lg font-bold">ข้อมูลนักศึกษา</h3>
+        <h3 className="text-lg font-bold">จัดการผลงาน</h3>
 
         <div className="flex items-center gap-3">
           <form className="relative">
@@ -103,7 +98,7 @@ const ClassBookListComponents = ({
             </div>
             <input
               type="text"
-              placeholder="ค้นหารุ่น"
+              placeholder="ค้นหา"
               {...register("search")}
               className="border-neutral04 text-h4 h-[44px] w-[280px] rounded-sm border pl-10"
             />
@@ -173,7 +168,7 @@ const ClassBookListComponents = ({
           </Select>
 
           <Button
-            onClick={handleClickAddClassBook}
+            onClick={handleClickAddProject}
             variant="contained"
             sx={{
               backgroundColor: "var(--color-primary02)",
@@ -188,25 +183,24 @@ const ClassBookListComponents = ({
             }}
           >
             <AddIcon />
-            เพิ่มรุ่นนักศึกษา
+            เพิ่มผลงานใหม่
           </Button>
         </div>
       </div>
 
       <div className="flex w-full flex-col items-center justify-center gap-10">
         <div className="grid w-full grid-cols-3 justify-items-center gap-6">
-          {classbooks.map((classbook) => (
+          {projects.map((project) => (
             <AdminCard
-              key={classbook.id}
-              type="classBook"
-              data={classbook}
-              onEdit={() => router.push(`/admin/students/edit/${classbook.id}`)}
+              key={project.id}
+              type="project"
+              data={project}
               onView={() =>
                 router.push(
-                  `/admin/students?page=1&pageSize=10&classBookId=${classbook.id}`,
+                  `/admin/projects/${project.id}`,
                 )
               }
-              onDelete={() => console.log("Delete succeed:", classbook.id)}
+              onDelete={() => console.log("Delete succeed:", project.id)}
             />
           ))}
         </div>
@@ -224,4 +218,4 @@ const ClassBookListComponents = ({
   );
 };
 
-export default ClassBookListComponents;
+export default ProjectListComponents;

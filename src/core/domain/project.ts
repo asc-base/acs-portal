@@ -16,6 +16,7 @@ export interface IProject {
   projectMembers: IStudent[];
   projectCategories: ListType[];
   projectFields: ListType[];
+  projectTypes: ListType[];
   projectCourses: ICourse[];
   createdAt: Date;
   updatedAt: Date;
@@ -34,6 +35,7 @@ export interface QueryProject {
   types?: string[];
   courses?: string[];
   classBooks?: string[];
+  search?: string;
 }
 
 export interface IProjectAssets {

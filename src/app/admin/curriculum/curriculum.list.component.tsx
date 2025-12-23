@@ -9,7 +9,7 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ICurriculum } from "@/core/domain/curriculum";
-import { CurriculumAdminCard } from "@/components/curriculumcardadmin";
+import { AdminCard } from "@/components/adminCard";
 import { QueryCurriculum } from "@/core/domain/curriculum";
 
 interface CurriculumListComponentsProps {
@@ -130,9 +130,10 @@ const CurriculumListComponents = ({
       <div className="flex w-full flex-col items-center justify-center gap-10">
         <div className="grid w-full grid-cols-3 justify-items-center gap-6">
           {curriculums.map((curriculum) => (
-            <CurriculumAdminCard
+            <AdminCard
               key={curriculum.id}
-              curriculum={curriculum}
+              type= "curriculum"
+              data={curriculum}
               onEdit={() =>
                 router.push(`/admin/curriculum/edit/${curriculum.id}`)
               }
