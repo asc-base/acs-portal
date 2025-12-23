@@ -21,6 +21,7 @@ export class ProjectService {
       params.set("courses", query.courses.join(","));
     if (query.classBooks && query.classBooks.length > 0)
       params.set("classBooks", query.classBooks.join(","));
+    if(query.search)params.set("search", query.search);
 
     console.log("params", params.toString());
     console.log("query", query);
