@@ -28,8 +28,8 @@ const MainPage = async () => {
     newsService
       .getNews(1, 6, "", "งานกิจกรรมนักศึกษา")
       .catch(() => ({ rows: [] })),
-    newsService.getNewsMedias("announcement", 1, 6).catch(() => []),
-    newsService.getNewsMedias("newshighlight", 1, 5).catch(() => []),
+    newsService.getNewsInformations("announcement", 1, 6).catch(() => []),
+    newsService.getNewsInformations("newshighlight", 1, 5).catch(() => []),
   ]);
 
   console.log("base url is", API_URL);

@@ -1,6 +1,6 @@
 "use client";
 import { HeroCard } from "@/components/herocard";
-import { INews, INewsMedia } from "@/core/domain/news";
+import { INews, INewsInformation } from "@/core/domain/news";
 import React from "react";
 import heroImage from "../../../../public/hero.jpg";
 import { NewsCard } from "@/components/newscard";
@@ -16,8 +16,8 @@ interface HomePageProps {
   initNewsActivity: INews[];
   initNewsComplete: INews[];
   initNewsActivityStudent: INews[];
-  initAnnoucement?: INewsMedia[];
-  initNewsHighlight?: INewsMedia[];
+  initAnnoucement?: INewsInformation[];
+  initNewsHighlight?: INewsInformation[];
   apibase: string;
 }
 

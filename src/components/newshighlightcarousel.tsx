@@ -2,11 +2,11 @@ import ImageList from "@mui/material/ImageList";
 import ImageListItem from "@mui/material/ImageListItem";
 import ImageListItemBar from "@mui/material/ImageListItemBar";
 import Image from "next/image";
-import { INewsMedia } from "@/core/domain/news";
+import { INewsInformation } from "@/core/domain/news";
 import { useState, useEffect } from "react";
 
 interface NewsHighlightCarouselProps {
-  newsHighlight: INewsMedia[];
+  newsHighlight: INewsInformation[];
 }
 
 const NewsHighlightCarousel = ({
