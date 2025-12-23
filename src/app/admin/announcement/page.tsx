@@ -12,7 +12,6 @@ const page = async () => {
     1,
     pageSize,
   );
-  console.log(newsInformation);
   return (
     <NewsMediaListComponent
       newsInformation={newsInformation}
