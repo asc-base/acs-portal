@@ -1,9 +1,7 @@
-import {
-  Accordion,
-  AccordionSummary,
-  AccordionDetails,
-  Box,
-} from "@mui/material";
+"use client";
+
+import { useState } from "react";
+import { Box, IconButton, Collapse } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { Course } from "@/interface/course";
 
@@ -13,61 +11,79 @@ const CourseCard: React.FC<Course> = ({
   courseNameTh,
   preCourses,
   credits,
-  courseDetail
+  courseDetail,
 }) => {
+  const [open, setOpen] = useState(false);
 
   return (
-    <Accordion
+    <Box
       sx={{
-        backgroundColor: "var(--color-neutral02)",
-        padding: 2,
+        backgroundColor: open
+          ? "var(--color-neutral01)"
+          : "var(--color-neutral02)",
+        padding: 4,
         borderRadius: 4,
-        border: "none",
-        "&.Mui-expanded": {
-          backgroundColor: "var(--color-neutral01)",
-          border: "1px solid var(--color-neutral03)",
-        },
-        marginBottom: 4
+        border: open ? "1px solid var(--color-neutral03)" : "none",
+        marginBottom: 4,
       }}
     >
-      <AccordionSummary
-        expandIcon={<ExpandMoreIcon />}
+      <Box
+        display="flex"
+        justifyContent="space-between"
+        alignItems="flex-start"
+        onClick={() => setOpen((prev) => !prev)}
+        sx={{ cursor: "pointer" }}
+      >
+        <h2>
+          {courseId} {courseNameEn}
+        </h2>
+
+        <IconButton
+          size="small"
+          sx={{
+            transform: open ? "rotate(180deg)" : "rotate(0deg)",
+            transition: "transform 0.2s",
+          }}
+        >
+          <ExpandMoreIcon />
+        </IconButton>
+      </Box>
+
+      <Box
         sx={{
-          alignItems: "flex-start",
-          "& .MuiAccordionSummary-content": {
-            margin: 0,
-          },
-          "& .MuiAccordionSummary-content.Mui-expanded": {
-            margin: 0,
-          },
+          maxHeight: open ? 300 : "none",
+          overflowY: open ? "auto" : "visible",
+          marginTop: 1,
+          paddingRight: open ? 1 : 0,
         }}
       >
-        <Box display="flex" flexDirection="column" marginBottom={2}>
-          <h2>
-            {courseId} {courseNameEn}
-          </h2>
-          <h3>
-            <span className="font-bold">ชื่อภาษาไทย :</span> {courseNameTh}
-          </h3>
-          {Array.isArray(preCourses) && preCourses.length > 0 && (
-            <h3>
-              <span className="font-bold">วิชาบังคับก่อน :</span>{" "}
-              {preCourses
-                .map((p) => `${p.courseId} ${p.courseNameEn}`)
-                .join(", ")}
-            </h3>
-          )}
-          <h3>
-            <span className="font-bold">ลักษณะการเรียน :</span> {credits}
-          </h3>
-        </Box>
-      </AccordionSummary>
+        <h3>
+          <span className="font-bold">ชื่อภาษาไทย :</span> {courseNameTh}
+        </h3>
 
-      <AccordionDetails>
-          <h3 className="max-h-50 overflow-y-scroll whitespace-pre-wrap break-words leading-relaxed">{courseDetail}</h3>
-      </AccordionDetails>
-    </Accordion>
+        {Array.isArray(preCourses) && preCourses.length > 0 && (
+          <h3>
+            <span className="font-bold">วิชาบังคับก่อน :</span>{" "}
+            {preCourses
+              .map((p) => `${p.courseId} ${p.courseNameEn}`)
+              .join(", ")}
+          </h3>
+        )}
+
+        <h3>
+          <span className="font-bold">ลักษณะการเรียน :</span> {credits}
+        </h3>
+
+        <Collapse in={open}>
+          <Box mt={1}>
+            <h3 className="leading-relaxed whitespace-pre-wrap">
+              {courseDetail}
+            </h3>
+          </Box>
+        </Collapse>
+      </Box>
+    </Box>
   );
-}
+};
 
 export default CourseCard;

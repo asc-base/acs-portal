@@ -4,8 +4,6 @@ import { ICourse } from "@/core/domain/course";
 import CourseCard from "@/components/coursecard";
 import { Breadcrumbs } from "@mui/material";
 import Link from "next/link";
-// import InfiniteScroll from "react-infinite-scroll-component";
-// import { useRouter } from "next/navigation";
 
 interface CourseListComponentsProps {
   course: ICourse[];
@@ -20,25 +18,6 @@ const CourseListComponents = ({
   totalRecords,
   typeCourseName,
 }: CourseListComponentsProps) => {
-  // const [pulledCourse, setPulledCourse] = useState<ICourse[]>(course);
-  // const [page, setPage] = useState(1);
-  // const [hasMore, setHasMore] = useState(pulledCourse.length < totalRecords);
-
-  // const router = useRouter();
-
-  // const fetchMoreData = () => {
-  //     router.push(
-  //         `/course?page=${page + 1}&pageSize=12&prerequisite=true&curriculumId=${curriculumId}&typeCourseId=${typeCourseId}&typeCourseName=${typeCourseName}`,
-  //     );
-
-  //     setPulledCourse(prev => [...prev, ...course]);
-  //     setPage(prev => prev + 1);
-
-  //     if (pulledCourse.length + course.length >= totalRecords) {
-  //         setHasMore(false);
-  //     }
-  // };
-
   return (
     <div className="container mx-auto px-16 py-5">
       <div className="flex flex-col items-start justify-start gap-2">
@@ -51,13 +30,6 @@ const CourseListComponents = ({
       <h1 className="mb-4">
         {typeCourseName} จำนวน {totalRecords} วิชา
       </h1>
-
-      {/* <InfiniteScroll
-                dataLength={pulledCourse.length}
-                next={fetchMoreData}
-                hasMore={hasMore}
-                loader={<h4>กำลังโหลด...</h4>}
-            > */}
       {course.map((item) => (
         <CourseCard
           key={item.id}
