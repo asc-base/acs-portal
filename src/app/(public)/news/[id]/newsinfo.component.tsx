@@ -38,6 +38,7 @@ const NewsInfoComponent = ({ newsInfo, recommendNews }: NewsInfoProps) => {
             variant="rectangular"
             className="absolute inset-0"
             sx={{ width: "100%", height: "100%" }}
+            animation="wave"
           />
           {newsInfo?.image && (
             <Image
