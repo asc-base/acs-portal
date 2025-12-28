@@ -21,6 +21,10 @@ export type AdminCardProps = BaseAdminCardProps & (
     | {
         type: "project";
         data: IProject
+    } 
+    | {
+        type: "news";
+        data: INews
     }
 );
 

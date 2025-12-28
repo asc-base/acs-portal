@@ -32,3 +32,10 @@ export interface newsInformationPageProps {
   type: string;
   pageSize: number;
 }
+
+export interface queryNews {
+  page?: number;
+  pageSize?: number;
+  category?: string;
+  title?:string
+}
