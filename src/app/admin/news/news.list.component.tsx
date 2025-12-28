@@ -38,7 +38,7 @@ const NewsListComponent = (initValue: NewsListComponentProps) => {
   const router = useRouter();
   const pathname = usePathname();
 
-  const [page, setPage] = useState(initValue.page ?? 1);
+  const page = initValue.page;
   const [category, setCategory] = useState<string>("");
   const [openModal, setOpenModal] = useState(false);
   const [deleteNews, setDeleteNews] = useState<INews | null>(null);
@@ -67,7 +67,6 @@ const NewsListComponent = (initValue: NewsListComponentProps) => {
   useEffect(() => {
     const timer = setTimeout(() => {
       router.push(buildSearchUrl({ page: 1, title: watchedSearch }));
-      setPage(1);
     }, 300);
 
     return () => clearTimeout(timer);
@@ -76,7 +75,6 @@ const NewsListComponent = (initValue: NewsListComponentProps) => {
   const handleFilter = (event: SelectChangeEvent<string>) => {
     const value = event.target.value;
     setCategory(value);
-    setPage(1);
     router.push(buildSearchUrl({ category: value, page: 1 }));
   };
 
@@ -93,6 +91,10 @@ const NewsListComponent = (initValue: NewsListComponentProps) => {
     if (!deleteNews) return;
     console.log("Delete news:", deleteNews);
     setOpenModal(false);
+  };
+
+  const handleNextPage = (currentPage: number) => {
+    router.push(buildSearchUrl({ page: currentPage }));
   };
 
   return (
@@ -167,10 +169,7 @@ const NewsListComponent = (initValue: NewsListComponentProps) => {
             shape="rounded"
             page={page}
             count={Math.ceil(initValue.totalRecords / initValue.pageSize)}
-            onChange={(_, value) => {
-              setPage(value);
-              router.push(buildSearchUrl({ page: value }));
-            }}
+            onChange={(_, currentPage) => handleNextPage(currentPage)}
           />
         </div>
       </div>
