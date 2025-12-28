@@ -12,4 +12,8 @@ export class CurriculumService {
     const response = await this.curriculumRepository.getCurriculumById(id);
     return response ? response.data : null;
   }
+  async createCurriculum(data:FormData): Promise<ICurriculum> {     
+      const response = await this.curriculumRepository.createCurriculum(data);
+        return response.data;   
+    }
 }

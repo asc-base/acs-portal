@@ -43,4 +43,11 @@ export class CurriculumRepository implements ICurriculumRepository {
     const response = await this.http.get<ApiResponse<ICurriculum>>(url);
     return response;
   }
+  
+  async createCurriculum(data: FormData): Promise<ApiResponse<ICurriculum>> {
+    const response = await this.http.post<ApiResponse<ICurriculum>>(
+      `/v1/curriculum/`,data
+    );
+    return response;
+  }
 }
