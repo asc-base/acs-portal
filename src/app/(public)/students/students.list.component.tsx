@@ -49,7 +49,7 @@ const StudentsListComponent = ({
     <div>
       <HeroCard
         image={classBook?.image ? classBook.image : classbookImage}
-        description={`รุ่น ${classBook?.classof} ปีการศึกษา ${classBook?.firstYearAcademic}`}
+        header={`รุ่น ${classBook?.classof} ปีการศึกษา ${classBook?.firstYearAcademic}`}
       />
       <div className="container mx-auto px-6 py-5 lg:px-16">
         <div className="mb-2 flex flex-col items-start justify-start gap-2">
@@ -72,7 +72,7 @@ const StudentsListComponent = ({
           </div>
         ) : (
           <div>
-            <div className="ml-4 lg:ml-12 mb-10">
+            <div className="mb-10 ml-4 lg:ml-12">
               <div className="grid grid-cols-2 gap-y-4 md:grid-cols-4 lg:grid-cols-4 lg:gap-y-6">
                 {students.map((item) => (
                   <div key={item.id} onClick={() => handleOpen(item)}>
@@ -81,16 +81,16 @@ const StudentsListComponent = ({
                 ))}
               </div>
             </div>
-              
+
             <div className="flex items-center justify-center">
-            <Pagination
-              shape="rounded"
-              count={Math.ceil(totalRecords / pageSize)}
-              page={page}
-              onChange={(_, currentPage) => handleNextPage(currentPage)}
-              color="primary"
-              size="large"
-            />
+              <Pagination
+                shape="rounded"
+                count={Math.ceil(totalRecords / pageSize)}
+                page={page}
+                onChange={(_, currentPage) => handleNextPage(currentPage)}
+                color="primary"
+                size="large"
+              />
             </div>
           </div>
         )}
