@@ -11,6 +11,8 @@ import { RHFSelect } from "@/components/form/RHFSelect";
 import { CurriculumService } from "@/core/service/curriculum.service";
 import { CurriculumRepository } from "@/infra/repositories/curriculum.repository";
 import { ICurriculum } from "@/core/domain/curriculum";
+import { ClassBookRepository } from "@/infra/repositories/class-book.repository";
+import { ClassBookService } from "@/core/service/class-book.service";
 
 interface FormClassbookProps {
   apiBase: string;
@@ -45,11 +47,32 @@ export const FormClassbook: FC<FormClassbookProps> = ({ apiBase }) => {
     return new CurriculumService(curriculumRepository);
   }, [apiBase]);
 
+  const classBookService = useMemo(() => {
+    const classBookRepository = new ClassBookRepository(apiBase);
+    return new ClassBookService(classBookRepository);
+  }, [apiBase]);
+
+  const { control, handleSubmit } = useForm<FormData>({
+    resolver: zodResolver(Schema),
+    defaultValues: {
+      classof: "",
+      firstYearAcademic: "",
+      curriculumId: 0,
+    },
+    mode: "onBlur",
+    reValidateMode: "onChange",
+  });
+
   const handleSelectFile = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
       setSelectedFile(file);
     }
+  };
+
+  const onSubmit = async (data: FormData) => {
+    const reps = await classBookService.createClassBook(data, selectedFile!);
+    console.log("Create ClassBook Response:", reps);
   };
 
   useEffect(() => {
@@ -63,18 +86,8 @@ export const FormClassbook: FC<FormClassbookProps> = ({ apiBase }) => {
     fetchCurriculums();
   }, [apiBase, cuurriculumService]);
 
-  const { control } = useForm<FormData>({
-    resolver: zodResolver(Schema),
-    defaultValues: {
-      classof: "",
-      firstYearAcademic: "",
-      curriculumId: 0,
-    },
-    mode: "onBlur",
-    reValidateMode: "onChange",
-  });
   return (
-    <form className="space-y-4 p-8">
+    <form className="space-y-4 p-8" onSubmit={handleSubmit(onSubmit)}>
       <h3 className="font-bold">เพิ่มรุ่นการศึกษา</h3>
       <div className="flex flex-row">
         <div className="flex w-full items-center justify-center">

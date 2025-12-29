@@ -6,4 +6,5 @@ export interface IClassBookRepository {
     query: QueryClassBook,
   ): Promise<ApiResponse<Pageable<IClassBook>>>;
   getClassBookById(id: number): Promise<ApiResponse<IClassBook> | null>;
+  createClassBook(data: FormData): Promise<ApiResponse<IClassBook>>;
 }
