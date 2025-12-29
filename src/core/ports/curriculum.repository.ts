@@ -8,4 +8,5 @@ export interface ICurriculumRepository {
   ): Promise<ApiResponse<Pageable<ICurriculum>>>;
   
   getCurriculumById(id: number): Promise<ApiResponse<ICurriculum> | null>;
+  createCurriculum(data:FormData): Promise<ApiResponse<ICurriculum>>;
 }
