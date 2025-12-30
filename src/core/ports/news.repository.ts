@@ -2,6 +2,7 @@ import { ApiResponse, Pageable } from "@/interface/response";
 import { INews, INewsInformation } from "../domain/news";
 
 export interface INewsRepository {
+  createNews(data : FormData): Promise<ApiResponse<INews>>;
   getNews(
     page: number,
     pageSize: number,

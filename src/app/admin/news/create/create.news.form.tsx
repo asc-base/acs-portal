@@ -9,28 +9,23 @@ import {
   FormHelperText,
 } from "@mui/material";
 import React from "react";
-import { styled } from "@mui/material/styles";
-import { useState, useEffect } from "react";
+import { useState, useMemo } from "react";
 import { useForm, SubmitHandler, Controller } from "react-hook-form";
-import { fetchCategories } from "@/core/viewmodels/type";
-import { Category } from "@/interface/type";
 import Image from "next/image";
-import { ICreateNews } from "@/interface/news";
-import { createNewsAction } from "./create/action";
+import { NewsRepository } from "@/infra/repositories/news.repository";
+import { NewsService } from "@/core/service/news.service";
+import { SuccessModal } from "@/components/modal/success";
 
-const VisuallyHiddenInput = styled("input")({
-  clip: "rect(0 0 0 0)",
-  clipPath: "inset(50%)",
-  height: 1,
-  overflow: "hidden",
-  position: "absolute",
-  bottom: 0,
-  left: 0,
-  whiteSpace: "nowrap",
-  width: 1,
-});
+interface ICreateNews {
+  title: string;
+  categoryId: number;
+  image: File;
+  startDate: string;
+  dueDate: string | null;
+  detail: string;
+}
 
-const CreateNewsPage = () => {
+const CreateNewsForm = ({ apiBase }: { apiBase: string }) => {
   const {
     register,
     handleSubmit,
@@ -47,8 +42,28 @@ const CreateNewsPage = () => {
     mode: "onBlur",
     reValidateMode: "onChange",
   });
-  const [categories, setCategories] = useState<Category[]>([]);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [openSuccess, setOpenSuccess] = useState(false);
+
+  const categories = [
+    {
+      id: 16,
+      name: "ข่าวประชาสัมพันธ์",
+    },
+    {
+      id: 17,
+      name: "ความสำเร็จนักศึกษา",
+    },
+    {
+      id: 18,
+      name: "งานกิจกรรมนักศึกษา",
+    },
+  ];
+
+  const newsService = useMemo(() => {
+    const repo = new NewsRepository(apiBase);
+    return new NewsService(repo);
+  }, [apiBase]);
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0] || null;
@@ -60,47 +75,92 @@ const CreateNewsPage = () => {
     }
   };
 
-  const onSubmit: SubmitHandler<ICreateNews> = (data) => {
-    if (selectedFile) {
-      createNewsAction(data, selectedFile);
+  const onSubmit: SubmitHandler<ICreateNews> = async (data) => {
+    try {
+      const formData = new FormData();
+
+      formData.append("title", data.title);
+      formData.append("detail", data.detail);
+      formData.append("categoryId", String(data.categoryId));
+      formData.append("startDate", new Date(data.startDate).toISOString());
+
+      if (data.dueDate) {
+        formData.append("dueDate", new Date(data.dueDate).toISOString());
+      }
+
+      if (selectedFile) {
+        formData.append("image", selectedFile);
+      }
+
+      const response = await newsService.createNews(formData);
+
+      if (response) setOpenSuccess(true);
+    } catch (error) {
+      console.error("Create news failed:", error);
     }
   };
-
-  useEffect(() => {
-    const fetchData = async () => {
-      const result = await fetchCategories("news");
-      if (result instanceof Error) {
-        console.error("Error fetching categories:", result);
-      } else {
-        setCategories(result);
-      }
-    };
-    fetchData();
-  }, []);
 
   return (
     <form className="space-y-4 p-8" onSubmit={handleSubmit(onSubmit)}>
       <h3 className="font-bold">ข้อมูลข่าวสาร</h3>
       <div className="flex flex-row">
         <div className="flex w-full items-center justify-center">
-          <div className="bg-neutral02 flex h-80 w-96 items-center justify-center">
+          <div className="bg-neutral02 flex h-71 w-100 items-center justify-center">
             {selectedFile ? (
-              <Image
-                src={URL.createObjectURL(selectedFile)}
-                alt="Preview"
-                width={384}
-                height={192}
-                style={{ objectFit: "cover" }}
-                className="h-full w-full object-cover"
-              />
+              <div className="group relative h-full w-full">
+                <Image
+                  src={URL.createObjectURL(selectedFile)}
+                  alt="Preview"
+                  width={384}
+                  height={192}
+                  style={{ objectFit: "cover" }}
+                  className="h-full w-full object-cover"
+                />
+                <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
+                  <Button
+                    variant="contained"
+                    component="label"
+                    size="large"
+                    sx={{
+                      border: "1px solid var(--color-neutral04)",
+                      backgroundColor: "var(--color-neutral01)",
+                      color: "var(--color-neutral04)",
+                      boxShadow: "none",
+                      fontWeight: "bold",
+                      px: 4,
+                    }}
+                  >
+                    เปลี่ยนรูปภาพ
+                    <input
+                      type="file"
+                      hidden
+                      accept="image/*"
+                      onChange={handleFileChange}
+                    />
+                  </Button>
+                </div>
+              </div>
             ) : (
-              <Button variant="outlined" component="label">
-                <VisuallyHiddenInput
+              <Button
+                variant="outlined"
+                component="label"
+                size="large"
+                sx={{
+                  border: "1px solid var(--color-neutral04)",
+                  backgroundColor: "var(--color-neutral01)",
+                  color: "var(--color-neutral04)",
+                  boxShadow: "none",
+                  fontWeight: "bold",
+                  px: 4,
+                }}
+              >
+                อัปโหลดรูปภาพ
+                <input
                   type="file"
+                  hidden
                   accept="image/*"
                   onChange={handleFileChange}
                 />
-                อัปโหลดรูปภาพ
               </Button>
             )}
           </div>
@@ -173,15 +233,20 @@ const CreateNewsPage = () => {
         />
       </div>
       <div className="flex flex-row justify-end gap-x-4">
-        <Button type="submit" variant="outlined" color="primary" size="medium">
-          บันทึกข้อมูลข่าวสาร
+        <Button variant="outlined" color="primary" size="medium">
+          ยกเลิก
         </Button>
         <Button type="submit" variant="contained" color="primary" size="medium">
           บันทึกข้อมูลข่าวสาร
         </Button>
       </div>
+      <SuccessModal
+        open={openSuccess}
+        type="news"
+        onClose={() => setOpenSuccess(false)}
+      />
     </form>
   );
 };
 
-export default CreateNewsPage;
+export default CreateNewsForm;

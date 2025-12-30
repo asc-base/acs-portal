@@ -5,6 +5,11 @@ import { INewsInformation } from "../domain/news";
 export class NewsService {
   constructor(private newsRepository: INewsRepository) {}
 
+  async createNews(data : FormData) : Promise<INews> {
+    const response = await this.newsRepository.createNews(data);
+    return response.data;
+  }
+
   async getNews(
     page: number,
     pageSize: number,
