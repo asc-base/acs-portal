@@ -14,6 +14,14 @@ export interface INews {
   category: Category;
 }
 
+export interface ICreateNews {
+  title: string;
+  categoryId: number;
+  startDate: string;
+  dueDate: string | null;
+  detail: string;
+}
+
 export interface INewsInformation {
   id: number;
   image: string;

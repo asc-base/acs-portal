@@ -15,15 +15,20 @@ import Image from "next/image";
 import { NewsRepository } from "@/infra/repositories/news.repository";
 import { NewsService } from "@/core/service/news.service";
 import { SuccessModal } from "@/components/modal/success";
+import { ICreateNews } from "@/core/domain/news";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useRouter } from "next/navigation";
 
-interface ICreateNews {
-  title: string;
-  categoryId: number;
-  image: File;
-  startDate: string;
-  dueDate: string | null;
-  detail: string;
-}
+const Schema = z.object({
+  title: z.string().min(1, "กรุณากรอกหัวข้อ"),
+  detail: z.string().min(1, "กรุณากรอกรายละเอียด"),
+  categoryId: z.number().min(1, "กรุณาเลือกหมวดหมู่"),
+  startDate: z.string().min(1, "กรุณาเลือกวันที่เริ่มต้น"),
+  dueDate: z.string().nullable(),
+});
+
+type FormData = z.infer<typeof Schema>;
 
 const CreateNewsForm = ({ apiBase }: { apiBase: string }) => {
   const {
@@ -31,7 +36,8 @@ const CreateNewsForm = ({ apiBase }: { apiBase: string }) => {
     handleSubmit,
     control,
     formState: { errors },
-  } = useForm<ICreateNews>({
+  } = useForm<FormData>({
+    resolver: zodResolver(Schema),
     defaultValues: {
       title: "",
       categoryId: 0,
@@ -44,6 +50,9 @@ const CreateNewsForm = ({ apiBase }: { apiBase: string }) => {
   });
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [openSuccess, setOpenSuccess] = useState(false);
+  const [imageError, setImageError] = useState<string | null>(null);
+
+  const router = useRouter();
 
   const categories = [
     {
@@ -66,33 +75,20 @@ const CreateNewsForm = ({ apiBase }: { apiBase: string }) => {
   }, [apiBase]);
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0] || null;
+    const file = event.target.files?.[0];
     if (file) {
       setSelectedFile(file);
-      console.log("Selected file:", file);
-    } else {
-      setSelectedFile(null);
     }
   };
 
   const onSubmit: SubmitHandler<ICreateNews> = async (data) => {
+    if (!selectedFile) {
+      setImageError("กรุณาอัปโหลดรูปภาพ");
+      return;
+    }
+
     try {
-      const formData = new FormData();
-
-      formData.append("title", data.title);
-      formData.append("detail", data.detail);
-      formData.append("categoryId", String(data.categoryId));
-      formData.append("startDate", new Date(data.startDate).toISOString());
-
-      if (data.dueDate) {
-        formData.append("dueDate", new Date(data.dueDate).toISOString());
-      }
-
-      if (selectedFile) {
-        formData.append("image", selectedFile);
-      }
-
-      const response = await newsService.createNews(formData);
+      const response = await newsService.createNews(data, selectedFile);
 
       if (response) setOpenSuccess(true);
     } catch (error) {
@@ -104,7 +100,7 @@ const CreateNewsForm = ({ apiBase }: { apiBase: string }) => {
     <form className="space-y-4 p-8" onSubmit={handleSubmit(onSubmit)}>
       <h3 className="font-bold">ข้อมูลข่าวสาร</h3>
       <div className="flex flex-row">
-        <div className="flex w-full items-center justify-center">
+        <div className="flex w-full flex-col items-center justify-center">
           <div className="bg-neutral02 flex h-71 w-100 items-center justify-center">
             {selectedFile ? (
               <div className="group relative h-full w-full">
@@ -164,6 +160,9 @@ const CreateNewsForm = ({ apiBase }: { apiBase: string }) => {
               </Button>
             )}
           </div>
+          {imageError && (
+            <p className="mt-2 text-sm text-red-500">{imageError}</p>
+          )}
         </div>
         <div className="gap- flex w-full flex-col justify-between">
           <TextField
@@ -173,6 +172,7 @@ const CreateNewsForm = ({ apiBase }: { apiBase: string }) => {
             size="medium"
             fullWidth
             error={!!errors.title}
+            helperText={errors.title?.message}
           />
           <FormControl fullWidth size="medium" error={!!errors.categoryId}>
             <InputLabel id="category-label">หมวดหมู่</InputLabel>
@@ -204,6 +204,7 @@ const CreateNewsForm = ({ apiBase }: { apiBase: string }) => {
                 shrink: true,
               }}
               error={!!errors.startDate}
+              helperText={errors.startDate?.message}
             />
             <TextField
               {...register("dueDate")}
@@ -222,7 +223,7 @@ const CreateNewsForm = ({ apiBase }: { apiBase: string }) => {
       </div>
       <div>
         <TextField
-          {...register("detail", { required: "กรุณากรอกเนื้อหาข่าวสาร" })}
+          {...register("detail")}
           label="เนื้อหาข่าวสาร"
           variant="outlined"
           size="medium"
@@ -230,10 +231,18 @@ const CreateNewsForm = ({ apiBase }: { apiBase: string }) => {
           multiline
           rows={12}
           error={!!errors.detail}
+          helperText={errors.detail?.message}
         />
       </div>
       <div className="flex flex-row justify-end gap-x-4">
-        <Button variant="outlined" color="primary" size="medium">
+        <Button
+          variant="outlined"
+          color="primary"
+          size="medium"
+          onClick={() => {
+            router.push("/admin/news");
+          }}
+        >
           ยกเลิก
         </Button>
         <Button type="submit" variant="contained" color="primary" size="medium">
