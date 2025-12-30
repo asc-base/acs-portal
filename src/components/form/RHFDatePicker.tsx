@@ -6,7 +6,7 @@ import {
   DatePickerProps,
 } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
-import { Dayjs } from "dayjs";
+import dayjs from "dayjs";
 import Stack from "@mui/material/Stack";
 import FormLabel from "@mui/material/FormLabel";
 
@@ -40,8 +40,8 @@ export function RHFDatePickerDayjs<T extends FieldValues>({
           >
             <DatePicker
               {...props}
-              value={(field.value as Dayjs | null) ?? null}
-              onChange={(val) => field.onChange(val)} // RHF เก็บเป็น Dayjs | null
+              value={field.value ? dayjs(field.value) : null}
+              onChange={(val) => field.onChange(val ? val.toISOString() : "")}
               slotProps={{
                 textField: {
                   placeholder,

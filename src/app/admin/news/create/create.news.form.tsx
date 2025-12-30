@@ -10,9 +10,10 @@ import { SuccessModal } from "@/components/modal/success";
 import { ICreateNews } from "@/core/domain/news";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useRouter } from "next/navigation";
 import { RHFTextField } from "@/components/form/RHFTextField";
 import { RHFSelect } from "@/components/form/RHFSelect";
+import { RHFDatePickerDayjs } from "@/components/form/RHFDatePicker";
+import Link from "next/link";
 
 const Schema = z.object({
   title: z.string().min(1, "กรุณากรอกหัวข้อ"),
@@ -41,8 +42,6 @@ const CreateNewsForm = ({ apiBase }: { apiBase: string }) => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [openSuccess, setOpenSuccess] = useState(false);
   const [imageError, setImageError] = useState<boolean>(false);
-
-  const router = useRouter();
 
   const categories = [
     { id: 16, name: "ข่าวประชาสัมพันธ์" },
@@ -164,21 +163,17 @@ const CreateNewsForm = ({ apiBase }: { apiBase: string }) => {
 
           <div className="flex w-full gap-4">
             <div className="flex-1">
-              <RHFTextField
+              <RHFDatePickerDayjs
                 control={control}
                 name="startDate"
                 label="วันที่เริ่มต้น"
-                type="date"
-                fullWidth
               />
             </div>
             <div className="flex-1">
-              <RHFTextField
+              <RHFDatePickerDayjs
                 control={control}
                 name="dueDate"
                 label="วันที่ครบกำหนด"
-                type="date"
-                fullWidth
               />
             </div>
           </div>
@@ -195,14 +190,11 @@ const CreateNewsForm = ({ apiBase }: { apiBase: string }) => {
       />
 
       <div className="flex justify-end gap-4">
-        <Button
-          variant="outlined"
-          color="primary"
-          size="medium"
-          onClick={() => router.push("/admin/news")}
-        >
-          ยกเลิก
-        </Button>
+        <Link href={"/admin/news"}>
+          <Button variant="outlined" color="primary" size="medium">
+            ยกเลิก
+          </Button>
+        </Link>
         <Button type="submit" variant="contained" color="primary" size="medium">
           บันทึกข้อมูลข่าวสาร
         </Button>
