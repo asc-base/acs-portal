@@ -12,3 +12,9 @@ export interface QueryClassBook {
   sortOrder?: "asc" | "desc";
   search?: string;
 }
+
+export interface ICreateClassBook {
+  firstYearAcademic: string;
+  classof: string;
+  curriculumId: number;
+}

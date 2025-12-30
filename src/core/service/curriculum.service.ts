@@ -2,7 +2,7 @@ import { ICurriculumRepository } from "../ports/curriculum.repository";
 import { ICurriculum, QueryCurriculum } from "../domain/curriculum";
 import { Pageable } from "@/interface/response";
 export class CurriculumService {
-  constructor(private curriculumRepository: ICurriculumRepository) { }
+  constructor(private readonly curriculumRepository: ICurriculumRepository) {}
 
   async getCurriculum(query: QueryCurriculum): Promise<Pageable<ICurriculum>> {
     const response = await this.curriculumRepository.getCurriculum(query);
@@ -12,8 +12,8 @@ export class CurriculumService {
     const response = await this.curriculumRepository.getCurriculumById(id);
     return response ? response.data : null;
   }
-  async createCurriculum(data:FormData): Promise<ICurriculum> {     
-      const response = await this.curriculumRepository.createCurriculum(data);
-        return response.data;   
-    }
+  async createCurriculum(data: FormData): Promise<ICurriculum> {
+    const response = await this.curriculumRepository.createCurriculum(data);
+    return response.data;
+  }
 }
