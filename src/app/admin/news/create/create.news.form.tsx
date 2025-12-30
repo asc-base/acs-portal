@@ -210,7 +210,7 @@ const CreateNewsForm = ({ apiBase }: { apiBase: string }) => {
 
       <SuccessModal
         open={openSuccess}
-        type="news"
+        path="news"
         onClose={() => setOpenSuccess(false)}
       />
     </form>

@@ -2,15 +2,15 @@
 
 import { Modal, Button } from "@mui/material";
 import { useRouter } from "next/navigation";
-import Image from "next/image";
+import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
 
 export const SuccessModal = ({
   open,
-  type,
+  path,
   onClose,
 }: {
   open: boolean;
-  type: string;
+  path: string;
   onClose: () => void;
 }) => {
   const router = useRouter();
@@ -20,11 +20,8 @@ export const SuccessModal = ({
       <div className="fixed inset-0 flex items-center justify-center">
         <div className="h-{276px} w-[272px] rounded-lg bg-white p-8 shadow-2xl">
           <div className="mb-4 flex justify-center">
-            <Image
-              src="/checkmarkcircle.svg"
-              width={80}
-              height={80}
-              alt="checkmarkcircle"
+            <CheckCircleOutlineIcon
+              sx={{ fontSize: 84, color: "success.main" }}
             />
           </div>
 
@@ -36,7 +33,7 @@ export const SuccessModal = ({
             <Button
               variant="contained"
               color="primary"
-              onClick={() => router.push(`/admin/${type}`)}
+              onClick={() => router.push(`/admin/${path}`)}
             >
               กลับสู่หน้าหลัก
             </Button>
