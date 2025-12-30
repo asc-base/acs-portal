@@ -4,8 +4,8 @@ import { HttpHelper } from "@/lib/http";
 import { ApiResponse, Pageable } from "@/interface/response";
 
 export class ClassBookRepository implements IClassBookRepository {
-  private http: HttpHelper;
-  private baseUrl: string;
+  private readonly http: HttpHelper;
+  private readonly baseUrl: string;
 
   constructor(baseUrl: string) {
     this.baseUrl = baseUrl;
@@ -14,12 +14,20 @@ export class ClassBookRepository implements IClassBookRepository {
   async getClassBooks(
     query: QueryClassBook,
   ): Promise<ApiResponse<Pageable<IClassBook>>> {
-    const { page, pageSize, sortBy = "createdAt", sortOrder = "desc", search } = query;
+    const {
+      page,
+      pageSize,
+      sortBy = "createdAt",
+      sortOrder = "desc",
+      search,
+    } = query;
 
     const params = new URLSearchParams();
     if (page !== undefined) params.append("page", page.toString());
     if (pageSize !== undefined) params.append("pageSize", pageSize.toString());
-    if (search) {params.append("search", search);}
+    if (search) {
+      params.append("search", search);
+    }
     params.append("sortBy", sortBy);
     params.append("sortOrder", sortOrder);
 
@@ -33,6 +41,12 @@ export class ClassBookRepository implements IClassBookRepository {
   async getClassBookById(id: number): Promise<ApiResponse<IClassBook> | null> {
     const url = `/v1/class-book/${id}`;
     const response = await this.http.get<ApiResponse<IClassBook>>(url);
+    return response;
+  }
+
+  async createClassBook(data: FormData): Promise<ApiResponse<IClassBook>> {
+    const url = `/v1/class-book`;
+    const response = await this.http.post<ApiResponse<IClassBook>>(url, data);
     return response;
   }
 }
