@@ -2,7 +2,7 @@ import { IClassBookRepository } from "../ports/class-book.repository";
 import {
   QueryClassBook,
   IClassBook,
-  CreateClassBook,
+  ICreateClassBook,
 } from "../domain/classbook";
 import { Pageable } from "@/interface/response";
 export class ClassBookService {
@@ -18,16 +18,18 @@ export class ClassBookService {
     return response ? response.data : null;
   }
 
-  async createClassBook(
-    data: CreateClassBook,
-    image: File,
-  ): Promise<IClassBook> {
-    const formData = new FormData();
-    formData.append("firstYearAcademic", data.firstYearAcademic);
-    formData.append("classof", data.classof);
-    formData.append("curriculumId", data.curriculumId.toString());
-    formData.append("image", image);
-    const response = await this.classBookRepository.createClassBook(formData);
-    return response.data;
+  async createClassBook(data: ICreateClassBook, image: File) {
+    try {
+      const formData = new FormData();
+      Object.entries(data).forEach(([key, value]) => {
+        formData.append(key, value?.toString() ?? "");
+      });
+      formData.append("image", image);
+      const response = await this.classBookRepository.createClassBook(formData);
+      return response;
+    } catch (error) {
+      console.error("Failed to create class book:", error);
+      return null;
+    }
   }
 }

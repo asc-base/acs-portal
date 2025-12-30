@@ -1,7 +1,7 @@
 "use client";
 import React, { FC, useEffect, useMemo, useState } from "react";
 import Image from "next/image";
-import { Button, MenuItem } from "@mui/material";
+import { Button, MenuItem, Alert, Snackbar } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { RHFTextField } from "@/components/form/RHFTextField";
 import { useForm } from "react-hook-form";
@@ -13,6 +13,7 @@ import { CurriculumRepository } from "@/infra/repositories/curriculum.repository
 import { ICurriculum } from "@/core/domain/curriculum";
 import { ClassBookRepository } from "@/infra/repositories/class-book.repository";
 import { ClassBookService } from "@/core/service/class-book.service";
+import { useRouter } from "next/navigation";
 
 interface FormClassbookProps {
   apiBase: string;
@@ -41,6 +42,8 @@ const VisuallyHiddenInput = styled("input")({
 export const FormClassbook: FC<FormClassbookProps> = ({ apiBase }) => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [curriculums, setCurriculums] = useState<ICurriculum[]>([]);
+  const [isError, setIsError] = useState(false);
+  const router = useRouter();
 
   const cuurriculumService = useMemo(() => {
     const curriculumRepository = new CurriculumRepository(apiBase);
@@ -71,8 +74,25 @@ export const FormClassbook: FC<FormClassbookProps> = ({ apiBase }) => {
   };
 
   const onSubmit = async (data: FormData) => {
-    const reps = await classBookService.createClassBook(data, selectedFile!);
-    console.log("Create ClassBook Response:", reps);
+    setIsError(false);
+    try {
+      const reps = await classBookService.createClassBook(data, selectedFile!);
+      if (!reps) {
+        setIsError(true);
+        return;
+      }
+
+      router.push(
+        `/admin/students?page=1&pageSize=10&classBookId=${reps.data.id}&search=&sortBy=studentId&sortOrder=desc`,
+      );
+    } catch (error) {
+      console.error(error);
+      setIsError(true);
+    }
+  };
+
+  const handleCloseAlert = () => {
+    setIsError(false);
   };
 
   useEffect(() => {
@@ -88,19 +108,46 @@ export const FormClassbook: FC<FormClassbookProps> = ({ apiBase }) => {
 
   return (
     <form className="space-y-4 p-8" onSubmit={handleSubmit(onSubmit)}>
+      {" "}
+      <Snackbar
+        anchorOrigin={{ vertical: "top", horizontal: "right" }}
+        open={isError}
+        autoHideDuration={4000}
+        onClose={handleCloseAlert}
+      >
+        <Alert
+          severity="error"
+          onClose={handleCloseAlert}
+          sx={{ width: "100%" }}
+        >
+          ไม่สามารถเพิ่มรุ่นการศึกษาได้
+        </Alert>
+      </Snackbar>
       <h3 className="font-bold">เพิ่มรุ่นการศึกษา</h3>
       <div className="flex flex-row">
         <div className="flex w-full items-center justify-center">
-          <div className="bg-neutral02 flex h-80 w-96 items-center justify-center">
+          <div className="bg-neutral02 group relative flex h-80 w-96 items-center justify-center">
             {selectedFile ? (
-              <Image
-                src={URL.createObjectURL(selectedFile)}
-                alt="Preview"
-                width={384}
-                height={192}
-                style={{ objectFit: "cover" }}
-                className="h-full w-full object-cover"
-              />
+              <>
+                <Image
+                  src={URL.createObjectURL(selectedFile)}
+                  alt="Preview"
+                  width={384}
+                  height={192}
+                  style={{ objectFit: "cover" }}
+                  className="h-full w-full object-cover"
+                />
+                <div className="bg-opacity-40 absolute inset-0 flex items-center justify-center bg-black/60 opacity-0 transition-opacity group-hover:opacity-100">
+                  <Button variant="contained" component="label">
+                    <VisuallyHiddenInput
+                      type="file"
+                      accept="image/*"
+                      onChange={handleSelectFile}
+                    />
+                    อัปโหลดรูปภาพ
+                  </Button>
+                </div>
+              </>
             ) : (
               <Button variant="outlined" component="label">
                 <VisuallyHiddenInput
