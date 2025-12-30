@@ -1,16 +1,8 @@
 "use client";
-import {
-  Button,
-  FormControl,
-  TextField,
-  InputLabel,
-  Select,
-  MenuItem,
-  FormHelperText,
-} from "@mui/material";
+import { Button, MenuItem } from "@mui/material";
 import React from "react";
 import { useState, useMemo } from "react";
-import { useForm, SubmitHandler, Controller } from "react-hook-form";
+import { useForm, SubmitHandler } from "react-hook-form";
 import Image from "next/image";
 import { NewsRepository } from "@/infra/repositories/news.repository";
 import { NewsService } from "@/core/service/news.service";
@@ -19,6 +11,8 @@ import { ICreateNews } from "@/core/domain/news";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
+import { RHFTextField } from "@/components/form/RHFTextField";
+import { RHFSelect } from "@/components/form/RHFSelect";
 
 const Schema = z.object({
   title: z.string().min(1, "กรุณากรอกหัวข้อ"),
@@ -31,12 +25,7 @@ const Schema = z.object({
 type FormData = z.infer<typeof Schema>;
 
 const CreateNewsForm = ({ apiBase }: { apiBase: string }) => {
-  const {
-    register,
-    handleSubmit,
-    control,
-    formState: { errors },
-  } = useForm<FormData>({
+  const { handleSubmit, control } = useForm<FormData>({
     resolver: zodResolver(Schema),
     defaultValues: {
       title: "",
@@ -48,25 +37,17 @@ const CreateNewsForm = ({ apiBase }: { apiBase: string }) => {
     mode: "onBlur",
     reValidateMode: "onChange",
   });
+
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [openSuccess, setOpenSuccess] = useState(false);
-  const [imageError, setImageError] = useState<string | null>(null);
+  const [imageError, setImageError] = useState<boolean>(false);
 
   const router = useRouter();
 
   const categories = [
-    {
-      id: 16,
-      name: "ข่าวประชาสัมพันธ์",
-    },
-    {
-      id: 17,
-      name: "ความสำเร็จนักศึกษา",
-    },
-    {
-      id: 18,
-      name: "งานกิจกรรมนักศึกษา",
-    },
+    { id: 16, name: "ข่าวประชาสัมพันธ์" },
+    { id: 17, name: "ความสำเร็จนักศึกษา" },
+    { id: 18, name: "งานกิจกรรมนักศึกษา" },
   ];
 
   const newsService = useMemo(() => {
@@ -76,32 +57,25 @@ const CreateNewsForm = ({ apiBase }: { apiBase: string }) => {
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
-    if (file) {
-      setSelectedFile(file);
-    }
+    if (file) setSelectedFile(file);
   };
 
   const onSubmit: SubmitHandler<ICreateNews> = async (data) => {
     if (!selectedFile) {
-      setImageError("กรุณาอัปโหลดรูปภาพ");
+      setImageError(true);
       return;
     }
 
-    try {
-      const response = await newsService.createNews(data, selectedFile);
-
-      if (response) setOpenSuccess(true);
-    } catch (error) {
-      console.error("Create news failed:", error);
-    }
+    const response = await newsService.createNews(data, selectedFile);
+    if (response) setOpenSuccess(true);
   };
 
   return (
-    <form className="space-y-4 p-8" onSubmit={handleSubmit(onSubmit)}>
+    <form className="space-y-6 p-8" onSubmit={handleSubmit(onSubmit)}>
       <h3 className="font-bold">ข้อมูลข่าวสาร</h3>
-      <div className="flex flex-row">
-        <div className="flex w-full flex-col items-center justify-center">
-          <div className="bg-neutral02 flex h-71 w-100 items-center justify-center">
+      <div className="flex items-start gap-8">
+        <div className="flex w-[500px] flex-col items-start">
+          <div className="bg-neutral02 flex h-[310px] w-full items-center justify-center">
             {selectedFile ? (
               <div className="group relative h-full w-full">
                 <Image
@@ -109,7 +83,6 @@ const CreateNewsForm = ({ apiBase }: { apiBase: string }) => {
                   alt="Preview"
                   width={384}
                   height={192}
-                  style={{ objectFit: "cover" }}
                   className="h-full w-full object-cover"
                 />
                 <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
@@ -160,88 +133,73 @@ const CreateNewsForm = ({ apiBase }: { apiBase: string }) => {
               </Button>
             )}
           </div>
+
           {imageError && (
-            <p className="mt-2 text-sm text-red-500">{imageError}</p>
+            <p className="mt-2 w-full text-center text-sm text-red-600">
+              กรุณาอัปโหลดรูปภาพ
+            </p>
           )}
         </div>
-        <div className="gap- flex w-full flex-col justify-between">
-          <TextField
-            {...register("title", { required: "กรุณากรอกหัวข้อข่าวสาร" })}
+
+        <div className="flex flex-1 flex-col gap-4">
+          <RHFTextField
+            control={control}
+            name="title"
             label="หัวข้อข่าวสาร"
-            variant="outlined"
-            size="medium"
             fullWidth
-            error={!!errors.title}
-            helperText={errors.title?.message}
           />
-          <FormControl fullWidth size="medium" error={!!errors.categoryId}>
-            <InputLabel id="category-label">หมวดหมู่</InputLabel>
-            <Controller
-              name="categoryId"
-              control={control}
-              rules={{ required: "กรุณาเลือกหมวดหมู่" }}
-              render={({ field }) => (
-                <Select {...field} labelId="category-label" label="หมวดหมู่">
-                  {categories.map((category) => (
-                    <MenuItem key={category.id} value={category.id}>
-                      {category.name}
-                    </MenuItem>
-                  ))}
-                </Select>
-              )}
-            />
-            <FormHelperText>{errors.categoryId?.message}</FormHelperText>
-          </FormControl>
-          <div className="flex flex-row gap-4">
-            <TextField
-              {...register("startDate")}
-              label="วันที่เริ่มต้น"
-              type="date"
-              variant="outlined"
-              size="medium"
-              fullWidth
-              InputLabelProps={{
-                shrink: true,
-              }}
-              error={!!errors.startDate}
-              helperText={errors.startDate?.message}
-            />
-            <TextField
-              {...register("dueDate")}
-              label="วันที่ครบกำหนด"
-              type="date"
-              variant="outlined"
-              size="medium"
-              fullWidth
-              InputLabelProps={{
-                shrink: true,
-              }}
-              error={!!errors.dueDate}
-            />
+
+          <RHFSelect
+            name="categoryId"
+            control={control}
+            label="หลักสูตร"
+            fullWidth
+          >
+            {categories.map((category) => (
+              <MenuItem key={category.id} value={category.id}>
+                {category.name}
+              </MenuItem>
+            ))}
+          </RHFSelect>
+
+          <div className="flex w-full gap-4">
+            <div className="flex-1">
+              <RHFTextField
+                control={control}
+                name="startDate"
+                label="วันที่เริ่มต้น"
+                type="date"
+                fullWidth
+              />
+            </div>
+            <div className="flex-1">
+              <RHFTextField
+                control={control}
+                name="dueDate"
+                label="วันที่ครบกำหนด"
+                type="date"
+                fullWidth
+              />
+            </div>
           </div>
         </div>
       </div>
-      <div>
-        <TextField
-          {...register("detail")}
-          label="เนื้อหาข่าวสาร"
-          variant="outlined"
-          size="medium"
-          fullWidth
-          multiline
-          rows={12}
-          error={!!errors.detail}
-          helperText={errors.detail?.message}
-        />
-      </div>
-      <div className="flex flex-row justify-end gap-x-4">
+
+      <RHFTextField
+        control={control}
+        name="detail"
+        label="เนื้อหาข่าวสาร"
+        fullWidth
+        multiline
+        rows={12}
+      />
+
+      <div className="flex justify-end gap-4">
         <Button
           variant="outlined"
           color="primary"
           size="medium"
-          onClick={() => {
-            router.push("/admin/news");
-          }}
+          onClick={() => router.push("/admin/news")}
         >
           ยกเลิก
         </Button>
@@ -249,6 +207,7 @@ const CreateNewsForm = ({ apiBase }: { apiBase: string }) => {
           บันทึกข้อมูลข่าวสาร
         </Button>
       </div>
+
       <SuccessModal
         open={openSuccess}
         type="news"
