@@ -43,47 +43,57 @@ const StudentTableComponents = ({
     <TableContainer component={Paper} sx={{ boxShadow: "none" }}>
       <Table>
         <TableHead>
-          <TableRow sx={{ borderBottom: "2px solid var(--color-neutral04)"}}>
+          <TableRow sx={{ borderBottom: "2px solid var(--color-neutral04)" }}>
             <TableCell align="center">
               <h3 className="font-bold">รูปภาพ</h3>
             </TableCell>
             <TableCell align="center">
               <div className="flex items-center justify-center gap-1">
                 <h3 className="font-bold">รหัสนักศึกษา</h3>
-                <IconButton
-                  size="small"
-                  onClick={() => onSort("studentId")}
-
-                >
+                <IconButton size="small" onClick={() => onSort("studentId")}>
                   {sortBy === "studentId" ? (
                     sortOrder === "asc" ? (
-                      <ArrowUpward fontSize="small" sx={{ color: "var(--color-primary01)" }} />
+                      <ArrowUpward
+                        fontSize="small"
+                        sx={{ color: "var(--color-primary01)" }}
+                      />
                     ) : (
-                      <ArrowDownward fontSize="small" sx={{ color: "var(--color-primary01)" }} />
+                      <ArrowDownward
+                        fontSize="small"
+                        sx={{ color: "var(--color-primary01)" }}
+                      />
                     )
                   ) : (
-                    <ArrowDownward fontSize="small" sx={{ color: "var(--color-neutral04)" }} />
+                    <ArrowDownward
+                      fontSize="small"
+                      sx={{ color: "var(--color-neutral04)" }}
+                    />
                   )}
                 </IconButton>
               </div>
             </TableCell>
 
-
             <TableCell align="center">
               <div className="flex items-center justify-center gap-1">
                 <h3 className="font-bold">ชื่อ นามสกุล</h3>
-                <IconButton
-                  size="small"
-                  onClick={() => onSort("firstNameTh")}
-                >
+                <IconButton size="small" onClick={() => onSort("firstNameTh")}>
                   {sortBy === "firstNameTh" ? (
                     sortOrder === "asc" ? (
-                      <ArrowUpward fontSize="small" sx={{ color: "var(--color-primary01)" }} />
+                      <ArrowUpward
+                        fontSize="small"
+                        sx={{ color: "var(--color-primary01)" }}
+                      />
                     ) : (
-                      <ArrowDownward fontSize="small" sx={{ color: "var(--color-primary01)" }} />
+                      <ArrowDownward
+                        fontSize="small"
+                        sx={{ color: "var(--color-primary01)" }}
+                      />
                     )
                   ) : (
-                    <ArrowDownward fontSize="small" sx={{ color: "var(--color-neutral04)" }} />
+                    <ArrowDownward
+                      fontSize="small"
+                      sx={{ color: "var(--color-neutral04)" }}
+                    />
                   )}
                 </IconButton>
               </div>
