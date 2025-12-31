@@ -12,6 +12,13 @@ export class NewsRepository implements INewsRepository {
     this.http = new HttpHelper(this.baseUrl);
   }
 
+  async createNews(data : FormData): Promise<ApiResponse<INews>>{
+    const response = await this.http.post<ApiResponse<INews>>(
+      `/v1/news`,data
+    );
+    return response;
+  }
+
   async getNews(
     page: number,
     pageSize: number,
