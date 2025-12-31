@@ -1,6 +1,7 @@
 "use client";
-import React, { useEffect, useCallback } from "react";
-import { useRouter } from "next/navigation";
+import Link from "next/link";
+import React, { useEffect } from "react";
+import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { Button, Pagination } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import SearchIcon from "@mui/icons-material/Search";
@@ -8,16 +9,15 @@ import CloseIcon from "@mui/icons-material/Close";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ICurriculum } from "@/core/domain/curriculum";
 import { AdminCard } from "@/components/adminCard";
-import { QueryCurriculum } from "@/core/domain/curriculum";
+import { RHFTextField } from "@/components/form/RHFTextField";
+import { ICurriculum } from "@/core/domain/curriculum";
 
 interface CurriculumListComponentsProps {
   curriculums: ICurriculum[];
   totalRecords: number;
   pageSize: number;
   page: number;
-  search?: string;
 }
 
 const searchSchema = z.object({
@@ -31,50 +31,36 @@ const CurriculumListComponents = ({
   totalRecords,
   pageSize,
   page,
-  search,
 }: CurriculumListComponentsProps) => {
   const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
 
-  const { register, reset, watch } = useForm<SearchForm>({
+  const { control, reset, watch } = useForm<SearchForm>({
     resolver: zodResolver(searchSchema),
-    defaultValues: { search },
+    defaultValues: { search: "" },
   });
 
   const watchedSearch = watch("search");
 
-  const SearchCurriculumUrl = useCallback(
-    (query: Partial<QueryCurriculum>) => {
-      const searchYear = (query.search ?? watchedSearch ?? "").replace(
-        /\D/g,
-        "",
-      );
-
-      const params = new URLSearchParams({
-        page: query.page?.toString() || page.toString(),
-        pageSize: query.pageSize?.toString() || pageSize.toString(),
-        search: searchYear,
-      });
-
-      return `/admin/curriculum?${params.toString()}`;
-    },
-    [watchedSearch, page, pageSize],
-  );
+  const handleResetSearch = () => {
+    reset({ search: "" });
+  };
 
   useEffect(() => {
-    const handler = setTimeout(() => {
-      router.push(SearchCurriculumUrl({ page: 1, search: watchedSearch }));
-    }, 300);
-
-    return () => clearTimeout(handler);
-  }, [watchedSearch, router, SearchCurriculumUrl]);
-
-  const handleClickAddClassBook = () => {
-    router.push(`/admin/curriculum/create`);
-  };
-
-  const handleNextPage = (currentPage: number) => {
-    router.push(SearchCurriculumUrl({ page: currentPage }));
-  };
+    const delayDebounce = setTimeout(() => {
+      const params = new URLSearchParams(searchParams.toString());
+      if (watchedSearch) {
+        params.set("search", watchedSearch);
+      } else {
+        params.delete("search");
+      }
+      params.set("page", "1");
+      const newSearch = params.toString();
+      router.replace(`${pathname}?${newSearch}`, { scroll: false });
+    }, 500);
+    return () => clearTimeout(delayDebounce);
+  }, [pathname, router, searchParams, watchedSearch]);
 
   return (
     <div className="min-h-screen px-8 py-5">
@@ -82,48 +68,27 @@ const CurriculumListComponents = ({
         <h3 className="text-lg font-bold">จัดการหลักสูตร</h3>
 
         <div className="flex items-center gap-4">
-          <form className="relative">
-            <div className="text-neutral04 absolute top-1/2 left-2 -translate-y-1/2">
-              <SearchIcon className="h-5 w-5" />
-            </div>
-            <input
-              type="text"
-              placeholder="ค้นหา"
-              {...register("search")}
-              className="border-neutral04 text-h4 h-[44px] w-[280px] rounded-sm border pl-10"
-            />
-            <button
-              type="button"
-              onClick={() => reset({ search: "" })}
-              disabled={!watchedSearch}
-              className={`text-neutral05 absolute top-1/2 right-2 -translate-y-1/2 ${
-                !watchedSearch
-                  ? "cursor-not-allowed opacity-50"
-                  : "hover:text-primary01 cursor-pointer"
-              }`}
-            >
-              <CloseIcon fontSize="small" />
-            </button>
-          </form>
+          <RHFTextField
+            name="search"
+            control={control}
+            startIcon={<SearchIcon />}
+            endIcon={
+              watchedSearch ? (
+                <CloseIcon onClick={handleResetSearch} />
+              ) : (
+                <span style={{ width: "24px" }} />
+              )
+            }
+            placeholder="ค้นหาหลักสูตร (ปี)"
+            size="small"
+          />
 
-          <Button
-            onClick={handleClickAddClassBook}
-            variant="contained"
-            sx={{
-              backgroundColor: "var(--color-primary02)",
-              color: "var(--color-neutral01)",
-              px: 2,
-              height: "44px",
-              fontWeight: "bold",
-              display: "flex",
-              alignItems: "center",
-              gap: 1,
-              "&:hover": { backgroundColor: "var(--color-primary03)" },
-            }}
-          >
-            <AddIcon />
-            เพิ่มข้อมูลใหม่
-          </Button>
+          <Link href="/admin/curriculum/create">
+            <Button variant="contained">
+              <AddIcon />
+              เพิ่มข้อมูลใหม่
+            </Button>{" "}
+          </Link>
         </div>
       </div>
 
@@ -132,7 +97,7 @@ const CurriculumListComponents = ({
           {curriculums.map((curriculum) => (
             <AdminCard
               key={curriculum.id}
-              type= "curriculum"
+              type="curriculum"
               data={curriculum}
               onEdit={() =>
                 router.push(`/admin/curriculum/edit/${curriculum.id}`)
@@ -151,7 +116,7 @@ const CurriculumListComponents = ({
           shape="rounded"
           count={Math.ceil(totalRecords / pageSize)}
           page={page}
-          onChange={(_, currentPage) => handleNextPage(currentPage)}
+          // onChange={(_, currentPage) => handleNextPage(currentPage)}
           color="primary"
           size="large"
         />
