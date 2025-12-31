@@ -47,6 +47,13 @@ const CurriculumListComponents = ({
     reset({ search: "" });
   };
 
+  const handleNextPage = (currentPage: number) => {
+    const params = new URLSearchParams(searchParams.toString());
+    params.set("page", currentPage.toString());
+    const newSearch = params.toString();
+    router.push(`${pathname}?${newSearch}`);
+  };
+
   useEffect(() => {
     const delayDebounce = setTimeout(() => {
       const params = new URLSearchParams(searchParams.toString());
@@ -116,7 +123,7 @@ const CurriculumListComponents = ({
           shape="rounded"
           count={Math.ceil(totalRecords / pageSize)}
           page={page}
-          // onChange={(_, currentPage) => handleNextPage(currentPage)}
+          onChange={(_, currentPage) => handleNextPage(currentPage)}
           color="primary"
           size="large"
         />
