@@ -27,3 +27,14 @@ export interface QueryCourse {
   sortBy?: string,
   sortOrder?: "asc" | "desc";
 }
+
+export interface ICreateCourse {
+  courseId: string;
+  typeCourseId: number;
+  courseNameTh: string;
+  courseNameEn: string;
+  credits: string;
+  courseDetail: string;
+  prerequisites?: number[];
+  curriculumId: number;
+}

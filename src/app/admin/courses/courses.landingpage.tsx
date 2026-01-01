@@ -101,7 +101,7 @@ const CoursesLandingpage = ({
   };
 
   const handleClickAddCourse = () => {
-    router.push("/admin/courses/create");
+    router.push(`/admin/courses/create?curriculumId=${curriculumId}`);
   };
 
   const handleFilterTypeCourse = (event: SelectChangeEvent) => {
