@@ -189,23 +189,8 @@ const CoursesLandingpage = ({
             ))}
           </Select>
 
-          <Link
-            href={`/admin/courses/create?curriculumId=${curriculumId}`}
-          >
-            <Button
-              variant="contained"
-              sx={{
-                backgroundColor: "var(--color-primary02)",
-                color: "var(--color-neutral01)",
-                px: 2,
-                height: "44px",
-                fontWeight: "bold",
-                display: "flex",
-                alignItems: "center",
-                gap: 1,
-                "&:hover": { backgroundColor: "var(--color-primary03)" },
-              }}
-            >
+          <Link href={`/admin/courses/create?curriculumId=${curriculumId}`}>
+            <Button variant="contained">
               <AddIcon />
               เพิ่มรายวิชาใหม่
             </Button>
