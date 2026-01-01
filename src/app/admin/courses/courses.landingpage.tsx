@@ -19,6 +19,7 @@ import CourseTableComponents from "./courses.table.component";
 import { ICourse } from "@/core/domain/course";
 import { QueryCourse } from "@/core/domain/course";
 import { TypeCourse } from "@/core/domain/master-data";
+import Link from "next/link";
 
 interface CoursesLandingPageProps {
   courses: ICourse[];
@@ -98,10 +99,6 @@ const CoursesLandingpage = ({
     router.push(
       SearchCourseUrl({ sortBy: newSortBy, sortOrder: newSortOrder }),
     );
-  };
-
-  const handleClickAddCourse = () => {
-    router.push(`/admin/courses/create?curriculumId=${curriculumId}`);
   };
 
   const handleFilterTypeCourse = (event: SelectChangeEvent) => {
@@ -192,24 +189,27 @@ const CoursesLandingpage = ({
             ))}
           </Select>
 
-          <Button
-            onClick={handleClickAddCourse}
-            variant="contained"
-            sx={{
-              backgroundColor: "var(--color-primary02)",
-              color: "var(--color-neutral01)",
-              px: 2,
-              height: "44px",
-              fontWeight: "bold",
-              display: "flex",
-              alignItems: "center",
-              gap: 1,
-              "&:hover": { backgroundColor: "var(--color-primary03)" },
-            }}
+          <Link
+            href={`/admin/courses/create?curriculumId=${curriculumId}`}
           >
-            <AddIcon />
-            เพิ่มรายวิชาใหม่
-          </Button>
+            <Button
+              variant="contained"
+              sx={{
+                backgroundColor: "var(--color-primary02)",
+                color: "var(--color-neutral01)",
+                px: 2,
+                height: "44px",
+                fontWeight: "bold",
+                display: "flex",
+                alignItems: "center",
+                gap: 1,
+                "&:hover": { backgroundColor: "var(--color-primary03)" },
+              }}
+            >
+              <AddIcon />
+              เพิ่มรายวิชาใหม่
+            </Button>
+          </Link>
         </div>
       </div>
 
