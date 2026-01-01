@@ -209,10 +209,12 @@ export const CourseForm: FC<CoursesFormProps> = ({ apiBase, curriculumId }) => {
       <div className="mt-6">
         <div className="mb-4 flex flex-row items-center justify-between">
           <h3 className="text-primary01 font-bold">รายวิชาบังคับ</h3>
-          <AddCircleOutlineRoundedIcon
-            sx={{ fontSize: 32, color: "var(--color-primary03)", cursor: "pointer" }}
+          <IconButton
             onClick={() => append({ id: 0 })}
-          />
+            sx={{ color: "var(--color-primary03)" }}
+          >
+            <AddCircleOutlineRoundedIcon sx={{ fontSize: 32 }} />
+          </IconButton>
         </div>
 
         {fields.map((item, index) => (
