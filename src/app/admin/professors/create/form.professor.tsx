@@ -16,7 +16,6 @@ import { RHFTextField } from "@/components/form/RHFTextField";
 import { RHFSelect } from "@/components/form/RHFSelect";
 import MenuItem from "@mui/material/MenuItem";
 import { useFieldArray } from "react-hook-form";
-import { Controller } from "react-hook-form";
 
 interface FormProfessorsProps {
   apiBase: string;
@@ -44,7 +43,13 @@ const Schema = z.object({
     )
     .min(1, "กรุณาเพิ่มประวัติการศึกษา"),
   email: z.string().email("อีเมลไม่ถูกต้อง"),
-  expertFields: z.array(z.string()).min(1, "กรุณาเลือกสาขาความเชี่ยวชาญ"),
+  expertFields: z
+    .array(
+      z.object({
+        value: z.string().min(1, "กรุณากรอกสาขาที่เชี่ยวชาญ"),
+      }),
+    )
+    .min(1, "กรุณากรอกสาขาที่เชี่ยวชาญอย่างน้อย 1 รายการ"),
   firstNameEn: z.string().min(1, "กรุณากรอกชื่อภาษาอังกฤษ"),
   firstNameTh: z.string().min(1, "กรุณากรอกชื่อภาษาไทย"),
   lastNameEn: z.string().min(1, "กรุณากรอกนามสกุลภาษาอังกฤษ"),
@@ -101,7 +106,7 @@ export const FormProfesssors: FC<FormProfessorsProps> = ({ apiBase }) => {
         },
       ],
       email: "",
-      expertFields: [""],
+      expertFields: [{ value: "" }],
       firstNameEn: "",
       firstNameTh: "",
       lastNameEn: "",
@@ -119,6 +124,11 @@ export const FormProfesssors: FC<FormProfessorsProps> = ({ apiBase }) => {
     name: "education",
   });
 
+  const { fields: expertFields, append: appendExpert } = useFieldArray({
+    control,
+    name: "expertFields",
+  });
+
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0] || null;
     if (file) {
@@ -132,6 +142,10 @@ export const FormProfesssors: FC<FormProfessorsProps> = ({ apiBase }) => {
   const onSubmit = async (data: FormData) => {
     setIsError(false);
     try {
+      const payload = {
+        ...data,
+        expertFields: data.expertFields.map((e) => e.value),
+      };
       //   const reps = await classBookService.createClassBook(data, selectedFile!);
       //   if (!reps) {
       //     setIsError(true);
@@ -434,66 +448,41 @@ export const FormProfesssors: FC<FormProfessorsProps> = ({ apiBase }) => {
           ))}
         </div>
         <div className="mt-5">
-          <Controller
-            control={control}
-            name="expertFields"
-            render={({ field, fieldState }) => (
-              <>
-                <Typography variant="h6" fontWeight="bold">
-                  ข้อมูลเกี่ยวกับสาขา
-                </Typography>
-
-                <div
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "space-between",
-                    marginTop: "24px",
-                    marginBottom: "24px",
-                  }}
-                >
-                  <Typography variant="h6" fontWeight="bold">
-                    สาขาที่เชี่ยวชาญ
-                  </Typography>
-
-                  <IconButton
-                    color="primary"
-                    sx={{
-                      border: "1px solid #120554",
-                      color: "#120554",
-                      backgroundColor: "#fff",
-                      "&:hover": { backgroundColor: "#e3e8fd" },
-                    }}
-                    onClick={() => field.onChange([...field.value, ""])}
-                  >
-                    <AddIcon />
-                  </IconButton>
-                </div>
-
-                {field.value.map((value, index) => (
-                  <TextField
-                    key={index}
-                    fullWidth
-                    label="สาขาที่เชี่ยวชาญ"
-                    value={value}
-                    error={!!fieldState.error}
-                    onChange={(e) => {
-                      const next = [...field.value];
-                      next[index] = e.target.value;
-                      field.onChange(next);
-                    }}
-                    sx={{ mb: 2 }}
-                  />
-                ))}
-
-                {fieldState.error && (
-                  <Typography color="error" variant="caption">
-                    {fieldState.error.message}
-                  </Typography>
-                )}
-              </>
-            )}
-          />
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              marginTop: "12px",
+              marginBottom: "8px",
+            }}
+          >
+            <Typography variant="h6" fontWeight="bold">
+              สาขาที่เชี่ยวชาญ
+            </Typography>
+            <IconButton
+              color="primary"
+              sx={{
+                border: "1px solid #120554",
+                color: "#120554",
+                backgroundColor: "#fff",
+                "&:hover": { backgroundColor: "#e3e8fd" },
+              }}
+              onClick={() => appendExpert({ value: "" })}
+            >
+              <AddIcon />
+            </IconButton>
+          </div>
+          {expertFields.map((field, index) => (
+            <RHFTextField
+              key={field.id}
+              control={control}
+              name={`expertFields.${index}.value`}
+              label="สาขาที่เชี่ยวชาญ"
+              fullWidth
+              required
+            />
+          ))}
         </div>
       </div>
       <div className="flex flex-row justify-end gap-x-4">
