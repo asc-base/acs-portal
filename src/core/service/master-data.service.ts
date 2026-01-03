@@ -19,8 +19,16 @@ export class MasterDataService {
     return response.data;
   }
   async getMasterDataTypeCourse() {
-    const response =
-      await this.masterDataRepository.getMasterDataTypeCourse();
+    const response = await this.masterDataRepository.getMasterDataTypeCourse();
+    return response.data;
+  }
+  async getMajorpositions() {
+    const response = await this.masterDataRepository.getMajorpositions();
+    return response.data;
+  }
+
+  async getEducationLevel() {
+    const response = await this.masterDataRepository.getEducationLevel();
     return response.data;
   }
 }

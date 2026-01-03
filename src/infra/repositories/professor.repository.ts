@@ -1,5 +1,5 @@
 import { IProfessorRepository } from "@/core/ports/professor.repository";
-import { IProfessor , IUpdateProfessor } from "@/core/domain/professor";
+import { IProfessor, IUpdateProfessor } from "@/core/domain/professor";
 import { HttpHelper } from "@/lib/http";
 import { ApiResponse, Pageable } from "@/interface/response";
 import { QueryProfessor } from "@/core/domain/professor";
@@ -13,8 +13,10 @@ export class ProfessorRepository implements IProfessorRepository {
     this.http = new HttpHelper(this.baseUrl);
   }
 
-  async getProfessors(query: QueryProfessor): Promise<ApiResponse<Pageable<IProfessor>>> {
-        const {
+  async getProfessors(
+    query: QueryProfessor,
+  ): Promise<ApiResponse<Pageable<IProfessor>>> {
+    const {
       page,
       pageSize,
       educations,
@@ -27,7 +29,7 @@ export class ProfessorRepository implements IProfessorRepository {
     if (page !== undefined) params.append("page", page.toString());
     if (pageSize !== undefined) params.append("pageSize", pageSize.toString());
 
-        if (educations && educations.length > 0) {
+    if (educations && educations.length > 0) {
       params.append("educations", educations);
     }
     if (expertFields && expertFields.length > 0) {
@@ -39,19 +41,28 @@ export class ProfessorRepository implements IProfessorRepository {
     if (academicPosition && academicPosition.length > 0) {
       params.append("academicPosition", academicPosition);
     }
-        const queryString = params.toString() ? `?${params.toString()}` : "";
-        const url = `/v1/professors${queryString}`;
-        const response = await this.http.get<ApiResponse<Pageable<IProfessor>>>(url);
-        return response;
-      }
-
-  async getProfessorById(id: string): Promise<ApiResponse<IProfessor>> {
-    const response = await this.http.get<ApiResponse<IProfessor>>(`/v1/professors/${id}`);
+    const queryString = params.toString() ? `?${params.toString()}` : "";
+    const url = `/v1/professors${queryString}`;
+    const response =
+      await this.http.get<ApiResponse<Pageable<IProfessor>>>(url);
     return response;
   }
 
-  async updateProfessor(data : IUpdateProfessor , id: string): Promise<ApiResponse<IProfessor>> {
-    const response = await this.http.put<ApiResponse<IProfessor>>(`/v1/professors/${id}`,data);
+  async getProfessorById(id: string): Promise<ApiResponse<IProfessor>> {
+    const response = await this.http.get<ApiResponse<IProfessor>>(
+      `/v1/professors/${id}`,
+    );
+    return response;
+  }
+
+  async updateProfessor(
+    data: IUpdateProfessor,
+    id: string,
+  ): Promise<ApiResponse<IProfessor>> {
+    const response = await this.http.put<ApiResponse<IProfessor>>(
+      `/v1/professors/${id}`,
+      data,
+    );
     return response;
   }
 }
