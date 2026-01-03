@@ -1,10 +1,9 @@
 "use client";
-import React, { FC } from "react";
-import { Button, TextField, Typography, IconButton } from "@mui/material";
+import React, { FC, useState, useMemo, useEffect } from "react";
+import { Button, Typography, IconButton } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import AddIcon from "@mui/icons-material/Add";
-import { useState, useMemo, useEffect } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, useFieldArray } from "react-hook-form";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { MasterDataService } from "@/core/service/master-data.service";
@@ -15,7 +14,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { RHFTextField } from "@/components/form/RHFTextField";
 import { RHFSelect } from "@/components/form/RHFSelect";
 import MenuItem from "@mui/material/MenuItem";
-import { useFieldArray } from "react-hook-form";
 
 interface FormProfessorsProps {
   apiBase: string;
@@ -37,23 +35,23 @@ const Schema = z.object({
           .refine((v) => v !== null, {
             message: "กรุณากรอกระดับการศึกษา",
           }),
-        major: z.string().min(1, "กรุณากรอกชื่อวิชาเอก"),
-        university: z.string().min(1, "กรุณากรอกชื่อมหาวิทยาลัย"),
+        major: z.string().trim().min(1, "กรุณากรอกชื่อวิชาเอก"),
+        university: z.string().trim().min(1, "กรุณากรอกชื่อมหาวิทยาลัย"),
       }),
     )
     .min(1, "กรุณาเพิ่มประวัติการศึกษา"),
-  email: z.string().email("อีเมลไม่ถูกต้อง"),
+  email: z.string().trim().email("อีเมลไม่ถูกต้อง"),
   expertFields: z
     .array(
       z.object({
-        value: z.string().min(1, "กรุณากรอกสาขาที่เชี่ยวชาญ"),
+        value: z.string().trim().min(1, "กรุณากรอกสาขาที่เชี่ยวชาญ"),
       }),
     )
     .min(1, "กรุณากรอกสาขาที่เชี่ยวชาญอย่างน้อย 1 รายการ"),
-  firstNameEn: z.string().min(1, "กรุณากรอกชื่อภาษาอังกฤษ"),
-  firstNameTh: z.string().min(1, "กรุณากรอกชื่อภาษาไทย"),
-  lastNameEn: z.string().min(1, "กรุณากรอกนามสกุลภาษาอังกฤษ"),
-  lastNameTh: z.string().min(1, "กรุณากรอกนามสกุลภาษาไทย"),
+  firstNameEn: z.string().trim().min(1, "กรุณากรอกชื่อภาษาอังกฤษ"),
+  firstNameTh: z.string().trim().min(1, "กรุณากรอกชื่อภาษาไทย"),
+  lastNameEn: z.string().trim().min(1, "กรุณากรอกนามสกุลภาษาอังกฤษ"),
+  lastNameTh: z.string().trim().min(1, "กรุณากรอกนามสกุลภาษาไทย"),
   majorPositionId: z
     .number()
     .nullable()
@@ -62,6 +60,7 @@ const Schema = z.object({
     }),
   phone: z
     .string()
+    .trim()
     .min(9, "กรุณากรอกเบอร์โทร")
     .regex(/^[0-9]+$/, "เบอร์โทรต้องเป็นตัวเลขเท่านั้น"),
   profRoom: z.string().min(1, "กรุณากรอกชื่อห้อง"),
@@ -133,7 +132,6 @@ export const FormProfesssors: FC<FormProfessorsProps> = ({ apiBase }) => {
     const file = event.target.files?.[0] || null;
     if (file) {
       setSelectedFile(file);
-      console.log("Selected file:", file);
     } else {
       setSelectedFile(null);
     }
@@ -177,7 +175,7 @@ export const FormProfesssors: FC<FormProfessorsProps> = ({ apiBase }) => {
   }, [apiBase, masterDataService]);
 
   return (
-    <form className="space-y-4 p-8">
+    <form className="space-y-4 p-8" onSubmit={handleSubmit(onSubmit)}>
       <div>
         <Typography variant="h6" fontWeight="bold">
           ข้อมูลส่วนตัว
@@ -238,10 +236,7 @@ export const FormProfesssors: FC<FormProfessorsProps> = ({ apiBase }) => {
               />
             )}
           </div>
-          <div
-            className="flex flex-1 flex-col justify-between"
-            style={{ height: "176px" }}
-          >
+          <div className="flex h-[176px] flex-1 flex-col justify-between">
             <div className="flex flex-row gap-x-4">
               <div className="flex-2">
                 <RHFSelect
@@ -378,15 +373,7 @@ export const FormProfesssors: FC<FormProfessorsProps> = ({ apiBase }) => {
             </div>
           </div>
         </div>
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            marginTop: "12px",
-            marginBottom: "8px",
-          }}
-        >
+        <div className="mt-[12px] mb-[8px] flex items-center justify-between">
           <Typography variant="h6" fontWeight="bold">
             ประวัติการศึกษา
           </Typography>
@@ -448,15 +435,7 @@ export const FormProfesssors: FC<FormProfessorsProps> = ({ apiBase }) => {
           ))}
         </div>
         <div className="mt-5">
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-              marginTop: "12px",
-              marginBottom: "8px",
-            }}
-          >
+          <div className="mt-[12px] mb-[8px] flex items-center justify-between">
             <Typography variant="h6" fontWeight="bold">
               สาขาที่เชี่ยวชาญ
             </Typography>

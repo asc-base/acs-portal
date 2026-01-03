@@ -44,13 +44,12 @@ export interface QueryProfessor {
 
 export interface ICreateProfessor {
   academicPositionId: number;
-  education?: string[];
+  education?: IEducation[];
   email: string;
   expertFields?: string[];
   firstNameEn?: string;
   firstNameTh: string;
   image?: string;
-  isPassword: boolean;
   lastNameEn?: string;
   lastNameTh: string;
   majorPositionId: number;
