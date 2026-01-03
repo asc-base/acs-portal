@@ -78,6 +78,7 @@ const VisuallyHiddenInput = styled("input")({
 
 export const FormProfesssors: FC<FormProfessorsProps> = ({ apiBase }) => {
   const [majorPositions, setMajorPositions] = useState<Position[]>([]);
+  const [acadamicPositions, setAcadamicPositions] = useState<Position[]>([]);
   const [levelId, setLevelId] = useState<EducationLevel[]>([]);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isError, setIsError] = useState(false);
@@ -128,18 +129,6 @@ export const FormProfesssors: FC<FormProfessorsProps> = ({ apiBase }) => {
     }
   };
 
-  const [expertField, setExpertField] = useState<string[]>([""]);
-
-  const handleAddExpertField = () => {
-    setExpertField([...expertField, ""]);
-  };
-
-  const handleExpertChange = (index: number, value: string) => {
-    const updatedExpert = [...expertField];
-    updatedExpert[index] = value;
-    setExpertField(updatedExpert);
-  };
-
   const onSubmit = async (data: FormData) => {
     setIsError(false);
     try {
@@ -159,12 +148,15 @@ export const FormProfesssors: FC<FormProfessorsProps> = ({ apiBase }) => {
 
   useEffect(() => {
     const fetchData = async () => {
-      const [positionsRes, levelRes] = await Promise.all([
-        masterDataService.getMajorpositions(),
-        masterDataService.getEducationLevel(),
-      ]);
+      const [majorPositionsRes, acadamicPositionsRes, levelRes] =
+        await Promise.all([
+          masterDataService.getMajorpositions(),
+          masterDataService.getAcademicPosition(),
+          masterDataService.getEducationLevel(),
+        ]);
 
-      setMajorPositions(positionsRes);
+      setMajorPositions(majorPositionsRes);
+      setAcadamicPositions(acadamicPositionsRes);
       setLevelId(levelRes);
     };
     fetchData();
@@ -290,7 +282,7 @@ export const FormProfesssors: FC<FormProfessorsProps> = ({ apiBase }) => {
                   <MenuItem value="" disabled></MenuItem>
                   {majorPositions.map((position) => (
                     <MenuItem key={position.id} value={position.id}>
-                      {position.positionTh}
+                      {position.positionEn}
                     </MenuItem>
                   ))}
                 </RHFSelect>
@@ -345,14 +337,20 @@ export const FormProfesssors: FC<FormProfessorsProps> = ({ apiBase }) => {
           </div>
           <div className="flex flex-row gap-x-4">
             <div className="flex-4">
-              <RHFTextField
+              <RHFSelect
                 control={control}
                 name="academicPositionId"
                 label="ตำแหน่งในหลักสูตร"
-                variant="outlined"
                 fullWidth
                 required
-              />
+              >
+                <MenuItem value="" disabled />
+                {acadamicPositions.map((positon) => (
+                  <MenuItem key={positon.id} value={positon.id}>
+                    {positon.positionTh}
+                  </MenuItem>
+                ))}
+              </RHFSelect>
             </div>
             <div className="flex-4">
               <RHFTextField
@@ -393,8 +391,6 @@ export const FormProfesssors: FC<FormProfessorsProps> = ({ apiBase }) => {
             <AddIcon />
           </IconButton>
         </div>
-      </div>
-      <div>
         <div>
           {educationFields.map((field, index) => (
             <div key={field.id} className="flex flex-row gap-x-4">

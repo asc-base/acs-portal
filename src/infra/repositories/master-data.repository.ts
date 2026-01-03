@@ -58,4 +58,11 @@ export class MasterDataRepository implements IMasterDataRepository {
     );
     return response;
   }
+
+  async getAcademicPosition(): Promise<ApiResponse<Position[]>> {
+    const response = await this.http.get<ApiResponse<Position[]>>(
+      `/v1/master-data/academic-positions`,
+    );
+    return response;
+  }
 }

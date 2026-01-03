@@ -13,5 +13,6 @@ export interface IMasterDataRepository {
   getMasterDataListType(type: string): Promise<ApiResponse<IType[]>>;
   getMasterDataTypeCourse(): Promise<ApiResponse<TypeCourse[]>>;
   getMajorpositions(): Promise<ApiResponse<Position[]>>;
+  getAcademicPosition(): Promise<ApiResponse<Position[]>>;
   getEducationLevel(): Promise<ApiResponse<EducationLevel[]>>;
 }

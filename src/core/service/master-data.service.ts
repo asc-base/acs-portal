@@ -31,4 +31,9 @@ export class MasterDataService {
     const response = await this.masterDataRepository.getEducationLevel();
     return response.data;
   }
+
+  async getAcademicPosition() {
+    const response = await this.masterDataRepository.getAcademicPosition();
+    return response.data;
+  }
 }
