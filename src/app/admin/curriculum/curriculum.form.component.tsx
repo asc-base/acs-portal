@@ -83,7 +83,7 @@ export const CurriculumForm = ({ apiBase }: CurriculumFormProps) => {
       <h3 className="mb-6 font-bold">เพิ่มหลักสูตร</h3>
       <form className="space-y-4" onSubmit={handleSubmit(onSubmit)}>
         <div className="flex gap-x-10 gap-y-2">
-          <div className="bg-neutral02 border-neutral04 relative flex h-[284px] w-[590px] flex-col items-center justify-center overflow-hidden rounded-md">
+          <div className="bg-neutral02 border-neutral04 relative flex h-[248px] w-[200px] flex-col items-center justify-center overflow-hidden rounded-md">
             {selectedFile ? (
               <div className="group relative h-full w-full">
                 <Image
