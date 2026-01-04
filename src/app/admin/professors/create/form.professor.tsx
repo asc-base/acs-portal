@@ -55,6 +55,12 @@ const Schema = z.object({
             message: "กรอกมหาลัย",
             code: "custom",
           });
+        if (i.level === null)
+          ctx.addIssue({
+            path: [idx, "level"],
+            message: "กรอกระดับการศึกษา",
+            code: "custom",
+          });
       });
     }),
   email: z.string().trim().email("อีเมลไม่ถูกต้อง"),
@@ -248,10 +254,10 @@ export const FormProfesssors: FC<FormProfessorsProps> = ({ apiBase }) => {
           ข้อมูลส่วนตัว
         </Typography>
         <div className="mt-6 mb-16 flex flex-row items-center gap-x-8">
-          <div className="relative inline-block">
+          <div>
             <Button
               component="label"
-              className="flex h-41 w-41 min-w-0 items-center justify-center overflow-hidden p-0"
+              className="flex h-41 w-41 items-center justify-center overflow-hidden p-0"
               sx={{
                 width: "176px",
                 height: "176px",
@@ -312,8 +318,8 @@ export const FormProfesssors: FC<FormProfessorsProps> = ({ apiBase }) => {
                   variant="outlined"
                   fullWidth
                   required
+                  displayEmpty
                 >
-                  <MenuItem value="" disabled></MenuItem>
                   {majorPositions.map((position) => (
                     <MenuItem key={position.id} value={position.id}>
                       {position.positionTh}
@@ -330,6 +336,7 @@ export const FormProfesssors: FC<FormProfessorsProps> = ({ apiBase }) => {
                   variant="outlined"
                   fullWidth
                   required
+                  placeholder="ระบุชื่อ (ภาษาไทย)"
                 />
               </div>
 
@@ -341,6 +348,7 @@ export const FormProfesssors: FC<FormProfessorsProps> = ({ apiBase }) => {
                   variant="outlined"
                   fullWidth
                   required
+                  placeholder="ระบุนามสกุล (ภาษาไทย)"
                 />
               </div>
             </div>
@@ -353,8 +361,8 @@ export const FormProfesssors: FC<FormProfessorsProps> = ({ apiBase }) => {
                   variant="outlined"
                   fullWidth
                   required
+                  displayEmpty
                 >
-                  <MenuItem value="" disabled></MenuItem>
                   {majorPositions.map((position) => (
                     <MenuItem key={position.id} value={position.id}>
                       {position.positionEn}
@@ -370,6 +378,7 @@ export const FormProfesssors: FC<FormProfessorsProps> = ({ apiBase }) => {
                   label="ชื่อ (ภาษาอังกฤษ)"
                   variant="outlined"
                   fullWidth
+                  placeholder="ระบุชื่อ (ภาษาอังกฤษ)"
                 />
               </div>
 
@@ -380,6 +389,7 @@ export const FormProfesssors: FC<FormProfessorsProps> = ({ apiBase }) => {
                   label="นามสกุล (ภาษาอังกฤษ)"
                   variant="outlined"
                   fullWidth
+                  placeholder="ระบุนามสกุล (ภาษาอังกฤษ)"
                 />
               </div>
             </div>
@@ -395,6 +405,7 @@ export const FormProfesssors: FC<FormProfessorsProps> = ({ apiBase }) => {
                 variant="outlined"
                 fullWidth
                 required
+                placeholder="ระบุเบอร์โทร"
               />
             </div>
             <div className="flex-4">
@@ -405,6 +416,7 @@ export const FormProfesssors: FC<FormProfessorsProps> = ({ apiBase }) => {
                 variant="outlined"
                 fullWidth
                 required
+                placeholder="ระบุอีเมล"
               />
             </div>
           </div>
@@ -433,6 +445,7 @@ export const FormProfesssors: FC<FormProfessorsProps> = ({ apiBase }) => {
                 variant="outlined"
                 fullWidth
                 required
+                placeholder="ระบุห้องพักอาจารย์"
               />
             </div>
           </div>
@@ -458,7 +471,7 @@ export const FormProfesssors: FC<FormProfessorsProps> = ({ apiBase }) => {
         </div>
         <div>
           {educationFields.map((field, index) => (
-            <div key={field.id} className="flex flex-row gap-x-4">
+            <div key={field.id} className="mt-2 flex flex-row gap-x-4">
               <div className="flex-2">
                 <RHFSelect
                   control={control}
@@ -481,6 +494,7 @@ export const FormProfesssors: FC<FormProfessorsProps> = ({ apiBase }) => {
                   name={`education.${index}.education`}
                   label="วิชาเอก"
                   fullWidth
+                  placeholder="ระบุวิชาเอก"
                 />
               </div>
 
@@ -490,6 +504,7 @@ export const FormProfesssors: FC<FormProfessorsProps> = ({ apiBase }) => {
                   name={`education.${index}.university`}
                   label="มหาวิทยาลัย"
                   fullWidth
+                  placeholder="ระบุมหาวิทยาลัย"
                 />
               </div>
             </div>
@@ -513,19 +528,28 @@ export const FormProfesssors: FC<FormProfessorsProps> = ({ apiBase }) => {
               <AddIcon />
             </IconButton>
           </div>
-          {expertFields.map((field, index) => (
-            <RHFTextField
-              key={field.id}
-              control={control}
-              name={`expertFields.${index}.value`}
-              label="สาขาที่เชี่ยวชาญ"
-              fullWidth
-            />
-          ))}
+          {expertFields.map((field, index) => {
+            return (
+              <div className="mt-2" key={index}>
+                <RHFTextField
+                  key={field.id}
+                  control={control}
+                  name={`expertFields.${index}.value`}
+                  label="สาขาที่เชี่ยวชาญ"
+                  fullWidth
+                  placeholder="ระบุสาขาที่เชี่ยวชาญ"
+                />
+              </div>
+            );
+          })}
         </div>
       </div>
       <div className="flex flex-row justify-end gap-x-4">
-        <Button variant="outlined" size="large">
+        <Button
+          variant="outlined"
+          size="large"
+          onClick={() => router.push("/admin/professors")}
+        >
           ยกเลิก
         </Button>
         <Button
