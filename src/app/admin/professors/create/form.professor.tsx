@@ -319,6 +319,19 @@ export const FormProfesssors: FC<FormProfessorsProps> = ({ apiBase }) => {
                   fullWidth
                   required
                   displayEmpty
+                  renderValue={(value) => {
+                    if (!value) {
+                      return (
+                        <span style={{ color: "#9e9e9e" }}>
+                          ระบุตำแหน่ง (ภาษาไทย)
+                        </span>
+                      );
+                    }
+                    const selected = majorPositions.find(
+                      (item) => item.id === value,
+                    );
+                    return selected?.positionTh;
+                  }}
                 >
                   {majorPositions.map((position) => (
                     <MenuItem key={position.id} value={position.id}>
@@ -362,6 +375,19 @@ export const FormProfesssors: FC<FormProfessorsProps> = ({ apiBase }) => {
                   fullWidth
                   required
                   displayEmpty
+                  renderValue={(value) => {
+                    if (!value) {
+                      return (
+                        <span style={{ color: "#9e9e9e" }}>
+                          ระบุตำแหน่ง (ภาษาอังกฤษ)
+                        </span>
+                      );
+                    }
+                    const selected = majorPositions.find(
+                      (item) => item.id === value,
+                    );
+                    return selected?.positionEn;
+                  }}
                 >
                   {majorPositions.map((position) => (
                     <MenuItem key={position.id} value={position.id}>
@@ -428,6 +454,20 @@ export const FormProfesssors: FC<FormProfessorsProps> = ({ apiBase }) => {
                 label="ตำแหน่งในหลักสูตร"
                 fullWidth
                 required
+                displayEmpty
+                renderValue={(value) => {
+                  if (!value) {
+                    return (
+                      <span style={{ color: "#9e9e9e" }}>
+                        ระบุตำแหน่งในหลักสูตร
+                      </span>
+                    );
+                  }
+                  const selected = acadamicPositions.find(
+                    (item) => item.id === value,
+                  );
+                  return selected?.positionTh;
+                }}
               >
                 <MenuItem value="" disabled />
                 {acadamicPositions.map((positon) => (
@@ -478,6 +518,18 @@ export const FormProfesssors: FC<FormProfessorsProps> = ({ apiBase }) => {
                   name={`education.${index}.level`}
                   label="ระดับการศึกษา"
                   fullWidth
+                  displayEmpty
+                  renderValue={(value) => {
+                    if (!value) {
+                      return (
+                        <span style={{ color: "#9e9e9e" }}>
+                          ระบุระดับการศึกษา
+                        </span>
+                      );
+                    }
+                    const selected = levelId.find((item) => item.id === value);
+                    return selected?.level;
+                  }}
                 >
                   <MenuItem value="" disabled />
                   {levelId.map((level) => (
