@@ -9,7 +9,15 @@ export interface ICurriculum {
 export interface QueryCurriculum {
   page?: number;
   pageSize?: number;
-  search?: string,
+  search?: string;
   sortBy?: string;
   sortOrder?: "asc" | "desc";
+}
+
+export interface ICreateCurriculum {
+  year: string;
+  title: string;
+  fileUrl: string;
+  description: string;
+  image: File;
 }
