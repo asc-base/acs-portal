@@ -14,6 +14,9 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { RHFTextField } from "@/components/form/RHFTextField";
 import { RHFSelect } from "@/components/form/RHFSelect";
 import MenuItem from "@mui/material/MenuItem";
+import { ProfessorService } from "@/core/service/professor.service";
+import { ProfessorRepository } from "@/infra/repositories/professor.repository";
+import { ICreateProfessor } from "@/core/domain/professor";
 
 interface FormProfessorsProps {
   apiBase: string;
@@ -35,11 +38,11 @@ const Schema = z.object({
           .refine((v) => v !== null, {
             message: "กรุณากรอกระดับการศึกษา",
           }),
-        major: z.string().trim().min(1, "กรุณากรอกชื่อวิชาเอก"),
+        education: z.string().trim().min(1, "กรุณากรอกชื่อวิชาเอก"),
         university: z.string().trim().min(1, "กรุณากรอกชื่อมหาวิทยาลัย"),
       }),
     )
-    .min(1, "กรุณาเพิ่มประวัติการศึกษา"),
+    .optional(),
   email: z.string().trim().email("อีเมลไม่ถูกต้อง"),
   expertFields: z
     .array(
@@ -47,10 +50,10 @@ const Schema = z.object({
         value: z.string().trim().min(1, "กรุณากรอกสาขาที่เชี่ยวชาญ"),
       }),
     )
-    .min(1, "กรุณากรอกสาขาที่เชี่ยวชาญอย่างน้อย 1 รายการ"),
-  firstNameEn: z.string().trim().min(1, "กรุณากรอกชื่อภาษาอังกฤษ"),
+    .optional(),
+  firstNameEn: z.string().trim().min(1, "กรุณากรอกชื่อภาษาอังกฤษ").optional(),
   firstNameTh: z.string().trim().min(1, "กรุณากรอกชื่อภาษาไทย"),
-  lastNameEn: z.string().trim().min(1, "กรุณากรอกนามสกุลภาษาอังกฤษ"),
+  lastNameEn: z.string().trim().min(1, "กรุณากรอกนามสกุลภาษาอังกฤษ").optional(),
   lastNameTh: z.string().trim().min(1, "กรุณากรอกนามสกุลภาษาไทย"),
   majorPositionId: z
     .number()
@@ -93,6 +96,11 @@ export const FormProfesssors: FC<FormProfessorsProps> = ({ apiBase }) => {
     return new MasterDataService(masterdataRepository);
   }, [apiBase]);
 
+  const professorService = useMemo(() => {
+    const professorRepository = new ProfessorRepository(apiBase);
+    return new ProfessorService(professorRepository);
+  }, [apiBase]);
+
   const { control, handleSubmit } = useForm<FormData>({
     resolver: zodResolver(Schema),
     defaultValues: {
@@ -100,7 +108,7 @@ export const FormProfesssors: FC<FormProfessorsProps> = ({ apiBase }) => {
       education: [
         {
           level: null,
-          major: "",
+          education: "",
           university: "",
         },
       ],
@@ -140,18 +148,35 @@ export const FormProfesssors: FC<FormProfessorsProps> = ({ apiBase }) => {
   const onSubmit = async (data: FormData) => {
     setIsError(false);
     try {
-      const payload = {
-        ...data,
-        expertFields: data.expertFields.map((e) => e.value),
+      const payload: ICreateProfessor = {
+        academicPositionId: data.academicPositionId!,
+        majorPositionId: data.majorPositionId!,
+        firstNameTh: data.firstNameTh,
+        lastNameTh: data.lastNameTh,
+        firstNameEn: data.firstNameEn,
+        lastNameEn: data.lastNameEn,
+        email: data.email,
+        phone: data.phone,
+        profRoom: data.profRoom,
+
+        expertFields: data.expertFields?.map((e) => e.value),
+
+        education: data.education?.map((e) => ({
+          level: e.level!,
+          education: e.education,
+          university: e.university,
+        })),
       };
-      //   const reps = await classBookService.createClassBook(data, selectedFile!);
-      //   if (!reps) {
-      //     setIsError(true);
-      //     return;
-      //   }
-      //   router.push(
-      //     `/admin/students?page=1&pageSize=10&classBookId=${reps.data.id}&search=&sortBy=studentId&sortOrder=desc`,
-      //   );
+
+      const reps = await professorService.createProfessor(
+        payload,
+        selectedFile!,
+      );
+      if (!reps) {
+        setIsError(true);
+        return;
+      }
+      router.push(`/admin/professors`);
     } catch (error) {
       console.error(error);
       setIsError(true);
@@ -304,7 +329,6 @@ export const FormProfesssors: FC<FormProfessorsProps> = ({ apiBase }) => {
                   label="ชื่อ (ภาษาอังกฤษ)"
                   variant="outlined"
                   fullWidth
-                  required
                 />
               </div>
 
@@ -315,7 +339,6 @@ export const FormProfesssors: FC<FormProfessorsProps> = ({ apiBase }) => {
                   label="นามสกุล (ภาษาอังกฤษ)"
                   variant="outlined"
                   fullWidth
-                  required
                 />
               </div>
             </div>
@@ -380,7 +403,7 @@ export const FormProfesssors: FC<FormProfessorsProps> = ({ apiBase }) => {
           <IconButton
             color="primary"
             onClick={() =>
-              appendEducation({ level: null, major: "", university: "" })
+              appendEducation({ level: null, education: "", university: "" })
             }
             sx={{
               border: "1px solid #120554",
@@ -401,7 +424,6 @@ export const FormProfesssors: FC<FormProfessorsProps> = ({ apiBase }) => {
                   name={`education.${index}.level`}
                   label="ระดับการศึกษา"
                   fullWidth
-                  required
                 >
                   <MenuItem value="" disabled />
                   {levelId.map((level) => (
@@ -415,10 +437,9 @@ export const FormProfesssors: FC<FormProfessorsProps> = ({ apiBase }) => {
               <div className="flex-2">
                 <RHFTextField
                   control={control}
-                  name={`education.${index}.major`}
+                  name={`education.${index}.education`}
                   label="วิชาเอก"
                   fullWidth
-                  required
                 />
               </div>
 
@@ -428,7 +449,6 @@ export const FormProfesssors: FC<FormProfessorsProps> = ({ apiBase }) => {
                   name={`education.${index}.university`}
                   label="มหาวิทยาลัย"
                   fullWidth
-                  required
                 />
               </div>
             </div>
@@ -459,7 +479,6 @@ export const FormProfesssors: FC<FormProfessorsProps> = ({ apiBase }) => {
               name={`expertFields.${index}.value`}
               label="สาขาที่เชี่ยวชาญ"
               fullWidth
-              required
             />
           ))}
         </div>

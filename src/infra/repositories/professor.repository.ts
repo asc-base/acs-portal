@@ -65,4 +65,12 @@ export class ProfessorRepository implements IProfessorRepository {
     );
     return response;
   }
+
+  async createProfessor(data: FormData): Promise<ApiResponse<IProfessor>> {
+    const response = await this.http.post<ApiResponse<IProfessor>>(
+      `/v2/professors`,
+      data,
+    );
+    return response;
+  }
 }

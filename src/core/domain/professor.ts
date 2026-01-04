@@ -44,7 +44,7 @@ export interface QueryProfessor {
 
 export interface ICreateProfessor {
   academicPositionId: number;
-  education?: IEducation[];
+  education?: INewEducation[];
   email: string;
   expertFields?: string[];
   firstNameEn?: string;
