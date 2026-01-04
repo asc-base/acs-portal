@@ -17,6 +17,8 @@ import MenuItem from "@mui/material/MenuItem";
 import { ProfessorService } from "@/core/service/professor.service";
 import { ProfessorRepository } from "@/infra/repositories/professor.repository";
 import { ICreateProfessor } from "@/core/domain/professor";
+import Snackbar from "@mui/material/Snackbar";
+import Alert from "@mui/material/Alert";
 
 interface FormProfessorsProps {
   apiBase: string;
@@ -32,28 +34,50 @@ const Schema = z.object({
   education: z
     .array(
       z.object({
-        level: z
-          .number()
-          .nullable()
-          .refine((v) => v !== null, {
-            message: "กรุณากรอกระดับการศึกษา",
-          }),
-        education: z.string().trim().min(1, "กรุณากรอกชื่อวิชาเอก"),
-        university: z.string().trim().min(1, "กรุณากรอกชื่อมหาวิทยาลัย"),
+        level: z.number().nullable(),
+        education: z.string().trim(),
+        university: z.string().trim(),
       }),
     )
-    .optional(),
+    .optional()
+    .superRefine((items, ctx) => {
+      items?.forEach((i, idx) => {
+        if (i.level === null && !i.education && !i.university) return;
+        if (!i.education)
+          ctx.addIssue({
+            path: [idx, "education"],
+            message: "กรอกวิชาเอก",
+            code: "custom",
+          });
+        if (!i.university)
+          ctx.addIssue({
+            path: [idx, "university"],
+            message: "กรอกมหาลัย",
+            code: "custom",
+          });
+      });
+    }),
   email: z.string().trim().email("อีเมลไม่ถูกต้อง"),
   expertFields: z
     .array(
       z.object({
-        value: z.string().trim().min(1, "กรุณากรอกสาขาที่เชี่ยวชาญ"),
+        value: z.string().trim(),
       }),
     )
     .optional(),
-  firstNameEn: z.string().trim().min(1, "กรุณากรอกชื่อภาษาอังกฤษ").optional(),
+  firstNameEn: z
+    .string()
+    .trim()
+    .min(1, "กรุณากรอกชื่อภาษาอังกฤษ")
+    .optional()
+    .or(z.literal("")),
   firstNameTh: z.string().trim().min(1, "กรุณากรอกชื่อภาษาไทย"),
-  lastNameEn: z.string().trim().min(1, "กรุณากรอกนามสกุลภาษาอังกฤษ").optional(),
+  lastNameEn: z
+    .string()
+    .trim()
+    .min(1, "กรุณากรอกนามสกุลภาษาอังกฤษ")
+    .optional()
+    .or(z.literal("")),
   lastNameTh: z.string().trim().min(1, "กรุณากรอกนามสกุลภาษาไทย"),
   majorPositionId: z
     .number()
@@ -101,7 +125,11 @@ export const FormProfesssors: FC<FormProfessorsProps> = ({ apiBase }) => {
     return new ProfessorService(professorRepository);
   }, [apiBase]);
 
-  const { control, handleSubmit } = useForm<FormData>({
+  const {
+    control,
+    handleSubmit,
+    formState: { isValid },
+  } = useForm<FormData>({
     resolver: zodResolver(Schema),
     defaultValues: {
       academicPositionId: null,
@@ -201,6 +229,20 @@ export const FormProfesssors: FC<FormProfessorsProps> = ({ apiBase }) => {
 
   return (
     <form className="space-y-4 p-8" onSubmit={handleSubmit(onSubmit)}>
+      <Snackbar
+        anchorOrigin={{ vertical: "top", horizontal: "right" }}
+        open={isError}
+        autoHideDuration={4000}
+        onClose={() => setIsError(false)}
+      >
+        <Alert
+          severity="error"
+          onClose={() => setIsError(false)}
+          sx={{ width: "100%" }}
+        >
+          ไม่สามารถเพิ่มข้อมูลอาจารย์ได้
+        </Alert>
+      </Snackbar>
       <div>
         <Typography variant="h6" fontWeight="bold">
           ข้อมูลส่วนตัว
@@ -209,9 +251,8 @@ export const FormProfesssors: FC<FormProfessorsProps> = ({ apiBase }) => {
           <div className="relative inline-block">
             <Button
               component="label"
-              className="flex h-41 w-41 min-w-0 items-center justify-center overflow-hidden rounded-full p-0"
+              className="flex h-41 w-41 min-w-0 items-center justify-center overflow-hidden p-0"
               sx={{
-                borderRadius: "50%",
                 width: "176px",
                 height: "176px",
                 padding: 0,
@@ -256,7 +297,7 @@ export const FormProfesssors: FC<FormProfessorsProps> = ({ apiBase }) => {
                 width={40}
                 height={40}
                 style={{ width: "auto", height: "auto" }}
-                className="bg-neutral02 absolute right-2 bottom-0 rounded-full p-2"
+                className="bg-neutral02 absolute right-2 bottom-0 p-2"
                 priority
               />
             )}
@@ -455,7 +496,7 @@ export const FormProfesssors: FC<FormProfessorsProps> = ({ apiBase }) => {
           ))}
         </div>
         <div className="mt-5">
-          <div className="mt-[12px] mb-[8px] flex items-center justify-between">
+          <div className="mb-[8px] flex items-center justify-between">
             <Typography variant="h6" fontWeight="bold">
               สาขาที่เชี่ยวชาญ
             </Typography>
@@ -487,7 +528,12 @@ export const FormProfesssors: FC<FormProfessorsProps> = ({ apiBase }) => {
         <Button variant="outlined" size="large">
           ยกเลิก
         </Button>
-        <Button type="submit" variant="contained" size="large">
+        <Button
+          type="submit"
+          variant="contained"
+          size="large"
+          disabled={!isValid}
+        >
           บันทึกข้อมูล
         </Button>
       </div>
