@@ -6,6 +6,7 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
+import dayjs from "dayjs";
 import { CurriculumRepository } from "@/infra/repositories/curriculum.repository";
 import { CurriculumService } from "@/core/service/curriculum.service";
 import { styled } from "@mui/material/styles";
@@ -20,7 +21,7 @@ const Schema = z.object({
   image: z.instanceof(File, { message: "กรุณาอัปโหลดรูปภาพ" }),
   title: z.string().min(1, "กรุณาระบุชื่อหลักสูตร"),
   year: z.string().min(1, "กรุณาระบุปีการศึกษา"),
-  fileUrl: z.string().url("กรุณาระบุลิงก์ที่ถูกต้อง"),
+  fileUrl: z.url({ message: "กรุณาระบุลิงก์ที่ถูกต้อง" }),
   description: z.string().min(1, "กรุณาระบุรายละเอียด"),
 });
 
@@ -64,14 +65,11 @@ export const CurriculumForm = ({ apiBase }: CurriculumFormProps) => {
 
   const onSubmit = async (data: FormValues) => {
     try {
-      const formData = new FormData();
-      formData.append("image", data.image);
-      formData.append("title", data.title);
-      formData.append("year", data.year);
-      formData.append("fileUrl", data.fileUrl);
-      formData.append("description", data.description);
-
-      const response = await curriculumService.createCurriculum(formData);
+      const year = dayjs(data.year).year().toString();
+      const response = await curriculumService.createCurriculum({
+        ...data,
+        year,
+      });
       if (response) {
         router.push(`/admin/curriculum`);
       }
@@ -131,6 +129,13 @@ export const CurriculumForm = ({ apiBase }: CurriculumFormProps) => {
               label="ปี"
               views={["year"]}
               openTo="year"
+            />
+            <RHFTextField
+              control={control}
+              name="fileUrl"
+              label="ลิงก์ไฟล์หลักสูตร (Google Drive หรือ OneDrive)"
+              variant="outlined"
+              size="small"
             />
           </div>
         </div>
