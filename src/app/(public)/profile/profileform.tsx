@@ -360,7 +360,7 @@ const ProfileForm = () => {
         </div>
 
         {/* Section 3: Projects */}
-        <div className="mt-6 flex flex-row items-center justify-between">
+        {/* <div className="mt-6 flex flex-row items-center justify-between">
           <h3 className="text-primary01 mb-4 font-bold">โปรเจกต์อื่นๆ</h3>
           <AddCircleOutlineRoundedIcon
             sx={{ fontSize: 36, color: "primary.main", cursor: "pointer" }}
@@ -388,7 +388,7 @@ const ProfileForm = () => {
               />
             </div>
           </div>
-        ))}
+        ))} */}
 
         <div className="mt-6 flex w-full flex-row justify-center gap-x-4 align-bottom md:justify-end">
           <Button
