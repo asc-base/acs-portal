@@ -102,7 +102,7 @@ const ProfileForm = () => {
             <div className="relative inline-block">
               <Button
                 component="label"
-                className="flex h-41 w-41 min-w-0 items-center justify-center overflow-hidden rounded-2xl p-0"
+                className="group relative flex items-center justify-center overflow-hidden rounded-2xl p-0"
                 sx={{
                   borderRadius: "16px",
                   width: "176px",
@@ -113,32 +113,34 @@ const ProfileForm = () => {
                   "&:hover": { backgroundColor: "#E2E2E2" },
                 }}
               >
-                {selectedFile ? (
+                {(selectedFile || studentData?.user?.imageUrl) && (
                   <Image
-                    src={URL.createObjectURL(selectedFile)}
-                    alt="Preview"
-                    width={300}
-                    height={300}
-                    className="h-full w-full object-cover"
-                  />
-                ) : studentData?.user?.imageUrl ? (
-                  <Image
-                    src={studentData.user.imageUrl}
+                    src={
+                      selectedFile
+                        ? URL.createObjectURL(selectedFile)
+                        : studentData?.user?.imageUrl!
+                    }
                     alt="Profile"
                     width={300}
                     height={300}
-                    className="h-full w-full object-cover"
-                  />
-                ) : (
-                  <Image
-                    alt="Upload"
-                    src="/uploadimage.png"
-                    width={70}
-                    height={70}
-                    style={{ width: "auto", height: "auto" }}
-                    priority
+                    className="h-full w-full object-cover transition-opacity"
                   />
                 )}
+                <div
+                  className={`flex items-center justify-center
+                    ${
+                      selectedFile || studentData?.user?.imageUrl
+                        ? "absolute inset-0 z-10 h-full w-full bg-black/40 opacity-0 transition-opacity duration-300 hover:opacity-100"
+                        : "relative h-full w-full opacity-100"
+                    }
+                  `}
+                >
+                  <div className="flex items-center justify-center rounded-lg border border-gray-300 bg-white/70 px-6 py-3 shadow-sm backdrop-blur-sm">
+                    <span className="text-base font-medium text-gray-700">
+                      อัปโหลดรูปภาพ
+                    </span>
+                  </div>
+                </div>
                 <VisuallyHiddenInput
                   type="file"
                   accept="image/*"
