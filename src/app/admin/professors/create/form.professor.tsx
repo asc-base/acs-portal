@@ -219,16 +219,10 @@ export const FormProfesssors: FC<FormProfessorsProps> = ({ apiBase }) => {
 
   useEffect(() => {
     const fetchData = async () => {
-      const [majorPositionsRes, acadamicPositionsRes, levelRes] =
-        await Promise.all([
-          masterDataService.getMajorpositions(),
-          masterDataService.getAcademicPosition(),
-          masterDataService.getEducationLevel(),
-        ]);
-
-      setMajorPositions(majorPositionsRes);
-      setAcadamicPositions(acadamicPositionsRes);
-      setLevelId(levelRes);
+      const res = await masterDataService.getMasterData();
+      setMajorPositions(res.majorPositions);
+      setAcadamicPositions(res.academicPositions);
+      setLevelId(res.educationLevels);
     };
     fetchData();
   }, [apiBase, masterDataService]);
