@@ -1,4 +1,4 @@
-import { MasterData, IType ,TypeCourse} from "../domain/master-data";
+import { MasterData, IType, TypeCourse } from "../domain/master-data";
 import { ApiResponse } from "@/interface/response";
 
 export interface IMasterDataRepository {
