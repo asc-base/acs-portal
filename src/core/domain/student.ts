@@ -22,3 +22,13 @@ export interface QueryStudent
     sortBy?: string,
     sortOrder?: "asc" | "desc";
 }
+
+export interface ICreateStudent {
+    studentId: string;
+    email: string;
+    firstNameTh: string;
+    lastNameTh: string;
+    firstNameEn: string;
+    lastNameEn: string;
+    nickName?: string;
+}

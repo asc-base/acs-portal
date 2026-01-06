@@ -1,5 +1,5 @@
 import { IStudentRepository } from "@/core/ports/student.repository";
-import { IStudent, QueryStudent } from "@/core/domain/student";
+import { IStudent, QueryStudent,ICreateStudent } from "@/core/domain/student";
 import { HttpHelper } from "@/lib/http";
 import { ApiResponse, Pageable } from "@/interface/response";
 
@@ -40,6 +40,13 @@ export class StudentRepository implements IStudentRepository {
   async getStudentByUserId(id: number): Promise<ApiResponse<IStudent>> {
     const response = await this.http.get<ApiResponse<IStudent>>(
       `/v1/students/by-user?userId=${id}`,
+    );
+    return response;
+  }
+
+  async createStudent(data: ICreateStudent[] , classBookId :number): Promise<ApiResponse<IStudent[]>> {
+    const response = await this.http.post<ApiResponse<IStudent[]>>(
+      `/v2/students?classBookId=${classBookId}`,data
     );
     return response;
   }
