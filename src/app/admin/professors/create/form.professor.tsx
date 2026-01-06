@@ -20,7 +20,6 @@ import { RHFTextField } from "@/components/form/RHFTextField";
 import { RHFSelect } from "@/components/form/RHFSelect";
 import { ICreateProfessor } from "@/core/domain/professor";
 import { ConfirmModal } from "@/components/modal/confirmModal";
-import { SuccessModal } from "@/components/modal/success";
 
 interface FormProfessorsProps {
   apiBase: string;
@@ -623,10 +622,14 @@ export const FormProfesssors: FC<FormProfessorsProps> = ({ apiBase }) => {
         type="warning"
         confirmText="บันทึก"
       />
-      <SuccessModal
+      <ConfirmModal
         open={openSucsessModal}
         onClose={() => setOpenSucsessModal(false)}
-        path="professors"
+        title="บันทึกข้อมูลสำเร็จ"
+        description="ข้อมูลถูกจัดเก็บในระบบแล้ว"
+        type="success"
+        onConfirm={() => router.push("/admin/professors")}
+        confirmText="กลับสู่หน้าหลัก"
       />
     </form>
   );

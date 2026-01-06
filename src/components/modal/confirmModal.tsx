@@ -83,9 +83,11 @@ export const ConfirmModal: FC<ConfirmModalProps> = (props) => {
             </h2>
           </div>
           <div className="flex w-full justify-center gap-x-4">
-            <Button variant="outlined" onClick={onClose} className="w-full">
-              {cancelText ?? "ยกเลิก"}
-            </Button>
+            {type !== "success" && (
+              <Button variant="outlined" onClick={onClose} className="w-full">
+                {cancelText ?? "ยกเลิก"}
+              </Button>
+            )}
             <Button
               className="w-full"
               variant="contained"
