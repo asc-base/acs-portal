@@ -1,8 +1,9 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import { Button, TextField, InputAdornment } from "@mui/material";
+import { Button, InputAdornment } from "@mui/material";
+import { RHFTextField } from "@/components/form/RHFTextField";
 import { styled } from "@mui/material/styles";
-import AddCircleOutlineRoundedIcon from "@mui/icons-material/AddCircleOutlineRounded";
+// import AddCircleOutlineRoundedIcon from "@mui/icons-material/AddCircleOutlineRounded";
 import GitHubIcon from "@mui/icons-material/GitHub";
 import FacebookRoundedIcon from "@mui/icons-material/FacebookRounded";
 import LinkedInIcon from "@mui/icons-material/LinkedIn";
@@ -87,7 +88,12 @@ const ProfileForm = () => {
   return (
     <div className="w-full flex-col px-20 py-6">
       <h2 className="text-primary01 mb-4 font-bold">แก้ไขโปรไฟล์</h2>
-      <h3 className="text-primary01 font-bold">ข้อมูลส่วนตัว</h3>
+      <h3 className="text-primary01 font-bold text-xl">
+        ข้อมูลส่วนตัว
+        <span className="text-red-500 text-sm font-bold ml-2">
+          (หากต้องการแก้ไขติดต่อแอดมิน)
+        </span>
+      </h3>
       <form onSubmit={handleSubmit(onSubmit)}>
         {/* Section 1 */}
         <div className="flex flex-col items-center gap-x-10 md:flex-row">
@@ -96,9 +102,9 @@ const ProfileForm = () => {
             <div className="relative inline-block">
               <Button
                 component="label"
-                className="flex h-41 w-41 min-w-0 items-center justify-center overflow-hidden rounded-full p-0"
+                className="group relative flex items-center justify-center overflow-hidden rounded-2xl p-0"
                 sx={{
-                  borderRadius: "50%",
+                  borderRadius: "16px",
                   width: "176px",
                   height: "176px",
                   padding: 0,
@@ -107,30 +113,34 @@ const ProfileForm = () => {
                   "&:hover": { backgroundColor: "#E2E2E2" },
                 }}
               >
-                {selectedFile ? (
+                {(selectedFile || studentData?.user?.imageUrl) && (
                   <Image
-                    src={URL.createObjectURL(selectedFile)}
-                    alt="Preview"
-                    width={300}
-                    height={300}
-                  />
-                ) : studentData?.user?.imageUrl !== "" ? (
-                  <Image
-                    src={studentData?.user?.imageUrl || ""}
+                    src={
+                      selectedFile
+                        ? URL.createObjectURL(selectedFile)
+                        : studentData?.user?.imageUrl!
+                    }
                     alt="Profile"
                     width={300}
                     height={300}
-                  />
-                ) : (
-                  <Image
-                    alt="Upload"
-                    src="/uploadimage.png"
-                    width={70}
-                    height={70}
-                    style={{ width: "auto", height: "auto" }}
-                    priority
+                    className="h-full w-full object-cover transition-opacity"
                   />
                 )}
+                <div
+                  className={`flex items-center justify-center
+                    ${
+                      selectedFile || studentData?.user?.imageUrl
+                        ? "absolute inset-0 z-10 h-full w-full bg-black/40 opacity-0 transition-opacity duration-300 hover:opacity-100"
+                        : "relative h-full w-full opacity-100"
+                    }
+                  `}
+                >
+                  <div className="flex items-center justify-center rounded-lg border border-gray-300 bg-white/70 px-6 py-3 shadow-sm backdrop-blur-sm">
+                    <span className="text-base font-medium text-gray-700">
+                      อัปโหลดรูปภาพ
+                    </span>
+                  </div>
+                </div>
                 <VisuallyHiddenInput
                   type="file"
                   accept="image/*"
@@ -139,59 +149,40 @@ const ProfileForm = () => {
               </Button>
             </div>
           </div>
-
           {/* Personal Info */}
-          <div className="text-neutral04 flex w-full flex-col gap-4">
-            <div className="flex flex-col gap-4 md:flex-row">
-              <div className="md:w-1/2">
-                <h4>รหัสนักศึกษา</h4>
-                <TextField
-                  value={studentData?.studentId}
-                  disabled
-                  fullWidth
-                  className="bg-neutral02"
-                />
-                <h6 className="text-xs text-gray-500">
-                  *ต้องการแก้ไขติดต่อแอดมิน
-                </h6>
+          <div className="text-neutral04 w-full">
+            <div className="grid grid-cols-[1fr_auto_1fr] gap-y-6 text-base md:grid-cols-[max-content_24px_1fr]">
+              
+              {/* Row 1: Student ID */}
+              <div className="text-gray-500">รหัสนักศึกษา</div>
+              <div className="text-center">:</div>
+              <div className="font-bold text-neutral-800">
+                {studentData?.studentId || "6009050401"}
               </div>
-              <div className="md:w-1/2">
-                <h4>ชื่อเล่น</h4>
-                <TextField
-                  value={nickName}
-                  disabled
-                  fullWidth
-                  className="bg-neutral02"
-                />
-                <h6 className="text-xs text-gray-500">
-                  *ต้องการแก้ไขติดต่อแอดมิน
-                </h6>
+
+              {/* Row 2: Nickname */}
+              <div className="text-gray-500">ชื่อเล่น</div>
+              <div className="text-center">:</div>
+              <div className="font-bold text-neutral-800">
+                {nickName || "ก้องภพ"}
               </div>
-            </div>
-            <div className="flex flex-col gap-4 md:flex-row">
-              <div className="md:w-1/2">
-                <h4>ชื่อ - นามสกุล (ภาษาไทย)</h4>
-                <TextField
-                  value={`${firstNameTh} ${lastNameTh}`}
-                  disabled
-                  fullWidth
-                  className="bg-neutral02"
-                />
-                <h6 className="text-xs text-gray-500">
-                  *ต้องการแก้ไขติดต่อแอดมิน
-                </h6>
+
+              {/* Row 3: Full Name TH */}
+              <div className="text-gray-500">ชื่อ - นามสกุล (ภาษาไทย)</div>
+              <div className="text-center">:</div>
+              <div className="font-bold text-neutral-800">
+                {studentData?.user
+                  ? `${firstNameTh} ${lastNameTh}`.trim()
+                  : "สมชาย ใจดี"}
               </div>
-              <div className="md:w-1/2">
-                <h4>ชื่อ - นามสกุล (ภาษาอังกฤษ)</h4>
-                <TextField
-                  value={`${firstNameEn} ${lastNameEn}`}
-                  disabled
-                  fullWidth
-                  className="bg-neutral02"
-                />
-                <h6 className="text-xs text-gray-500">
-                  *ต้องการแก้ไขติดต่อแอดมิน
-                </h6>
+
+              {/* Row 4: Full Name EN */}
+              <div className="text-gray-500">ชื่อ - นามสกุล (ภาษาอังกฤษ)</div>
+              <div className="text-center">:</div>
+              <div className="font-bold text-neutral-800">
+                {studentData?.user
+                  ? `${firstNameEn} ${lastNameEn}`.trim()
+                  : "Somchai Jaidee"}
               </div>
             </div>
           </div>
@@ -202,78 +193,68 @@ const ProfileForm = () => {
           <div className="flex flex-col gap-4 md:flex-row">
             <div className="group md:w-1/2">
               <h4 className="group-focus-within:text-primary03">Github</h4>
-              <Controller
+              <RHFTextField
                 name="github"
                 control={control}
-                render={({ field }) => (
-                  <TextField
-                    {...field}
-                    placeholder="http://github.com/"
-                    fullWidth
-                    variant="outlined"
-                    sx={{
-                      "& .MuiOutlinedInput-root": {
-                        "& fieldset": {
-                          borderColor: "neutral03",
-                        },
-                        "&.Mui-focused fieldset": {
-                          borderColor: "primary03",
-                        },
-                      },
-                      "& .MuiOutlinedInput-root.Mui-focused .MuiInputAdornment-root .MuiSvgIcon-root":
-                        {
-                          color: "primary.main",
-                        },
-                    }}
-                    slotProps={{
-                      input: {
-                        startAdornment: (
-                          <InputAdornment position="start">
-                            <GitHubIcon />
-                          </InputAdornment>
-                        ),
-                      },
-                    }}
-                  />
-                )}
+                placeholder="http://github.com/"
+                fullWidth
+                variant="outlined"
+                sx={{
+                  "& .MuiOutlinedInput-root": {
+                    "& fieldset": {
+                      borderColor: "neutral03",
+                    },
+                    "&.Mui-focused fieldset": {
+                      borderColor: "primary03",
+                    },
+                  },
+                  "& .MuiOutlinedInput-root.Mui-focused .MuiInputAdornment-root .MuiSvgIcon-root":
+                    {
+                      color: "primary.main",
+                    },
+                }}
+                slotProps={{
+                  input: {
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <GitHubIcon />
+                      </InputAdornment>
+                    ),
+                  },
+                }}
               />
             </div>
             <div className="group md:w-1/2">
               <h4 className="group-focus-within:text-primary03">LinkIn</h4>
-              <Controller
+              <RHFTextField
                 name="linkin"
                 control={control}
-                render={({ field }) => (
-                  <TextField
-                    {...field}
-                    placeholder="https://www.linkin.com/in/"
-                    fullWidth
-                    variant="outlined"
-                    sx={{
-                      "& .MuiOutlinedInput-root": {
-                        "& fieldset": {
-                          borderColor: "neutral03",
-                        },
-                        "&.Mui-focused fieldset": {
-                          borderColor: "primary03",
-                        },
-                      },
-                      "& .MuiOutlinedInput-root.Mui-focused .MuiInputAdornment-root .MuiSvgIcon-root":
-                        {
-                          color: "primary.main",
-                        },
-                    }}
-                    slotProps={{
-                      input: {
-                        startAdornment: (
-                          <InputAdornment position="start">
-                            <LinkedInIcon />
-                          </InputAdornment>
-                        ),
-                      },
-                    }}
-                  />
-                )}
+                placeholder="https://www.linkin.com/in/"
+                fullWidth
+                variant="outlined"
+                sx={{
+                  "& .MuiOutlinedInput-root": {
+                    "& fieldset": {
+                      borderColor: "neutral03",
+                    },
+                    "&.Mui-focused fieldset": {
+                      borderColor: "primary03",
+                    },
+                  },
+                  "& .MuiOutlinedInput-root.Mui-focused .MuiInputAdornment-root .MuiSvgIcon-root":
+                    {
+                      color: "primary.main",
+                    },
+                }}
+                slotProps={{
+                  input: {
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <LinkedInIcon />
+                      </InputAdornment>
+                    ),
+                  },
+                }}
               />
             </div>
           </div>
@@ -281,86 +262,77 @@ const ProfileForm = () => {
           <div className="flex flex-col gap-4 md:flex-row">
             <div className="group md:w-1/2">
               <h4 className="group-focus-within:text-primary03">Facebook</h4>
-
-              <Controller
+              <RHFTextField
                 name="facebook"
                 control={control}
-                render={({ field }) => (
-                  <TextField
-                    {...field}
-                    placeholder="https://facebook.com/"
-                    fullWidth
-                    variant="outlined"
-                    sx={{
-                      "& .MuiOutlinedInput-root": {
-                        "& fieldset": {
-                          borderColor: "neutral03",
-                        },
-                        "&.Mui-focused fieldset": {
-                          borderColor: "primary03",
-                        },
-                      },
-                      "& .MuiOutlinedInput-root.Mui-focused .MuiInputAdornment-root .MuiSvgIcon-root":
-                        {
-                          color: "primary.main",
-                        },
-                    }}
-                    slotProps={{
-                      input: {
-                        startAdornment: (
-                          <InputAdornment position="start">
-                            <FacebookRoundedIcon />
-                          </InputAdornment>
-                        ),
-                      },
-                    }}
-                  />
-                )}
+                placeholder="https://facebook.com/"
+                fullWidth
+                variant="outlined"
+                sx={{
+                  "& .MuiOutlinedInput-root": {
+                    "& fieldset": {
+                      borderColor: "neutral03",
+                    },
+                    "&.Mui-focused fieldset": {
+                      borderColor: "primary03",
+                    },
+                  },
+                  "& .MuiOutlinedInput-root.Mui-focused .MuiInputAdornment-root .MuiSvgIcon-root":
+                    {
+                      color: "primary.main",
+                    },
+                }}
+                slotProps={{
+                  input: {
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <FacebookRoundedIcon />
+                      </InputAdornment>
+                    ),
+                  },
+                }}
               />
             </div>
             <div className="group md:w-1/2">
               <h4 className="group-focus-within:text-primary03">Instragram</h4>
-              <Controller
+              <RHFTextField
                 name="instragram"
                 control={control}
-                render={({ field }) => (
-                  <TextField
-                    {...field}
-                    placeholder="https://instragram.com/"
-                    fullWidth
-                    variant="outlined"
-                    sx={{
-                      "& .MuiOutlinedInput-root": {
-                        "& fieldset": {
-                          borderColor: "neutral03",
-                        },
-                        "&.Mui-focused fieldset": {
-                          borderColor: "primary03",
-                        },
-                      },
-                      "& .MuiOutlinedInput-root.Mui-focused .MuiInputAdornment-root .MuiSvgIcon-root":
-                        {
-                          color: "primary.main",
-                        },
-                    }}
-                    slotProps={{
-                      input: {
-                        startAdornment: (
-                          <InputAdornment position="start">
-                            <InstagramIcon />
-                          </InputAdornment>
-                        ),
-                      },
-                    }}
-                  />
-                )}
+                placeholder="https://instragram.com/"
+                fullWidth
+                variant="outlined"
+                sx={{
+                  "& .MuiOutlinedInput-root": {
+                    "& fieldset": {
+                      borderColor: "neutral03",
+                    },
+                    "&.Mui-focused fieldset": {
+                      borderColor: "primary03",
+                    },
+                  },
+                  "& .MuiOutlinedInput-root.Mui-focused .MuiInputAdornment-root .MuiSvgIcon-root":
+                    {
+                      color: "primary.main",
+                    },
+                }}
+                slotProps={{
+                  input: {
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <InstagramIcon />
+                      </InputAdornment>
+                    ),
+                  },
+                }}
               />
             </div>
           </div>
         </div>
 
         {/* Section 3: Projects */}
-        <div className="mt-6 flex flex-row items-center justify-between">
+        {/* Commented out due to incomplete implementation */}
+
+        {/* <div className="mt-6 flex flex-row items-center justify-between">
           <h3 className="text-primary01 mb-4 font-bold">โปรเจกต์อื่นๆ</h3>
           <AddCircleOutlineRoundedIcon
             sx={{ fontSize: 36, color: "primary.main", cursor: "pointer" }}
@@ -388,7 +360,7 @@ const ProfileForm = () => {
               />
             </div>
           </div>
-        ))}
+        ))} */}
 
         <div className="mt-6 flex w-full flex-row justify-center gap-x-4 align-bottom md:justify-end">
           <Button
