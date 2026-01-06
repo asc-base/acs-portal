@@ -1,9 +1,11 @@
 import { FC } from "react";
 import { Box, Modal, Button } from "@mui/material";
-import Image from "next/image";
 import { ButtonProps } from "@mui/material/Button";
+import ErrorOutlineIcon from "@mui/icons-material/ErrorOutline";
+import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
+import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
 
-type ButtonType = "delete" | "warning";
+type ButtonType = "delete" | "warning" | "success";
 
 interface ConfirmModalProps {
   open: boolean;
@@ -43,18 +45,37 @@ export const ConfirmModal: FC<ConfirmModalProps> = (props) => {
   const colorMap: Record<string, ButtonProps["color"]> = {
     delete: "error",
     warning: "warning",
+    success: "success",
   };
 
   return (
     <Modal open={open} onClose={onClose}>
       <Box sx={style}>
         <div className="flex flex-col items-center justify-center gap-6">
-          <Image
-            src={`/${type}.png`}
-            width={50}
-            height={50}
-            alt="delete"
-          ></Image>
+          {type === "warning" && (
+            <ErrorOutlineIcon
+              sx={{
+                fontSize: 100,
+                color: "#FACC15",
+              }}
+            />
+          )}
+          {type === "delete" && (
+            <DeleteOutlineIcon
+              sx={{
+                fontSize: 100,
+                color: "#EF4444",
+              }}
+            />
+          )}
+          {type === "success" && (
+            <CheckCircleOutlineIcon
+              sx={{
+                fontSize: 100,
+                color: "#22C55E",
+              }}
+            />
+          )}
           <div>
             <h2 className="text-center text-lg font-medium">{title}</h2>
             <h2 className="text-center text-sm font-medium text-gray-500">
