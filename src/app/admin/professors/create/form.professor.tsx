@@ -213,37 +213,37 @@ export const FormProfesssors: FC<FormProfessorsProps> = ({ apiBase }) => {
 
   const onSubmit = async (data: FormData) => {
     setIsError(false);
-    try {
-      const payload: ICreateProfessor = {
-        academicPositionId: data.academicPositionId!,
-        majorPositionId: data.majorPositionId!,
-        firstNameTh: data.firstNameTh,
-        lastNameTh: data.lastNameTh,
-        firstNameEn: data.firstNameEn,
-        lastNameEn: data.lastNameEn,
-        email: data.email,
-        phone: data.phone,
-        profRoom: data.profRoom,
-        expertFields: data.expertFields?.map((e) => e.value),
-        education: data.education?.map((e) => ({
-          level: e.level!,
-          education: e.education,
-          university: e.university,
-        })),
-      };
-      const reps = await professorService.createProfessor(
-        payload,
-        selectedFile!,
-      );
-      if (!reps) {
-        setIsError(true);
-        return;
-      }
-      setOpenSucsessModal(true);
-    } catch (error) {
-      console.error(error);
-      setIsError(true);
-    }
+    // try {
+    //   const payload: ICreateProfessor = {
+    //     academicPositionId: data.academicPositionId!,
+    //     majorPositionId: data.majorPositionId!,
+    //     firstNameTh: data.firstNameTh,
+    //     lastNameTh: data.lastNameTh,
+    //     firstNameEn: data.firstNameEn,
+    //     lastNameEn: data.lastNameEn,
+    //     email: data.email,
+    //     phone: data.phone,
+    //     profRoom: data.profRoom,
+    //     expertFields: data.expertFields?.map((e) => e.value),
+    //     education: data.education?.map((e) => ({
+    //       level: e.level!,
+    //       education: e.education,
+    //       university: e.university,
+    //     })),
+    //   };
+    //   const reps = await professorService.createProfessor(
+    //     payload,
+    //     selectedFile!,
+    //   );
+    //   if (!reps) {
+    //     setIsError(true);
+    //     return;
+    //   }
+    //   setOpenSucsessModal(true);
+    // } catch (error) {
+    //   console.error(error);
+    //   setIsError(true);
+    // }
   };
 
   useEffect(() => {

@@ -28,18 +28,18 @@ export class ProfessorService {
     return response.data;
   }
 
-  async createProfessor(data: ICreateProfessor, image: File) {
-    try {
-      const formData = new FormData();
-      Object.entries(data).forEach(([key, value]) => {
-        formData.append(key, value?.toString() ?? "");
-      });
-      formData.append("image", image);
-      const response = await this.professorRepository.createProfessor(formData);
-      return response;
-    } catch (error) {
-      console.error("Failed to create professor:", error);
-      return null;
-    }
-  }
+  // async createProfessor(data: ICreateProfessor, image: File) {
+  //   try {
+  //     const formData = new FormData();
+  //     Object.entries(data).forEach(([key, value]) => {
+  //       formData.append(key, value?.toString() ?? "");
+  //     });
+  //     formData.append("image", image);
+  //     const response = await this.professorRepository.createProfessor(formData);
+  //     return response;
+  //   } catch (error) {
+  //     console.error("Failed to create professor:", error);
+  //     return null;
+  //   }
+  // }
 }
