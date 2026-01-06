@@ -20,6 +20,7 @@ import { RHFTextField } from "@/components/form/RHFTextField";
 import { RHFSelect } from "@/components/form/RHFSelect";
 import { ICreateProfessor } from "@/core/domain/professor";
 import { ConfirmModal } from "@/components/modal/confirmModal";
+import { SuccessModal } from "@/components/modal/success";
 
 interface FormProfessorsProps {
   apiBase: string;
@@ -121,7 +122,8 @@ export const FormProfesssors: FC<FormProfessorsProps> = ({ apiBase }) => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isError, setIsError] = useState(false);
   const router = useRouter();
-  const [openModal, setOpenModal] = useState(false);
+  const [openWarningModal, setOpenWarningModal] = useState(false);
+  const [openSucsessModal, setOpenSucsessModal] = useState(false);
 
   const masterDataService = useMemo(() => {
     const masterdataRepository = new MasterDataRepository(apiBase);
@@ -137,6 +139,7 @@ export const FormProfesssors: FC<FormProfessorsProps> = ({ apiBase }) => {
     control,
     handleSubmit,
     formState: { isValid },
+    watch,
   } = useForm<FormData>({
     resolver: zodResolver(Schema),
     defaultValues: {
@@ -181,6 +184,34 @@ export const FormProfesssors: FC<FormProfessorsProps> = ({ apiBase }) => {
     }
   };
 
+  const cancelForm = () => {
+    const v = watch();
+
+    const hasEducationValue = (education: FormData["education"]) =>
+      education?.some((e) => e.level !== null || e.education || e.university);
+
+    const hasExpertValue = (experts?: FormData["expertFields"]) =>
+      experts?.some((e) => e.value);
+
+    const hasAnyValue =
+      hasEducationValue(v.education) ||
+      hasExpertValue(v.expertFields) ||
+      Object.entries(v).some(
+        ([key, value]) =>
+          !["education", "expertFields"].includes(key) &&
+          value !== "" &&
+          value !== null,
+      ) ||
+      selectedFile !== null;
+
+    hasAnyValue ? setOpenWarningModal(true) : router.push("/admin/professors");
+  };
+
+  const handleConfirmSubmit = handleSubmit(async (data) => {
+    setOpenWarningModal(false);
+    await onSubmit(data);
+  });
+
   const onSubmit = async (data: FormData) => {
     setIsError(false);
     try {
@@ -209,7 +240,7 @@ export const FormProfesssors: FC<FormProfessorsProps> = ({ apiBase }) => {
         setIsError(true);
         return;
       }
-      router.push(`/admin/professors`);
+      setOpenSucsessModal(true);
     } catch (error) {
       console.error(error);
       setIsError(true);
@@ -569,11 +600,7 @@ export const FormProfesssors: FC<FormProfessorsProps> = ({ apiBase }) => {
         </div>
       </div>
       <div className="flex flex-row justify-end gap-x-4">
-        <Button
-          variant="outlined"
-          size="large"
-          onClick={() => router.push("/admin/professors")}
-        >
+        <Button variant="outlined" size="large" onClick={cancelForm}>
           ยกเลิก
         </Button>
         <Button
@@ -584,22 +611,22 @@ export const FormProfesssors: FC<FormProfessorsProps> = ({ apiBase }) => {
         >
           บันทึกข้อมูล
         </Button>
-        <Button
-          variant="contained"
-          size="large"
-          onClick={() => setOpenModal(true)}
-        >
-          test
-        </Button>
       </div>
       <ConfirmModal
-        open={openModal}
-        onClose={() => setOpenModal(false)}
-        onConfirm={() => setOpenModal(false)}
+        open={openWarningModal}
+        onClose={() => {
+          setOpenWarningModal(false);
+        }}
+        onConfirm={handleConfirmSubmit}
         title="การดำเนินการยังไม่เสร็จสิ้น"
         description="กรุณาบันทึกพื่อไม่ให้ข้อมูลสูญหาย"
         type="warning"
         confirmText="บันทึก"
+      />
+      <SuccessModal
+        open={openSucsessModal}
+        onClose={() => setOpenSucsessModal(false)}
+        path="professors"
       />
     </form>
   );
