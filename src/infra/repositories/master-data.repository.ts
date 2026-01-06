@@ -33,8 +33,9 @@ export class MasterDataRepository implements IMasterDataRepository {
   }
 
   async getMasterDataTypeCourse(): Promise<ApiResponse<TypeCourse[]>> {
-      const response =
-        await this.http.get<ApiResponse<TypeCourse[]>>(`/v1/master-data/typecourse`);
-      return response;
+    const response = await this.http.get<ApiResponse<TypeCourse[]>>(
+      `/v1/master-data/typecourse`,
+    );
+    return response;
   }
 }
