@@ -137,8 +137,7 @@ export const FormProfesssors: FC<FormProfessorsProps> = ({ apiBase }) => {
   const {
     control,
     handleSubmit,
-    formState: { isValid },
-    watch,
+    formState: { isValid, isDirty },
   } = useForm<FormData>({
     resolver: zodResolver(Schema),
     defaultValues: {
@@ -184,25 +183,7 @@ export const FormProfesssors: FC<FormProfessorsProps> = ({ apiBase }) => {
   };
 
   const cancelForm = () => {
-    const v = watch();
-
-    const hasEducationValue = (education: FormData["education"]) =>
-      education?.some((e) => e.level !== null || e.education || e.university);
-
-    const hasExpertValue = (experts?: FormData["expertFields"]) =>
-      experts?.some((e) => e.value);
-
-    const hasAnyValue =
-      hasEducationValue(v.education) ||
-      hasExpertValue(v.expertFields) ||
-      Object.entries(v).some(
-        ([key, value]) =>
-          !["education", "expertFields"].includes(key) &&
-          value !== "" &&
-          value !== null,
-      ) ||
-      selectedFile !== null;
-
+    const hasAnyValue = isDirty || selectedFile;
     hasAnyValue ? setOpenWarningModal(true) : router.push("/admin/professors");
   };
 
