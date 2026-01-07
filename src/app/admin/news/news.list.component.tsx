@@ -178,8 +178,8 @@ const NewsListComponent = (initValue: NewsListComponentProps) => {
         open={openModal}
         onClose={() => setOpenModal(false)}
         onConfirm={handleDelete}
-        category="ข่าว"
-        title={deleteNews?.title}
+        title={`${deleteNews?.title}` ?? ""}
+        type="delete"
       />
     </div>
   );
