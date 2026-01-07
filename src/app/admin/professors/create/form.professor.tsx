@@ -183,12 +183,11 @@ export const FormProfesssors: FC<FormProfessorsProps> = ({ apiBase }) => {
   };
 
   const cancelForm = () => {
-    const hasAnyValue = isDirty || selectedFile;
+    const hasAnyValue = isDirty || !!selectedFile;
     hasAnyValue ? setOpenWarningModal(true) : router.push("/admin/professors");
   };
 
   const handleConfirmSubmit = handleSubmit(async (data) => {
-    setOpenWarningModal(false);
     await onSubmit(data);
   });
 
@@ -597,11 +596,16 @@ export const FormProfesssors: FC<FormProfessorsProps> = ({ apiBase }) => {
         onClose={() => {
           setOpenWarningModal(false);
         }}
-        onConfirm={handleConfirmSubmit}
+        onConfirm={() => {
+          setOpenWarningModal(false);
+          handleConfirmSubmit();
+        }}
+        onCancel={() => router.push("/admin/professors")}
         title="การดำเนินการยังไม่เสร็จสิ้น"
         description="กรุณาบันทึกพื่อไม่ให้ข้อมูลสูญหาย"
         type="warning"
         confirmText="บันทึก"
+        cancelText="ออกโดยไม่บันทึก"
       />
       <ConfirmModal
         open={openSucsessModal}

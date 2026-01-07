@@ -11,6 +11,7 @@ interface ConfirmModalProps {
   open: boolean;
   onClose: () => void;
   onConfirm: () => void;
+  onCancel?: () => void;
   title: string;
   description?: string;
   type: ButtonType;
@@ -35,6 +36,7 @@ export const ConfirmModal: FC<ConfirmModalProps> = (props) => {
     open,
     onClose,
     onConfirm,
+    onCancel,
     title,
     description,
     type,
@@ -84,7 +86,11 @@ export const ConfirmModal: FC<ConfirmModalProps> = (props) => {
           </div>
           <div className="flex w-full justify-center gap-x-4">
             {type !== "success" && (
-              <Button variant="outlined" onClick={onClose} className="w-full">
+              <Button
+                variant="outlined"
+                onClick={onCancel ?? onClose}
+                className="w-full"
+              >
                 {cancelText ?? "ยกเลิก"}
               </Button>
             )}
@@ -94,7 +100,6 @@ export const ConfirmModal: FC<ConfirmModalProps> = (props) => {
               color={colorMap[type] ?? "primary"}
               onClick={() => {
                 onConfirm();
-                onClose();
               }}
             >
               {confirmText ?? "ยืนยัน"}
