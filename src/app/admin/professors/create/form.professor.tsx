@@ -601,20 +601,13 @@ export const FormProfesssors: FC<FormProfessorsProps> = ({ apiBase }) => {
           handleConfirmSubmit();
         }}
         onCancel={() => router.push("/admin/professors")}
-        title="การดำเนินการยังไม่เสร็จสิ้น"
-        description="กรุณาบันทึกพื่อไม่ให้ข้อมูลสูญหาย"
         type="warning"
-        confirmText="บันทึก"
-        cancelText="ออกโดยไม่บันทึก"
       />
       <ConfirmModal
         open={openSucsessModal}
         onClose={() => setOpenSucsessModal(false)}
-        title="บันทึกข้อมูลสำเร็จ"
-        description="ข้อมูลถูกจัดเก็บในระบบแล้ว"
-        type="success"
         onConfirm={() => router.push("/admin/professors")}
-        confirmText="กลับสู่หน้าหลัก"
+        type="success"
       />
     </form>
   );

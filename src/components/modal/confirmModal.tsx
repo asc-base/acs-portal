@@ -12,9 +12,9 @@ interface ConfirmModalProps {
   onClose: () => void;
   onConfirm: () => void;
   onCancel?: () => void;
-  title: string;
-  description?: string;
   type: ButtonType;
+  title?: string;
+  description?: string;
   confirmText?: string;
   cancelText?: string;
 }
@@ -37,9 +37,9 @@ export const ConfirmModal: FC<ConfirmModalProps> = (props) => {
     onClose,
     onConfirm,
     onCancel,
+    type,
     title,
     description,
-    type,
     confirmText,
     cancelText,
   } = props;
@@ -48,6 +48,30 @@ export const ConfirmModal: FC<ConfirmModalProps> = (props) => {
     delete: "error",
     warning: "warning",
     success: "success",
+  };
+
+  const defaultTitle = {
+    delete: "ยืนยันการลบข้อมูล",
+    warning: "ยกเลิกการบันทึก",
+    success: "บันทึกข้อมูลสำเร็จ",
+  };
+
+  const defaultDescription = {
+    delete: "เมื่อลบแล้ว ข้อมูลจะไม่สามารถกู้คืนได้",
+    warning: "ข้อมูลยังไม่มีการบันทึก",
+    success: "ข้อมูลถูกจัดเก็บในระบบแล้ว",
+  };
+
+  const defaultConfirmText = {
+    delete: "ยืนยันการลบ",
+    warning: "บันทึก",
+    success: "กลับสู่หน้าหลัก",
+  };
+
+  const defaultCancelText = {
+    delete: "ยกเลิก",
+    warning: "ยกเลิกโดยไม่ทันทึก",
+    success: "",
   };
 
   return (
@@ -79,9 +103,11 @@ export const ConfirmModal: FC<ConfirmModalProps> = (props) => {
             />
           )}
           <div>
-            <h2 className="text-center text-lg font-medium">{title}</h2>
+            <h2 className="text-center text-lg font-medium">
+              {title ?? defaultTitle[type]}
+            </h2>
             <h2 className="text-center text-sm font-medium text-gray-500">
-              {description}
+              {description ?? defaultDescription[type]}
             </h2>
           </div>
           <div className="flex w-full justify-center gap-x-4">
@@ -91,7 +117,7 @@ export const ConfirmModal: FC<ConfirmModalProps> = (props) => {
                 onClick={onCancel ?? onClose}
                 className="w-full"
               >
-                {cancelText ?? "ยกเลิก"}
+                {cancelText ?? defaultCancelText[type]}
               </Button>
             )}
             <Button
@@ -102,7 +128,7 @@ export const ConfirmModal: FC<ConfirmModalProps> = (props) => {
                 onConfirm();
               }}
             >
-              {confirmText ?? "ยืนยัน"}
+              {confirmText ?? defaultConfirmText[type]}
             </Button>
           </div>
         </div>
