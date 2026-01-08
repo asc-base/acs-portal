@@ -53,9 +53,12 @@ export const CreateStudentForm: FC<FormProfessorsProps> = ({
   apiBase,
   classBookId,
 }) => {
+  type ModalType = "success" | "warning" | "delete";
+
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isError, setIsError] = useState(false);
-  const [openSuccess, setOpenSuccess] = useState(false);
+  const [OpenModal, setOpenModal] = useState(false);
+  const [modalType, setModalType] = useState<ModalType>("success");
 
   const router = useRouter();
 
@@ -112,7 +115,10 @@ export const CreateStudentForm: FC<FormProfessorsProps> = ({
       const response = await studentService.createStudent(payload, classBookId);
 
       if (!response) setIsError(true);
-      else setOpenSuccess(true);
+      else {
+        setModalType("success");
+        setOpenModal(true);
+      }
     } catch (error) {
       console.log(error);
       setIsError(true);
@@ -391,11 +397,10 @@ export const CreateStudentForm: FC<FormProfessorsProps> = ({
         <Button
           variant="outlined"
           size="large"
-          onClick={() =>
-            router.push(
-              `/admin/students?page=1&pageSize=10&classBookId=${classBookId}`,
-            )
-          }
+          onClick={() => {
+            setModalType("warning");
+            setOpenModal(true);
+          }}
         >
           ยกเลิก
         </Button>
@@ -410,14 +415,14 @@ export const CreateStudentForm: FC<FormProfessorsProps> = ({
       </div>
 
       <ConfirmModal
-        open={openSuccess}
-        onClose={() => () => setOpenSuccess(false)}
+        open={OpenModal}
+        onClose={() => setOpenModal(false)}
         onConfirm={() =>
           router.push(
             `/admin/students?page=1&pageSize=10&classBookId=${classBookId}`,
           )
         }
-        type="success"
+        type={modalType}
       />
     </form>
   );
