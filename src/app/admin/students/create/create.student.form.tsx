@@ -13,7 +13,7 @@ import { RHFTextField } from "@/components/form/RHFTextField";
 import { StudentService } from "@/core/service/student.service";
 import { StudentRepository } from "@/infra/repositories/student.repository";
 import { ICreateStudent } from "@/core/domain/student";
-import { SuccessModal } from "@/components/modal/success";
+import { ConfirmModal } from "@/components/modal/confirmModal";
 
 interface FormProfessorsProps {
   apiBase: string;
@@ -25,20 +25,19 @@ const Schema = z.object({
   lastNameTh: z.string().min(1, "กรุณากรอกนามสกุลภาษาไทย"),
   firstNameEn: z.string().min(1, "กรุณากรอกชื่อภาษาอังกฤษ"),
   lastNameEn: z.string().min(1, "กรุณากรอกนามสกุลภาษาอังกฤษ"),
-  studentId: z.string().min(1, "กรุณากรอกรหัสนักศึกษา"),
-  nickname: z.string().min(1, "กรุณากรอกชื่อเล่น"),
-  phone: z
+  studentId: z
     .string()
-    .trim()
-    .min(9, "กรุณากรอกเบอร์โทร")
-    .regex(/^[0-9]+$/, "เบอร์โทรต้องเป็นตัวเลขเท่านั้น"),
+    .min(11, "กรุณากรอกรหัสนักศึกษา")
+    .regex(/^[0-9]+$/, "รหัสนักศึกษาต้องเป็นตัวเลขเท่านั้น"),
+  nickname: z.string().min(1, "กรุณากรอกชื่อเล่น"),
+  phone: z.string().optional(),
   email: z.string().email("อีเมลไม่ถูกต้อง"),
-  yearOfFirstAdmission: z.string().min(4, "กรุณากรอกปีที่เข้าศึกษา"),
-  yearOfCompletion: z.string().min(4, "กรุณากรอกปีที่เข้าศึกษา"),
-  facebook: z.string().nullable().optional(),
-  linkedin: z.string().nullable().optional(),
-  instagram: z.string().nullable().optional(),
-  github: z.string().nullable().optional(),
+  yearOfFirstAdmission: z.string().optional(),
+  yearOfCompletion: z.string().optional(),
+  facebook: z.string().optional(),
+  linkedin: z.string().optional(),
+  instagram: z.string().optional(),
+  github: z.string().optional(),
   otherProjects: z
     .array(
       z.object({
@@ -266,7 +265,6 @@ export const CreateStudentForm: FC<FormProfessorsProps> = ({
               label="เบอร์โทร"
               variant="outlined"
               fullWidth
-              required
               placeholder="ระบุเบอร์โทร"
             />
           </div>
@@ -290,7 +288,6 @@ export const CreateStudentForm: FC<FormProfessorsProps> = ({
               label="ปีที่เข้าศึกษา"
               variant="outlined"
               fullWidth
-              required
               placeholder="ระบุปีที่เข้าศึกษา"
             />
           </div>
@@ -301,7 +298,6 @@ export const CreateStudentForm: FC<FormProfessorsProps> = ({
               label="ปีที่จบการศึกษา"
               variant="outlined"
               fullWidth
-              required
               placeholder="ระบุปีที่จบการศึกษา"
             />
           </div>
@@ -319,7 +315,6 @@ export const CreateStudentForm: FC<FormProfessorsProps> = ({
               label="Facebook"
               variant="outlined"
               fullWidth
-              required
               placeholder="ระบุลิงก์ Facebook"
             />
           </div>
@@ -330,7 +325,6 @@ export const CreateStudentForm: FC<FormProfessorsProps> = ({
               label="Linkedin"
               variant="outlined"
               fullWidth
-              required
               placeholder="ระบุลิงก์ Linkedin"
             />
           </div>
@@ -343,7 +337,6 @@ export const CreateStudentForm: FC<FormProfessorsProps> = ({
               label="Instagram"
               variant="outlined"
               fullWidth
-              required
               placeholder="ระบุลิงก์ Instagram"
             />
           </div>
@@ -354,7 +347,6 @@ export const CreateStudentForm: FC<FormProfessorsProps> = ({
               label="Github"
               variant="outlined"
               fullWidth
-              required
               placeholder="ระบุลิงก์ Github"
             />
           </div>
@@ -417,10 +409,15 @@ export const CreateStudentForm: FC<FormProfessorsProps> = ({
         </Button>
       </div>
 
-      <SuccessModal
+      <ConfirmModal
         open={openSuccess}
-        path={`/students?page=1&pageSize=10&classBookId=${classBookId}`}
-        onClose={() => setOpenSuccess(false)}
+        onClose={() => () => setOpenSuccess(false)}
+        onConfirm={() =>
+          router.push(
+            `/admin/students?page=1&pageSize=10&classBookId=${classBookId}`,
+          )
+        }
+        type="success"
       />
     </form>
   );
