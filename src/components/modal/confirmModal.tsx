@@ -52,25 +52,25 @@ export const ConfirmModal: FC<ConfirmModalProps> = (props) => {
 
   const defaultTitle = {
     delete: "ยืนยันการลบข้อมูล",
-    warning: "ยกเลิกการบันทึก",
+    warning: "ข้อมูลที่คุณกรอกไว้ยังไม่ถูกบันทึก",
     success: "บันทึกข้อมูลสำเร็จ",
   };
 
   const defaultDescription = {
     delete: "เมื่อลบแล้ว ข้อมูลจะไม่สามารถกู้คืนได้",
-    warning: "ข้อมูลยังไม่มีการบันทึก",
+    warning: "หากออกจากหน้านี้ข้อมูลจะสูญหาย",
     success: "ข้อมูลถูกจัดเก็บในระบบแล้ว",
   };
 
   const defaultConfirmText = {
     delete: "ยืนยันการลบ",
-    warning: "บันทึก",
+    warning: "ยืนยันการออก",
     success: "กลับสู่หน้าหลัก",
   };
 
   const defaultCancelText = {
     delete: "ยกเลิก",
-    warning: "ยกเลิกโดยไม่ทันทึก",
+    warning: "ย้อนกลับ",
     success: "",
   };
 
