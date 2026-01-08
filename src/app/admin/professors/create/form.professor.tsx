@@ -19,6 +19,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { RHFTextField } from "@/components/form/RHFTextField";
 import { RHFSelect } from "@/components/form/RHFSelect";
 import { ICreateProfessor } from "@/core/domain/professor";
+import { ConfirmModal } from "@/components/modal/confirmModal";
 
 interface FormProfessorsProps {
   apiBase: string;
@@ -120,6 +121,8 @@ export const FormProfesssors: FC<FormProfessorsProps> = ({ apiBase }) => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isError, setIsError] = useState(false);
   const router = useRouter();
+  const [openWarningModal, setOpenWarningModal] = useState(false);
+  const [openSucsessModal, setOpenSucsessModal] = useState(false);
 
   const masterDataService = useMemo(() => {
     const masterdataRepository = new MasterDataRepository(apiBase);
@@ -134,7 +137,7 @@ export const FormProfesssors: FC<FormProfessorsProps> = ({ apiBase }) => {
   const {
     control,
     handleSubmit,
-    formState: { isValid },
+    formState: { isValid, isDirty },
   } = useForm<FormData>({
     resolver: zodResolver(Schema),
     defaultValues: {
@@ -179,6 +182,15 @@ export const FormProfesssors: FC<FormProfessorsProps> = ({ apiBase }) => {
     }
   };
 
+  const cancelForm = () => {
+    const hasAnyValue = isDirty || !!selectedFile;
+    hasAnyValue ? setOpenWarningModal(true) : router.push("/admin/professors");
+  };
+
+  const handleConfirmSubmit = handleSubmit(async (data) => {
+    await onSubmit(data);
+  });
+
   const onSubmit = async (data: FormData) => {
     setIsError(false);
     try {
@@ -192,16 +204,13 @@ export const FormProfesssors: FC<FormProfessorsProps> = ({ apiBase }) => {
         email: data.email,
         phone: data.phone,
         profRoom: data.profRoom,
-
         expertFields: data.expertFields?.map((e) => e.value),
-
         education: data.education?.map((e) => ({
           level: e.level!,
           education: e.education,
           university: e.university,
         })),
       };
-
       const reps = await professorService.createProfessor(
         payload,
         selectedFile!,
@@ -210,7 +219,7 @@ export const FormProfesssors: FC<FormProfessorsProps> = ({ apiBase }) => {
         setIsError(true);
         return;
       }
-      router.push(`/admin/professors`);
+      setOpenSucsessModal(true);
     } catch (error) {
       console.error(error);
       setIsError(true);
@@ -248,58 +257,37 @@ export const FormProfesssors: FC<FormProfessorsProps> = ({ apiBase }) => {
           ข้อมูลส่วนตัว
         </Typography>
         <div className="mt-6 mb-16 flex flex-row items-center gap-x-8">
-          <div>
-            <Button
-              component="label"
-              className="flex h-41 w-41 items-center justify-center overflow-hidden p-0"
-              sx={{
-                width: "176px",
-                height: "176px",
-                padding: 0,
-                minWidth: 0,
-                backgroundColor: "#F2F2F2",
-                "&:hover": {
-                  backgroundColor: "#E2E2E2",
-                },
-              }}
-            >
-              {selectedFile ? (
-                <div className="h-full w-full">
-                  <Image
-                    src={URL.createObjectURL(selectedFile)}
-                    alt="Preview"
-                    width={300}
-                    height={300}
-                    style={{ objectFit: "cover" }}
-                    className="bg-neutral02 h-full w-full object-cover"
-                  />
-                </div>
-              ) : (
+          <div className="bg-neutral02 group relative flex h-[182px] w-[268px] items-center justify-center rounded-xl">
+            {selectedFile ? (
+              <>
                 <Image
-                  alt="Upload"
-                  src="/uploadimage.png"
-                  width={70}
-                  height={70}
-                  style={{ width: "auto", height: "auto" }}
-                  priority
+                  src={URL.createObjectURL(selectedFile)}
+                  alt="Preview"
+                  width={384}
+                  height={192}
+                  style={{ objectFit: "cover" }}
+                  className="h-full w-full rounded-xl object-cover"
                 />
-              )}
-              <VisuallyHiddenInput
-                type="file"
-                accept="image/*"
-                onChange={handleFileChange}
-              />
-            </Button>
-            {selectedFile && (
-              <Image
-                alt="Uploaded file"
-                src="/uploadimage.png"
-                width={40}
-                height={40}
-                style={{ width: "auto", height: "auto" }}
-                className="bg-neutral02 absolute right-2 bottom-0 p-2"
-                priority
-              />
+                <div className="bg-opacity-40 absolute inset-0 flex items-center justify-center bg-black/60 opacity-0 transition-opacity group-hover:opacity-100">
+                  <Button variant="contained" component="label">
+                    <VisuallyHiddenInput
+                      type="file"
+                      accept="image/*"
+                      onChange={handleFileChange}
+                    />
+                    อัปโหลดรูปภาพ
+                  </Button>
+                </div>
+              </>
+            ) : (
+              <Button variant="outlined" component="label">
+                <VisuallyHiddenInput
+                  type="file"
+                  accept="image/*"
+                  onChange={handleFileChange}
+                />
+                อัปโหลดรูปภาพ
+              </Button>
             )}
           </div>
           <div className="flex h-[176px] flex-1 flex-col justify-between">
@@ -591,11 +579,7 @@ export const FormProfesssors: FC<FormProfessorsProps> = ({ apiBase }) => {
         </div>
       </div>
       <div className="flex flex-row justify-end gap-x-4">
-        <Button
-          variant="outlined"
-          size="large"
-          onClick={() => router.push("/admin/professors")}
-        >
+        <Button variant="outlined" size="large" onClick={cancelForm}>
           ยกเลิก
         </Button>
         <Button
@@ -607,6 +591,24 @@ export const FormProfesssors: FC<FormProfessorsProps> = ({ apiBase }) => {
           บันทึกข้อมูล
         </Button>
       </div>
+      <ConfirmModal
+        open={openWarningModal}
+        onClose={() => {
+          setOpenWarningModal(false);
+        }}
+        onConfirm={() => {
+          setOpenWarningModal(false);
+          handleConfirmSubmit();
+        }}
+        onCancel={() => router.push("/admin/professors")}
+        type="warning"
+      />
+      <ConfirmModal
+        open={openSucsessModal}
+        onClose={() => setOpenSucsessModal(false)}
+        onConfirm={() => router.push("/admin/professors")}
+        type="success"
+      />
     </form>
   );
 };
