@@ -9,7 +9,7 @@ import {
   MenuItem,
   SelectChangeEvent,
 } from "@mui/material";
-import { ConfirmModal } from "@/components/modal/confirm";
+import { ConfirmModal } from "@/components/modal/confirmModal";
 import { useRouter, usePathname } from "next/navigation";
 import { AdminCard } from "@/components/adminCard";
 import AddIcon from "@mui/icons-material/Add";
@@ -178,8 +178,8 @@ const NewsListComponent = (initValue: NewsListComponentProps) => {
         open={openModal}
         onClose={() => setOpenModal(false)}
         onConfirm={handleDelete}
-        category="ข่าว"
-        title={deleteNews?.title}
+        title={`${deleteNews?.title}` ?? ""}
+        type="delete"
       />
     </div>
   );
