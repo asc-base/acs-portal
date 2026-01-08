@@ -27,16 +27,11 @@ const HomePage = ({
   initNewsHighlight,
   apibase,
 }: HomePageProps) => {
-  console.log(initAnnoucement, initNewsHighlight);
   const [newsActivityActive, setNewsActivityActive] = useState(0);
   const [newsCompleteActive, setNewsCompleteActive] = useState(0);
   const [newsActivityStudentActive, setNewsActivityStudentActive] = useState(0);
 
-  console.log("API_URL:", apibase);
-
   const user = useAuthStore((state) => state.user);
-
-  console.log("user in home page:", user);
 
   const handleNextNewsActivity = () => {
     if (initNewsActivity.length === 0) return;
@@ -94,6 +89,11 @@ const HomePage = ({
     setNewsActivityStudentActive(index);
   };
 
+  const showActivitySection = initNewsActivity && initNewsActivity.length > 0;
+  const showAnnouncementSection = initAnnoucement && initAnnoucement.length > 0;
+  const showCompleteSection = initNewsComplete && initNewsComplete.length > 0;
+  const showActivityStudentSection = initNewsActivityStudent && initNewsActivityStudent.length > 0;
+
   return (
     <div>
       <HeroCard
@@ -103,54 +103,55 @@ const HomePage = ({
       />
       <div className="container mx-auto my-2.5 px-3.5 py-4">
         <div className="flex flex-col gap-y-6">
-          <div className="flex flex-col-reverse gap-x-6 gap-y-6 md:grid md:grid-cols-2">
-            <div>
-              <h3 className="text-accent04 mb-3 items-baseline font-bold lg:text-[32px]">
-                งานกิจกรรมเร็ว ๆ นี้
-              </h3>
-              <div className="flex flex-col gap-y-3 md:[&>*:nth-child(n+3)]:hidden lg:[&>*:nth-child(n+3)]:block [&>*:nth-child(n+5)]:hidden">
-                {initNewsActivity.length > 0 ? (
-                  initNewsActivity.slice(0, 4).map((item) => (
-                    <Link key={item.id} href={`/news/${item.id}`}>
-                      <ActivityCard
-                        key={item.id}
-                        title={item.title}
-                        date={item.startDate}
-                      />
-                    </Link>
-                  ))
-                ) : (
-                  <div className="p-4 text-gray-500">
-                    ไม่มีข่าวกิจกรรมในขณะนี้
+          {(showActivitySection || showAnnouncementSection) && (
+            <div className="flex flex-col-reverse gap-x-6 gap-y-6 md:grid md:grid-cols-2">
+              {showActivitySection ? (
+                <div>
+                  <h3 className="text-accent04 mb-3 items-baseline font-bold lg:text-[32px]">
+                    งานกิจกรรมเร็ว ๆ นี้
+                  </h3>
+                  <div className="flex flex-col gap-y-3 md:[&>*:nth-child(n+3)]:hidden lg:[&>*:nth-child(n+3)]:block [&>*:nth-child(n+5)]:hidden">
+                    {initNewsActivity.slice(0, 4).map((item) => (
+                      <Link key={item.id} href={`/news/${item.id}`}>
+                        <ActivityCard
+                          key={item.id}
+                          title={item.title}
+                          date={item.startDate}
+                        />
+                      </Link>
+                    ))}
                   </div>
-                )}
-              </div>
+                </div>
+              ) : null}
+
+              {showAnnouncementSection && (
+                <div>
+                  <h3 className="text-accent04 mb-3 items-baseline font-bold lg:text-[32px]">
+                    ประชาสัมพันธ์สำคัญ
+                  </h3>
+                  <div className="h-full">
+                    <Carousel
+                      items={initAnnoucement || []}
+                      autoPlay
+                      autoPlayInterval={3000}
+                      showIndicators
+                    />
+                  </div>
+                </div>
+              )}
             </div>
-            <div>
-              <h3 className="text-accent04 mb-3 items-baseline font-bold lg:text-[32px]">
-                ประชาสัมพันธ์สำคัญ
-              </h3>
-              <div className="h-full">
-                <Carousel
-                  items={initAnnoucement || []}
-                  autoPlay
-                  autoPlayInterval={3000}
-                  showIndicators
-                />
-              </div>
-            </div>
-          </div>
-          {/* <NewsHighlightCarousel newsHighlight={initNewsHighlight || []} /> */}
-          <NewsCarouselComponent
-            title="ข่าวประชาสัมพันธ์"
-            news={initNewsActivity}
-            handleNextNews={handleNextNewsActivity}
-            handlePrevNews={handlePrevNewsActivity}
-            activeIndex={newsActivityActive}
-            handleSetActiveIndex={handleSetNewsActivity}
-          >
-            {initNewsActivity && initNewsActivity.length > 0 ? (
-              Array.from(
+          )}
+
+          {showActivitySection && (
+            <NewsCarouselComponent
+              title="ข่าวประชาสัมพันธ์"
+              news={initNewsActivity}
+              handleNextNews={handleNextNewsActivity}
+              handlePrevNews={handlePrevNewsActivity}
+              activeIndex={newsActivityActive}
+              handleSetActiveIndex={handleSetNewsActivity}
+            >
+              {Array.from(
                 { length: Math.min(3, initNewsActivity.length) },
                 (_, i) => {
                   const index =
@@ -175,23 +176,20 @@ const HomePage = ({
                     </div>
                   );
                 },
-              )
-            ) : (
-              <div className="p-4 text-center text-gray-500">
-                ไม่มีข่าวสารในขณะนี้
-              </div>
-            )}
-          </NewsCarouselComponent>
-          <NewsCarouselComponent
-            title="ความสำเร็จนักศึกษา"
-            news={initNewsComplete}
-            handleNextNews={handleNextNewsComplete}
-            handlePrevNews={handlePrevNewsComplete}
-            activeIndex={newsCompleteActive}
-            handleSetActiveIndex={handleSetNewsComplete}
-          >
-            {initNewsComplete && initNewsComplete.length > 0 ? (
-              Array.from(
+              )}
+            </NewsCarouselComponent>
+          )}
+
+          {showCompleteSection && (
+            <NewsCarouselComponent
+              title="ความสำเร็จนักศึกษา"
+              news={initNewsComplete}
+              handleNextNews={handleNextNewsComplete}
+              handlePrevNews={handlePrevNewsComplete}
+              activeIndex={newsCompleteActive}
+              handleSetActiveIndex={handleSetNewsComplete}
+            >
+              {Array.from(
                 { length: Math.min(3, initNewsComplete.length) },
                 (_, i) => {
                   const index =
@@ -216,23 +214,20 @@ const HomePage = ({
                     </div>
                   );
                 },
-              )
-            ) : (
-              <div className="p-4 text-center text-gray-500">
-                ไม่มีข่าวสารในขณะนี้
-              </div>
-            )}
-          </NewsCarouselComponent>
-          <NewsCarouselComponent
-            title="งานกิจกรรมนักศึกษา"
-            news={initNewsActivityStudent}
-            handleNextNews={handleNextNewsActivityStudent}
-            handlePrevNews={handlePrevNewsActivityStudent}
-            activeIndex={newsActivityStudentActive}
-            handleSetActiveIndex={handleSetNewsActivityStudent}
-          >
-            {initNewsActivityStudent && initNewsActivityStudent.length > 0 ? (
-              Array.from(
+              )}
+            </NewsCarouselComponent>
+          )}
+
+          {showActivityStudentSection && (
+            <NewsCarouselComponent
+              title="งานกิจกรรมนักศึกษา"
+              news={initNewsActivityStudent}
+              handleNextNews={handleNextNewsActivityStudent}
+              handlePrevNews={handlePrevNewsActivityStudent}
+              activeIndex={newsActivityStudentActive}
+              handleSetActiveIndex={handleSetNewsActivityStudent}
+            >
+              {Array.from(
                 { length: Math.min(3, initNewsActivityStudent.length) },
                 (_, i) => {
                   const index =
@@ -258,13 +253,10 @@ const HomePage = ({
                     </div>
                   );
                 },
-              )
-            ) : (
-              <div className="p-4 text-center text-gray-500">
-                ไม่มีข่าวสารในขณะนี้
-              </div>
-            )}
-          </NewsCarouselComponent>
+              )}
+            </NewsCarouselComponent>
+          )}
+
         </div>
       </div>
     </div>
