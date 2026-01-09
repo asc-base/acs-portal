@@ -36,7 +36,7 @@ export const ConfirmModal: FC<ConfirmModalProps> = ({
 
   const defaultTitle = {
     delete: "ยืนยันการลบข้อมูล",
-    warning: "ข้อมูลที่คุณกรอกไว้ยังไม่ถูบันทึก",
+    warning: "ข้อมูลที่คุณกรอกไว้ยังไม่ถูกบันทึก",
     success: "บันทึกข้อมูลสำเร็จ",
   };
 
