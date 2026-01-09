@@ -14,6 +14,7 @@ import { StudentService } from "@/core/service/student.service";
 import { StudentRepository } from "@/infra/repositories/student.repository";
 import { ICreateStudent } from "@/core/domain/student";
 import { ConfirmModal } from "@/components/modal/confirmModal";
+import { ConfirmModalProps } from "@/core/domain/confirmmodal";
 
 interface FormProfessorsProps {
   apiBase: string;
@@ -53,12 +54,10 @@ export const CreateStudentForm: FC<FormProfessorsProps> = ({
   apiBase,
   classBookId,
 }) => {
-  type ModalType = "success" | "warning" | "delete";
-
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isError, setIsError] = useState(false);
-  const [OpenModal, setOpenModal] = useState(false);
-  const [modalType, setModalType] = useState<ModalType>("success");
+  const [modalParameter, setModalParameter] =
+    useState<ConfirmModalProps | null>(null);
 
   const router = useRouter();
 
@@ -116,8 +115,16 @@ export const CreateStudentForm: FC<FormProfessorsProps> = ({
 
       if (!response) setIsError(true);
       else {
-        setModalType("success");
-        setOpenModal(true);
+        setModalParameter({
+          isOpen: true,
+          type: "success",
+          onClose: () => setModalParameter(null),
+          onConfirm: () => {
+            router.push(
+              `/admin/students?page=1&pageSize=10&classBookId=${classBookId}`,
+            );
+          },
+        });
       }
     } catch (error) {
       console.log(error);
@@ -398,8 +405,16 @@ export const CreateStudentForm: FC<FormProfessorsProps> = ({
           variant="outlined"
           size="large"
           onClick={() => {
-            setModalType("warning");
-            setOpenModal(true);
+            setModalParameter({
+              isOpen: true,
+              type: "warning",
+              onClose: () => setModalParameter(null),
+              onConfirm: () => {
+                router.push(
+                  `/admin/students?page=1&pageSize=10&classBookId=${classBookId}`,
+                );
+              },
+            });
           }}
         >
           ยกเลิก
@@ -414,16 +429,7 @@ export const CreateStudentForm: FC<FormProfessorsProps> = ({
         </Button>
       </div>
 
-      <ConfirmModal
-        open={OpenModal}
-        onClose={() => setOpenModal(false)}
-        onConfirm={() =>
-          router.push(
-            `/admin/students?page=1&pageSize=10&classBookId=${classBookId}`,
-          )
-        }
-        type={modalType}
-      />
+      {modalParameter && <ConfirmModal {...modalParameter} />}
     </form>
   );
 };
