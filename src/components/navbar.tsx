@@ -13,6 +13,12 @@ import FilterListIcon from "@mui/icons-material/FilterList";
 import { useAuthStore } from "@/store/auth";
 import UserIcon from "@mui/icons-material/Person";
 import { IUser } from "@/core/domain/user";
+import Menu from '@mui/material/Menu';
+import MenuItem from '@mui/material/MenuItem';
+import ListItemIcon from '@mui/material/ListItemIcon';
+import IconButton from '@mui/material/IconButton';
+import Tooltip from '@mui/material/Tooltip';
+import Logout from '@mui/icons-material/Logout';
 
 const MenuBar = () => {
   const [isOpenSubMenu, setIsOpenSubMenu] = useState(0);
@@ -164,6 +170,21 @@ export const NavbarMain = () => {
   const [isHydrated, setIsHydrated] = useState(false);
   const user = useAuthStore((state) => state.user);
   const [userAuth, setUserAuth] = useState<IUser | null>(null);
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const openMenu = Boolean(anchorEl);
+
+  const handleMenuClick = (event: React.MouseEvent<HTMLElement>) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleMenuClose = () => {
+    setAnchorEl(null);
+  };
+
+  const handleLogout = () => {
+    console.log("Logout clicked");
+    handleMenuClose();
+  };
 
   useEffect(() => {
     // Handle hydration for persisted store
@@ -180,7 +201,7 @@ export const NavbarMain = () => {
 
   const majorName = "วิทยาการคอมพิวเตอร์ประยุกต์/Applied Computer Science";
 
-  const linkIcons = useMemo(
+  const socialLinks = useMemo(
     () => [
       {
         icon: <FacebookRoundedIcon />,
@@ -189,20 +210,107 @@ export const NavbarMain = () => {
       {
         icon: <YouTubeIcon />,
         href: "https://www.youtube.com/@ACSOfficial_KMUTT",
-      },
-      {
-        icon: userAuth ? (
-          <div className="flex items-center gap-2">
-            <UserIcon />
-          </div>
-        ) : (
-          <h4>เข้าสู่ระบบ</h4>
-        ),
-        href: userAuth ? "/profile" : "/auth/student",
-      },
+      }
     ],
-    [userAuth],
+    [],
   );
+
+  const renderUserAuth = () => {
+    const activeBlue = "#1a237e";
+    const hoverBg = "#E5E7EB";
+
+    const menuItemSx = {
+      color: "text.primary",
+      py: 1.5,
+      "&:hover": {
+        backgroundColor: hoverBg,
+        color: activeBlue,
+        "& .MuiListItemIcon-root": {
+          color: activeBlue,
+        },
+      },
+    };
+
+    if (userAuth) {
+      return (
+        <>
+          <Tooltip title="Account settings">
+            <IconButton
+              onClick={handleMenuClick}
+              size="small"
+              aria-controls={openMenu ? "account-menu" : undefined}
+              aria-haspopup="true"
+              aria-expanded={openMenu ? "true" : undefined}
+            >
+              <div className="flex items-center gap-2 text-white">
+                <UserIcon />
+              </div>
+            </IconButton>
+          </Tooltip>
+
+          <Menu
+            anchorEl={anchorEl}
+            id="account-menu"
+            open={openMenu}
+            onClose={handleMenuClose}
+            onClick={handleMenuClose}
+            slotProps={{
+              paper: {
+                elevation: 0,
+                sx: {
+                  overflow: "visible",
+                  filter: "drop-shadow(0px 2px 8px rgba(0,0,0,0.32))",
+                  mt: 1.5,
+                  minWidth: "200px",
+                  "& .MuiAvatar-root": {
+                    width: 32,
+                    height: 32,
+                    ml: -0.5,
+                    mr: 1,
+                  },
+                  "&::before": {
+                    content: '""',
+                    display: "block",
+                    position: "absolute",
+                    top: 0,
+                    right: 14,
+                    width: 10,
+                    height: 10,
+                    bgcolor: "background.paper",
+                    transform: "translateY(-50%) rotate(45deg)",
+                    zIndex: 0,
+                  },
+                },
+              },
+            }}
+            transformOrigin={{ horizontal: "right", vertical: "top" }}
+            anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
+          >
+            {/* Profile */}
+            <MenuItem component={Link} href="/profile" sx={menuItemSx}>
+              <ListItemIcon>
+                <UserIcon fontSize="small" />
+              </ListItemIcon>
+              โปรไฟล์
+            </MenuItem>
+            {/* Logout */}
+            <MenuItem onClick={handleLogout} sx={menuItemSx}>
+              <ListItemIcon>
+                <Logout fontSize="small" />
+              </ListItemIcon>
+              ออกจากระบบ
+            </MenuItem>
+          </Menu>
+        </>
+      );
+    } else {
+      return (
+        <Link href="/auth/student">
+          <h4>เข้าสู่ระบบ</h4>
+        </Link>
+      );
+    }
+  };
 
   return (
     <nav
@@ -215,7 +323,6 @@ export const NavbarMain = () => {
           <button
             className="jun-edgeDrawerTrigger p-2 md:hidden"
             onClick={() => {
-              // The jun-layout library will handle the click event
               const event = new CustomEvent("triggerEdgeDrawer");
               document.dispatchEvent(event);
             }}
@@ -225,9 +332,9 @@ export const NavbarMain = () => {
 
           {isOpen ? (
             <div className="flex min-h-20 items-center gap-x-4">
-              {linkIcons.map((link, index) => (
+              {socialLinks.map((link, index) => (
                 <Link
-                  key={`mobile-${index}-${userAuth?.id || "guest"}`}
+                  key={`mobile-${index}`}
                   href={link.href}
                   target={link.href.startsWith("http") ? "_blank" : "_self"}
                   rel={
@@ -239,6 +346,7 @@ export const NavbarMain = () => {
                   {link.icon}
                 </Link>
               ))}
+               {renderUserAuth()}
             </div>
           ) : (
             <div className="flex min-h-20 items-center gap-x-4">
@@ -267,9 +375,9 @@ export const NavbarMain = () => {
           )}
         </div>
         <div className="hidden items-center gap-x-4 md:flex">
-          {linkIcons.map((link, index) => (
+          {socialLinks.map((link, index) => (
             <Link
-              key={`${index}-${userAuth?.id || "guest"}`}
+              key={`desktop-${index}`}
               href={link.href}
               target={link.href.startsWith("http") ? "_blank" : "_self"}
               rel={
@@ -279,7 +387,9 @@ export const NavbarMain = () => {
               {link.icon}
             </Link>
           ))}
+          {renderUserAuth()}
         </div>
+
         {isOpen ? (
           <button
             className="flex items-center md:hidden"
