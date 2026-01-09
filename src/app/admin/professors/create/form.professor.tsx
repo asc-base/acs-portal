@@ -20,6 +20,7 @@ import { RHFTextField } from "@/components/form/RHFTextField";
 import { RHFSelect } from "@/components/form/RHFSelect";
 import { ICreateProfessor } from "@/core/domain/professor";
 import { ConfirmModal } from "@/components/modal/confirmModal";
+import { ConfirmModalProps } from "@/core/domain/confirmmodal";
 
 interface FormProfessorsProps {
   apiBase: string;
@@ -121,8 +122,8 @@ export const FormProfesssors: FC<FormProfessorsProps> = ({ apiBase }) => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isError, setIsError] = useState(false);
   const router = useRouter();
-  const [openWarningModal, setOpenWarningModal] = useState(false);
-  const [openSucsessModal, setOpenSucsessModal] = useState(false);
+  const [modalParameter, setModalParameter] =
+    useState<ConfirmModalProps | null>(null);
 
   const masterDataService = useMemo(() => {
     const masterdataRepository = new MasterDataRepository(apiBase);
@@ -184,7 +185,14 @@ export const FormProfesssors: FC<FormProfessorsProps> = ({ apiBase }) => {
 
   const cancelForm = () => {
     const hasAnyValue = isDirty || !!selectedFile;
-    hasAnyValue ? setOpenWarningModal(true) : router.push("/admin/professors");
+    if (hasAnyValue) {
+      setModalParameter({
+        isOpen: true,
+        type: "warning",
+        onClose: () => setModalParameter(null),
+        onConfirm: () => router.push(`/admin/professors`),
+      });
+    } else router.push(`/admin/professors`);
   };
 
   const handleConfirmSubmit = handleSubmit(async (data) => {
@@ -219,7 +227,12 @@ export const FormProfesssors: FC<FormProfessorsProps> = ({ apiBase }) => {
         setIsError(true);
         return;
       }
-      setOpenSucsessModal(true);
+      setModalParameter({
+        isOpen: true,
+        type: "success",
+        onClose: () => setModalParameter(null),
+        onConfirm: () => router.push(`/admin/professors`),
+      });
     } catch (error) {
       console.error(error);
       setIsError(true);
@@ -586,29 +599,13 @@ export const FormProfesssors: FC<FormProfessorsProps> = ({ apiBase }) => {
           type="submit"
           variant="contained"
           size="large"
+          onClick={handleConfirmSubmit}
           disabled={!isValid}
         >
           บันทึกข้อมูล
         </Button>
       </div>
-      <ConfirmModal
-        open={openWarningModal}
-        onClose={() => {
-          setOpenWarningModal(false);
-        }}
-        onConfirm={() => {
-          setOpenWarningModal(false);
-          handleConfirmSubmit();
-        }}
-        onCancel={() => router.push("/admin/professors")}
-        type="warning"
-      />
-      <ConfirmModal
-        open={openSucsessModal}
-        onClose={() => setOpenSucsessModal(false)}
-        onConfirm={() => router.push("/admin/professors")}
-        type="success"
-      />
+      {modalParameter && <ConfirmModal {...modalParameter} />}
     </form>
   );
 };
