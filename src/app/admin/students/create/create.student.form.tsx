@@ -14,7 +14,7 @@ import { StudentService } from "@/core/service/student.service";
 import { StudentRepository } from "@/infra/repositories/student.repository";
 import { ICreateStudent } from "@/core/domain/student";
 import { ConfirmModal } from "@/components/modal/confirmModal";
-import { ConfirmModalProps } from "@/core/domain/confirmmodal";
+import { ConfirmModalProps } from "@/components/modal/confirmModal";
 
 interface FormProfessorsProps {
   apiBase: string;
@@ -56,8 +56,9 @@ export const CreateStudentForm: FC<FormProfessorsProps> = ({
 }) => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isError, setIsError] = useState(false);
-  const [modalParameter, setModalParameter] =
-    useState<ConfirmModalProps | null>(null);
+  const [confirmModal, setConfirmModal] = useState<ConfirmModalProps | null>(
+    null,
+  );
 
   const router = useRouter();
 
@@ -115,10 +116,10 @@ export const CreateStudentForm: FC<FormProfessorsProps> = ({
 
       if (!response) setIsError(true);
       else {
-        setModalParameter({
+        setConfirmModal({
           isOpen: true,
           type: "success",
-          onClose: () => setModalParameter(null),
+          onClose: () => setConfirmModal(null),
           onConfirm: () => {
             router.push(
               `/admin/students?page=1&pageSize=10&classBookId=${classBookId}`,
@@ -164,19 +165,7 @@ export const CreateStudentForm: FC<FormProfessorsProps> = ({
                   className="h-full w-full rounded-md object-cover"
                 />
                 <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
-                  <Button
-                    variant="contained"
-                    component="label"
-                    size="large"
-                    sx={{
-                      border: "1px solid var(--color-neutral04)",
-                      backgroundColor: "var(--color-neutral01)",
-                      color: "var(--color-neutral04)",
-                      boxShadow: "none",
-                      fontWeight: "bold",
-                      px: 4,
-                    }}
-                  >
+                  <Button variant="contained" component="label" size="large">
                     อัปโหลดรูปภาพ
                     <input
                       type="file"
@@ -188,19 +177,7 @@ export const CreateStudentForm: FC<FormProfessorsProps> = ({
                 </div>
               </div>
             ) : (
-              <Button
-                variant="outlined"
-                component="label"
-                size="large"
-                sx={{
-                  border: "1px solid var(--color-neutral04)",
-                  backgroundColor: "var(--color-neutral01)",
-                  color: "var(--color-neutral04)",
-                  boxShadow: "none",
-                  fontWeight: "bold",
-                  px: 4,
-                }}
-              >
+              <Button variant="outlined" component="label" size="large">
                 อัปโหลดรูปภาพ
                 <input
                   type="file"
@@ -405,10 +382,10 @@ export const CreateStudentForm: FC<FormProfessorsProps> = ({
           variant="outlined"
           size="large"
           onClick={() => {
-            setModalParameter({
+            setConfirmModal({
               isOpen: true,
               type: "warning",
-              onClose: () => setModalParameter(null),
+              onClose: () => setConfirmModal(null),
               onConfirm: () => {
                 router.push(
                   `/admin/students?page=1&pageSize=10&classBookId=${classBookId}`,
@@ -429,7 +406,7 @@ export const CreateStudentForm: FC<FormProfessorsProps> = ({
         </Button>
       </div>
 
-      {modalParameter && <ConfirmModal {...modalParameter} />}
+      {confirmModal && <ConfirmModal {...confirmModal} />}
     </form>
   );
 };
