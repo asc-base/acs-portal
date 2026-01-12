@@ -20,7 +20,7 @@ import { RHFTextField } from "@/components/form/RHFTextField";
 import { RHFSelect } from "@/components/form/RHFSelect";
 import { ICreateProfessor } from "@/core/domain/professor";
 import { ConfirmModal } from "@/components/modal/confirmModal";
-import { ConfirmModalProps } from "@/core/domain/confirmmodal";
+import { ConfirmModalProps } from "@/components/modal/confirmModal";
 
 interface FormProfessorsProps {
   apiBase: string;
@@ -122,8 +122,9 @@ export const FormProfesssors: FC<FormProfessorsProps> = ({ apiBase }) => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isError, setIsError] = useState(false);
   const router = useRouter();
-  const [modalParameter, setModalParameter] =
-    useState<ConfirmModalProps | null>(null);
+  const [confirmModal, setConfirmModal] = useState<ConfirmModalProps | null>(
+    null,
+  );
 
   const masterDataService = useMemo(() => {
     const masterdataRepository = new MasterDataRepository(apiBase);
@@ -186,10 +187,10 @@ export const FormProfesssors: FC<FormProfessorsProps> = ({ apiBase }) => {
   const cancelForm = () => {
     const hasAnyValue = isDirty || !!selectedFile;
     if (hasAnyValue) {
-      setModalParameter({
+      setConfirmModal({
         isOpen: true,
         type: "warning",
-        onClose: () => setModalParameter(null),
+        onClose: () => setConfirmModal(null),
         onConfirm: () => router.push(`/admin/professors`),
       });
     } else router.push(`/admin/professors`);
@@ -227,10 +228,10 @@ export const FormProfesssors: FC<FormProfessorsProps> = ({ apiBase }) => {
         setIsError(true);
         return;
       }
-      setModalParameter({
+      setConfirmModal({
         isOpen: true,
         type: "success",
-        onClose: () => setModalParameter(null),
+        onClose: () => setConfirmModal(null),
         onConfirm: () => router.push(`/admin/professors`),
       });
     } catch (error) {
@@ -605,7 +606,7 @@ export const FormProfesssors: FC<FormProfessorsProps> = ({ apiBase }) => {
           บันทึกข้อมูล
         </Button>
       </div>
-      {modalParameter && <ConfirmModal {...modalParameter} />}
+      {confirmModal && <ConfirmModal {...confirmModal} />}
     </form>
   );
 };

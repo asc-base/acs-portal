@@ -4,7 +4,6 @@ import { ButtonProps } from "@mui/material/Button";
 import ErrorOutlineIcon from "@mui/icons-material/ErrorOutline";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
-import { ConfirmModalProps } from "@/core/domain/confirmmodal";
 
 const style = {
   position: "absolute",
@@ -17,6 +16,19 @@ const style = {
   boxShadow: 24,
   p: 4,
 };
+
+type modalType = "delete" | "warning" | "success";
+
+export interface ConfirmModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onConfirm: () => void;
+  type: modalType;
+  title?: string;
+  description?: string;
+  confirmText?: string;
+  cancelText?: string;
+}
 
 export const ConfirmModal: FC<ConfirmModalProps> = ({
   isOpen,
