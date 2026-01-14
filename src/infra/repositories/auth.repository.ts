@@ -10,8 +10,8 @@ import { IUser } from "@/interface/user";
 import { authErrorHandler } from "@/lib/auth-error-handler";
 
 export class AuthRepository implements IAuthRepository {
-  private http: HttpHelper;
-  private baseUrl: string;
+  private readonly http: HttpHelper;
+  private readonly baseUrl: string;
 
   constructor(baseUrl: string) {
     this.baseUrl = baseUrl;
@@ -71,6 +71,12 @@ export class AuthRepository implements IAuthRepository {
         return response.data;
       }
       return null;
+    });
+  }
+
+  async Logout(): Promise<void> {
+    authErrorHandler.withAuthErrorHandling(async () => {
+      await this.http.post<void>(`/v2/auth/logout`);
     });
   }
 }
