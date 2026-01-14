@@ -35,17 +35,6 @@ export interface INewsInformation {
   type: Category;
 }
 
-export interface IUpsertNewsInformation {
-  id: number;
-  image: string;
-  newsId: number;
-  typeId: number;
-  createdAt: Date;
-  updatedAt: Date;
-  createdBy: number;
-  updatedBy: number;
-}
-
 export interface newsInformationPageProps {
   newsInformation: INewsInformation[];
   type: string;

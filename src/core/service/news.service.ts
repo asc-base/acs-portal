@@ -1,7 +1,7 @@
 import { Pageable } from "@/interface/response";
 import { INews, ICreateNews } from "../domain/news";
 import { INewsRepository } from "../ports/news.repository";
-import { INewsInformation, IUpsertNewsInformation } from "../domain/news";
+import { INewsInformation } from "../domain/news";
 export class NewsService {
   constructor(private newsRepository: INewsRepository) {}
 
@@ -73,7 +73,7 @@ export class NewsService {
     return response.data;
   }
 
-  async upsertNewsInformation(data: FormData): Promise<IUpsertNewsInformation> {
+  async upsertNewsInformation(data: FormData): Promise<INewsInformation> {
     const response = await this.newsRepository.upsertNewsInformation(data);
     return response.data;
   }

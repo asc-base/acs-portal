@@ -1,9 +1,5 @@
 import { INewsRepository } from "@/core/ports/news.repository";
-import {
-  INews,
-  INewsInformation,
-  IUpsertNewsInformation,
-} from "@/core/domain/news";
+import { INews, INewsInformation } from "@/core/domain/news";
 import { HttpHelper } from "@/lib/http";
 import { ApiResponse, Pageable } from "@/interface/response";
 
@@ -87,8 +83,8 @@ export class NewsRepository implements INewsRepository {
 
   async upsertNewsInformation(
     data: FormData,
-  ): Promise<ApiResponse<IUpsertNewsInformation>> {
-    const response = await this.http.put<ApiResponse<IUpsertNewsInformation>>(
+  ): Promise<ApiResponse<INewsInformation>> {
+    const response = await this.http.put<ApiResponse<INewsInformation>>(
       `/v1/news/news-media/`,
       data,
     );
