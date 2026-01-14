@@ -1,5 +1,9 @@
 import { INewsRepository } from "@/core/ports/news.repository";
-import { INews, INewsInformation } from "@/core/domain/news";
+import {
+  INews,
+  INewsInformation,
+  IUpsertNewsInformation,
+} from "@/core/domain/news";
 import { HttpHelper } from "@/lib/http";
 import { ApiResponse, Pageable } from "@/interface/response";
 
@@ -12,10 +16,8 @@ export class NewsRepository implements INewsRepository {
     this.http = new HttpHelper(this.baseUrl);
   }
 
-  async createNews(data : FormData): Promise<ApiResponse<INews>>{
-    const response = await this.http.post<ApiResponse<INews>>(
-      `/v1/news`,data
-    );
+  async createNews(data: FormData): Promise<ApiResponse<INews>> {
+    const response = await this.http.post<ApiResponse<INews>>(`/v1/news`, data);
     return response;
   }
 
@@ -61,16 +63,34 @@ export class NewsRepository implements INewsRepository {
     return response;
   }
 
-  async getNewsInformations(type: string,page: number,pageSize: number,): Promise<ApiResponse<INewsInformation[]>> {
+  async getNewsInformations(
+    type: string,
+    page: number,
+    pageSize: number,
+  ): Promise<ApiResponse<INewsInformation[]>> {
     const response = await this.http.get<ApiResponse<INewsInformation[]>>(
       `/v1/news/news-media?type=${type}&page=${page}&pageSize=${pageSize}`,
     );
     return response;
   }
 
-  async createNewsInformation(type:string,data: FormData): Promise<ApiResponse<INewsInformation>> {
+  async createNewsInformation(
+    type: string,
+    data: FormData,
+  ): Promise<ApiResponse<INewsInformation>> {
     const response = await this.http.post<ApiResponse<INewsInformation>>(
-      `/v1/news/news-media/${type}`,data
+      `/v1/news/news-media/${type}`,
+      data,
+    );
+    return response;
+  }
+
+  async upsertNewsInformation(
+    data: FormData,
+  ): Promise<ApiResponse<IUpsertNewsInformation>> {
+    const response = await this.http.put<ApiResponse<IUpsertNewsInformation>>(
+      `/v1/news/news-media/`,
+      data,
     );
     return response;
   }
