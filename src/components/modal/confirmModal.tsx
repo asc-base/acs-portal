@@ -5,20 +5,6 @@ import ErrorOutlineIcon from "@mui/icons-material/ErrorOutline";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
 
-type ButtonType = "delete" | "warning" | "success";
-
-interface ConfirmModalProps {
-  open: boolean;
-  onClose: () => void;
-  onConfirm: () => void;
-  onCancel?: () => void;
-  type: ButtonType;
-  title?: string;
-  description?: string;
-  confirmText?: string;
-  cancelText?: string;
-}
-
 const style = {
   position: "absolute",
   top: "50%",
@@ -31,19 +17,29 @@ const style = {
   p: 4,
 };
 
-export const ConfirmModal: FC<ConfirmModalProps> = (props) => {
-  const {
-    open,
-    onClose,
-    onConfirm,
-    onCancel,
-    type,
-    title,
-    description,
-    confirmText,
-    cancelText,
-  } = props;
+type modalType = "delete" | "warning" | "success";
 
+export interface ConfirmModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onConfirm: () => void;
+  type: modalType;
+  title?: string;
+  description?: string;
+  confirmText?: string;
+  cancelText?: string;
+}
+
+export const ConfirmModal: FC<ConfirmModalProps> = ({
+  isOpen,
+  onClose,
+  onConfirm,
+  type,
+  title,
+  description,
+  confirmText,
+  cancelText,
+}) => {
   const colorMap: Record<string, ButtonProps["color"]> = {
     delete: "error",
     warning: "warning",
@@ -52,30 +48,30 @@ export const ConfirmModal: FC<ConfirmModalProps> = (props) => {
 
   const defaultTitle = {
     delete: "ยืนยันการลบข้อมูล",
-    warning: "ยกเลิกการบันทึก",
+    warning: "ข้อมูลที่คุณกรอกไว้ยังไม่ถูกบันทึก",
     success: "บันทึกข้อมูลสำเร็จ",
   };
 
   const defaultDescription = {
     delete: "เมื่อลบแล้ว ข้อมูลจะไม่สามารถกู้คืนได้",
-    warning: "ข้อมูลยังไม่มีการบันทึก",
+    warning: "หากออกจากหน้านี้ข้อมูลจะสูญหาย",
     success: "ข้อมูลถูกจัดเก็บในระบบแล้ว",
   };
 
   const defaultConfirmText = {
     delete: "ยืนยันการลบ",
-    warning: "บันทึก",
+    warning: "ยืนยันการออก",
     success: "กลับสู่หน้าหลัก",
   };
 
   const defaultCancelText = {
     delete: "ยกเลิก",
-    warning: "ยกเลิกโดยไม่ทันทึก",
+    warning: "ย้อนกลับ",
     success: "",
   };
 
   return (
-    <Modal open={open} onClose={onClose}>
+    <Modal open={isOpen} onClose={onClose}>
       <Box sx={style}>
         <div className="flex flex-col items-center justify-center gap-6">
           {type === "warning" && (
@@ -112,11 +108,7 @@ export const ConfirmModal: FC<ConfirmModalProps> = (props) => {
           </div>
           <div className="flex w-full justify-center gap-x-4">
             {type !== "success" && (
-              <Button
-                variant="outlined"
-                onClick={onCancel ?? onClose}
-                className="w-full"
-              >
+              <Button variant="outlined" onClick={onClose} className="w-full">
                 {cancelText ?? defaultCancelText[type]}
               </Button>
             )}
