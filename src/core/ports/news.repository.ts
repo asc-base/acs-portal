@@ -17,9 +17,5 @@ export interface INewsRepository {
     page: number,
     pageSize: number,
   ): Promise<ApiResponse<INewsInformation[]>>;
-  createNewsInformation(
-    type: string,
-    data: FormData,
-  ): Promise<ApiResponse<INewsInformation>>;
   upsertNewsInformation(data: FormData): Promise<ApiResponse<INewsInformation>>;
 }
