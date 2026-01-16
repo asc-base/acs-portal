@@ -1,6 +1,7 @@
 export interface ICurriculum {
   id: number;
   year: string;
+  title: string;
   fileUrl: string;
   description: string;
   imageUrl: string;
