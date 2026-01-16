@@ -4,6 +4,7 @@ import { newsInformationPageProps } from "@/core/domain/news";
 import { useRouter } from "next/navigation";
 import { Button } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
+import Link from "next/link";
 
 const NewsInformationListComponent = ({
   newsInformation,
@@ -23,15 +24,20 @@ const NewsInformationListComponent = ({
           )}
           <h4>(สามารถเลือกได้สูงสุด {pageSize} ข่าวสาร)</h4>
         </div>
-        <Button
-          variant="contained"
-          startIcon={<AddIcon />}
-          sx={{
-            background: "#120554",
-          }}
-        >
-          เพิ่มข่าวประชาสัมพันธ์
-        </Button>
+        {type === "newshighlight" && (
+          <Link href={"/admin/newshighlight/create"}>
+            <Button variant="contained" startIcon={<AddIcon />}>
+              ข่าว Highlight
+            </Button>
+          </Link>
+        )}
+        {type === "announcement" && (
+          <Link href={"/admin/announcement/create"}>
+            <Button variant="contained" startIcon={<AddIcon />}>
+              ข่าวประชาสัมพันธ์
+            </Button>
+          </Link>
+        )}
       </div>
 
       <div className="grid max-w-7xl grid-cols-3 justify-start gap-6">
