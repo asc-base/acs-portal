@@ -24,14 +24,13 @@ const NewsInformationListComponent = ({
           )}
           <h4>(สามารถเลือกได้สูงสุด {pageSize} ข่าวสาร)</h4>
         </div>
-        {type === "newshighlight" && (
+        {type === "newshighlight" ? (
           <Link href={"/admin/newshighlight/create"}>
             <Button variant="contained" startIcon={<AddIcon />}>
               ข่าว Highlight
             </Button>
           </Link>
-        )}
-        {type === "announcement" && (
+        ) : (
           <Link href={"/admin/announcement/create"}>
             <Button variant="contained" startIcon={<AddIcon />}>
               ข่าวประชาสัมพันธ์
