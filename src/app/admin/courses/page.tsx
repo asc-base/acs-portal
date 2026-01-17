@@ -1,8 +1,7 @@
 import React from "react";
 import CoursesLandingpage from "./courses.landingpage";
-import { courseService } from "@/infra/container";
+import { courseService, masterDataService, curriculumService, baseUrl } from "@/infra/container";
 import { QueryCourse } from "@/core/domain/course";
-import { masterDataService } from "@/infra/container";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -23,11 +22,20 @@ const page = async ({ searchParams }: PageProps) => {
     sortBy: search.sortBy ?? "courseId",
     sortOrder: search.sortOrder ?? "desc",
   };
-  
 
   const { rows, pageSize, page, totalRecords } = await courseService.getCourse(query);
   
   const typeCourses = await masterDataService.getMasterDataTypeCourse();
+
+  const curriculum = await curriculumService.getCurriculumById(query.curriculumId)
+
+  if (!curriculum) {
+  return (
+    <div className="flex items-center justify-center h-screen">
+      <h2 className="font-bold">No curriculum information</h2>
+    </div>
+  );
+  }
 
   return (
     <CoursesLandingpage
@@ -40,6 +48,8 @@ const page = async ({ searchParams }: PageProps) => {
       typecourseId={query.typecourseId}
       sortBy={query.sortBy}
       sortOrder={query.sortOrder}
+      curriculum={curriculum}
+      apiBase={baseUrl}
     />
   );
 };
