@@ -3,9 +3,10 @@ import {
   LoginRequest,
   AuthResponse,
   ResetPasswordPayload,
+  ForgetPasswordPayload,
+  ForgetPasswordResponse,
 } from "../domain/auth";
 import { IUser } from "../domain/user";
-import { ForgetPasswordPayload, ForgetPasswordResponse } from "../domain/auth";
 
 export interface IAuthRepository {
   LoginAdmin(data: LoginRequest): Promise<ApiResponse<AuthResponse>>;
@@ -18,4 +19,5 @@ export interface IAuthRepository {
     data: ResetPasswordPayload,
   ): Promise<ApiResponse<ForgetPasswordResponse>>;
   getUser(): Promise<IUser | null>;
+  Logout(): Promise<void>;
 }
