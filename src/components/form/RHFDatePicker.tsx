@@ -16,6 +16,7 @@ type RHFDatePickerProps<T extends FieldValues> = {
   label?: string;
   placeholder?: string;
   adapterLocale?: string;
+  requiredMark?: boolean;
 } & Omit<DatePickerProps, "value" | "onChange" | "label">;
 
 export function RHFDatePickerDayjs<T extends FieldValues>({
@@ -24,6 +25,7 @@ export function RHFDatePickerDayjs<T extends FieldValues>({
   label,
   placeholder,
   adapterLocale = "th",
+  requiredMark,
   ...props
 }: RHFDatePickerProps<T>) {
   return (
@@ -32,7 +34,9 @@ export function RHFDatePickerDayjs<T extends FieldValues>({
       control={control}
       render={({ field, fieldState }) => (
         <Stack spacing={0.5}>
-          {label && <FormLabel>{label}</FormLabel>}
+          {label && (
+            <FormLabel>{requiredMark ? `${label} *` : label}</FormLabel>
+          )}
 
           <LocalizationProvider
             dateAdapter={AdapterDayjs}
