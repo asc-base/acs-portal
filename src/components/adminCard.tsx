@@ -24,7 +24,9 @@ const CurriculumContent: FC<{
   onEdit?: () => void;
 }> = ({ curriculum, onEdit }) => (
   <div className="flex items-start justify-between">
-    <h3 className="mt-1 font-bold">หลักสูตรปรับปรุง พ.ศ. {curriculum.year}</h3>
+    <h3 className="mt-1 font-bold">
+      {curriculum.title} พ.ศ. {curriculum.year}
+    </h3>
     <IconButton onClick={onEdit}>
       <EditIcon className="text-primary03 cursor-pointer" />
     </IconButton>
