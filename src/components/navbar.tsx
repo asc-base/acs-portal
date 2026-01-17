@@ -13,12 +13,14 @@ import FilterListIcon from "@mui/icons-material/FilterList";
 import { useAuthStore } from "@/store/auth";
 import UserIcon from "@mui/icons-material/Person";
 import { IUser } from "@/core/domain/user";
-import Menu from '@mui/material/Menu';
-import MenuItem from '@mui/material/MenuItem';
-import ListItemIcon from '@mui/material/ListItemIcon';
-import IconButton from '@mui/material/IconButton';
-import Tooltip from '@mui/material/Tooltip';
-import Logout from '@mui/icons-material/Logout';
+import Menu from "@mui/material/Menu";
+import MenuItem from "@mui/material/MenuItem";
+import ListItemIcon from "@mui/material/ListItemIcon";
+import IconButton from "@mui/material/IconButton";
+import Tooltip from "@mui/material/Tooltip";
+import Logout from "@mui/icons-material/Logout";
+import { AuthRepository } from "@/infra/repositories/auth.repository";
+import { AuthService } from "@/core/service/auth.service";
 
 const MenuBar = () => {
   const [isOpenSubMenu, setIsOpenSubMenu] = useState(0);
@@ -165,13 +167,18 @@ const MenuBar = () => {
   );
 };
 
-export const NavbarMain = () => {
+export const NavbarMain = ({ baseUrl }: { baseUrl: string }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [isHydrated, setIsHydrated] = useState(false);
   const user = useAuthStore((state) => state.user);
   const [userAuth, setUserAuth] = useState<IUser | null>(null);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const openMenu = Boolean(anchorEl);
+
+  const authService = useMemo(() => {
+    const authRepository = new AuthRepository(baseUrl);
+    return new AuthService(authRepository);
+  }, [baseUrl]);
 
   const handleMenuClick = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
@@ -182,7 +189,7 @@ export const NavbarMain = () => {
   };
 
   const handleLogout = () => {
-    console.log("Logout clicked");
+    authService.logout();
     handleMenuClose();
   };
 
@@ -210,7 +217,7 @@ export const NavbarMain = () => {
       {
         icon: <YouTubeIcon />,
         href: "https://www.youtube.com/@ACSOfficial_KMUTT",
-      }
+      },
     ],
     [],
   );
@@ -346,7 +353,7 @@ export const NavbarMain = () => {
                   {link.icon}
                 </Link>
               ))}
-               {renderUserAuth()}
+              {renderUserAuth()}
             </div>
           ) : (
             <div className="flex min-h-20 items-center gap-x-4">
