@@ -1,8 +1,9 @@
+"use client";
 import Image from "next/image";
 import Link from "next/link";
 import LOGOACS from "../../public/logoacs.png";
 import FacebookRoundedIcon from "@mui/icons-material/FacebookRounded";
-import InstagramIcon from '@mui/icons-material/Instagram';
+import InstagramIcon from "@mui/icons-material/Instagram";
 import YouTubeIcon from "@mui/icons-material/YouTube";
 
 export const Footer = () => {
@@ -12,18 +13,17 @@ export const Footer = () => {
       href: "https://www.facebook.com/profile.php?id=100086247692906",
     },
     {
-      icon: <InstagramIcon/>,
+      icon: <InstagramIcon />,
       href: "https://www.instagram.com/dek_warmkid/",
     },
     {
       icon: <YouTubeIcon />,
       href: "https://www.youtube.com/@ACSOfficial_KMUTT",
     },
-
   ];
 
   return (
-    <div className="bg-primary01 px-6 py-8 text-white md:px-12 mt-0">
+    <div className="bg-primary01 mt-0 px-6 py-8 text-white md:px-12">
       <div className="flex flex-col flex-wrap gap-4 lg:flex-row">
         <div className="flex w-full flex-col items-start md:flex-row lg:flex-1">
           <div className="flex min-w-[120px] flex-col gap-4 pb-5">
@@ -42,8 +42,8 @@ export const Footer = () => {
             </div>
           </div>
 
-          <div className="w-full md:flex-1 md:ml-10">
-            <h4 className="text-secondary01 font-bold mb-2">ติดต่อเรา</h4>
+          <div className="w-full md:ml-10 md:flex-1">
+            <h4 className="text-secondary01 mb-2 font-bold">ติดต่อเรา</h4>
             <h5 className="text-neutral01 leading-relaxed whitespace-nowrap">
               ภาควิชาคณิตศาสตร์ คณะวิทยาศาสตร์ <br />
               มหาวิทยาลัยเทคโนโลยีพระจอมเกล้าธนบุรี
@@ -80,12 +80,12 @@ export const Footer = () => {
             <Link href="/news?category=ข่าวสารและกิจกรรม&page=1&pageSize=12">
               <h5 className="text-neutral01">ประชาสัมพันธ์</h5>
             </Link>
-                      <Link href="/news?category=ความสำเร็จสาขาวิชา&page=1&pageSize=12">
-            <h5 className="text-neutral01">ความสำเร็จสาขาวิชา</h5>
-             </Link>
-                       <Link href="/news?category=งานกิจกรรมนักศึกษา&page=1&pageSize=12">
-            <h5 className="text-neutral01">งานกิจกรรมนักศึกษา</h5>
-          </Link>
+            <Link href="/news?category=ความสำเร็จสาขาวิชา&page=1&pageSize=12">
+              <h5 className="text-neutral01">ความสำเร็จสาขาวิชา</h5>
+            </Link>
+            <Link href="/news?category=งานกิจกรรมนักศึกษา&page=1&pageSize=12">
+              <h5 className="text-neutral01">งานกิจกรรมนักศึกษา</h5>
+            </Link>
           </div>
 
           <div className="flex min-w-[120px] flex-1 flex-col gap-2">

@@ -1,5 +1,5 @@
 import { IStudentRepository } from "../ports/student.repository";
-import { IStudent, QueryStudent } from "../domain/student";
+import { IStudent, QueryStudent , ICreateStudent} from "../domain/student";
 import { Pageable } from "@/interface/response";
 
 export class StudentService {
@@ -14,4 +14,9 @@ export class StudentService {
         const response = await this.studentRepository.getStudentByUserId(id);
         return response.data;
       }
+
+  async createStudent(data : ICreateStudent[] , classBookId : number): Promise<IStudent[]> {
+        const response = await this.studentRepository.createStudent(data ,classBookId)
+        return response.data;
+  }
 }

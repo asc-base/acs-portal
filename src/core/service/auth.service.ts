@@ -8,7 +8,7 @@ import {
 } from "../domain/auth";
 
 export class AuthService {
-  constructor(private authRepository: IAuthRepository) {}
+  constructor(private readonly authRepository: IAuthRepository) {}
 
   /** ===== ของเดิม: ห้ามแก้ ===== */
   async LoginAdmin(data: { email: string; password: string }) {
@@ -38,5 +38,9 @@ export class AuthService {
   async getUser(): Promise<void | IUser | null> {
     const user = await this.authRepository.getUser();
     return user;
+  }
+
+  async logout(): Promise<void> {
+    this.authRepository.Logout();
   }
 }
