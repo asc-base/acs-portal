@@ -1,12 +1,11 @@
 import { ICurriculumRepository } from "@/core/ports/curriculum.repository";
 import { ICurriculum, QueryCurriculum } from "@/core/domain/curriculum";
-import { Pageable } from "@/interface/response";
+import { Pageable, ApiResponse } from "@/interface/response";
 import { HttpHelper } from "@/lib/http";
-import { ApiResponse } from "@/interface/response";
 
 export class CurriculumRepository implements ICurriculumRepository {
-  private http: HttpHelper;
-  private baseUrl: string;
+  private readonly http: HttpHelper;
+  private readonly baseUrl: string;
 
   constructor(baseUrl: string) {
     this.baseUrl = baseUrl;
@@ -50,4 +49,16 @@ export class CurriculumRepository implements ICurriculumRepository {
     );
     return response;
   }
+
+  async updateCurriculum(
+    id: number,
+    data: FormData,
+  ): Promise<ApiResponse<ICurriculum>> {
+    const response = await this.http.patch<ApiResponse<ICurriculum>>(
+      `/v1/curriculum/${id}`,
+      data,
+    );
+    return response;
+  }
+
 }

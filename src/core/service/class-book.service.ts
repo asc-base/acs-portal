@@ -3,6 +3,7 @@ import {
   QueryClassBook,
   IClassBook,
   ICreateClassBook,
+  IUpdateClassBook,
 } from "../domain/classbook";
 import { Pageable } from "@/interface/response";
 export class ClassBookService {
@@ -29,6 +30,25 @@ export class ClassBookService {
       return response;
     } catch (error) {
       console.error("Failed to create class book:", error);
+      return null;
+    }
+  }
+
+  async updateClassBook(data: IUpdateClassBook, image: File | null, id : number){
+    try {
+      const formData = new FormData();
+      Object.entries(data).forEach(([key, value]) => {
+        formData.append(key, value?.toString() ?? "");
+      });
+      
+      if (image) {
+      formData.append("image", image);
+    }
+
+      const response = await this.classBookRepository.updateClassBook(formData , id);
+      return response;
+    } catch (error) {
+      console.error("Failed to update class book:", error);
       return null;
     }
   }
