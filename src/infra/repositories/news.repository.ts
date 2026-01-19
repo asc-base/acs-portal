@@ -12,10 +12,8 @@ export class NewsRepository implements INewsRepository {
     this.http = new HttpHelper(this.baseUrl);
   }
 
-  async createNews(data : FormData): Promise<ApiResponse<INews>>{
-    const response = await this.http.post<ApiResponse<INews>>(
-      `/v1/news`,data
-    );
+  async createNews(data: FormData): Promise<ApiResponse<INews>> {
+    const response = await this.http.post<ApiResponse<INews>>(`/v1/news`, data);
     return response;
   }
 
@@ -61,16 +59,23 @@ export class NewsRepository implements INewsRepository {
     return response;
   }
 
-  async getNewsInformations(type: string,page: number,pageSize: number,): Promise<ApiResponse<INewsInformation[]>> {
+  async getNewsInformations(
+    type: string,
+    page: number,
+    pageSize: number,
+  ): Promise<ApiResponse<INewsInformation[]>> {
     const response = await this.http.get<ApiResponse<INewsInformation[]>>(
       `/v1/news/news-media?type=${type}&page=${page}&pageSize=${pageSize}`,
     );
     return response;
   }
 
-  async createNewsInformation(type:string,data: FormData): Promise<ApiResponse<INewsInformation>> {
-    const response = await this.http.post<ApiResponse<INewsInformation>>(
-      `/v1/news/news-media/${type}`,data
+  async upsertNewsInformation(
+    data: FormData,
+  ): Promise<ApiResponse<INewsInformation>> {
+    const response = await this.http.put<ApiResponse<INewsInformation>>(
+      `/v1/news/news-media/`,
+      data,
     );
     return response;
   }
