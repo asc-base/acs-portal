@@ -14,6 +14,8 @@ import { ICurriculum } from "@/core/domain/curriculum";
 import { ClassBookRepository } from "@/infra/repositories/class-book.repository";
 import { ClassBookService } from "@/core/service/class-book.service";
 import { useRouter } from "next/navigation";
+import { ConfirmModal } from "@/components/modal/confirmModal";
+import { ConfirmModalProps } from "@/components/modal/confirmModal";
 
 interface FormClassbookProps {
   apiBase: string;
@@ -44,6 +46,9 @@ export const FormClassbook: FC<FormClassbookProps> = ({ apiBase }) => {
   const [curriculums, setCurriculums] = useState<ICurriculum[]>([]);
   const [isError, setIsError] = useState(false);
   const router = useRouter();
+  const [confirmModal, setConfirmModal] = useState<ConfirmModalProps | null>(
+    null,
+  );
 
   const cuurriculumService = useMemo(() => {
     const curriculumRepository = new CurriculumRepository(apiBase);
@@ -55,7 +60,11 @@ export const FormClassbook: FC<FormClassbookProps> = ({ apiBase }) => {
     return new ClassBookService(classBookRepository);
   }, [apiBase]);
 
-  const { control, handleSubmit } = useForm<FormData>({
+  const {
+    control,
+    handleSubmit,
+    formState: { isDirty },
+  } = useForm<FormData>({
     resolver: zodResolver(Schema),
     defaultValues: {
       classof: "",
@@ -73,6 +82,18 @@ export const FormClassbook: FC<FormClassbookProps> = ({ apiBase }) => {
     }
   };
 
+  const cancelForm = () => {
+    const hasAnyValue = isDirty || !!selectedFile;
+    if (hasAnyValue) {
+      setConfirmModal({
+        isOpen: true,
+        type: "warning",
+        onClose: () => setConfirmModal(null),
+        onConfirm: () => router.push(`/admin/classbook`),
+      });
+    } else router.push(`/admin/classbook`);
+  };
+
   const onSubmit = async (data: FormData) => {
     setIsError(false);
     try {
@@ -81,10 +102,12 @@ export const FormClassbook: FC<FormClassbookProps> = ({ apiBase }) => {
         setIsError(true);
         return;
       }
-
-      router.push(
-        `/admin/students?page=1&pageSize=10&classBookId=${reps.data.id}&search=&sortBy=studentId&sortOrder=desc`,
-      );
+      setConfirmModal({
+        isOpen: true,
+        type: "success",
+        onClose: () => setConfirmModal(null),
+        onConfirm: () => router.push(`/admin/classbook`),
+      });
     } catch (error) {
       console.error(error);
       setIsError(true);
@@ -168,6 +191,7 @@ export const FormClassbook: FC<FormClassbookProps> = ({ apiBase }) => {
             variant="outlined"
             size="small"
             fullWidth
+            requiredMark
           />
           <RHFTextField
             control={control}
@@ -176,6 +200,7 @@ export const FormClassbook: FC<FormClassbookProps> = ({ apiBase }) => {
             variant="outlined"
             size="small"
             fullWidth
+            requiredMark
           />
           <RHFSelect
             name="curriculumId"
@@ -184,6 +209,7 @@ export const FormClassbook: FC<FormClassbookProps> = ({ apiBase }) => {
             variant="outlined"
             size="small"
             fullWidth
+            requiredMark
           >
             {curriculums.map((curriculum) => (
               <MenuItem key={curriculum.id} value={curriculum.id}>
@@ -195,13 +221,20 @@ export const FormClassbook: FC<FormClassbookProps> = ({ apiBase }) => {
         </div>
       </div>
       <div className="flex flex-row justify-end gap-x-4">
-        <Button type="submit" variant="outlined" color="primary" size="medium">
+        <Button
+          type="submit"
+          variant="outlined"
+          color="primary"
+          size="medium"
+          onClick={cancelForm}
+        >
           ยกเลิก
         </Button>
         <Button type="submit" variant="contained" color="primary" size="medium">
           บันทึกข้อมูล
         </Button>
       </div>
+      {confirmModal && <ConfirmModal {...confirmModal} />}
     </form>
   );
 };
