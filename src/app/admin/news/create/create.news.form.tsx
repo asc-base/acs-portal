@@ -1,157 +1,233 @@
 "use client";
-import { Button, MenuItem } from "@mui/material";
-import React from "react";
-import { useState, useMemo } from "react";
+import { Button, MenuItem, Alert, Snackbar } from "@mui/material";
+import React, { useState, useMemo } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
 import Image from "next/image";
 import { NewsRepository } from "@/infra/repositories/news.repository";
 import { NewsService } from "@/core/service/news.service";
-import { SuccessModal } from "@/components/modal/success";
 import { ICreateNews } from "@/core/domain/news";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
+import dayjs from "dayjs";
+import "dayjs/locale/th";
+import buddhistEra from "dayjs/plugin/buddhistEra";
 import { RHFTextField } from "@/components/form/RHFTextField";
 import { RHFSelect } from "@/components/form/RHFSelect";
 import { RHFDatePickerDayjs } from "@/components/form/RHFDatePicker";
-import Link from "next/link";
+import { IType } from "@/core/domain/master-data";
+import {
+  ConfirmModal,
+  ConfirmModalProps,
+} from "@/components/modal/confirmModal";
+import { useRouter } from "next/navigation";
+import { styled } from "@mui/material/styles";
+
+dayjs.extend(buddhistEra);
+dayjs.locale("th");
+
+interface craeteNewsProps {
+  apiBase: string;
+  categories: IType[];
+}
 
 const Schema = z.object({
   title: z.string().min(1, "กรุณากรอกหัวข้อ"),
   detail: z.string().min(1, "กรุณากรอกรายละเอียด"),
   categoryId: z.number().min(1, "กรุณาเลือกหมวดหมู่"),
-  startDate: z.string().min(1, "กรุณาเลือกวันที่เริ่มต้น"),
-  dueDate: z.string().nullable(),
+  startDate: z
+    .string()
+    .min(1, "กรุณาเลือกวันที่เริ่มต้น")
+    .refine((val) => dayjs(val).isValid(), {
+      message: "รูปแบบวันที่ไม่ถูกต้อง",
+    }),
+  dueDate: z.string().optional(),
 });
 
 type FormData = z.infer<typeof Schema>;
 
-const CreateNewsForm = ({ apiBase }: { apiBase: string }) => {
-  const { handleSubmit, control } = useForm<FormData>({
+const VisuallyHiddenInput = styled("input")({
+  clip: "rect(0 0 0 0)",
+  clipPath: "inset(50%)",
+  height: 1,
+  overflow: "hidden",
+  position: "absolute",
+  bottom: 0,
+  left: 0,
+  whiteSpace: "nowrap",
+  width: 1,
+});
+
+const CreateNewsForm = ({ apiBase, categories }: craeteNewsProps) => {
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [confirmModal, setConfirmModal] = useState<ConfirmModalProps | null>(
+    null,
+  );
+  const [isError, setIsError] = useState(false);
+  const [imageError, setImageError] = useState(false);
+
+  const router = useRouter();
+
+  const {
+    control,
+    handleSubmit,
+    reset,
+    formState: { isDirty },
+  } = useForm<FormData>({
     resolver: zodResolver(Schema),
     defaultValues: {
       title: "",
+      startDate: undefined,
+      dueDate: undefined,
       categoryId: 0,
-      startDate: "",
-      dueDate: null,
       detail: "",
     },
-    mode: "onBlur",
-    reValidateMode: "onChange",
   });
 
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [openSuccess, setOpenSuccess] = useState(false);
-  const [imageError, setImageError] = useState<boolean>(false);
-
-  const categories = [
-    { id: 16, name: "ข่าวประชาสัมพันธ์" },
-    { id: 17, name: "ความสำเร็จนักศึกษา" },
-    { id: 18, name: "งานกิจกรรมนักศึกษา" },
-  ];
-
   const newsService = useMemo(() => {
-    const repo = new NewsRepository(apiBase);
-    return new NewsService(repo);
+    const newsRepository = new NewsRepository(apiBase);
+    return new NewsService(newsRepository);
   }, [apiBase]);
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
-    if (file) setSelectedFile(file);
+    if (file) {
+      setSelectedFile(file);
+      setImageError(false);
+    }
   };
 
-  const onSubmit: SubmitHandler<ICreateNews> = async (data) => {
-    if (!selectedFile) {
-      setImageError(true);
-      return;
+  const handleCancel = () => {
+    if (isDirty || selectedFile) {
+      setConfirmModal({
+        isOpen: true,
+        type: "warning",
+        onClose: () => setConfirmModal(null),
+        onConfirm: () => {
+          reset();
+          setSelectedFile(null);
+          setConfirmModal(null);
+          router.push(`/admin/news?page=1&pageSize=9&category=&title=`);
+        },
+      });
+    } else {
+      reset();
+      setSelectedFile(null);
+      router.push(`/admin/news?page=1&pageSize=9&category=&title=`);
     }
+  };
 
-    const response = await newsService.createNews(data, selectedFile);
-    if (response) setOpenSuccess(true);
+  const onSubmit: SubmitHandler<FormData> = async (data) => {
+    if (isDirty || selectedFile) {
+      try {
+        if (!selectedFile) {
+          setImageError(true);
+          return;
+        }
+        const payload: ICreateNews = {
+          title: data.title,
+          categoryId: data.categoryId,
+          detail: data.detail,
+          startDate: dayjs(data.startDate).toISOString(),
+          dueDate: data.dueDate ? dayjs(data.dueDate).toISOString() : undefined,
+        };
+
+        const response = await newsService.createNews(payload, selectedFile);
+
+        if (!response) setIsError(true);
+        else {
+          setConfirmModal({
+            isOpen: true,
+            type: "success",
+            onClose: () => setConfirmModal(null),
+            onConfirm: () => {
+              setConfirmModal(null);
+              router.push(`/admin/news?page=1&pageSize=9&category=&title=`);
+            },
+          });
+        }
+      } catch (error) {
+        console.log(error);
+        setIsError(true);
+      }
+    }
   };
 
   return (
-    <form className="space-y-6 p-8" onSubmit={handleSubmit(onSubmit)}>
-      <h3 className="font-bold">ข้อมูลข่าวสาร</h3>
-      <div className="flex items-start gap-8">
-        <div className="flex w-[500px] flex-col items-start">
-          <div className="bg-neutral02 flex h-[310px] w-full items-center justify-center">
+    <div className="p-8">
+      <Snackbar
+        anchorOrigin={{ vertical: "top", horizontal: "right" }}
+        open={isError}
+        autoHideDuration={4000}
+        onClose={() => setIsError(false)}
+      >
+        <Alert
+          severity="error"
+          onClose={() => setIsError(false)}
+          sx={{ width: "100%" }}
+        >
+          ไม่สามารถเพิ่มข่าวสารได้
+        </Alert>
+      </Snackbar>
+      <h3 className="mb-6 font-bold">ข้อมูลข่าวสาร</h3>
+      <form className="gap-4 p-4" onSubmit={handleSubmit(onSubmit)}>
+        <div className="flex flex-col gap-4">
+          <div className="bg-neutral02 flex min-h-[500px] items-center justify-center rounded-lg">
             {selectedFile ? (
-              <div className="group relative h-full w-full">
+              <div className="group relative aspect-video w-full overflow-hidden rounded-xl">
                 <Image
                   src={URL.createObjectURL(selectedFile)}
                   alt="Preview"
-                  width={384}
-                  height={192}
-                  className="h-full w-full object-cover"
+                  fill
+                  sizes="100vw"
+                  className="rounded-md object-cover"
                 />
+
                 <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
-                  <Button
-                    variant="contained"
-                    component="label"
-                    size="large"
-                    sx={{
-                      border: "1px solid var(--color-neutral04)",
-                      backgroundColor: "var(--color-neutral01)",
-                      color: "var(--color-neutral04)",
-                      boxShadow: "none",
-                      fontWeight: "bold",
-                      px: 4,
-                    }}
-                  >
-                    เปลี่ยนรูปภาพ
-                    <input
+                  <Button variant="contained" component="label">
+                    <VisuallyHiddenInput
                       type="file"
-                      hidden
                       accept="image/*"
                       onChange={handleFileChange}
                     />
+                    อัปโหลดรูปภาพ
                   </Button>
                 </div>
               </div>
             ) : (
-              <Button
-                variant="outlined"
-                component="label"
-                size="large"
-                sx={{
-                  border: "1px solid var(--color-neutral04)",
-                  backgroundColor: "var(--color-neutral01)",
-                  color: "var(--color-neutral04)",
-                  boxShadow: "none",
-                  fontWeight: "bold",
-                  px: 4,
-                }}
-              >
+              <Button variant="contained" component="label" size="large">
                 อัปโหลดรูปภาพ
-                <input
+                <VisuallyHiddenInput
                   type="file"
-                  hidden
                   accept="image/*"
                   onChange={handleFileChange}
                 />
               </Button>
             )}
           </div>
-
           {imageError && (
-            <p className="mt-2 w-full text-center text-sm text-red-600">
-              กรุณาอัปโหลดรูปภาพ
-            </p>
+            <p className="mt-1 text-sm text-red-600">กรุณาอัปโหลดรูปภาพ</p>
           )}
-        </div>
-
-        <div className="flex flex-1 flex-col gap-4">
           <RHFTextField
-            control={control}
             name="title"
-            label="หัวข้อข่าวสาร"
+            control={control}
+            label="หัวข้อข่าว"
+            requiredMark
             fullWidth
           />
-
+          <RHFTextField
+            control={control}
+            name="detail"
+            label="รายละเอียด"
+            minRows={2}
+            multiline
+            fullWidth
+            requiredMark
+          />
           <RHFSelect
             name="categoryId"
             control={control}
-            label="หลักสูตร"
+            label="หมวดหมู่"
+            requiredMark
             fullWidth
           >
             {categories.map((category) => (
@@ -160,52 +236,37 @@ const CreateNewsForm = ({ apiBase }: { apiBase: string }) => {
               </MenuItem>
             ))}
           </RHFSelect>
-
-          <div className="flex w-full gap-4">
-            <div className="flex-1">
-              <RHFDatePickerDayjs
-                control={control}
-                name="startDate"
-                label="วันที่เริ่มต้น"
-              />
-            </div>
-            <div className="flex-1">
-              <RHFDatePickerDayjs
-                control={control}
-                name="dueDate"
-                label="วันที่ครบกำหนด"
-              />
-            </div>
+          <div className="grid grid-cols-2 gap-x-4">
+            <RHFDatePickerDayjs
+              name="startDate"
+              control={control}
+              label="วันที่เริ่มต้น"
+              format="D MMMM YYYY"
+              placeholder="เลือกวันที่เริ่มต้น"
+              requiredMark
+            />
+            <RHFDatePickerDayjs
+              name="dueDate"
+              control={control}
+              label="วันที่สิ้นสุด"
+              format="D MMMM YYYY"
+              placeholder="เลือกวันที่สิ้นสุด"
+            />
           </div>
         </div>
-      </div>
-
-      <RHFTextField
-        control={control}
-        name="detail"
-        label="เนื้อหาข่าวสาร"
-        fullWidth
-        multiline
-        rows={12}
-      />
-
-      <div className="flex justify-end gap-4">
-        <Link href={"/admin/news"}>
-          <Button variant="outlined" color="primary" size="medium">
-            ยกเลิก
-          </Button>
-        </Link>
-        <Button type="submit" variant="contained" color="primary" size="medium">
-          บันทึกข้อมูลข่าวสาร
-        </Button>
-      </div>
-
-      <SuccessModal
-        open={openSuccess}
-        path="news"
-        onClose={() => setOpenSuccess(false)}
-      />
-    </form>
+        <div className="mt-4 flex justify-end">
+          <div className="flex gap-x-4">
+            <Button variant="outlined" onClick={handleCancel} size="large">
+              ยกเลิก
+            </Button>
+            <Button variant="contained" type="submit" size="large">
+              บันทึก
+            </Button>
+          </div>
+        </div>
+      </form>
+      {confirmModal && <ConfirmModal {...confirmModal} />}
+    </div>
   );
 };
 
