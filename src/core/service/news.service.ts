@@ -1,25 +1,25 @@
 import { Pageable } from "@/interface/response";
-import { INews , ICreateNews} from "../domain/news";
+import { INews, ICreateNews } from "../domain/news";
 import { INewsRepository } from "../ports/news.repository";
 import { INewsInformation } from "../domain/news";
 export class NewsService {
   constructor(private newsRepository: INewsRepository) {}
 
-  async createNews(data : ICreateNews , image :File) : Promise<INews> {
+  async createNews(data: ICreateNews, image: File): Promise<INews> {
     const formData = new FormData();
 
-      formData.append("title", data.title);
-      formData.append("detail", data.detail);
-      formData.append("categoryId", String(data.categoryId));
-      formData.append("startDate", new Date(data.startDate).toISOString());
+    formData.append("title", data.title);
+    formData.append("detail", data.detail);
+    formData.append("categoryId", String(data.categoryId));
+    formData.append("startDate", new Date(data.startDate).toISOString());
 
-      if (data.dueDate) {
-        formData.append("dueDate", new Date(data.dueDate).toISOString());
-      }
+    if (data.dueDate) {
+      formData.append("dueDate", new Date(data.dueDate).toISOString());
+    }
 
-      if (image) {
-        formData.append("image", image);
-      }
+    if (image) {
+      formData.append("image", image);
+    }
     const response = await this.newsRepository.createNews(formData);
     return response.data;
   }
@@ -62,8 +62,8 @@ export class NewsService {
     return response.data;
   }
 
-  async createNewsInformation(type:string,data:FormData ):  Promise<INewsInformation> {     
-    const response = await this.newsRepository.createNewsInformation(type,data);
-      return response.data;   
+  async upsertNewsInformation(data: FormData): Promise<INewsInformation> {
+    const response = await this.newsRepository.upsertNewsInformation(data);
+    return response.data;
   }
 }

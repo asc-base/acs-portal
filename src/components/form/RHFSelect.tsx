@@ -12,12 +12,14 @@ type RHFSelectProps<T extends FieldValues> = {
   name: FieldPath<T>;
   control: Control<T>;
   label?: string; // แสดงหัวข้อด้านบน
+  requiredMark?: boolean;
 } & Omit<SelectProps, "name" | "value" | "onChange">;
 
 export function RHFSelect<T extends FieldValues>({
   name,
   control,
   label,
+  requiredMark,
   children,
   ...props
 }: RHFSelectProps<T>) {
@@ -27,7 +29,9 @@ export function RHFSelect<T extends FieldValues>({
       control={control}
       render={({ field, fieldState }) => (
         <Stack spacing={0.5}>
-          {label && <FormLabel>{label}</FormLabel>}
+          {label && (
+            <FormLabel>{requiredMark ? `${label} *` : label}</FormLabel>
+          )}
 
           <FormControl fullWidth error={!!fieldState.error}>
             <Select
