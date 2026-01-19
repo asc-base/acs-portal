@@ -49,4 +49,10 @@ export class ClassBookRepository implements IClassBookRepository {
     const response = await this.http.post<ApiResponse<IClassBook>>(url, data);
     return response;
   }
+
+  async updateClassBook(data:FormData , id: number): Promise<ApiResponse<IClassBook>> {
+    const url = `/v1/class-book/${id}`;
+    const response = await this.http.patch<ApiResponse<IClassBook>>(url, data);
+    return response;
+  }
 }
