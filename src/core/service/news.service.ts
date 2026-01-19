@@ -1,7 +1,6 @@
 import { Pageable } from "@/interface/response";
-import { INews, ICreateNews } from "../domain/news";
+import { INews, ICreateNews , IUpdateNews , INewsInformation } from "../domain/news";
 import { INewsRepository } from "../ports/news.repository";
-import { INewsInformation } from "../domain/news";
 export class NewsService {
   constructor(private newsRepository: INewsRepository) {}
 
@@ -44,9 +43,23 @@ export class NewsService {
     return response.data;
   }
 
-  async updateNews(id: string, news: Partial<INews>): Promise<INews> {
-    const response = await this.newsRepository.updateNews(id, news);
+  async updateNews(id: number, data:  IUpdateNews , image : File | null) {
+    try {
+      const formData = new FormData();
+      Object.entries(data).forEach(([key, value]) => {
+        formData.append(key, value?.toString() ?? "");
+      });
+
+      if (image) {
+      formData.append("image", image);
+    }
+
+    const response = await this.newsRepository.updateNews(id, formData);
     return response.data;
+    } catch (error) {
+      console.error("Failed to update news:", error);
+      return null;
+    }
   }
 
   async getNewsInformations(
