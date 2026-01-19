@@ -1,181 +1,295 @@
 "use client";
-import { useParams } from "next/navigation";
-import { useState, useEffect } from "react";
+import { useState, useMemo } from "react";
 import { INews } from "@/core/domain/news";
-import { masterDataService, newsService } from "@/infra/container";
 import { IType } from "@/core/domain/master-data";
 import dayjs from "dayjs";
 import "dayjs/locale/th";
 import buddhistEra from "dayjs/plugin/buddhistEra";
-import { useForm } from "react-hook-form";
+import { useForm, SubmitHandler } from "react-hook-form";
 import { RHFTextField } from "@/components/form/RHFTextField";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Image from "next/image";
 import { RHFSelect } from "@/components/form/RHFSelect";
-import { Button, MenuItem } from "@mui/material";
+import { Button, MenuItem, Alert, Snackbar } from "@mui/material";
 import { RHFDatePickerDayjs } from "@/components/form/RHFDatePicker";
 import { Dayjs } from "dayjs";
+import { styled } from "@mui/material/styles";
+import { NewsService } from "@/core/service/news.service";
+import { NewsRepository } from "@/infra/repositories/news.repository";
+import { IUpdateNews } from "@/core/domain/news";
+import { useRouter } from "next/navigation";
+import {
+  ConfirmModal,
+  ConfirmModalProps,
+} from "@/components/modal/confirmModal";
 
 dayjs.extend(buddhistEra);
 dayjs.locale("th");
 
+interface NewsInfoProps {
+  news: INews;
+  apiBase: string;
+  categories: IType[];
+}
+
 const formSchema = z.object({
-  title: z.string().optional(),
-  startDate: z.custom<Dayjs>().optional(),
-  dueDate: z.custom<Dayjs>().optional(),
-  category: z.number().optional(),
+  title: z.string(),
+  startDate: z.custom<Dayjs>(),
+  dueDate: z.custom<Dayjs>().nullable(),
+  category: z.number(),
   detail: z.string().optional(),
 });
 
 type Inputs = z.infer<typeof formSchema>;
 
-const NewsInfo = () => {
-  const params = useParams();
-  const [news, setNews] = useState<INews | null>(null);
-  const [categories, setCategories] = useState<IType[]>([]);
-  const [editMode, setEditMode] = useState(false);
+const VisuallyHiddenInput = styled("input")({
+  clip: "rect(0 0 0 0)",
+  clipPath: "inset(50%)",
+  height: 1,
+  overflow: "hidden",
+  position: "absolute",
+  bottom: 0,
+  left: 0,
+  whiteSpace: "nowrap",
+  width: 1,
+});
 
-  const { control, reset } = useForm<Inputs>({
+const NewsInfo = ({ news, apiBase, categories }: NewsInfoProps) => {
+  const [isEdit, setIsEdit] = useState(false);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [confirmModal, setConfirmModal] = useState<ConfirmModalProps | null>(
+    null,
+  );
+  const [isError, setIsError] = useState(false);
+
+  const router = useRouter();
+
+  const previewSrc = selectedFile
+    ? URL.createObjectURL(selectedFile)
+    : news.image;
+
+  const newsService = useMemo(() => {
+    const newsRepository = new NewsRepository(apiBase);
+    return new NewsService(newsRepository);
+  }, [apiBase]);
+
+  const {
+    control,
+    handleSubmit,
+    formState: { isDirty },
+  } = useForm<Inputs>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      title: "",
-      startDate: undefined,
-      dueDate: undefined,
-      category: undefined,
-      detail: "",
+      title: news.title,
+      startDate: dayjs(news.startDate),
+      dueDate: news.dueDate ? dayjs(news.dueDate) : undefined,
+      category: news.category.id,
+      detail: news.detail,
     },
   });
 
-  useEffect(() => {
-    const fetchData = async () => {
-      const id = String(params.id);
-      if (id) {
-        const response = await newsService.getNewsById(id);
-        setNews(response);
-        // Reset form with fetched data
-        reset({
-          title: response?.title || "",
-          startDate: response?.startDate
-            ? dayjs(response.startDate)
-            : undefined,
-          dueDate: response?.dueDate ? dayjs(response.dueDate) : undefined,
-          category: response?.category.id || undefined,
-          detail: response?.detail || "",
-        });
-      }
-    };
-    fetchData();
-  }, [params.id, reset]);
-
-  useEffect(() => {
-    const fetchCategories = async () => {
-      const response = await masterDataService.getMasterDataListType("news");
-      setCategories(response);
-    };
-    fetchCategories();
-  }, []);
-
-  const handleEdit = () => {
-    setEditMode(!editMode);
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0] || null;
+    if (file) {
+      setSelectedFile(file);
+    } else {
+      setSelectedFile(null);
+    }
   };
 
   const handleCancel = () => {
-    if (news) {
-      reset({
-        title: news.title || "",
-        startDate: news.startDate ? dayjs(news.startDate) : undefined,
-        dueDate: news.dueDate ? dayjs(news.dueDate) : undefined,
-        category: news.category.id || undefined,
-        detail: news.detail || "",
+    if (isDirty || selectedFile) {
+      setConfirmModal({
+        isOpen: true,
+        type: "warning",
+        onClose: () => setConfirmModal(null),
+        onConfirm: () => {
+          setIsEdit(false);
+          router.push(`/admin/news?page=1&pageSize=9&category=&title=`);
+        },
       });
+    } else {
+      setIsEdit(false);
+      router.push(`/admin/news?page=1&pageSize=9&category=&title=`);
     }
-    setEditMode(false);
+  };
+
+  const onSubmit: SubmitHandler<Inputs> = async (data) => {
+    if (isDirty || selectedFile) {
+      try {
+        const payload: IUpdateNews = {
+          title: data.title,
+          categoryId: data.category,
+          detail: data.detail,
+          startDate: dayjs(data.startDate).toISOString(),
+
+          dueDate: data.dueDate ? dayjs(data.dueDate).toISOString() : undefined,
+        };
+
+        console.log(payload);
+
+        const response = await newsService.updateNews(
+          news.id,
+          payload,
+          selectedFile,
+        );
+
+        if (!response) setIsError(true);
+        else {
+          setConfirmModal({
+            isOpen: true,
+            type: "success",
+            onClose: () => setConfirmModal(null),
+            onConfirm: () => {
+              setConfirmModal(null);
+              setIsEdit(false);
+              router.push(`/admin/news?page=1&pageSize=9&category=&title=`);
+            },
+          });
+        }
+      } catch (error) {
+        console.log(error);
+        setIsError(true);
+      }
+    }
   };
 
   return (
-    <>
-      <form className="p-4">
-        <div className="grid grid-cols-2">
-          <div className="flex w-full justify-center">
-            <div className="h-full w-96">
-              <Image
-                src={news?.image || "/images/placeholder.png"}
-                className="h-full w-full object-cover"
-                alt={news?.title || "dadasd"}
-                width={500}
-                height={300}
-              />
-            </div>
+    <div className="p-8">
+      <Snackbar
+        anchorOrigin={{ vertical: "top", horizontal: "right" }}
+        open={isError}
+        autoHideDuration={4000}
+        onClose={() => setIsError(false)}
+      >
+        <Alert
+          severity="error"
+          onClose={() => setIsError(false)}
+          sx={{ width: "100%" }}
+        >
+          ไม่สามารถเพิ่มข่าวสารได้
+        </Alert>
+      </Snackbar>
+      <h3 className="mb-6 font-bold">ข้อมูลข่าวสาร</h3>
+      <form className="gap-4 p-4" onSubmit={handleSubmit(onSubmit)}>
+        <div className="flex flex-col gap-4">
+          <div className="bg-neutral02 flex items-center justify-center rounded-lg">
+            {news || selectedFile ? (
+              <div className="group relative aspect-video w-full overflow-hidden rounded-xl">
+                <Image
+                  src={previewSrc}
+                  alt="Preview"
+                  fill
+                  sizes="100vw"
+                  className="rounded-md object-cover"
+                />
+                {isEdit && (
+                  <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
+                    <Button variant="contained" component="label">
+                      <VisuallyHiddenInput
+                        type="file"
+                        accept="image/*"
+                        onChange={handleFileChange}
+                      />
+                      อัปโหลดรูปภาพ
+                    </Button>
+                  </div>
+                )}
+              </div>
+            ) : (
+              isEdit && (
+                <Button variant="contained" component="label" size="large">
+                  อัปโหลดรูปภาพ
+                  <VisuallyHiddenInput
+                    type="file"
+                    accept="image/*"
+                    onChange={handleFileChange}
+                  />
+                </Button>
+              )
+            )}
           </div>
-          <div className="flex flex-col gap-y-8">
-            <RHFTextField
-              name="title"
-              control={control}
-              label="หัวข้อข่าว"
-              disabled={!editMode}
-              required
-              requiredMark
-            />
-            <RHFSelect
-              name="category"
-              control={control}
-              label="หมวดหมู่"
-              disabled={!editMode}
-              required
-            >
-              {categories.map((category) => (
-                <MenuItem key={category.id} value={category.id}>
-                  {category.name}
-                </MenuItem>
-              ))}
-            </RHFSelect>
-            <div className="grid grid-cols-2 gap-x-4">
-              <RHFDatePickerDayjs
-                name="startDate"
-                control={control}
-                label="วันที่เริ่มต้น"
-                format="D MMMM YYYY"
-                placeholder="เลือกวันที่เริ่มต้น"
-              />
-              <RHFDatePickerDayjs
-                name="dueDate"
-                control={control}
-                label="วันที่สิ้นสุด"
-                format="D MMMM YYYY"
-                placeholder="เลือกวันที่สิ้นสุด"
-              />
-            </div>
-          </div>
-        </div>
-        <div className="flex flex-col gap-y-3">
+          <RHFTextField
+            name="title"
+            control={control}
+            label="หัวข้อข่าว"
+            disabled={!isEdit}
+            required
+            requiredMark
+            fullWidth
+          />
           <RHFTextField
             control={control}
             name="detail"
-            disabled={!editMode}
+            disabled={!isEdit}
             label="รายละเอียด"
-            minRows={15}
+            minRows={2}
             multiline
+            fullWidth
+            required
+            requiredMark
           />
-          <div className="flex justify-end">
-            {editMode ? (
-              <div className="flex gap-x-4">
-                <Button variant="outlined" onClick={handleCancel}>
-                  ยกเลิก
-                </Button>
-                <Button variant="contained">บันทึก</Button>
-              </div>
-            ) : (
-              <div>
-                <Button variant="contained" onClick={handleEdit}>
-                  แก้ไข
-                </Button>
-              </div>
-            )}
+          <RHFSelect
+            name="category"
+            control={control}
+            label="หมวดหมู่"
+            disabled={!isEdit}
+            required
+            requiredMark
+            fullWidth
+          >
+            {categories.map((category) => (
+              <MenuItem key={category.id} value={category.id}>
+                {category.name}
+              </MenuItem>
+            ))}
+          </RHFSelect>
+          <div className="grid grid-cols-2 gap-x-4">
+            <RHFDatePickerDayjs
+              name="startDate"
+              control={control}
+              label="วันที่เริ่มต้น"
+              format="D MMMM YYYY"
+              placeholder="เลือกวันที่เริ่มต้น"
+              disabled={!isEdit}
+              requiredMark
+            />
+            <RHFDatePickerDayjs
+              name="dueDate"
+              control={control}
+              label="วันที่สิ้นสุด"
+              format="D MMMM YYYY"
+              placeholder="เลือกวันที่สิ้นสุด"
+              disabled={!isEdit}
+            />
           </div>
         </div>
+        <div className="mt-4 flex justify-end">
+          {isEdit ? (
+            <div className="flex gap-x-4">
+              <Button variant="outlined" onClick={handleCancel} size="large">
+                ยกเลิก
+              </Button>
+              <Button variant="contained" type="submit" size="large">
+                บันทึก
+              </Button>
+            </div>
+          ) : (
+            <div>
+              <Button
+                variant="contained"
+                onClick={() => setIsEdit(true)}
+                size="large"
+              >
+                แก้ไข
+              </Button>
+            </div>
+          )}
+        </div>
       </form>
-    </>
+      {confirmModal && <ConfirmModal {...confirmModal} />}
+    </div>
   );
 };
 

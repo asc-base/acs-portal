@@ -18,8 +18,16 @@ export interface ICreateNews {
   title: string;
   categoryId: number;
   startDate: string;
-  dueDate: string | null;
+  dueDate?: string;
   detail: string;
+}
+
+export interface IUpdateNews {
+  title?: string;
+  categoryId?: number;
+  startDate: string;
+  dueDate?: string;
+  detail?: string;
 }
 
 export interface INewsInformation {

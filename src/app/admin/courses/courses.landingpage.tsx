@@ -1,25 +1,17 @@
 "use client";
 import React, { useEffect, useCallback } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import {
-  MenuItem,
-  Select,
   SelectChangeEvent,
-  Button,
-  Pagination,
 } from "@mui/material";
-import SearchIcon from "@mui/icons-material/Search";
-import AddIcon from "@mui/icons-material/Add";
-import CloseIcon from "@mui/icons-material/Close";
-import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import CourseTableComponents from "./courses.table.component";
 import { ICourse } from "@/core/domain/course";
-import { QueryCourse } from "@/core/domain/course";
 import { TypeCourse } from "@/core/domain/master-data";
-import Link from "next/link";
+import { ICurriculum } from "@/core/domain/curriculum";
+import { CurriculumInfoComponent } from "./curriculum.info.component";
 
 interface CoursesLandingPageProps {
   courses: ICourse[];
@@ -32,13 +24,15 @@ interface CoursesLandingPageProps {
   search?: string;
   sortBy?: string;
   sortOrder?: "asc" | "desc";
+  curriculum: ICurriculum;
+  apiBase: string;
 }
 
 const searchSchema = z.object({
   search: z.string().optional(),
 });
 
-type SearchForm = z.infer<typeof searchSchema>;
+export type SearchForm = z.infer<typeof searchSchema>;
 
 const CoursesLandingpage = ({
   courses,
@@ -51,169 +45,107 @@ const CoursesLandingpage = ({
   search,
   sortBy,
   sortOrder,
+  apiBase,
+  curriculum
 }: CoursesLandingPageProps) => {
   const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
 
-  const { register, reset, watch } = useForm<SearchForm>({
+  const {
+    control: searchControl,
+    reset: searchReset,
+    watch
+  } = useForm<SearchForm>({
     resolver: zodResolver(searchSchema),
     defaultValues: { search },
   });
 
   const watchedSearch = watch("search");
 
-  const SearchCourseUrl = useCallback(
-    (query: Partial<QueryCourse>) => {
-      const params = new URLSearchParams({
-        page: query.page?.toString() || page.toString(),
-        pageSize: query.pageSize?.toString() || pageSize.toString(),
-        curriculumId: (query.curriculumId ?? curriculumId).toString(),
-        search: query.search ?? watchedSearch ?? "",
-        sortBy: query.sortBy ?? sortBy ?? "courseId",
-        sortOrder: query.sortOrder ?? sortOrder ?? "desc",
-      });
+  const handleResetSearch = () => {
+    searchReset({ search: "" });
+  };
 
-      if (query.typecourseId !== undefined) {
-        params.set("typecourseId", query.typecourseId.toString());
-      }
-
-      return `/admin/courses?${params.toString()}`;
+  const handleNextPage = useCallback(
+    (currentPage: number) => {
+      const params = new URLSearchParams(searchParams.toString());
+      params.set("page", currentPage.toString());
+      router.push(`${pathname}?${params.toString()}`, { scroll: false });
     },
-    [page, pageSize, curriculumId, watchedSearch, sortBy, sortOrder],
+    [pathname, router, searchParams],
   );
 
   useEffect(() => {
-    const handler = setTimeout(() => {
-      router.push(SearchCourseUrl({ page: 1, search: watchedSearch }));
-    }, 300);
+    const delayDebounceFn = setTimeout(() => {
+      const params = new URLSearchParams(searchParams.toString());
+      if (watchedSearch) {
+        params.set("search", watchedSearch);
+      } else {
+        params.delete("search");
+      }
+      const newSearch = params.toString();
+      if (searchParams.toString() !== newSearch) {
+        router.push(`${pathname}?${newSearch}`, { scroll: false });
+      }
+    }, 500);
 
-    return () => clearTimeout(handler);
-  }, [SearchCourseUrl, router, watchedSearch]);
+    return () => clearTimeout(delayDebounceFn);
+  }, [watchedSearch, pathname, router, searchParams]);
 
-  const handleNextPage = (currentPage: number) => {
-    router.push(SearchCourseUrl({ page: currentPage }));
-  };
+  const handleSort = (sortBy: string) => {
+    const params = new URLSearchParams(searchParams.toString());
 
-  const handleSort = (newSortBy: string) => {
-    const newSortOrder =
-      sortBy === newSortBy && sortOrder === "desc" ? "asc" : "desc";
-    router.push(
-      SearchCourseUrl({ sortBy: newSortBy, sortOrder: newSortOrder }),
-    );
+    const currentSortBy = params.get("sortBy");
+    const currentOrder = params.get("sortOrder") as "asc" | "desc" | null;
+    const newOrder =
+      currentSortBy === sortBy && currentOrder === "desc" ? "asc" : "desc";
+
+    params.set("sortBy", sortBy);
+    params.set("sortOrder", newOrder);
+    router.push(`${pathname}?${params.toString()}`, { scroll: false });
   };
 
   const handleFilterTypeCourse = (event: SelectChangeEvent) => {
     const value = event.target.value;
-    const typecourseId = value === "all" ? undefined : Number(value);
-    router.push(SearchCourseUrl({ page: 1, typecourseId }));
+    const params = new URLSearchParams(searchParams.toString());
+
+    if (value === "all") {
+      params.delete("typecourseId");
+    } else {
+      params.set("typecourseId", value);
+    }
+
+    params.set("page", "1");
+    router.push(`${pathname}?${params.toString()}`, { scroll: false });
   };
+
 
   return (
     <div className="p-6">
-      <div className="mb-4 flex items-center justify-between">
-        <h3 className="font-bold">ข้อมูลรายวิชา</h3>
-        <div className="flex gap-2">
-          <form className="relative">
-            <div className="text-neutral04 absolute top-1/2 left-2 -translate-y-1/2">
-              <SearchIcon className="h-5 w-5" />
-            </div>
-            <input
-              type="text"
-              placeholder="ค้นหา"
-              {...register("search")}
-              className="border-neutral04 text-h4 h-[44px] w-[280px] rounded-sm border pl-10"
-            />
-            <button
-              type="button"
-              onClick={() => reset({ search: "" })}
-              disabled={!watchedSearch}
-              className={`text-neutral05 absolute top-1/2 right-2 -translate-y-1/2 ${
-                !watchedSearch
-                  ? "cursor-not-allowed opacity-50"
-                  : "hover:text-primary01 cursor-pointer"
-              }`}
-            >
-              <CloseIcon fontSize="small" />
-            </button>
-          </form>
+      <div className="mb-4 flex flex-col gap-6">
+        <h3 className="font-bold"> จัดการหลักสูตร <span>{`>> ปีการศึกษา ${curriculum.year}`}</span> </h3>
 
-          <Select
-            onChange={handleFilterTypeCourse}
-            value={(typecourseId ?? "all").toString()}
-            size="small"
-            displayEmpty
-            sx={{
-              "& .MuiOutlinedInput-notchedOutline": {
-                borderColor: "var(--color-neutral04)",
-              },
-              py: 1,
-              width: "260px",
-              height: "44px",
-              color: "var(--color-neutral04)",
-            }}
-            IconComponent={ExpandMoreIcon}
-            MenuProps={{
-              PaperProps: {
-                sx: {
-                  border: "1px solid var(--color-neutral04)",
-                  borderRadius: 1,
-                },
-              },
-              MenuListProps: {
-                sx: { py: 0 },
-              },
-            }}
-          >
-            <MenuItem
-              value="all"
-              sx={{
-                py: 1,
-                color: "var(--color-neutral04)",
-                borderBottom: "1px solid var(--color-neutral04)",
-              }}
-            >
-              ทั้งหมด
-            </MenuItem>
+        <CurriculumInfoComponent curriculum={curriculum} apiBase={apiBase} />
 
-            {typeCourses.map((typeCourse) => (
-              <MenuItem
-                key={typeCourse.id}
-                value={typeCourse.id.toString()}
-                sx={{
-                  py: 1,
-                  color: "var(--color-neutral04)",
-                  borderBottom: "1px solid var(--color-neutral04)",
-                }}
-              >
-                {typeCourse.name}
-              </MenuItem>
-            ))}
-          </Select>
-
-          <Link href={`/admin/courses/create?curriculumId=${curriculumId}`}>
-            <Button variant="contained">
-              <AddIcon />
-              เพิ่มรายวิชาใหม่
-            </Button>
-          </Link>
-        </div>
-      </div>
-
-      <CourseTableComponents
-        courses={courses}
-        onSort={handleSort}
-        sortBy={sortBy}
-        sortOrder={sortOrder}
-      />
-
-      <div className="mt-4 flex justify-center">
-        <Pagination
-          shape="rounded"
-          count={Math.ceil(totalRecords / pageSize)}
+        <CourseTableComponents
+          courses={courses}
+          onSort={handleSort}
+          sortBy={sortBy}
+          sortOrder={sortOrder}
+          control={searchControl}
+          watchedSearch={watchedSearch}
+          onResetSearch={handleResetSearch}
+          curriculumId={curriculumId}
+          totalRecords={totalRecords}
           page={page}
-          onChange={(_, currentPage) => handleNextPage(currentPage)}
-          color="primary"
-          size="large"
+          pageSize={pageSize}
+          handleNextPage={handleNextPage}
+          typeCourses={typeCourses}
+          typecourseId={typecourseId}
+          handleFilterTypeCourse={handleFilterTypeCourse}
         />
+
       </div>
     </div>
   );
