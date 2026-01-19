@@ -18,7 +18,7 @@ export interface ICreateNews {
   title: string;
   categoryId: number;
   startDate: string;
-  dueDate: string | null;
+  dueDate?: string;
   detail: string;
 }
 
