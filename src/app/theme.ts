@@ -33,7 +33,7 @@ export const Theme = createTheme({
               borderColor: "var(--color-primary03)",
               borderWidth: 3,
             },
-            "&:hover:not(.Mui-focused) .MuiOutlinedInput-notchedOutline": {
+            "&:hover:not(.Mui-focused):not(.Mui-disabled) .MuiOutlinedInput-notchedOutline": {
               borderColor: "var(--color-primary04)",
               borderWidth: 1,
             },

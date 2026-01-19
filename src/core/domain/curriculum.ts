@@ -22,3 +22,11 @@ export interface ICreateCurriculum {
   description: string;
   image: File;
 }
+
+export interface IUpdateCurriculum {
+  year?: string;
+  title?: string;
+  fileUrl?: string;
+  description?: string;
+  image?: File;
+}
