@@ -2,7 +2,8 @@ export interface IClassBook {
   id: number;
   firstYearAcademic: string;
   image: string;
-  classof: string;
+  classof: number;
+  curriculumId: number;
 }
 
 export interface QueryClassBook {
@@ -17,4 +18,10 @@ export interface ICreateClassBook {
   firstYearAcademic: string;
   classof: string;
   curriculumId: number;
+}
+
+export interface IUpdateClassBook {
+  firstYearAcademic?: string;
+  classof?: string;
+  curriculumId?: number;
 }
