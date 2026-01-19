@@ -144,6 +144,7 @@ export const CurriculumForm = ({ apiBase }: CurriculumFormProps) => {
               label="ชื่อหลักสูตร"
               variant="outlined"
               size="small"
+              required
             />
             <RHFDatePickerDayjs
               control={control}
@@ -151,6 +152,7 @@ export const CurriculumForm = ({ apiBase }: CurriculumFormProps) => {
               label="ปี"
               views={["year"]}
               openTo="year"
+              required
             />
             <RHFTextField
               control={control}
@@ -158,6 +160,7 @@ export const CurriculumForm = ({ apiBase }: CurriculumFormProps) => {
               label="ลิงก์ไฟล์หลักสูตร (Google Drive หรือ OneDrive)"
               variant="outlined"
               size="small"
+              required
             />
           </div>
         </div>
@@ -172,6 +175,7 @@ export const CurriculumForm = ({ apiBase }: CurriculumFormProps) => {
             fullWidth
             multiline
             rows={4}
+            required
           />
         </div>
 
