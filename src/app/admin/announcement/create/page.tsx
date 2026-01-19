@@ -6,7 +6,7 @@ export const dynamic = "force-dynamic";
 export default function Page() {
   return (
     <div className="w-full">
-      <NewsInformationForm type="announcement" apiBase={baseUrl} />
+      <NewsInformationForm type="announcement" apiBase={baseUrl} typeId={19}/>
     </div>
   );
 }
