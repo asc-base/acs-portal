@@ -77,7 +77,6 @@ const NewsInfo = ({ news, apiBase, categories }: NewsInfoProps) => {
   const {
     control,
     handleSubmit,
-    reset,
     formState: { isDirty },
   } = useForm<Inputs>({
     resolver: zodResolver(formSchema),
@@ -169,7 +168,7 @@ const NewsInfo = ({ news, apiBase, categories }: NewsInfoProps) => {
           onClose={() => setIsError(false)}
           sx={{ width: "100%" }}
         >
-          ไม่สามารถเพิ่มข้อมูลนักศึกษาได้
+          ไม่สามารถเพิ่มข่าวสารได้
         </Alert>
       </Snackbar>
       <h3 className="mb-6 font-bold">ข้อมูลข่าวสาร</h3>
