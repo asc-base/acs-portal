@@ -93,7 +93,7 @@ const CourseTableComponents = ({
               watchedSearch ? (
                 <CloseIcon onClick={onResetSearch} />
               ) : (
-                <span style={{ width: "24px" }} />
+                <span className="w-6" />
               )
             }
             placeholder="ค้นหา"
@@ -106,7 +106,7 @@ const CourseTableComponents = ({
             size="small"
             displayEmpty
             IconComponent={ExpandMoreIcon}
-            sx={{  width: "260px", }}
+            className="w-[260px]"
           >
             <MenuItem value="all">ทั้งหมด</MenuItem>
             {typeCourses.map((typeCourse) => (
