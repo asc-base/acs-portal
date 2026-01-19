@@ -13,8 +13,8 @@ import { RHFTextField } from "@/components/form/RHFTextField";
 import { StudentService } from "@/core/service/student.service";
 import { StudentRepository } from "@/infra/repositories/student.repository";
 import { ICreateStudent } from "@/core/domain/student";
-import { ConfirmModal } from "@/components/modal/confirmModal";
-import { ConfirmModalProps } from "@/components/modal/confirmModal";
+import { ConfirmModal, ConfirmModalProps } from "@/components/modal/confirmModal";
+import { styled } from "@mui/material/styles";
 
 interface FormProfessorsProps {
   apiBase: string;
@@ -31,7 +31,6 @@ const Schema = z.object({
     .min(11, "กรุณากรอกรหัสนักศึกษา")
     .regex(/^[0-9]+$/, "รหัสนักศึกษาต้องเป็นตัวเลขเท่านั้น"),
   nickname: z.string().min(1, "กรุณากรอกชื่อเล่น"),
-  phone: z.string().optional(),
   email: z.string().email("อีเมลไม่ถูกต้อง"),
   yearOfFirstAdmission: z.string().optional(),
   yearOfCompletion: z.string().optional(),
@@ -49,6 +48,18 @@ const Schema = z.object({
 });
 
 type FormData = z.infer<typeof Schema>;
+
+const VisuallyHiddenInput = styled("input")({
+  clip: "rect(0 0 0 0)",
+  clipPath: "inset(50%)",
+  height: 1,
+  overflow: "hidden",
+  position: "absolute",
+  bottom: 0,
+  left: 0,
+  whiteSpace: "nowrap",
+  width: 1,
+});
 
 export const CreateStudentForm: FC<FormProfessorsProps> = ({
   apiBase,
@@ -80,7 +91,6 @@ export const CreateStudentForm: FC<FormProfessorsProps> = ({
       lastNameEn: "",
       studentId: "",
       nickname: "",
-      phone: "",
       email: "",
       yearOfFirstAdmission: "",
       yearOfCompletion: "",
@@ -167,9 +177,8 @@ export const CreateStudentForm: FC<FormProfessorsProps> = ({
                 <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
                   <Button variant="contained" component="label" size="large">
                     อัปโหลดรูปภาพ
-                    <input
+                    <VisuallyHiddenInput
                       type="file"
-                      hidden
                       accept="image/*"
                       onChange={handleFileChange}
                     />
@@ -179,9 +188,8 @@ export const CreateStudentForm: FC<FormProfessorsProps> = ({
             ) : (
               <Button variant="outlined" component="label" size="large">
                 อัปโหลดรูปภาพ
-                <input
+                <VisuallyHiddenInput
                   type="file"
-                  hidden
                   accept="image/*"
                   onChange={handleFileChange}
                 />
@@ -199,6 +207,7 @@ export const CreateStudentForm: FC<FormProfessorsProps> = ({
               fullWidth
               required
               placeholder="ระบุชื่อ (ภาษาไทย)"
+              requiredMark
             />
             <RHFTextField
               control={control}
@@ -207,6 +216,7 @@ export const CreateStudentForm: FC<FormProfessorsProps> = ({
               fullWidth
               required
               placeholder="ระบุนามสกุล (ภาษาไทย)"
+              requiredMark
             />
           </div>
 
@@ -217,6 +227,7 @@ export const CreateStudentForm: FC<FormProfessorsProps> = ({
               label="ชื่อ (ภาษาอังกฤษ)"
               fullWidth
               placeholder="ระบุชื่อ (ภาษาอังกฤษ)"
+              requiredMark
             />
             <RHFTextField
               control={control}
@@ -224,6 +235,7 @@ export const CreateStudentForm: FC<FormProfessorsProps> = ({
               label="นามสกุล (ภาษาอังกฤษ)"
               fullWidth
               placeholder="ระบุนามสกุล (ภาษาอังกฤษ)"
+              requiredMark
             />
           </div>
 
@@ -234,6 +246,7 @@ export const CreateStudentForm: FC<FormProfessorsProps> = ({
               label="รหัสนักศึกษา"
               fullWidth
               placeholder="ระบุรหัสนักศึกษา"
+              requiredMark
             />
             <RHFTextField
               control={control}
@@ -241,35 +254,13 @@ export const CreateStudentForm: FC<FormProfessorsProps> = ({
               label="ชื่อเล่น"
               fullWidth
               placeholder="ระบุชื่อเล่น"
+              requiredMark
             />
           </div>
         </div>
       </div>
 
       <div className="flex flex-1 flex-col justify-between gap-y-8">
-        <div className="flex flex-row gap-x-4">
-          <div className="flex-4">
-            <RHFTextField
-              control={control}
-              name="phone"
-              label="เบอร์โทร"
-              variant="outlined"
-              fullWidth
-              placeholder="ระบุเบอร์โทร"
-            />
-          </div>
-          <div className="flex-4">
-            <RHFTextField
-              control={control}
-              name="email"
-              label="อีเมล"
-              variant="outlined"
-              fullWidth
-              required
-              placeholder="ระบุอีเมล"
-            />
-          </div>
-        </div>
         <div className="flex flex-row gap-x-4">
           <div className="flex-4">
             <RHFTextField
@@ -291,6 +282,18 @@ export const CreateStudentForm: FC<FormProfessorsProps> = ({
               placeholder="ระบุปีที่จบการศึกษา"
             />
           </div>
+        </div>
+        <div className="grid grid-cols-2 gap-x-4">
+          <RHFTextField
+            control={control}
+            name="email"
+            label="อีเมล"
+            variant="outlined"
+            required
+            fullWidth
+            placeholder="ระบุอีเมล"
+            requiredMark
+          />
         </div>
       </div>
       <Typography variant="h6" fontWeight="bold" marginY={3}>
@@ -346,7 +349,7 @@ export const CreateStudentForm: FC<FormProfessorsProps> = ({
       <div className="mt-4 mb-3 w-full">
         <div className="mb-3 flex w-full items-center justify-between">
           <Typography variant="h6" fontWeight="bold">
-            สาขาที่เชี่ยวชาญ
+            โปรเจกต์อื่นๆ
           </Typography>
           <IconButton
             color="primary"
