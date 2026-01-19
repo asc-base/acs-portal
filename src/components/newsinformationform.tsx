@@ -67,7 +67,7 @@ export const NewsInformationForm = ({
       formData.append("image", data.image);
       formData.append("newsId", data.newsId.toString());
 
-      const response = await newsService.createNewsInformation(type, formData);
+      const response = await newsService.upsertNewsInformation(formData);
       if (response) {
         router.push(`/admin/${type}`);
       } else {

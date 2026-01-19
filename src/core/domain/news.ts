@@ -45,5 +45,5 @@ export interface queryNews {
   page?: number;
   pageSize?: number;
   category?: string;
-  title?:string
+  title?: string;
 }
