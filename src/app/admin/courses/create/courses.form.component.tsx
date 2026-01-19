@@ -173,6 +173,7 @@ export const CourseForm: FC<CoursesFormProps> = ({ apiBase, curriculumId }) => {
           label="กลุ่มวิชา"
           variant="outlined"
           size="small"
+          required
         >
           {typeCourses.map((typeCourse) => (
             <MenuItem key={typeCourse.id} value={typeCourse.id}>
@@ -187,6 +188,7 @@ export const CourseForm: FC<CoursesFormProps> = ({ apiBase, curriculumId }) => {
           label="รหัสวิชา"
           variant="outlined"
           size="small"
+          required
         />
 
         <RHFTextField
@@ -195,6 +197,7 @@ export const CourseForm: FC<CoursesFormProps> = ({ apiBase, curriculumId }) => {
           label="หน่วยกิต"
           variant="outlined"
           size="small"
+          required
         />
       </div>
 
@@ -205,6 +208,7 @@ export const CourseForm: FC<CoursesFormProps> = ({ apiBase, curriculumId }) => {
         variant="outlined"
         size="small"
         fullWidth
+        required
       />
 
       <RHFTextField
@@ -214,6 +218,7 @@ export const CourseForm: FC<CoursesFormProps> = ({ apiBase, curriculumId }) => {
         variant="outlined"
         size="small"
         fullWidth
+        required
       />
 
       <RHFTextField
@@ -224,6 +229,7 @@ export const CourseForm: FC<CoursesFormProps> = ({ apiBase, curriculumId }) => {
         fullWidth
         multiline
         rows={6}
+        required
       />
 
       <div className="mt-6">
