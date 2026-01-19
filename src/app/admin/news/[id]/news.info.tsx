@@ -107,15 +107,12 @@ const NewsInfo = ({ news, apiBase, categories }: NewsInfoProps) => {
         onClose: () => setConfirmModal(null),
         onConfirm: () => {
           setIsEdit(false);
-          reset();
-          setSelectedFile(null);
-          setConfirmModal(null);
+          router.push(`/admin/news?page=1&pageSize=9&category=&title=`);
         },
       });
     } else {
       setIsEdit(false);
-      reset();
-      setSelectedFile(null);
+      router.push(`/admin/news?page=1&pageSize=9&category=&title=`);
     }
   };
 
@@ -272,16 +269,20 @@ const NewsInfo = ({ news, apiBase, categories }: NewsInfoProps) => {
         <div className="mt-4 flex justify-end">
           {isEdit ? (
             <div className="flex gap-x-4">
-              <Button variant="outlined" onClick={handleCancel}>
+              <Button variant="outlined" onClick={handleCancel} size="large">
                 ยกเลิก
               </Button>
-              <Button variant="contained" type="submit">
+              <Button variant="contained" type="submit" size="large">
                 บันทึก
               </Button>
             </div>
           ) : (
             <div>
-              <Button variant="contained" onClick={() => setIsEdit(true)}>
+              <Button
+                variant="contained"
+                onClick={() => setIsEdit(true)}
+                size="large"
+              >
                 แก้ไข
               </Button>
             </div>
