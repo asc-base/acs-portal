@@ -1,9 +1,8 @@
 import { Pageable } from "@/interface/response";
-import { INews, ICreateNews } from "../domain/news";
+import { INews, ICreateNews, INewsInformation } from "../domain/news";
 import { INewsRepository } from "../ports/news.repository";
-import { INewsInformation } from "../domain/news";
 export class NewsService {
-  constructor(private newsRepository: INewsRepository) {}
+  constructor(private readonly newsRepository: INewsRepository) { }
 
   async createNews(data: ICreateNews, image: File): Promise<INews> {
     const formData = new FormData();
@@ -64,6 +63,11 @@ export class NewsService {
 
   async upsertNewsInformation(data: FormData): Promise<INewsInformation> {
     const response = await this.newsRepository.upsertNewsInformation(data);
+    return response.data;
+  }
+
+  async getNewsInformationById(id: number): Promise<INewsInformation> {
+    const response = await this.newsRepository.getNewsInformationById(id);
     return response.data;
   }
 }
