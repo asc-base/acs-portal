@@ -10,6 +10,8 @@ import { CropImageCard } from "./cropimagecard";
 import { NewsRepository } from "@/infra/repositories/news.repository";
 import { NewsService } from "@/core/service/news.service";
 import { useRouter } from "next/navigation";
+import { ConfirmModal } from "@/components/modal/confirmModal";
+import { ConfirmModalProps } from "@/components/modal/confirmModal";
 
 interface NewsInformationFormProps {
   type: string;
@@ -35,6 +37,9 @@ export const NewsInformationForm = ({
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [croppedFile, setCroppedFile] = useState<File | null>(null);
   const [open, setOpen] = useState(false);
+  const [confirmModal, setConfirmModal] = useState<ConfirmModalProps | null>(
+    null,
+  );
 
   const [options, setOptions] = useState<NewsItem[]>([]);
   const [loading, setLoading] = useState(false);
@@ -50,7 +55,7 @@ export const NewsInformationForm = ({
     control,
     handleSubmit,
     setValue,
-    formState: { errors },
+    formState: { errors, isDirty },
     setError,
   } = useForm<FormValues>({
     resolver: zodResolver(Schema),
@@ -61,6 +66,17 @@ export const NewsInformationForm = ({
     },
   });
 
+  const cancelForm = () => {
+    if (isDirty) {
+      setConfirmModal({
+        isOpen: true,
+        type: "warning",
+        onClose: () => setConfirmModal(null),
+        onConfirm: () => router.push(`/admin/${type}`),
+      });
+    } else router.push(`/admin/${type}`);
+  };
+
   const onSubmit = async (data: FormValues) => {
     try {
       const formData = new FormData();
@@ -69,7 +85,12 @@ export const NewsInformationForm = ({
 
       const response = await newsService.upsertNewsInformation(formData);
       if (response) {
-        router.push(`/admin/${type}`);
+        setConfirmModal({
+          isOpen: true,
+          type: "success",
+          onClose: () => setConfirmModal(null),
+          onConfirm: () => router.push(`/admin/${type}`),
+        });
       } else {
         setError("newsId", {
           type: "manual",
@@ -156,7 +177,6 @@ export const NewsInformationForm = ({
           </div>
 
           <div className="w-full">
-            <h4 className="mb-2 font-bold">ข่าวสาร</h4>
             <Controller
               name="newsId"
               control={control}
@@ -174,6 +194,11 @@ export const NewsInformationForm = ({
                       {...params}
                       placeholder="ค้นหาข่าว"
                       error={!!errors.newsId}
+                      required
+                      label="ข่าวสาร"
+                      InputLabelProps={{
+                        shrink: true,
+                      }}
                     />
                   )}
                 />
@@ -195,16 +220,14 @@ export const NewsInformationForm = ({
         </Modal>
 
         <div className="mt-6 flex justify-end gap-x-4">
-          <Button
-            variant="outlined"
-            onClick={() => router.push(`/admin/${type}`)}
-          >
+          <Button variant="outlined" onClick={cancelForm}>
             ยกเลิก
           </Button>
           <Button type="submit" variant="contained">
             บันทึกข้อมูล
           </Button>
         </div>
+        {confirmModal && <ConfirmModal {...confirmModal} />}
       </form>
     </div>
   );
