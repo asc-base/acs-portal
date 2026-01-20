@@ -95,7 +95,7 @@ export const NewsInformationForm = ({
         onClose: () => setConfirmModal(null),
         onConfirm: () => router.push(`/admin/${type}`),
       });
-    } else router.push(`/admin/${type}`);
+    } else router.push(`/admin/newsinformation/${type}`);
   };
 
   const onSubmit = async (data: FormValues) => {
@@ -112,7 +112,7 @@ export const NewsInformationForm = ({
           isOpen: true,
           type: "success",
           onClose: () => setConfirmModal(null),
-          onConfirm: () => router.push(`/admin/${type}`),
+          onConfirm: () => router.push(`/admin/newsinformation/${type}`),
         });
         return;
       }
