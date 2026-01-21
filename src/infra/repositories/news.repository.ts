@@ -39,10 +39,10 @@ export class NewsRepository implements INewsRepository {
   }
 
   async updateNews(
-    id: string,
-    news: Partial<INews>,
+    id: number,
+    news: FormData,
   ): Promise<ApiResponse<INews>> {
-    const response = await this.http.put<ApiResponse<INews>>(
+    const response = await this.http.patch<ApiResponse<INews>>(
       `/v1/news/${id}`,
       news,
     );

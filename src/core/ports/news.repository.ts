@@ -1,5 +1,5 @@
 import { ApiResponse, Pageable } from "@/interface/response";
-import { INews, INewsInformation } from "../domain/news";
+import { INews, INewsInformation} from "../domain/news";
 
 export interface INewsRepository {
   createNews(data: FormData): Promise<ApiResponse<INews>>;
@@ -10,7 +10,7 @@ export interface INewsRepository {
     category?: string,
   ): Promise<ApiResponse<Pageable<INews>>>;
   getNewsById(id: string): Promise<ApiResponse<INews>>;
-  updateNews(id: string, news: Partial<INews>): Promise<ApiResponse<INews>>;
+  updateNews(id: number, news: FormData): Promise<ApiResponse<INews>>;
   deleteNews(id: string, token: string): Promise<ApiResponse<INews>>;
   getNewsInformations(
     type: string,
