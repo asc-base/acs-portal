@@ -18,4 +18,5 @@ export interface INewsRepository {
     pageSize: number,
   ): Promise<ApiResponse<INewsInformation[]>>;
   upsertNewsInformation(data: FormData): Promise<ApiResponse<INewsInformation>>;
+  getNewsInformationById(id: number): Promise<ApiResponse<INewsInformation>>;
 }

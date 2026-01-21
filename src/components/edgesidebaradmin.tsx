@@ -31,12 +31,12 @@ const sidebarItems = [
   },
   {
     name: "ข่าวประชาสัมพันธ์",
-    href: "/admin/announcement",
+    href: "/admin/newsinformation/announcement",
     icon: <CampaignIcon />,
   },
   {
     name: "ข่าว Highlight",
-    href: "/admin/newshighlight",
+    href: "/admin/newsinformation/newshighlight",
     icon: <BorderColorIcon />,
   },
   {

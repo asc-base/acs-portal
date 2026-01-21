@@ -4,8 +4,8 @@ import { HttpHelper } from "@/lib/http";
 import { ApiResponse, Pageable } from "@/interface/response";
 
 export class NewsRepository implements INewsRepository {
-  private http: HttpHelper;
-  private baseUrl: string;
+  private readonly http: HttpHelper;
+  private readonly baseUrl: string;
 
   constructor(baseUrl: string) {
     this.baseUrl = baseUrl;
@@ -77,6 +77,11 @@ export class NewsRepository implements INewsRepository {
       `/v1/news/news-media/`,
       data,
     );
+    return response;
+  }
+
+  async getNewsInformationById(id: number): Promise<ApiResponse<INewsInformation>> {
+    const response = await this.http.get<ApiResponse<INewsInformation>>(`/v1/news/news-media/${id}`);
     return response;
   }
 }
