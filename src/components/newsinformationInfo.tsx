@@ -119,7 +119,7 @@ export const NewsInformationInfo = ({
                         reset();
                         setIsEdit(false);
                         setConfirmModal(null);
-                        router.push(`/admin/${type}`
+                        router.push(`/admin/newsinformation/${type}`
                         );
                     },
                 });
