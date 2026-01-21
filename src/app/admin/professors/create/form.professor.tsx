@@ -19,8 +19,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { RHFTextField } from "@/components/form/RHFTextField";
 import { RHFSelect } from "@/components/form/RHFSelect";
 import { ICreateProfessor } from "@/core/domain/professor";
-import { ConfirmModal } from "@/components/modal/confirmModal";
-import { ConfirmModalProps } from "@/components/modal/confirmModal";
+import { ConfirmModal, ConfirmModalProps } from "@/components/modal/confirmModal";
 
 interface FormProfessorsProps {
   apiBase: string;
@@ -315,6 +314,7 @@ export const FormProfesssors: FC<FormProfessorsProps> = ({ apiBase }) => {
                   fullWidth
                   required
                   displayEmpty
+                  requiredMark
                   renderValue={(value) => {
                     if (!value) {
                       return (
@@ -346,6 +346,7 @@ export const FormProfesssors: FC<FormProfessorsProps> = ({ apiBase }) => {
                   fullWidth
                   required
                   placeholder="ระบุชื่อ (ภาษาไทย)"
+                  requiredMark
                 />
               </div>
 
@@ -358,6 +359,7 @@ export const FormProfesssors: FC<FormProfessorsProps> = ({ apiBase }) => {
                   fullWidth
                   required
                   placeholder="ระบุนามสกุล (ภาษาไทย)"
+                  requiredMark
                 />
               </div>
             </div>
@@ -371,6 +373,7 @@ export const FormProfesssors: FC<FormProfessorsProps> = ({ apiBase }) => {
                   fullWidth
                   required
                   displayEmpty
+                  requiredMark
                   renderValue={(value) => {
                     if (!value) {
                       return (
@@ -401,6 +404,7 @@ export const FormProfesssors: FC<FormProfessorsProps> = ({ apiBase }) => {
                   variant="outlined"
                   fullWidth
                   placeholder="ระบุชื่อ (ภาษาอังกฤษ)"
+                  requiredMark
                 />
               </div>
 
@@ -412,6 +416,7 @@ export const FormProfesssors: FC<FormProfessorsProps> = ({ apiBase }) => {
                   variant="outlined"
                   fullWidth
                   placeholder="ระบุนามสกุล (ภาษาอังกฤษ)"
+                  requiredMark
                 />
               </div>
             </div>
@@ -428,6 +433,7 @@ export const FormProfesssors: FC<FormProfessorsProps> = ({ apiBase }) => {
                 fullWidth
                 required
                 placeholder="ระบุเบอร์โทร"
+                requiredMark
               />
             </div>
             <div className="flex-4">
@@ -439,6 +445,7 @@ export const FormProfesssors: FC<FormProfessorsProps> = ({ apiBase }) => {
                 fullWidth
                 required
                 placeholder="ระบุอีเมล"
+                requiredMark
               />
             </div>
           </div>
@@ -451,6 +458,7 @@ export const FormProfesssors: FC<FormProfessorsProps> = ({ apiBase }) => {
                 fullWidth
                 required
                 displayEmpty
+                requiredMark
                 renderValue={(value) => {
                   if (!value) {
                     return (
@@ -482,6 +490,7 @@ export const FormProfesssors: FC<FormProfessorsProps> = ({ apiBase }) => {
                 fullWidth
                 required
                 placeholder="ระบุห้องพักอาจารย์"
+                requiredMark
               />
             </div>
           </div>

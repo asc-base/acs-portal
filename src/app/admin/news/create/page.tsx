@@ -1,8 +1,10 @@
 import CreateNewsForm from "./create.news.form";
-import { baseUrl } from "@/infra/container";
+import { baseUrl, masterDataService } from "@/infra/container";
 
 const page = async () => {
-  return <CreateNewsForm apiBase={baseUrl} />;
+  const categories = await masterDataService.getMasterDataListType("news");
+
+  return <CreateNewsForm apiBase={baseUrl} categories={categories} />;
 };
 
 export default page;

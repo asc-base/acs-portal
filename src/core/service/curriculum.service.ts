@@ -3,10 +3,11 @@ import {
   ICurriculum,
   QueryCurriculum,
   ICreateCurriculum,
+  IUpdateCurriculum,
 } from "../domain/curriculum";
 import { Pageable } from "@/interface/response";
 export class CurriculumService {
-  constructor(private readonly curriculumRepository: ICurriculumRepository) {}
+  constructor(private readonly curriculumRepository: ICurriculumRepository) { }
 
   async getCurriculum(query: QueryCurriculum): Promise<Pageable<ICurriculum>> {
     const response = await this.curriculumRepository.getCurriculum(query);
@@ -25,4 +26,19 @@ export class CurriculumService {
     const response = await this.curriculumRepository.createCurriculum(formData);
     return response.data;
   }
+  
+  async updateCurriculum(id: number, data: IUpdateCurriculum): Promise<ICurriculum> {
+    const formData = new FormData();
+    Object.entries(data).forEach(([key, value]) => {
+      if (value !== undefined && value !== null && key !== "image") {
+        formData.append(key, value.toString());
+      }
+    });
+    if (data.image) {
+      formData.append("image", data.image);
+    }
+    const response = await this.curriculumRepository.updateCurriculum(id, formData);
+    return response.data;
+  }
+
 }
