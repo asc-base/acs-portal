@@ -3,9 +3,15 @@ import NewsMediaListComponent from "@/components/newsinformation.list.component"
 
 export const dynamic = "force-dynamic";
 
-const page = async () => {
+interface PageProps {
+  params: Promise<{
+    type: string;
+  }>;
+}
+
+const page = async ({params}: PageProps) => {
   const pageSize = 6;
-  const type = "announcement";
+  const { type } = await params;
 
   const newsInformation = await newsService.getNewsInformations(
     type,

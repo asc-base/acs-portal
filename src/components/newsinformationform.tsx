@@ -1,7 +1,14 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { Button, TextField, Modal, Autocomplete } from "@mui/material";
+import {
+  Button,
+  TextField,
+  Modal,
+  Autocomplete,
+  Snackbar,
+  Alert,
+} from "@mui/material";
 import Image from "next/image";
 import { Controller, useForm } from "react-hook-form";
 import { z } from "zod";
@@ -10,12 +17,13 @@ import { CropImageCard } from "./cropimagecard";
 import { NewsRepository } from "@/infra/repositories/news.repository";
 import { NewsService } from "@/core/service/news.service";
 import { useRouter } from "next/navigation";
-import { ConfirmModal } from "@/components/modal/confirmModal";
-import { ConfirmModalProps } from "@/components/modal/confirmModal";
+import { ConfirmModal, ConfirmModalProps } from "@/components/modal/confirmModal";
+import { styled } from "@mui/material/styles";
 
 interface NewsInformationFormProps {
   type: string;
   apiBase: string;
+  typeId: number;
 }
 
 type NewsItem = {
@@ -30,9 +38,22 @@ const Schema = z.object({
 
 type FormValues = z.infer<typeof Schema>;
 
+const VisuallyHiddenInput = styled("input")({
+  clip: "rect(0 0 0 0)",
+  clipPath: "inset(50%)",
+  height: 1,
+  overflow: "hidden",
+  position: "absolute",
+  bottom: 0,
+  left: 0,
+  whiteSpace: "nowrap",
+  width: 1,
+});
+
 export const NewsInformationForm = ({
   type,
   apiBase,
+  typeId,
 }: NewsInformationFormProps) => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [croppedFile, setCroppedFile] = useState<File | null>(null);
@@ -40,6 +61,7 @@ export const NewsInformationForm = ({
   const [confirmModal, setConfirmModal] = useState<ConfirmModalProps | null>(
     null,
   );
+  const [isError, setIsError] = useState(false);
 
   const [options, setOptions] = useState<NewsItem[]>([]);
   const [loading, setLoading] = useState(false);
@@ -56,7 +78,6 @@ export const NewsInformationForm = ({
     handleSubmit,
     setValue,
     formState: { errors, isDirty },
-    setError,
   } = useForm<FormValues>({
     resolver: zodResolver(Schema),
     mode: "onChange",
@@ -74,7 +95,7 @@ export const NewsInformationForm = ({
         onClose: () => setConfirmModal(null),
         onConfirm: () => router.push(`/admin/${type}`),
       });
-    } else router.push(`/admin/${type}`);
+    } else router.push(`/admin/newsinformation/${type}`);
   };
 
   const onSubmit = async (data: FormValues) => {
@@ -82,26 +103,23 @@ export const NewsInformationForm = ({
       const formData = new FormData();
       formData.append("image", data.image);
       formData.append("newsId", data.newsId.toString());
+      formData.append("typeId", typeId.toString());
 
       const response = await newsService.upsertNewsInformation(formData);
+
       if (response) {
         setConfirmModal({
           isOpen: true,
           type: "success",
           onClose: () => setConfirmModal(null),
-          onConfirm: () => router.push(`/admin/${type}`),
+          onConfirm: () => router.push(`/admin/newsinformation/${type}`),
         });
-      } else {
-        setError("newsId", {
-          type: "manual",
-          message: "ข้อมูลข่าวไม่ถูกต้อง",
-        });
+        return;
       }
+
+      setIsError(true);
     } catch {
-      setError("newsId", {
-        type: "manual",
-        message: "เกิดข้อผิดพลาด กรุณาลองใหม่",
-      });
+      setIsError(true);
     }
   };
 
@@ -135,6 +153,16 @@ export const NewsInformationForm = ({
 
   return (
     <div className="px-[32px] py-[28px]">
+      <Snackbar
+        anchorOrigin={{ vertical: "top", horizontal: "right" }}
+        open={isError}
+        autoHideDuration={4000}
+        onClose={() => setIsError(false)}
+      >
+        <Alert severity="error" sx={{ width: "100%" }}>
+          ไม่สามารถบันทึกข้อมูลได้ในขณะนี้ กรุณาลองใหม่อีกครั้ง
+        </Alert>
+      </Snackbar>
       <div className="mb-4 flex flex-row items-end">
         <h3 className="font-bold">
           {type === "announcement" ? "ข่าวประชาสัมพันธ์" : "ข่าว Highlight"}
@@ -154,9 +182,8 @@ export const NewsInformationForm = ({
                 <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
                   <Button variant="contained" component="label">
                     เปลี่ยนรูปภาพ
-                    <input
+                    <VisuallyHiddenInput
                       type="file"
-                      hidden
                       accept="image/*"
                       onChange={handleFileChange}
                     />
@@ -166,9 +193,8 @@ export const NewsInformationForm = ({
             ) : (
               <Button variant="contained" component="label">
                 อัปโหลดรูปภาพ
-                <input
+                <VisuallyHiddenInput
                   type="file"
-                  hidden
                   accept="image/*"
                   onChange={handleFileChange}
                 />
@@ -196,9 +222,6 @@ export const NewsInformationForm = ({
                       error={!!errors.newsId}
                       required
                       label="ข่าวสาร"
-                      InputLabelProps={{
-                        shrink: true,
-                      }}
                     />
                   )}
                 />
@@ -227,6 +250,7 @@ export const NewsInformationForm = ({
             บันทึกข้อมูล
           </Button>
         </div>
+        
         {confirmModal && <ConfirmModal {...confirmModal} />}
       </form>
     </div>
