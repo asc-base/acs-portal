@@ -25,13 +25,13 @@ const NewsInformationListComponent = ({
           <h4>(สามารถเลือกได้สูงสุด {pageSize} ข่าวสาร)</h4>
         </div>
         {type === "newshighlight" ? (
-          <Link href={"/admin/newshighlight/create"}>
+          <Link href={"/admin/newsinformation/newshighlight/create"}>
             <Button variant="contained" startIcon={<AddIcon />}>
               ข่าว Highlight
             </Button>
           </Link>
         ) : (
-          <Link href={"/admin/announcement/create"}>
+          <Link href={"/admin/newsinformation/announcement/create"}>
             <Button variant="contained" startIcon={<AddIcon />}>
               ข่าวประชาสัมพันธ์
             </Button>
@@ -47,8 +47,8 @@ const NewsInformationListComponent = ({
             onClick={() =>
               router.push(
                 newsInformation[index]?.id
-                  ? `/admin/${type}/${newsInformation[index]?.id}`
-                  : `/admin/${type}/create`,
+                  ? `/admin/newsinformation/${type}/${newsInformation[index]?.id}`
+                  : `/admin/newsinformation/${type}/create`,
               )
             }
           >
