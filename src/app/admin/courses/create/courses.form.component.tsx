@@ -14,6 +14,7 @@ import { MasterDataRepository } from "@/infra/repositories/master-data.repositor
 import { MasterDataService } from "@/core/service/master-data.service";
 import { useRouter } from "next/navigation";
 import { ICreateCourse } from "@/core/domain/course";
+import { ConfirmModal, ConfirmModalProps } from "@/components/modal/confirmModal";
 
 interface CoursesFormProps {
   apiBase: string;
@@ -42,6 +43,7 @@ export const CourseForm: FC<CoursesFormProps> = ({ apiBase, curriculumId }) => {
   const [typeCourses, setTypeCourses] = useState<any[]>([]);
   const [courses, setCourses] = useState<any[]>([]);
   const [isError, setIsError] = useState(false);
+  const [confirmModal, setConfirmModal] = useState<ConfirmModalProps | null>(null);
 
   const courseService = useMemo(() => {
     const courseRepository = new CourseRepository(apiBase);
@@ -53,7 +55,7 @@ export const CourseForm: FC<CoursesFormProps> = ({ apiBase, curriculumId }) => {
     return new MasterDataService(typeCourseRepository);
   }, [apiBase]);
 
-  const { control, handleSubmit } = useForm<FormData>({
+  const { control, handleSubmit, formState: { isDirty } } = useForm<FormData>({
     resolver: zodResolver(Schema),
     defaultValues: {
       typeCourseId: 0,
@@ -70,6 +72,19 @@ export const CourseForm: FC<CoursesFormProps> = ({ apiBase, curriculumId }) => {
     control,
     name: "prerequisites",
   });
+
+  const handleCancel = () => {
+    if (isDirty) {
+      setConfirmModal({
+        isOpen: true,
+        type: "warning",
+        onClose: () => setConfirmModal(null),
+        onConfirm: () => router.back(),
+      });
+    } else {
+      router.back();
+    }
+  };
 
   const onSubmit = async (data: FormData) => {
     setIsError(false);
@@ -97,10 +112,15 @@ export const CourseForm: FC<CoursesFormProps> = ({ apiBase, curriculumId }) => {
         return;
       }
 
-      router.push(
-        `/admin/courses?page=1&pageSize=10&curriculumId=${curriculumId}`,
-        
-      );
+      setConfirmModal({
+        isOpen: true,
+        type: "success",
+        onClose: () => setConfirmModal(null),
+        onConfirm: () => router.push(
+          `/admin/courses?page=1&pageSize=10&curriculumId=${curriculumId}`
+        ),
+      });
+
     } catch (error) {
       console.error("Submit Error:", error);
       setIsError(true);
@@ -153,6 +173,7 @@ export const CourseForm: FC<CoursesFormProps> = ({ apiBase, curriculumId }) => {
           label="กลุ่มวิชา"
           variant="outlined"
           size="small"
+          required
         >
           {typeCourses.map((typeCourse) => (
             <MenuItem key={typeCourse.id} value={typeCourse.id}>
@@ -167,6 +188,7 @@ export const CourseForm: FC<CoursesFormProps> = ({ apiBase, curriculumId }) => {
           label="รหัสวิชา"
           variant="outlined"
           size="small"
+          required
         />
 
         <RHFTextField
@@ -175,6 +197,7 @@ export const CourseForm: FC<CoursesFormProps> = ({ apiBase, curriculumId }) => {
           label="หน่วยกิต"
           variant="outlined"
           size="small"
+          required
         />
       </div>
 
@@ -185,6 +208,7 @@ export const CourseForm: FC<CoursesFormProps> = ({ apiBase, curriculumId }) => {
         variant="outlined"
         size="small"
         fullWidth
+        required
       />
 
       <RHFTextField
@@ -194,6 +218,7 @@ export const CourseForm: FC<CoursesFormProps> = ({ apiBase, curriculumId }) => {
         variant="outlined"
         size="small"
         fullWidth
+        required
       />
 
       <RHFTextField
@@ -204,6 +229,7 @@ export const CourseForm: FC<CoursesFormProps> = ({ apiBase, curriculumId }) => {
         fullWidth
         multiline
         rows={6}
+        required
       />
 
       <div className="mt-6">
@@ -252,7 +278,7 @@ export const CourseForm: FC<CoursesFormProps> = ({ apiBase, curriculumId }) => {
           variant="outlined"
           size="medium"
           className="w-[150px]"
-          onClick={() => router.back()}
+          onClick={handleCancel}
         >
           ยกเลิก
         </Button>
@@ -265,6 +291,8 @@ export const CourseForm: FC<CoursesFormProps> = ({ apiBase, curriculumId }) => {
           บันทึกข้อมูล
         </Button>
       </div>
+
+      {confirmModal && <ConfirmModal {...confirmModal} />}
     </form>
   );
 };

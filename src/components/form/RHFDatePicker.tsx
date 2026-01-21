@@ -17,6 +17,7 @@ type RHFDatePickerProps<T extends FieldValues> = {
   placeholder?: string;
   adapterLocale?: string;
   requiredMark?: boolean;
+  required?: boolean;
 } & Omit<DatePickerProps, "value" | "onChange" | "label">;
 
 export function RHFDatePickerDayjs<T extends FieldValues>({
@@ -26,6 +27,7 @@ export function RHFDatePickerDayjs<T extends FieldValues>({
   placeholder,
   adapterLocale = "th",
   requiredMark,
+  required,
   ...props
 }: RHFDatePickerProps<T>) {
   return (
@@ -35,7 +37,9 @@ export function RHFDatePickerDayjs<T extends FieldValues>({
       render={({ field, fieldState }) => (
         <Stack spacing={0.5}>
           {label && (
-            <FormLabel>{requiredMark ? `${label} *` : label}</FormLabel>
+            <FormLabel>
+              {requiredMark || required ? `${label} *` : label}
+            </FormLabel>
           )}
 
           <LocalizationProvider
@@ -48,6 +52,7 @@ export function RHFDatePickerDayjs<T extends FieldValues>({
               onChange={(val) => field.onChange(val ? val.toISOString() : "")}
               slotProps={{
                 textField: {
+                  required: required,
                   placeholder,
                   fullWidth: true,
                   variant: "outlined",

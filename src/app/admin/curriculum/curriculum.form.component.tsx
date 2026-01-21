@@ -12,6 +12,7 @@ import { CurriculumService } from "@/core/service/curriculum.service";
 import { styled } from "@mui/material/styles";
 import { RHFTextField } from "@/components/form/RHFTextField";
 import { RHFDatePickerDayjs } from "@/components/form/RHFDatePicker";
+import { ConfirmModal, ConfirmModalProps } from "@/components/modal/confirmModal";
 
 interface CurriculumFormProps {
   apiBase: string;
@@ -43,12 +44,14 @@ export const CurriculumForm = ({ apiBase }: CurriculumFormProps) => {
   const router = useRouter();
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
+  const [confirmModal, setConfirmModal] = useState<ConfirmModalProps | null>(null);
+
   const curriculumService = useMemo(() => {
     const repo = new CurriculumRepository(apiBase);
     return new CurriculumService(repo);
   }, [apiBase]);
 
-  const { handleSubmit, control, setValue } = useForm<FormValues>({
+  const { handleSubmit, control, setValue, formState: { isDirty } } = useForm<FormValues>({
     resolver: zodResolver(Schema),
     mode: "onChange",
   });
@@ -63,6 +66,19 @@ export const CurriculumForm = ({ apiBase }: CurriculumFormProps) => {
     }
   };
 
+  const handleCancel = () => {
+    if (isDirty) {
+      setConfirmModal({
+        isOpen: true,
+        type: "warning",
+        onClose: () => setConfirmModal(null),
+        onConfirm: () => router.back(),
+      });
+    } else {
+      router.back();
+    }
+  };
+
   const onSubmit = async (data: FormValues) => {
     try {
       const year = dayjs(data.year).year().toString();
@@ -70,8 +86,14 @@ export const CurriculumForm = ({ apiBase }: CurriculumFormProps) => {
         ...data,
         year,
       });
+      
       if (response) {
-        router.push(`/admin/curriculum`);
+        setConfirmModal({
+            isOpen: true,
+            type: "success",
+            onClose: () => setConfirmModal(null),
+            onConfirm: () => router.push(`/admin/curriculum`),
+        });
       }
     } catch (error) {
       console.error("Submit Error:", error);
@@ -122,6 +144,7 @@ export const CurriculumForm = ({ apiBase }: CurriculumFormProps) => {
               label="ชื่อหลักสูตร"
               variant="outlined"
               size="small"
+              required
             />
             <RHFDatePickerDayjs
               control={control}
@@ -129,6 +152,7 @@ export const CurriculumForm = ({ apiBase }: CurriculumFormProps) => {
               label="ปี"
               views={["year"]}
               openTo="year"
+              required
             />
             <RHFTextField
               control={control}
@@ -136,6 +160,7 @@ export const CurriculumForm = ({ apiBase }: CurriculumFormProps) => {
               label="ลิงก์ไฟล์หลักสูตร (Google Drive หรือ OneDrive)"
               variant="outlined"
               size="small"
+              required
             />
           </div>
         </div>
@@ -150,6 +175,7 @@ export const CurriculumForm = ({ apiBase }: CurriculumFormProps) => {
             fullWidth
             multiline
             rows={4}
+            required
           />
         </div>
 
@@ -158,7 +184,7 @@ export const CurriculumForm = ({ apiBase }: CurriculumFormProps) => {
             variant="outlined"
             className="w-[150px]"
             size="large"
-            onClick={() => router.back()}
+            onClick={handleCancel}
           >
             ยกเลิก
           </Button>
@@ -171,6 +197,8 @@ export const CurriculumForm = ({ apiBase }: CurriculumFormProps) => {
             บันทึกข้อมูล
           </Button>
         </div>
+
+        {confirmModal && <ConfirmModal {...confirmModal} />}
       </form>
     </div>
   );
