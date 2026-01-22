@@ -31,7 +31,7 @@ export class CourseRepository implements ICourseRepository {
     if (query.sortOrder !== undefined)
       params.append("sortOrder", query.sortOrder.toString());
 
-    
+
     const url = `/v1/course?${params.toString()}`;
 
     const response = await this.http.get<ApiResponse<Pageable<ICourse>>>(url);
@@ -43,7 +43,13 @@ export class CourseRepository implements ICourseRepository {
       `/v1/course`,data
     );
     return response;
-    
+
   }
 
+  async getCourseById(id: number): Promise<ApiResponse<ICourse> | null> {
+    const response = await this.http.get<ApiResponse<ICourse>>(
+      `/v1/course/${id}`
+    );
+    return response;
+  }
 }

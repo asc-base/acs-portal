@@ -14,5 +14,9 @@ export class CourseService {
     return response.data;
   }
 
+  async getCourseById(id: number): Promise<ICourse | null> {
+    const response = await this.courseRepository.getCourseById(id);
+    return response ? response.data : null;
+  }
 
 }
