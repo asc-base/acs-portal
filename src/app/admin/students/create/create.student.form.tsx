@@ -13,7 +13,10 @@ import { RHFTextField } from "@/components/form/RHFTextField";
 import { StudentService } from "@/core/service/student.service";
 import { StudentRepository } from "@/infra/repositories/student.repository";
 import { ICreateStudent } from "@/core/domain/student";
-import { ConfirmModal, ConfirmModalProps } from "@/components/modal/confirmModal";
+import {
+  ConfirmModal,
+  ConfirmModalProps,
+} from "@/components/modal/confirmModal";
 import { styled } from "@mui/material/styles";
 
 interface FormProfessorsProps {
