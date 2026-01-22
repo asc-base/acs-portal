@@ -38,3 +38,14 @@ export interface ICreateCourse {
   prerequisites?: number[];
   curriculumId: number;
 }
+
+export interface IUpdateCourse {
+  courseId?: string;
+  typeCourseId?: number;
+  courseNameTh?: string;
+  courseNameEn?: string;
+  credits?: string;
+  courseDetail?: string;
+  prerequisites?: number[];
+  curriculumId: number;
+}
