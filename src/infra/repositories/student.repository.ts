@@ -50,4 +50,11 @@ export class StudentRepository implements IStudentRepository {
     );
     return response;
   }
+
+  async updateStudent(data: FormData ,studentId : number): Promise<ApiResponse<IStudent>> {
+    const response = await this.http.put<ApiResponse<IStudent>>(
+      `/v2/students/${studentId}`,data
+    );
+    return response;
+  }
 }
