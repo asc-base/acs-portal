@@ -73,7 +73,7 @@ const CourseTableComponents = ({
   const router = useRouter();
 
   const handleEdit = (courseId: number) => {
-    router.push(`/admin/courses/edit/${courseId}`);
+    router.push(`/admin/courses/${courseId}?curriculumId=${curriculumId}`);
   };
 
   const handleDelete = (courseId: number) => {
