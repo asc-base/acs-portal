@@ -15,7 +15,7 @@ import {
 } from "@mui/material";
 import { Edit, Delete, Add } from "@mui/icons-material";
 import { useRouter } from "next/navigation";
-import { IStudent } from "@/core/domain/student";
+import { IStudent, ICreateStudentCsv } from "@/core/domain/student";
 import { ArrowDownward, ArrowUpward } from "@mui/icons-material";
 import SearchIcon from "@mui/icons-material/Search";
 import CloseIcon from "@mui/icons-material/Close";
@@ -23,6 +23,11 @@ import { RHFTextField } from "@/components/form/RHFTextField";
 import { SearchForm } from "./students.landingpage";
 import { Control } from "react-hook-form";
 import Link from "next/link";
+import { useRef } from "react";
+import AddIcon from "@mui/icons-material/Add";
+import { useImportStudentStore } from "@/store/preview-data";
+import Papa from "papaparse";
+
 interface StudentTableComponentsProps {
   students: IStudent[];
   onSort: (sortBy: string) => void;
@@ -53,6 +58,8 @@ const StudentTableComponents = ({
   handleNextPage,
 }: StudentTableComponentsProps) => {
   const router = useRouter();
+  const inputRef = useRef<HTMLInputElement | null>(null);
+  const { setImportData } = useImportStudentStore();
 
   const handleEdit = (studentId: number) => {
     router.push(`/admin/students/edit/${studentId}`);
@@ -60,6 +67,24 @@ const StudentTableComponents = ({
 
   const handleDelete = (studentId: number) => {
     console.log("delete", studentId);
+  };
+
+  const handleClick = () => {
+    inputRef.current?.click();
+  };
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files || !e.target.files[0]) return;
+    const file = e.target.files[0];
+    Papa.parse(file, {
+      header: true,
+      skipEmptyLines: true,
+      complete: (result) => {
+        const data: ICreateStudentCsv[] = result.data as ICreateStudentCsv[];
+        setImportData(data);
+        router.push(`/admin/students/preview?classbookId=${classBookId}`);
+      },
+    });
   };
 
   return (
@@ -82,12 +107,24 @@ const StudentTableComponents = ({
             size="small"
           />
           <Button variant="contained" size="large">
-            <Link href={`/students/create?classBookId=${classBookId}`}>
+            <Link href={`/admin/students/create?classBookId=${classBookId}`}>
               <Add /> เพิ่มนักศึกษา(บุคคล)
             </Link>
           </Button>
-          <Button variant="contained" size="large">
-            <Add /> เพิ่มนักศึกษา(ไฟล์)
+          <input
+            type="file"
+            ref={inputRef}
+            hidden
+            accept=".csv"
+            onChange={handleFileChange}
+          />
+          <Button
+            variant="contained"
+            size="large"
+            startIcon={<AddIcon />}
+            onClick={handleClick}
+          >
+            เพิ่มนักศึกษา (ไฟล์)
           </Button>
         </div>
       </div>
