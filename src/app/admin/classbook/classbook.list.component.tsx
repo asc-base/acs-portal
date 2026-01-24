@@ -7,6 +7,8 @@ import {
   SelectChangeEvent,
   Button,
   Pagination,
+  Snackbar,
+  Alert,
 } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import DoneIcon from "@mui/icons-material/Done";
@@ -16,10 +18,16 @@ import CloseIcon from "@mui/icons-material/Close";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useCallback, useEffect } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { RHFTextField } from "@/components/form/RHFTextField";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
+import { ClassBookRepository } from "@/infra/repositories/class-book.repository";
+import { ClassBookService } from "@/core/service/class-book.service";
+import {
+  ConfirmModal,
+  ConfirmModalProps,
+} from "@/components/modal/confirmModal";
 
 interface ClassBookListComponentsProps {
   classbooks: IClassBook[];
@@ -28,6 +36,7 @@ interface ClassBookListComponentsProps {
   page: number;
   sortOrder?: string;
   search?: string;
+  apiBase: string;
 }
 
 const searchSchema = z.object({
@@ -43,10 +52,15 @@ const ClassBookListComponents = ({
   page,
   sortOrder,
   search,
+  apiBase,
 }: ClassBookListComponentsProps) => {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const [isError, setIsError] = useState(false);
+  const [confirmModal, setConfirmModal] = useState<ConfirmModalProps | null>(
+    null,
+  );
 
   const { control, reset, watch } = useForm<SearchForm>({
     resolver: zodResolver(searchSchema),
@@ -75,6 +89,49 @@ const ClassBookListComponents = ({
     router.push(`${pathname}?${params.toString()}`);
   };
 
+  const classBookService = useMemo(() => {
+    const classBookRepository = new ClassBookRepository(apiBase);
+    return new ClassBookService(classBookRepository);
+  }, [apiBase]);
+
+  const confirmDeleteClassbook = (id: number) => {
+    setConfirmModal({
+      isOpen: true,
+      type: "delete",
+      onClose: () => setConfirmModal(null),
+      onConfirm: () => {
+        deleteClassbook(id);
+        setConfirmModal(null);
+      },
+    });
+  };
+
+  const deleteClassbook = async (id: number) => {
+    try {
+      const reps = await classBookService.deleteClassBook(id);
+      if (!reps) {
+        setIsError(true);
+        return;
+      }
+      setConfirmModal({
+        isOpen: true,
+        type: "success",
+        onClose: () => setConfirmModal(null),
+        onConfirm: () => setConfirmModal(null),
+        title: "ลบข้อมูลสำเร็จ",
+        description: "ข้อมูลถูกลบออกจากฐานข้อมูลแล้ว",
+        confirmText: "เสร็จสิ้น",
+      });
+    } catch (error) {
+      console.error(error);
+      setIsError(true);
+    }
+  };
+
+  const handleCloseAlert = () => {
+    setIsError(false);
+  };
+
   useEffect(() => {
     const delayDebounceFn = setTimeout(() => {
       const params = new URLSearchParams(searchParams.toString());
@@ -94,6 +151,20 @@ const ClassBookListComponents = ({
 
   return (
     <div className="min-h-screen px-8 py-5">
+      <Snackbar
+        anchorOrigin={{ vertical: "top", horizontal: "right" }}
+        open={isError}
+        autoHideDuration={4000}
+        onClose={handleCloseAlert}
+      >
+        <Alert
+          severity="error"
+          onClose={handleCloseAlert}
+          sx={{ width: "100%" }}
+        >
+          ไม่สามารถลบรุ่นการศึกษาได้
+        </Alert>
+      </Snackbar>
       <div className="mb-6 flex items-center justify-between">
         <h3 className="text-lg font-bold">ข้อมูลนักศึกษา</h3>
 
@@ -186,7 +257,7 @@ const ClassBookListComponents = ({
                   `/admin/students?page=1&pageSize=10&classBookId=${classbook.id}`,
                 )
               }
-              onDelete={() => console.log("Delete succeed:", classbook.id)}
+              onDelete={() => confirmDeleteClassbook(classbook.id)}
             />
           ))}
         </div>
@@ -200,6 +271,7 @@ const ClassBookListComponents = ({
           size="large"
         />
       </div>
+      {confirmModal && <ConfirmModal {...confirmModal} />}
     </div>
   );
 };
