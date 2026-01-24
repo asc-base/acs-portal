@@ -23,12 +23,12 @@ interface CoursesFormProps {
 }
 
 const Schema = z.object({
-  typeCourseId: z.number().min(1).optional(),
-  courseId: z.string().min(1).optional(),
-  credits: z.string().min(1).optional(),
-  courseNameEn: z.string().min(1).optional(),
-  courseNameTh: z.string().min(1).optional(),
-  courseDetail: z.string().min(1).optional(),
+  typeCourseId: z.number().min(1, "กรุณาเลือกกลุ่มวิชา"),
+  courseId: z.string().min(1, "กรุณากรอกรหัสวิชา"),
+  credits: z.string().min(1, "กรุณากรอกหน่วยกิต"),
+  courseNameEn: z.string().min(1, "กรุณากรอกชื่อวิชาภาษาอังกฤษ"),
+  courseNameTh: z.string().min(1, "กรุณากรอกชื่อวิชาภาษาไทย"),
+  courseDetail: z.string().min(1, "กรุณากรอกลักษณะการเรียน"),
   prerequisites: z
     .array(
       z.object({
