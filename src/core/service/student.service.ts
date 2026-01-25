@@ -19,4 +19,9 @@ export class StudentService {
         const response = await this.studentRepository.createStudent(data ,classBookId)
         return response.data;
   }
+
+  async deleteStudent(id: number):Promise<IStudent> {
+    const response = await this.studentRepository.deleteStudent(id)
+      return response.data;
+  }
 }
