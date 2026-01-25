@@ -159,7 +159,7 @@ const StudentTableComponents = ({
           onClose={() => setIsError(false)}
           sx={{ width: "100%" }}
         >
-          ไม่สามารถเพิ่มข้อมูลนักศึกษาได้
+          ไม่สามารถลบข้อมูลนักศึกษาได้้ในขณะนี้ กรุณาลองใหม่อีกครั้ง
         </Alert>
       </Snackbar>
       <div className="flex items-center justify-between p-6">
