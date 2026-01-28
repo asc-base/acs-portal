@@ -40,7 +40,7 @@ const MenuBar = () => {
     {
       id: 3,
       label: "หลักสูตร",
-      href: "/curriculum?sortBy=year&sortOrder=desc",
+      // href: "/curriculum?sortBy=year&sortOrder=desc",
       submenu: [],
     },
     {
@@ -68,7 +68,7 @@ const MenuBar = () => {
     {
       id: 5,
       label: "ผลงานนักศึกษา",
-      href: "/project?sortBy=createdAt&sortOrder=desc",
+      // href: "/project?sortBy=createdAt&sortOrder=desc",
       submenu: [],
     },
     {
