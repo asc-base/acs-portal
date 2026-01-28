@@ -15,6 +15,7 @@ import { MasterDataService } from "@/core/service/master-data.service";
 import { useRouter } from "next/navigation";
 import { ICourse, IUpdateCourse } from "@/core/domain/course";
 import { ConfirmModal, ConfirmModalProps } from "@/components/modal/confirmModal";
+import { TypeCourse } from "@/core/domain/master-data";
 
 interface CoursesFormProps {
   apiBase: string;
@@ -42,8 +43,8 @@ type FormData = z.infer<typeof Schema>;
 
 export const CourseInfo: FC<CoursesFormProps> = ({ apiBase, curriculumId, course }) => {
   const router = useRouter();
-  const [typeCourses, setTypeCourses] = useState<any[]>([]);
-  const [courses, setCourses] = useState<any[]>([]);
+  const [typeCourses, setTypeCourses] = useState<TypeCourse[]>([]);
+  const [courses, setCourses] = useState<ICourse[]>([]);
   const [isError, setIsError] = useState(false);
   const [confirmModal, setConfirmModal] = useState<ConfirmModalProps | null>(null);
 
