@@ -119,7 +119,7 @@ const ClassBookListComponents = ({
         onClose: () => setConfirmModal(null),
         onConfirm: () => setConfirmModal(null),
         title: "ลบข้อมูลสำเร็จ",
-        description: "ข้อมูลถูกลบออกจากฐานข้อมูลแล้ว",
+        description: "ข้อมูลถูกลบออกจากระบบแล้ว",
         confirmText: "เสร็จสิ้น",
       });
     } catch (error) {
