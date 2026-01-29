@@ -1,6 +1,12 @@
 import { ICurriculum } from "./curriculum";
 import { TypeCourse } from "./master-data";
 
+export interface ITypeCourse {
+  id: number;
+  name: string;
+  description: string;
+}
+
 export interface ICourse {
   id: number;
   courseId: string;
@@ -23,8 +29,8 @@ export interface QueryCourse {
   prerequisite?: boolean;
   curriculumId: number;
   typecourseId?: number;
-  search?: string,
-  sortBy?: string,
+  search?: string;
+  sortBy?: string;
   sortOrder?: "asc" | "desc";
 }
 

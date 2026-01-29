@@ -25,7 +25,7 @@ import { styled } from "@mui/material/styles";
 dayjs.extend(buddhistEra);
 dayjs.locale("th");
 
-interface craeteNewsProps {
+interface CraeteNewsProps {
   apiBase: string;
   categories: IType[];
 }
@@ -57,7 +57,7 @@ const VisuallyHiddenInput = styled("input")({
   width: 1,
 });
 
-const CreateNewsForm = ({ apiBase, categories }: craeteNewsProps) => {
+const CreateNewsForm = ({ apiBase, categories }: CraeteNewsProps) => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [confirmModal, setConfirmModal] = useState<ConfirmModalProps | null>(
     null,

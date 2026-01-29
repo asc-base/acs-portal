@@ -37,7 +37,11 @@ const ClassBookLandingPage: FC<PageProps> = ({ classBooks }) => {
             key={item.id}
             href={`/students?page=1&pageSize=12&classBookId=${item.id}`}
           >
-            <ClassbookCard {...item} priority={i < 2} />
+            <ClassbookCard
+              {...item}
+              classof={String(item.classof)}
+              priority={i < 2}
+            />
           </Link>
         ))}
       </div>

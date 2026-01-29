@@ -13,8 +13,11 @@ import { CourseService } from "@/core/service/course.service";
 import { MasterDataRepository } from "@/infra/repositories/master-data.repository";
 import { MasterDataService } from "@/core/service/master-data.service";
 import { useRouter } from "next/navigation";
-import { ICreateCourse } from "@/core/domain/course";
-import { ConfirmModal, ConfirmModalProps } from "@/components/modal/confirmModal";
+import { ICreateCourse, ICourse, ITypeCourse } from "@/core/domain/course";
+import {
+  ConfirmModal,
+  ConfirmModalProps,
+} from "@/components/modal/confirmModal";
 
 interface CoursesFormProps {
   apiBase: string;
@@ -28,22 +31,23 @@ const Schema = z.object({
   courseNameEn: z.string().min(1, "กรุณากรอกชื่อวิชาภาษาอังกฤษ"),
   courseNameTh: z.string().min(1, "กรุณากรอกชื่อวิชาภาษาไทย"),
   courseDetail: z.string().min(1, "กรุณากรอกลักษณะการเรียน"),
-  prerequisites: z
-    .array(
-      z.object({
-        id: z.number().optional(),
-      })
-    )
+  prerequisites: z.array(
+    z.object({
+      id: z.number().optional(),
+    }),
+  ),
 });
 
 type FormData = z.infer<typeof Schema>;
 
 export const CourseForm: FC<CoursesFormProps> = ({ apiBase, curriculumId }) => {
   const router = useRouter();
-  const [typeCourses, setTypeCourses] = useState<any[]>([]);
-  const [courses, setCourses] = useState<any[]>([]);
+  const [typeCourses, setTypeCourses] = useState<ITypeCourse[]>([]);
+  const [courses, setCourses] = useState<ICourse[]>([]);
   const [isError, setIsError] = useState(false);
-  const [confirmModal, setConfirmModal] = useState<ConfirmModalProps | null>(null);
+  const [confirmModal, setConfirmModal] = useState<ConfirmModalProps | null>(
+    null,
+  );
 
   const courseService = useMemo(() => {
     const courseRepository = new CourseRepository(apiBase);
@@ -55,7 +59,11 @@ export const CourseForm: FC<CoursesFormProps> = ({ apiBase, curriculumId }) => {
     return new MasterDataService(typeCourseRepository);
   }, [apiBase]);
 
-  const { control, handleSubmit, formState: { isDirty } } = useForm<FormData>({
+  const {
+    control,
+    handleSubmit,
+    formState: { isDirty },
+  } = useForm<FormData>({
     resolver: zodResolver(Schema),
     defaultValues: {
       typeCourseId: 0,
@@ -99,10 +107,10 @@ export const CourseForm: FC<CoursesFormProps> = ({ apiBase, curriculumId }) => {
         courseDetail: data.courseDetail,
         prerequisites: data.prerequisites
           ? data.prerequisites
-            .map((p) => p.id)
-            .filter((id): id is number => id !== undefined && id !== 0)
+              .map((p) => p.id)
+              .filter((id): id is number => id !== undefined && id !== 0)
           : [],
-        curriculumId: curriculumId
+        curriculumId: curriculumId,
       };
 
       const response = await courseService.createCourse(CreateData);
@@ -116,11 +124,11 @@ export const CourseForm: FC<CoursesFormProps> = ({ apiBase, curriculumId }) => {
         isOpen: true,
         type: "success",
         onClose: () => setConfirmModal(null),
-        onConfirm: () => router.push(
-          `/admin/courses?page=1&pageSize=10&curriculumId=${curriculumId}`
-        ),
+        onConfirm: () =>
+          router.push(
+            `/admin/courses?page=1&pageSize=10&curriculumId=${curriculumId}`,
+          ),
       });
-
     } catch (error) {
       console.error("Submit Error:", error);
       setIsError(true);
@@ -136,7 +144,7 @@ export const CourseForm: FC<CoursesFormProps> = ({ apiBase, curriculumId }) => {
             curriculumId,
             sortBy: "courseId",
             sortOrder: "asc",
-          })
+          }),
         ]);
 
         setTypeCourses(typeRes);
@@ -159,12 +167,16 @@ export const CourseForm: FC<CoursesFormProps> = ({ apiBase, curriculumId }) => {
         autoHideDuration={4000}
         onClose={handleCloseAlert}
       >
-        <Alert severity="error" onClose={handleCloseAlert} sx={{ width: "100%" }}>
+        <Alert
+          severity="error"
+          onClose={handleCloseAlert}
+          sx={{ width: "100%" }}
+        >
           เกิดข้อผิดพลาด ไม่สามารถเพิ่มรายวิชาได้
         </Alert>
       </Snackbar>
 
-      <h3 className="font-bold text-lg mb-4">ข้อมูลรายวิชา</h3>
+      <h3 className="mb-4 text-lg font-bold">ข้อมูลรายวิชา</h3>
 
       <div className="grid grid-cols-3 gap-4">
         <RHFSelect
@@ -256,16 +268,13 @@ export const CourseForm: FC<CoursesFormProps> = ({ apiBase, curriculumId }) => {
               >
                 {courses.map((c) => (
                   <MenuItem key={c.id} value={c.id}>
-                    {c.courseId}   {c.courseNameTh}
+                    {c.courseId} {c.courseNameTh}
                   </MenuItem>
                 ))}
               </RHFSelect>
             </div>
 
-            <IconButton
-              color="error"
-              onClick={() => remove(index)}
-            >
+            <IconButton color="error" onClick={() => remove(index)}>
               <DeleteIcon />
             </IconButton>
           </div>
@@ -277,7 +286,7 @@ export const CourseForm: FC<CoursesFormProps> = ({ apiBase, curriculumId }) => {
           type="button"
           variant="outlined"
           size="medium"
-          className="w-[150px]"
+          className="w-37.5"
           onClick={handleCancel}
         >
           ยกเลิก
@@ -286,7 +295,7 @@ export const CourseForm: FC<CoursesFormProps> = ({ apiBase, curriculumId }) => {
           variant="contained"
           size="medium"
           type="submit"
-          className="w-[150px]"
+          className="w-37.5"
         >
           บันทึกข้อมูล
         </Button>
