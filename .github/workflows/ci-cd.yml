@@ -4,6 +4,7 @@ on:
   push:
     tags:
       - "v*" # เช่น v1.0.0
+      - "[0-9]*" # เช่น 1.0.0 (ไม่มี v นำหน้า)
 
 permissions:
   contents: read
