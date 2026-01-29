@@ -1,7 +1,6 @@
 import React from "react";
 import HomePage from "./home";
-import { newsService } from "@/infra/container";
-import { API_URL } from "@/infra/container";
+import { newsService, API_URL } from "@/infra/container";
 
 // Force dynamic rendering to avoid build-time API calls
 export const dynamic = "force-dynamic";
@@ -17,7 +16,7 @@ const MainPage = async () => {
     initNewsComplete,
     initNewsActivityStudent,
     initAnnoucement,
-    initNewsHighlight,
+    // initNewsHighlight,
   ] = await Promise.all([
     newsService
       .getNews(1, 6, "", "ข่าวประชาสัมพันธ์")
@@ -40,8 +39,7 @@ const MainPage = async () => {
       initNewsComplete={initNewsComplete.rows || []}
       initNewsActivityStudent={initNewsActivityStudent.rows || []}
       initAnnoucement={initAnnoucement || []}
-      initNewsHighlight={initNewsHighlight || []}
-      apibase={API_URL}
+      // initNewsHighlight={initNewsHighlight || []}
     />
   );
 };

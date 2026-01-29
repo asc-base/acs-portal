@@ -8,9 +8,9 @@ import InstagramIcon from "@mui/icons-material/Instagram";
 import GitHubIcon from "@mui/icons-material/GitHub";
 import CloseIcon from "@mui/icons-material/Close";
 import { Typography } from "@mui/material";
-import { IStudent } from "@/interface/student";
 import Image from "next/image";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
+import { IStudent } from "@/core/domain/student";
 
 interface StudentModalProps {
   student: IStudent;

@@ -175,10 +175,10 @@ const NewsListComponent = (initValue: NewsListComponentProps) => {
       </div>
 
       <ConfirmModal
-        open={openModal}
+        isOpen={openModal}
         onClose={() => setOpenModal(false)}
         onConfirm={handleDelete}
-        title={`${deleteNews?.title}` ?? ""}
+        title={deleteNews?.title ?? ""}
         type="delete"
       />
     </div>

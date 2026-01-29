@@ -43,7 +43,6 @@ const ProfileForm = () => {
   const user = useAuthStore((state) => state.user);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [studentData, setStudentData] = useState<IStudent | null>(null);
-  const [projects, setProject] = useState<string[]>([]);
   const { handleSubmit, control, setValue } = useForm<FormData>({
     defaultValues: {
       github: studentData?.github || "",
@@ -59,10 +58,6 @@ const ProfileForm = () => {
 
   const { nickName, firstNameTh, firstNameEn, lastNameTh, lastNameEn } =
     studentData?.user ?? {};
-
-  const handleAddProject = () => {
-    setProject((prev) => [...prev, ""]);
-  };
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0] || null;
@@ -118,7 +113,7 @@ const ProfileForm = () => {
                     src={
                       selectedFile
                         ? URL.createObjectURL(selectedFile)
-                        : studentData?.user?.imageUrl!
+                        : (studentData?.user?.imageUrl ?? "")
                     }
                     alt="Profile"
                     width={300}

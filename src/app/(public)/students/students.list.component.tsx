@@ -5,10 +5,10 @@ import Link from "next/link";
 import { HeroCard } from "@/components/herocard";
 import classbookImage from "../../../../public/classbook.jpg";
 import { StudentCard } from "@/components/studentcard";
-import { IStudent } from "@/core/domain/student";
 import { StudentModal } from "@/components/studentmodal";
 import { useRouter } from "next/navigation";
 import { IClassBook } from "@/core/domain/classbook";
+import { IStudent } from "@/core/domain/student";
 
 interface StudentsListComponentsProps {
   students: IStudent[];

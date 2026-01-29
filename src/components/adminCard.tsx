@@ -108,7 +108,7 @@ export const AdminCard: FC<AdminCardProps> = (props) => {
     alt = data.year;
   } else if (type === "classBook") {
     image = data.image;
-    alt = data.classof;
+    alt = String(data.classof);
   } else if (type === "project") {
     image = data.thumbnail || "";
     alt = data.title;
