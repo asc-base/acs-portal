@@ -1,5 +1,10 @@
 import { Pageable } from "@/interface/response";
-import { ICourse, ICreateCourse, IUpdateCourse, QueryCourse } from "../domain/course";
+import {
+  ICourse,
+  ICreateCourse,
+  IUpdateCourse,
+  QueryCourse,
+} from "../domain/course";
 import { ICourseRepository } from "../ports/course.repository";
 export class CourseService {
   constructor(private readonly courseRepository: ICourseRepository) {}
@@ -20,8 +25,12 @@ export class CourseService {
   }
 
   async updateCourse(id: number, data: IUpdateCourse): Promise<ICourse> {
-    const response = await this.courseRepository.updateCourse(id,data);
+    const response = await this.courseRepository.updateCourse(id, data);
     return response.data;
   }
 
+  async deleteCourse(id: number): Promise<ICourse> {
+    const response = await this.courseRepository.deleteCourse(id);
+    return response.data;
+  }
 }

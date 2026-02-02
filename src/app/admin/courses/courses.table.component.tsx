@@ -14,16 +14,13 @@ import {
   Pagination,
   Button,
   SelectChangeEvent,
-  Card
+  Card,
+  Alert,
+  Snackbar,
 } from "@mui/material";
 import { useRouter } from "next/navigation";
 import { ICourse } from "@/core/domain/course";
-import {
-  ArrowDownward,
-  ArrowUpward,
-  Edit,
-  Delete,
-} from "@mui/icons-material";
+import { ArrowDownward, ArrowUpward, Edit, Delete } from "@mui/icons-material";
 import Link from "next/link";
 import { Control } from "react-hook-form";
 import { TypeCourse } from "@/core/domain/master-data";
@@ -33,7 +30,13 @@ import AddIcon from "@mui/icons-material/Add";
 import CloseIcon from "@mui/icons-material/Close";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { SearchForm } from "./courses.landingpage";
-
+import { CourseRepository } from "@/infra/repositories/course.repository";
+import { CourseService } from "@/core/service/course.service";
+import {
+  ConfirmModal,
+  ConfirmModalProps,
+} from "@/components/modal/confirmModal";
+import { useState, useMemo } from "react";
 
 interface CourseTableComponentsProps {
   courses: ICourse[];
@@ -51,6 +54,7 @@ interface CourseTableComponentsProps {
   typeCourses: TypeCourse[];
   typecourseId?: number;
   handleFilterTypeCourse: (event: SelectChangeEvent) => void;
+  apiBase: string;
 }
 
 const CourseTableComponents = ({
@@ -68,22 +72,67 @@ const CourseTableComponents = ({
   totalRecords,
   pageSize,
   page,
+  apiBase,
   handleNextPage,
 }: CourseTableComponentsProps) => {
   const router = useRouter();
+  const [isError, setIsError] = useState(false);
+  const [confirmModal, setConfirmModal] = useState<ConfirmModalProps | null>(
+    null,
+  );
+  const courseService = useMemo(() => {
+    const courseRepository = new CourseRepository(apiBase);
+    return new CourseService(courseRepository);
+  }, [apiBase]);
 
   const handleEdit = (courseId: number) => {
     router.push(`/admin/courses/${courseId}?curriculumId=${curriculumId}`);
   };
 
-  const handleDelete = (courseId: number) => {
-    console.log("delete", courseId);
+  const handleDelete = async (courseId: number) => {
+    try {
+      const reps = await courseService.deleteCourse(courseId);
+      if (!reps) {
+        setIsError(true);
+        return;
+      }
+      setConfirmModal({
+        isOpen: true,
+        type: "success",
+        onClose: () => setConfirmModal(null),
+        onConfirm: () => setConfirmModal(null),
+        title: "ลบข้อมูลสำเร็จ",
+        description: "ข้อมูลถูกลบออกจากระบบแล้ว",
+        confirmText: "เสร็จสิ้น",
+      });
+    } catch (error) {
+      console.error(error);
+      setIsError(true);
+    }
+  };
+
+  const handleCloseAlert = () => {
+    setIsError(false);
   };
 
   return (
     <Card>
+      <Snackbar
+        anchorOrigin={{ vertical: "top", horizontal: "right" }}
+        open={isError}
+        autoHideDuration={4000}
+        onClose={handleCloseAlert}
+      >
+        <Alert
+          severity="error"
+          onClose={handleCloseAlert}
+          sx={{ width: "100%" }}
+        >
+          ไม่สามารถลบรายวิชาได้
+        </Alert>
+      </Snackbar>
       <div className="flex items-center justify-between p-6">
-         <h3 className="font-bold">รายวิชาทั้งหมด ({totalRecords} วิชา)</h3>
+        <h3 className="font-bold">รายวิชาทั้งหมด ({totalRecords} วิชา)</h3>
         <div className="flex gap-6">
           <RHFTextField
             name="search"
@@ -115,13 +164,12 @@ const CourseTableComponents = ({
               </MenuItem>
             ))}
           </Select>
-        
 
-        <Link href={`/admin/courses/create?curriculumId=${curriculumId}`}>
-          <Button variant="contained" startIcon={<AddIcon />}>
-            เพิ่มรายวิชาใหม่
-          </Button>
-        </Link>
+          <Link href={`/admin/courses/create?curriculumId=${curriculumId}`}>
+            <Button variant="contained" startIcon={<AddIcon />}>
+              เพิ่มรายวิชาใหม่
+            </Button>
+          </Link>
         </div>
       </div>
 
@@ -132,19 +180,24 @@ const CourseTableComponents = ({
               <TableCell align="center">
                 <div className="flex items-center justify-center gap-1">
                   <h3 className="font-bold">รหัสวิชา</h3>
-                  <IconButton
-                    size="small"
-                    onClick={() => onSort("courseId")}
-
-                  >
+                  <IconButton size="small" onClick={() => onSort("courseId")}>
                     {sortBy === "courseId" ? (
                       sortOrder === "asc" ? (
-                        <ArrowUpward fontSize="small" sx={{ color: "var(--color-primary01)" }} />
+                        <ArrowUpward
+                          fontSize="small"
+                          sx={{ color: "var(--color-primary01)" }}
+                        />
                       ) : (
-                        <ArrowDownward fontSize="small" sx={{ color: "var(--color-primary01)" }} />
+                        <ArrowDownward
+                          fontSize="small"
+                          sx={{ color: "var(--color-primary01)" }}
+                        />
                       )
                     ) : (
-                      <ArrowDownward fontSize="small" sx={{ color: "var(--color-neutral04)" }} />
+                      <ArrowDownward
+                        fontSize="small"
+                        sx={{ color: "var(--color-neutral04)" }}
+                      />
                     )}
                   </IconButton>
                 </div>
@@ -177,13 +230,13 @@ const CourseTableComponents = ({
                   </TableCell>
                   <TableCell
                     align="center"
-                    sx={{ borderBottom: "none", fontSize: 18, maxWidth: 320, }}
+                    sx={{ borderBottom: "none", fontSize: 18, maxWidth: 320 }}
                   >
                     {course.courseNameEn}
                   </TableCell>
                   <TableCell
                     align="center"
-                    sx={{ borderBottom: "none", fontSize: 18, maxWidth: 320, }}
+                    sx={{ borderBottom: "none", fontSize: 18, maxWidth: 320 }}
                   >
                     {course.courseNameTh}
                   </TableCell>
@@ -201,7 +254,7 @@ const CourseTableComponents = ({
                   </TableCell>
                   <TableCell
                     align="center"
-                    sx={{ borderBottom: "none", fontSize: 18, pr:4}}
+                    sx={{ borderBottom: "none", fontSize: 18, pr: 4 }}
                   >
                     <IconButton
                       color="primary"
@@ -235,7 +288,7 @@ const CourseTableComponents = ({
         </Table>
       </TableContainer>
 
-       <div className="mb-6 flex justify-center">
+      <div className="mb-6 flex justify-center">
         <Pagination
           shape="rounded"
           count={Math.ceil(totalRecords / pageSize)}
@@ -245,7 +298,7 @@ const CourseTableComponents = ({
           size="large"
         />
       </div>
-      
+      {confirmModal && <ConfirmModal {...confirmModal} />}
     </Card>
   );
 };
