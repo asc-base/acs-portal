@@ -37,15 +37,18 @@ export class CurriculumRepository implements ICurriculumRepository {
     return response;
   }
 
-  async getCurriculumById(id: number): Promise<ApiResponse<ICurriculum> | null> {
+  async getCurriculumById(
+    id: number,
+  ): Promise<ApiResponse<ICurriculum> | null> {
     const url = `/v1/curriculum/${id}`;
     const response = await this.http.get<ApiResponse<ICurriculum>>(url);
     return response;
   }
-  
+
   async createCurriculum(data: FormData): Promise<ApiResponse<ICurriculum>> {
     const response = await this.http.post<ApiResponse<ICurriculum>>(
-      `/v1/curriculum/`,data
+      `/v1/curriculum/`,
+      data,
     );
     return response;
   }
@@ -61,4 +64,10 @@ export class CurriculumRepository implements ICurriculumRepository {
     return response;
   }
 
+  async deleteCurriculum(id: number): Promise<ApiResponse<ICurriculum>> {
+    const response = await this.http.delete<ApiResponse<ICurriculum>>(
+      `/v1/curriculum/${id}`,
+    );
+    return response;
+  }
 }
