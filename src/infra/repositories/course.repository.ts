@@ -1,5 +1,5 @@
 import { ICourseRepository } from "@/core/ports/course.repository";
-import { ICourse, ICreateCourse, QueryCourse } from "@/core/domain/course";
+import { ICourse, ICreateCourse, IUpdateCourse, QueryCourse } from "@/core/domain/course";
 import { HttpHelper } from "@/lib/http";
 import { ApiResponse, Pageable } from "@/interface/response";
 
@@ -31,7 +31,7 @@ export class CourseRepository implements ICourseRepository {
     if (query.sortOrder !== undefined)
       params.append("sortOrder", query.sortOrder.toString());
 
-    
+
     const url = `/v1/course?${params.toString()}`;
 
     const response = await this.http.get<ApiResponse<Pageable<ICourse>>>(url);
@@ -43,7 +43,23 @@ export class CourseRepository implements ICourseRepository {
       `/v1/course`,data
     );
     return response;
-    
+
   }
+
+  async getCourseById(id: number): Promise<ApiResponse<ICourse> | null> {
+    const response = await this.http.get<ApiResponse<ICourse>>(
+      `/v1/course/${id}`
+    );
+    return response;
+  }
+
+  async updateCourse(id: number, data: IUpdateCourse): Promise<ApiResponse<ICourse>> {
+    const response = await this.http.patch<ApiResponse<ICourse>>(
+      `/v1/course/${id}`, data
+    );
+    return response;
+
+  }
+
 
 }
