@@ -71,6 +71,18 @@ const CurriculumListComponents = ({
     router.push(`${pathname}?${newSearch}`);
   };
 
+  const confirmDeleteCurriculum = (curriculumId: number) => {
+    setConfirmModal({
+      isOpen: true,
+      type: "delete",
+      onClose: () => setConfirmModal(null),
+      onConfirm: () => {
+        handleDelete(curriculumId);
+        setConfirmModal(null);
+      },
+    });
+  };
+
   const handleDelete = async (curriculumId: number) => {
     try {
       const reps = await curriculumService.deleteCurriculum(curriculumId);
@@ -171,7 +183,7 @@ const CurriculumListComponents = ({
                   `/admin/courses?prerequisite=false&page=1&pageSize=10&curriculumId=${curriculum.id}`,
                 )
               }
-              onDelete={() => handleDelete(curriculum.id)}
+              onDelete={() => confirmDeleteCurriculum(curriculum.id)}
             />
           ))}
         </div>
