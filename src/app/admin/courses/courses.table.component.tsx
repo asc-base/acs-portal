@@ -89,6 +89,18 @@ const CourseTableComponents = ({
     router.push(`/admin/courses/${courseId}?curriculumId=${curriculumId}`);
   };
 
+  const confirmDeleteCourse = (courseId: number) => {
+    setConfirmModal({
+      isOpen: true,
+      type: "delete",
+      onClose: () => setConfirmModal(null),
+      onConfirm: () => {
+        handleDelete(courseId);
+        setConfirmModal(null);
+      },
+    });
+  };
+
   const handleDelete = async (courseId: number) => {
     try {
       const reps = await courseService.deleteCourse(courseId);
@@ -266,7 +278,7 @@ const CourseTableComponents = ({
                     <IconButton
                       color="error"
                       size="small"
-                      onClick={() => handleDelete(course.id)}
+                      onClick={() => confirmDeleteCourse(course.id)}
                     >
                       <Delete />
                     </IconButton>
