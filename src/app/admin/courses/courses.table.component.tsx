@@ -112,7 +112,10 @@ const CourseTableComponents = ({
         isOpen: true,
         type: "success",
         onClose: () => setConfirmModal(null),
-        onConfirm: () => setConfirmModal(null),
+        onConfirm: () => {
+          setConfirmModal(null);
+          router.refresh();
+        },
         title: "ลบข้อมูลสำเร็จ",
         description: "ข้อมูลถูกลบออกจากระบบแล้ว",
         confirmText: "เสร็จสิ้น",
