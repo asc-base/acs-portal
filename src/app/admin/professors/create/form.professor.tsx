@@ -1,12 +1,13 @@
 "use client";
 import React, { FC, useState, useMemo, useEffect } from "react";
-import { useForm, useFieldArray } from "react-hook-form";
+import { useForm, useFieldArray, SubmitHandler } from "react-hook-form";
 import { Button, Typography, IconButton } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import AddIcon from "@mui/icons-material/Add";
 import MenuItem from "@mui/material/MenuItem";
 import Alert from "@mui/material/Alert";
 import Snackbar from "@mui/material/Snackbar";
+import { Delete } from "@mui/icons-material";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { MasterDataService } from "@/core/service/master-data.service";
@@ -18,85 +19,44 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { RHFTextField } from "@/components/form/RHFTextField";
 import { RHFSelect } from "@/components/form/RHFSelect";
-import { ICreateProfessor } from "@/core/domain/professor";
-import { ConfirmModal, ConfirmModalProps } from "@/components/modal/confirmModal";
+import {
+  ConfirmModal,
+  ConfirmModalProps,
+} from "@/components/modal/confirmModal";
 
 interface FormProfessorsProps {
   apiBase: string;
 }
 
 const Schema = z.object({
-  academicPositionId: z
-    .number()
-    .nullable()
-    .refine((v) => v !== null, {
-      message: "กรุณากรอกตำแหน่ง",
-    }),
+  academicPositionId: z.number().min(1, "กรุณากรอกตำแหน่ง"),
   education: z
     .array(
       z.object({
-        level: z.number().nullable(),
-        education: z.string().trim(),
-        university: z.string().trim(),
-      }),
-    )
-    .optional()
-    .superRefine((items, ctx) => {
-      items?.forEach((i, idx) => {
-        if (i.level === null && !i.education && !i.university) return;
-        if (!i.education)
-          ctx.addIssue({
-            path: [idx, "education"],
-            message: "กรอกวิชาเอก",
-            code: "custom",
-          });
-        if (!i.university)
-          ctx.addIssue({
-            path: [idx, "university"],
-            message: "กรอกมหาลัย",
-            code: "custom",
-          });
-        if (i.level === null)
-          ctx.addIssue({
-            path: [idx, "level"],
-            message: "กรอกระดับการศึกษา",
-            code: "custom",
-          });
-      });
-    }),
-  email: z.string().trim().email("อีเมลไม่ถูกต้อง"),
-  expertFields: z
-    .array(
-      z.object({
-        value: z.string().trim(),
+        levelId: z.number().min(1, "กรุณากรอกระดับการศึกษา"),
+        education: z.string().min(1, "กรุณากรอกวิชาเอก"),
+        university: z.string().min(1, "กรุณากรอกมหาวิทยาลัย"),
       }),
     )
     .optional(),
-  firstNameEn: z
-    .string()
-    .trim()
-    .min(1, "กรุณากรอกชื่อภาษาอังกฤษ")
-    .optional()
-    .or(z.literal("")),
-  firstNameTh: z.string().trim().min(1, "กรุณากรอกชื่อภาษาไทย"),
-  lastNameEn: z
-    .string()
-    .trim()
-    .min(1, "กรุณากรอกนามสกุลภาษาอังกฤษ")
-    .optional()
-    .or(z.literal("")),
-  lastNameTh: z.string().trim().min(1, "กรุณากรอกนามสกุลภาษาไทย"),
-  majorPositionId: z
-    .number()
-    .nullable()
-    .refine((v) => v !== null, {
-      message: "กรุณากรอกตำแหน่ง",
-    }),
+  email: z.email("อีเมลไม่ถูกต้อง"),
+  expertFields: z
+    .array(
+      z.object({
+        value: z.string().min(1, "กรุณากรอกสาขาที่เชี่ยวชาญ"),
+      }),
+    )
+    .optional(),
+  firstNameEn: z.string().min(1, "กรุณากรอกชื่อภาษาอังกฤษ"),
+  firstNameTh: z.string().min(1, "กรุณากรอกชื่อภาษาไทย"),
+  lastNameEn: z.string().min(1, "กรุณากรอกนามสกุลภาษาอังกฤษ"),
+  lastNameTh: z.string().min(1, "กรุณากรอกนามสกุลภาษาไทย"),
+  majorPositionId: z.number().min(1, "กรุณากรอกตำแหน่ง"),
   phone: z
     .string()
-    .trim()
-    .min(9, "กรุณากรอกเบอร์โทร")
-    .regex(/^[0-9]+$/, "เบอร์โทรต้องเป็นตัวเลขเท่านั้น"),
+    .min(1, "กรุณากรอกเบอร์โทร")
+    .max(10, "เบอร์โทรต้องไม่เกิน 10 ตัวอักษร")
+    .regex(/^\d+$/, "เบอร์โทรต้องเป็นตัวเลขเท่านั้น"),
   profRoom: z.string().min(1, "กรุณากรอกชื่อห้อง"),
 });
 
@@ -142,10 +102,10 @@ export const FormProfesssors: FC<FormProfessorsProps> = ({ apiBase }) => {
   } = useForm<FormData>({
     resolver: zodResolver(Schema),
     defaultValues: {
-      academicPositionId: null,
+      academicPositionId: 0,
       education: [
         {
-          level: null,
+          levelId: 0,
           education: "",
           university: "",
         },
@@ -156,7 +116,7 @@ export const FormProfesssors: FC<FormProfessorsProps> = ({ apiBase }) => {
       firstNameTh: "",
       lastNameEn: "",
       lastNameTh: "",
-      majorPositionId: null,
+      majorPositionId: 0,
       phone: "",
       profRoom: "",
     },
@@ -164,12 +124,20 @@ export const FormProfesssors: FC<FormProfessorsProps> = ({ apiBase }) => {
     reValidateMode: "onChange",
   });
 
-  const { fields: educationFields, append: appendEducation } = useFieldArray({
+  const {
+    fields: educationFields,
+    append: appendEducation,
+    remove: removeEducation,
+  } = useFieldArray({
     control,
     name: "education",
   });
 
-  const { fields: expertFields, append: appendExpert } = useFieldArray({
+  const {
+    fields: expertFields,
+    append: appendExpert,
+    remove: removeExpert,
+  } = useFieldArray({
     control,
     name: "expertFields",
   });
@@ -195,44 +163,51 @@ export const FormProfesssors: FC<FormProfessorsProps> = ({ apiBase }) => {
     } else router.push(`/admin/professors`);
   };
 
-  const handleConfirmSubmit = handleSubmit(async (data) => {
-    await onSubmit(data);
-  });
-
-  const onSubmit = async (data: FormData) => {
+  const onSubmit: SubmitHandler<FormData> = async (data) => {
     setIsError(false);
+
     try {
-      const payload: ICreateProfessor = {
-        academicPositionId: data.academicPositionId!,
-        majorPositionId: data.majorPositionId!,
+      const payload = {
+        academicPositionId: data.academicPositionId,
+        majorPositionId: data.majorPositionId,
         firstNameTh: data.firstNameTh,
         lastNameTh: data.lastNameTh,
-        firstNameEn: data.firstNameEn,
-        lastNameEn: data.lastNameEn,
+        firstNameEn: data.firstNameEn || "",
+        lastNameEn: data.lastNameEn || "",
         email: data.email,
         phone: data.phone,
         profRoom: data.profRoom,
-        expertFields: data.expertFields?.map((e) => e.value),
-        education: data.education?.map((e) => ({
-          level: e.level!,
-          education: e.education,
-          university: e.university,
-        })),
+        expertFields:
+          data.expertFields
+            ?.map((e) => e.value)
+            .filter((v) => v && v.trim() !== "") ?? [],
+        education:
+          data.education
+            ?.filter(
+              (e) =>
+                e.levelId !== null ||
+                e.education.trim() !== "" ||
+                e.university.trim() !== "",
+            )
+            .map((e) => ({
+              levelId: e.levelId,
+              education: e.education,
+              university: e.university,
+            })) ?? [],
       };
-      const reps = await professorService.createProfessor(
-        payload,
-        selectedFile!,
-      );
-      if (!reps) {
-        setIsError(true);
-        return;
+
+      const res = await professorService.createProfessor(payload, selectedFile);
+      if (res) {
+        setConfirmModal({
+          isOpen: true,
+          type: "success",
+          onClose: () => setConfirmModal(null),
+          onConfirm: () => {
+            setConfirmModal(null);
+            router.push(`/admin/professors`);
+          },
+        });
       }
-      setConfirmModal({
-        isOpen: true,
-        type: "success",
-        onClose: () => setConfirmModal(null),
-        onConfirm: () => router.push(`/admin/professors`),
-      });
     } catch (error) {
       console.error(error);
       setIsError(true);
@@ -502,7 +477,7 @@ export const FormProfesssors: FC<FormProfessorsProps> = ({ apiBase }) => {
           <IconButton
             color="primary"
             onClick={() =>
-              appendEducation({ level: null, education: "", university: "" })
+              appendEducation({ levelId: 0, education: "", university: "" })
             }
             sx={{
               border: "1px solid #120554",
@@ -520,7 +495,7 @@ export const FormProfesssors: FC<FormProfessorsProps> = ({ apiBase }) => {
               <div className="flex-2">
                 <RHFSelect
                   control={control}
-                  name={`education.${index}.level`}
+                  name={`education.${index}.levelId`}
                   label="ระดับการศึกษา"
                   fullWidth
                   displayEmpty
@@ -564,6 +539,10 @@ export const FormProfesssors: FC<FormProfessorsProps> = ({ apiBase }) => {
                   placeholder="ระบุมหาวิทยาลัย"
                 />
               </div>
+
+              <IconButton color="error" onClick={() => removeEducation(index)}>
+                <Delete />
+              </IconButton>
             </div>
           ))}
         </div>
@@ -587,15 +566,23 @@ export const FormProfesssors: FC<FormProfessorsProps> = ({ apiBase }) => {
           </div>
           {expertFields.map((field, index) => {
             return (
-              <div className="mt-2" key={index}>
-                <RHFTextField
-                  key={field.id}
-                  control={control}
-                  name={`expertFields.${index}.value`}
-                  label="สาขาที่เชี่ยวชาญ"
-                  fullWidth
-                  placeholder="ระบุสาขาที่เชี่ยวชาญ"
-                />
+              <div className="mt-2 flex items-center gap-2" key={field.id}>
+                <div className="flex-1">
+                  <RHFTextField
+                    control={control}
+                    name={`expertFields.${index}.value`}
+                    label="สาขาที่เชี่ยวชาญ"
+                    placeholder="ระบุสาขาที่เชี่ยวชาญ"
+                  />
+                </div>
+
+                <IconButton
+                  color="error"
+                  onClick={() => removeExpert(index)}
+                  className="mt-6"
+                >
+                  <Delete />
+                </IconButton>
               </div>
             );
           })}
@@ -609,7 +596,6 @@ export const FormProfesssors: FC<FormProfessorsProps> = ({ apiBase }) => {
           type="submit"
           variant="contained"
           size="large"
-          onClick={handleConfirmSubmit}
           disabled={!isValid}
         >
           บันทึกข้อมูล
