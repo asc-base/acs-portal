@@ -111,9 +111,7 @@ const NewsListComponent = (initValue: NewsListComponentProps) => {
           onClose: () => setConfirmModal(null),
           onConfirm: () => {
             setConfirmModal(null);
-            router.push(
-              `/admin/news?page=${initValue.page}&pageSize=${initValue.pageSize}`,
-            );
+            router.refresh();
           },
           title: "ลบข้อมูลสำเร็จ",
           description: "ข้อมูลถูกลบออกจากฐานข้อมูลแล้ว",
