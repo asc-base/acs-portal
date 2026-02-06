@@ -53,7 +53,13 @@ export class StudentRepository implements IStudentRepository {
 
   async deleteStudent(id :number): Promise<ApiResponse<IStudent>> {
     const response = await this.http.delete<ApiResponse<IStudent>>(
-      `/v1/students/${id}`
+      `/v1/students/${id}`);
+    return response;
+  }
+      
+  async updateStudent(data: FormData ,studentId : number): Promise<ApiResponse<IStudent>> {
+    const response = await this.http.put<ApiResponse<IStudent>>(
+      `/v2/students/${studentId}`,data
     );
     return response;
   }

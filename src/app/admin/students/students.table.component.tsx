@@ -61,8 +61,8 @@ const StudentTableComponents = ({
   const inputRef = useRef<HTMLInputElement | null>(null);
   const { setImportData } = useImportStudentStore();
 
-  const handleEdit = (studentId: number) => {
-    router.push(`/admin/students/edit/${studentId}`);
+  const handleEdit = (userId: number) => {
+    router.push(`/admin/students/${userId}?classBookId=${classBookId}`);
   };
 
   const handleDelete = (studentId: number) => {
@@ -252,7 +252,7 @@ const StudentTableComponents = ({
                     <IconButton
                       color="primary"
                       size="small"
-                      onClick={() => handleEdit(student.id)}
+                      onClick={() => handleEdit(student.user.id)}
                     >
                       <Edit />
                     </IconButton>

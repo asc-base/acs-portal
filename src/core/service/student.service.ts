@@ -1,5 +1,5 @@
 import { IStudentRepository } from "../ports/student.repository";
-import { IStudent, QueryStudent , ICreateStudent} from "../domain/student";
+import { IStudent, QueryStudent , ICreateStudent , IUpdateStudent} from "../domain/student";
 import { Pageable } from "@/interface/response";
 
 export class StudentService {
@@ -21,7 +21,26 @@ export class StudentService {
   }
 
   async deleteStudent(id: number):Promise<IStudent> {
-    const response = await this.studentRepository.deleteStudent(id)
+    const response = await this.studentRepository.deleteStudent(id);
       return response.data;
+  }
+  
+  async updateStudent(data : IUpdateStudent, image:File | null , classBookId : number , studentId : number): Promise<IStudent | null> {
+    try{
+       const formData = new FormData();
+      Object.entries(data).forEach(([key, value]) => {
+        formData.append(key, value?.toString() ?? "");
+      });
+      if(image)formData.append("image", image);
+      formData.append("classBookId",classBookId.toString());
+
+      const response = await this.studentRepository.updateStudent(formData ,studentId)
+      return response.data;
+    }catch (error) {
+      console.error("Failed to update student:", error);
+      return null;
+    }
+
+        
   }
 }
