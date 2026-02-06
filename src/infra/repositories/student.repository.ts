@@ -4,8 +4,8 @@ import { HttpHelper } from "@/lib/http";
 import { ApiResponse, Pageable } from "@/interface/response";
 
 export class StudentRepository implements IStudentRepository {
-  private http: HttpHelper;
-  private baseUrl: string;
+  private readonly http: HttpHelper;
+  private readonly baseUrl: string;
 
   constructor(baseUrl: string) {
     this.baseUrl = baseUrl;
@@ -51,6 +51,12 @@ export class StudentRepository implements IStudentRepository {
     return response;
   }
 
+  async deleteStudent(id :number): Promise<ApiResponse<IStudent>> {
+    const response = await this.http.delete<ApiResponse<IStudent>>(
+      `/v1/students/${id}`);
+    return response;
+  }
+      
   async updateStudent(data: FormData ,studentId : number): Promise<ApiResponse<IStudent>> {
     const response = await this.http.put<ApiResponse<IStudent>>(
       `/v2/students/${studentId}`,data
