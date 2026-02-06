@@ -6,6 +6,8 @@ export interface IStudent {
   studentId: string;
   user: IUser;
   classBook: IClassBook;
+  yearOfFirstAdmission:string | null;
+  yearOfCompletion:string | null;
   linkin?: string | null;
   facebook?: string | null;
   instragram?: string | null;
@@ -30,6 +32,21 @@ export interface ICreateStudent {
   firstNameEn: string;
   lastNameEn: string;
   nickName?: string;
+}
+
+export interface IUpdateStudent {
+  studentId?: string;
+  email?: string;
+  firstNameTh?: string;
+  lastNameTh?: string;
+  firstNameEn?: string;
+  lastNameEn?: string;
+  nickName?: string;
+  classBook?: IClassBook;
+  linkin?: string | null;
+  facebook?: string | null;
+  instragram?: string | null;
+  github?: string | null;
 }
 
 export interface ICreateStudentCsv {

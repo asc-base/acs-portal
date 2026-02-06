@@ -2,6 +2,7 @@ import React from "react";
 import { classBookService } from "@/infra/container";
 import ClassBookListComponents from "./classbook.list.component";
 import { QueryClassBook } from "@/core/domain/classbook";
+import { baseUrl } from "@/infra/container";
 
 export const dynamic = "force-dynamic";
 
@@ -28,6 +29,7 @@ const page = async ({ searchParams }: PageProps) => {
       pageSize={pageSize}
       page={page}
       sortOrder={query.sortOrder}
+      apiBase={baseUrl}
     />
   );
 };

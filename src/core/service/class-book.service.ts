@@ -34,21 +34,38 @@ export class ClassBookService {
     }
   }
 
-  async updateClassBook(data: IUpdateClassBook, image: File | null, id : number){
+  async updateClassBook(
+    data: IUpdateClassBook,
+    image: File | null,
+    id: number,
+  ) {
     try {
       const formData = new FormData();
       Object.entries(data).forEach(([key, value]) => {
         formData.append(key, value?.toString() ?? "");
       });
-      
-      if (image) {
-      formData.append("image", image);
-    }
 
-      const response = await this.classBookRepository.updateClassBook(formData , id);
+      if (image) {
+        formData.append("image", image);
+      }
+
+      const response = await this.classBookRepository.updateClassBook(
+        formData,
+        id,
+      );
       return response;
     } catch (error) {
       console.error("Failed to update class book:", error);
+      return null;
+    }
+  }
+
+  async deleteClassBook(id: number) {
+    try {
+      const response = await this.classBookRepository.deleteClassBook(id);
+      return response;
+    } catch (error) {
+      console.error("Failed to delete class book:", error);
       return null;
     }
   }
