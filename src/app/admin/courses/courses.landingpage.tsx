@@ -1,9 +1,7 @@
 "use client";
 import React, { useEffect, useCallback } from "react";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
-import {
-  SelectChangeEvent,
-} from "@mui/material";
+import { SelectChangeEvent } from "@mui/material";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -46,7 +44,7 @@ const CoursesLandingpage = ({
   sortBy,
   sortOrder,
   apiBase,
-  curriculum
+  curriculum,
 }: CoursesLandingPageProps) => {
   const router = useRouter();
   const pathname = usePathname();
@@ -55,7 +53,7 @@ const CoursesLandingpage = ({
   const {
     control: searchControl,
     reset: searchReset,
-    watch
+    watch,
   } = useForm<SearchForm>({
     resolver: zodResolver(searchSchema),
     defaultValues: { search },
@@ -120,11 +118,13 @@ const CoursesLandingpage = ({
     router.push(`${pathname}?${params.toString()}`, { scroll: false });
   };
 
-
   return (
     <div className="p-6">
       <div className="mb-4 flex flex-col gap-6">
-        <h3 className="font-bold"> จัดการหลักสูตร <span>{`>> ปีการศึกษา ${curriculum.year}`}</span> </h3>
+        <h3 className="font-bold">
+          {" "}
+          จัดการหลักสูตร <span>{`>> ปีการศึกษา ${curriculum.year}`}</span>{" "}
+        </h3>
 
         <CurriculumInfoComponent curriculum={curriculum} apiBase={apiBase} />
 
@@ -144,8 +144,8 @@ const CoursesLandingpage = ({
           typeCourses={typeCourses}
           typecourseId={typecourseId}
           handleFilterTypeCourse={handleFilterTypeCourse}
+          apiBase={apiBase}
         />
-
       </div>
     </div>
   );
