@@ -21,6 +21,8 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
 import { RHFTextField } from "@/components/form/RHFTextField";
+import { NewsService } from "@/core/service/news.service";
+import { NewsRepository } from "@/infra/repositories/news.repository";
 import { ConfirmModal, ConfirmModalProps } from "@/components/modal/confirmModal";
 import Alert from "@mui/material/Alert";
 import Snackbar from "@mui/material/Snackbar";
@@ -30,6 +32,7 @@ interface NewsListComponentProps {
   totalRecords: number;
   page?: number;
   pageSize: number;
+  apiBase: string;
 }
 
 const searchSchema = z.object({
@@ -44,13 +47,15 @@ const NewsListComponent = (initValue: NewsListComponentProps) => {
   const searchParams = useSearchParams();
 
   const [category, setCategory] = useState<string>("all");
-  const [openModal, setOpenModal] = useState(false);
-  const [deleteNews, setDeleteNews] = useState<INews | null>(null);
   const [confirmModal, setConfirmModal] = useState<ConfirmModalProps | null>(
     null,
   );
   const [isError, setIsError] = useState(false);
 
+  const newsService = useMemo(() => {
+    const repo = new NewsRepository(initValue.apiBase);
+    return new NewsService(repo);
+  }, [initValue.apiBase]);
 
   const { control, reset, watch } = useForm<SearchForm>({
     resolver: zodResolver(searchSchema),
@@ -94,15 +99,42 @@ const NewsListComponent = (initValue: NewsListComponentProps) => {
     router.push(`${pathname}?${params.toString()}`, { scroll: false });
   };
 
-  const handleDeleteModal = (news: INews) => {
-    setDeleteNews(news);
-    setOpenModal(true);
+
+  const onDelete = async (id: number) => {
+    try {
+      const response = await newsService.deleteNews(id);
+
+      if (response) {
+        setConfirmModal({
+          isOpen: true,
+          type: "success",
+          onClose: () => setConfirmModal(null),
+          onConfirm: () => {
+            setConfirmModal(null);
+            router.refresh();
+          },
+          title: "ลบข้อมูลสำเร็จ",
+          description: "ข้อมูลถูกลบออกจากฐานข้อมูลแล้ว",
+          confirmText: "เสร็จสิ้น",
+        });
+      } else {
+        setIsError(true);
+      }
+    } catch (error) {
+      console.log(error);
+      setIsError(true);
+    }
   };
 
-  const handleDelete = () => {
-    if (!deleteNews) return;
-    console.log("Delete news:", deleteNews);
-    setOpenModal(false);
+  const confirmDeleteNews = (id: number) => {
+    setConfirmModal({
+      isOpen: true,
+      type: "delete",
+      onClose: () => setConfirmModal(null),
+      onConfirm: () => {
+        onDelete(id);
+      },
+    });
   };
 
   const handleNextPage = useCallback(
@@ -200,7 +232,7 @@ const NewsListComponent = (initValue: NewsListComponentProps) => {
               type="news"
               data={news}
               onView={() => router.push(`/admin/news/${news.id}`)}
-              onDelete={() => handleDeleteModal(news)}
+              onDelete={() => confirmDeleteNews(news.id)}
             />
           ))}
         </div>

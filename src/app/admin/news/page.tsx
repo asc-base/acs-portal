@@ -1,5 +1,5 @@
 import NewsListComponent from "./news.list.component";
-import { newsService } from "@/infra/container";
+import { baseUrl, newsService } from "@/infra/container";
 import { queryNews } from "@/core/domain/news";
 
 export const dynamic = "force-dynamic";
@@ -22,6 +22,7 @@ const page = async ({ searchParams }: PageProps) => {
       totalRecords={totalRecords}
       page={page}
       pageSize={pageSize}
+      apiBase={baseUrl}
     />
   );
 };
