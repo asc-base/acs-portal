@@ -10,8 +10,8 @@ import {
   TableRow,
   Paper,
   Avatar,
+  IconButton,
 } from "@mui/material";
-import { IconButton } from "@mui/material";
 import { Edit, Delete } from "@mui/icons-material";
 import { useRouter } from "next/navigation";
 
