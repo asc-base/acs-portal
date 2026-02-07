@@ -84,4 +84,9 @@ export class NewsService {
     const response = await this.newsRepository.getNewsInformationById(id);
     return response.data;
   }
+
+  async deleteNews(id: number):Promise<INews> {
+    const response = await this.newsRepository.deleteNews(id)
+    return response.data;
+  }
 }

@@ -11,7 +11,7 @@ export interface INewsRepository {
   ): Promise<ApiResponse<Pageable<INews>>>;
   getNewsById(id: string): Promise<ApiResponse<INews>>;
   updateNews(id: number, news: FormData): Promise<ApiResponse<INews>>;
-  deleteNews(id: string, token: string): Promise<ApiResponse<INews>>;
+  deleteNews(id: number): Promise<ApiResponse<INews>>;
   getNewsInformations(
     type: string,
     page: number,

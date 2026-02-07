@@ -49,12 +49,9 @@ export class NewsRepository implements INewsRepository {
     return response;
   }
 
-  async deleteNews(id: string, token: string): Promise<ApiResponse<INews>> {
+  async deleteNews(id: number): Promise<ApiResponse<INews>> {
     const response = await this.http.delete<ApiResponse<INews>>(
-      `/v1/news/${id}`,
-      {
-        Authorization: `Bearer ${token}`,
-      },
+      `/v1/news/${id}`
     );
     return response;
   }
