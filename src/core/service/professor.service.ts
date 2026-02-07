@@ -23,9 +23,40 @@ export class ProfessorService {
   async updateProfessor(
     data: IUpdateProfessor,
     id: string,
+    image: File | null,
   ): Promise<IProfessor> {
-    const response = await this.professorRepository.updateProfessor(data, id);
+    try {
+    const formData = new FormData();
+
+    Object.entries(data).forEach(([key, value]) => {
+      if (value === undefined || value === null) {
+        formData.append(key, "");
+        return;
+      }
+
+      if (Array.isArray(value) || typeof value === "object") {
+        formData.append(key, JSON.stringify(value));
+      } else {
+        formData.append(key, String(value));
+      }
+    });
+
+    if (image) {
+      formData.append("image", image);
+    }
+
+    formData.append("nickname"," ");
+
+    const response = await this.professorRepository.updateProfessor(
+      formData,
+      id,
+    );
+
     return response.data;
+  } catch (error) {
+    console.error("Failed to update professor:", error);
+    throw error;
+  }
   }
 
   async createProfessor(data: ICreateProfessor, image: File) {

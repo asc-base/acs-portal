@@ -1,17 +1,25 @@
 "use client";
-import React, { useState, useEffect } from "react";
-import { Button, TextField, Typography, IconButton, Box } from "@mui/material";
+import React, { useState, useMemo } from "react";
+import { Button, Typography, IconButton, Snackbar, Alert } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import AddIcon from "@mui/icons-material/Add";
 import Image from "next/image";
-import { useForm, Controller, useFieldArray } from "react-hook-form";
-import { IProfessor, IUpdateProfessor } from "@/core/domain/professor";
+import { useForm, useFieldArray, SubmitHandler } from "react-hook-form";
+import { IProfessor } from "@/core/domain/professor";
 import { EducationLevel, Position } from "@/core/domain/master-data";
 import { Delete } from "@mui/icons-material";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import MenuItem from "@mui/material/MenuItem";
-import { professorService } from "@/infra/container";
+import { ProfessorService } from "@/core/service/professor.service";
+import { ProfessorRepository } from "@/infra/repositories/professor.repository";
+import { RHFTextField } from "@/components/form/RHFTextField";
+import { RHFSelect } from "@/components/form/RHFSelect";
+// import {
+//   ConfirmModal,
+//   ConfirmModalProps,
+// } from "@/components/modal/confirmModal";
+import { IUpdateExpertField } from "@/core/domain/expert-field";
 
 const VisuallyHiddenInput = styled("input")({
   clip: "rect(0 0 0 0)",
@@ -30,34 +38,41 @@ interface ProfessorFormComponentProps {
   academicPosition: Position[];
   majorPosition: Position[];
   educationLevel: EducationLevel[];
+  apiBase: string;
 }
 
 const Schema = z.object({
-  firstNameTh: z.string().min(1, "กรุณากรอกชื่อ (ภาษาไทย)"),
-  lastNameTh: z.string().min(1, "กรุณากรอกนามสกุล (ภาษาไทย)"),
-  firstNameEn: z.string().min(1, "กรุณากรอกชื่อ (ภาษาอังกฤษ)"),
-  lastNameEn: z.string().min(1, "กรุณากรอกนามสกุล (ภาษาอังกฤษ)"),
-  majorPositionTh: z.number().min(1, "กรุณาเลือกตำแหน่ง (ไทย)"),
-  majorPositionEn: z.number().min(1, "กรุณาเลือกตำแหน่ง (อังกฤษ)"),
-  phone: z.string().regex(/^[0-9]{9,10}$/, "กรุณากรอกเบอร์โทรให้ถูกต้อง"),
-  email: z.string().email("รูปแบบอีเมลไม่ถูกต้อง"),
-  academicPosition: z.number().min(1, "กรุณากรอกตำแหน่งในหลักสูตร"),
-  profRoom: z.string().min(1, "กรุณากรอกห้องพักอาจารย์"),
-  imageURL: z.string().optional(),
-  educations: z.array(
-    z.object({
-      id: z.number().optional(),
-      level: z.number().min(1, "กรุณาเลือกระดับการศึกษา"),
-      education: z.string().min(1, "กรุณากรอกชื่อสาขา"),
-      university: z.string().min(1, "กรุณากรอกชื่อมหาวิทยาลัย"),
-    }),
-  ),
-  expertFields: z.array(
-    z.object({
-      id: z.number().optional(),
-      field: z.string().min(1, "กรุณากรอกสาขาที่เชี่ยวชาญ"),
-    }),
-  ),
+  academicPositionId: z.number().min(1, "กรุณากรอกตำแหน่ง"),
+  education: z
+    .array(
+      z.object({
+        id: z.number().optional(),
+        levelId: z.number().min(1, "กรุณากรอกระดับการศึกษา"),
+        education: z.string().min(1, "กรุณากรอกวิชาเอก"),
+        university: z.string().min(1, "กรุณากรอกมหาวิทยาลัย"),
+      }),
+    )
+    .optional(),
+  email: z.email("อีเมลไม่ถูกต้อง"),
+  expertFields: z
+    .array(
+      z.object({
+        id: z.number().optional(),
+        field: z.string().min(1, "กรุณากรอกสาขาที่เชี่ยวชาญ"),
+      }),
+    )
+    .optional(),
+  firstNameEn: z.string().min(1, "กรุณากรอกชื่อภาษาอังกฤษ"),
+  firstNameTh: z.string().min(1, "กรุณากรอกชื่อภาษาไทย"),
+  lastNameEn: z.string().min(1, "กรุณากรอกนามสกุลภาษาอังกฤษ"),
+  lastNameTh: z.string().min(1, "กรุณากรอกนามสกุลภาษาไทย"),
+  majorPositionId: z.number().min(1, "กรุณากรอกตำแหน่ง"),
+  phone: z
+    .string()
+    .min(1, "กรุณากรอกเบอร์โทร")
+    .max(10, "เบอร์โทรต้องไม่เกิน 10 ตัวอักษร")
+    .regex(/^\d+$/, "เบอร์โทรต้องเป็นตัวเลขเท่านั้น"),
+  profRoom: z.string().min(1, "กรุณากรอกชื่อห้อง"),
 });
 type FormValues = z.infer<typeof Schema>;
 
@@ -66,28 +81,51 @@ const ProfessorFormComponent = ({
   academicPosition,
   majorPosition,
   educationLevel,
+  apiBase,
 }: ProfessorFormComponentProps) => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isEdit, setIsEdit] = useState(false);
+  const [isError, setIsError] = useState(false);
 
   const { control, handleSubmit, reset } = useForm<FormValues>({
     resolver: zodResolver(Schema),
     defaultValues: {
-      firstNameTh: "",
-      lastNameTh: "",
-      firstNameEn: "",
-      lastNameEn: "",
-      majorPositionTh: 1,
-      majorPositionEn: 1,
-      phone: "",
-      email: "",
-      academicPosition: 1,
-      profRoom: "",
-      imageURL: "",
-      educations: [],
-      expertFields: [],
+      academicPositionId: professor.academicPosition?.id ?? 0,
+      majorPositionId: professor.majorPosition?.id ?? 0,
+
+      firstNameTh: professor.user.firstNameTh ?? "",
+      lastNameTh: professor.user.lastNameTh ?? "",
+      firstNameEn: professor.user.firstNameEn ?? "",
+      lastNameEn: professor.user.lastNameEn ?? "",
+
+      phone: professor.phone ?? "",
+      email: professor.user.email ?? "",
+      profRoom: professor.profRoom ?? "",
+
+      education: professor.educations?.map((e) => ({
+        id: e.id,
+        levelId: e.level?.id ?? 0,
+        education: e.education ?? "",
+        university: e.university ?? "",
+      })) ?? [
+        {
+          id: undefined,
+          levelId: 0,
+          education: "",
+          university: "",
+        },
+      ],
+
+      expertFields: professor.expertFields?.map((f) => ({
+        id: f.id,
+        field: f.field ?? "",
+      })) ?? [{ id: undefined, field: "" }],
     },
   });
+
+  const previewSrc = selectedFile
+    ? URL.createObjectURL(selectedFile)
+    : professor.user.imageUrl;
 
   const {
     fields: educationFields,
@@ -95,7 +133,7 @@ const ProfessorFormComponent = ({
     remove: removeEducation,
   } = useFieldArray<FormValues>({
     control,
-    name: "educations",
+    name: "education",
   });
 
   const {
@@ -107,34 +145,10 @@ const ProfessorFormComponent = ({
     name: "expertFields",
   });
 
-  useEffect(() => {
-    reset({
-      firstNameTh: professor.user.firstNameTh || "",
-      lastNameTh: professor.user.lastNameTh || "",
-      firstNameEn: professor.user.firstNameEn || "",
-      lastNameEn: professor.user.lastNameEn || "",
-      majorPositionTh: professor.majorPosition?.id || 1,
-      majorPositionEn: professor.majorPosition?.id || 1,
-      phone: professor.phone || "",
-      email: professor.user.email || "",
-      academicPosition: professor.academicPosition?.id || 1,
-      profRoom: professor.profRoom || "",
-      imageURL: professor.user.imageUrl || "",
-      educations:
-        professor.educations?.map((e) => ({
-          id: e.id,
-          level: e.level?.id ?? "",
-          education: e.education || "",
-          university: e.university || "",
-        })) || [],
-
-      expertFields:
-        professor.expertFields?.map((f) => ({
-          id: f.id,
-          field: f.field,
-        })) || [],
-    });
-  }, [professor, reset]);
+  const professorService = useMemo(() => {
+    const professorRepository = new ProfessorRepository(apiBase);
+    return new ProfessorService(professorRepository);
+  }, [apiBase]);
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0] || null;
@@ -147,515 +161,369 @@ const ProfessorFormComponent = ({
     setIsEdit(false);
   };
 
-  const onSubmit = (data: FormValues) => {
-    const originalEducations = professor.educations || [];
-    const originalExperts = professor.expertFields || [];
+  const onSubmit: SubmitHandler<FormValues> = async (data) => {
+    setIsError(false);
 
-    const formEducations = data.educations.map((e) => ({
-      id: e.id ?? 0,
-      education: e.education,
-      university: e.university,
-      level: e.level,
-    }));
+    try {
+      const originalEducations = professor.educations ?? [];
+      const originalExperts = professor.expertFields ?? [];
 
-    const existingEducationIds = originalEducations.map((e) => e.id);
-    const newEducation = formEducations
-      .filter((e) => !e.id)
-      .map((e) => ({
-        education: e.education,
-        university: e.university,
-        level: e.level,
-      }));
-    const updatedEducation = formEducations.filter(
-      (e) => e.id && existingEducationIds.includes(e.id),
-    );
-    const deleteEducationIds = originalEducations
-      .filter((e) => !formEducations.some((f) => f.id === e.id))
-      .map((e) => e.id);
+      // -----------------------
+      // EDUCATION
+      // -----------------------
+      const formEducations = data.education ?? [];
 
-    const formExperts = data.expertFields.map((f) => ({
-      id: f.id ?? 0,
-      field: f.field,
-    }));
-    const existingExpertIds = originalExperts.map((f) => f.id);
-    const newExpertFields = formExperts
-      .filter((f) => !f.id)
-      .map((f) => f.field);
-    const updatedExpertFields = formExperts.filter(
-      (f) => f.id && existingExpertIds.includes(f.id),
-    );
-    const deleteExpertFieldsIds = originalExperts
-      .filter((f) => !formExperts.some((ff) => ff.id === f.id))
-      .map((f) => f.id);
+      const existingEducationIds = new Set(originalEducations.map((e) => e.id));
 
-    const updateData: IUpdateProfessor = {
-      id: professor.id,
-      academicPositionId: data.academicPosition,
-      majorPositionId: data.majorPositionTh,
-      profRoom: data.profRoom,
-      phone: data.phone,
-      firstNameTh: data.firstNameTh,
-      lastNameTh: data.lastNameTh,
-      firstNameEn: data.firstNameEn,
-      lastNameEn: data.lastNameEn,
-      mail: data.email,
+      const newEducation = formEducations
+        .filter((e) => !e.id)
+        .map((e) => ({
+          levelId: e.levelId,
+          education: e.education,
+          university: e.university,
+        }));
 
-      newExpertFields,
-      updatedExpertFields,
-      deleteExpertFieldsIds,
+      const updatedEducation = formEducations.filter(
+        (e): e is typeof e & { id: number } =>
+          !!e.id && existingEducationIds.has(e.id),
+      );
 
-      newEducation,
-      updatedEducation,
-      deleteEducationIds,
-    };
+      const deleteEducationIds = originalEducations
+        .filter((e) => !formEducations.some((f) => f.id === e.id))
+        .map((e) => e.id);
 
-    const formData = new FormData();
-    formData.append("data", JSON.stringify(updateData));
-    if (selectedFile) formData.append("image", selectedFile);
+      // -----------------------
+      // EXPERT FIELDS
+      // -----------------------
+      const formExperts = data.expertFields ?? [];
 
-    console.log("Update Data:", updateData);
+      const newExpertFields = formExperts
+        .filter((f) => !f.id && f.field.trim() !== "")
+        .map((f) => f.field);
 
-    professorService.updateProfessor(updateData, professor.id.toString());
-    setIsEdit(false);
-  };
+      const updatedExpertFields: IUpdateExpertField[] = formExperts
+        .filter((f) => f.id !== undefined)
+        .map((f) => ({
+          id: f.id!,
+          field: f.field,
+        }));
 
-  const onError = (errors: unknown) => {
-    console.error("Validation Errors:", errors);
+      const deleteExpertFieldIds = originalExperts
+        .filter((f) => !formExperts.some((ff) => ff.id === f.id))
+        .map((f) => f.id);
+
+      // -----------------------
+      // FINAL PAYLOAD
+      // -----------------------
+      const payload = {
+        academicPositionId: data.academicPositionId,
+        majorPositionId: data.majorPositionId,
+        firstNameTh: data.firstNameTh,
+        lastNameTh: data.lastNameTh,
+        firstNameEn: data.firstNameEn,
+        lastNameEn: data.lastNameEn,
+        email: data.email,
+        phone: data.phone,
+        profRoom: data.profRoom,
+
+        newEducation,
+        updatedEducation,
+        deleteEducationIds,
+
+        newExpertFields,
+        updatedExpertFields,
+        deleteExpertFieldIds,
+      };
+
+      const res = await professorService.updateProfessor(
+        payload,
+        professor.id.toString(),
+        selectedFile,
+      );
+
+      if (res) {
+        setIsEdit(false);
+      }
+    } catch (error) {
+      console.error(error);
+      setIsError(true);
+    }
   };
 
   return (
-    <form className="space-y-4 p-8" onSubmit={handleSubmit(onSubmit, onError)}>
+    <form
+      className="w-full space-y-4 px-8 py-8"
+      onSubmit={handleSubmit(onSubmit)}
+    >
+      <Snackbar
+        anchorOrigin={{ vertical: "top", horizontal: "right" }}
+        open={isError}
+        autoHideDuration={4000}
+        onClose={() => setIsError(false)}
+      >
+        <Alert
+          severity="error"
+          onClose={() => setIsError(false)}
+          sx={{ width: "100%" }}
+        >
+          ไม่สามารถแก้ไขข้อมูลอาจารย์ได้
+        </Alert>
+      </Snackbar>
       <Typography variant="h6" fontWeight="bold">
         ข้อมูลส่วนตัว
       </Typography>
 
-      {/* รูปภาพ */}
       <div className="mt-6 mb-16 flex flex-row items-center gap-x-8">
-        <div className="relative inline-block">
-          <Button
-            component="label"
-            className="flex h-41 w-41 min-w-0 items-center justify-center overflow-hidden rounded-full p-0"
-            sx={{
-              borderRadius: "50%",
-              width: "176px",
-              height: "176px",
-              padding: 0,
-              minWidth: 0,
-              backgroundColor: "#F2F2F2",
-              "&:hover": { backgroundColor: "#E2E2E2" },
-            }}
-            disabled={!isEdit}
-          >
-            {selectedFile ? (
-              <Image
-                src={URL.createObjectURL(selectedFile)}
-                alt="Preview"
-                width={300}
-                height={300}
-                style={{ objectFit: "cover" }}
-                className="h-full w-full rounded-full"
-              />
-            ) : professor.user.imageUrl ? (
-              <Image
-                src={professor.user.imageUrl}
-                alt="Profile"
-                width={300}
-                height={300}
-                style={{ objectFit: "cover" }}
-                className="h-full w-full rounded-full"
-              />
-            ) : (
-              <Image
-                alt="Upload"
-                src="/uploadimage.png"
-                width={70}
-                height={70}
-                style={{ width: "auto", height: "auto" }}
-                priority
-              />
-            )}
-            <VisuallyHiddenInput
-              type="file"
-              accept="image/*"
-              onChange={handleFileChange}
-            />
-          </Button>
-          {isEdit && (selectedFile || professor.user.imageUrl) && (
-            <Image
-              alt="Uploaded file"
-              src="/uploadimage.png"
-              width={40}
-              height={40}
-              style={{ width: "auto", height: "auto" }}
-              className="bg-neutral02 absolute right-2 bottom-0 rounded-full p-2"
-              priority
-            />
+        <div className="bg-neutral02 border-neutral04 relative flex h-[182px] w-[268px] flex-col items-center justify-center overflow-hidden rounded-lg">
+          {previewSrc ? (
+            <div className="group relative h-full w-full">
+              <Image src={previewSrc} alt="Preview" width={268} height={182} />
+              {isEdit && (
+                <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
+                  <Button variant="contained" component="label">
+                    <VisuallyHiddenInput
+                      type="file"
+                      accept="image/*"
+                      onChange={handleFileChange}
+                    />
+                    อัปโหลดรูปภาพ
+                  </Button>
+                </div>
+              )}
+            </div>
+          ) : (
+            isEdit && (
+              <Button variant="contained" component="label" size="large">
+                อัปโหลดรูปภาพ
+                <VisuallyHiddenInput
+                  type="file"
+                  accept="image/*"
+                  onChange={handleFileChange}
+                />
+              </Button>
+            )
           )}
         </div>
 
-        {/* ชื่อ นามสกุล */}
-        <div
-          className="flex flex-1 flex-col justify-between"
-          style={{ height: "176px" }}
-        >
-          <div className="flex flex-row gap-x-4">
-            <Box sx={{ minWidth: 220 }}>
-              <Controller
-                name={`majorPositionTh`}
-                control={control}
-                render={({ field, fieldState }) => (
-                  <TextField
-                    {...field}
-                    select
-                    fullWidth
-                    label="ตำแหน่ง (ภาษาไทย)"
-                    value={field.value || 1}
-                    onChange={(e) => field.onChange(e.target.value)}
-                    disabled={!isEdit}
-                    error={!!fieldState.error}
-                    helperText={fieldState.error?.message}
-                  >
-                    <MenuItem value="" disabled>
-                      เลือกตำแหน่ง
-                    </MenuItem>
-                    {majorPosition.map((pos) => (
-                      <MenuItem key={pos.id} value={pos.id}>
-                        {pos.positionTh}
-                      </MenuItem>
-                    ))}
-                  </TextField>
-                )}
-              />
-            </Box>
-            <Controller
-              name="firstNameTh"
+        <div className="flex w-full flex-col">
+          <div className="grid w-full grid-cols-[220px_1fr_1fr] gap-x-4">
+            <RHFSelect
+              name="majorPositionId"
               control={control}
-              render={({ field, fieldState }) => (
-                <TextField
-                  {...field}
-                  label="ชื่อ (ภาษาไทย)"
-                  fullWidth
-                  InputLabelProps={{ shrink: true }}
-                  disabled={!isEdit}
-                  error={!!fieldState.error}
-                  helperText={fieldState.error?.message}
-                />
-              )}
-            />
-            <Controller
-              name="lastNameTh"
-              control={control}
-              render={({ field, fieldState }) => (
-                <TextField
-                  {...field}
-                  label="นามสกุล (ภาษาไทย)"
-                  fullWidth
-                  InputLabelProps={{ shrink: true }}
-                  disabled={!isEdit}
-                  error={!!fieldState.error}
-                  helperText={fieldState.error?.message}
-                />
-              )}
-            />
-          </div>
-
-          <div className="mt-4 flex flex-row gap-x-4">
-            <Box sx={{ minWidth: 220 }}>
-              <Controller
-                name={`majorPositionEn`}
-                control={control}
-                render={({ field, fieldState }) => (
-                  <TextField
-                    {...field}
-                    select
-                    fullWidth
-                    label="ตำแหน่ง (ภาษาอังกฤษ)"
-                    value={field.value || 1}
-                    onChange={(e) => field.onChange(e.target.value)}
-                    disabled={!isEdit}
-                    error={!!fieldState.error}
-                    helperText={fieldState.error?.message}
-                  >
-                    <MenuItem value="" disabled>
-                      เลือกตำแหน่ง
-                    </MenuItem>
-                    {majorPosition.map((pos) => (
-                      <MenuItem key={pos.id} value={pos.id}>
-                        {pos.positionEn}
-                      </MenuItem>
-                    ))}
-                  </TextField>
-                )}
-              />
-            </Box>
-            <Controller
-              name="firstNameEn"
-              control={control}
-              render={({ field, fieldState }) => (
-                <TextField
-                  {...field}
-                  label="ชื่อ (ภาษาอังกฤษ)"
-                  fullWidth
-                  InputLabelProps={{ shrink: true }}
-                  disabled={!isEdit}
-                  error={!!fieldState.error}
-                  helperText={fieldState.error?.message}
-                />
-              )}
-            />
-            <Controller
-              name="lastNameEn"
-              control={control}
-              render={({ field, fieldState }) => (
-                <TextField
-                  {...field}
-                  label="นามสกุล (ภาษาอังกฤษ)"
-                  fullWidth
-                  InputLabelProps={{ shrink: true }}
-                  disabled={!isEdit}
-                  error={!!fieldState.error}
-                  helperText={fieldState.error?.message}
-                />
-              )}
-            />
-          </div>
-        </div>
-      </div>
-
-      {/* เบอร์โทร / อีเมล */}
-      <div className="flex flex-row gap-x-4">
-        <Controller
-          name="phone"
-          control={control}
-          render={({ field, fieldState }) => (
-            <TextField
-              {...field}
-              label="เบอร์โทร"
-              fullWidth
-              InputLabelProps={{ shrink: true }}
+              label="ระบุตำแหน่ง"
               disabled={!isEdit}
-              error={!!fieldState.error}
-              helperText={fieldState.error?.message}
-            />
-          )}
-        />
-        <Controller
-          name="email"
-          control={control}
-          render={({ field, fieldState }) => (
-            <TextField
-              {...field}
-              label="อีเมล"
-              fullWidth
-              InputLabelProps={{ shrink: true }}
-              disabled={!isEdit}
-              error={!!fieldState.error}
-              helperText={fieldState.error?.message}
-            />
-          )}
-        />
-      </div>
-
-      {/* ตำแหน่งในหลักสูตร / ห้องพัก */}
-      <div className="flex flex-row gap-x-4">
-        <Controller
-          name={`academicPosition`}
-          control={control}
-          render={({ field, fieldState }) => (
-            <TextField
-              {...field}
-              select
-              fullWidth
-              label="ตำแหน่งในหลักสูตร"
-              value={field.value || 1}
-              onChange={(e) => field.onChange(e.target.value)}
-              disabled={true}
-              error={!!fieldState.error}
-              helperText={fieldState.error?.message}
+              requiredMark
             >
-              {academicPosition.map((pos) => (
+              {majorPosition.map((pos) => (
                 <MenuItem key={pos.id} value={pos.id}>
                   {pos.positionTh}
                 </MenuItem>
               ))}
-            </TextField>
-          )}
-        />
-        <Controller
-          name="profRoom"
-          control={control}
-          render={({ field, fieldState }) => (
-            <TextField
-              {...field}
-              label="ห้องพักอาจารย์"
+            </RHFSelect>
+
+            <RHFTextField
+              name="firstNameTh"
+              control={control}
+              label="ชื่อ (ภาษาไทย)"
               fullWidth
-              InputLabelProps={{ shrink: true }}
               disabled={!isEdit}
-              error={!!fieldState.error}
-              helperText={fieldState.error?.message}
+              requiredMark
             />
-          )}
+
+            <RHFTextField
+              name="lastNameTh"
+              control={control}
+              label="นามสกุล (ภาษาไทย)"
+              fullWidth
+              disabled={!isEdit}
+              requiredMark
+            />
+          </div>
+
+          <div className="mt-4 grid w-full grid-cols-[220px_1fr_1fr] gap-x-4">
+            <RHFSelect
+              name="majorPositionId"
+              control={control}
+              label="ระบุตำแหน่ง"
+              disabled={!isEdit}
+            >
+              {majorPosition.map((pos) => (
+                <MenuItem key={pos.id} value={pos.id}>
+                  {pos.positionEn}
+                </MenuItem>
+              ))}
+            </RHFSelect>
+
+            <RHFTextField
+              name="firstNameEn"
+              control={control}
+              label="ชื่อ (ภาษาอังกฤษ)"
+              fullWidth
+              disabled={!isEdit}
+              requiredMark
+            />
+
+            <RHFTextField
+              name="lastNameEn"
+              control={control}
+              label="นามสกุล (ภาษาอังกฤษ)"
+              fullWidth
+              disabled={!isEdit}
+              requiredMark
+            />
+          </div>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-2 gap-x-4">
+        <RHFTextField
+          name="phone"
+          control={control}
+          label="เบอร์โทร"
+          fullWidth
+          disabled={!isEdit}
+          requiredMark
+        />
+        <RHFTextField
+          name="email"
+          control={control}
+          label="อีเมล"
+          fullWidth
+          disabled={!isEdit}
+          requiredMark
         />
       </div>
 
-      {/* ประวัติการศึกษา */}
-      <div className="mb-2 flex items-center justify-between">
+      <div className="grid grid-cols-2 gap-x-4">
+        <RHFSelect
+          name="academicPositionId"
+          control={control}
+          label="ตำแหน่งในหลักสูตร"
+          disabled
+        >
+          {academicPosition.map((pos) => (
+            <MenuItem key={pos.id} value={pos.id}>
+              {pos.positionTh}
+            </MenuItem>
+          ))}
+        </RHFSelect>
+
+        <RHFTextField
+          name="profRoom"
+          control={control}
+          label="ห้องพักอาจารย์"
+          fullWidth
+          disabled={!isEdit}
+          requiredMark
+        />
+      </div>
+
+      <div className="mt-6 flex items-center justify-between">
         <Typography variant="h6" fontWeight="bold">
           ประวัติการศึกษา
         </Typography>
         <IconButton
           onClick={() =>
-            appendEducation({ level: 1, education: "", university: "" })
+            appendEducation({ levelId: 0, education: "", university: "" })
           }
           disabled={!isEdit}
-          sx={{
-            border: `1px solid ${isEdit ? "#120554" : "#BDBDBD"}`,
-            color: isEdit ? "#120554" : "#BDBDBD",
-          }}
         >
           <AddIcon />
         </IconButton>
       </div>
 
       {educationFields.map((edu, index) => (
-        <div key={edu.id} className="mb-3 flex flex-row gap-x-4">
-          {/* ระดับการศึกษา */}
-          <Box sx={{ minWidth: 220 }}>
-            <Controller
-              name={`educations.${index}.level`}
-              control={control}
-              render={({ field, fieldState }) => (
-                <TextField
-                  {...field}
-                  select
-                  fullWidth
-                  label="ระดับการศึกษา"
-                  value={field.value || ""}
-                  onChange={(e) => field.onChange(e.target.value)}
-                  disabled={!isEdit}
-                  error={!!fieldState.error}
-                  helperText={fieldState.error?.message}
-                >
-                  <MenuItem value="" disabled>
-                    เลือกระดับการศึกษา
-                  </MenuItem>
-                  {educationLevel.map((lvl) => (
-                    <MenuItem key={lvl.id} value={lvl.id}>
-                      {lvl.level}
-                    </MenuItem>
-                  ))}
-                </TextField>
-              )}
-            />
-          </Box>
-          <Controller
-            name={`educations.${index}.education`}
+        <div
+          key={edu.id}
+          className="grid w-full grid-cols-[220px_1fr_1fr_40px] items-center gap-x-4"
+        >
+          <RHFSelect
+            name={`education.${index}.levelId`}
             control={control}
-            render={({ field, fieldState }) => (
-              <TextField
-                {...field}
-                label="วิชาเอก"
-                fullWidth
-                InputLabelProps={{ shrink: true }}
-                disabled={!isEdit}
-                error={!!fieldState.error}
-                helperText={fieldState.error?.message}
-              />
-            )}
+            label="ระดับการศึกษา"
+            disabled={!isEdit}
+          >
+            {educationLevel.map((lvl) => (
+              <MenuItem key={lvl.id} value={lvl.id}>
+                {lvl.level}
+              </MenuItem>
+            ))}
+          </RHFSelect>
+          <RHFTextField
+            name={`education.${index}.education`}
+            control={control}
+            label="วิชาเอก"
+            fullWidth
+            disabled={!isEdit}
+            requiredMark
           />
-          <Controller
-            name={`educations.${index}.university`}
+
+          <RHFTextField
+            name={`education.${index}.university`}
             control={control}
-            render={({ field, fieldState }) => (
-              <TextField
-                {...field}
-                label="มหาวิทยาลัย"
-                fullWidth
-                InputLabelProps={{ shrink: true }}
-                disabled={!isEdit}
-                error={!!fieldState.error}
-                helperText={fieldState.error?.message}
-              />
-            )}
+            label="มหาวิทยาลัย"
+            fullWidth
+            disabled={!isEdit}
+            requiredMark
           />
           {isEdit && (
-            <IconButton
-              color="error"
-              onClick={() => removeEducation(index)}
-              sx={{ alignSelf: "center" }}
-            >
+            <IconButton color="error" onClick={() => removeEducation(index)}>
               <Delete />
             </IconButton>
           )}
         </div>
       ))}
 
-      {/* สาขาที่เชี่ยวชาญ */}
-      <div className="mt-6 mb-4 flex items-center justify-between">
+      <div className="mt-6 flex items-center justify-between">
         <Typography variant="h6" fontWeight="bold">
           สาขาที่เชี่ยวชาญ
         </Typography>
         <IconButton
           onClick={() => appendExpert({ field: "" })}
           disabled={!isEdit}
-          sx={{
-            border: `1px solid ${isEdit ? "#120554" : "#BDBDBD"}`,
-            color: isEdit ? "#120554" : "#BDBDBD",
-          }}
         >
           <AddIcon />
         </IconButton>
       </div>
 
       {expertFields.map((f, index) => (
-        <div key={f.id} className="mb-3 flex flex-row gap-x-2">
-          <Controller
+        <div
+          key={f.id}
+          className="grid w-full grid-cols-[1fr_40px] items-center gap-x-2"
+        >
+          <RHFTextField
             name={`expertFields.${index}.field`}
             control={control}
-            render={({ field, fieldState }) => (
-              <TextField
-                {...field}
-                label="สาขาเชี่ยวชาญ"
-                fullWidth
-                InputLabelProps={{ shrink: true }}
-                disabled={!isEdit}
-                error={!!fieldState.error}
-                helperText={fieldState.error?.message}
-              />
-            )}
+            label="สาขาเชี่ยวชาญ"
+            fullWidth
+            disabled={!isEdit}
+            requiredMark
           />
+
           {isEdit && (
-            <IconButton
-              color="error"
-              onClick={() => removeExpert(index)}
-              sx={{ alignSelf: "center" }}
-            >
+            <IconButton color="error" onClick={() => removeExpert(index)}>
               <Delete />
             </IconButton>
           )}
         </div>
       ))}
 
-      {!isEdit ? (
-        <div className="mt-8 flex justify-end gap-x-4">
-          <Button
-            onClick={() => setIsEdit(true)}
-            variant="contained"
-            size="large"
-          >
+      <div className="mt-8 flex justify-end gap-x-4">
+        {isEdit ? (
+          <>
+            <Button variant="outlined" onClick={handleCancel}>
+              ยกเลิก
+            </Button>
+            <Button type="submit" variant="contained">
+              บันทึกข้อมูล
+            </Button>
+          </>
+        ) : (
+          <Button variant="contained" onClick={() => setIsEdit(true)}>
             แก้ไขข้อมูล
           </Button>
-        </div>
-      ) : (
-        <div className="mt-8 flex justify-end gap-x-4">
-          <Button onClick={handleCancel} variant="outlined" size="large">
-            ยกเลิก
-          </Button>
-          <Button type="submit" variant="contained" size="large">
-            บันทึกข้อมูล
-          </Button>
-        </div>
-      )}
+        )}
+      </div>
     </form>
   );
 };

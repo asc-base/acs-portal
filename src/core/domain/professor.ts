@@ -15,7 +15,6 @@ export interface IProfessor {
 }
 
 export interface IUpdateProfessor {
-  id: number;
   academicPositionId: number;
   majorPositionId: number;
   profRoom: string;
@@ -24,10 +23,10 @@ export interface IUpdateProfessor {
   lastNameTh: string;
   firstNameEn: string;
   lastNameEn: string;
-  mail: string;
+  email: string;
   newExpertFields: string[];
   updatedExpertFields: IUpdateExpertField[];
-  deleteExpertFieldsIds: number[];
+  deleteExpertFieldIds: number[];
   newEducation: INewEducation[];
   updatedEducation: IUpdateEducation[];
   deleteEducationIds: number[];
