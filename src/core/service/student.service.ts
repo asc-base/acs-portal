@@ -20,6 +20,11 @@ export class StudentService {
         return response.data;
   }
 
+  async deleteStudent(id: number):Promise<IStudent> {
+    const response = await this.studentRepository.deleteStudent(id);
+      return response.data;
+  }
+  
   async updateStudent(data : IUpdateStudent, image:File | null , classBookId : number , studentId : number): Promise<IStudent | null> {
     try{
        const formData = new FormData();

@@ -2,6 +2,7 @@ import React from "react";
 import CurriculumListComponents from "./curriculum.list.component";
 import { QueryCurriculum } from "@/core/domain/curriculum";
 import { curriculumService } from "@/infra/container";
+import { baseUrl } from "@/infra/container";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -18,7 +19,8 @@ const page = async ({ searchParams }: PageProps) => {
     pageSize: search.pageSize || 10,
     search: search.search ?? "",
   };
-  const { rows, pageSize, page, totalRecords } = await curriculumService.getCurriculum(query);
+  const { rows, pageSize, page, totalRecords } =
+    await curriculumService.getCurriculum(query);
 
   return (
     <CurriculumListComponents
@@ -26,6 +28,7 @@ const page = async ({ searchParams }: PageProps) => {
       totalRecords={totalRecords}
       pageSize={pageSize}
       page={page}
+      apiBase={baseUrl}
     />
   );
 };
