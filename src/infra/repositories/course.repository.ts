@@ -1,5 +1,10 @@
 import { ICourseRepository } from "@/core/ports/course.repository";
-import { ICourse, ICreateCourse, IUpdateCourse, QueryCourse } from "@/core/domain/course";
+import {
+  ICourse,
+  ICreateCourse,
+  IUpdateCourse,
+  QueryCourse,
+} from "@/core/domain/course";
 import { HttpHelper } from "@/lib/http";
 import { ApiResponse, Pageable } from "@/interface/response";
 
@@ -24,13 +29,12 @@ export class CourseRepository implements ICourseRepository {
       params.append("curriculumId", query.curriculumId.toString());
     if (query.typecourseId !== undefined)
       params.append("typecourseId", query.typecourseId.toString());
-    if (query.search !== undefined) 
+    if (query.search !== undefined)
       params.append("search", query.search.toString());
     if (query.sortBy !== undefined)
       params.append("sortBy", query.sortBy.toString());
     if (query.sortOrder !== undefined)
       params.append("sortOrder", query.sortOrder.toString());
-
 
     const url = `/v1/course?${params.toString()}`;
 
@@ -38,28 +42,36 @@ export class CourseRepository implements ICourseRepository {
     return response;
   }
 
-    async createCourse(data : ICreateCourse): Promise<ApiResponse<ICourse>>{
+  async createCourse(data: ICreateCourse): Promise<ApiResponse<ICourse>> {
     const response = await this.http.post<ApiResponse<ICourse>>(
-      `/v1/course`,data
+      `/v1/course`,
+      data,
     );
     return response;
-
   }
 
   async getCourseById(id: number): Promise<ApiResponse<ICourse> | null> {
     const response = await this.http.get<ApiResponse<ICourse>>(
-      `/v1/course/${id}`
+      `/v1/course/${id}`,
     );
     return response;
   }
 
-  async updateCourse(id: number, data: IUpdateCourse): Promise<ApiResponse<ICourse>> {
+  async updateCourse(
+    id: number,
+    data: IUpdateCourse,
+  ): Promise<ApiResponse<ICourse>> {
     const response = await this.http.patch<ApiResponse<ICourse>>(
-      `/v1/course/${id}`, data
+      `/v1/course/${id}`,
+      data,
     );
     return response;
-
   }
 
-
+  async deleteCourse(id: number): Promise<ApiResponse<ICourse>> {
+    const response = await this.http.delete<ApiResponse<ICourse>>(
+      `/v1/course/${id}`,
+    );
+    return response;
+  }
 }

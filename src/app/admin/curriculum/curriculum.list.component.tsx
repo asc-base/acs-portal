@@ -1,8 +1,8 @@
 "use client";
 import Link from "next/link";
-import React, { useEffect } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
-import { Button, Pagination } from "@mui/material";
+import { Button, Pagination, Snackbar, Alert } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import SearchIcon from "@mui/icons-material/Search";
 import CloseIcon from "@mui/icons-material/Close";
@@ -12,12 +12,19 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { AdminCard } from "@/components/adminCard";
 import { RHFTextField } from "@/components/form/RHFTextField";
 import { ICurriculum } from "@/core/domain/curriculum";
+import { CurriculumRepository } from "@/infra/repositories/curriculum.repository";
+import { CurriculumService } from "@/core/service/curriculum.service";
+import {
+  ConfirmModal,
+  ConfirmModalProps,
+} from "@/components/modal/confirmModal";
 
 interface CurriculumListComponentsProps {
   curriculums: ICurriculum[];
   totalRecords: number;
   pageSize: number;
   page: number;
+  apiBase: string;
 }
 
 const searchSchema = z.object({
@@ -31,10 +38,20 @@ const CurriculumListComponents = ({
   totalRecords,
   pageSize,
   page,
+  apiBase,
 }: CurriculumListComponentsProps) => {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const [isError, setIsError] = useState(false);
+  const [confirmModal, setConfirmModal] = useState<ConfirmModalProps | null>(
+    null,
+  );
+
+  const curriculumService = useMemo(() => {
+    const repo = new CurriculumRepository(apiBase);
+    return new CurriculumService(repo);
+  }, [apiBase]);
 
   const { control, reset, watch } = useForm<SearchForm>({
     resolver: zodResolver(searchSchema),
@@ -54,6 +71,44 @@ const CurriculumListComponents = ({
     router.push(`${pathname}?${newSearch}`);
   };
 
+  const confirmDeleteCurriculum = (curriculumId: number) => {
+    setConfirmModal({
+      isOpen: true,
+      type: "delete",
+      onClose: () => setConfirmModal(null),
+      onConfirm: () => {
+        handleDelete(curriculumId);
+        setConfirmModal(null);
+      },
+    });
+  };
+
+  const handleDelete = async (curriculumId: number) => {
+    try {
+      const reps = await curriculumService.deleteCurriculum(curriculumId);
+      if (!reps) {
+        setIsError(true);
+        return;
+      }
+      setConfirmModal({
+        isOpen: true,
+        type: "success",
+        onClose: () => setConfirmModal(null),
+        onConfirm: () => setConfirmModal(null),
+        title: "ลบข้อมูลสำเร็จ",
+        description: "ข้อมูลถูกลบออกจากระบบแล้ว",
+        confirmText: "เสร็จสิ้น",
+      });
+    } catch (error) {
+      console.error(error);
+      setIsError(true);
+    }
+  };
+
+  const handleCloseAlert = () => {
+    setIsError(false);
+  };
+
   useEffect(() => {
     const delayDebounce = setTimeout(() => {
       const params = new URLSearchParams(searchParams.toString());
@@ -71,6 +126,20 @@ const CurriculumListComponents = ({
 
   return (
     <div className="min-h-screen px-8 py-5">
+      <Snackbar
+        anchorOrigin={{ vertical: "top", horizontal: "right" }}
+        open={isError}
+        autoHideDuration={4000}
+        onClose={handleCloseAlert}
+      >
+        <Alert
+          severity="error"
+          onClose={handleCloseAlert}
+          sx={{ width: "100%" }}
+        >
+          ไม่สามารถลบหลักสูตรได้
+        </Alert>
+      </Snackbar>
       <div className="mb-6 flex items-center justify-between">
         <h3 className="text-lg font-bold">จัดการหลักสูตร</h3>
 
@@ -114,7 +183,7 @@ const CurriculumListComponents = ({
                   `/admin/courses?prerequisite=false&page=1&pageSize=10&curriculumId=${curriculum.id}`,
                 )
               }
-              onDelete={() => console.log("Delete succeed:", curriculum.id)}
+              onDelete={() => confirmDeleteCurriculum(curriculum.id)}
             />
           ))}
         </div>
@@ -128,6 +197,7 @@ const CurriculumListComponents = ({
           size="large"
         />
       </div>
+      {confirmModal && <ConfirmModal {...confirmModal} />}
     </div>
   );
 };

@@ -116,6 +116,7 @@ const StudentsLandingpage = ({
           page={page}
           pageSize={pageSize}
           handleNextPage={handleNextPage}
+          apiBase={apiBase}
         />
       </div>
     </div>
