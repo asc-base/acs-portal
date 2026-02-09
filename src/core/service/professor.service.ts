@@ -1,14 +1,13 @@
 import { IProfessorRepository } from "../ports/professor.repository";
 import {
-  IProfessor,
-  IUpdateProfessor,
   ICreateProfessor,
-} from "../domain/professor";
+  IUpdateProfessor,
+  IProfessor,
+ QueryProfessor } from "../domain/professor";
 import { Pageable } from "@/interface/response";
-import { QueryProfessor } from "../domain/professor";
 
 export class ProfessorService {
-  constructor(private professorRepository: IProfessorRepository) {}
+  constructor(private readonly professorRepository: IProfessorRepository) {}
 
   async getProfessors(query: QueryProfessor): Promise<Pageable<IProfessor>> {
     const response = await this.professorRepository.getProfessors(query);
@@ -20,7 +19,7 @@ export class ProfessorService {
     return response.data;
   }
 
-  async updateProfessor(
+async updateProfessor(
     data: IUpdateProfessor,
     id: string,
     image: File | null,
@@ -59,13 +58,27 @@ export class ProfessorService {
   }
   }
 
-  async createProfessor(data: ICreateProfessor, image: File) {
+  async createProfessor(data: ICreateProfessor, image?: File | null) {
     try {
-      const formData = new FormData();
+
+       const formData = new FormData();
       Object.entries(data).forEach(([key, value]) => {
-        formData.append(key, value?.toString() ?? "");
-      });
+      if (value === undefined || value === null) {
+        formData.append(key, "");
+        return;
+      }
+
+      if (Array.isArray(value) || typeof value === "object") {
+        formData.append(key, JSON.stringify(value));
+      } else {
+        formData.append(key, String(value));
+      }
+    });
+
+    if (image) {
       formData.append("image", image);
+    }
+
       const response = await this.professorRepository.createProfessor(formData);
       return response;
     } catch (error) {
