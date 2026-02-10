@@ -47,7 +47,7 @@ const NewsInfoComponent = ({ newsInfo, recommendNews }: NewsInfoProps) => {
               fill
               loading="lazy"
               sizes="100vw"
-              className="relative z-10 object-cover"
+              className="relative z-10 mt-3 object-cover"
               onLoadingComplete={(img) => {
                 const skeleton = img.parentElement?.querySelector(
                   "[data-skeleton]",
@@ -61,12 +61,14 @@ const NewsInfoComponent = ({ newsInfo, recommendNews }: NewsInfoProps) => {
           )}
         </div>
         <div className="flex w-full flex-col gap-4 py-8">
-          <h4>{date}</h4>
-          <h2 className="font-bold">{newsInfo?.title}</h2>
+          <div>
+            <h4>{date}</h4>
+            <h2 className="font-bold">{newsInfo?.title}</h2>
+          </div>
           <h3 className="break-words whitespace-pre-wrap">{newsInfo.detail}</h3>
         </div>
       </div>
-      <div className="flex flex-col gap-4 py-8">
+      <div className="flex flex-col gap-4 pb-8">
         <h2 className="text-accent04 font-bold">ข่าวที่น่าสนใจอื่นๆ</h2>
         <div className="grid grid-cols-1 justify-center justify-items-center gap-4 md:grid-cols-2 lg:grid-cols-3">
           {recommendNews.map((news) => (
