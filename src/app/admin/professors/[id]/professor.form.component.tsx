@@ -118,7 +118,7 @@ const ProfessorFormComponent = ({
 
       expertFields: professor.expertFields?.map((f) => ({
         id: f.id,
-        expertField: f.field ?? "",
+        expertField: f.expertField ?? "",
       })) ?? [{ id: undefined, expertField: "" }],
     },
   });

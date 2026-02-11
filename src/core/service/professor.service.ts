@@ -1,8 +1,8 @@
 import { IProfessorRepository } from "../ports/professor.repository";
 import {
-  ICreateProfessor,
-  IUpdateProfessor,  
   IProfessor,
+  ICreateProfessor,
+  IUpdateProfessor,
   QueryProfessor,
 } from "../domain/professor";
 import { Pageable } from "@/interface/response";
