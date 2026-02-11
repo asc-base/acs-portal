@@ -10,20 +10,30 @@ interface IHeroCard {
 export const HeroCard: FC<IHeroCard> = (props) => {
   const { image, description, header } = props;
   return (
-    <div className="relative h-60 w-full overflow-hidden">
+    <div className="relative w-full overflow-hidden flex flex-col justify-center min-h-[12rem] md:min-h-[18rem]">
       <Image
-        loading="lazy"
+        loading="eager"
         src={image}
         alt="Hero Image"
-        width={800}
-        height={600}
-        className="absolute h-full w-full object-cover blur-[2px]"
+        fill
+        className="absolute object-cover blur-[2px] select-none"
+        priority
       />
-      <div className="absolute inset-0 bg-black/60" />
-      <div className="absolute inset-0 z-10 flex flex-col items-center justify-center text-center text-white">
-        <h1 className="mb-4 text-4xl font-bold md:text-6xl">{header}</h1>
-        {description?.split("/").map((part) => (
-          <h5 key={part} className="mb-2 text-lg md:text-xl">
+      
+      <div className="absolute inset-0 bg-black/50" />
+      <div className="relative z-10 flex flex-col items-center px-4 py-4 text-center text-white">
+        <h1 
+          className="mb-3 font-bold drop-shadow-lg tracking-tight"
+          style={{ fontSize: "var(--text-h1)" }}
+        >
+          {header}
+        </h1>
+        {description?.split("/").map((part, index) => (
+          <h5 
+            key={index} 
+            className="font-medium drop-shadow-md opacity-90"
+            style={{ fontSize: "var(--text-h3)" }}
+          >
             {part}
           </h5>
         ))}
