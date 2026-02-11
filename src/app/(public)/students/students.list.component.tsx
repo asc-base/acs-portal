@@ -51,7 +51,7 @@ const StudentsListComponent = ({
         image={classBook?.image ? classBook.image : classbookImage}
         header={`รุ่น ${classBook?.classof} ปีการศึกษา ${classBook?.firstYearAcademic}`}
       />
-      <div className="container mx-auto px-6 py-5 lg:px-16">
+      <div className="container mx-auto px-4 py-6 lg:py-8 md:px-8 xl:px-8">
         <div className="mb-2 flex flex-col items-start justify-start gap-2">
           <Breadcrumbs aria-label="breadcrumb" separator=">>">
             <Link href="/">หน้าหลัก</Link>
@@ -62,9 +62,7 @@ const StudentsListComponent = ({
           </Breadcrumbs>
         </div>
 
-        <h2 className="text-primary02 mb-4 lg:mb-6">
-          {`   นักศึกษารุ่น ${classBook?.classof} ปีการศึกษา ${classBook?.firstYearAcademic}`}
-        </h2>
+         <h4 className="font-bold text-accent04 mt-2 lg:mt-3 mb-4 lg:mb-6 lg:text-2xl">{`   นักศึกษารุ่น ${classBook?.classof} ปีการศึกษา ${classBook?.firstYearAcademic}`}</h4>
 
         {students.length === 0 ? (
           <div className="flex w-full flex-col items-center justify-center">
@@ -72,8 +70,8 @@ const StudentsListComponent = ({
           </div>
         ) : (
           <div>
-            <div className="mb-10 ml-4 lg:ml-12">
-              <div className="grid grid-cols-2 gap-y-4 md:grid-cols-4 lg:grid-cols-4 lg:gap-y-6">
+            <div className="mb-10">
+              <div className="grid grid-cols-2 gap-y-4 md:grid-cols-4 lg:grid-cols-4 lg:gap-y-6 justify-items-center">
                 {students.map((item) => (
                   <div key={item.id} onClick={() => handleOpen(item)}>
                     <StudentCard {...item} />
