@@ -26,10 +26,10 @@ export interface IUpdateProfessor {
   email: string;
   newExpertFields: string[];
   updatedExpertFields: IUpdateExpertField[];
-  deleteExpertFieldIds: number[];
+  deletedExpertFieldIds: number[];
   newEducation: INewEducation[];
   updatedEducation: IUpdateEducation[];
-  deleteEducationIds: number[];
+  deletedEducationIds: number[];
 }
 
 export interface QueryProfessor {

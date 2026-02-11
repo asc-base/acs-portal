@@ -58,7 +58,7 @@ const Schema = z.object({
     .array(
       z.object({
         id: z.number().optional(),
-        field: z.string().min(1, "กรุณากรอกสาขาที่เชี่ยวชาญ"),
+        expertField: z.string().min(1, "กรุณากรอกสาขาที่เชี่ยวชาญ"),
       }),
     )
     .optional(),
@@ -118,8 +118,8 @@ const ProfessorFormComponent = ({
 
       expertFields: professor.expertFields?.map((f) => ({
         id: f.id,
-        field: f.field ?? "",
-      })) ?? [{ id: undefined, field: "" }],
+        expertField: f.field ?? "",
+      })) ?? [{ id: undefined, expertField: "" }],
     },
   });
 
@@ -188,7 +188,7 @@ const ProfessorFormComponent = ({
           !!e.id && existingEducationIds.has(e.id),
       );
 
-      const deleteEducationIds = originalEducations
+      const deletedEducationIds = originalEducations
         .filter((e) => !formEducations.some((f) => f.id === e.id))
         .map((e) => e.id);
 
@@ -198,17 +198,17 @@ const ProfessorFormComponent = ({
       const formExperts = data.expertFields ?? [];
 
       const newExpertFields = formExperts
-        .filter((f) => !f.id && f.field.trim() !== "")
-        .map((f) => f.field);
+        .filter((f) => !f.id && f.expertField.trim() !== "")
+        .map((f) => f.expertField);
 
       const updatedExpertFields: IUpdateExpertField[] = formExperts
         .filter((f) => f.id !== undefined)
         .map((f) => ({
           id: f.id!,
-          field: f.field,
+          expertField: f.expertField,
         }));
 
-      const deleteExpertFieldIds = originalExperts
+      const deletedExpertFieldIds = originalExperts
         .filter((f) => !formExperts.some((ff) => ff.id === f.id))
         .map((f) => f.id);
 
@@ -228,11 +228,11 @@ const ProfessorFormComponent = ({
 
         newEducation,
         updatedEducation,
-        deleteEducationIds,
+        deletedEducationIds,
 
         newExpertFields,
         updatedExpertFields,
-        deleteExpertFieldIds,
+        deletedExpertFieldIds,
       };
 
       const res = await professorService.updateProfessor(
@@ -479,7 +479,7 @@ const ProfessorFormComponent = ({
           สาขาที่เชี่ยวชาญ
         </Typography>
         <IconButton
-          onClick={() => appendExpert({ field: "" })}
+          onClick={() => appendExpert({ expertField: "" })}
           disabled={!isEdit}
         >
           <AddIcon />
@@ -492,7 +492,7 @@ const ProfessorFormComponent = ({
           className="grid w-full grid-cols-[1fr_40px] items-center gap-x-2"
         >
           <RHFTextField
-            name={`expertFields.${index}.field`}
+            name={`expertFields.${index}.expertField`}
             control={control}
             label="สาขาเชี่ยวชาญ"
             fullWidth

@@ -1,9 +1,10 @@
 import { IProfessorRepository } from "../ports/professor.repository";
 import {
   ICreateProfessor,
-  IUpdateProfessor,
+  IUpdateProfessor,  
   IProfessor,
- QueryProfessor } from "../domain/professor";
+  QueryProfessor,
+} from "../domain/professor";
 import { Pageable } from "@/interface/response";
 
 export class ProfessorService {
