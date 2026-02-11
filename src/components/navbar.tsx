@@ -9,7 +9,6 @@ import { useState, useEffect, useMemo } from "react";
 import MenuIcon from "@mui/icons-material/Menu";
 import CloseIcon from "@mui/icons-material/Close";
 import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
-import FilterListIcon from "@mui/icons-material/FilterList";
 import { useAuthStore } from "@/store/auth";
 import UserIcon from "@mui/icons-material/Person";
 import { IUser } from "@/core/domain/user";
@@ -21,9 +20,48 @@ import Tooltip from "@mui/material/Tooltip";
 import Logout from "@mui/icons-material/Logout";
 import { AuthRepository } from "@/infra/repositories/auth.repository";
 import { AuthService } from "@/core/service/auth.service";
+import { usePathname } from "next/navigation";
+
+type SubMenuItem = {
+  id: number;
+  label: string;
+  href?: string;
+};
+
+type MenuItem = {
+  id: number;
+  label: string;
+  href?: string;
+  submenu: SubMenuItem[];
+};
 
 const MenuBar = () => {
   const [isOpenSubMenu, setIsOpenSubMenu] = useState(0);
+  const pathname = usePathname();
+
+  function isActiveMenu(item: MenuItem): boolean {
+    if (!pathname) return false;
+
+    const cleanPath = pathname.replace(/\/$/, "");
+
+    if (item.href === "/" && (cleanPath === "/" || cleanPath === "/home"))
+      return true;
+
+    if (item.href && item.href !== "/") {
+      const basePath = item.href.split("?")[0].replace(/\/$/, "");
+      if (cleanPath.startsWith(basePath)) return true;
+    }
+
+    if (item.submenu.length > 0) {
+      return item.submenu.some((sub) => {
+        if (!sub.href) return false;
+        const basePath = sub.href.split("?")[0].replace(/\/$/, "");
+        return cleanPath.startsWith(basePath);
+      });
+    }
+
+    return false;
+  }
 
   function onOpenSubMenu(id: number) {
     if (isOpenSubMenu === id) setIsOpenSubMenu(0);
@@ -90,10 +128,15 @@ const MenuBar = () => {
             {item.submenu.length > 0 && item.href === "" ? (
               <div className="block w-auto flex-col md:flex">
                 <Button
+                  color="inherit"
                   onClick={() => onOpenSubMenu(item.id)}
-                  className="flex w-full items-center justify-between !px-0 text-left md:pointer-events-none md:cursor-default"
+                  className="flex w-full items-center justify-between !px-0 text-left"
                 >
-                  <p className="flex-1 text-left text-base font-bold">
+                  <p
+                    className={`flex-1 text-left text-base font-bold ${
+                      isActiveMenu(item) ? "!text-accent04" : ""
+                    }`}
+                  >
                     {item.label}
                   </p>
                   {isOpenSubMenu === item.id ? (
@@ -124,7 +167,9 @@ const MenuBar = () => {
                   ))}
                 </ul>
 
-                <ul className="absolute top-full left-0 z-50 hidden min-w-48 overflow-hidden rounded-xl bg-white shadow-lg md:group-hover:block">
+                <ul
+                  className={`absolute top-full left-0 z-50 min-w-48 overflow-hidden rounded-xl bg-white shadow-lg ${isOpenSubMenu === item.id ? "block" : "hidden"} lg:invisible lg:block lg:group-hover:visible`}
+                >
                   {item.submenu.map((subItem) => (
                     <li
                       key={subItem.id}
@@ -149,13 +194,21 @@ const MenuBar = () => {
             ) : item.href ? (
               <Link
                 href={item.href}
-                className="hover:text-accent04 block w-full text-left text-base font-bold md:w-auto"
+                className={`block w-full text-left text-base font-bold md:w-auto ${
+                  isActiveMenu(item)
+                    ? "!text-accent04"
+                    : "text-primary01 hover:text-accent04"
+                }`}
               >
                 {item.label}
               </Link>
             ) : (
               <Button disabled className="block w-full !px-0 text-left">
-                <p className="flex-1 text-left text-base font-bold">
+                <p
+                  className={`flex-1 text-left text-base font-bold ${
+                    isActiveMenu(item) ? "!text-accent04" : ""
+                  }`}
+                >
                   {item.label}
                 </p>
               </Button>
@@ -322,21 +375,10 @@ export const NavbarMain = ({ baseUrl }: { baseUrl: string }) => {
   return (
     <nav
       key={`navbar-${userAuth?.id || "guest"}`}
-      className="text-neutral01 bg-primary01 relative min-h-12 w-full shadow-md"
+      className="text-neutral01 bg-primary01 relative z-40 min-h-12 w-full shadow-md"
     >
-      <div className="flex h-full w-full items-center justify-between px-5 md:px-10">
+      <div className="flex h-full w-full items-center justify-between px-5 md:px-20">
         <div className="flex h-full items-center gap-x-4">
-          {/* Drawer trigger button for mobile */}
-          <button
-            className="jun-edgeDrawerTrigger p-2 md:hidden"
-            onClick={() => {
-              const event = new CustomEvent("triggerEdgeDrawer");
-              document.dispatchEvent(event);
-            }}
-          >
-            <FilterListIcon />
-          </button>
-
           {isOpen ? (
             <div className="flex min-h-20 items-center gap-x-4">
               {socialLinks.map((link, index) => (
