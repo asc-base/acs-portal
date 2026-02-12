@@ -20,29 +20,22 @@ export const NewsCard: FC<NewsCardProps> = (props) => {
   })} ${new Date(news.startDate).getFullYear() + 543}`;
 
   return (
-    <Card className="w-[300px] lg:w-[362px] h-[282px] lg:h-[340px] !rounded-xl lg:!rounded-2xl">
-      <div className="px-6 pt-4 overflow-hidden">
+    <Card className="w-full h-full flex flex-col !rounded-xl lg:!rounded-2xl shadow-md">
+      <div className="px-6 pt-4">
         <CardMedia
-          sx={{
-            height: "180px",
-            backgroundSize: "cover",
-            backgroundPosition: "center",
-            borderRadius: "12px",
-            "@media (min-width: 1024px)": {
-              height: "240px",
-            },
-          }}
+          className="h-[180px] lg:h-[240px] w-full object-cover rounded-xl"
           component="img"
           image={news.image}
           alt={news.title}
         />
       </div>
-      <CardContent className="!px-6">
-        <h3 className="line-clamp-1 font-bold">{news.title}</h3>
-        <h6 className="line-clamp-2">{date}</h6>
+
+      <CardContent className="!px-6 flex-grow">
+        <h3 className="line-clamp-1 font-bold text-lg lg:text-xl">{news.title}</h3>
+        <h6 className="line-clamp-2 text-sm text-gray-500 mt-1">{date}</h6>
       </CardContent>
 
-      <CardActions>
+      <CardActions className="p-4 pt-0">
         {onEdit && (
           <Button size="small" variant="contained" fullWidth onClick={onEdit}>
             <DeleteOutlineOutlinedIcon fontSize="small" />
