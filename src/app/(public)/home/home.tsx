@@ -95,6 +95,17 @@ const HomePage = ({
   const showActivityStudentSection =
     initNewsActivityStudent && initNewsActivityStudent.length > 0;
 
+  const getCardClasses = (index: number) => {
+    const sizeClasses = "w-full md:w-1/2 lg:w-1/3";
+    
+    let visibilityClass = "hidden";
+    if (index === 0) visibilityClass = "block";
+    if (index === 1) visibilityClass = "hidden md:block";
+    if (index === 2) visibilityClass = "hidden lg:block";
+
+    return `${sizeClasses} ${visibilityClass}`;
+  };
+
   return (
     <div>
       <HeroCard
@@ -155,22 +166,20 @@ const HomePage = ({
               {Array.from(
                 { length: Math.min(3, initNewsActivity.length) },
                 (_, i) => {
-                  const index =
-                    (newsActivityActive + i) % initNewsActivity.length;
+                  const index = (newsActivityActive + i) % initNewsActivity.length;
                   const news = initNewsActivity[index];
                   return (
                     <div
                       key={`${news.id}-${i}`}
-                      className="transform transition-all duration-300 ease-in-out hover:scale-105 hover:shadow-lg"
+                      className={`p-2 flex-shrink-0 transition-all duration-300 ease-in-out ${getCardClasses(i)}`}
                       style={{
                         opacity: 1,
-                        transform: "translateX(0)",
                         transitionDelay: `${i * 100}ms`,
                       }}
                     >
                       <Link
                         href={`/news/${news.id}`}
-                        className="w-fit transition-colors duration-200 ease-in-out"
+                        className="block h-full transition-colors duration-200 ease-in-out hover:scale-[1.02]"
                       >
                         <NewsCard news={news} />
                       </Link>
@@ -193,22 +202,17 @@ const HomePage = ({
               {Array.from(
                 { length: Math.min(3, initNewsComplete.length) },
                 (_, i) => {
-                  const index =
-                    (newsCompleteActive + i) % initNewsComplete.length;
+                  const index = (newsCompleteActive + i) % initNewsComplete.length;
                   const news = initNewsComplete[index];
                   return (
                     <div
                       key={`${news.id}-${i}`}
-                      className="transform transition-all duration-300 ease-in-out hover:scale-105 hover:shadow-lg"
-                      style={{
-                        opacity: 1,
-                        transform: "translateX(0)",
-                        transitionDelay: `${i * 100}ms`,
-                      }}
+                      className={`p-2 flex-shrink-0 transition-all duration-300 ease-in-out ${getCardClasses(i)}`}
+                      style={{ opacity: 1, transitionDelay: `${i * 100}ms` }}
                     >
                       <Link
                         href={`/news/${news.id}`}
-                        className="w-fit transition-colors duration-200 ease-in-out"
+                        className="block h-full transition-colors duration-200 ease-in-out hover:scale-[1.02]"
                       >
                         <NewsCard news={news} />
                       </Link>
@@ -231,23 +235,17 @@ const HomePage = ({
               {Array.from(
                 { length: Math.min(3, initNewsActivityStudent.length) },
                 (_, i) => {
-                  const index =
-                    (newsActivityStudentActive + i) %
-                    initNewsActivityStudent.length;
+                  const index = (newsActivityStudentActive + i) % initNewsActivityStudent.length;
                   const news = initNewsActivityStudent[index];
                   return (
                     <div
                       key={`${news.id}-${i}`}
-                      className="transform transition-all duration-300 ease-in-out hover:scale-105 hover:shadow-lg"
-                      style={{
-                        opacity: 1,
-                        transform: "translateX(0)",
-                        transitionDelay: `${i * 100}ms`,
-                      }}
+                      className={`p-2 flex-shrink-0 transition-all duration-300 ease-in-out ${getCardClasses(i)}`}
+                      style={{ opacity: 1, transitionDelay: `${i * 100}ms` }}
                     >
                       <Link
                         href={`/news/${news.id}`}
-                        className="w-fit transition-colors duration-200 ease-in-out"
+                        className="block h-full transition-colors duration-200 ease-in-out hover:scale-[1.02]"
                       >
                         <NewsCard news={news} />
                       </Link>
