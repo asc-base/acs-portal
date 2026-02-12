@@ -168,7 +168,11 @@ const MenuBar = () => {
                 </ul>
 
                 <ul
-                  className={`absolute top-full left-0 z-50 min-w-48 overflow-hidden rounded-xl bg-white shadow-lg ${isOpenSubMenu === item.id ? "block" : "hidden"} lg:invisible lg:block lg:group-hover:visible`}
+                  className={`absolute top-full left-0 z-50 hidden min-w-48 overflow-hidden rounded-xl bg-white shadow-lg lg:block ${
+                    isOpenSubMenu === item.id
+                      ? "block lg:visible"
+                      : "lg:invisible lg:group-hover:visible"
+                  } `}
                 >
                   {item.submenu.map((subItem) => (
                     <li
