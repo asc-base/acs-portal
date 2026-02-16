@@ -5,7 +5,7 @@ import Link from "next/link";
 
 export type ClassbookCardProps = {
   image: string;
-  classof: string;
+  classof: number;
   firstYearAcademic: string;
   priority?: boolean;
   href?: string; // ทำให้การ์ดเป็นลิงก์
