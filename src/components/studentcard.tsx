@@ -16,7 +16,7 @@ import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 
 export const StudentCard: FC<StudentCardProps> = (props) => {
   return (
-    <Card className="h-full max-h-[340px] !w-[162px] cursor-pointer !rounded-2xl lg:!w-[268px]">
+    <Card className="flex flex-col !min-h-[300px] max-h-[340px] !w-[162px] cursor-pointer !rounded-2xl xl:!w-[268px]">
       {props.user.imageUrl ? (
         <CardMedia
           sx={{
@@ -31,7 +31,7 @@ export const StudentCard: FC<StudentCardProps> = (props) => {
       ) : (
         <Box
           sx={{
-            height: { sm: 156, lg: 240 },
+            height: { xs: 156, lg: 240 },
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
@@ -46,7 +46,7 @@ export const StudentCard: FC<StudentCardProps> = (props) => {
           />
         </Box>
       )}
-      <CardContent className="flex h-[100px] flex-col items-center justify-center text-center">
+      <CardContent className="flex flex-1 flex-col items-center justify-center text-center">
         <Typography className="!text-h4 lg:!text-h3 !text-primary01 text-center !font-bold">
           <span className="lg:hidden">
             {`${props.user.firstNameTh} ${props.user.lastNameTh}`.length >=
@@ -64,7 +64,7 @@ export const StudentCard: FC<StudentCardProps> = (props) => {
             {props.user.firstNameTh} {props.user.lastNameTh}
           </span>
         </Typography>
-        <Box className="flex w-full flex-col items-center justify-between lg:mt-4 lg:flex-row">
+        <Box className="flex w-full flex-col items-center justify-between xl:mt-4 xl:flex-row">
           <Typography className="!text-h5 lg:!text-h4 !text-primary01">
             {`${props.studentId.slice(0, 2)}-${props.studentId.slice(-3)}`}
           </Typography>
