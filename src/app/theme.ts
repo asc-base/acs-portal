@@ -49,5 +49,18 @@ export const Theme = createTheme({
         },
       },
     },
+    MuiBreadcrumbs: {
+      styleOverrides: {
+        root: {
+          fontSize: "12px",
+          color: "var(--color-neutral04)",
+        },
+        separator: {
+          color: "var(--color-neutral04)",
+          marginLeft: 4,
+          marginRight: 4,
+        },
+      },
+    },
   },
 });
