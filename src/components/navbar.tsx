@@ -122,11 +122,11 @@ const MenuBar = () => {
 
   return (
     <div className="bg-neutral01 text-primary01 p-1 px-5 font-bold md:px-0">
-      <ul className="text-primary01 container mx-auto flex w-full flex-col justify-around sm:flex-row md:items-center">
+      <ul className="text-primary01 container mx-auto flex w-full flex-col justify-around sm:flex-row lg:items-center">
         {menuItems.map((item) => (
-          <li key={item.id} className="group relative w-full py-1 md:w-auto">
+          <li key={item.id} className="group relative w-full py-1 lg:w-auto">
             {item.submenu.length > 0 && item.href === "" ? (
-              <div className="block w-auto flex-col md:flex">
+              <div className="block w-auto flex-col lg:flex">
                 <Button
                   color="inherit"
                   onClick={() => onOpenSubMenu(item.id)}
@@ -147,7 +147,7 @@ const MenuBar = () => {
                 </Button>
 
                 <ul
-                  className={`${isOpenSubMenu === item.id ? "block" : "hidden"} w-full md:hidden`}
+                  className={`${isOpenSubMenu === item.id ? "block" : "hidden"} w-full lg:hidden`}
                 >
                   {item.submenu.map((subItem) => (
                     <li key={subItem.id}>
@@ -198,7 +198,7 @@ const MenuBar = () => {
             ) : item.href ? (
               <Link
                 href={item.href}
-                className={`block w-full text-left text-base font-bold md:w-auto ${
+                className={`block w-full text-left text-base font-bold lg:w-auto ${
                   isActiveMenu(item)
                     ? "!text-accent04"
                     : "text-primary01 hover:text-accent04"
@@ -381,7 +381,7 @@ export const NavbarMain = ({ baseUrl }: { baseUrl: string }) => {
       key={`navbar-${userAuth?.id || "guest"}`}
       className="text-neutral01 bg-primary01 relative z-40 min-h-12 w-full shadow-md"
     >
-      <div className="flex h-full w-full items-center justify-between px-5 md:px-20">
+      <div className="flex h-full w-full items-center justify-between px-5 lg:px-20">
         <div className="flex h-full items-center gap-x-4">
           {isOpen ? (
             <div className="flex min-h-20 items-center gap-x-4">
@@ -402,22 +402,24 @@ export const NavbarMain = ({ baseUrl }: { baseUrl: string }) => {
               {renderUserAuth()}
             </div>
           ) : (
-            <div className="flex min-h-20 items-center gap-x-4">
+            <div className="flex min-h-20 items-center gap-x-1.5 lg:gap-x-4">
               <Image
                 src="/kmuttlogo.png"
                 alt="KMUTT Logo"
-                width={50}
-                height={50}
+                width={38}
+                height={40}
                 priority
                 unoptimized
+                className="lg:w-[60px] lg:h-[62px]"
               />
               <Image
                 src="/logoacs.png"
                 alt="ACS Logo"
-                width={48}
-                height={40}
+                width={38}
+                height={30}
                 priority
                 unoptimized
+                className="lg:w-[58px] lg:h-[50px]"
               />
               <div>
                 {majorName.split("/").map((part, index) => (
@@ -427,7 +429,7 @@ export const NavbarMain = ({ baseUrl }: { baseUrl: string }) => {
             </div>
           )}
         </div>
-        <div className="hidden items-center gap-x-4 md:flex">
+        <div className="hidden items-center gap-x-4 lg:flex">
           {socialLinks.map((link, index) => (
             <Link
               key={`desktop-${index}`}
@@ -445,14 +447,14 @@ export const NavbarMain = ({ baseUrl }: { baseUrl: string }) => {
 
         {isOpen ? (
           <button
-            className="flex items-center md:hidden"
+            className="flex items-center lg:hidden"
             onClick={() => setIsOpen(false)}
           >
             <CloseIcon sx={{ fontSize: 28 }} />
           </button>
         ) : (
           <button
-            className="flex items-center md:hidden"
+            className="flex items-center lg:hidden"
             onClick={() => setIsOpen(true)}
           >
             <MenuIcon sx={{ fontSize: 28 }} />
@@ -460,7 +462,7 @@ export const NavbarMain = ({ baseUrl }: { baseUrl: string }) => {
         )}
       </div>
 
-      <div className={`${isOpen ? "block" : "hidden"} md:block`}>
+      <div className={`${isOpen ? "block" : "hidden"} lg:block`}>
         <MenuBar />
       </div>
     </nav>
