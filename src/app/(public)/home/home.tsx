@@ -8,15 +8,15 @@ import { useState } from "react";
 import { NewsCarouselComponent } from "@/components/news.carousel.component";
 import { ActivityCard } from "@/components/activitycard";
 import { Carousel } from "@/components/carousel";
-import { useAuthStore } from "@/store/auth";
+// import { useAuthStore } from "@/store/auth";
 
 interface HomePageProps {
   initNewsActivity: INews[];
   initNewsComplete: INews[];
   initNewsActivityStudent: INews[];
   initAnnoucement?: INewsInformation[];
-  initNewsHighlight?: INewsInformation[];
-  apibase: string;
+  // initNewsHighlight?: INewsInformation[];
+  // apibase: string;
 }
 
 const HomePage = ({
@@ -24,14 +24,14 @@ const HomePage = ({
   initNewsComplete,
   initNewsActivityStudent,
   initAnnoucement,
-  initNewsHighlight,
-  apibase,
+  // initNewsHighlight,
+  // apibase,
 }: HomePageProps) => {
   const [newsActivityActive, setNewsActivityActive] = useState(0);
   const [newsCompleteActive, setNewsCompleteActive] = useState(0);
   const [newsActivityStudentActive, setNewsActivityStudentActive] = useState(0);
 
-  const user = useAuthStore((state) => state.user);
+  // const user = useAuthStore((state) => state.user);
 
   const handleNextNewsActivity = () => {
     if (initNewsActivity.length === 0) return;
@@ -92,7 +92,8 @@ const HomePage = ({
   const showActivitySection = initNewsActivity && initNewsActivity.length > 0;
   const showAnnouncementSection = initAnnoucement && initAnnoucement.length > 0;
   const showCompleteSection = initNewsComplete && initNewsComplete.length > 0;
-  const showActivityStudentSection = initNewsActivityStudent && initNewsActivityStudent.length > 0;
+  const showActivityStudentSection =
+    initNewsActivityStudent && initNewsActivityStudent.length > 0;
 
   return (
     <div>
@@ -107,7 +108,7 @@ const HomePage = ({
             <div className="flex flex-col-reverse gap-x-6 gap-y-6 md:grid md:grid-cols-2">
               {showActivitySection ? (
                 <div>
-                  <h3 className="text-accent04 mb-3 items-baseline font-bold lg:text-[32px]">
+                  <h3 className="text-accent04 lg:text-h1 mb-3 items-baseline font-bold">
                     งานกิจกรรมเร็ว ๆ นี้
                   </h3>
                   <div className="flex flex-col gap-y-3 md:[&>*:nth-child(n+3)]:hidden lg:[&>*:nth-child(n+3)]:block [&>*:nth-child(n+5)]:hidden">
@@ -256,7 +257,6 @@ const HomePage = ({
               )}
             </NewsCarouselComponent>
           )}
-
         </div>
       </div>
     </div>

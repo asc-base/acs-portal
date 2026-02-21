@@ -23,7 +23,10 @@ import Link from "next/link";
 import { RHFTextField } from "@/components/form/RHFTextField";
 import { NewsService } from "@/core/service/news.service";
 import { NewsRepository } from "@/infra/repositories/news.repository";
-import { ConfirmModal, ConfirmModalProps } from "@/components/modal/confirmModal";
+import {
+  ConfirmModal,
+  ConfirmModalProps,
+} from "@/components/modal/confirmModal";
 import Alert from "@mui/material/Alert";
 import Snackbar from "@mui/material/Snackbar";
 
@@ -98,7 +101,6 @@ const NewsListComponent = (initValue: NewsListComponentProps) => {
     params.set("page", "1");
     router.push(`${pathname}?${params.toString()}`, { scroll: false });
   };
-
 
   const onDelete = async (id: number) => {
     try {
@@ -187,7 +189,7 @@ const NewsListComponent = (initValue: NewsListComponentProps) => {
             value={category ?? "all"}
             displayEmpty
             onChange={handleFilterCategory}
-            renderValue={(value) => value === "all" ? "ทั้งหมด" : value}
+            renderValue={(value) => (value === "all" ? "ทั้งหมด" : value)}
             IconComponent={ExpandMoreIcon}
             sx={{ width: 200, height: 44 }}
           >
@@ -210,14 +212,10 @@ const NewsListComponent = (initValue: NewsListComponentProps) => {
                 )}
               </MenuItem>
             ))}
-
           </Select>
 
           <Link href="/admin/news/create">
-            <Button
-              variant="contained"
-              startIcon={<AddIcon />}
-            >
+            <Button variant="contained" startIcon={<AddIcon />}>
               เพิ่มข่าวใหม่
             </Button>
           </Link>
@@ -247,7 +245,13 @@ const NewsListComponent = (initValue: NewsListComponentProps) => {
         </div>
       </div>
 
-       {confirmModal && <ConfirmModal {...confirmModal} />}
+      <ConfirmModal
+        isOpen={openModal}
+        onClose={() => setOpenModal(false)}
+        onConfirm={handleDelete}
+        title={deleteNews?.title ?? ""}
+        type="delete"
+      />
     </div>
   );
 };

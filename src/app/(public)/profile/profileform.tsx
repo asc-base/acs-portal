@@ -9,7 +9,7 @@ import FacebookRoundedIcon from "@mui/icons-material/FacebookRounded";
 import LinkedInIcon from "@mui/icons-material/LinkedIn";
 import InstagramIcon from "@mui/icons-material/Instagram";
 import Image from "next/image";
-import { useForm, Controller } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { IStudent } from "@/core/domain/student";
 import { useAuthStore } from "@/store/auth";
 import { studentService } from "@/infra/container";
@@ -43,7 +43,6 @@ const ProfileForm = () => {
   const user = useAuthStore((state) => state.user);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [studentData, setStudentData] = useState<IStudent | null>(null);
-  const [projects, setProject] = useState<string[]>([]);
   const { handleSubmit, control, setValue } = useForm<FormData>({
     defaultValues: {
       github: studentData?.github || "",
@@ -59,10 +58,6 @@ const ProfileForm = () => {
 
   const { nickName, firstNameTh, firstNameEn, lastNameTh, lastNameEn } =
     studentData?.user ?? {};
-
-  const handleAddProject = () => {
-    setProject((prev) => [...prev, ""]);
-  };
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0] || null;
@@ -88,9 +83,9 @@ const ProfileForm = () => {
   return (
     <div className="w-full flex-col px-20 py-6">
       <h2 className="text-primary01 mb-4 font-bold">แก้ไขโปรไฟล์</h2>
-      <h3 className="text-primary01 font-bold text-xl">
+      <h3 className="text-primary01 text-xl font-bold">
         ข้อมูลส่วนตัว
-        <span className="text-red-500 text-sm font-bold ml-2">
+        <span className="ml-2 text-sm font-bold text-red-500">
           (หากต้องการแก้ไขติดต่อแอดมิน)
         </span>
       </h3>
@@ -118,7 +113,7 @@ const ProfileForm = () => {
                     src={
                       selectedFile
                         ? URL.createObjectURL(selectedFile)
-                        : studentData?.user?.imageUrl!
+                        : (studentData?.user?.imageUrl ?? "")
                     }
                     alt="Profile"
                     width={300}
@@ -127,13 +122,11 @@ const ProfileForm = () => {
                   />
                 )}
                 <div
-                  className={`flex items-center justify-center
-                    ${
-                      selectedFile || studentData?.user?.imageUrl
-                        ? "absolute inset-0 z-10 h-full w-full bg-black/40 opacity-0 transition-opacity duration-300 hover:opacity-100"
-                        : "relative h-full w-full opacity-100"
-                    }
-                  `}
+                  className={`flex items-center justify-center ${
+                    selectedFile || studentData?.user?.imageUrl
+                      ? "absolute inset-0 z-10 h-full w-full bg-black/40 opacity-0 transition-opacity duration-300 hover:opacity-100"
+                      : "relative h-full w-full opacity-100"
+                  } `}
                 >
                   <div className="flex items-center justify-center rounded-lg border border-gray-300 bg-white/70 px-6 py-3 shadow-sm backdrop-blur-sm">
                     <span className="text-base font-medium text-gray-700">
@@ -152,7 +145,6 @@ const ProfileForm = () => {
           {/* Personal Info */}
           <div className="text-neutral04 w-full">
             <div className="grid grid-cols-[1fr_auto_1fr] gap-y-6 text-base md:grid-cols-[max-content_24px_1fr]">
-              
               {/* Row 1: Student ID */}
               <div className="text-gray-500">รหัสนักศึกษา</div>
               <div className="text-center">:</div>
