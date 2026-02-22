@@ -25,7 +25,7 @@ interface AdminLoginLandingPageProps {
 
 export default function AdminLoginLandingPage({
   apiBase,
-}: AdminLoginLandingPageProps) {
+}: Readonly<AdminLoginLandingPageProps>) {
   const router = useRouter();
   const [showPwd, setShowPwd] = React.useState(false);
 
