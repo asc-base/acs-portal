@@ -295,31 +295,31 @@ const StudentTableComponents = ({
                     )}
                   </TableCell>
                   <TableCell
-                    align="center"
+                    align="left"
                     sx={{ borderBottom: "none", fontSize: 18 }}
                   >
                     {student.studentId}
                   </TableCell>
                   <TableCell
-                    align="center"
+                    align="left"
                     sx={{ borderBottom: "none", fontSize: 18 }}
                   >
                     {`${student.user?.firstNameTh || ""} ${student.user?.lastNameTh || ""}`}
                   </TableCell>
                   <TableCell
-                    align="center"
+                    align="left"
                     sx={{ borderBottom: "none", fontSize: 18 }}
                   >
                     {student.user?.nickName}
                   </TableCell>
                   <TableCell
-                    align="center"
+                    align="left"
                     sx={{ borderBottom: "none", fontSize: 18 }}
                   >
                     {student.user?.email}
                   </TableCell>
                   <TableCell
-                    align="center"
+                    align="left"
                     sx={{ borderBottom: "none", fontSize: 18 }}
                   >
                     <IconButton

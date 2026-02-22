@@ -236,41 +236,26 @@ const CourseTableComponents = ({
           <TableBody>
             {courses?.length > 0 ? (
               courses.map((course) => (
-                <TableRow key={course.id}>
-                  <TableCell
-                    align="center"
-                    sx={{ borderBottom: "none", fontSize: 18 }}
-                  >
-                    {course.courseId}
-                  </TableCell>
-                  <TableCell
-                    align="center"
-                    sx={{ borderBottom: "none", fontSize: 18, maxWidth: 320 }}
-                  >
+                <TableRow
+                  key={course.id}
+                  sx={{
+                    "& td": {
+                      verticalAlign: "top",
+                      borderBottom: "none",
+                      fontSize: 18,
+                    },
+                  }}
+                >
+                  <TableCell align="left">{course.courseId}</TableCell>
+                  <TableCell align="left" sx={{ maxWidth: 320 }}>
                     {course.courseNameEn}
                   </TableCell>
-                  <TableCell
-                    align="center"
-                    sx={{ borderBottom: "none", fontSize: 18, maxWidth: 320 }}
-                  >
+                  <TableCell align="left" sx={{ maxWidth: 320 }}>
                     {course.courseNameTh}
                   </TableCell>
-                  <TableCell
-                    align="center"
-                    sx={{ borderBottom: "none", fontSize: 18 }}
-                  >
-                    {course.credits}
-                  </TableCell>
-                  <TableCell
-                    align="center"
-                    sx={{ borderBottom: "none", fontSize: 18 }}
-                  >
-                    {course.typeCourse.name}
-                  </TableCell>
-                  <TableCell
-                    align="center"
-                    sx={{ borderBottom: "none", fontSize: 18, pr: 4 }}
-                  >
+                  <TableCell align="left">{course.credits}</TableCell>
+                  <TableCell align="left">{course.typeCourse.name}</TableCell>
+                  <TableCell align="left" sx={{ pr: 4 }}>
                     <IconButton
                       color="primary"
                       size="small"
