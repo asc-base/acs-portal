@@ -102,7 +102,7 @@ const HomePage = ({
         header="สาขาวิทยาการคอมพิวเตอร์ประยุกต์"
         description="คณะวิทยาศาสตร์ ภาควิชาคณิตศาสตร์/มหาวิทยาลัยเทคโนโลยีพระจอมเกล้าธนบุรี"
       />
-      <div className="container mx-auto my-2.5 px-3.5 py-4">
+      <div className="container mx-auto my-2.5 px-6 py-4">
         <div className="flex flex-col gap-y-6">
           {(showActivitySection || showAnnouncementSection) && (
             <div className="flex flex-col-reverse gap-x-6 gap-y-6 md:grid md:grid-cols-2">

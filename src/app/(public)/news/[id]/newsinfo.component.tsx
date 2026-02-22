@@ -19,7 +19,7 @@ const NewsInfoComponent = ({ newsInfo, recommendNews }: NewsInfoProps) => {
   })} ${new Date(newsInfo.startDate).getFullYear() + 543}`;
 
   return (
-    <div className="px container mx-auto px-8 py-5">
+    <div className="container mx-auto px-8 py-5">
       <Breadcrumbs aria-label="breadcrumb" separator=">>" className="mb-4">
         <Link href="/">หน้าหลัก</Link>
         <Link
@@ -45,7 +45,7 @@ const NewsInfoComponent = ({ newsInfo, recommendNews }: NewsInfoProps) => {
               fill
               loading="lazy"
               sizes="100vw"
-              className="relative z-10 mt-3 rounded-xl object-cover"
+              className="relative mt-3 rounded-xl object-cover"
               onLoadingComplete={(img) => {
                 const skeleton = img.parentElement?.querySelector(
                   "[data-skeleton]",

@@ -60,7 +60,7 @@ const sidebarItems = [
 export const EdgeSidebarAdmin = ({ username }: { username: string }) => {
   const pathName = usePathname();
   return (
-    <aside className="bg-neutral01 flex h-full w-full flex-col shadow-2xl">
+    <aside className="bg-neutral01 flex h-full w-full flex-col shadow-lg">
       <div>
         <div className="flex items-center gap-x-4 px-8 py-4">
           <AccountCircleRoundedIcon

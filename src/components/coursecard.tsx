@@ -32,7 +32,7 @@ const CourseCard: React.FC<Course> = ({
         justifyContent="space-between"
         alignItems="flex-start"
         onClick={() => setOpen((prev) => !prev)}
-        sx={{ cursor: "pointer" }}
+        sx={{ backgroundColor: "gray", cursor: "pointer" }}
       >
         <h2>
           {courseId} {courseNameEn}
