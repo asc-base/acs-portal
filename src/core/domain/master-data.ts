@@ -2,7 +2,7 @@ export interface MasterData {
   majorPositions: Position[];
   types: IType[];
   roles: Role[];
-  typeCourses: EducationLevel[];
+  typeCourses: TypeCourse[];
   listTypes: IType[];
   educationLevels: EducationLevel[];
   academicPositions: Position[];
@@ -39,7 +39,7 @@ export interface IType {
 
 export interface TypeCourse {
   id: number;
-  name: string;
+  type: string;
   description: string;
   createdDate: Date;
   updatedDate: Date;

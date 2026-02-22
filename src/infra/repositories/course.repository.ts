@@ -27,16 +27,16 @@ export class CourseRepository implements ICourseRepository {
       params.append("prerequisite", String(query.prerequisite));
     if (query.curriculumId !== undefined)
       params.append("curriculumId", query.curriculumId.toString());
-    if (query.typecourseId !== undefined)
-      params.append("typecourseId", query.typecourseId.toString());
+    if (query.typeCourseId !== undefined)
+      params.append("typeCourseId", query.typeCourseId.toString());
     if (query.search !== undefined)
       params.append("search", query.search.toString());
+    if (query.orderBy !== undefined)
+      params.append("orderBy", query.orderBy.toString());
     if (query.sortBy !== undefined)
       params.append("sortBy", query.sortBy.toString());
-    if (query.sortOrder !== undefined)
-      params.append("sortOrder", query.sortOrder.toString());
 
-    const url = `/v1/course?${params.toString()}`;
+    const url = `/v1/courses?${params.toString()}`;
 
     const response = await this.http.get<ApiResponse<Pageable<ICourse>>>(url);
     return response;
@@ -44,7 +44,7 @@ export class CourseRepository implements ICourseRepository {
 
   async createCourse(data: ICreateCourse): Promise<ApiResponse<ICourse>> {
     const response = await this.http.post<ApiResponse<ICourse>>(
-      `/v1/course`,
+      `/v1/courses`,
       data,
     );
     return response;
@@ -52,7 +52,7 @@ export class CourseRepository implements ICourseRepository {
 
   async getCourseById(id: number): Promise<ApiResponse<ICourse> | null> {
     const response = await this.http.get<ApiResponse<ICourse>>(
-      `/v1/course/${id}`,
+      `/v1/courses/${id}`,
     );
     return response;
   }
@@ -62,7 +62,7 @@ export class CourseRepository implements ICourseRepository {
     data: IUpdateCourse,
   ): Promise<ApiResponse<ICourse>> {
     const response = await this.http.patch<ApiResponse<ICourse>>(
-      `/v1/course/${id}`,
+      `/v1/courses/${id}`,
       data,
     );
     return response;
@@ -70,7 +70,7 @@ export class CourseRepository implements ICourseRepository {
 
   async deleteCourse(id: number): Promise<ApiResponse<ICourse>> {
     const response = await this.http.delete<ApiResponse<ICourse>>(
-      `/v1/course/${id}`,
+      `/v1/courses/${id}`,
     );
     return response;
   }

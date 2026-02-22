@@ -17,7 +17,7 @@ const page = async ({ searchParams }: PageProps) => {
   const resolvedSearchParams = await searchParams;
   const { rows, totalRecords } = await courseService.getCourse({
     curriculumId: resolvedSearchParams.curriculumId,
-    typecourseId: resolvedSearchParams.typeCourseId,
+    typeCourseId: resolvedSearchParams.typeCourseId,
   });
 
   return (
@@ -25,8 +25,6 @@ const page = async ({ searchParams }: PageProps) => {
       course={rows}
       totalRecords={totalRecords}
       typeCourseName={resolvedSearchParams.typeCourseName}
-      curriculumId={resolvedSearchParams.curriculumId}
-      typeCourseId={resolvedSearchParams.typeCourseId}
     />
   );
 };
