@@ -4,15 +4,15 @@ import Image from "next/image";
 import Link from "next/link";
 
 export type ClassbookCardProps = {
-  image: string;
-  classof: number;
+  thumbnailURL: string;
+  classof: string;
   firstYearAcademic: string;
   priority?: boolean;
   href?: string; // ทำให้การ์ดเป็นลิงก์
 };
 
 export function ClassbookCard({
-  image,
+  thumbnailURL,
   classof,
   firstYearAcademic,
   priority,
@@ -28,7 +28,7 @@ export function ClassbookCard({
       {/* รูปภาพ */}
       <div className="relative aspect-[16/9]">
         <Image
-          src={image}
+          src={thumbnailURL}
           alt={`รุ่นที่ ${classof} ปีการศึกษา ${firstYearAcademic}`}
           fill
           priority={priority}

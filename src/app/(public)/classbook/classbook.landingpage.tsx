@@ -26,11 +26,11 @@ const ClassBookLandingPage: FC<PageProps> = ({ classBooks }) => {
         {classBooks.map((item, i) => (
           <Link
             key={item.id}
-            href={`/students?page=1&pageSize=12&classBookId=${item.id}`}
+            href={`/students?page=1&pageSize=12&classBookID=${item.id}`}
           >
             <ClassbookCard
               {...item}
-              classof={String(item.classof)}
+              classof={item.classof}
               priority={i < 2}
             />
           </Link>
