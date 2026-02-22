@@ -6,45 +6,29 @@ import {
   CardMedia,
   CardActions,
   Button,
-  IconButton,
   AvatarGroup,
   Avatar,
 } from "@mui/material";
 import VisibilityOutlinedIcon from "@mui/icons-material/VisibilityOutlined";
 import DeleteOutlineOutlinedIcon from "@mui/icons-material/DeleteOutlineOutlined";
-import EditIcon from "@mui/icons-material/Edit";
 import { AdminCardProps } from "@/interface/admincard";
 import { ICurriculum } from "@/core/domain/curriculum";
 import { IClassBook } from "@/core/domain/classbook";
 import { IProject } from "@/core/domain/project";
 import { INews } from "@/core/domain/news";
 
-const CurriculumContent: FC<{
-  curriculum: ICurriculum;
-  onEdit?: () => void;
-}> = ({ curriculum, onEdit }) => (
-  <div className="flex items-start justify-between">
-    <h3 className="mt-1 font-bold">
+const CurriculumContent: FC<{ curriculum: ICurriculum }> = ({ curriculum }) => (
+    <h3 className="mt-1 font-bold text-start">
       {curriculum.title} พ.ศ. {curriculum.year}
     </h3>
-    <IconButton onClick={onEdit}>
-      <EditIcon className="text-primary03 cursor-pointer" />
-    </IconButton>
-  </div>
 );
 
-const ClassBookContent: FC<{ classbook: IClassBook; onEdit?: () => void }> = ({
-  classbook,
-  onEdit,
-}) => (
-  <div className="flex items-start justify-between">
+const ClassBookContent: FC<{ classbook: IClassBook }> = ({ classbook }) => (
+  <div className="flex items-start">
     <div>
       <h3 className="mb-2 font-bold">รุ่น {classbook.classof}</h3>
       <h6>ปีการศึกษา {classbook.firstYearAcademic}</h6>
     </div>
-    <IconButton onClick={onEdit}>
-      <EditIcon className="text-primary03 cursor-pointer" />
-    </IconButton>
   </div>
 );
 
@@ -85,21 +69,21 @@ const ProjectContent: FC<{ project: IProject }> = ({ project }) => {
 const NewsContent: FC<{ news: INews }> = ({ news }) => {
   return (
     <div className="flex flex-col items-start gap-1">
-      <h4 className="line-clamp-2 font-bold">{news.title}</h4>
-      <p>
+      <h3 className="line-clamp-2 font-bold">{news.title}</h3>
+      <h6>
         {" "}
         {new Date(news.startDate).toLocaleDateString("th-TH", {
           year: "numeric",
           month: "long",
           day: "numeric",
         })}
-      </p>
+      </h6>
     </div>
   );
 };
 
 export const AdminCard: FC<AdminCardProps> = (props) => {
-  const { type, data, onView, onDelete, onEdit } = props;
+  const { type, data, onView, onDelete } = props;
   let image = "";
   let alt = "";
 
@@ -138,10 +122,10 @@ export const AdminCard: FC<AdminCardProps> = (props) => {
 
       <CardContent className="flex-grow !px-7">
         {type === "curriculum" && (
-          <CurriculumContent curriculum={data} onEdit={onEdit} />
+          <CurriculumContent curriculum={data}/>
         )}
         {type === "classBook" && (
-          <ClassBookContent classbook={data} onEdit={onEdit} />
+          <ClassBookContent classbook={data}/>
         )}
         {type === "project" && <ProjectContent project={data} />}
         {type === "news" && <NewsContent news={data} />}
