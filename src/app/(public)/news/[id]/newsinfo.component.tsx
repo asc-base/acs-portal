@@ -12,8 +12,6 @@ interface NewsInfoProps {
 }
 
 const NewsInfoComponent = ({ newsInfo, recommendNews }: NewsInfoProps) => {
-  console.log("client", newsInfo);
-
   const date = `${new Date(newsInfo.startDate).getDate()} ${new Date(
     newsInfo.startDate,
   ).toLocaleString("th-TH", {
@@ -25,9 +23,9 @@ const NewsInfoComponent = ({ newsInfo, recommendNews }: NewsInfoProps) => {
       <Breadcrumbs aria-label="breadcrumb" separator=">>" className="mb-4">
         <Link href="/">หน้าหลัก</Link>
         <Link
-          href={`/news?category=${newsInfo.category.name}&page=1&pageSize=12`}
+          href={`/news?category=${newsInfo.tag.name}&page=1&pageSize=12&tagId=${newsInfo.tag.id}`}
         >
-          {newsInfo.category.name}
+          {newsInfo.tag.name}
         </Link>
         {newsInfo.title && <span>{newsInfo.title}</span>}
       </Breadcrumbs>
@@ -73,7 +71,7 @@ const NewsInfoComponent = ({ newsInfo, recommendNews }: NewsInfoProps) => {
           ข่าวที่น่าสนใจอื่นๆ
         </h3>
         <div className="grid grid-cols-1 justify-center justify-items-center gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {recommendNews.map((news) => (
+          {recommendNews?.map((news) => (
             <Link key={news.id} href={`/news/${news.id}`}>
               <NewsCard news={news} />
             </Link>

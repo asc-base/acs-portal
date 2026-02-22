@@ -26,14 +26,16 @@ export class NewsService {
   async getNews(
     page: number,
     pageSize: number,
-    title?: string,
-    category?: string,
+    tagId?: number,
+    orderBy?:string,
+    sortBy?:string,
   ): Promise<Pageable<INews>> {
     const response = await this.newsRepository.getNews(
       page,
       pageSize,
-      title,
-      category,
+      tagId,
+      orderBy,
+      sortBy,
     );
     return response.data;
   }
@@ -63,14 +65,18 @@ export class NewsService {
   }
 
   async getNewsInformations(
-    type: string,
     page: number,
     pageSize: number,
-  ): Promise<INewsInformation[]> {
+    tagId?: number,
+    orderBy?:string,
+    sortBy?:string,
+  ): Promise<Pageable<INewsInformation>> {
     const response = await this.newsRepository.getNewsInformations(
-      type,
       page,
       pageSize,
+      tagId,
+      orderBy,
+      sortBy,
     );
     return response.data;
   }
