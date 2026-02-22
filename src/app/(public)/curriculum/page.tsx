@@ -1,7 +1,6 @@
 import React, { FC } from "react";
-import { curriculumService } from "@/infra/container";
+import { curriculumService, masterDataService } from "@/infra/container";
 import CurriculumListComponents from "./curriculum.landingpage";
-import { masterDataService } from "@/infra/container";
 import { QueryCurriculum } from "@/core/domain/curriculum";
 
 // Force this route to be dynamic to avoid build-time prerender fetches
@@ -18,18 +17,18 @@ const Page: FC<CurriculumPageProps> = async ({ searchParams }) => {
   const query: QueryCurriculum = {
     page: search.page || 1,
     pageSize: search.pageSize || 2,
-    sortBy: search.sortBy || "year",
-    sortOrder: search.sortOrder || "desc",
+    orderBy: search.orderBy || "year",
+    sortBy: search.sortBy || "desc",
   };
 
   const { rows } = await curriculumService.getCurriculum(query);
 
-  const typeCourseResponse = await masterDataService.getMasterDataTypeCourse();
+  const { typeCourses } = await masterDataService.getMasterData();
 
   return (
     <CurriculumListComponents
       curriculum={rows}
-      typeCourse={typeCourseResponse}
+      typeCourse={typeCourses}
     />
   );
 };

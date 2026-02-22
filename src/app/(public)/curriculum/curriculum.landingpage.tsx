@@ -46,7 +46,7 @@ const CurriculumListComponents = ({
   }
 
   return (
-    <div className="container mx-auto px-16 py-5">
+    <div className="container mx-auto px-10 py-5">
       <div className="flex flex-col gap-2">
         <Breadcrumbs aria-label="breadcrumb" separator=">>" className="mb-4">
           <Link href="/">หน้าหลัก</Link>
@@ -87,7 +87,7 @@ const CurriculumListComponents = ({
                   <TypeCourseComponent
                     curriculumId={focusCurriculum?.id}
                     typeCourseId={item.id}
-                    name={item.name}
+                    type={item.type}
                     description={item.description}
                     index={idx}
                   />
