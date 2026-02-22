@@ -21,7 +21,7 @@ const NewsInfoComponent = ({ newsInfo, recommendNews }: NewsInfoProps) => {
   })} ${new Date(newsInfo.startDate).getFullYear() + 543}`;
 
   return (
-    <div className="px container mx-auto px-8 py-5">
+    <div className="container mx-auto px-8 py-5">
       <Breadcrumbs aria-label="breadcrumb" separator=">>" className="mb-4">
         <Link href="/">หน้าหลัก</Link>
         <Link
@@ -47,7 +47,7 @@ const NewsInfoComponent = ({ newsInfo, recommendNews }: NewsInfoProps) => {
               fill
               loading="lazy"
               sizes="100vw"
-              className="relative z-10 mt-3 object-cover rounded-xl"
+              className="relative mt-3 rounded-xl object-cover"
               onLoadingComplete={(img) => {
                 const skeleton = img.parentElement?.querySelector(
                   "[data-skeleton]",
@@ -63,13 +63,15 @@ const NewsInfoComponent = ({ newsInfo, recommendNews }: NewsInfoProps) => {
         <div className="flex w-full flex-col gap-4 py-5 lg:py-8">
           <div>
             <h4>{date}</h4>
-            <h2 className="font-bold lg:text-4xl lg:mt-2">{newsInfo?.title}</h2>
+            <h2 className="font-bold lg:mt-2 lg:text-4xl">{newsInfo?.title}</h2>
           </div>
           <h3 className="break-words whitespace-pre-wrap">{newsInfo.detail}</h3>
         </div>
       </div>
       <div className="flex flex-col gap-4 pb-8">
-        <h3 className="text-accent04 font-bold lg:text-2xl">ข่าวที่น่าสนใจอื่นๆ</h3>
+        <h3 className="text-accent04 font-bold lg:text-2xl">
+          ข่าวที่น่าสนใจอื่นๆ
+        </h3>
         <div className="grid grid-cols-1 justify-center justify-items-center gap-4 md:grid-cols-2 lg:grid-cols-3">
           {recommendNews.map((news) => (
             <Link key={news.id} href={`/news/${news.id}`}>
