@@ -140,6 +140,7 @@ const ClassBookListComponents = ({
       const params = new URLSearchParams(searchParams.toString());
       if (watchedSearch) {
         params.set("search", watchedSearch);
+        params.set("page", "1");
       } else {
         params.delete("search");
       }
@@ -169,7 +170,7 @@ const ClassBookListComponents = ({
         </Alert>
       </Snackbar>
       <div className="mb-6 flex items-center justify-between">
-        <h3 className="text-lg font-bold">ข้อมูลนักศึกษา</h3>
+        <h3 className="font-bold">ข้อมูลนักศึกษา</h3>
 
         <div className="flex items-center gap-3">
           <RHFTextField
@@ -195,11 +196,10 @@ const ClassBookListComponents = ({
             renderValue={() => "จัดเรียงตาม"}
             sx={{
               "& .MuiOutlinedInput-notchedOutline": {
-                borderColor: "var(--color-neutral04)",
+                borderColor: "var(--color-neutral03)",
               },
               py: 0.5,
               width: "180px",
-              height: "44px",
               color: "var(--color-neutral04)",
             }}
             IconComponent={ExpandMoreIcon}
@@ -239,7 +239,7 @@ const ClassBookListComponents = ({
           </Select>
 
           <Link href="/admin/classbook/create">
-            <Button variant="contained">
+            <Button variant="contained" size="large">
               <AddIcon />
               เพิ่มรุ่นนักศึกษา
             </Button>
@@ -254,7 +254,6 @@ const ClassBookListComponents = ({
               key={classbook.id}
               type="classBook"
               data={classbook}
-              onEdit={() => router.push(`/admin/students/edit/${classbook.id}`)}
               onView={() =>
                 router.push(
                   `/admin/students?page=1&pageSize=10&classBookId=${classbook.id}`,
