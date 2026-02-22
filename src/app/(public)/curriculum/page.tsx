@@ -27,12 +27,10 @@ const Page: FC<CurriculumPageProps> = async ({ searchParams }) => {
   const typeCourseResponse = await masterDataService.getMasterDataTypeCourse();
 
   return (
-    <div className="container mx-auto px-16 py-5">
-      <CurriculumListComponents
-        curriculum={rows}
-        typeCourse={typeCourseResponse}
-      />
-    </div>
+    <CurriculumListComponents
+      curriculum={rows}
+      typeCourse={typeCourseResponse}
+    />
   );
 };
 
