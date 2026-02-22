@@ -89,17 +89,17 @@ const MenuBar = () => {
         {
           id: 1,
           label: "ข่าวประชาสัมพันธ์",
-          href: "/news?category=ข่าวประชาสัมพันธ์&page=1&pageSize=12",
+          href: "/news?category=ข่าวประชาสัมพันธ์&page=1&pageSize=12&tagId=16",
         },
         {
           id: 2,
           label: "ความสำเร็จนักศึกษา",
-          href: "/news?category=ความสำเร็จนักศึกษา&page=1&pageSize=12",
+          href: "/news?category=ความสำเร็จนักศึกษา&page=1&pageSize=12&tagId=17",
         },
         {
           id: 3,
           label: "งานกิจกรรมนักศึกษา",
-          href: "/news?category=งานกิจกรรมนักศึกษา&page=1&pageSize=12",
+          href: "/news?category=งานกิจกรรมนักศึกษา&page=1&pageSize=12&tagId=18",
         },
       ],
     },

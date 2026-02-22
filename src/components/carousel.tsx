@@ -38,7 +38,7 @@ export const Carousel: FC<CarouselProps> = ({
               <Link href={`/news/${item?.news?.id}`}>
                 <Image
                   className="object-cover"
-                  src={item?.image}
+                  src={item?.thumbnailURL}
                   alt={`Slide ${index + 1}`}
                   fill
                   sizes="(max-width: 640px) 100vw, (max-width: 1280px) 100vw, 1152px"

@@ -151,6 +151,7 @@ const HomePage = ({
               handlePrevNews={handlePrevNewsActivity}
               activeIndex={newsActivityActive}
               handleSetActiveIndex={handleSetNewsActivity}
+              tagId={16}
             >
               {Array.from(
                 { length: Math.min(3, initNewsActivity.length) },
@@ -189,6 +190,7 @@ const HomePage = ({
               handlePrevNews={handlePrevNewsComplete}
               activeIndex={newsCompleteActive}
               handleSetActiveIndex={handleSetNewsComplete}
+              tagId={17}
             >
               {Array.from(
                 { length: Math.min(3, initNewsComplete.length) },
@@ -227,6 +229,7 @@ const HomePage = ({
               handlePrevNews={handlePrevNewsActivityStudent}
               activeIndex={newsActivityStudentActive}
               handleSetActiveIndex={handleSetNewsActivityStudent}
+              tagId={18}
             >
               {Array.from(
                 { length: Math.min(3, initNewsActivityStudent.length) },

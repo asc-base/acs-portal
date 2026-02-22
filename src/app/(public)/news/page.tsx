@@ -1,10 +1,10 @@
 import React from "react";
 import { newsService } from "@/infra/container";
 import NewsListComponents from "./news.list.components";
-import { queryNews } from "@/core/domain/news";
+import { QueryNews } from "@/core/domain/news";
 
 interface PageProps {
-  searchParams: Promise<queryNews>;
+  searchParams: Promise<QueryNews>;
 }
 
 const page = async ({ searchParams }: PageProps) => {
@@ -12,11 +12,8 @@ const page = async ({ searchParams }: PageProps) => {
   const { rows, totalRecords, pageSize, page } = await newsService.getNews(
     resolvedSearchParams.page || 1,
     resolvedSearchParams.pageSize || 12,
-    "",
-    resolvedSearchParams.category || "",
+    resolvedSearchParams.tagId,
   );
-
-  console.log(resolvedSearchParams.category);
 
   return (
     <NewsListComponents

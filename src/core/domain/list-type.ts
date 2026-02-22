@@ -1,6 +1,5 @@
-export interface Category {
+export interface Tag {
   id: number;
   name: string;
-  createdDate: Date;
-  updatedDate: Date;
+  tagsGroupsId: number;
 }
