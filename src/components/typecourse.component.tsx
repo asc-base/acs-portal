@@ -28,7 +28,7 @@ export const TypeCourseComponent: FC<TypeCourseProps> = ({
 }) => {
   return (
     <div className="mb-10 flex flex-col items-center justify-center text-center">
-      <div className="h-[120px] w-[120px]">
+      <div className="relative h-16 w-16 lg:h-21 lg:w-21">
         <Image
           src={typeCourseImage[index].src}
           alt={name}
