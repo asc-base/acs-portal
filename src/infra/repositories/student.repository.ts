@@ -18,7 +18,7 @@ export class StudentRepository implements IStudentRepository {
     const searchParams = new URLSearchParams({
       page: query.page?.toString() || "1",
       pageSize: query.pageSize?.toString() || "10",
-      classBookId: query.classBookId.toString(),
+      classBookID: query.classBookID.toString(),
     });
     if (query.search) {
       searchParams.append("search", query.search);
@@ -28,8 +28,8 @@ export class StudentRepository implements IStudentRepository {
       searchParams.append("sortBy", query.sortBy);
     }
 
-    if (query.sortOrder) {
-      searchParams.append("sortOrder", query.sortOrder);
+    if (query.orderBy) {
+      searchParams.append("orderBy", query.orderBy);
     }
 
     const url = `/v1/students?${searchParams.toString()}`;
