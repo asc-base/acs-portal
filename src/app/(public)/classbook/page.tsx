@@ -13,8 +13,8 @@ export const metadata = {
 
 const Page = async () => {
   const { rows } = await classBookService.getClassBooks({
-    sortBy: "createdAt",
-    sortOrder: "desc",
+    orderBy: "createdAt",
+    sortBy: "desc",
   });
 
   return (

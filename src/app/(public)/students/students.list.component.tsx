@@ -48,7 +48,7 @@ const StudentsListComponent = ({
   return (
     <div>
       <HeroCard
-        image={classBook?.image ? classBook.image : classbookImage}
+        image={classBook?.thumbnailURL ? classBook.thumbnailURL : classbookImage}
         header={`รุ่น ${classBook?.classof} ปีการศึกษา ${classBook?.firstYearAcademic}`}
       />
       <div className="container mx-auto px-4 py-6 lg:py-8 md:px-8 xl:px-8">
@@ -98,6 +98,7 @@ const StudentsListComponent = ({
           student={selectedStudent}
           Open={true}
           onClose={handleClose}
+          classBook={classBook}
         />
       )}
     </div>

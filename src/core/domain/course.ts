@@ -9,17 +9,17 @@ export interface ITypeCourse {
 
 export interface ICourse {
   id: number;
-  courseId: string;
+  courseCode: string;
   courseNameTh: string;
   courseNameEn: string;
   credits: string;
-  courseDetail: string;
+  detail: string;
   createdBy: number;
   updatedBy: number;
   createdDate: Date;
   updatedDate: Date;
   curriculum: ICurriculum;
-  preCourses: ICourse[];
+  // preCourses: ICourse[];
   typeCourse: TypeCourse;
 }
 
@@ -28,10 +28,10 @@ export interface QueryCourse {
   pageSize?: number;
   prerequisite?: boolean;
   curriculumId: number;
-  typecourseId?: number;
+  typeCourseId?: number;
   search?: string;
-  sortBy?: string;
-  sortOrder?: "asc" | "desc";
+  orderBy?: string;
+  sortBy?: "asc" | "desc";
 }
 
 export interface ICreateCourse {
