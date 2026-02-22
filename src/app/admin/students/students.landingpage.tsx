@@ -82,6 +82,7 @@ const StudentsLandingpage = ({
       const params = new URLSearchParams(searchParams.toString());
       if (watchedSearch) {
         params.set("search", watchedSearch);
+        params.set("page", "1");
       } else {
         params.delete("search");
       }
