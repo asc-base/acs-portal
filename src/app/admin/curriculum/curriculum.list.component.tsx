@@ -114,16 +114,17 @@ const CurriculumListComponents = ({
       const params = new URLSearchParams(searchParams.toString());
       if (watchedSearch) {
         params.set("search", watchedSearch);
+        params.set("page", "1");
       } else {
         params.delete("search");
       }
-      params.set("page", "1");
       const newSearch = params.toString();
-      router.replace(`${pathname}?${newSearch}`, { scroll: false });
+      if (searchParams.toString() !== newSearch) {
+        router.push(`${pathname}?${newSearch}`, { scroll: false });
+      }
     }, 500);
     return () => clearTimeout(delayDebounce);
   }, [pathname, router, searchParams, watchedSearch]);
-
   return (
     <div className="min-h-screen px-8 py-5">
       <Snackbar
@@ -141,7 +142,7 @@ const CurriculumListComponents = ({
         </Alert>
       </Snackbar>
       <div className="mb-6 flex items-center justify-between">
-        <h3 className="text-lg font-bold">จัดการหลักสูตร</h3>
+        <h3 className="font-bold">จัดการหลักสูตร</h3>
 
         <div className="flex items-center gap-4">
           <RHFTextField
@@ -160,7 +161,7 @@ const CurriculumListComponents = ({
           />
 
           <Link href="/admin/curriculum/create">
-            <Button variant="contained">
+            <Button variant="contained" size="large">
               <AddIcon />
               เพิ่มข้อมูลใหม่
             </Button>{" "}
@@ -175,9 +176,6 @@ const CurriculumListComponents = ({
               key={curriculum.id}
               type="curriculum"
               data={curriculum}
-              onEdit={() =>
-                router.push(`/admin/curriculum/edit/${curriculum.id}`)
-              }
               onView={() =>
                 router.push(
                   `/admin/courses?prerequisite=false&page=1&pageSize=10&curriculumId=${curriculum.id}`,
