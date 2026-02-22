@@ -15,7 +15,7 @@ const ProfessorsListComponent = ({
   professors,
 }: ProfessorsListComponentsProps) => {
   return (
-    <div className="container mx-auto px-10 py-6 lg:py-8 md:px-8">
+    <div className="container mx-auto px-10 py-6 lg:py-8 lg:px-16">
       <div className="flex flex-col items-start justify-start gap-2">
         <Breadcrumbs aria-label="breadcrumb" separator=">>">
           <Link href="/">หน้าหลัก</Link>
@@ -30,7 +30,7 @@ const ProfessorsListComponent = ({
           <p className="text-gray-500">ไม่มีข้อมูลอาจารย์และเจ้าหน้าที่</p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-4 justify-items-center">
+        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 justify-items-center">
           {professors.map((item) => (
             <Link key={item.id} href={`/professors/${item.id}`}>
               <ProfessorCard {...item} />
