@@ -149,7 +149,7 @@ const NewsListComponent = (initValue: NewsListComponentProps) => {
   );
 
   return (
-    <div className="min-h-screen px-8 py-5">
+    <div className="min-h-screen p-6">
       <Snackbar
         anchorOrigin={{ vertical: "top", horizontal: "right" }}
         open={isError}
@@ -166,7 +166,7 @@ const NewsListComponent = (initValue: NewsListComponentProps) => {
       </Snackbar>
 
       <div className="mb-6 flex items-center justify-between">
-        <h3 className="text-lg font-bold">จัดการข่าว</h3>
+        <h3 className="font-bold">จัดการข่าว</h3>
 
         <div className="flex items-center gap-3">
           <RHFTextField
@@ -191,7 +191,7 @@ const NewsListComponent = (initValue: NewsListComponentProps) => {
             onChange={handleFilterCategory}
             renderValue={(value) => (value === "all" ? "ทั้งหมด" : value)}
             IconComponent={ExpandMoreIcon}
-            sx={{ width: 200, height: 44 }}
+            sx={{ width: 200 }}
           >
             <MenuItem value="all">
               ทั้งหมด
@@ -215,7 +215,7 @@ const NewsListComponent = (initValue: NewsListComponentProps) => {
           </Select>
 
           <Link href="/admin/news/create">
-            <Button variant="contained" startIcon={<AddIcon />}>
+            <Button variant="contained" startIcon={<AddIcon />} size="large">
               เพิ่มข่าวใหม่
             </Button>
           </Link>
@@ -241,17 +241,13 @@ const NewsListComponent = (initValue: NewsListComponentProps) => {
             page={initValue.page}
             count={Math.ceil(initValue.totalRecords / initValue.pageSize)}
             onChange={(_, currentPage) => handleNextPage(currentPage)}
+            color="primary"
+            size="large"
           />
         </div>
       </div>
 
-      <ConfirmModal
-        isOpen={openModal}
-        onClose={() => setOpenModal(false)}
-        onConfirm={handleDelete}
-        title={deleteNews?.title ?? ""}
-        type="delete"
-      />
+       {confirmModal && <ConfirmModal {...confirmModal} />}
     </div>
   );
 };

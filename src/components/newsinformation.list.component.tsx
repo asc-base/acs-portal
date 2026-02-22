@@ -26,14 +26,14 @@ const NewsInformationListComponent = ({
         </div>
         {type === "newshighlight" ? (
           <Link href={"/admin/newsinformation/newshighlight/create"}>
-            <Button variant="contained" startIcon={<AddIcon />}>
-              ข่าว Highlight
+            <Button variant="contained" startIcon={<AddIcon />} size="large">
+              เพิ่มข่าว Highlight
             </Button>
           </Link>
         ) : (
           <Link href={"/admin/newsinformation/announcement/create"}>
-            <Button variant="contained" startIcon={<AddIcon />}>
-              ข่าวประชาสัมพันธ์
+            <Button variant="contained" startIcon={<AddIcon />} size="large">
+              เพิ่มข่าวประชาสัมพันธ์
             </Button>
           </Link>
         )}
