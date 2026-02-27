@@ -133,8 +133,7 @@ const CreateNewsForm = ({ apiBase, tags }: CraeteNewsProps) => {
 
         const response = await newsService.createNews(payload, selectedFile);
 
-        if (!response) setIsError(true);
-        else {
+        if (response) {
           setConfirmModal({
             isOpen: true,
             type: "success",
@@ -144,6 +143,8 @@ const CreateNewsForm = ({ apiBase, tags }: CraeteNewsProps) => {
               router.push(`/admin/news?page=1&pageSize=9&category=&title=`);
             },
           });
+        } else {
+          setIsError(true);
         }
       } catch (error) {
         console.log(error);
