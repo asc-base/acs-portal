@@ -1,7 +1,5 @@
 import { IUser } from "./user";
 import { Position } from "./master-data";
-import { IUpdateExpertField } from "./expert-field";
-import { IUpdateEducation, INewEducation } from "./education";
 
 export interface IProfessor {
   id: number;
@@ -25,12 +23,8 @@ export interface IUpdateProfessor {
   firstNameEn: string;
   lastNameEn: string;
   mail: string;
-  newExpertFields: string[];
-  updatedExpertFields: IUpdateExpertField[];
-  deleteExpertFieldsIds: number[];
-  newEducation: INewEducation[];
-  updatedEducation: IUpdateEducation[];
-  deleteEducationIds: number[];
+  expertFields?: string;
+  educations?: string;
 }
 
 export interface QueryProfessor {
@@ -44,9 +38,9 @@ export interface QueryProfessor {
 
 export interface ICreateProfessor {
   academicPositionId: number;
-  education?: INewEducation[];
+  education?: string;
   email: string;
-  expertFields?: string[];
+  expertFields?: string;
   firstNameEn?: string;
   firstNameTh: string;
   image?: string;

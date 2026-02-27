@@ -1,8 +1,10 @@
 export interface IClassBook {
+  image: string;
   id: number;
   firstYearAcademic: string;
   thumbnailURL: string;
   classof: string;
+  curriculumId: number;
 }
 
 export interface QueryClassBook {

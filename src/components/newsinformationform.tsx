@@ -23,7 +23,7 @@ import { styled } from "@mui/material/styles";
 interface NewsInformationFormProps {
   type: string;
   apiBase: string;
-  typeId: number;
+  tagId: number;
 }
 
 type NewsItem = {
@@ -53,7 +53,7 @@ const VisuallyHiddenInput = styled("input")({
 export const NewsInformationForm = ({
   type,
   apiBase,
-  typeId,
+  tagId,
 }: NewsInformationFormProps) => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [croppedFile, setCroppedFile] = useState<File | null>(null);
@@ -103,7 +103,7 @@ export const NewsInformationForm = ({
       const formData = new FormData();
       formData.append("image", data.image);
       formData.append("newsId", data.newsId.toString());
-      formData.append("typeId", typeId.toString());
+      formData.append("tagId", tagId.toString());
 
       const response = await newsService.upsertNewsInformation(formData);
 
@@ -141,10 +141,10 @@ export const NewsInformationForm = ({
     setOpen(false);
   };
 
-  const handleSearch = async (title: string) => {
+  const handleSearch = async ( search: string) => {
     setLoading(true);
     try {
-      const { rows } = await newsService.getNews(1, 10, title, "");
+      const { rows } = await newsService.getNews(1, 10, undefined, undefined, undefined, search);
       setOptions(rows);
     } finally {
       setLoading(false);

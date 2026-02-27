@@ -10,12 +10,11 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { IClassBook, IUpdateClassBook } from "@/core/domain/classbook";
 import { ICurriculum } from "@/core/domain/curriculum";
-import { ConfirmModal } from "@/components/modal/confirmModal";
+import { ConfirmModal, ConfirmModalProps } from "@/components/modal/confirmModal";
 import { ClassBookService } from "@/core/service/class-book.service";
 import { ClassBookRepository } from "@/infra/repositories/class-book.repository";
 import { CurriculumService } from "@/core/service/curriculum.service";
 import { CurriculumRepository } from "@/infra/repositories/curriculum.repository";
-import { ConfirmModalProps } from "@/components/modal/confirmModal";
 
 interface CurriculumFormProps {
   classBook: IClassBook;
@@ -56,7 +55,7 @@ export const ClassBookInfoComponent = ({
 
   const previewSrc = selectedFile
     ? URL.createObjectURL(selectedFile)
-    : classBook.image;
+    : classBook.thumbnailURL;
 
   const cuurriculumService = useMemo(() => {
     const curriculumRepository = new CurriculumRepository(apiBase);
@@ -144,8 +143,8 @@ export const ClassBookInfoComponent = ({
   useEffect(() => {
     const fetchCurriculums = async () => {
       const response = await cuurriculumService.getCurriculum({
-        sortBy: "year",
-        sortOrder: "desc",
+        orderBy: "year",
+        sortBy: "desc",
       });
       setCurriculums(response.rows);
     };

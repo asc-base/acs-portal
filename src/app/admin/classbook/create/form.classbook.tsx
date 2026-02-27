@@ -14,8 +14,7 @@ import { ICurriculum } from "@/core/domain/curriculum";
 import { ClassBookRepository } from "@/infra/repositories/class-book.repository";
 import { ClassBookService } from "@/core/service/class-book.service";
 import { useRouter } from "next/navigation";
-import { ConfirmModal } from "@/components/modal/confirmModal";
-import { ConfirmModalProps } from "@/components/modal/confirmModal";
+import { ConfirmModal, ConfirmModalProps } from "@/components/modal/confirmModal";
 
 interface FormClassbookProps {
   apiBase: string;
@@ -121,8 +120,8 @@ export const FormClassbook: FC<FormClassbookProps> = ({ apiBase }) => {
   useEffect(() => {
     const fetchCurriculums = async () => {
       const response = await cuurriculumService.getCurriculum({
-        sortBy: "year",
-        sortOrder: "desc",
+        orderBy: "year",
+        sortBy: "desc",
       });
       setCurriculums(response.rows);
     };

@@ -23,6 +23,7 @@ export class NewsRepository implements INewsRepository {
     tagId?: number,
     orderBy?:string,
     sortBy?:string,
+    search?: string,
   ): Promise<ApiResponse<Pageable<INews>>> {
     let url = `/v1/news/?page=${page}&pageSize=${pageSize}`;
 
@@ -36,6 +37,10 @@ export class NewsRepository implements INewsRepository {
 
     if (sortBy && sortBy !== "") {
       url += `&sortBy=${encodeURIComponent(sortBy)}`;
+    }
+
+    if (search && search !== "") {
+      url += `&search=${encodeURIComponent(search)}`;
     }
 
     const response = await this.http.get<ApiResponse<Pageable<INews>>>(url);

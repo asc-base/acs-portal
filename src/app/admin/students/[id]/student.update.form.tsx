@@ -30,7 +30,7 @@ const Schema = z.object({
   lastNameTh: z.string().min(1, "กรุณากรอกนามสกุลภาษาไทย"),
   firstNameEn: z.string().min(1, "กรุณากรอกชื่อภาษาอังกฤษ"),
   lastNameEn: z.string().min(1, "กรุณากรอกนามสกุลภาษาอังกฤษ"),
-  studentId: z
+  studentCode: z
     .string()
     .min(11, "กรุณากรอกรหัสนักศึกษา")
     .regex(/^[0-9]+$/, "รหัสนักศึกษาต้องเป็นตัวเลขเท่านั้น"),
@@ -98,13 +98,13 @@ export const StudentUpdateForm = ({
       lastNameTh: student.user.lastNameTh,
       firstNameEn: student.user.firstNameEn,
       lastNameEn: student.user.lastNameEn,
-      studentId: student.studentId,
+      studentCode: student.studentCode,
       nickname: student.user.nickName,
       email: student.user.email,
-      yearOfFirstAdmission: student.yearOfFirstAdmission || "",
-      yearOfCompletion: student.yearOfCompletion || "",
+      // yearOfFirstAdmission: student.yearOfFirstAdmission || "",
+      // yearOfCompletion: student.yearOfCompletion || "",
       facebook: student.facebook || undefined,
-      linkedin: student.linkin || undefined,
+      linkedin: student.linkedin || undefined,
       instagram: student.instragram || undefined,
       github: student.github || undefined,
       otherProjects: [{ value: "" }],
@@ -254,7 +254,7 @@ export const StudentUpdateForm = ({
           <div className="grid grid-cols-2 gap-x-4">
             <RHFTextField
               control={control}
-              name="studentId"
+              name="studentCode"
               label="รหัสนักศึกษา"
               fullWidth
               placeholder="ระบุรหัสนักศึกษา"

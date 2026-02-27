@@ -13,7 +13,8 @@ import { CourseService } from "@/core/service/course.service";
 import { MasterDataRepository } from "@/infra/repositories/master-data.repository";
 import { MasterDataService } from "@/core/service/master-data.service";
 import { useRouter } from "next/navigation";
-import { ICreateCourse, ICourse, ITypeCourse } from "@/core/domain/course";
+import { ICreateCourse, ICourse } from "@/core/domain/course";
+import { TypeCourse } from "@/core/domain/master-data";
 import {
   ConfirmModal,
   ConfirmModalProps,
@@ -26,11 +27,11 @@ interface CoursesFormProps {
 
 const Schema = z.object({
   typeCourseId: z.number().min(1, "กรุณาเลือกกลุ่มวิชา"),
-  courseId: z.string().min(1, "กรุณากรอกรหัสวิชา"),
+  courseCode: z.string().min(1, "กรุณากรอกรหัสวิชา"),
   credits: z.string().min(1, "กรุณากรอกหน่วยกิต"),
   courseNameEn: z.string().min(1, "กรุณากรอกชื่อวิชาภาษาอังกฤษ"),
   courseNameTh: z.string().min(1, "กรุณากรอกชื่อวิชาภาษาไทย"),
-  courseDetail: z.string().min(1, "กรุณากรอกลักษณะการเรียน"),
+  detail: z.string().min(1, "กรุณากรอกลักษณะการเรียน"),
   prerequisites: z.array(
     z.object({
       id: z.number().optional(),
@@ -42,7 +43,7 @@ type FormData = z.infer<typeof Schema>;
 
 export const CourseForm: FC<CoursesFormProps> = ({ apiBase, curriculumId }) => {
   const router = useRouter();
-  const [typeCourses, setTypeCourses] = useState<ITypeCourse[]>([]);
+  const [typeCourses, setTypeCourses] = useState<TypeCourse[]>([]);
   const [courses, setCourses] = useState<ICourse[]>([]);
   const [isError, setIsError] = useState(false);
   const [confirmModal, setConfirmModal] = useState<ConfirmModalProps | null>(
@@ -67,11 +68,11 @@ export const CourseForm: FC<CoursesFormProps> = ({ apiBase, curriculumId }) => {
     resolver: zodResolver(Schema),
     defaultValues: {
       typeCourseId: 0,
-      courseId: "",
+      courseCode: "",
       credits: "",
       courseNameEn: "",
       courseNameTh: "",
-      courseDetail: "",
+      detail: "",
       prerequisites: [],
     },
   });
@@ -99,12 +100,12 @@ export const CourseForm: FC<CoursesFormProps> = ({ apiBase, curriculumId }) => {
 
     try {
       const CreateData: ICreateCourse = {
-        courseId: data.courseId,
+        courseCode: data.courseCode,
         typeCourseId: Number(data.typeCourseId),
         courseNameTh: data.courseNameTh,
         courseNameEn: data.courseNameEn,
         credits: data.credits,
-        courseDetail: data.courseDetail,
+        detail: data.detail,
         prerequisites: data.prerequisites
           ? data.prerequisites
               .map((p) => p.id)
@@ -142,8 +143,8 @@ export const CourseForm: FC<CoursesFormProps> = ({ apiBase, curriculumId }) => {
           typeCourseService.getMasterDataTypeCourse(),
           courseService.getCourse({
             curriculumId,
-            sortBy: "courseId",
-            sortOrder: "asc",
+            orderBy: "courseCode",
+            sortBy: "asc",
           }),
         ]);
 
@@ -189,14 +190,14 @@ export const CourseForm: FC<CoursesFormProps> = ({ apiBase, curriculumId }) => {
         >
           {typeCourses.map((typeCourse) => (
             <MenuItem key={typeCourse.id} value={typeCourse.id}>
-              {typeCourse.name}
+              {typeCourse.type}
             </MenuItem>
           ))}
         </RHFSelect>
 
         <RHFTextField
           control={control}
-          name="courseId"
+          name="courseCode"
           label="รหัสวิชา"
           variant="outlined"
           size="small"
@@ -235,7 +236,7 @@ export const CourseForm: FC<CoursesFormProps> = ({ apiBase, curriculumId }) => {
 
       <RHFTextField
         control={control}
-        name="courseDetail"
+        name="detail"
         label="ลักษณะการเรียน"
         variant="outlined"
         fullWidth
@@ -268,7 +269,7 @@ export const CourseForm: FC<CoursesFormProps> = ({ apiBase, curriculumId }) => {
               >
                 {courses.map((c) => (
                   <MenuItem key={c.id} value={c.id}>
-                    {c.courseId} {c.courseNameTh}
+                    {c.courseCode} {c.courseNameTh}
                   </MenuItem>
                 ))}
               </RHFSelect>

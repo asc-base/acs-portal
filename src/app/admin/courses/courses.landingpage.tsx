@@ -18,10 +18,10 @@ interface CoursesLandingPageProps {
   page: number;
   curriculumId: number;
   typeCourses: TypeCourse[];
-  typecourseId?: number;
+  typeCourseId?: number;
   search?: string;
-  sortBy?: string;
-  sortOrder?: "asc" | "desc";
+  orderBy?: string;
+  sortBy?: "asc" | "desc";
   curriculum: ICurriculum;
   apiBase: string;
 }
@@ -38,11 +38,11 @@ const CoursesLandingpage = ({
   pageSize,
   curriculumId,
   typeCourses,
-  typecourseId,
+  typeCourseId,
   page,
   search,
   sortBy,
-  sortOrder,
+  orderBy,
   apiBase,
   curriculum,
 }: CoursesLandingPageProps) => {
@@ -92,16 +92,16 @@ const CoursesLandingpage = ({
     return () => clearTimeout(delayDebounceFn);
   }, [watchedSearch, pathname, router, searchParams]);
 
-  const handleSort = (sortBy: string) => {
+  const handleSort = (orderBy: string) => {
     const params = new URLSearchParams(searchParams.toString());
 
-    const currentSortBy = params.get("sortBy");
-    const currentOrder = params.get("sortOrder") as "asc" | "desc" | null;
+    const currentOrderBy = params.get("orderBy");
+    const currentSortBy = params.get("sortBy") as "asc" | "desc" | null;
     const newOrder =
-      currentSortBy === sortBy && currentOrder === "desc" ? "asc" : "desc";
+      currentOrderBy === orderBy && currentSortBy === "desc" ? "asc" : "desc";
 
-    params.set("sortBy", sortBy);
-    params.set("sortOrder", newOrder);
+    params.set("orderBy", orderBy);
+    params.set("sortBy", newOrder);
     router.push(`${pathname}?${params.toString()}`, { scroll: false });
   };
 
@@ -110,9 +110,9 @@ const CoursesLandingpage = ({
     const params = new URLSearchParams(searchParams.toString());
 
     if (value === "all") {
-      params.delete("typecourseId");
+      params.delete("typeCourseId");
     } else {
-      params.set("typecourseId", value);
+      params.set("typeCourseId", value);
     }
 
     params.set("page", "1");
@@ -133,7 +133,7 @@ const CoursesLandingpage = ({
           courses={courses}
           onSort={handleSort}
           sortBy={sortBy}
-          sortOrder={sortOrder}
+          orderBy={orderBy}
           control={searchControl}
           watchedSearch={watchedSearch}
           onResetSearch={handleResetSearch}
@@ -143,7 +143,7 @@ const CoursesLandingpage = ({
           pageSize={pageSize}
           handleNextPage={handleNextPage}
           typeCourses={typeCourses}
-          typecourseId={typecourseId}
+          typeCourseId={typeCourseId}
           handleFilterTypeCourse={handleFilterTypeCourse}
           apiBase={apiBase}
         />

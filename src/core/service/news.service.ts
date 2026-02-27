@@ -9,7 +9,7 @@ export class NewsService {
 
     formData.append("title", data.title);
     formData.append("detail", data.detail);
-    formData.append("categoryId", String(data.categoryId));
+    formData.append("tagId", String(data.tagId));
     formData.append("startDate", new Date(data.startDate).toISOString());
 
     if (data.dueDate) {
@@ -29,6 +29,7 @@ export class NewsService {
     tagId?: number,
     orderBy?:string,
     sortBy?:string,
+    search?: string,
   ): Promise<Pageable<INews>> {
     const response = await this.newsRepository.getNews(
       page,
@@ -36,6 +37,7 @@ export class NewsService {
       tagId,
       orderBy,
       sortBy,
+      search,
     );
     return response.data;
   }

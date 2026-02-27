@@ -3,3 +3,8 @@ export interface Tag {
   name: string;
   tagsGroupsId: number;
 }
+
+export interface TagsGroups {
+  id: number;
+  name: string;
+}

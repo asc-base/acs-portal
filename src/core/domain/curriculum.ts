@@ -18,15 +18,15 @@ export interface QueryCurriculum {
 export interface ICreateCurriculum {
   year: string;
   title: string;
-  fileUrl: string;
+  documentURL: string;
   description: string;
-  image: File;
+  thumbnailFile: File;
 }
 
 export interface IUpdateCurriculum {
   year?: string;
   title?: string;
-  fileUrl?: string;
+  documentURL?: string;
   description?: string;
-  image?: File;
+  thumbnailFile?: File;
 }

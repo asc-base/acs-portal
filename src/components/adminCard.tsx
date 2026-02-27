@@ -88,10 +88,10 @@ export const AdminCard: FC<AdminCardProps> = (props) => {
   let alt = "";
 
   if (type === "curriculum") {
-    image = data.imageUrl;
+    image = data.thumbnailURL;
     alt = data.year;
   } else if (type === "classBook") {
-    image = data.image;
+    image = data.thumbnailURL;
     alt = String(data.classof);
   } else if (type === "project") {
     image = data.thumbnail || "";

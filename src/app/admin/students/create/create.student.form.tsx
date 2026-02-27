@@ -29,7 +29,7 @@ const Schema = z.object({
   lastNameTh: z.string().min(1, "กรุณากรอกนามสกุลภาษาไทย"),
   firstNameEn: z.string().min(1, "กรุณากรอกชื่อภาษาอังกฤษ"),
   lastNameEn: z.string().min(1, "กรุณากรอกนามสกุลภาษาอังกฤษ"),
-  studentId: z
+  studentCode: z
     .string()
     .min(11, "กรุณากรอกรหัสนักศึกษา")
     .regex(/^[0-9]+$/, "รหัสนักศึกษาต้องเป็นตัวเลขเท่านั้น"),
@@ -92,7 +92,7 @@ export const CreateStudentForm: FC<FormProfessorsProps> = ({
       lastNameTh: "",
       firstNameEn: "",
       lastNameEn: "",
-      studentId: "",
+      studentCode: "",
       nickname: "",
       email: "",
       yearOfFirstAdmission: "",
@@ -245,7 +245,7 @@ export const CreateStudentForm: FC<FormProfessorsProps> = ({
           <div className="grid grid-cols-2 gap-x-4">
             <RHFTextField
               control={control}
-              name="studentId"
+              name="studentCode"
               label="รหัสนักศึกษา"
               fullWidth
               placeholder="ระบุรหัสนักศึกษา"

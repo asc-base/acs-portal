@@ -19,10 +19,10 @@ interface CurriculumFormProps {
 }
 
 const Schema = z.object({
-  image: z.instanceof(File, { message: "กรุณาอัปโหลดรูปภาพ" }),
+  thumbnailFile: z.instanceof(File, { message: "กรุณาอัปโหลดรูปภาพ" }),
   title: z.string().min(1, "กรุณาระบุชื่อหลักสูตร"),
   year: z.string().min(1, "กรุณาระบุปีการศึกษา"),
-  fileUrl: z.url({ message: "กรุณาระบุลิงก์ที่ถูกต้อง" }),
+  documentURL: z.url({ message: "กรุณาระบุลิงก์ที่ถูกต้อง" }),
   description: z.string().min(1, "กรุณาระบุรายละเอียด"),
 });
 
@@ -60,7 +60,7 @@ export const CurriculumForm = ({ apiBase }: CurriculumFormProps) => {
     const file = e.target.files?.[0];
     if (file) {
       setSelectedFile(file);
-      setValue("image", file, { shouldValidate: true });
+      setValue("thumbnailFile", file, { shouldValidate: true });
     } else {
       setSelectedFile(null);
     }
@@ -156,7 +156,7 @@ export const CurriculumForm = ({ apiBase }: CurriculumFormProps) => {
             />
             <RHFTextField
               control={control}
-              name="fileUrl"
+              name="documentURL"
               label="ลิงก์ไฟล์หลักสูตร (Google Drive หรือ OneDrive)"
               variant="outlined"
               size="small"

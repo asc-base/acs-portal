@@ -44,8 +44,8 @@ import Snackbar from "@mui/material/Snackbar";
 interface StudentTableComponentsProps {
   students: IStudent[];
   onSort: (sortBy: string) => void;
-  sortBy?: string;
-  sortOrder?: "asc" | "desc";
+  orderBy?: string;
+  sortBy?: "asc" | "desc";
   control: Control<SearchForm>;
   watchedSearch?: string;
   onResetSearch: () => void;
@@ -61,7 +61,7 @@ const StudentTableComponents = ({
   students,
   onSort,
   sortBy,
-  sortOrder,
+  orderBy,
   control,
   watchedSearch,
   onResetSearch,
@@ -212,8 +212,8 @@ const StudentTableComponents = ({
                 <div className="flex items-center justify-center gap-1">
                   <h3 className="font-bold">รหัสนักศึกษา</h3>
                   <IconButton size="small" onClick={() => onSort("studentId")}>
-                    {sortBy === "studentId" ? (
-                      sortOrder === "asc" ? (
+                    {orderBy === "studentCode" ? (
+                      sortBy === "asc" ? (
                         <ArrowUpward
                           fontSize="small"
                           sx={{ color: "var(--color-primary01)" }}
@@ -241,8 +241,8 @@ const StudentTableComponents = ({
                     size="small"
                     onClick={() => onSort("firstNameTh")}
                   >
-                    {sortBy === "firstNameTh" ? (
-                      sortOrder === "asc" ? (
+                    {orderBy === "firstNameTh" ? (
+                      sortBy === "asc" ? (
                         <ArrowUpward
                           fontSize="small"
                           sx={{ color: "var(--color-primary01)" }}
@@ -298,7 +298,7 @@ const StudentTableComponents = ({
                     align="left"
                     sx={{ borderBottom: "none", fontSize: 18 }}
                   >
-                    {student.studentId}
+                    {student.studentCode}
                   </TableCell>
                   <TableCell
                     align="left"

@@ -1,3 +1,5 @@
+import { Tag, TagsGroups } from "./list-type";
+
 export interface MasterData {
   majorPositions: Position[];
   types: IType[];
@@ -6,6 +8,8 @@ export interface MasterData {
   listTypes: IType[];
   educationLevels: EducationLevel[];
   academicPositions: Position[];
+  tags: Tag[];
+  tagsGroups: TagsGroups[];
 }
 
 export interface Position {

@@ -1,5 +1,5 @@
 import { IUser } from "./user";
-import { IProject } from "./project";
+// import { IProject } from "./project";
 import { IClassBook } from "./classbook";
 export interface IStudent {
   id: number;
@@ -25,7 +25,7 @@ export interface QueryStudent {
 }
 
 export interface ICreateStudent {
-  studentId: string;
+  studentCode: string;
   email: string;
   firstNameTh: string;
   lastNameTh: string;
@@ -35,7 +35,7 @@ export interface ICreateStudent {
 }
 
 export interface IUpdateStudent {
-  studentId?: string;
+  studentCode?: string;
   email?: string;
   firstNameTh?: string;
   lastNameTh?: string;
@@ -43,7 +43,7 @@ export interface IUpdateStudent {
   lastNameEn?: string;
   nickName?: string;
   classBook?: IClassBook;
-  linkin?: string | null;
+  linkedin?: string | null;
   facebook?: string | null;
   instragram?: string | null;
   github?: string | null;
@@ -51,7 +51,7 @@ export interface IUpdateStudent {
 
 export interface ICreateStudentCsv {
   Timestamp: string;
-  studentId: string;
+  studentCode: string;
   email: string;
   firstNameTh: string;
   lastNameTh: string;

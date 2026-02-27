@@ -4,9 +4,9 @@ import { baseUrl } from "@/infra/container";
 export const dynamic = "force-dynamic";
 
 interface PageProps {
-  searchParams: {
+  searchParams: Promise<{
     classbookId?: number;
-  };
+  }>;
 }
 
 const page = async ({ searchParams }: PageProps) => {

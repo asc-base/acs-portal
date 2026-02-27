@@ -23,10 +23,10 @@ interface CurriculumInfoProps {
 }
 
 const curriculumSchema = z.object({
-  image: z.instanceof(File).optional(),
+  thumbnailFile: z.instanceof(File).optional(),
   title: z.string().min(1, "กรุณาระบุชื่อหลักสูตร"),
   year: z.string().min(1, "กรุณาระบุปีการศึกษา"),
-  fileUrl: z.url({ message: "กรุณาระบุลิงก์ที่ถูกต้อง" }),
+  documentURL: z.url({ message: "กรุณาระบุลิงก์ที่ถูกต้อง" }),
   description: z.string().min(1, "กรุณาระบุรายละเอียด"),
 });
 
@@ -55,8 +55,8 @@ export const CurriculumInfoComponent = ({ apiBase, curriculum }: CurriculumInfoP
     if (selectedFile) {
       return URL.createObjectURL(selectedFile);
     }
-    return curriculum.imageUrl;
-  }, [selectedFile, curriculum.imageUrl]);
+    return curriculum.thumbnailURL;
+  }, [selectedFile, curriculum.thumbnailURL]);
 
 
   const curriculumService = useMemo(() => {
@@ -74,7 +74,7 @@ export const CurriculumInfoComponent = ({ apiBase, curriculum }: CurriculumInfoP
     defaultValues: {
       title: curriculum.title ?? "",
       year: curriculum.year ?? "",
-      fileUrl: curriculum.fileUrl ?? "",
+      documentURL: curriculum.documentURL ?? "",
       description: curriculum.description ?? "",
     },
     mode: "onBlur",
@@ -227,7 +227,7 @@ export const CurriculumInfoComponent = ({ apiBase, curriculum }: CurriculumInfoP
                 />
                 <RHFTextField
                   control={control}
-                  name="fileUrl"
+                  name="documentURL"
                   label="ลิงก์ไฟล์หลักสูตร (Google Drive หรือ OneDrive)"
                   variant="outlined"
                   size="small"

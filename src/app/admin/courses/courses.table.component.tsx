@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import React, { useState, useMemo } from "react";
 import {
   Table,
   TableBody,
@@ -36,13 +36,12 @@ import {
   ConfirmModal,
   ConfirmModalProps,
 } from "@/components/modal/confirmModal";
-import { useState, useMemo } from "react";
 
 interface CourseTableComponentsProps {
   courses: ICourse[];
   onSort: (sortBy: string) => void;
-  sortBy?: string;
-  sortOrder?: "asc" | "desc";
+  orderBy?: string;
+  sortBy?: "asc" | "desc";
   control: Control<SearchForm>;
   watchedSearch?: string;
   onResetSearch: () => void;
@@ -52,7 +51,7 @@ interface CourseTableComponentsProps {
   pageSize: number;
   handleNextPage: (page: number) => void;
   typeCourses: TypeCourse[];
-  typecourseId?: number;
+  typeCourseId?: number;
   handleFilterTypeCourse: (event: SelectChangeEvent) => void;
   apiBase: string;
 }
@@ -61,12 +60,12 @@ const CourseTableComponents = ({
   courses,
   onSort,
   sortBy,
-  sortOrder,
+  orderBy,
   control,
   watchedSearch,
   onResetSearch,
   typeCourses,
-  typecourseId,
+  typeCourseId,
   handleFilterTypeCourse,
   curriculumId,
   totalRecords,
@@ -166,7 +165,7 @@ const CourseTableComponents = ({
 
           <Select
             onChange={handleFilterTypeCourse}
-            value={(typecourseId ?? "all").toString()}
+            value={(typeCourseId ?? "all").toString()}
             size="small"
             displayEmpty
             IconComponent={ExpandMoreIcon}
@@ -175,7 +174,7 @@ const CourseTableComponents = ({
             <MenuItem value="all">ทั้งหมด</MenuItem>
             {typeCourses.map((typeCourse) => (
               <MenuItem key={typeCourse.id} value={typeCourse.id.toString()}>
-                {typeCourse.name}
+                {typeCourse.type}
               </MenuItem>
             ))}
           </Select>
@@ -196,8 +195,8 @@ const CourseTableComponents = ({
                 <div className="flex items-center justify-center gap-1">
                   <h3 className="font-bold">รหัสวิชา</h3>
                   <IconButton size="small" onClick={() => onSort("courseId")}>
-                    {sortBy === "courseId" ? (
-                      sortOrder === "asc" ? (
+                    {orderBy === "courseCode" ? (
+                      sortBy === "asc" ? (
                         <ArrowUpward
                           fontSize="small"
                           sx={{ color: "var(--color-primary01)" }}
@@ -246,7 +245,7 @@ const CourseTableComponents = ({
                     },
                   }}
                 >
-                  <TableCell align="left">{course.courseId}</TableCell>
+                  <TableCell align="left">{course.courseCode}</TableCell>
                   <TableCell align="left" sx={{ maxWidth: 320 }}>
                     {course.courseNameEn}
                   </TableCell>
@@ -254,7 +253,7 @@ const CourseTableComponents = ({
                     {course.courseNameTh}
                   </TableCell>
                   <TableCell align="left">{course.credits}</TableCell>
-                  <TableCell align="left">{course.typeCourse.name}</TableCell>
+                  <TableCell align="left">{course.typeCourse.type}</TableCell>
                   <TableCell align="left" sx={{ pr: 4 }}>
                     <IconButton
                       color="primary"

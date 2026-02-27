@@ -1,8 +1,7 @@
 import StudentsLandingpage from "./students.landingpage";
-import { studentService } from "@/infra/container";
-import { classBookService } from "@/infra/container";
+import { studentService, classBookService, baseUrl } from "@/infra/container";
 import { QueryStudent } from "@/core/domain/student";
-import { baseUrl } from "@/infra/container";
+
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -17,16 +16,16 @@ const page = async ({ searchParams }: PageProps) => {
   const query: QueryStudent = {
     page: search.page || 1,
     pageSize: search.pageSize || 10,
-    classBookId: search.classBookId || 1,
+    classBookID: search.classBookID || 1,
     search: search.search ?? "",
-    sortBy: search.sortBy ?? "studentId",
-    sortOrder: search.sortOrder || "desc",
+    orderBy: search.orderBy ?? "studentId",
+    sortBy: search.sortBy || "desc",
   };
   const { rows, pageSize, page, totalRecords } =
     await studentService.getStudents(query);
 
   const classBook = await classBookService.getClassBookById(
-    search.classBookId || 1,
+    search.classBookID || 1,
   );
 
   if (!classBook) {
@@ -43,9 +42,9 @@ const page = async ({ searchParams }: PageProps) => {
       totalRecords={totalRecords}
       pageSize={pageSize}
       page={page}
-      classBookId={search.classBookId}
+      classBookId={search.classBookID}
       sortBy={query.sortBy}
-      sortOrder={query.sortOrder}
+      orderBy={query.orderBy}
       apiBase={baseUrl}
       classBook={classBook}
     />

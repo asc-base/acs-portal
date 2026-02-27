@@ -15,10 +15,10 @@ export const useImportStudentStore = create<ImportStudentState>()(
       importData: [],
       setImportData: (data) => set({ importData: data }),
       clearImportData: () => set({ importData: [] }),
-      deleteByStudentId: (studentId: string, index: number) =>
+      deleteByStudentId: (studentCode: string, index: number) =>
         set((state) => ({
           importData: state.importData.filter(
-            (row, i) => !(row.studentId === studentId && i === index),
+            (row, i) => !(row.studentCode === studentCode && i === index),
           ),
         })),
     }),

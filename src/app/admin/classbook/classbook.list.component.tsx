@@ -34,7 +34,7 @@ interface ClassBookListComponentsProps {
   totalRecords: number;
   pageSize: number;
   page: number;
-  sortOrder?: string;
+  sortBy?: string;
   search?: string;
   apiBase: string;
 }
@@ -50,7 +50,7 @@ const ClassBookListComponents = ({
   totalRecords,
   pageSize,
   page,
-  sortOrder,
+  sortBy,
   search,
   apiBase,
 }: ClassBookListComponentsProps) => {
@@ -191,7 +191,7 @@ const ClassBookListComponents = ({
           <Select
             onChange={handleSortOrder}
             size="small"
-            value={sortOrder ?? "desc"}
+            value={sortBy ?? "desc"}
             displayEmpty
             renderValue={() => "จัดเรียงตาม"}
             sx={{
@@ -220,7 +220,7 @@ const ClassBookListComponents = ({
               }}
             >
               ใหม่สุดไปเก่าสุด
-              {sortOrder === "desc" && <DoneIcon fontSize="small" />}
+              {sortBy === "desc" && <DoneIcon fontSize="small" />}
             </MenuItem>
 
             <MenuItem
@@ -234,7 +234,7 @@ const ClassBookListComponents = ({
               }}
             >
               เก่าสุดไปใหม่สุด
-              {sortOrder === "asc" && <DoneIcon fontSize="small" />}
+              {sortBy === "asc" && <DoneIcon fontSize="small" />}
             </MenuItem>
           </Select>
 

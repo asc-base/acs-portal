@@ -12,6 +12,7 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import MenuItem from "@mui/material/MenuItem";
 import { professorService } from "@/infra/container";
+import { RHFTextField } from "@/components/form/RHFTextField";
 
 const VisuallyHiddenInput = styled("input")({
   clip: "rect(0 0 0 0)",
@@ -44,20 +45,16 @@ const Schema = z.object({
   academicPosition: z.number().min(1, "กรุณากรอกตำแหน่งในหลักสูตร"),
   profRoom: z.string().min(1, "กรุณากรอกห้องพักอาจารย์"),
   imageURL: z.string().optional(),
-  educations: z.array(
-    z.object({
-      id: z.number().optional(),
-      level: z.number().min(1, "กรุณาเลือกระดับการศึกษา"),
-      education: z.string().min(1, "กรุณากรอกชื่อสาขา"),
-      university: z.string().min(1, "กรุณากรอกชื่อมหาวิทยาลัย"),
-    }),
-  ),
-  expertFields: z.array(
-    z.object({
-      id: z.number().optional(),
-      field: z.string().min(1, "กรุณากรอกสาขาที่เชี่ยวชาญ"),
-    }),
-  ),
+  education: z.array(
+  z.object({
+    value: z.string(),
+  })
+),
+expertFields: z.array(
+  z.object({
+    value: z.string(),
+  })
+),
 });
 type FormValues = z.infer<typeof Schema>;
 
@@ -65,76 +62,48 @@ const ProfessorFormComponent = ({
   professor,
   academicPosition,
   majorPosition,
-  educationLevel,
 }: ProfessorFormComponentProps) => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isEdit, setIsEdit] = useState(false);
 
   const { control, handleSubmit, reset } = useForm<FormValues>({
-    resolver: zodResolver(Schema),
-    defaultValues: {
-      firstNameTh: "",
-      lastNameTh: "",
-      firstNameEn: "",
-      lastNameEn: "",
-      majorPositionTh: 1,
-      majorPositionEn: 1,
-      phone: "",
-      email: "",
-      academicPosition: 1,
-      profRoom: "",
-      imageURL: "",
-      educations: [],
-      expertFields: [],
-    },
-  });
-
-  const {
-    fields: educationFields,
-    append: appendEducation,
-    remove: removeEducation,
-  } = useFieldArray<FormValues>({
-    control,
-    name: "educations",
-  });
-
-  const {
-    fields: expertFields,
-    append: appendExpert,
-    remove: removeExpert,
-  } = useFieldArray<FormValues>({
-    control,
-    name: "expertFields",
-  });
+  resolver: zodResolver(Schema),
+  defaultValues: {
+    firstNameTh: "",
+    lastNameTh: "",
+    firstNameEn: "",
+    lastNameEn: "",
+    majorPositionTh: 1,
+    majorPositionEn: 1,
+    phone: "",
+    email: "",
+    academicPosition: 1,
+    profRoom: "",
+    imageURL: "",
+    education: [],
+    expertFields: [],
+  },
+});
 
   useEffect(() => {
-    reset({
-      firstNameTh: professor.user.firstNameTh || "",
-      lastNameTh: professor.user.lastNameTh || "",
-      firstNameEn: professor.user.firstNameEn || "",
-      lastNameEn: professor.user.lastNameEn || "",
-      majorPositionTh: professor.majorPosition?.id || 1,
-      majorPositionEn: professor.majorPosition?.id || 1,
-      phone: professor.phone || "",
-      email: professor.user.email || "",
-      academicPosition: professor.academicPosition?.id || 1,
-      profRoom: professor.profRoom || "",
-      imageURL: professor.user.imageUrl || "",
-      educations:
-        professor.educations?.map((e) => ({
-          id: e.id,
-          level: e.level?.id ?? "",
-          education: e.education || "",
-          university: e.university || "",
-        })) || [],
-
-      expertFields:
-        professor.expertFields?.map((f) => ({
-          id: f.id,
-          field: f.field,
-        })) || [],
-    });
-  }, [professor, reset]);
+  reset({
+    firstNameTh: professor.user.firstNameTh || "",
+    lastNameTh: professor.user.lastNameTh || "",
+    firstNameEn: professor.user.firstNameEn || "",
+    lastNameEn: professor.user.lastNameEn || "",
+    majorPositionTh: professor.majorPosition?.id || 1,
+    majorPositionEn: professor.majorPosition?.id || 1,
+    phone: professor.phone || "",
+    email: professor.user.email || "",
+    academicPosition: professor.academicPosition?.id || 1,
+    profRoom: professor.profRoom || "",
+    imageURL: professor.user.imageUrl || "",
+    education:
+      professor.educations?.map((e) => ({ value: e })) || [],
+    expertFields:
+      professor.expertFields?.map((e) => ({ value: e })) || [],
+  });
+}, [professor, reset]);
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0] || null;
@@ -147,67 +116,39 @@ const ProfessorFormComponent = ({
     setIsEdit(false);
   };
 
+  const {
+  fields: educationFields,
+  append: appendEducation,
+  remove: removeEducation,
+} = useFieldArray({
+  control,
+  name: "education",
+});
+
+const {
+  fields: expertFields,
+  append: appendExpert,
+  remove: removeExpert,
+} = useFieldArray({
+  control,
+  name: "expertFields",
+});
+
   const onSubmit = (data: FormValues) => {
-    const originalEducations = professor.educations || [];
-    const originalExperts = professor.expertFields || [];
-
-    const formEducations = data.educations.map((e) => ({
-      id: e.id ?? 0,
-      education: e.education,
-      university: e.university,
-      level: e.level,
-    }));
-
-    const existingEducationIds = originalEducations.map((e) => e.id);
-    const newEducation = formEducations
-      .filter((e) => !e.id)
-      .map((e) => ({
-        education: e.education,
-        university: e.university,
-        level: e.level,
-      }));
-    const updatedEducation = formEducations.filter(
-      (e) => e.id && existingEducationIds.includes(e.id),
-    );
-    const deleteEducationIds = originalEducations
-      .filter((e) => !formEducations.some((f) => f.id === e.id))
-      .map((e) => e.id);
-
-    const formExperts = data.expertFields.map((f) => ({
-      id: f.id ?? 0,
-      field: f.field,
-    }));
-    const existingExpertIds = originalExperts.map((f) => f.id);
-    const newExpertFields = formExperts
-      .filter((f) => !f.id)
-      .map((f) => f.field);
-    const updatedExpertFields = formExperts.filter(
-      (f) => f.id && existingExpertIds.includes(f.id),
-    );
-    const deleteExpertFieldsIds = originalExperts
-      .filter((f) => !formExperts.some((ff) => ff.id === f.id))
-      .map((f) => f.id);
-
     const updateData: IUpdateProfessor = {
-      id: professor.id,
-      academicPositionId: data.academicPosition,
-      majorPositionId: data.majorPositionTh,
-      profRoom: data.profRoom,
-      phone: data.phone,
-      firstNameTh: data.firstNameTh,
-      lastNameTh: data.lastNameTh,
-      firstNameEn: data.firstNameEn,
-      lastNameEn: data.lastNameEn,
-      mail: data.email,
-
-      newExpertFields,
-      updatedExpertFields,
-      deleteExpertFieldsIds,
-
-      newEducation,
-      updatedEducation,
-      deleteEducationIds,
-    };
+  id: professor.id,
+  academicPositionId: data.academicPosition,
+  majorPositionId: data.majorPositionTh,
+  profRoom: data.profRoom,
+  phone: data.phone,
+  firstNameTh: data.firstNameTh,
+  lastNameTh: data.lastNameTh,
+  firstNameEn: data.firstNameEn,
+  lastNameEn: data.lastNameEn,
+  mail: data.email,
+  expertFields: data.expertFields.map((e) => e.value).join("/"),
+  educations: data.education.map((e) => e.value).join("/"),
+};
 
     const formData = new FormData();
     formData.append("data", JSON.stringify(updateData));
@@ -504,9 +445,7 @@ const ProfessorFormComponent = ({
           ประวัติการศึกษา
         </Typography>
         <IconButton
-          onClick={() =>
-            appendEducation({ level: 1, education: "", university: "" })
-          }
+            onClick={() => appendEducation({ value: "" })}
           disabled={!isEdit}
           sx={{
             border: `1px solid ${isEdit ? "#120554" : "#BDBDBD"}`,
@@ -517,86 +456,33 @@ const ProfessorFormComponent = ({
         </IconButton>
       </div>
 
-      {educationFields.map((edu, index) => (
-        <div key={edu.id} className="mb-3 flex flex-row gap-x-4">
-          {/* ระดับการศึกษา */}
-          <Box sx={{ minWidth: 220 }}>
-            <Controller
-              name={`educations.${index}.level`}
-              control={control}
-              render={({ field, fieldState }) => (
-                <TextField
-                  {...field}
-                  select
-                  fullWidth
-                  label="ระดับการศึกษา"
-                  value={field.value || ""}
-                  onChange={(e) => field.onChange(e.target.value)}
-                  disabled={!isEdit}
-                  error={!!fieldState.error}
-                  helperText={fieldState.error?.message}
-                >
-                  <MenuItem value="" disabled>
-                    เลือกระดับการศึกษา
-                  </MenuItem>
-                  {educationLevel.map((lvl) => (
-                    <MenuItem key={lvl.id} value={lvl.id}>
-                      {lvl.level}
-                    </MenuItem>
-                  ))}
-                </TextField>
-              )}
-            />
-          </Box>
-          <Controller
-            name={`educations.${index}.education`}
-            control={control}
-            render={({ field, fieldState }) => (
-              <TextField
-                {...field}
-                label="วิชาเอก"
-                fullWidth
-                InputLabelProps={{ shrink: true }}
-                disabled={!isEdit}
-                error={!!fieldState.error}
-                helperText={fieldState.error?.message}
-              />
-            )}
-          />
-          <Controller
-            name={`educations.${index}.university`}
-            control={control}
-            render={({ field, fieldState }) => (
-              <TextField
-                {...field}
-                label="มหาวิทยาลัย"
-                fullWidth
-                InputLabelProps={{ shrink: true }}
-                disabled={!isEdit}
-                error={!!fieldState.error}
-                helperText={fieldState.error?.message}
-              />
-            )}
-          />
-          {isEdit && (
-            <IconButton
-              color="error"
-              onClick={() => removeEducation(index)}
-              sx={{ alignSelf: "center" }}
-            >
-              <Delete />
-            </IconButton>
-          )}
-        </div>
-      ))}
-
+      {educationFields.map((field, index) => (
+  <div key={field.id} className="mb-3 flex flex-row gap-x-4">
+    <RHFTextField
+      control={control}
+      name={`education.${index}.value`}
+      label="การศึกษา"
+      fullWidth
+      placeholder="ระบุการศึกษา"
+      disabled={!isEdit}
+    />
+    {isEdit && (
+      <IconButton
+        color="error"
+        onClick={() => removeEducation(index)}
+      >
+        <Delete />
+      </IconButton>
+    )}
+  </div>
+))}
       {/* สาขาที่เชี่ยวชาญ */}
       <div className="mt-6 mb-4 flex items-center justify-between">
         <Typography variant="h6" fontWeight="bold">
           สาขาที่เชี่ยวชาญ
         </Typography>
         <IconButton
-          onClick={() => appendExpert({ field: "" })}
+          onClick={() => appendExpert({ value: "" })}
           disabled={!isEdit}
           sx={{
             border: `1px solid ${isEdit ? "#120554" : "#BDBDBD"}`,
@@ -607,34 +493,26 @@ const ProfessorFormComponent = ({
         </IconButton>
       </div>
 
-      {expertFields.map((f, index) => (
-        <div key={f.id} className="mb-3 flex flex-row gap-x-2">
-          <Controller
-            name={`expertFields.${index}.field`}
-            control={control}
-            render={({ field, fieldState }) => (
-              <TextField
-                {...field}
-                label="สาขาเชี่ยวชาญ"
-                fullWidth
-                InputLabelProps={{ shrink: true }}
-                disabled={!isEdit}
-                error={!!fieldState.error}
-                helperText={fieldState.error?.message}
-              />
-            )}
-          />
-          {isEdit && (
-            <IconButton
-              color="error"
-              onClick={() => removeExpert(index)}
-              sx={{ alignSelf: "center" }}
-            >
-              <Delete />
-            </IconButton>
-          )}
-        </div>
-      ))}
+      {expertFields.map((field, index) => (
+  <div key={field.id} className="mb-3 flex flex-row gap-x-2">
+    <RHFTextField
+      control={control}
+      name={`expertFields.${index}.value`}
+      label="สาขาที่เชี่ยวชาญ"
+      fullWidth
+      placeholder="ระบุสาขาที่เชี่ยวชาญ"
+      disabled={!isEdit}
+    />
+    {isEdit && (
+      <IconButton
+        color="error"
+        onClick={() => removeExpert(index)}
+      >
+        <Delete />
+      </IconButton>
+    )}
+  </div>
+))}
 
       {!isEdit ? (
         <div className="mt-8 flex justify-end gap-x-4">

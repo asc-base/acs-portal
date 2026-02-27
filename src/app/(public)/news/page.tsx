@@ -1,10 +1,14 @@
 import React from "react";
 import { newsService } from "@/infra/container";
 import NewsListComponents from "./news.list.components";
-import { QueryNews } from "@/core/domain/news";
 
 interface PageProps {
-  searchParams: Promise<QueryNews>;
+  searchParams: Promise<{
+    page?: number;
+    pageSize?: number;
+    tagId?: number;
+    category?: string;
+  }>;
 }
 
 const page = async ({ searchParams }: PageProps) => {
@@ -22,6 +26,7 @@ const page = async ({ searchParams }: PageProps) => {
       pageSize={pageSize}
       page={page}
       category={resolvedSearchParams.category || ""}
+      tagId={resolvedSearchParams.tagId}
     />
   );
 };

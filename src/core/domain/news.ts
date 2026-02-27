@@ -16,7 +16,7 @@ export interface INews {
 
 export interface ICreateNews {
   title: string;
-  categoryId: number;
+  tagId: number;
   startDate: string;
   dueDate?: string;
   detail: string;
@@ -24,7 +24,7 @@ export interface ICreateNews {
 
 export interface IUpdateNews {
   title?: string;
-  categoryId?: number;
+  tagId?: number;
   startDate: string;
   dueDate?: string;
   detail?: string;
@@ -38,7 +38,7 @@ export interface INewsInformation {
 
 export interface newsInformationPageProps {
   newsInformation: INewsInformation[];
-  type: string;
+  tagId: number;
   pageSize: number;
 }
 
@@ -46,5 +46,4 @@ export interface QueryNews {
   page?: number;
   pageSize?: number;
   tagId?: number;
-  category:string;
 }

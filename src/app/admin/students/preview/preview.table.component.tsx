@@ -39,7 +39,7 @@ const studentSchema = z.object({
   lastNameTh: z.string().min(1, "ข้อมูลนามสกุลภาษาไทยไม่ถูกต้อง"),
   firstNameEn: z.string().min(1, "ข้อมูลชื่อภาษาอังกฤษไม่ถูกต้อง"),
   lastNameEn: z.string().min(1, "ข้อมูลนามสกุลภาษาอังกฤษไม่ถูกต้อง"),
-  studentId: z
+  studentCode: z
     .string()
     .min(11, "รหัสนักศึกษาต้องมี 11 หลัก")
     .regex(/^[0-9]+$/, "รหัสนักศึกษาต้องเป็นตัวเลขเท่านั้น"),
@@ -112,7 +112,7 @@ export default function Preview_table_component({
       firstNameEn: s.firstNameEn.trim(),
       lastNameEn: s.lastNameEn.trim(),
       email: s.email.trim(),
-      studentId: s.studentId.trim(),
+      studentId: s.studentCode.trim(),
     }));
 
     const result = z.array(studentSchema).safeParse(cleanedStudents);
@@ -150,8 +150,8 @@ export default function Preview_table_component({
     const duplicate = new Set<string>();
 
     students.forEach((student) => {
-      if (seen.has(student.studentId)) duplicate.add(student.studentId);
-      else seen.add(student.studentId);
+      if (seen.has(student.studentCode)) duplicate.add(student.studentCode);
+      else seen.add(student.studentCode);
     });
 
     return [...duplicate];
@@ -222,11 +222,11 @@ export default function Preview_table_component({
               {students?.length > 0 ? (
                 students?.map((student, index) => {
                   const isDuplicate = duplicateIds.find(
-                    (id) => student.studentId === id,
+                    (id) => student.studentCode === id,
                   );
                   return (
                     <TableRow
-                      key={`${student.studentId}-${index}`}
+                      key={`${student.studentCode}-${index}`}
                       sx={{
                         "& .MuiTableCell-root": {
                           color: isDuplicate ? "error.main" : "inherit",
@@ -237,7 +237,7 @@ export default function Preview_table_component({
                         align="center"
                         sx={{ borderBottom: "none", fontSize: 18 }}
                       >
-                        {student.studentId}
+                        {student.studentCode}
                       </TableCell>
                       <TableCell
                         align="center"
@@ -264,7 +264,7 @@ export default function Preview_table_component({
                         <IconButton
                           color="primary"
                           size="small"
-                          onClick={() => editStudentRowById(student.studentId)}
+                          onClick={() => editStudentRowById(student.studentCode)}
                         >
                           <Edit />
                         </IconButton>
@@ -272,7 +272,7 @@ export default function Preview_table_component({
                           color="error"
                           size="small"
                           onClick={() =>
-                            deleteStudentRowById(student.studentId, index)
+                            deleteStudentRowById(student.studentCode, index)
                           }
                         >
                           <Delete />

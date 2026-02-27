@@ -4,12 +4,12 @@ import { INews, INewsInformation} from "../domain/news";
 export interface INewsRepository {
   createNews(data: FormData): Promise<ApiResponse<INews>>;
   getNews(
-   
     page: number,
     pageSize: number, 
     tagId?: number,
     orderBy?:string,
     sortBy?:string,
+    search?: string,
   ): Promise<ApiResponse<Pageable<INews>>>;
   getNewsById(id: string): Promise<ApiResponse<INews>>;
   updateNews(id: number, news: FormData): Promise<ApiResponse<INews>>;

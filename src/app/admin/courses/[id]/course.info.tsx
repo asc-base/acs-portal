@@ -25,11 +25,11 @@ interface CoursesFormProps {
 
 const Schema = z.object({
   typeCourseId: z.number().min(1, "กรุณาเลือกกลุ่มวิชา"),
-  courseId: z.string().min(1, "กรุณากรอกรหัสวิชา"),
+  courseCode: z.string().min(1, "กรุณากรอกรหัสวิชา"),
   credits: z.string().min(1, "กรุณากรอกหน่วยกิต"),
   courseNameEn: z.string().min(1, "กรุณากรอกชื่อวิชาภาษาอังกฤษ"),
   courseNameTh: z.string().min(1, "กรุณากรอกชื่อวิชาภาษาไทย"),
-  courseDetail: z.string().min(1, "กรุณากรอกลักษณะการเรียน"),
+  detail: z.string().min(1, "กรุณากรอกลักษณะการเรียน"),
   prerequisites: z
     .array(
       z.object({
@@ -62,14 +62,14 @@ export const CourseInfo: FC<CoursesFormProps> = ({ apiBase, curriculumId, course
     resolver: zodResolver(Schema),
     defaultValues: {
       typeCourseId: course.typeCourse.id,
-      courseId: course.courseId,
+      courseCode: course.courseCode,
       credits: course.credits,
       courseNameEn: course.courseNameEn,
       courseNameTh: course.courseNameTh,
-      courseDetail: course.courseDetail,
-      prerequisites: course.preCourses?.map(p => ({
-        id: p.id,
-      })) ?? [],
+      detail: course.detail,
+      // prerequisites: course.preCourses?.map(p => ({
+      //   id: p.id,
+      // })) ?? [],
     },
   });
 
@@ -96,17 +96,17 @@ export const CourseInfo: FC<CoursesFormProps> = ({ apiBase, curriculumId, course
 
     try {
       const updateData: IUpdateCourse = {
-        courseId: data.courseId,
+        courseCode: data.courseCode,
         typeCourseId: Number(data.typeCourseId),
         courseNameTh: data.courseNameTh,
         courseNameEn: data.courseNameEn,
         credits: data.credits,
-        courseDetail: data.courseDetail,
-        prerequisites: data.prerequisites
-          ? data.prerequisites
-            .map((p) => p.id)
-            .filter((id): id is number => id !== undefined) ?? []
-          : [],
+        detail: data.detail,
+        // prerequisites: data.prerequisites
+        //   ? data.prerequisites
+        //     .map((p) => p.id)
+        //     .filter((id): id is number => id !== undefined) ?? []
+        //   : [],
         curriculumId: curriculumId
       };
       console.log("SEND UPDATE DATA", updateData);
@@ -139,8 +139,8 @@ export const CourseInfo: FC<CoursesFormProps> = ({ apiBase, curriculumId, course
           typeCourseService.getMasterDataTypeCourse(),
           courseService.getCourse({
             curriculumId,
-            sortBy: "courseId",
-            sortOrder: "asc",
+            orderBy: "courseId",
+            sortBy: "asc",
           })
         ]);
 
@@ -183,14 +183,14 @@ export const CourseInfo: FC<CoursesFormProps> = ({ apiBase, curriculumId, course
         >
           {typeCourses.map((typeCourse) => (
             <MenuItem key={typeCourse.id} value={typeCourse.id}>
-              {typeCourse.name}
+              {typeCourse.type}
             </MenuItem>
           ))}
         </RHFSelect>
 
         <RHFTextField
           control={control}
-          name="courseId"
+          name="courseCode"
           label="รหัสวิชา"
           variant="outlined"
           size="small"
@@ -233,7 +233,7 @@ export const CourseInfo: FC<CoursesFormProps> = ({ apiBase, curriculumId, course
 
       <RHFTextField
         control={control}
-        name="courseDetail"
+        name="detail"
         label="ลักษณะการเรียน"
         variant="outlined"
         fullWidth
@@ -267,7 +267,7 @@ export const CourseInfo: FC<CoursesFormProps> = ({ apiBase, curriculumId, course
               >
                 {courses.map((c) => (
                   <MenuItem key={c.id} value={c.id}>
-                    {c.courseId}   {c.courseNameTh}
+                    {c.courseCode}   {c.courseNameTh}
                   </MenuItem>
                 ))}
               </RHFSelect>

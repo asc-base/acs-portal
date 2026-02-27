@@ -35,23 +35,23 @@ export interface QueryCourse {
 }
 
 export interface ICreateCourse {
-  courseId: string;
+  courseCode: string;
   typeCourseId: number;
   courseNameTh: string;
   courseNameEn: string;
   credits: string;
-  courseDetail: string;
+  detail: string;
   prerequisites?: number[];
   curriculumId: number;
 }
 
 export interface IUpdateCourse {
-  courseId?: string;
+  courseCode?: string;
   typeCourseId?: number;
   courseNameTh?: string;
   courseNameEn?: string;
   credits?: string;
-  courseDetail?: string;
+  detail?: string;
   prerequisites?: number[];
   curriculumId: number;
 }
