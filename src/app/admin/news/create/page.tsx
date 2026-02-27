@@ -1,25 +1,23 @@
 import CreateNewsForm from "./create.news.form";
 import { baseUrl, masterDataService } from "@/infra/container";
 
-const page = async () => {
-  const data  = await masterDataService.getMasterData();
+import React from "react";
+
+const Page = async () => {
+  const data = await masterDataService.getMasterData();
 
   const newsGroup = data.tagsGroups.find(
-    (group: any) => group.name === "news"
+    (group: { name: string }) => group.name === "news",
   );
 
   const tags = newsGroup
     ? data.tags.filter(
-        (tag: any) => tag.tagsGroupsId === newsGroup.id
+        (tag: { tagsGroupsId: string | number }) =>
+          String(tag.tagsGroupsId) === String(newsGroup.id),
       )
     : [];
 
-  return (
-    <CreateNewsForm
-      apiBase={baseUrl}
-      tags={tags}
-    />
-  );
+  return <CreateNewsForm apiBase={baseUrl} tags={tags} />;
 };
 
-export default page;
+export default Page;
