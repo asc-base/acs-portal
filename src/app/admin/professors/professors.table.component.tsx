@@ -80,39 +80,39 @@ const ProfessorTableComponent = ({
                 </TableCell>
 
                 <TableCell
-                  align="center"
+                  align="left"
                   sx={{ borderBottom: "none", fontSize: 18 }}
                 >
                   {prof.academicPosition.positionTh}
                 </TableCell>
 
                 <TableCell
-                  align="center"
+                  align="left"
                   sx={{ borderBottom: "none", fontSize: 18 }}
                 >
                   {`${prof.user?.firstNameTh || ""} ${prof.user?.lastNameTh || ""}`}
                 </TableCell>
 
                 <TableCell
-                  align="center"
+                  align="left"
                   sx={{ borderBottom: "none", fontSize: 18 }}
                 >
                   {prof.profRoom}
                 </TableCell>
                 <TableCell
-                  align="center"
+                  align="left"
                   sx={{ borderBottom: "none", fontSize: 18 }}
                 >
                   {prof.phone}
                 </TableCell>
                 <TableCell
-                  align="center"
+                  align="left"
                   sx={{ borderBottom: "none", fontSize: 18 }}
                 >
                   {prof.user.email}
                 </TableCell>
                 <TableCell
-                  align="center"
+                  align="left"
                   sx={{ borderBottom: "none", fontSize: 18 }}
                 >
                   <IconButton

@@ -1,7 +1,7 @@
 "use client";
 
-import { INews, queryNews } from "@/core/domain/news";
-import { useState, useEffect, useCallback } from "react";
+import { INews } from "@/core/domain/news";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import {
   Button,
   Pagination,
@@ -9,8 +9,7 @@ import {
   MenuItem,
   SelectChangeEvent,
 } from "@mui/material";
-import { ConfirmModal } from "@/components/modal/confirmModal";
-import { useRouter, usePathname } from "next/navigation";
+import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { AdminCard } from "@/components/adminCard";
 import AddIcon from "@mui/icons-material/Add";
 import SearchIcon from "@mui/icons-material/Search";
@@ -20,12 +19,23 @@ import DoneIcon from "@mui/icons-material/Done";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
+import Link from "next/link";
+import { RHFTextField } from "@/components/form/RHFTextField";
+import { NewsService } from "@/core/service/news.service";
+import { NewsRepository } from "@/infra/repositories/news.repository";
+import {
+  ConfirmModal,
+  ConfirmModalProps,
+} from "@/components/modal/confirmModal";
+import Alert from "@mui/material/Alert";
+import Snackbar from "@mui/material/Snackbar";
 
 interface NewsListComponentProps {
   news: INews[];
   totalRecords: number;
   page?: number;
   pageSize: number;
+  apiBase: string;
 }
 
 const searchSchema = z.object({
@@ -37,98 +47,159 @@ type SearchForm = z.infer<typeof searchSchema>;
 const NewsListComponent = (initValue: NewsListComponentProps) => {
   const router = useRouter();
   const pathname = usePathname();
+  const searchParams = useSearchParams();
 
-  const page = initValue.page;
-  const [category, setCategory] = useState<string>("");
-  const [openModal, setOpenModal] = useState(false);
-  const [deleteNews, setDeleteNews] = useState<INews | null>(null);
+  const [category, setCategory] = useState<string>("all");
+  const [confirmModal, setConfirmModal] = useState<ConfirmModalProps | null>(
+    null,
+  );
+  const [isError, setIsError] = useState(false);
 
-  const { register, reset, watch } = useForm<SearchForm>({
+  const newsService = useMemo(() => {
+    const repo = new NewsRepository(initValue.apiBase);
+    return new NewsService(repo);
+  }, [initValue.apiBase]);
+
+  const { control, reset, watch } = useForm<SearchForm>({
     resolver: zodResolver(searchSchema),
     defaultValues: { search: "" },
   });
 
   const watchedSearch = watch("search");
 
-  const buildSearchUrl = useCallback(
-    (query: Partial<queryNews>) => {
-      const params = new URLSearchParams({
-        page: String(query.page ?? page),
-        pageSize: String(initValue.pageSize),
-        category: query.category ?? category,
-        title: query.title ?? watchedSearch ?? "",
-      });
-
-      return `${pathname}?${params.toString()}`;
-    },
-    [pathname, page, category, watchedSearch, initValue.pageSize],
-  );
+  const handleResetSearch = () => {
+    reset({ search: "" });
+  };
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      router.push(buildSearchUrl({ page: 1, title: watchedSearch }));
-    }, 300);
+    const delayDebounce = setTimeout(() => {
+      const params = new URLSearchParams(searchParams.toString());
+      if (watchedSearch) {
+        params.set("title", watchedSearch);
+        params.set("page", "1");
+      } else {
+        params.delete("title");
+      }
+      const newSearch = params.toString();
+      if (searchParams.toString() !== newSearch) {
+        router.push(`${pathname}?${newSearch}`, { scroll: false });
+      }
+    }, 500);
+    return () => clearTimeout(delayDebounce);
+  }, [pathname, router, searchParams, watchedSearch]);
 
-    return () => clearTimeout(timer);
-  }, [watchedSearch, buildSearchUrl, router]);
-
-  const handleFilter = (event: SelectChangeEvent<string>) => {
+  const handleFilterCategory = (event: SelectChangeEvent<string>) => {
     const value = event.target.value;
     setCategory(value);
-    router.push(buildSearchUrl({ category: value, page: 1 }));
+    const params = new URLSearchParams(searchParams.toString());
+
+    if (value === "all") {
+      params.delete("category");
+    } else {
+      params.set("category", value);
+    }
+    params.set("page", "1");
+    router.push(`${pathname}?${params.toString()}`, { scroll: false });
   };
 
-  const handleAddNews = () => {
-    router.push("/admin/news/create");
+  const onDelete = async (id: number) => {
+    try {
+      const response = await newsService.deleteNews(id);
+
+      if (response) {
+        setConfirmModal({
+          isOpen: true,
+          type: "success",
+          onClose: () => setConfirmModal(null),
+          onConfirm: () => {
+            setConfirmModal(null);
+            router.refresh();
+          },
+          title: "ลบข้อมูลสำเร็จ",
+          description: "ข้อมูลถูกลบออกจากฐานข้อมูลแล้ว",
+          confirmText: "เสร็จสิ้น",
+        });
+      } else {
+        setIsError(true);
+      }
+    } catch (error) {
+      console.log(error);
+      setIsError(true);
+    }
   };
 
-  const handleDeleteModal = (news: INews) => {
-    setDeleteNews(news);
-    setOpenModal(true);
+  const confirmDeleteNews = (id: number) => {
+    setConfirmModal({
+      isOpen: true,
+      type: "delete",
+      onClose: () => setConfirmModal(null),
+      onConfirm: () => {
+        onDelete(id);
+      },
+    });
   };
 
-  const handleDelete = () => {
-    if (!deleteNews) return;
-    console.log("Delete news:", deleteNews);
-    setOpenModal(false);
-  };
-
-  const handleNextPage = (currentPage: number) => {
-    router.push(buildSearchUrl({ page: currentPage }));
-  };
+  const handleNextPage = useCallback(
+    (currentPage: number) => {
+      const params = new URLSearchParams(searchParams.toString());
+      params.set("page", currentPage.toString());
+      router.push(`${pathname}?${params.toString()}`);
+    },
+    [pathname, router, searchParams],
+  );
 
   return (
-    <div className="min-h-screen px-8 py-5">
+    <div className="min-h-screen p-6">
+      <Snackbar
+        anchorOrigin={{ vertical: "top", horizontal: "right" }}
+        open={isError}
+        autoHideDuration={4000}
+        onClose={() => setIsError(false)}
+      >
+        <Alert
+          severity="error"
+          onClose={() => setIsError(false)}
+          sx={{ width: "100%" }}
+        >
+          ไม่สามารถลบข้อมูลข่าวได้ในขณะนี้ กรุณาลองใหม่อีกครั้ง
+        </Alert>
+      </Snackbar>
+
       <div className="mb-6 flex items-center justify-between">
-        <h3 className="text-lg font-bold">จัดการข่าว</h3>
+        <h3 className="font-bold">จัดการข่าว</h3>
 
         <div className="flex items-center gap-3">
-          <form className="relative">
-            <SearchIcon className="absolute top-1/2 left-2 -translate-y-1/2" />
-            <input
-              {...register("search")}
-              placeholder="ค้นหา"
-              className="h-[44px] w-[280px] rounded-sm border pl-10"
-            />
-            <button
-              type="button"
-              onClick={() => reset({ search: "" })}
-              disabled={!watchedSearch}
-              className="absolute top-1/2 right-2 -translate-y-1/2"
-            >
-              <CloseIcon fontSize="small" />
-            </button>
-          </form>
+          <RHFTextField
+            name="search"
+            control={control}
+            startIcon={<SearchIcon />}
+            endIcon={
+              watchedSearch ? (
+                <CloseIcon onClick={handleResetSearch} />
+              ) : (
+                <span style={{ width: "24px" }} />
+              )
+            }
+            placeholder="ค้นหา"
+            size="small"
+          />
 
           <Select
             size="small"
-            value={category}
+            value={category ?? "all"}
             displayEmpty
-            onChange={handleFilter}
-            renderValue={(value) => (value ? value : "จัดเรียงตาม")}
+            onChange={handleFilterCategory}
+            renderValue={(value) => (value === "all" ? "ทั้งหมด" : value)}
             IconComponent={ExpandMoreIcon}
-            sx={{ width: 180, height: 44 }}
+            sx={{ width: 200 }}
           >
+            <MenuItem value="all">
+              ทั้งหมด
+              {category === "all" && (
+                <DoneIcon fontSize="small" sx={{ ml: 1 }} />
+              )}
+            </MenuItem>
+
             {[
               "ข่าวประชาสัมพันธ์",
               "ความสำเร็จนักศึกษา",
@@ -136,18 +207,18 @@ const NewsListComponent = (initValue: NewsListComponentProps) => {
             ].map((item) => (
               <MenuItem key={item} value={item}>
                 {item}
-                {category === item && <DoneIcon fontSize="small" />}
+                {category === item && (
+                  <DoneIcon fontSize="small" sx={{ ml: 1 }} />
+                )}
               </MenuItem>
             ))}
           </Select>
 
-          <Button
-            variant="contained"
-            startIcon={<AddIcon />}
-            onClick={handleAddNews}
-          >
-            เพิ่มข่าวใหม่
-          </Button>
+          <Link href="/admin/news/create">
+            <Button variant="contained" startIcon={<AddIcon />} size="large">
+              เพิ่มข่าวใหม่
+            </Button>
+          </Link>
         </div>
       </div>
 
@@ -159,7 +230,7 @@ const NewsListComponent = (initValue: NewsListComponentProps) => {
               type="news"
               data={news}
               onView={() => router.push(`/admin/news/${news.id}`)}
-              onDelete={() => handleDeleteModal(news)}
+              onDelete={() => confirmDeleteNews(news.id)}
             />
           ))}
         </div>
@@ -167,20 +238,16 @@ const NewsListComponent = (initValue: NewsListComponentProps) => {
         <div className="mt-8 flex justify-center">
           <Pagination
             shape="rounded"
-            page={page}
+            page={initValue.page}
             count={Math.ceil(initValue.totalRecords / initValue.pageSize)}
             onChange={(_, currentPage) => handleNextPage(currentPage)}
+            color="primary"
+            size="large"
           />
         </div>
       </div>
 
-      <ConfirmModal
-        isOpen={openModal}
-        onClose={() => setOpenModal(false)}
-        onConfirm={handleDelete}
-        title={deleteNews?.title ?? ""}
-        type="delete"
-      />
+       {confirmModal && <ConfirmModal {...confirmModal} />}
     </div>
   );
 };

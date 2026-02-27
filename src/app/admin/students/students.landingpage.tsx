@@ -16,8 +16,8 @@ interface StudentsLandingPageProps {
   classBookId: number;
   classBook: IClassBook;
   search?: string;
-  sortBy?: string;
-  sortOrder?: "asc" | "desc";
+  orderBy?: string;
+  sortBy?: "asc" | "desc";
   apiBase: string;
 }
 
@@ -36,7 +36,7 @@ const StudentsLandingpage = ({
   classBook,
   search,
   sortBy,
-  sortOrder,
+  orderBy,
   apiBase,
 }: StudentsLandingPageProps) => {
   const router = useRouter();
@@ -70,11 +70,17 @@ const StudentsLandingpage = ({
     [pathname, router, searchParams],
   );
 
-  const handleSortOrder = (event: string) => {
-    const newSortOrder = event as "asc" | "desc";
+  const handleSort = (orderBy: string) => {
     const params = new URLSearchParams(searchParams.toString());
-    params.set("sortOrder", newSortOrder);
-    router.push(`${pathname}?${params.toString()}`);
+
+    const currentOrderBy = params.get("orderBy");
+    const currentSortBy = params.get("sortBy") as "asc" | "desc" | null;
+    const newOrder =
+      currentOrderBy === orderBy && currentSortBy === "desc" ? "asc" : "desc";
+
+    params.set("orderBy", orderBy);
+    params.set("sortBy", newOrder);
+    router.push(`${pathname}?${params.toString()}`, { scroll: false });
   };
 
   useEffect(() => {
@@ -82,6 +88,7 @@ const StudentsLandingpage = ({
       const params = new URLSearchParams(searchParams.toString());
       if (watchedSearch) {
         params.set("search", watchedSearch);
+        params.set("page", "1");
       } else {
         params.delete("search");
       }
@@ -105,9 +112,9 @@ const StudentsLandingpage = ({
 
         <StudentTableComponents
           students={students}
-          onSort={handleSortOrder}
+          onSort={handleSort}
+          orderBy={orderBy}
           sortBy={sortBy}
-          sortOrder={sortOrder}
           control={searchControl}
           watchedSearch={watchedSearch}
           onResetSearch={handleResetSearch}
@@ -116,6 +123,7 @@ const StudentsLandingpage = ({
           page={page}
           pageSize={pageSize}
           handleNextPage={handleNextPage}
+          apiBase={apiBase}
         />
       </div>
     </div>

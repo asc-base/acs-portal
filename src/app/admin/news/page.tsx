@@ -1,11 +1,11 @@
 import NewsListComponent from "./news.list.component";
-import { newsService } from "@/infra/container";
-import { queryNews } from "@/core/domain/news";
+import { baseUrl, newsService } from "@/infra/container";
+import { QueryNews } from "@/core/domain/news";
 
 export const dynamic = "force-dynamic";
 
 interface PageProps {
-  searchParams: Promise<queryNews>;
+  searchParams: Promise<QueryNews>;
 }
 
 const page = async ({ searchParams }: PageProps) => {
@@ -13,8 +13,7 @@ const page = async ({ searchParams }: PageProps) => {
   const { rows, totalRecords, page, pageSize } = await newsService.getNews(
     search.page || 1,
     search.pageSize || 9,
-    search.title || "",
-    search.category || "",
+    search.tagId,
   );
   return (
     <NewsListComponent
@@ -22,6 +21,7 @@ const page = async ({ searchParams }: PageProps) => {
       totalRecords={totalRecords}
       page={page}
       pageSize={pageSize}
+      apiBase={baseUrl}
     />
   );
 };

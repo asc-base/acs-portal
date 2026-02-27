@@ -14,26 +14,26 @@ import buddhistEra from "dayjs/plugin/buddhistEra";
 import { RHFTextField } from "@/components/form/RHFTextField";
 import { RHFSelect } from "@/components/form/RHFSelect";
 import { RHFDatePickerDayjs } from "@/components/form/RHFDatePicker";
-import { IType } from "@/core/domain/master-data";
 import {
   ConfirmModal,
   ConfirmModalProps,
 } from "@/components/modal/confirmModal";
 import { useRouter } from "next/navigation";
 import { styled } from "@mui/material/styles";
+import { Tag } from "@/core/domain/list-type";
 
 dayjs.extend(buddhistEra);
 dayjs.locale("th");
 
 interface CraeteNewsProps {
   apiBase: string;
-  categories: IType[];
+  tags: Tag[];
 }
 
 const Schema = z.object({
   title: z.string().min(1, "กรุณากรอกหัวข้อ"),
   detail: z.string().min(1, "กรุณากรอกรายละเอียด"),
-  categoryId: z.number().min(1, "กรุณาเลือกหมวดหมู่"),
+  tagId: z.number().min(1, "กรุณาเลือกหมวดหมู่"),
   startDate: z
     .string()
     .min(1, "กรุณาเลือกวันที่เริ่มต้น")
@@ -57,7 +57,7 @@ const VisuallyHiddenInput = styled("input")({
   width: 1,
 });
 
-const CreateNewsForm = ({ apiBase, categories }: CraeteNewsProps) => {
+const CreateNewsForm = ({ apiBase, tags }: CraeteNewsProps) => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [confirmModal, setConfirmModal] = useState<ConfirmModalProps | null>(
     null,
@@ -78,7 +78,7 @@ const CreateNewsForm = ({ apiBase, categories }: CraeteNewsProps) => {
       title: "",
       startDate: undefined,
       dueDate: undefined,
-      categoryId: 0,
+      tagId: 0,
       detail: "",
     },
   });
@@ -125,7 +125,7 @@ const CreateNewsForm = ({ apiBase, categories }: CraeteNewsProps) => {
         }
         const payload: ICreateNews = {
           title: data.title,
-          categoryId: data.categoryId,
+          tagId: data.tagId,
           detail: data.detail,
           startDate: dayjs(data.startDate).toISOString(),
           dueDate: data.dueDate ? dayjs(data.dueDate).toISOString() : undefined,
@@ -224,15 +224,15 @@ const CreateNewsForm = ({ apiBase, categories }: CraeteNewsProps) => {
             requiredMark
           />
           <RHFSelect
-            name="categoryId"
+            name="tagId"
             control={control}
             label="หมวดหมู่"
             requiredMark
             fullWidth
           >
-            {categories.map((category) => (
-              <MenuItem key={category.id} value={category.id}>
-                {category.name}
+            {tags.map((tag) => (
+              <MenuItem key={tag.id} value={tag.id}>
+                {tag.name}
               </MenuItem>
             ))}
           </RHFSelect>

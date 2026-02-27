@@ -11,16 +11,16 @@ import FacebookIcon from "@mui/icons-material/Facebook";
 import LinkedInIcon from "@mui/icons-material/LinkedIn";
 import InstagramIcon from "@mui/icons-material/Instagram";
 import GitHubIcon from "@mui/icons-material/GitHub";
-import { StudentCardProps } from "@/interface/studentcard";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
+import { IStudent } from "@/core/domain/student";
 
-export const StudentCard: FC<StudentCardProps> = (props) => {
+export const StudentCard: FC<IStudent> = (props) => {
   return (
-    <Card className="h-full max-h-[340px] !w-[162px] cursor-pointer !rounded-2xl lg:!w-[268px]">
+    <Card className="flex flex-col !min-h-[300px] max-h-[340px] !w-[162px] cursor-pointer !rounded-2xl xl:!w-[268px]  transition-all duration-300 hover:-translate-y-1 cursor-pointer">
       {props.user.imageUrl ? (
         <CardMedia
           sx={{
-            height: { sm: 156, lg: 240 },
+            height: { sm: 158, lg: 236 },
             backgroundSize: "cover",
             backgroundPosition: "center",
           }}
@@ -31,7 +31,7 @@ export const StudentCard: FC<StudentCardProps> = (props) => {
       ) : (
         <Box
           sx={{
-            height: { sm: 156, lg: 240 },
+            height: { xs: 158, lg: 240 },
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
@@ -46,7 +46,7 @@ export const StudentCard: FC<StudentCardProps> = (props) => {
           />
         </Box>
       )}
-      <CardContent className="flex h-[100px] flex-col items-center justify-center text-center">
+      <CardContent className="flex flex-1 flex-col items-center justify-center text-center gap-2">
         <Typography className="!text-h4 lg:!text-h3 !text-primary01 text-center !font-bold">
           <span className="lg:hidden">
             {`${props.user.firstNameTh} ${props.user.lastNameTh}`.length >=
@@ -64,11 +64,11 @@ export const StudentCard: FC<StudentCardProps> = (props) => {
             {props.user.firstNameTh} {props.user.lastNameTh}
           </span>
         </Typography>
-        <Box className="flex w-full flex-col items-center justify-between lg:mt-4 lg:flex-row">
+        <Box className="flex w-full flex-col items-center justify-between xl:mt-2 xl:flex-row">
           <Typography className="!text-h5 lg:!text-h4 !text-primary01">
-            {`${props.studentId.slice(0, 2)}-${props.studentId.slice(-3)}`}
+            {`${props.studentCode.slice(0, 2)}-${props.studentCode.slice(-3)}`}
           </Typography>
-          <Box className="flex">
+          <Box className="flex mt-2 md:m-0">
             {props.facebook && (
               <IconButton
                 component="a"
@@ -81,10 +81,10 @@ export const StudentCard: FC<StudentCardProps> = (props) => {
                 <FacebookIcon fontSize="small" />
               </IconButton>
             )}
-            {props.linkin && (
+            {props.linkedin && (
               <IconButton
                 component="a"
-                href={props.linkin}
+                href={props.linkedin}
                 target="_blank"
                 rel="noopener noreferrer"
                 sx={{ p: "2px", color: "var(--color-neutral05)" }}

@@ -5,22 +5,22 @@ export const dynamic = "force-dynamic";
 
 interface PageProps {
   params: Promise<{
-    type: string;
+    tagId: number;
   }>;
 }
 
 const page = async ({params}: PageProps) => {
-  const { type } = await params; 
+  const { tagId } = await params; 
 
   const types = await masterDataService.getMasterDataListType("news");
   const selectedType = types.find(
-    (item) => item.name === type
+    (item) => item.id === tagId
   );
 
   if (!selectedType) {
   return (
     <div className="flex items-center justify-center h-screen">
-      <h2 className="font-bold">Not found {type} </h2>
+      <h2 className="font-bold">Not found {tagId} </h2>
     </div>
   );
   }
@@ -28,9 +28,9 @@ const page = async ({params}: PageProps) => {
   return (
     <div className="w-full">
       <NewsInformationForm
-        type={type}
+        type={selectedType.name}
         apiBase={baseUrl}
-        typeId={selectedType.id}
+        tagId={selectedType.id}
       />
     </div>
   );

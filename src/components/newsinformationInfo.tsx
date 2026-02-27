@@ -34,7 +34,7 @@ type NewsItem = {
 };
 
 const Schema = z.object({
-    image: z.instanceof(File).optional(),
+    thumbnailURL: z.instanceof(File).optional(),
     newsId: z.number().min(1, "กรุณาเลือกข่าว"),
 });
 
@@ -75,8 +75,8 @@ export const NewsInformationInfo = ({
         if (selectedFile) {
             return URL.createObjectURL(croppedFile as File);
         }
-        return newsInformation.image;
-    }, [croppedFile, newsInformation.image]);
+        return newsInformation.thumbnailURL;
+    }, [croppedFile, newsInformation.thumbnailURL]);
 
 
 
@@ -95,15 +95,15 @@ export const NewsInformationInfo = ({
         resolver: zodResolver(Schema),
         mode: "onChange",
         defaultValues: {
-            image: undefined,
-            newsId: newsInformation.newsId,
+            thumbnailURL: undefined,
+            newsId: newsInformation.news.id,
         },
     });
 
     const onSubmit = async (data: FormValues) => {
         try {
             const formData = new FormData();
-            if (data.image) formData.append("image", data.image);
+            if (data.thumbnailURL) formData.append("image", data.thumbnailURL);
             formData.append("newsId", data.newsId.toString());
             formData.append("typeId", typeId.toString());
             formData.append("id", newsInformation.id.toString());
@@ -144,17 +144,17 @@ export const NewsInformationInfo = ({
     const handleUploadComplete = (file: File) => {
         setCroppedFile(file);
 
-        setValue("image", file, {
+        setValue("thumbnailURL", file, {
             shouldValidate: true,
             shouldDirty: true,
         });
         setOpenCrop(false);
     };
 
-    const handleSearch = async (title: string) => {
+    const handleSearch = async (search: string) => {
         setLoading(true);
         try {
-            const { rows } = await newsService.getNews(1, 10, title, "");
+            const { rows } = await newsService.getNews(1, 10, undefined, undefined, undefined, search);
             setOptions(rows);
         } finally {
             setLoading(false);

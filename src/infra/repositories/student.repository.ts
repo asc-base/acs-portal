@@ -4,8 +4,8 @@ import { HttpHelper } from "@/lib/http";
 import { ApiResponse, Pageable } from "@/interface/response";
 
 export class StudentRepository implements IStudentRepository {
-  private http: HttpHelper;
-  private baseUrl: string;
+  private readonly http: HttpHelper;
+  private readonly baseUrl: string;
 
   constructor(baseUrl: string) {
     this.baseUrl = baseUrl;
@@ -18,7 +18,7 @@ export class StudentRepository implements IStudentRepository {
     const searchParams = new URLSearchParams({
       page: query.page?.toString() || "1",
       pageSize: query.pageSize?.toString() || "10",
-      classBookId: query.classBookId.toString(),
+      classBookID: query.classBookID.toString(),
     });
     if (query.search) {
       searchParams.append("search", query.search);
@@ -28,8 +28,8 @@ export class StudentRepository implements IStudentRepository {
       searchParams.append("sortBy", query.sortBy);
     }
 
-    if (query.sortOrder) {
-      searchParams.append("sortOrder", query.sortOrder);
+    if (query.orderBy) {
+      searchParams.append("orderBy", query.orderBy);
     }
 
     const url = `/v1/students?${searchParams.toString()}`;
@@ -47,6 +47,19 @@ export class StudentRepository implements IStudentRepository {
   async createStudent(data: ICreateStudent[] , classBookId :number): Promise<ApiResponse<IStudent[]>> {
     const response = await this.http.post<ApiResponse<IStudent[]>>(
       `/v2/students?classBookId=${classBookId}`,data
+    );
+    return response;
+  }
+
+  async deleteStudent(id :number): Promise<ApiResponse<IStudent>> {
+    const response = await this.http.delete<ApiResponse<IStudent>>(
+      `/v1/students/${id}`);
+    return response;
+  }
+      
+  async updateStudent(data: FormData ,studentId : number): Promise<ApiResponse<IStudent>> {
+    const response = await this.http.put<ApiResponse<IStudent>>(
+      `/v2/students/${studentId}`,data
     );
     return response;
   }

@@ -13,16 +13,14 @@ import { CourseService } from "@/core/service/course.service";
 import { MasterDataRepository } from "@/infra/repositories/master-data.repository";
 import { MasterDataService } from "@/core/service/master-data.service";
 import { useRouter } from "next/navigation";
-import { ICreateCourse, ICourse } from "@/core/domain/course";
+import { ICourse, IUpdateCourse } from "@/core/domain/course";
+import { ConfirmModal, ConfirmModalProps } from "@/components/modal/confirmModal";
 import { TypeCourse } from "@/core/domain/master-data";
-import {
-  ConfirmModal,
-  ConfirmModalProps,
-} from "@/components/modal/confirmModal";
 
 interface CoursesFormProps {
   apiBase: string;
   curriculumId: number;
+  course: ICourse;
 }
 
 const Schema = z.object({
@@ -32,23 +30,23 @@ const Schema = z.object({
   courseNameEn: z.string().min(1, "กรุณากรอกชื่อวิชาภาษาอังกฤษ"),
   courseNameTh: z.string().min(1, "กรุณากรอกชื่อวิชาภาษาไทย"),
   detail: z.string().min(1, "กรุณากรอกลักษณะการเรียน"),
-  prerequisites: z.array(
-    z.object({
-      id: z.number().optional(),
-    }),
-  ),
+  prerequisites: z
+    .array(
+      z.object({
+        id: z.number().optional(),
+      })
+    )
+    .optional(),
 });
 
 type FormData = z.infer<typeof Schema>;
 
-export const CourseForm: FC<CoursesFormProps> = ({ apiBase, curriculumId }) => {
+export const CourseInfo: FC<CoursesFormProps> = ({ apiBase, curriculumId, course }) => {
   const router = useRouter();
   const [typeCourses, setTypeCourses] = useState<TypeCourse[]>([]);
   const [courses, setCourses] = useState<ICourse[]>([]);
   const [isError, setIsError] = useState(false);
-  const [confirmModal, setConfirmModal] = useState<ConfirmModalProps | null>(
-    null,
-  );
+  const [confirmModal, setConfirmModal] = useState<ConfirmModalProps | null>(null);
 
   const courseService = useMemo(() => {
     const courseRepository = new CourseRepository(apiBase);
@@ -60,20 +58,18 @@ export const CourseForm: FC<CoursesFormProps> = ({ apiBase, curriculumId }) => {
     return new MasterDataService(typeCourseRepository);
   }, [apiBase]);
 
-  const {
-    control,
-    handleSubmit,
-    formState: { isDirty },
-  } = useForm<FormData>({
+  const { control, handleSubmit, formState: { isDirty } } = useForm<FormData>({
     resolver: zodResolver(Schema),
     defaultValues: {
-      typeCourseId: 0,
-      courseCode: "",
-      credits: "",
-      courseNameEn: "",
-      courseNameTh: "",
-      detail: "",
-      prerequisites: [],
+      typeCourseId: course.typeCourse.id,
+      courseCode: course.courseCode,
+      credits: course.credits,
+      courseNameEn: course.courseNameEn,
+      courseNameTh: course.courseNameTh,
+      detail: course.detail,
+      // prerequisites: course.preCourses?.map(p => ({
+      //   id: p.id,
+      // })) ?? [],
     },
   });
 
@@ -99,22 +95,22 @@ export const CourseForm: FC<CoursesFormProps> = ({ apiBase, curriculumId }) => {
     setIsError(false);
 
     try {
-      const CreateData: ICreateCourse = {
+      const updateData: IUpdateCourse = {
         courseCode: data.courseCode,
         typeCourseId: Number(data.typeCourseId),
         courseNameTh: data.courseNameTh,
         courseNameEn: data.courseNameEn,
         credits: data.credits,
         detail: data.detail,
-        prerequisites: data.prerequisites
-          ? data.prerequisites
-              .map((p) => p.id)
-              .filter((id): id is number => id !== undefined && id !== 0)
-          : [],
-        curriculumId: curriculumId,
+        // prerequisites: data.prerequisites
+        //   ? data.prerequisites
+        //     .map((p) => p.id)
+        //     .filter((id): id is number => id !== undefined) ?? []
+        //   : [],
+        curriculumId: curriculumId
       };
-
-      const response = await courseService.createCourse(CreateData);
+      console.log("SEND UPDATE DATA", updateData);
+      const response = await courseService.updateCourse(course.id, updateData);
 
       if (!response) {
         setIsError(true);
@@ -125,13 +121,13 @@ export const CourseForm: FC<CoursesFormProps> = ({ apiBase, curriculumId }) => {
         isOpen: true,
         type: "success",
         onClose: () => setConfirmModal(null),
-        onConfirm: () =>
-          router.push(
-            `/admin/courses?page=1&pageSize=10&curriculumId=${curriculumId}`,
-          ),
+        onConfirm: () => router.push(
+          `/admin/courses?page=1&pageSize=10&curriculumId=${curriculumId}`
+        ),
       });
+
     } catch (error) {
-      console.error("Submit Error:", error);
+      console.error("Update Course Error:", error);
       setIsError(true);
     }
   };
@@ -143,9 +139,9 @@ export const CourseForm: FC<CoursesFormProps> = ({ apiBase, curriculumId }) => {
           typeCourseService.getMasterDataTypeCourse(),
           courseService.getCourse({
             curriculumId,
-            orderBy: "courseCode",
+            orderBy: "courseId",
             sortBy: "asc",
-          }),
+          })
         ]);
 
         setTypeCourses(typeRes);
@@ -168,16 +164,12 @@ export const CourseForm: FC<CoursesFormProps> = ({ apiBase, curriculumId }) => {
         autoHideDuration={4000}
         onClose={handleCloseAlert}
       >
-        <Alert
-          severity="error"
-          onClose={handleCloseAlert}
-          sx={{ width: "100%" }}
-        >
-          เกิดข้อผิดพลาด ไม่สามารถเพิ่มรายวิชาได้
+        <Alert severity="error" onClose={handleCloseAlert} sx={{ width: "100%" }}>
+          ไม่สามารถบันทึกข้อมูลได้ในขณะนี้ กรุณาลองใหม่อีกครั้ง
         </Alert>
       </Snackbar>
 
-      <h3 className="mb-4 text-lg font-bold">ข้อมูลรายวิชา</h3>
+      <h3 className="font-bold text-lg mb-4">แก้ไขข้อมูลรายวิชา</h3>
 
       <div className="grid grid-cols-3 gap-4">
         <RHFSelect
@@ -187,6 +179,7 @@ export const CourseForm: FC<CoursesFormProps> = ({ apiBase, curriculumId }) => {
           variant="outlined"
           size="small"
           required
+          requiredMark
         >
           {typeCourses.map((typeCourse) => (
             <MenuItem key={typeCourse.id} value={typeCourse.id}>
@@ -202,6 +195,7 @@ export const CourseForm: FC<CoursesFormProps> = ({ apiBase, curriculumId }) => {
           variant="outlined"
           size="small"
           required
+          requiredMark
         />
 
         <RHFTextField
@@ -211,6 +205,7 @@ export const CourseForm: FC<CoursesFormProps> = ({ apiBase, curriculumId }) => {
           variant="outlined"
           size="small"
           required
+          requiredMark
         />
       </div>
 
@@ -222,6 +217,7 @@ export const CourseForm: FC<CoursesFormProps> = ({ apiBase, curriculumId }) => {
         size="small"
         fullWidth
         required
+        requiredMark
       />
 
       <RHFTextField
@@ -232,6 +228,7 @@ export const CourseForm: FC<CoursesFormProps> = ({ apiBase, curriculumId }) => {
         size="small"
         fullWidth
         required
+        requiredMark
       />
 
       <RHFTextField
@@ -243,13 +240,14 @@ export const CourseForm: FC<CoursesFormProps> = ({ apiBase, curriculumId }) => {
         multiline
         rows={6}
         required
+        requiredMark
       />
 
       <div className="mt-6">
         <div className="mb-4 flex flex-row items-center justify-between">
           <h3 className="text-primary01 font-bold">รายวิชาบังคับ</h3>
           <IconButton
-            onClick={() => append({ id: 0 })}
+            onClick={() => append({ id: undefined })}
             sx={{ color: "var(--color-primary03)" }}
           >
             <AddCircleOutlineRoundedIcon sx={{ fontSize: 32 }} />
@@ -269,13 +267,16 @@ export const CourseForm: FC<CoursesFormProps> = ({ apiBase, curriculumId }) => {
               >
                 {courses.map((c) => (
                   <MenuItem key={c.id} value={c.id}>
-                    {c.courseCode} {c.courseNameTh}
+                    {c.courseCode}   {c.courseNameTh}
                   </MenuItem>
                 ))}
               </RHFSelect>
             </div>
 
-            <IconButton color="error" onClick={() => remove(index)}>
+            <IconButton
+              color="error"
+              onClick={() => remove(index)}
+            >
               <DeleteIcon />
             </IconButton>
           </div>
@@ -283,23 +284,21 @@ export const CourseForm: FC<CoursesFormProps> = ({ apiBase, curriculumId }) => {
       </div>
 
       <div className="flex justify-end gap-x-4 pt-6">
-        <Button
-          type="button"
-          variant="outlined"
-          size="medium"
-          className="w-37.5"
-          onClick={handleCancel}
-        >
-          ยกเลิก
-        </Button>
-        <Button
-          variant="contained"
-          size="medium"
-          type="submit"
-          className="w-37.5"
-        >
-          บันทึกข้อมูล
-        </Button>
+            <Button
+              type="button"
+              variant="outlined"
+              size="large"
+              onClick={handleCancel}
+            >
+              ยกเลิก
+            </Button>
+            <Button
+              variant="contained"
+              size="large"
+              type="submit"
+            >
+              บันทึกข้อมูล
+            </Button>
       </div>
 
       {confirmModal && <ConfirmModal {...confirmModal} />}

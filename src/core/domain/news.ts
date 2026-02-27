@@ -1,4 +1,4 @@
-import { Category } from "./list-type";
+import { Tag } from "./list-type";
 
 export interface INews {
   id: number;
@@ -11,12 +11,12 @@ export interface INews {
   updatedBy: number;
   createdDate: Date;
   updatedDate: Date;
-  category: Category;
+  tag: Tag;
 }
 
 export interface ICreateNews {
   title: string;
-  categoryId: number;
+  tagId: number;
   startDate: string;
   dueDate?: string;
   detail: string;
@@ -24,7 +24,7 @@ export interface ICreateNews {
 
 export interface IUpdateNews {
   title?: string;
-  categoryId?: number;
+  tagId?: number;
   startDate: string;
   dueDate?: string;
   detail?: string;
@@ -32,26 +32,18 @@ export interface IUpdateNews {
 
 export interface INewsInformation {
   id: number;
-  image: string;
-  newsId: number;
-  typeId: number;
-  createdAt: Date;
-  updatedAt: Date;
-  createdBy: number;
-  updatedBy: number;
+  thumbnailURL: string;
   news: INews;
-  type: Category;
 }
 
 export interface newsInformationPageProps {
   newsInformation: INewsInformation[];
-  type: string;
+  tagId: number;
   pageSize: number;
 }
 
-export interface queryNews {
+export interface QueryNews {
   page?: number;
   pageSize?: number;
-  category?: string;
-  title?: string;
+  tagId?: number;
 }

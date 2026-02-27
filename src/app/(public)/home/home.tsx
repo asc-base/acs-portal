@@ -102,7 +102,7 @@ const HomePage = ({
         header="สาขาวิทยาการคอมพิวเตอร์ประยุกต์"
         description="คณะวิทยาศาสตร์ ภาควิชาคณิตศาสตร์/มหาวิทยาลัยเทคโนโลยีพระจอมเกล้าธนบุรี"
       />
-      <div className="container mx-auto my-2.5 px-3.5 py-4">
+      <div className="container mx-auto my-2.5 px-6 py-4">
         <div className="flex flex-col gap-y-6">
           {(showActivitySection || showAnnouncementSection) && (
             <div className="flex flex-col-reverse gap-x-6 gap-y-6 md:grid md:grid-cols-2">
@@ -151,6 +151,7 @@ const HomePage = ({
               handlePrevNews={handlePrevNewsActivity}
               activeIndex={newsActivityActive}
               handleSetActiveIndex={handleSetNewsActivity}
+              tagId={16}
             >
               {Array.from(
                 { length: Math.min(3, initNewsActivity.length) },
@@ -189,6 +190,7 @@ const HomePage = ({
               handlePrevNews={handlePrevNewsComplete}
               activeIndex={newsCompleteActive}
               handleSetActiveIndex={handleSetNewsComplete}
+              tagId={17}
             >
               {Array.from(
                 { length: Math.min(3, initNewsComplete.length) },
@@ -227,6 +229,7 @@ const HomePage = ({
               handlePrevNews={handlePrevNewsActivityStudent}
               activeIndex={newsActivityStudentActive}
               handleSetActiveIndex={handleSetNewsActivityStudent}
+              tagId={18}
             >
               {Array.from(
                 { length: Math.min(3, initNewsActivityStudent.length) },

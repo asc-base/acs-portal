@@ -7,6 +7,8 @@ import {
   SelectChangeEvent,
   Button,
   Pagination,
+  Snackbar,
+  Alert,
 } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import DoneIcon from "@mui/icons-material/Done";
@@ -16,18 +18,25 @@ import CloseIcon from "@mui/icons-material/Close";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useCallback, useEffect } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { RHFTextField } from "@/components/form/RHFTextField";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
+import { ClassBookRepository } from "@/infra/repositories/class-book.repository";
+import { ClassBookService } from "@/core/service/class-book.service";
+import {
+  ConfirmModal,
+  ConfirmModalProps,
+} from "@/components/modal/confirmModal";
 
 interface ClassBookListComponentsProps {
   classbooks: IClassBook[];
   totalRecords: number;
   pageSize: number;
   page: number;
-  sortOrder?: string;
+  sortBy?: string;
   search?: string;
+  apiBase: string;
 }
 
 const searchSchema = z.object({
@@ -41,12 +50,17 @@ const ClassBookListComponents = ({
   totalRecords,
   pageSize,
   page,
-  sortOrder,
+  sortBy,
   search,
+  apiBase,
 }: ClassBookListComponentsProps) => {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const [isError, setIsError] = useState(false);
+  const [confirmModal, setConfirmModal] = useState<ConfirmModalProps | null>(
+    null,
+  );
 
   const { control, reset, watch } = useForm<SearchForm>({
     resolver: zodResolver(searchSchema),
@@ -75,11 +89,58 @@ const ClassBookListComponents = ({
     router.push(`${pathname}?${params.toString()}`);
   };
 
+  const classBookService = useMemo(() => {
+    const classBookRepository = new ClassBookRepository(apiBase);
+    return new ClassBookService(classBookRepository);
+  }, [apiBase]);
+
+  const confirmDeleteClassbook = (id: number) => {
+    setConfirmModal({
+      isOpen: true,
+      type: "delete",
+      onClose: () => setConfirmModal(null),
+      onConfirm: () => {
+        deleteClassbook(id);
+        setConfirmModal(null);
+      },
+    });
+  };
+
+  const deleteClassbook = async (id: number) => {
+    try {
+      const reps = await classBookService.deleteClassBook(id);
+      if (!reps) {
+        setIsError(true);
+        return;
+      }
+      setConfirmModal({
+        isOpen: true,
+        type: "success",
+        onClose: () => setConfirmModal(null),
+        onConfirm: () => {
+          setConfirmModal(null);
+          router.refresh();
+        },
+        title: "ลบข้อมูลสำเร็จ",
+        description: "ข้อมูลถูกลบออกจากระบบแล้ว",
+        confirmText: "เสร็จสิ้น",
+      });
+    } catch (error) {
+      console.error(error);
+      setIsError(true);
+    }
+  };
+
+  const handleCloseAlert = () => {
+    setIsError(false);
+  };
+
   useEffect(() => {
     const delayDebounceFn = setTimeout(() => {
       const params = new URLSearchParams(searchParams.toString());
       if (watchedSearch) {
         params.set("search", watchedSearch);
+        params.set("page", "1");
       } else {
         params.delete("search");
       }
@@ -94,8 +155,22 @@ const ClassBookListComponents = ({
 
   return (
     <div className="min-h-screen px-8 py-5">
+      <Snackbar
+        anchorOrigin={{ vertical: "top", horizontal: "right" }}
+        open={isError}
+        autoHideDuration={4000}
+        onClose={handleCloseAlert}
+      >
+        <Alert
+          severity="error"
+          onClose={handleCloseAlert}
+          sx={{ width: "100%" }}
+        >
+          ไม่สามารถลบรุ่นการศึกษาได้
+        </Alert>
+      </Snackbar>
       <div className="mb-6 flex items-center justify-between">
-        <h3 className="text-lg font-bold">ข้อมูลนักศึกษา</h3>
+        <h3 className="font-bold">ข้อมูลนักศึกษา</h3>
 
         <div className="flex items-center gap-3">
           <RHFTextField
@@ -116,16 +191,15 @@ const ClassBookListComponents = ({
           <Select
             onChange={handleSortOrder}
             size="small"
-            value={sortOrder ?? "desc"}
+            value={sortBy ?? "desc"}
             displayEmpty
             renderValue={() => "จัดเรียงตาม"}
             sx={{
               "& .MuiOutlinedInput-notchedOutline": {
-                borderColor: "var(--color-neutral04)",
+                borderColor: "var(--color-neutral03)",
               },
               py: 0.5,
               width: "180px",
-              height: "44px",
               color: "var(--color-neutral04)",
             }}
             IconComponent={ExpandMoreIcon}
@@ -146,7 +220,7 @@ const ClassBookListComponents = ({
               }}
             >
               ใหม่สุดไปเก่าสุด
-              {sortOrder === "desc" && <DoneIcon fontSize="small" />}
+              {sortBy === "desc" && <DoneIcon fontSize="small" />}
             </MenuItem>
 
             <MenuItem
@@ -160,12 +234,12 @@ const ClassBookListComponents = ({
               }}
             >
               เก่าสุดไปใหม่สุด
-              {sortOrder === "asc" && <DoneIcon fontSize="small" />}
+              {sortBy === "asc" && <DoneIcon fontSize="small" />}
             </MenuItem>
           </Select>
 
           <Link href="/admin/classbook/create">
-            <Button variant="contained">
+            <Button variant="contained" size="large">
               <AddIcon />
               เพิ่มรุ่นนักศึกษา
             </Button>
@@ -180,13 +254,12 @@ const ClassBookListComponents = ({
               key={classbook.id}
               type="classBook"
               data={classbook}
-              onEdit={() => router.push(`/admin/students/edit/${classbook.id}`)}
               onView={() =>
                 router.push(
                   `/admin/students?page=1&pageSize=10&classBookId=${classbook.id}`,
                 )
               }
-              onDelete={() => console.log("Delete succeed:", classbook.id)}
+              onDelete={() => confirmDeleteClassbook(classbook.id)}
             />
           ))}
         </div>
@@ -200,6 +273,7 @@ const ClassBookListComponents = ({
           size="large"
         />
       </div>
+      {confirmModal && <ConfirmModal {...confirmModal} />}
     </div>
   );
 };

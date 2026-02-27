@@ -53,8 +53,8 @@ const Page = async ({ searchParams }: LocalPageProps) => {
   const classBooks = await classBookService.getClassBooks({
     page: 1,
     pageSize: 4,
-    sortBy: "firstYearAcademic",
-    sortOrder: "desc",
+    orderBy: "firstYearAcademic",
+    sortBy: "desc",
   });
 
   const revertedClassBooks = classBooks.rows.slice();

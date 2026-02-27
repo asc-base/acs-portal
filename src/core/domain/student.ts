@@ -1,29 +1,31 @@
 import { IUser } from "./user";
-import { IProject } from "./project";
+// import { IProject } from "./project";
 import { IClassBook } from "./classbook";
 export interface IStudent {
   id: number;
-  studentId: string;
+  studentCode: string;
   user: IUser;
-  classBook: IClassBook;
-  linkin?: string | null;
+  // classBook: IClassBook;
+  // yearOfFirstAdmission:string | null;
+  // yearOfCompletion:string | null;
+  linkedin?: string | null;
   facebook?: string | null;
   instragram?: string | null;
   github?: string | null;
-  projects: IProject[];
+  // projects: IProject[];
 }
 
 export interface QueryStudent {
   page: number;
   pageSize: number;
-  classBookId: number;
+  classBookID: number;
   search?: string;
-  sortBy?: string;
-  sortOrder?: "asc" | "desc";
+  orderBy?: string;
+  sortBy?: "asc" | "desc";
 }
 
 export interface ICreateStudent {
-  studentId: string;
+  studentCode: string;
   email: string;
   firstNameTh: string;
   lastNameTh: string;
@@ -32,9 +34,24 @@ export interface ICreateStudent {
   nickName?: string;
 }
 
+export interface IUpdateStudent {
+  studentCode?: string;
+  email?: string;
+  firstNameTh?: string;
+  lastNameTh?: string;
+  firstNameEn?: string;
+  lastNameEn?: string;
+  nickName?: string;
+  classBook?: IClassBook;
+  linkedin?: string | null;
+  facebook?: string | null;
+  instragram?: string | null;
+  github?: string | null;
+}
+
 export interface ICreateStudentCsv {
   Timestamp: string;
-  studentId: string;
+  studentCode: string;
   email: string;
   firstNameTh: string;
   lastNameTh: string;

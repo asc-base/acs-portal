@@ -17,10 +17,10 @@ const page = async ({ searchParams }: PageProps) => {
     page: search.page ?? 1,
     pageSize: search.pageSize ?? 10,
     curriculumId: search.curriculumId ?? 1,
-    typecourseId: search.typecourseId,
+    typeCourseId: search.typeCourseId,
     search: search.search ?? "",
-    sortBy: search.sortBy ?? "courseId",
-    sortOrder: search.sortOrder ?? "desc",
+    orderBy: search.sortBy ?? "courseCode",
+    sortBy: search.sortBy ?? "desc",
   };
 
   const { rows, pageSize, page, totalRecords } = await courseService.getCourse(query);
@@ -45,9 +45,9 @@ const page = async ({ searchParams }: PageProps) => {
       page={page}
       curriculumId={query.curriculumId}
       typeCourses={typeCourses}
-      typecourseId={query.typecourseId}
+      typeCourseId={query.typeCourseId}
       sortBy={query.sortBy}
-      sortOrder={query.sortOrder}
+      orderBy={query.orderBy}
       curriculum={curriculum}
       apiBase={baseUrl}
     />

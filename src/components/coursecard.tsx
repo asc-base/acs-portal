@@ -3,16 +3,13 @@
 import { useState } from "react";
 import { Box, IconButton, Collapse } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-import { Course } from "@/interface/course";
+import { ICourse } from "@/core/domain/course";
 
-const CourseCard: React.FC<Course> = ({
-  courseId,
-  courseNameEn,
-  courseNameTh,
-  preCourses,
-  credits,
-  courseDetail,
-}) => {
+interface CourseCardProps {
+  course: ICourse;
+}
+
+const CourseCard: React.FC<CourseCardProps> = ({ course }) => {
   const [open, setOpen] = useState(false);
 
   return (
@@ -35,7 +32,7 @@ const CourseCard: React.FC<Course> = ({
         sx={{ cursor: "pointer" }}
       >
         <h2>
-          {courseId} {courseNameEn}
+          {course.courseCode} {course.courseNameEn}
         </h2>
 
         <IconButton
@@ -58,26 +55,26 @@ const CourseCard: React.FC<Course> = ({
         }}
       >
         <h3>
-          <span className="font-bold">ชื่อภาษาไทย :</span> {courseNameTh}
+          <span className="font-bold">ชื่อภาษาไทย :</span> {course.courseNameTh}
         </h3>
 
-        {Array.isArray(preCourses) && preCourses.length > 0 && (
+        {/* {Array.isArray(preCourses) && preCourses.length > 0 && (
           <h3>
             <span className="font-bold">วิชาบังคับก่อน :</span>{" "}
             {preCourses
               .map((p) => `${p.courseId} ${p.courseNameEn}`)
               .join(", ")}
           </h3>
-        )}
+        )} */}
 
         <h3>
-          <span className="font-bold">ลักษณะการเรียน :</span> {credits}
+          <span className="font-bold">ลักษณะการเรียน :</span> {course.credits}
         </h3>
 
         <Collapse in={open}>
           <Box mt={1}>
             <h3 className="leading-relaxed whitespace-pre-wrap">
-              {courseDetail}
+              {course.detail}
             </h3>
           </Box>
         </Collapse>

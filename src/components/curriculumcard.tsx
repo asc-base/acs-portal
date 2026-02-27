@@ -26,7 +26,7 @@ export const CurriculumCard: FC<ICurriculumCard> = ({
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
 
-  const { id, year, description, imageUrl, fileUrl, title } = curriculum;
+  const { id, year, description, thumbnailURL, documentURL, title } = curriculum;
   const isFocused = focusCurriculum === id;
 
   return (
@@ -53,12 +53,12 @@ export const CurriculumCard: FC<ICurriculumCard> = ({
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          backgroundColor: imageUrl ? "transparent" : "var(--color-neutral02)",
+          backgroundColor: thumbnailURL ? "transparent" : "var(--color-neutral02)",
         }}
       >
-        {imageUrl ? (
+        {thumbnailURL ? (
           <Image
-            src={imageUrl}
+            src={thumbnailURL}
             alt={`Curriculum ${year}`}
             fill
             style={{ objectFit: "cover" }}
@@ -105,7 +105,7 @@ export const CurriculumCard: FC<ICurriculumCard> = ({
             py: 1.5,
           }}
         >
-          <Link href={fileUrl} target="_blank" rel="noopener noreferrer">
+          <Link href={documentURL} target="_blank" rel="noopener noreferrer">
             อ่านรายละเอียดเพิ่มเติม
           </Link>
         </Button>

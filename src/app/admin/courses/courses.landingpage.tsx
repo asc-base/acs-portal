@@ -1,9 +1,7 @@
 "use client";
 import React, { useEffect, useCallback } from "react";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
-import {
-  SelectChangeEvent,
-} from "@mui/material";
+import { SelectChangeEvent } from "@mui/material";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -20,10 +18,10 @@ interface CoursesLandingPageProps {
   page: number;
   curriculumId: number;
   typeCourses: TypeCourse[];
-  typecourseId?: number;
+  typeCourseId?: number;
   search?: string;
-  sortBy?: string;
-  sortOrder?: "asc" | "desc";
+  orderBy?: string;
+  sortBy?: "asc" | "desc";
   curriculum: ICurriculum;
   apiBase: string;
 }
@@ -40,13 +38,13 @@ const CoursesLandingpage = ({
   pageSize,
   curriculumId,
   typeCourses,
-  typecourseId,
+  typeCourseId,
   page,
   search,
   sortBy,
-  sortOrder,
+  orderBy,
   apiBase,
-  curriculum
+  curriculum,
 }: CoursesLandingPageProps) => {
   const router = useRouter();
   const pathname = usePathname();
@@ -55,7 +53,7 @@ const CoursesLandingpage = ({
   const {
     control: searchControl,
     reset: searchReset,
-    watch
+    watch,
   } = useForm<SearchForm>({
     resolver: zodResolver(searchSchema),
     defaultValues: { search },
@@ -81,6 +79,7 @@ const CoursesLandingpage = ({
       const params = new URLSearchParams(searchParams.toString());
       if (watchedSearch) {
         params.set("search", watchedSearch);
+        params.set("page", "1");
       } else {
         params.delete("search");
       }
@@ -93,16 +92,16 @@ const CoursesLandingpage = ({
     return () => clearTimeout(delayDebounceFn);
   }, [watchedSearch, pathname, router, searchParams]);
 
-  const handleSort = (sortBy: string) => {
+  const handleSort = (orderBy: string) => {
     const params = new URLSearchParams(searchParams.toString());
 
-    const currentSortBy = params.get("sortBy");
-    const currentOrder = params.get("sortOrder") as "asc" | "desc" | null;
+    const currentOrderBy = params.get("orderBy");
+    const currentSortBy = params.get("sortBy") as "asc" | "desc" | null;
     const newOrder =
-      currentSortBy === sortBy && currentOrder === "desc" ? "asc" : "desc";
+      currentOrderBy === orderBy && currentSortBy === "desc" ? "asc" : "desc";
 
-    params.set("sortBy", sortBy);
-    params.set("sortOrder", newOrder);
+    params.set("orderBy", orderBy);
+    params.set("sortBy", newOrder);
     router.push(`${pathname}?${params.toString()}`, { scroll: false });
   };
 
@@ -111,20 +110,22 @@ const CoursesLandingpage = ({
     const params = new URLSearchParams(searchParams.toString());
 
     if (value === "all") {
-      params.delete("typecourseId");
+      params.delete("typeCourseId");
     } else {
-      params.set("typecourseId", value);
+      params.set("typeCourseId", value);
     }
 
     params.set("page", "1");
     router.push(`${pathname}?${params.toString()}`, { scroll: false });
   };
 
-
   return (
     <div className="p-6">
       <div className="mb-4 flex flex-col gap-6">
-        <h3 className="font-bold"> จัดการหลักสูตร <span>{`>> ปีการศึกษา ${curriculum.year}`}</span> </h3>
+        <h3 className="font-bold">
+          {" "}
+          จัดการหลักสูตร <span>{`>> ปีการศึกษา ${curriculum.year}`}</span>{" "}
+        </h3>
 
         <CurriculumInfoComponent curriculum={curriculum} apiBase={apiBase} />
 
@@ -132,7 +133,7 @@ const CoursesLandingpage = ({
           courses={courses}
           onSort={handleSort}
           sortBy={sortBy}
-          sortOrder={sortOrder}
+          orderBy={orderBy}
           control={searchControl}
           watchedSearch={watchedSearch}
           onResetSearch={handleResetSearch}
@@ -142,10 +143,10 @@ const CoursesLandingpage = ({
           pageSize={pageSize}
           handleNextPage={handleNextPage}
           typeCourses={typeCourses}
-          typecourseId={typecourseId}
+          typeCourseId={typeCourseId}
           handleFilterTypeCourse={handleFilterTypeCourse}
+          apiBase={apiBase}
         />
-
       </div>
     </div>
   );

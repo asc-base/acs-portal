@@ -9,8 +9,6 @@ interface CourseListComponentsProps {
   course: ICourse[];
   totalRecords: number;
   typeCourseName: string;
-  curriculumId: number;
-  typeCourseId: number;
 }
 
 const CourseListComponents = ({
@@ -27,21 +25,13 @@ const CourseListComponents = ({
           <p>{typeCourseName}</p>
         </Breadcrumbs>
       </div>
-      <h1 className="mb-4">
+      <h4 className="mt-4 mb-4 font-bold text-accent04 lg:text-2xl">
         {typeCourseName} จำนวน {totalRecords} วิชา
-      </h1>
+      </h4>
       {course.map((item) => (
         <CourseCard
           key={item.id}
-          courseId={item.courseId}
-          courseNameEn={item.courseNameEn}
-          courseNameTh={item.courseNameTh}
-          preCourses={item.preCourses.map((preCourse) => ({
-            courseId: preCourse.courseId,
-            courseNameEn: preCourse.courseNameEn,
-          }))}
-          credits={item.credits}
-          courseDetail={item.courseDetail}
+          course={item}
         />
       ))}
     </div>

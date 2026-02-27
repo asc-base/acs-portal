@@ -13,6 +13,7 @@ interface NewsCarouselComponentProps {
   activeIndex: number;
   handleSetActiveIndex: (index: number) => void;
   title: string;
+  tagId:number;
 }
 
 export const NewsCarouselComponent = ({
@@ -23,13 +24,14 @@ export const NewsCarouselComponent = ({
   activeIndex,
   handleSetActiveIndex,
   title,
+  tagId,
 }: NewsCarouselComponentProps) => {
   return (
     <div>
       <div className="flex items-center justify-between">
-        <h3 className="lg:text-[24px] text-accent04 font-bold">{title}</h3>
+        <h3 className="text-accent04 font-bold lg:text-[24px]">{title}</h3>
         <Link
-          href={`/news?category=${title}&page=1&pageSize=12`}
+          href={`/news?category=${title}&page=1&pageSize=12&tagId=${tagId}`}
           className="flex items-center gap-x-1"
         >
           อ่านทั้งหมด
@@ -39,19 +41,16 @@ export const NewsCarouselComponent = ({
         </Link>
       </div>
       <div className="flex items-center justify-between">
-        <div className="hidden sm:flex items-center justify-between">
+        <div className="hidden items-center justify-between sm:flex">
           <Button onClick={handlePrevNews}>
             <ArrowBackIosIcon fontSize="large" />
           </Button>
         </div>
         <div className="w-full">
-          <div className=" flex justify-center gap-4 my-3 transition-all duration-300 ease-in-out
-              [&>*:nth-child(n+2)]:hidden
-              md:[&>*:nth-child(n+3)]:block
-              lg:[&>*:nth-child(n+2)]:block">
+          <div className="my-3 flex justify-center gap-4 transition-all duration-300 ease-in-out [&>*:nth-child(n+2)]:hidden lg:[&>*:nth-child(n+2)]:block md:[&>*:nth-child(n+3)]:block">
             {children}
           </div>
-          <div className="hidden sm:flex justify-center gap-x-3">
+          <div className="hidden justify-center gap-x-3 sm:flex">
             {news.map((_, index) => (
               <div
                 onClick={() => handleSetActiveIndex(index)}
@@ -61,7 +60,7 @@ export const NewsCarouselComponent = ({
             ))}
           </div>
         </div>
-        <div className="hidden sm:flex items-center justify-between">
+        <div className="hidden items-center justify-between sm:flex">
           <Button onClick={handleNextNews}>
             <ArrowForwardIosIcon fontSize="large" />
           </Button>

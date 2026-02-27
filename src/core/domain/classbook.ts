@@ -1,16 +1,17 @@
 export interface IClassBook {
+  image: string;
   id: number;
   firstYearAcademic: string;
-  image: string;
-  classof: number;
+  thumbnailURL: string;
+  classof: string;
   curriculumId: number;
 }
 
 export interface QueryClassBook {
   page?: number;
   pageSize?: number;
-  sortBy?: string;
-  sortOrder?: "asc" | "desc";
+  orderBy?: string;
+  sortBy?: "asc" | "desc";
   search?: string;
 }
 

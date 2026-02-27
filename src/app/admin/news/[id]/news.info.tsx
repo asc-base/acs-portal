@@ -1,8 +1,8 @@
 "use client";
 import { useState, useMemo } from "react";
-import { INews } from "@/core/domain/news";
+import { INews, IUpdateNews } from "@/core/domain/news";
 import { IType } from "@/core/domain/master-data";
-import dayjs from "dayjs";
+import dayjs, { Dayjs } from "dayjs";
 import "dayjs/locale/th";
 import buddhistEra from "dayjs/plugin/buddhistEra";
 import { useForm, SubmitHandler } from "react-hook-form";
@@ -13,11 +13,9 @@ import Image from "next/image";
 import { RHFSelect } from "@/components/form/RHFSelect";
 import { Button, MenuItem, Alert, Snackbar } from "@mui/material";
 import { RHFDatePickerDayjs } from "@/components/form/RHFDatePicker";
-import { Dayjs } from "dayjs";
 import { styled } from "@mui/material/styles";
 import { NewsService } from "@/core/service/news.service";
 import { NewsRepository } from "@/infra/repositories/news.repository";
-import { IUpdateNews } from "@/core/domain/news";
 import { useRouter } from "next/navigation";
 import {
   ConfirmModal,
@@ -37,7 +35,7 @@ const formSchema = z.object({
   title: z.string(),
   startDate: z.custom<Dayjs>(),
   dueDate: z.custom<Dayjs>().nullable(),
-  category: z.number(),
+  tag: z.number(),
   detail: z.string().optional(),
 });
 
@@ -84,7 +82,7 @@ const NewsInfo = ({ news, apiBase, categories }: NewsInfoProps) => {
       title: news.title,
       startDate: dayjs(news.startDate),
       dueDate: news.dueDate ? dayjs(news.dueDate) : undefined,
-      category: news.category.id,
+      tag: news.tag.id,
       detail: news.detail,
     },
   });
@@ -120,7 +118,7 @@ const NewsInfo = ({ news, apiBase, categories }: NewsInfoProps) => {
       try {
         const payload: IUpdateNews = {
           title: data.title,
-          categoryId: data.category,
+          tagId: data.tag,
           detail: data.detail,
           startDate: dayjs(data.startDate).toISOString(),
 
@@ -231,7 +229,7 @@ const NewsInfo = ({ news, apiBase, categories }: NewsInfoProps) => {
             requiredMark
           />
           <RHFSelect
-            name="category"
+            name="tag"
             control={control}
             label="หมวดหมู่"
             disabled={!isEdit}

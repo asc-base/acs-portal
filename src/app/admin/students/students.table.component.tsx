@@ -20,6 +20,7 @@ import {
   ArrowDownward,
   ArrowUpward,
 } from "@mui/icons-material";
+import { useState, useMemo, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { IStudent, ICreateStudentCsv } from "@/core/domain/student";
 import SearchIcon from "@mui/icons-material/Search";
@@ -28,16 +29,23 @@ import { RHFTextField } from "@/components/form/RHFTextField";
 import { SearchForm } from "./students.landingpage";
 import { Control } from "react-hook-form";
 import Link from "next/link";
-import { useRef } from "react";
 import AddIcon from "@mui/icons-material/Add";
 import { useImportStudentStore } from "@/store/preview-data";
 import Papa from "papaparse";
+import { StudentService } from "@/core/service/student.service";
+import { StudentRepository } from "@/infra/repositories/student.repository";
+import {
+  ConfirmModal,
+  ConfirmModalProps,
+} from "@/components/modal/confirmModal";
+import Alert from "@mui/material/Alert";
+import Snackbar from "@mui/material/Snackbar";
 
 interface StudentTableComponentsProps {
   students: IStudent[];
   onSort: (sortBy: string) => void;
-  sortBy?: string;
-  sortOrder?: "asc" | "desc";
+  orderBy?: string;
+  sortBy?: "asc" | "desc";
   control: Control<SearchForm>;
   watchedSearch?: string;
   onResetSearch: () => void;
@@ -46,13 +54,14 @@ interface StudentTableComponentsProps {
   page: number;
   pageSize: number;
   handleNextPage: (page: number) => void;
+  apiBase: string;
 }
 
 const StudentTableComponents = ({
   students,
   onSort,
   sortBy,
-  sortOrder,
+  orderBy,
   control,
   watchedSearch,
   onResetSearch,
@@ -61,17 +70,62 @@ const StudentTableComponents = ({
   page,
   pageSize,
   handleNextPage,
+  apiBase,
 }: StudentTableComponentsProps) => {
   const router = useRouter();
   const inputRef = useRef<HTMLInputElement | null>(null);
   const { setImportData } = useImportStudentStore();
+  const [confirmModal, setConfirmModal] = useState<ConfirmModalProps | null>(
+    null,
+  );
+  const [isError, setIsError] = useState(false);
 
-  const handleEdit = (studentId: number) => {
-    router.push(`/admin/students/edit/${studentId}`);
+  const studentService = useMemo(() => {
+    const repo = new StudentRepository(apiBase);
+    return new StudentService(repo);
+  }, [apiBase]);
+
+  const handleEdit = (userId: number) => {
+    router.push(`/admin/students/${userId}?classBookId=${classBookId}`);
   };
 
-  const handleDelete = (studentId: number) => {
-    console.log("delete", studentId);
+  const handleDelete = (id: number) => {
+    setConfirmModal({
+      isOpen: true,
+      type: "delete",
+      onClose: () => setConfirmModal(null),
+      onConfirm: () => {
+        onDelete(id);
+      },
+    });
+  };
+
+  const onDelete = async (id: number) => {
+    try {
+      const response = await studentService.deleteStudent(id);
+
+      if (response) {
+        setConfirmModal({
+          isOpen: true,
+          type: "success",
+          onClose: () => setConfirmModal(null),
+          onConfirm: () => {
+            setConfirmModal(null);
+            router.push(
+              `/admin/students?page=1&pageSize=10&classBookId=${classBookId}`,
+            );
+          },
+          title: "ลบข้อมูลสำเร็จ",
+          description: "ข้อมูลถูกลบออกจากฐานข้อมูลแล้ว",
+          confirmText: "เสร็จสิ้น",
+        });
+      } else {
+        setIsError(true);
+      }
+    } catch (error) {
+      console.log(error);
+      setIsError(true);
+    }
   };
 
   const handleClick = () => {
@@ -79,7 +133,7 @@ const StudentTableComponents = ({
   };
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (!e.target.files || !e.target.files[0]) return;
+    if (!e.target.files?.[0]) return;
     const file = e.target.files[0];
     Papa.parse(file, {
       header: true,
@@ -94,6 +148,20 @@ const StudentTableComponents = ({
 
   return (
     <Card>
+      <Snackbar
+        anchorOrigin={{ vertical: "top", horizontal: "right" }}
+        open={isError}
+        autoHideDuration={4000}
+        onClose={() => setIsError(false)}
+      >
+        <Alert
+          severity="error"
+          onClose={() => setIsError(false)}
+          sx={{ width: "100%" }}
+        >
+          ไม่สามารถลบข้อมูลนักศึกษาได้้ในขณะนี้ กรุณาลองใหม่อีกครั้ง
+        </Alert>
+      </Snackbar>
       <div className="flex items-center justify-between p-6">
         <h3 className="font-bold">นักศึกษาทั้งหมด ({totalRecords} คน)</h3>
         <div className="flex gap-6">
@@ -144,8 +212,8 @@ const StudentTableComponents = ({
                 <div className="flex items-center justify-center gap-1">
                   <h3 className="font-bold">รหัสนักศึกษา</h3>
                   <IconButton size="small" onClick={() => onSort("studentId")}>
-                    {sortBy === "studentId" ? (
-                      sortOrder === "asc" ? (
+                    {orderBy === "studentCode" ? (
+                      sortBy === "asc" ? (
                         <ArrowUpward
                           fontSize="small"
                           sx={{ color: "var(--color-primary01)" }}
@@ -173,8 +241,8 @@ const StudentTableComponents = ({
                     size="small"
                     onClick={() => onSort("firstNameTh")}
                   >
-                    {sortBy === "firstNameTh" ? (
-                      sortOrder === "asc" ? (
+                    {orderBy === "firstNameTh" ? (
+                      sortBy === "asc" ? (
                         <ArrowUpward
                           fontSize="small"
                           sx={{ color: "var(--color-primary01)" }}
@@ -227,37 +295,37 @@ const StudentTableComponents = ({
                     )}
                   </TableCell>
                   <TableCell
-                    align="center"
+                    align="left"
                     sx={{ borderBottom: "none", fontSize: 18 }}
                   >
-                    {student.studentId}
+                    {student.studentCode}
                   </TableCell>
                   <TableCell
-                    align="center"
+                    align="left"
                     sx={{ borderBottom: "none", fontSize: 18 }}
                   >
                     {`${student.user?.firstNameTh || ""} ${student.user?.lastNameTh || ""}`}
                   </TableCell>
                   <TableCell
-                    align="center"
+                    align="left"
                     sx={{ borderBottom: "none", fontSize: 18 }}
                   >
                     {student.user?.nickName}
                   </TableCell>
                   <TableCell
-                    align="center"
+                    align="left"
                     sx={{ borderBottom: "none", fontSize: 18 }}
                   >
                     {student.user?.email}
                   </TableCell>
                   <TableCell
-                    align="center"
+                    align="left"
                     sx={{ borderBottom: "none", fontSize: 18 }}
                   >
                     <IconButton
                       color="primary"
                       size="small"
-                      onClick={() => handleEdit(student.id)}
+                      onClick={() => handleEdit(student.user.id)}
                     >
                       <Edit />
                     </IconButton>
@@ -295,6 +363,7 @@ const StudentTableComponents = ({
           size="large"
         />
       </div>
+      {confirmModal && <ConfirmModal {...confirmModal} />}
     </Card>
   );
 };

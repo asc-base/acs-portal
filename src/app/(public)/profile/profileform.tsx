@@ -28,7 +28,7 @@ const VisuallyHiddenInput = styled("input")({
 
 interface FormData {
   github: string;
-  linkin: string;
+  linkedin: string;
   facebook: string;
   instragram: string;
   projects: { title: string }[];
@@ -46,12 +46,12 @@ const ProfileForm = () => {
   const { handleSubmit, control, setValue } = useForm<FormData>({
     defaultValues: {
       github: studentData?.github || "",
-      linkin: studentData?.linkin || "",
+      linkedin: studentData?.linkedin || "",
       facebook: studentData?.facebook || "",
       instragram: studentData?.instragram || "",
-      projects:
-        studentData?.projects?.map((project) => ({ title: project.title })) ||
-        [],
+      // projects:
+      //   studentData?.projects?.map((project) => ({ title: project.title })) ||
+      //   [],
       file: studentData?.user?.imageUrl || null,
     },
   });
@@ -149,7 +149,7 @@ const ProfileForm = () => {
               <div className="text-gray-500">รหัสนักศึกษา</div>
               <div className="text-center">:</div>
               <div className="font-bold text-neutral-800">
-                {studentData?.studentId || "6009050401"}
+                {studentData?.studentCode || "6009050401"}
               </div>
 
               {/* Row 2: Nickname */}
@@ -219,7 +219,7 @@ const ProfileForm = () => {
             <div className="group md:w-1/2">
               <h4 className="group-focus-within:text-primary03">LinkIn</h4>
               <RHFTextField
-                name="linkin"
+                name="linkedin"
                 control={control}
                 placeholder="https://www.linkin.com/in/"
                 fullWidth

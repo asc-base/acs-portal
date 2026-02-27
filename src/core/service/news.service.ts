@@ -9,7 +9,7 @@ export class NewsService {
 
     formData.append("title", data.title);
     formData.append("detail", data.detail);
-    formData.append("categoryId", String(data.categoryId));
+    formData.append("tagId", String(data.tagId));
     formData.append("startDate", new Date(data.startDate).toISOString());
 
     if (data.dueDate) {
@@ -26,14 +26,18 @@ export class NewsService {
   async getNews(
     page: number,
     pageSize: number,
-    title?: string,
-    category?: string,
+    tagId?: number,
+    orderBy?:string,
+    sortBy?:string,
+    search?: string,
   ): Promise<Pageable<INews>> {
     const response = await this.newsRepository.getNews(
       page,
       pageSize,
-      title,
-      category,
+      tagId,
+      orderBy,
+      sortBy,
+      search,
     );
     return response.data;
   }
@@ -63,14 +67,18 @@ export class NewsService {
   }
 
   async getNewsInformations(
-    type: string,
     page: number,
     pageSize: number,
-  ): Promise<INewsInformation[]> {
+    tagId?: number,
+    orderBy?:string,
+    sortBy?:string,
+  ): Promise<Pageable<INewsInformation>> {
     const response = await this.newsRepository.getNewsInformations(
-      type,
       page,
       pageSize,
+      tagId,
+      orderBy,
+      sortBy,
     );
     return response.data;
   }
@@ -82,6 +90,11 @@ export class NewsService {
 
   async getNewsInformationById(id: number): Promise<INewsInformation> {
     const response = await this.newsRepository.getNewsInformationById(id);
+    return response.data;
+  }
+
+  async deleteNews(id: number):Promise<INews> {
+    const response = await this.newsRepository.deleteNews(id)
     return response.data;
   }
 }

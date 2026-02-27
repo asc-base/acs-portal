@@ -5,23 +5,23 @@ export const dynamic = "force-dynamic";
 
 interface PageProps {
   params: Promise<{
-    type: string;
+    tagId: number;
   }>;
 }
 
 const page = async ({params}: PageProps) => {
   const pageSize = 6;
-  const { type } = await params;
+  const { tagId } = await params;
 
-  const newsInformation = await newsService.getNewsInformations(
-    type,
+  const { rows } = await newsService.getNewsInformations(
+    tagId,
     1,
     pageSize,
   );
   return (
     <NewsMediaListComponent
-      newsInformation={newsInformation}
-      type={type}
+      newsInformation={rows}
+      tagId={tagId}
       pageSize={pageSize}
     />
   );

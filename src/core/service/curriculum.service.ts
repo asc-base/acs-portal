@@ -7,7 +7,7 @@ import {
 } from "../domain/curriculum";
 import { Pageable } from "@/interface/response";
 export class CurriculumService {
-  constructor(private readonly curriculumRepository: ICurriculumRepository) { }
+  constructor(private readonly curriculumRepository: ICurriculumRepository) {}
 
   async getCurriculum(query: QueryCurriculum): Promise<Pageable<ICurriculum>> {
     const response = await this.curriculumRepository.getCurriculum(query);
@@ -22,23 +22,33 @@ export class CurriculumService {
     Object.entries(data).forEach(([key, value]) => {
       formData.append(key, value?.toString() ?? "");
     });
-    formData.append("image", data.image);
+    formData.append("thumbnailFile", data.thumbnailFile);
     const response = await this.curriculumRepository.createCurriculum(formData);
     return response.data;
   }
-  
-  async updateCurriculum(id: number, data: IUpdateCurriculum): Promise<ICurriculum> {
+
+  async updateCurriculum(
+    id: number,
+    data: IUpdateCurriculum,
+  ): Promise<ICurriculum> {
     const formData = new FormData();
     Object.entries(data).forEach(([key, value]) => {
-      if (value !== undefined && value !== null && key !== "image") {
+      if (value !== undefined && value !== null && key !== "thumbnailFile") {
         formData.append(key, value.toString());
       }
     });
-    if (data.image) {
-      formData.append("image", data.image);
+    if (data.thumbnailFile) {
+      formData.append("thumbnailFile", data.thumbnailFile);
     }
-    const response = await this.curriculumRepository.updateCurriculum(id, formData);
+    const response = await this.curriculumRepository.updateCurriculum(
+      id,
+      formData,
+    );
     return response.data;
   }
 
+  async deleteCurriculum(id: number): Promise<ICurriculum> {
+    const response = await this.curriculumRepository.deleteCurriculum(id);
+    return response.data;
+  }
 }

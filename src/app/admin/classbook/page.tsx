@@ -1,7 +1,8 @@
 import React from "react";
-import { classBookService } from "@/infra/container";
+import { classBookService, baseUrl } from "@/infra/container";
 import ClassBookListComponents from "./classbook.list.component";
 import { QueryClassBook } from "@/core/domain/classbook";
+
 
 export const dynamic = "force-dynamic";
 
@@ -15,8 +16,8 @@ const page = async ({ searchParams }: PageProps) => {
   const query: QueryClassBook = {
     page: resolvedSearchParams.page || 1,
     pageSize: resolvedSearchParams.pageSize || 10,
-    sortBy: "createdAt",
-    sortOrder: resolvedSearchParams.sortOrder ?? "desc",
+    orderBy: "createdAt",
+    sortBy: resolvedSearchParams.sortBy ?? "desc",
     search: resolvedSearchParams.search ?? "",
   };
   const { rows, totalRecords, pageSize, page } =
@@ -27,7 +28,8 @@ const page = async ({ searchParams }: PageProps) => {
       totalRecords={totalRecords}
       pageSize={pageSize}
       page={page}
-      sortOrder={query.sortOrder}
+      sortBy={query.sortBy}
+      apiBase={baseUrl}
     />
   );
 };

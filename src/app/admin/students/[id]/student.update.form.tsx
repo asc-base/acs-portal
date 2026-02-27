@@ -1,5 +1,5 @@
 "use client";
-import React, { FC, useState, useMemo } from "react";
+import React, { useState, useMemo } from "react";
 import { useForm, useFieldArray } from "react-hook-form";
 import { Button, Typography, IconButton } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
@@ -12,16 +12,17 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { RHFTextField } from "@/components/form/RHFTextField";
 import { StudentService } from "@/core/service/student.service";
 import { StudentRepository } from "@/infra/repositories/student.repository";
-import { ICreateStudent } from "@/core/domain/student";
+import { IUpdateStudent, IStudent } from "@/core/domain/student";
 import {
   ConfirmModal,
   ConfirmModalProps,
 } from "@/components/modal/confirmModal";
 import { styled } from "@mui/material/styles";
 
-interface FormProfessorsProps {
+interface StudentUpdateFormProps {
   apiBase: string;
   classBookId: number;
+  student: IStudent;
 }
 
 const Schema = z.object({
@@ -64,15 +65,20 @@ const VisuallyHiddenInput = styled("input")({
   width: 1,
 });
 
-export const CreateStudentForm: FC<FormProfessorsProps> = ({
+export const StudentUpdateForm = ({
   apiBase,
   classBookId,
-}) => {
+  student,
+}: StudentUpdateFormProps) => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isError, setIsError] = useState(false);
   const [confirmModal, setConfirmModal] = useState<ConfirmModalProps | null>(
     null,
   );
+
+  const previewSrc = selectedFile
+    ? URL.createObjectURL(selectedFile)
+    : student.user.imageUrl;
 
   const router = useRouter();
 
@@ -88,19 +94,19 @@ export const CreateStudentForm: FC<FormProfessorsProps> = ({
   } = useForm<FormData>({
     resolver: zodResolver(Schema),
     defaultValues: {
-      firstNameTh: "",
-      lastNameTh: "",
-      firstNameEn: "",
-      lastNameEn: "",
-      studentCode: "",
-      nickname: "",
-      email: "",
-      yearOfFirstAdmission: "",
-      yearOfCompletion: "",
-      facebook: undefined,
-      linkedin: undefined,
-      instagram: undefined,
-      github: undefined,
+      firstNameTh: student.user.firstNameTh,
+      lastNameTh: student.user.lastNameTh,
+      firstNameEn: student.user.firstNameEn,
+      lastNameEn: student.user.lastNameEn,
+      studentCode: student.studentCode,
+      nickname: student.user.nickName,
+      email: student.user.email,
+      // yearOfFirstAdmission: student.yearOfFirstAdmission || "",
+      // yearOfCompletion: student.yearOfCompletion || "",
+      facebook: student.facebook || undefined,
+      linkedin: student.linkedin || undefined,
+      instagram: student.instragram || undefined,
+      github: student.github || undefined,
       otherProjects: [{ value: "" }],
     },
     mode: "onBlur",
@@ -121,11 +127,14 @@ export const CreateStudentForm: FC<FormProfessorsProps> = ({
     }
   };
 
-  const onSubmit = async (data: ICreateStudent) => {
+  const onSubmit = async (data: IUpdateStudent) => {
     try {
-      const payload = [data];
-
-      const response = await studentService.createStudent(payload, classBookId);
+      const response = await studentService.updateStudent(
+        data,
+        selectedFile,
+        classBookId,
+        student.id,
+      );
 
       if (!response) setIsError(true);
       else {
@@ -159,7 +168,7 @@ export const CreateStudentForm: FC<FormProfessorsProps> = ({
           onClose={() => setIsError(false)}
           sx={{ width: "100%" }}
         >
-          ไม่สามารถเพิ่มข้อมูลนักศึกษาได้
+          ไม่สามารถบันทึกข้อมูลได้ในขณะนี้ กรุณาลองใหม่อีกครั้ง
         </Alert>
       </Snackbar>
       <Typography variant="h6" fontWeight="bold">
@@ -168,10 +177,10 @@ export const CreateStudentForm: FC<FormProfessorsProps> = ({
       <div className="flex gap-x-6">
         <div className="flex w-[268px] items-center">
           <div className="bg-neutral02 flex h-[240px] w-[268px] items-center justify-center rounded-lg">
-            {selectedFile ? (
+            {previewSrc ? (
               <div className="group relative h-full w-full">
                 <Image
-                  src={URL.createObjectURL(selectedFile)}
+                  src={previewSrc}
                   alt="Preview"
                   width={268}
                   height={240}
@@ -189,7 +198,7 @@ export const CreateStudentForm: FC<FormProfessorsProps> = ({
                 </div>
               </div>
             ) : (
-              <Button variant="outlined" component="label" size="large">
+              <Button variant="contained" component="label" size="large">
                 อัปโหลดรูปภาพ
                 <VisuallyHiddenInput
                   type="file"

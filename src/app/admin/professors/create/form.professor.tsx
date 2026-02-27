@@ -13,7 +13,7 @@ import { MasterDataService } from "@/core/service/master-data.service";
 import { MasterDataRepository } from "@/infra/repositories/master-data.repository";
 import { ProfessorService } from "@/core/service/professor.service";
 import { ProfessorRepository } from "@/infra/repositories/professor.repository";
-import { Position, EducationLevel } from "@/core/domain/master-data";
+import { Position} from "@/core/domain/master-data";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { RHFTextField } from "@/components/form/RHFTextField";
@@ -32,46 +32,17 @@ const Schema = z.object({
     .refine((v) => v !== null, {
       message: "กรุณากรอกตำแหน่ง",
     }),
-  education: z
-    .array(
-      z.object({
-        level: z.number().nullable(),
-        education: z.string().trim(),
-        university: z.string().trim(),
-      }),
-    )
-    .optional()
-    .superRefine((items, ctx) => {
-      items?.forEach((i, idx) => {
-        if (i.level === null && !i.education && !i.university) return;
-        if (!i.education)
-          ctx.addIssue({
-            path: [idx, "education"],
-            message: "กรอกวิชาเอก",
-            code: "custom",
-          });
-        if (!i.university)
-          ctx.addIssue({
-            path: [idx, "university"],
-            message: "กรอกมหาลัย",
-            code: "custom",
-          });
-        if (i.level === null)
-          ctx.addIssue({
-            path: [idx, "level"],
-            message: "กรอกระดับการศึกษา",
-            code: "custom",
-          });
-      });
-    }),
+ education: z.array(
+  z.object({
+    value: z.string(),
+  })
+),
+expertFields: z.array(
+  z.object({
+    value: z.string(),
+  })
+),
   email: z.string().trim().email("อีเมลไม่ถูกต้อง"),
-  expertFields: z
-    .array(
-      z.object({
-        value: z.string().trim(),
-      }),
-    )
-    .optional(),
   firstNameEn: z
     .string()
     .trim()
@@ -117,7 +88,6 @@ const VisuallyHiddenInput = styled("input")({
 export const FormProfesssors: FC<FormProfessorsProps> = ({ apiBase }) => {
   const [majorPositions, setMajorPositions] = useState<Position[]>([]);
   const [acadamicPositions, setAcadamicPositions] = useState<Position[]>([]);
-  const [levelId, setLevelId] = useState<EducationLevel[]>([]);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isError, setIsError] = useState(false);
   const router = useRouter();
@@ -143,15 +113,9 @@ export const FormProfesssors: FC<FormProfessorsProps> = ({ apiBase }) => {
     resolver: zodResolver(Schema),
     defaultValues: {
       academicPositionId: null,
-      education: [
-        {
-          level: null,
-          education: "",
-          university: "",
-        },
-      ],
+      education: [],
       email: "",
-      expertFields: [{ value: "" }],
+      expertFields: [],
       firstNameEn: "",
       firstNameTh: "",
       lastNameEn: "",
@@ -164,12 +128,14 @@ export const FormProfesssors: FC<FormProfessorsProps> = ({ apiBase }) => {
     reValidateMode: "onChange",
   });
 
-  const { fields: educationFields, append: appendEducation } = useFieldArray({
+  const { fields: educationFields, append: appendEducation } =
+  useFieldArray({
     control,
     name: "education",
   });
 
-  const { fields: expertFields, append: appendExpert } = useFieldArray({
+const { fields: expertFields, append: appendExpert } =
+  useFieldArray({
     control,
     name: "expertFields",
   });
@@ -212,12 +178,8 @@ export const FormProfesssors: FC<FormProfessorsProps> = ({ apiBase }) => {
         email: data.email,
         phone: data.phone,
         profRoom: data.profRoom,
-        expertFields: data.expertFields?.map((e) => e.value),
-        education: data.education?.map((e) => ({
-          level: e.level!,
-          education: e.education,
-          university: e.university,
-        })),
+        education: data.education.map((e) => e.value).join("/"),
+        expertFields: data.expertFields.map((e) => e.value).join("/"),
       };
       const reps = await professorService.createProfessor(
         payload,
@@ -244,7 +206,6 @@ export const FormProfesssors: FC<FormProfessorsProps> = ({ apiBase }) => {
       const res = await masterDataService.getMasterData();
       setMajorPositions(res.majorPositions);
       setAcadamicPositions(res.academicPositions);
-      setLevelId(res.educationLevels);
     };
     fetchData();
   }, [apiBase, masterDataService]);
@@ -501,9 +462,7 @@ export const FormProfesssors: FC<FormProfessorsProps> = ({ apiBase }) => {
           </Typography>
           <IconButton
             color="primary"
-            onClick={() =>
-              appendEducation({ level: null, education: "", university: "" })
-            }
+            onClick={() => appendEducation({ value: "" })}
             sx={{
               border: "1px solid #120554",
               color: "#120554",
@@ -518,50 +477,12 @@ export const FormProfesssors: FC<FormProfessorsProps> = ({ apiBase }) => {
           {educationFields.map((field, index) => (
             <div key={field.id} className="mt-2 flex flex-row gap-x-4">
               <div className="flex-2">
-                <RHFSelect
-                  control={control}
-                  name={`education.${index}.level`}
-                  label="ระดับการศึกษา"
-                  fullWidth
-                  displayEmpty
-                  renderValue={(value) => {
-                    if (!value) {
-                      return (
-                        <span style={{ color: "#9e9e9e" }}>
-                          ระบุระดับการศึกษา
-                        </span>
-                      );
-                    }
-                    const selected = levelId.find((item) => item.id === value);
-                    return selected?.level;
-                  }}
-                >
-                  <MenuItem value="" disabled />
-                  {levelId.map((level) => (
-                    <MenuItem key={level.id} value={level.id}>
-                      {level.level}
-                    </MenuItem>
-                  ))}
-                </RHFSelect>
-              </div>
-
-              <div className="flex-2">
                 <RHFTextField
                   control={control}
-                  name={`education.${index}.education`}
-                  label="วิชาเอก"
+                  name={`education.${index}`}
+                  label="การศึกษา"
                   fullWidth
-                  placeholder="ระบุวิชาเอก"
-                />
-              </div>
-
-              <div className="flex-2">
-                <RHFTextField
-                  control={control}
-                  name={`education.${index}.university`}
-                  label="มหาวิทยาลัย"
-                  fullWidth
-                  placeholder="ระบุมหาวิทยาลัย"
+                  placeholder="ระบุมการศึกษา"
                 />
               </div>
             </div>
@@ -591,7 +512,7 @@ export const FormProfesssors: FC<FormProfessorsProps> = ({ apiBase }) => {
                 <RHFTextField
                   key={field.id}
                   control={control}
-                  name={`expertFields.${index}.value`}
+                  name={`expertFields.${index}`}
                   label="สาขาที่เชี่ยวชาญ"
                   fullWidth
                   placeholder="ระบุสาขาที่เชี่ยวชาญ"
