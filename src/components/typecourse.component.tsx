@@ -12,35 +12,44 @@ const typeCourseImage = [
 ];
 
 interface TypeCourseProps {
-  name: string;
+  curriculumId: number;
+  typeCourseId: number;
+  type: string;
   description: string;
   index: number;
 }
 
-export const TypeCourseComponent: FC<TypeCourseProps> = ({ name, description, index }) => {
+export const TypeCourseComponent: FC<TypeCourseProps> = ({
+  curriculumId,
+  typeCourseId,
+  type,
+  description,
+  index,
+}) => {
   return (
-    <div className="flex flex-col items-center justify-center text-center mb-10">
-      <div className="w-[120px] h-[120px]">
+    <div className="mb-10 flex flex-col items-center justify-center text-center lg:p-2">
+      <div className="relative h-16 w-16 lg:h-21 lg:w-21">
         <Image
           src={typeCourseImage[index].src}
-          alt={name}
+          alt={type}
           width={100}
           height={100}
-          className="object-contain h-full w-full"
+          className="h-full w-full object-contain"
         />
       </div>
-      <h2 className="mt-2 mb-2 text-primary01">{name}</h2>
-      <h5 className="mb-4 text-primary01 text-sm">{description}</h5>
+      <h3 className="text-primary01 mt-2 mb-2 lg:text-2xl">{type}</h3>
+      <h4 className="text-primary01 mb-4 lg:text-sm">{description}</h4>
       <Button
         variant="outlined"
         rel="noopener noreferrer"
         className="border-primary03 text-primary03"
       >
-        <Link href="#" target="_blank">
+        <Link
+          href={`/course?prerequisite=true&curriculumId=${curriculumId}&typeCourseId=${typeCourseId}&typeCourseName=${type}`}
+        >
           ดูรายวิชา
         </Link>
       </Button>
     </div>
   );
-
 };

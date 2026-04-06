@@ -4,7 +4,6 @@ import { IProfessor } from "@/core/domain/professor";
 import { ProfessorCard } from "@/components/professorcard";
 import Link from "next/link";
 import { Breadcrumbs } from "@mui/material";
-import { Card, CardContent, Typography } from "@mui/material"
 
 interface ProfessorsInfoProps {
     professorsInfo: IProfessor;
@@ -13,8 +12,8 @@ interface ProfessorsInfoProps {
 const ProfessorsInfoComponent = ({ professorsInfo }: ProfessorsInfoProps) => {
 
     return (
-        <>
-            <div className="container mx-auto px-16 py-5">
+
+            <div className="container mx-auto px-8 lg:px-16 py-5">
                 <Breadcrumbs aria-label="breadcrumb" separator=">>" className="mb-4">
                     <Link href="/">หน้าหลัก</Link>
                     <p>เกี่ยวกับเรา</p>
@@ -24,53 +23,49 @@ const ProfessorsInfoComponent = ({ professorsInfo }: ProfessorsInfoProps) => {
                     </span>
                 </Breadcrumbs>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 py-6 ">
-                    <div>
+                <div className="flex flex-col md:flex-row gap-4 lg:gap-6 py-6 items-center md:items-start">
+                    <div className="md:basis-1/5 pointer-events-none">
                         <ProfessorCard {...professorsInfo} />
                     </div>
 
-                    <div className="lg:col-span-3 flex flex-col gap-6 min-w-[312px] ">
+                    <div className="md:basis-4/5 flex flex-col gap-2 lg:gap-4 min-w-[312px] ">
 
-                        <Card className="!rounded-2xl px-6 py-2">
-                            <CardContent>
+                        <div className="rounded-2xl px-12 py-8 shadow-md">
+                            <div>
                                 <h3 className="font-bold mb-2">
                                     ประวัติการศึกษา
                                 </h3>
-                               {professorsInfo.educations?.length ?  (
+                                {professorsInfo.educations?.length ? (
                                     <ul className="list-disc pl-6 text-h4">
-                                        {professorsInfo.educations.map((edu,idx) => (
-                                            <li key={idx}>
-                                                {edu.level?.level}({edu.education}),{edu.university}
-                                            </li>
+                                        {professorsInfo.educations.map((edu) => (
+                                            <li key={edu}>{edu}</li>
                                         ))}
                                     </ul>
                                 ) : (
-                                    <Typography>-</Typography>
+                                    <p>-</p>
                                 )}
-                            </CardContent>
-                        </Card>
+                            </div>
+                        </div>
 
-                        <Card className="!rounded-2xl px-6 py-2">
-                            <CardContent>
+                        <div className="rounded-2xl px-12 py-8 shadow-md">
+                            <div>
                                 <h3 className="font-bold mb-2">
                                     สาขาวิชาที่เชี่ยวชาญ
                                 </h3>
                                 {professorsInfo.expertFields?.length ? (
                                     <ul className="list-disc pl-6 text-h4">
                                         {professorsInfo.expertFields.map((exp) => (
-                                            <li key={exp.id}>{exp.field}</li>
+                                            <li key={exp}>{exp}</li>
                                         ))}
                                     </ul>
                                 ) : (
-                                    <Typography>-</Typography>
+                                    <p>-</p>
                                 )}
-                            </CardContent>
-                        </Card>
-
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
-        </>
     );
 };
 

@@ -1,27 +1,46 @@
 import { INewsRepository } from "@/core/ports/news.repository";
-import { INews, INewsMedia } from "@/core/domain/news";
+import { INews, INewsInformation } from "@/core/domain/news";
 import { HttpHelper } from "@/lib/http";
 import { ApiResponse, Pageable } from "@/interface/response";
 
 export class NewsRepository implements INewsRepository {
-  private http: HttpHelper;
-  private baseUrl: string;
+  private readonly http: HttpHelper;
+  private readonly baseUrl: string;
 
   constructor(baseUrl: string) {
     this.baseUrl = baseUrl;
     this.http = new HttpHelper(this.baseUrl);
   }
 
+  async createNews(data: FormData): Promise<ApiResponse<INews>> {
+    const response = await this.http.post<ApiResponse<INews>>(`/v1/news`, data);
+    return response;
+  }
+
   async getNews(
     page: number,
     pageSize: number,
-    title?: string,
-    category?: string,
+    tagId?: number,
+    orderBy?:string,
+    sortBy?:string,
+    search?: string,
   ): Promise<ApiResponse<Pageable<INews>>> {
-    let url = `/v1/news?page=${page}&pageSize=${pageSize}&category=${encodeURIComponent(category || "")}`;
+    let url = `/v1/news/?page=${page}&pageSize=${pageSize}`;
 
-    if (title && title !== "") {
-      url += `&title=${encodeURIComponent(title)}`;
+    if (tagId && tagId !== null) {
+      url += `&tagID=${encodeURIComponent(tagId)}`;
+    }
+
+    if (orderBy && orderBy !== "") {
+      url += `&orderBy=${encodeURIComponent(orderBy)}`;
+    }
+
+    if (sortBy && sortBy !== "") {
+      url += `&sortBy=${encodeURIComponent(sortBy)}`;
+    }
+
+    if (search && search !== "") {
+      url += `&search=${encodeURIComponent(search)}`;
     }
 
     const response = await this.http.get<ApiResponse<Pageable<INews>>>(url);
@@ -34,30 +53,62 @@ export class NewsRepository implements INewsRepository {
   }
 
   async updateNews(
-    id: string,
-    news: Partial<INews>,
+    id: number,
+    news: FormData,
   ): Promise<ApiResponse<INews>> {
-    const response = await this.http.put<ApiResponse<INews>>(
+    const response = await this.http.patch<ApiResponse<INews>>(
       `/v1/news/${id}`,
       news,
     );
     return response;
   }
 
-  async deleteNews(id: string, token: string): Promise<ApiResponse<INews>> {
+  async deleteNews(id: number): Promise<ApiResponse<INews>> {
     const response = await this.http.delete<ApiResponse<INews>>(
-      `/v1/news/${id}`,
-      {
-        Authorization: `Bearer ${token}`,
-      },
+      `/v1/news/${id}`
     );
     return response;
   }
 
-  async getNewsMedias(type: string): Promise<ApiResponse<INewsMedia[]>> {
-    const response = await this.http.get<ApiResponse<INewsMedia[]>>(
-      `/v1/news/news-media?type=${type}&page=1&pageSize=6`,
+  async getNewsInformations(
+    page: number,
+    pageSize: number,
+    tagId?: number,
+    orderBy?:string,
+    sortBy?:string,
+  ): Promise<ApiResponse<Pageable<INewsInformation>>> {
+
+     let url = `/v1/news/news-features/?type=&page=${page}&pageSize=${pageSize}`;
+
+    if (tagId && tagId !== null) {
+      url += `&tagID=${encodeURIComponent(tagId)}`;
+    }
+
+    if (orderBy && orderBy !== "") {
+      url += `&orderBy=${encodeURIComponent(orderBy)}`;
+    }
+
+    if (sortBy && sortBy !== "") {
+      url += `&sortBy=${encodeURIComponent(sortBy)}`;
+    }
+
+    const response = await this.http.get<ApiResponse<Pageable<INewsInformation>>>(url);
+
+    return response;
+  }
+
+  async upsertNewsInformation(
+    data: FormData,
+  ): Promise<ApiResponse<INewsInformation>> {
+    const response = await this.http.put<ApiResponse<INewsInformation>>(
+      `/v1/news/news-media/`,
+      data,
     );
+    return response;
+  }
+
+  async getNewsInformationById(id: number): Promise<ApiResponse<INewsInformation>> {
+    const response = await this.http.get<ApiResponse<INewsInformation>>(`/v1/news/news-media/${id}`);
     return response;
   }
 }

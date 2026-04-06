@@ -1,53 +1,29 @@
-"use client";
-import { useEffect, useState } from "react";
 import NewsListComponent from "./news.list.component";
-import { newsService } from "@/infra/container";
-import { INews } from "@/core/domain/news";
+import { baseUrl, newsService } from "@/infra/container";
+import { QueryNews } from "@/core/domain/news";
 
-export default function NewsPage() {
-  const [newsData, setNewsData] = useState<{
-    news: INews[];
-    totalRecords: number;
-    page: number;
-    pageSize: number;
-  } | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+export const dynamic = "force-dynamic";
 
-  useEffect(() => {
-    const fetchNews = async () => {
-      try {
-        const { rows, totalRecords, page, pageSize } =
-          await newsService.getNews(1, 9);
-        setNewsData({ news: rows, totalRecords, page, pageSize });
-      } catch (err) {
-        setError(err instanceof Error ? err.message : "Failed to fetch news");
-      } finally {
-        setLoading(false);
-      }
-    };
+interface PageProps {
+  searchParams: Promise<QueryNews>;
+}
 
-    fetchNews();
-  }, []);
-
-  if (loading) {
-    return <div>Loading...</div>;
-  }
-
-  if (error) {
-    return <div>Error: {error}</div>;
-  }
-
-  if (!newsData) {
-    return <div>No data available</div>;
-  }
-
+const page = async ({ searchParams }: PageProps) => {
+  const search = await searchParams;
+  const { rows, totalRecords, page, pageSize } = await newsService.getNews(
+    search.page || 1,
+    search.pageSize || 9,
+    search.tagId,
+  );
   return (
     <NewsListComponent
-      news={newsData.news}
-      totalRecords={newsData.totalRecords}
-      page={newsData.page}
-      pageSize={newsData.pageSize}
+      news={rows}
+      totalRecords={totalRecords}
+      page={page}
+      pageSize={pageSize}
+      apiBase={baseUrl}
     />
   );
-}
+};
+
+export default page;

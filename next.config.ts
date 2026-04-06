@@ -2,7 +2,9 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   /* config options here */
+
   images: {
+    // Remote patterns for external images
     remotePatterns: [
       {
         protocol: "https",
@@ -15,6 +17,27 @@ const nextConfig: NextConfig = {
         hostname: "jmexeeugomufbqjvofhu.supabase.co",
         port: "",
         pathname: "/**",
+      },
+      {
+        protocol: "https",
+        hostname: "picsum.photos",
+        port: "",
+        pathname: "/**",
+      },
+      {
+        protocol: "https",
+        hostname: "eooprolugtkiztqsnvdl.supabase.co",
+        pathname: "/storage/v1/object/public/**",
+      },
+      {
+        protocol: "https",
+        hostname: "lrqnuqoxttosziqcsean.supabase.co",
+        pathname: "/storage/v1/object/public/**",
+      },
+      {
+        protocol: "https",
+        hostname: "sxqybhqykgsfrqvzadzg.supabase.co",
+        pathname: "/storage/v1/object/public/**",
       },
     ],
   },

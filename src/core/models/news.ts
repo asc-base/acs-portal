@@ -1,4 +1,4 @@
-import { API_URL } from "@/config/config";
+import { API_URL } from "@/infra/container";
 import { INews } from "@/interface/news";
 import { Pageable } from "@/interface/response";
 

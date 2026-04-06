@@ -1,5 +1,5 @@
 import { Category } from "@/interface/type";
-import { API_URL } from "@/config/config";
+import { API_URL } from "@/infra/container";
 
 export const getCategories = async (
   type: string,

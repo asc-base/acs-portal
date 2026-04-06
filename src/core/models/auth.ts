@@ -1,4 +1,4 @@
-import { API_URL } from "@/config/config";
+import { API_URL } from "@/infra/container";
 import { InputLogin } from "@/interface/user";
 
 export const AuthModel = async (data: InputLogin, target: string) => {

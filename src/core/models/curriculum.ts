@@ -1,20 +1,22 @@
-import { API_URL } from "@/config/config";
+import { API_URL } from "@/infra/container";
 import { Curriculum } from "@/interface/curriculum";
 
-
-export const CreateCurriculumModel = async (data: Curriculum,  token: string) => {
+export const CreateCurriculumModel = async (
+  data: Curriculum,
+  token: string,
+) => {
   const response = await fetch(`${API_URL}/curriculum/`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`
+      Authorization: `Bearer ${token}`,
     },
     body: JSON.stringify({
       title: data.title,
       year: data.year,
       fileUrl: data.fileUrl,
-      description : data.description,
-      image : data.image
+      description: data.description,
+      image: data.image,
     }),
   });
 
