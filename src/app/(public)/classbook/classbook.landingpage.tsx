@@ -10,7 +10,7 @@ interface PageProps {
 
 const ClassBookLandingPage: FC<PageProps> = ({ classBooks }) => {
   return (
-    <main className="container mx-auto px-6 py-6 lg:py-8 md:px-16 xl:px-8">
+    <main className="container mx-auto px-6 py-6 md:px-16 lg:py-8 xl:px-8">
       <div className="flex flex-col items-start justify-start gap-2">
         <Breadcrumbs aria-label="breadcrumb" separator=">>">
           <Link href="/">หน้าหลัก</Link>
@@ -19,20 +19,18 @@ const ClassBookLandingPage: FC<PageProps> = ({ classBooks }) => {
         </Breadcrumbs>
       </div>
 
-       <h4 className="font-bold text-accent04 mt-2 lg:mt-3 mb-4 lg:mb-6 lg:text-2xl">ทำเนียบรุ่น นักศึกษาวิทยาการคอมพิวเตอร์ประยุกต์</h4>
+      <h4 className="text-accent04 mt-2 mb-4 font-bold lg:mt-3 lg:mb-6 lg:text-2xl">
+        ทำเนียบรุ่น นักศึกษาวิทยาการคอมพิวเตอร์ประยุกต์
+      </h4>
 
       {/* Grid 2 คอลัมน์ (Desktop) / 1 คอลัมน์ (Mobile) */}
-      <div className="grid gap-6 md:gap-8 xl:grid-cols-2 px-1">
+      <div className="grid gap-6 px-1 md:gap-8 xl:grid-cols-2">
         {classBooks.map((item, i) => (
           <Link
             key={item.id}
             href={`/students?page=1&pageSize=12&classBookID=${item.id}`}
           >
-            <ClassbookCard
-              {...item}
-              classof={item.classof}
-              priority={i < 2}
-            />
+            <ClassbookCard {...item} classof={item.classof} priority={i < 2} />
           </Link>
         ))}
       </div>

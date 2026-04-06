@@ -2,8 +2,9 @@ import { Box, Typography } from "@mui/material";
 import DescriptionOutlinedIcon from "@mui/icons-material/DescriptionOutlined";
 import EmojiEventsOutlinedIcon from "@mui/icons-material/EmojiEventsOutlined";
 import SportsKabaddiOutlinedIcon from "@mui/icons-material/SportsKabaddiOutlined";
+import PersonIcon from "@mui/icons-material/Person";
 
-export type EmptyStateType = "news" | "achievement" | "activity";
+export type EmptyStateType = "news" | "achievement" | "activity" | "student";
 
 const EmptyStateMap: Record<
   EmptyStateType,
@@ -24,6 +25,11 @@ const EmptyStateMap: Record<
   activity: {
     title: "ไม่พบข้อมูลกิจกรรมในขณะนี้",
     icon: SportsKabaddiOutlinedIcon,
+  },
+  student: {
+    title: "ไม่พบข้อมูลนักศึกษาในขณะนี้",
+    description: "เมื่อมีข่าวสารใหม่ๆ ข้อมูลจะปรากฏที่นี่",
+    icon: PersonIcon,
   },
 };
 
