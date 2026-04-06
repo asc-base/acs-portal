@@ -23,7 +23,6 @@ interface CurriculumInfoProps {
 }
 
 const curriculumSchema = z.object({
-  thumbnailFile: z.instanceof(File).optional(),
   title: z.string().min(1, "กรุณาระบุชื่อหลักสูตร"),
   year: z.string().min(1, "กรุณาระบุปีการศึกษา"),
   documentURL: z.url({ message: "กรุณาระบุลิงก์ที่ถูกต้อง" }),
@@ -85,8 +84,6 @@ export const CurriculumInfoComponent = ({ apiBase, curriculum }: CurriculumInfoP
     const file = e.target.files?.[0];
     if (file) {
       setSelectedFile(file);
-    } else {
-      setSelectedFile(null);
     }
   };
 
@@ -99,8 +96,8 @@ export const CurriculumInfoComponent = ({ apiBase, curriculum }: CurriculumInfoP
         {
           ...data,
           year,
-          ...(selectedFile ? { image: selectedFile } : {}),
-        }
+        },
+        selectedFile
       );
 
       if (response) {
@@ -112,7 +109,7 @@ export const CurriculumInfoComponent = ({ apiBase, curriculum }: CurriculumInfoP
             setConfirmModal(null)
             setIsEdit(false);
             router.push(
-              `/admin/courses?page=1&pageSize=10&curriculumId=${curriculum.id}`
+              `/admin/courses?page=1&pageSize=10&curriculumID=${curriculum.id}`
             );
           },
         });

@@ -1,4 +1,4 @@
-import { ReactNode } from "react";
+import { ReactNode, useState } from "react";
 import { Controller, FieldValues, Path, Control } from "react-hook-form";
 import {
   TextField,
@@ -28,6 +28,8 @@ export function RHFTextField<T extends FieldValues>({
   slotProps,
   ...props
 }: Readonly<RHFInputProps<T>>) {
+  const [focused, setFocused] = useState(false);
+
   return (
     <Controller
       name={name}
@@ -35,8 +37,14 @@ export function RHFTextField<T extends FieldValues>({
       render={({ field, fieldState }) => (
         <Stack spacing={0.5}>
           {label && (
-            <FormLabel>{requiredMark ? `${label} *` : label}</FormLabel>
+            <FormLabel
+              focused={focused}
+              error={!!fieldState.error}
+            >
+              {requiredMark ? `${label} *` : label}
+            </FormLabel>
           )}
+
           <TextField
             {...props}
             {...field}
@@ -44,7 +52,17 @@ export function RHFTextField<T extends FieldValues>({
             error={!!fieldState.error}
             helperText={fieldState.error?.message}
             variant="outlined"
+            size={props.size ?? "small"}
             fullWidth
+            onFocus={(e) => {
+              setFocused(true);
+              props.onFocus?.(e);
+            }}
+            onBlur={(e) => {
+              setFocused(false);
+              field.onBlur();
+              props.onBlur?.(e);
+            }}
             slotProps={{
               ...slotProps,
               input: {

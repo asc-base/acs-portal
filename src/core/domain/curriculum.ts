@@ -20,7 +20,6 @@ export interface ICreateCurriculum {
   title: string;
   documentURL: string;
   description: string;
-  thumbnailFile: File;
 }
 
 export interface IUpdateCurriculum {
@@ -28,5 +27,4 @@ export interface IUpdateCurriculum {
   title?: string;
   documentURL?: string;
   description?: string;
-  thumbnailFile?: File;
 }
