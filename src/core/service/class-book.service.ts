@@ -19,13 +19,13 @@ export class ClassBookService {
     return response ? response.data : null;
   }
 
-  async createClassBook(data: ICreateClassBook, image: File) {
+  async createClassBook(data: ICreateClassBook, thumbnailFile: File) {
     try {
       const formData = new FormData();
       Object.entries(data).forEach(([key, value]) => {
         formData.append(key, value?.toString() ?? "");
       });
-      formData.append("image", image);
+      formData.append("thumbnailFile", thumbnailFile);
       const response = await this.classBookRepository.createClassBook(formData);
       return response;
     } catch (error) {
@@ -36,7 +36,7 @@ export class ClassBookService {
 
   async updateClassBook(
     data: IUpdateClassBook,
-    image: File | null,
+    thumbnailFile: File | null,
     id: number,
   ) {
     try {
@@ -45,8 +45,8 @@ export class ClassBookService {
         formData.append(key, value?.toString() ?? "");
       });
 
-      if (image) {
-        formData.append("image", image);
+      if (thumbnailFile) {
+        formData.append("thumbnailFile", thumbnailFile);
       }
 
       const response = await this.classBookRepository.updateClassBook(
