@@ -4,6 +4,8 @@ import ArrowBackIosIcon from "@mui/icons-material/ArrowBackIos";
 import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 import { Button } from "@mui/material";
 import { INews } from "@/core/domain/news";
+import EmptyState from "./emptyState";
+import { EmptyStateType } from "./emptyState";
 
 interface NewsCarouselComponentProps {
   news: INews[];
@@ -13,8 +15,14 @@ interface NewsCarouselComponentProps {
   activeIndex: number;
   handleSetActiveIndex: (index: number) => void;
   title: string;
-  tagId:number;
+  tagId: number;
 }
+
+const EmptyStateTypeMap: Record<number, EmptyStateType> = {
+  16: "news",
+  17: "achievement",
+  18: "activity",
+} as const;
 
 export const NewsCarouselComponent = ({
   news,
@@ -26,6 +34,17 @@ export const NewsCarouselComponent = ({
   title,
   tagId,
 }: NewsCarouselComponentProps) => {
+  if (!news || news.length === 0) {
+    return (
+      <div>
+        <div className="flex items-center justify-between">
+          <h3 className="text-accent04 font-bold lg:text-[24px]">{title}</h3>
+        </div>
+
+        <EmptyState type={EmptyStateTypeMap[tagId] ?? "news"} />
+      </div>
+    );
+  }
   return (
     <div>
       <div className="flex items-center justify-between">

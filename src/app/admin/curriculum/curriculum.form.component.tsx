@@ -19,7 +19,6 @@ interface CurriculumFormProps {
 }
 
 const Schema = z.object({
-  thumbnailFile: z.instanceof(File, { message: "กรุณาอัปโหลดรูปภาพ" }),
   title: z.string().min(1, "กรุณาระบุชื่อหลักสูตร"),
   year: z.string().min(1, "กรุณาระบุปีการศึกษา"),
   documentURL: z.url({ message: "กรุณาระบุลิงก์ที่ถูกต้อง" }),
@@ -51,7 +50,7 @@ export const CurriculumForm = ({ apiBase }: CurriculumFormProps) => {
     return new CurriculumService(repo);
   }, [apiBase]);
 
-  const { handleSubmit, control, setValue, formState: { isDirty } } = useForm<FormValues>({
+  const { handleSubmit, control, formState: { isDirty } } = useForm<FormValues>({
     resolver: zodResolver(Schema),
     mode: "onChange",
   });
@@ -60,9 +59,6 @@ export const CurriculumForm = ({ apiBase }: CurriculumFormProps) => {
     const file = e.target.files?.[0];
     if (file) {
       setSelectedFile(file);
-      setValue("thumbnailFile", file, { shouldValidate: true });
-    } else {
-      setSelectedFile(null);
     }
   };
 
@@ -85,7 +81,9 @@ export const CurriculumForm = ({ apiBase }: CurriculumFormProps) => {
       const response = await curriculumService.createCurriculum({
         ...data,
         year,
-      });
+      },
+      selectedFile!
+    );
       
       if (response) {
         setConfirmModal({
@@ -143,8 +141,7 @@ export const CurriculumForm = ({ apiBase }: CurriculumFormProps) => {
               name="title"
               label="ชื่อหลักสูตร"
               variant="outlined"
-              size="small"
-              required
+              requiredMark
             />
             <RHFDatePickerDayjs
               control={control}
@@ -159,8 +156,7 @@ export const CurriculumForm = ({ apiBase }: CurriculumFormProps) => {
               name="documentURL"
               label="ลิงก์ไฟล์หลักสูตร (Google Drive หรือ OneDrive)"
               variant="outlined"
-              size="small"
-              required
+              requiredMark
             />
           </div>
         </div>
@@ -171,11 +167,10 @@ export const CurriculumForm = ({ apiBase }: CurriculumFormProps) => {
             name="description"
             label="รายละเอียด"
             variant="outlined"
-            size="small"
             fullWidth
             multiline
             rows={4}
-            required
+            requiredMark
           />
         </div>
 
