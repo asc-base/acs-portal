@@ -28,7 +28,7 @@ const EmptyStateMap: Record<
   },
   student: {
     title: "ไม่พบข้อมูลนักศึกษาในขณะนี้",
-    description: "เมื่อมีข่าวสารใหม่ๆ ข้อมูลจะปรากฏที่นี่",
+    description: "เมื่อมีข้อมูลนักศึกษา ข้อมูลจะปรากฏที่นี่",
     icon: PersonIcon,
   },
 };
