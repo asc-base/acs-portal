@@ -160,7 +160,7 @@ export const FormClassbook: FC<FormClassbookProps> = ({ apiBase }) => {
                   width={400}
                   height={284}
                   style={{ objectFit: "cover" }}
-                  className="h-full w-full object-cover"
+                  className="h-full w-full rounded-xl object-cover"
                 />
                 <div className="bg-opacity-40 absolute inset-0 flex items-center justify-center bg-black/60 opacity-0 transition-opacity group-hover:opacity-100">
                   <Button variant="contained" component="label">
