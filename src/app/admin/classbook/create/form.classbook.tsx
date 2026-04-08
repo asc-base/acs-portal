@@ -194,6 +194,7 @@ export const FormClassbook: FC<FormClassbookProps> = ({ apiBase }) => {
             size="small"
             fullWidth
             requiredMark
+            placeholder="ระบุรุ่นการศึกษา"
           />
           <RHFTextField
             control={control}
@@ -203,6 +204,7 @@ export const FormClassbook: FC<FormClassbookProps> = ({ apiBase }) => {
             size="small"
             fullWidth
             requiredMark
+            placeholder="ระบุปีการศึกษา"
           />
           <RHFSelect
             name="curriculumId"
@@ -212,6 +214,13 @@ export const FormClassbook: FC<FormClassbookProps> = ({ apiBase }) => {
             size="small"
             fullWidth
             requiredMark
+            renderValue={(value) => {
+              if (!value) {
+                return <span style={{ color: "#9e9e9e" }}>ระบุหลักสูตร</span>;
+              }
+              const selected = curriculums.find((item) => item.id === value);
+              return selected?.title;
+            }}
           >
             {curriculums.map((curriculum) => (
               <MenuItem key={curriculum.id} value={curriculum.id}>
