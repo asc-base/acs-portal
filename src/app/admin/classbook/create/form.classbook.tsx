@@ -14,7 +14,10 @@ import { ICurriculum } from "@/core/domain/curriculum";
 import { ClassBookRepository } from "@/infra/repositories/class-book.repository";
 import { ClassBookService } from "@/core/service/class-book.service";
 import { useRouter } from "next/navigation";
-import { ConfirmModal, ConfirmModalProps } from "@/components/modal/confirmModal";
+import {
+  ConfirmModal,
+  ConfirmModalProps,
+} from "@/components/modal/confirmModal";
 
 interface FormClassbookProps {
   apiBase: string;
@@ -146,16 +149,16 @@ export const FormClassbook: FC<FormClassbookProps> = ({ apiBase }) => {
         </Alert>
       </Snackbar>
       <h3 className="font-bold">เพิ่มรุ่นการศึกษา</h3>
-      <div className="flex flex-row">
-        <div className="flex w-full items-center justify-center">
-          <div className="bg-neutral02 group relative flex h-80 w-96 items-center justify-center">
+      <div className="mt-[28px] flex w-full justify-between gap-x-10">
+        <div className="flex h-[284px] w-[400px] items-center justify-center">
+          <div className="bg-neutral02 group relative flex h-full w-full items-center justify-center rounded-xl">
             {selectedFile ? (
               <>
                 <Image
                   src={URL.createObjectURL(selectedFile)}
                   alt="Preview"
-                  width={384}
-                  height={192}
+                  width={400}
+                  height={284}
                   style={{ objectFit: "cover" }}
                   className="h-full w-full object-cover"
                 />
@@ -195,7 +198,7 @@ export const FormClassbook: FC<FormClassbookProps> = ({ apiBase }) => {
           <RHFTextField
             control={control}
             name="firstYearAcademic"
-            label="ปีการศึกษาแรก"
+            label="ปีการศึกษา"
             variant="outlined"
             size="small"
             fullWidth
