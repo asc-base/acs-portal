@@ -216,7 +216,7 @@ export const FormClassbook: FC<FormClassbookProps> = ({ apiBase }) => {
             requiredMark
             renderValue={(value) => {
               if (!value) {
-                return <span style={{ color: "#9e9e9e" }}>ระบุหลักสูตร</span>;
+                return <span className="text-neutral-400">ระบุหลักสูตร</span>;
               }
               const selected = curriculums.find((item) => item.id === value);
               return selected?.title;
