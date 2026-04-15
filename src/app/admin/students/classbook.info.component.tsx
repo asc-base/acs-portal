@@ -24,7 +24,7 @@ interface CurriculumFormProps {
 const classBookSchema = z.object({
   classof: z.string().min(1, "กรุณาระบุรุุ่นการศึกษา"),
   firstYearAcademic: z.string().min(1, "กรุณาระบุปีการศึกษา"),
-  curriculumId: z.number().min(1, "กรุณาระบุหลักสูตร"),
+  curriculumID: z.number().min(1, "กรุณาระบุหลักสูตร"),
 });
 
 type ClassBookFormValues = z.infer<typeof classBookSchema>;
@@ -77,7 +77,7 @@ export const ClassBookInfoComponent = ({
     defaultValues: {
       classof: classBook.classof.toString() ?? "",
       firstYearAcademic: classBook.firstYearAcademic ?? "",
-      curriculumId: classBook.curriculumId ?? 0,
+      curriculumID: classBook.curriculumID ?? 0,
     },
     mode: "onBlur",
     reValidateMode: "onChange",
@@ -223,7 +223,6 @@ export const ClassBookInfoComponent = ({
                   name="classof"
                   label="รุุ่นการศึกษา"
                   variant="outlined"
-                  size="small"
                   disabled={!isEdit}
                   requiredMark
                 />
@@ -232,21 +231,21 @@ export const ClassBookInfoComponent = ({
                   name="firstYearAcademic"
                   label="ปีการศึกษา"
                   variant="outlined"
-                  size="small"
                   disabled={!isEdit}
+                  requiredMark
                 />
                 <RHFSelect
-                  name="curriculumId"
+                  name="curriculumID"
                   control={control}
                   label="หลักสูตร"
                   variant="outlined"
-                  size="small"
                   fullWidth
                   disabled={!isEdit}
+                  requiredMark
                 >
                   {curriculums.map((curriculum) => (
                     <MenuItem key={curriculum.id} value={curriculum.id}>
-                      หลักสูตร ({curriculum.year})
+                      {curriculum.title} พ.ศ.{curriculum.year}
                     </MenuItem>
                   ))}
                 </RHFSelect>

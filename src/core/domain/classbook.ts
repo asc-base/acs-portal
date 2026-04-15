@@ -4,7 +4,7 @@ export interface IClassBook {
   firstYearAcademic: string;
   thumbnailURL: string;
   classof: string;
-  curriculumId: number;
+  curriculumID: number;
 }
 
 export interface QueryClassBook {
@@ -13,16 +13,17 @@ export interface QueryClassBook {
   orderBy?: string;
   sortBy?: "asc" | "desc";
   search?: string;
+  searchBy?: string;
 }
 
 export interface ICreateClassBook {
   firstYearAcademic: string;
   classof: string;
-  curriculumId: number;
+  curriculumID: number;
 }
 
 export interface IUpdateClassBook {
   firstYearAcademic?: string;
   classof?: string;
-  curriculumId?: number;
+  curriculumID?: number;
 }
