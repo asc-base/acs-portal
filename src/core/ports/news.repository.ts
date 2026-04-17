@@ -9,9 +9,6 @@ export interface INewsRepository {
     tagID?: number,
     orderBy?: string,
     sortBy?: string,
-    pageSize: number, 
-    orderBy?:string,
-    sortBy?:string,
     search?: string,
     searchBy?: string,
   ): Promise<ApiResponse<Pageable<INews>>>;
