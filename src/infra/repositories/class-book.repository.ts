@@ -20,6 +20,7 @@ export class ClassBookRepository implements IClassBookRepository {
       orderBy = "createdAt",
       sortBy = "desc",
       search,
+      searchBy = "classof",
     } = query;
 
     const params = new URLSearchParams();
@@ -28,6 +29,7 @@ export class ClassBookRepository implements IClassBookRepository {
     if (search) {
       params.append("search", search);
     }
+    params.append("searchBy", searchBy);
     params.append("orderBy", orderBy);
     params.append("sortBy", sortBy);
 

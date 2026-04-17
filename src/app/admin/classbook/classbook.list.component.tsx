@@ -85,7 +85,8 @@ const ClassBookListComponents = ({
   const handleSortOrder = (event: SelectChangeEvent) => {
     const newSortOrder = event.target.value as "asc" | "desc";
     const params = new URLSearchParams(searchParams.toString());
-    params.set("sortOrder", newSortOrder);
+    params.set("orderBy", "createdAt");
+    params.set("sortBy", newSortOrder);
     router.push(`${pathname}?${params.toString()}`);
   };
 
@@ -194,30 +195,11 @@ const ClassBookListComponents = ({
             value={sortBy ?? "desc"}
             displayEmpty
             renderValue={() => "จัดเรียงตาม"}
-            sx={{
-              "& .MuiOutlinedInput-notchedOutline": {
-                borderColor: "var(--color-neutral03)",
-              },
-              py: 0.5,
-              width: "180px",
-              color: "var(--color-neutral04)",
-            }}
+            sx={{ width: 200 }}
             IconComponent={ExpandMoreIcon}
-            MenuProps={{
-              MenuListProps: {
-                sx: { py: 0 },
-              },
-            }}
           >
             <MenuItem
               value="desc"
-              sx={{
-                color: "var(--color-neutral04)",
-                borderRadius: 1,
-                border: "1px solid var(--color-neutral04)",
-                display: "flex",
-                justifyContent: "space-between",
-              }}
             >
               ใหม่สุดไปเก่าสุด
               {sortBy === "desc" && <DoneIcon fontSize="small" />}
@@ -225,13 +207,6 @@ const ClassBookListComponents = ({
 
             <MenuItem
               value="asc"
-              sx={{
-                color: "var(--color-neutral04)",
-                borderRadius: 1,
-                border: "1px solid var(--color-neutral04)",
-                display: "flex",
-                justifyContent: "space-between",
-              }}
             >
               เก่าสุดไปใหม่สุด
               {sortBy === "asc" && <DoneIcon fontSize="small" />}
@@ -256,7 +231,7 @@ const ClassBookListComponents = ({
               data={classbook}
               onView={() =>
                 router.push(
-                  `/admin/students?page=1&pageSize=10&classBookId=${classbook.id}`,
+                  `/admin/students?page=1&pageSize=10&classBookID=${classbook.id}`,
                 )
               }
               onDelete={() => confirmDeleteClassbook(classbook.id)}

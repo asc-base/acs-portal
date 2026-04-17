@@ -17,12 +17,12 @@ export class CurriculumService {
     const response = await this.curriculumRepository.getCurriculumById(id);
     return response ? response.data : null;
   }
-  async createCurriculum(data: ICreateCurriculum): Promise<ICurriculum> {
+  async createCurriculum(data: ICreateCurriculum, thumbnailFile: File): Promise<ICurriculum> {
     const formData = new FormData();
     Object.entries(data).forEach(([key, value]) => {
       formData.append(key, value?.toString() ?? "");
     });
-    formData.append("thumbnailFile", data.thumbnailFile);
+    formData.append("thumbnailFile", thumbnailFile);
     const response = await this.curriculumRepository.createCurriculum(formData);
     return response.data;
   }
@@ -30,6 +30,7 @@ export class CurriculumService {
   async updateCurriculum(
     id: number,
     data: IUpdateCurriculum,
+    thumbnailFile: File | null,
   ): Promise<ICurriculum> {
     const formData = new FormData();
     Object.entries(data).forEach(([key, value]) => {
@@ -37,8 +38,8 @@ export class CurriculumService {
         formData.append(key, value.toString());
       }
     });
-    if (data.thumbnailFile) {
-      formData.append("thumbnailFile", data.thumbnailFile);
+    if (thumbnailFile) {
+      formData.append("thumbnailFile", thumbnailFile);
     }
     const response = await this.curriculumRepository.updateCurriculum(
       id,

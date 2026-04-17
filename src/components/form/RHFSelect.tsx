@@ -7,6 +7,7 @@ import {
   SelectProps,
 } from "@mui/material";
 import Stack from "@mui/material/Stack";
+import { useState } from "react";
 
 type RHFSelectProps<T extends FieldValues> = {
   name: FieldPath<T>;
@@ -23,6 +24,8 @@ export function RHFSelect<T extends FieldValues>({
   children,
   ...props
 }: RHFSelectProps<T>) {
+  const [focused, setFocused] = useState(false);
+
   return (
     <Controller
       name={name}
@@ -30,7 +33,10 @@ export function RHFSelect<T extends FieldValues>({
       render={({ field, fieldState }) => (
         <Stack spacing={0.5}>
           {label && (
-            <FormLabel>{requiredMark ? `${label} *` : label}</FormLabel>
+            <FormLabel
+              focused={focused}
+              error={!!fieldState.error}
+            >{requiredMark ? `${label} *` : label}</FormLabel>
           )}
 
           <FormControl fullWidth error={!!fieldState.error}>
@@ -38,7 +44,17 @@ export function RHFSelect<T extends FieldValues>({
               {...props}
               {...field}
               value={field.value ?? ""}
+              size={props.size ?? "small"}
               onChange={(e) => field.onChange(e.target.value)}
+              onFocus={(e) => {
+              setFocused(true);
+              props.onFocus?.(e);
+            }}
+            onBlur={(e) => {
+              setFocused(false);
+              field.onBlur();
+              props.onBlur?.(e);
+            }}
             >
               {children}
             </Select>

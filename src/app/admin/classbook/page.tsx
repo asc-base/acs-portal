@@ -18,6 +18,7 @@ const page = async ({ searchParams }: PageProps) => {
     pageSize: resolvedSearchParams.pageSize || 10,
     orderBy: "createdAt",
     sortBy: resolvedSearchParams.sortBy ?? "desc",
+    searchBy: "classof",
     search: resolvedSearchParams.search ?? "",
   };
   const { rows, totalRecords, pageSize, page } =

@@ -178,7 +178,7 @@ const CurriculumListComponents = ({
               data={curriculum}
               onView={() =>
                 router.push(
-                  `/admin/courses?prerequisite=false&page=1&pageSize=10&curriculumId=${curriculum.id}`,
+                  `/admin/courses?prerequisite=false&page=1&pageSize=10&curriculumID=${curriculum.id}`,
                 )
               }
               onDelete={() => confirmDeleteCurriculum(curriculum.id)}
