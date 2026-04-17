@@ -21,9 +21,10 @@ export class NewsRepository implements INewsRepository {
     page: number,
     pageSize: number,
     tagId?: number,
-    orderBy?:string,
-    sortBy?:string,
+    orderBy?: string,
+    sortBy?: string,
     search?: string,
+    searchBy?: string,
   ): Promise<ApiResponse<Pageable<INews>>> {
     let url = `/v1/news/?page=${page}&pageSize=${pageSize}`;
 
@@ -43,6 +44,10 @@ export class NewsRepository implements INewsRepository {
       url += `&search=${encodeURIComponent(search)}`;
     }
 
+    if (searchBy && searchBy !== "") {
+      url += `&searchBy=${encodeURIComponent(searchBy)}`;
+    }
+
     const response = await this.http.get<ApiResponse<Pageable<INews>>>(url);
     return response;
   }
@@ -52,10 +57,7 @@ export class NewsRepository implements INewsRepository {
     return response;
   }
 
-  async updateNews(
-    id: number,
-    news: FormData,
-  ): Promise<ApiResponse<INews>> {
+  async updateNews(id: number, news: FormData): Promise<ApiResponse<INews>> {
     const response = await this.http.patch<ApiResponse<INews>>(
       `/v1/news/${id}`,
       news,
@@ -65,7 +67,7 @@ export class NewsRepository implements INewsRepository {
 
   async deleteNews(id: number): Promise<ApiResponse<INews>> {
     const response = await this.http.delete<ApiResponse<INews>>(
-      `/v1/news/${id}`
+      `/v1/news/${id}`,
     );
     return response;
   }
@@ -74,11 +76,10 @@ export class NewsRepository implements INewsRepository {
     page: number,
     pageSize: number,
     tagId?: number,
-    orderBy?:string,
-    sortBy?:string,
+    orderBy?: string,
+    sortBy?: string,
   ): Promise<ApiResponse<Pageable<INewsInformation>>> {
-
-     let url = `/v1/news/news-features/?type=&page=${page}&pageSize=${pageSize}`;
+    let url = `/v1/news/news-features/?type=&page=${page}&pageSize=${pageSize}`;
 
     if (tagId && tagId !== null) {
       url += `&tagID=${encodeURIComponent(tagId)}`;
@@ -92,7 +93,8 @@ export class NewsRepository implements INewsRepository {
       url += `&sortBy=${encodeURIComponent(sortBy)}`;
     }
 
-    const response = await this.http.get<ApiResponse<Pageable<INewsInformation>>>(url);
+    const response =
+      await this.http.get<ApiResponse<Pageable<INewsInformation>>>(url);
 
     return response;
   }
@@ -107,8 +109,12 @@ export class NewsRepository implements INewsRepository {
     return response;
   }
 
-  async getNewsInformationById(id: number): Promise<ApiResponse<INewsInformation>> {
-    const response = await this.http.get<ApiResponse<INewsInformation>>(`/v1/news/news-media/${id}`);
+  async getNewsInformationById(
+    id: number,
+  ): Promise<ApiResponse<INewsInformation>> {
+    const response = await this.http.get<ApiResponse<INewsInformation>>(
+      `/v1/news/news-media/${id}`,
+    );
     return response;
   }
 }

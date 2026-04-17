@@ -46,4 +46,6 @@ export interface QueryNews {
   page?: number;
   pageSize?: number;
   tagId?: number;
+  search?: string;
+  searchBy?: string;
 }

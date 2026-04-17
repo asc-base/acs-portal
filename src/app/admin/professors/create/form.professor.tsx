@@ -13,13 +13,16 @@ import { MasterDataService } from "@/core/service/master-data.service";
 import { MasterDataRepository } from "@/infra/repositories/master-data.repository";
 import { ProfessorService } from "@/core/service/professor.service";
 import { ProfessorRepository } from "@/infra/repositories/professor.repository";
-import { Position} from "@/core/domain/master-data";
+import { Position } from "@/core/domain/master-data";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { RHFTextField } from "@/components/form/RHFTextField";
 import { RHFSelect } from "@/components/form/RHFSelect";
 import { ICreateProfessor } from "@/core/domain/professor";
-import { ConfirmModal, ConfirmModalProps } from "@/components/modal/confirmModal";
+import {
+  ConfirmModal,
+  ConfirmModalProps,
+} from "@/components/modal/confirmModal";
 
 interface FormProfessorsProps {
   apiBase: string;
@@ -32,16 +35,16 @@ const Schema = z.object({
     .refine((v) => v !== null, {
       message: "กรุณากรอกตำแหน่ง",
     }),
- education: z.array(
-  z.object({
-    value: z.string(),
-  })
-),
-expertFields: z.array(
-  z.object({
-    value: z.string(),
-  })
-),
+  education: z.array(
+    z.object({
+      value: z.string(),
+    }),
+  ),
+  expertFields: z.array(
+    z.object({
+      value: z.string(),
+    }),
+  ),
   email: z.string().trim().email("อีเมลไม่ถูกต้อง"),
   firstNameEn: z
     .string()
@@ -128,14 +131,12 @@ export const FormProfesssors: FC<FormProfessorsProps> = ({ apiBase }) => {
     reValidateMode: "onChange",
   });
 
-  const { fields: educationFields, append: appendEducation } =
-  useFieldArray({
+  const { fields: educationFields, append: appendEducation } = useFieldArray({
     control,
     name: "education",
   });
 
-const { fields: expertFields, append: appendExpert } =
-  useFieldArray({
+  const { fields: expertFields, append: appendExpert } = useFieldArray({
     control,
     name: "expertFields",
   });
