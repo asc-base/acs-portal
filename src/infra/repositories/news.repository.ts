@@ -20,16 +20,18 @@ export class NewsRepository implements INewsRepository {
   async getNews(
     page: number,
     pageSize: number,
-    tagId?: number,
+    tagID?: number,
     orderBy?: string,
     sortBy?: string,
+    orderBy?:string,
+    sortBy?:string,
     search?: string,
     searchBy?: string,
   ): Promise<ApiResponse<Pageable<INews>>> {
     let url = `/v1/news/?page=${page}&pageSize=${pageSize}`;
 
-    if (tagId && tagId !== null) {
-      url += `&tagID=${encodeURIComponent(tagId)}`;
+    if (tagID && tagID !== null) {
+      url += `&tagID=${encodeURIComponent(tagID)}`;
     }
 
     if (orderBy && orderBy !== "") {

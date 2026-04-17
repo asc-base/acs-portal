@@ -14,7 +14,7 @@ export class NewsService {
 
     formData.append("title", data.title);
     formData.append("detail", data.detail);
-    formData.append("tagId", String(data.tagId));
+    formData.append("tagID", String(data.tagID));
     formData.append("startDate", new Date(data.startDate).toISOString());
 
     if (data.dueDate) {
@@ -31,16 +31,18 @@ export class NewsService {
   async getNews(
     page: number,
     pageSize: number,
-    tagId?: number,
+    tagID?: number,
     orderBy?: string,
     sortBy?: string,
+    orderBy?:string,
+    sortBy?:string,
     search?: string,
     searchBy?: string,
   ): Promise<Pageable<INews>> {
     const response = await this.newsRepository.getNews(
       page,
       pageSize,
-      tagId,
+      tagID,
       orderBy,
       sortBy,
       search,
