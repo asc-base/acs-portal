@@ -14,8 +14,8 @@ const page = async ({ searchParams }: PageProps) => {
     search.page || 1,
     search.pageSize || 9,
     search.tagId,
-    undefined,
-    undefined,
+    search.orderBy || "createdAt",
+    search.sortBy || "desc",
     search.search,
     search.searchBy,
   );
