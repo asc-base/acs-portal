@@ -1,7 +1,6 @@
 "use client";
 import { useState, useMemo } from "react";
 import { INews, IUpdateNews } from "@/core/domain/news";
-import { IType } from "@/core/domain/master-data";
 import dayjs, { Dayjs } from "dayjs";
 import "dayjs/locale/th";
 import buddhistEra from "dayjs/plugin/buddhistEra";
@@ -21,6 +20,7 @@ import {
   ConfirmModal,
   ConfirmModalProps,
 } from "@/components/modal/confirmModal";
+import { Tag } from "@/core/domain/list-type";
 
 dayjs.extend(buddhistEra);
 dayjs.locale("th");
@@ -28,7 +28,7 @@ dayjs.locale("th");
 interface NewsInfoProps {
   news: INews;
   apiBase: string;
-  categories: IType[];
+  categories: Tag[];
 }
 
 const formSchema = z.object({
@@ -118,7 +118,7 @@ const NewsInfo = ({ news, apiBase, categories }: NewsInfoProps) => {
       try {
         const payload: IUpdateNews = {
           title: data.title,
-          tagId: data.tag,
+          tagID: data.tag,
           detail: data.detail,
           startDate: dayjs(data.startDate).toISOString(),
 
@@ -142,7 +142,7 @@ const NewsInfo = ({ news, apiBase, categories }: NewsInfoProps) => {
             onConfirm: () => {
               setConfirmModal(null);
               setIsEdit(false);
-              router.push(`/admin/news?page=1&pageSize=9&category=&title=`);
+              router.push(`/admin/news?page=1`);
             },
           });
         }
@@ -237,9 +237,9 @@ const NewsInfo = ({ news, apiBase, categories }: NewsInfoProps) => {
             requiredMark
             fullWidth
           >
-            {categories.map((category) => (
-              <MenuItem key={category.id} value={category.id}>
-                {category.name}
+            {categories.map((tag) => (
+              <MenuItem key={tag.id} value={tag.id}>
+                {tag.name}
               </MenuItem>
             ))}
           </RHFSelect>

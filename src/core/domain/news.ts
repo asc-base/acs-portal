@@ -16,7 +16,7 @@ export interface INews {
 
 export interface ICreateNews {
   title: string;
-  tagId: number;
+  tagID: number;
   startDate: string;
   dueDate?: string;
   detail: string;
@@ -24,7 +24,7 @@ export interface ICreateNews {
 
 export interface IUpdateNews {
   title?: string;
-  tagId?: number;
+  tagID?: number;
   startDate: string;
   dueDate?: string;
   detail?: string;
@@ -38,12 +38,12 @@ export interface INewsInformation {
 
 export interface newsInformationPageProps {
   newsInformation: INewsInformation[];
-  tagId: number;
+  tagID: number;
   pageSize: number;
 }
 
 export interface QueryNews {
   page?: number;
   pageSize?: number;
-  tagId?: number;
+  tagID?: number;
 }

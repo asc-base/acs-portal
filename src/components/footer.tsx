@@ -6,7 +6,14 @@ import FacebookRoundedIcon from "@mui/icons-material/FacebookRounded";
 import InstagramIcon from "@mui/icons-material/Instagram";
 import YouTubeIcon from "@mui/icons-material/YouTube";
 
-export const Footer = () => {
+interface FooterProps {
+  curriculums?: {
+    id: number;
+    name: string;
+    fileUrl: string;
+  }[];
+}
+export const Footer = ({ curriculums = [] }: FooterProps) => {
   const linkIcons = [
     {
       icon: <FacebookRoundedIcon />,
@@ -65,12 +72,18 @@ export const Footer = () => {
             <Link href="/curriculum">
               <h4 className="text-secondary01 font-bold">หลักสูตร</h4>
             </Link>
-            {/*           <Link href="#">*/}
-            <h5 className="text-neutral01">หลักสูตรใหม่ พ.ศ2565</h5>
-            {/*</Link> */}
-            {/* <Link href="#"> */}
-            <h5 className="text-neutral01">หลักสูตร พ.ศ.2560</h5>
-            {/* </Link> */}
+            {curriculums.map((item) => (
+              <Link
+                key={item.id}
+                href={item.fileUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <h5 className="text-neutral01 hover:text-secondary01 transition-colors">
+                  {item.name}
+                </h5>
+              </Link>
+            ))}
           </div>
 
           <div className="flex min-w-[150px] flex-1 flex-col gap-2">

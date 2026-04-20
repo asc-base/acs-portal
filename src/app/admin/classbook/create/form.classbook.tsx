@@ -26,7 +26,7 @@ interface FormClassbookProps {
 const Schema = z.object({
   classof: z.string().min(1, "กรุณากรอกรุ่นการศึกษา"),
   firstYearAcademic: z.string().min(1, "กรุณากรอกปีการศึกษา"),
-  curriculumId: z.number().min(1, "กรุณาเลือกหลักสูตร"),
+  curriculumID: z.number().min(1, "กรุณาเลือกหลักสูตร"),
 });
 
 type FormData = z.infer<typeof Schema>;
@@ -71,7 +71,7 @@ export const FormClassbook: FC<FormClassbookProps> = ({ apiBase }) => {
     defaultValues: {
       classof: "",
       firstYearAcademic: "",
-      curriculumId: 0,
+      curriculumID: 0,
     },
     mode: "onBlur",
     reValidateMode: "onChange",
@@ -174,7 +174,7 @@ export const FormClassbook: FC<FormClassbookProps> = ({ apiBase }) => {
                 </div>
               </>
             ) : (
-              <Button variant="outlined" component="label">
+              <Button variant="contained" component="label">
                 <VisuallyHiddenInput
                   type="file"
                   accept="image/*"
@@ -207,7 +207,7 @@ export const FormClassbook: FC<FormClassbookProps> = ({ apiBase }) => {
             placeholder="ระบุปีการศึกษา"
           />
           <RHFSelect
-            name="curriculumId"
+            name="curriculumID"
             control={control}
             label="หลักสูตร"
             variant="outlined"
@@ -224,7 +224,7 @@ export const FormClassbook: FC<FormClassbookProps> = ({ apiBase }) => {
           >
             {curriculums.map((curriculum) => (
               <MenuItem key={curriculum.id} value={curriculum.id}>
-                หลักสูตร ({curriculum.year})
+                {curriculum.title} {curriculum.year}
               </MenuItem>
             ))}
           </RHFSelect>

@@ -6,7 +6,7 @@ export interface INewsRepository {
   getNews(
     page: number,
     pageSize: number, 
-    tagId?: number,
+    tagID?: number,
     orderBy?:string,
     sortBy?:string,
     search?: string,
