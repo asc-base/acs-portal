@@ -158,7 +158,7 @@ const HomePage = ({
                 return (
                   <div
                     key={`${news.id}-${i}`}
-                    className="transform transition-all duration-300 ease-in-out hover:scale-105 hover:shadow-lg"
+                    className="transform transition-all duration-300 ease-in-out hover:scale-105 "
                     style={{
                       opacity: 1,
                       transform: "translateX(0)",
