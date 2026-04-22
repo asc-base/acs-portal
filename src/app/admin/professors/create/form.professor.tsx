@@ -1,7 +1,7 @@
 "use client";
 import React, { FC, useState, useMemo, useEffect } from "react";
 import { useForm, useFieldArray } from "react-hook-form";
-import { Button, Typography, IconButton } from "@mui/material";
+import { Button, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import AddIcon from "@mui/icons-material/Add";
 import MenuItem from "@mui/material/MenuItem";
@@ -13,13 +13,17 @@ import { MasterDataService } from "@/core/service/master-data.service";
 import { MasterDataRepository } from "@/infra/repositories/master-data.repository";
 import { ProfessorService } from "@/core/service/professor.service";
 import { ProfessorRepository } from "@/infra/repositories/professor.repository";
-import { Position} from "@/core/domain/master-data";
+import { Position } from "@/core/domain/master-data";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { RHFTextField } from "@/components/form/RHFTextField";
 import { RHFSelect } from "@/components/form/RHFSelect";
 import { ICreateProfessor } from "@/core/domain/professor";
-import { ConfirmModal, ConfirmModalProps } from "@/components/modal/confirmModal";
+import {
+  ConfirmModal,
+  ConfirmModalProps,
+} from "@/components/modal/confirmModal";
+import AddCircleOutlineRoundedIcon from "@mui/icons-material/AddCircleOutlineRounded";
 
 interface FormProfessorsProps {
   apiBase: string;
@@ -32,16 +36,16 @@ const Schema = z.object({
     .refine((v) => v !== null, {
       message: "กรุณากรอกตำแหน่ง",
     }),
- education: z.array(
-  z.object({
-    value: z.string(),
-  })
-),
-expertFields: z.array(
-  z.object({
-    value: z.string(),
-  })
-),
+  education: z.array(
+    z.object({
+      value: z.string(),
+    }),
+  ),
+  expertFields: z.array(
+    z.object({
+      value: z.string(),
+    }),
+  ),
   email: z.string().trim().email("อีเมลไม่ถูกต้อง"),
   firstNameEn: z
     .string()
@@ -128,14 +132,12 @@ export const FormProfesssors: FC<FormProfessorsProps> = ({ apiBase }) => {
     reValidateMode: "onChange",
   });
 
-  const { fields: educationFields, append: appendEducation } =
-  useFieldArray({
+  const { fields: educationFields, append: appendEducation } = useFieldArray({
     control,
     name: "education",
   });
 
-const { fields: expertFields, append: appendExpert } =
-  useFieldArray({
+  const { fields: expertFields, append: appendExpert } = useFieldArray({
     control,
     name: "expertFields",
   });
@@ -167,6 +169,7 @@ const { fields: expertFields, append: appendExpert } =
 
   const onSubmit = async (data: FormData) => {
     setIsError(false);
+    console.log(data);
     try {
       const payload: ICreateProfessor = {
         academicPositionId: data.academicPositionId!,
@@ -393,7 +396,7 @@ const { fields: expertFields, append: appendExpert } =
                 variant="outlined"
                 fullWidth
                 required
-                placeholder="ระบุเบอร์โทร"
+                placeholder="ระบุเบอร์โทรศัพท์"
                 requiredMark
               />
             </div>
@@ -460,18 +463,17 @@ const { fields: expertFields, append: appendExpert } =
           <Typography variant="h6" fontWeight="bold">
             ประวัติการศึกษา
           </Typography>
-          <IconButton
+          <AddCircleOutlineRoundedIcon
             color="primary"
             onClick={() => appendEducation({ value: "" })}
             sx={{
-              border: "1px solid #120554",
               color: "#120554",
-              backgroundColor: "#fff",
-              "&:hover": { backgroundColor: "#e3e8fd" },
+              fontSize: 32,
+              cursor: "pointer",
             }}
           >
             <AddIcon />
-          </IconButton>
+          </AddCircleOutlineRoundedIcon>
         </div>
         <div>
           {educationFields.map((field, index) => (
@@ -479,10 +481,10 @@ const { fields: expertFields, append: appendExpert } =
               <div className="flex-2">
                 <RHFTextField
                   control={control}
-                  name={`education.${index}`}
-                  label="การศึกษา"
+                  name={`education.${index}.value`}
+                  label="ระดับการศึกษา"
                   fullWidth
-                  placeholder="ระบุมการศึกษา"
+                  placeholder="ระบุลำดับการศึกษา เช่น B.Sc. Mathematics King Mongkut's University of Technology Thonburi"
                 />
               </div>
             </div>
@@ -493,18 +495,17 @@ const { fields: expertFields, append: appendExpert } =
             <Typography variant="h6" fontWeight="bold">
               สาขาที่เชี่ยวชาญ
             </Typography>
-            <IconButton
+            <AddCircleOutlineRoundedIcon
               color="primary"
               sx={{
-                border: "1px solid #120554",
                 color: "#120554",
-                backgroundColor: "#fff",
-                "&:hover": { backgroundColor: "#e3e8fd" },
+                fontSize: 32,
+                cursor: "pointer",
               }}
               onClick={() => appendExpert({ value: "" })}
             >
               <AddIcon />
-            </IconButton>
+            </AddCircleOutlineRoundedIcon>
           </div>
           {expertFields.map((field, index) => {
             return (
@@ -512,7 +513,7 @@ const { fields: expertFields, append: appendExpert } =
                 <RHFTextField
                   key={field.id}
                   control={control}
-                  name={`expertFields.${index}`}
+                  name={`expertFields.${index}.value`}
                   label="สาขาที่เชี่ยวชาญ"
                   fullWidth
                   placeholder="ระบุสาขาที่เชี่ยวชาญ"
