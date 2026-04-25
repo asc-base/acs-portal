@@ -30,13 +30,13 @@ interface FormProfessorsProps {
 }
 
 const Schema = z.object({
-  academicPositionId: z
+  academicPositionID: z
     .number()
     .nullable()
     .refine((v) => v !== null, {
       message: "กรุณากรอกตำแหน่ง",
     }),
-  education: z.array(
+  educations: z.array(
     z.object({
       value: z.string(),
     }),
@@ -61,12 +61,6 @@ const Schema = z.object({
     .optional()
     .or(z.literal("")),
   lastNameTh: z.string().trim().min(1, "กรุณากรอกนามสกุลภาษาไทย"),
-  majorPositionId: z
-    .number()
-    .nullable()
-    .refine((v) => v !== null, {
-      message: "กรุณากรอกตำแหน่ง",
-    }),
   phone: z
     .string()
     .trim()
@@ -90,7 +84,6 @@ const VisuallyHiddenInput = styled("input")({
 });
 
 export const FormProfesssors: FC<FormProfessorsProps> = ({ apiBase }) => {
-  const [majorPositions, setMajorPositions] = useState<Position[]>([]);
   const [acadamicPositions, setAcadamicPositions] = useState<Position[]>([]);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isError, setIsError] = useState(false);
@@ -116,15 +109,14 @@ export const FormProfesssors: FC<FormProfessorsProps> = ({ apiBase }) => {
   } = useForm<FormData>({
     resolver: zodResolver(Schema),
     defaultValues: {
-      academicPositionId: null,
-      education: [],
+      academicPositionID: null,
+      educations: [],
       email: "",
       expertFields: [],
       firstNameEn: "",
       firstNameTh: "",
       lastNameEn: "",
       lastNameTh: "",
-      majorPositionId: null,
       phone: "",
       profRoom: "",
     },
@@ -134,7 +126,7 @@ export const FormProfesssors: FC<FormProfessorsProps> = ({ apiBase }) => {
 
   const { fields: educationFields, append: appendEducation } = useFieldArray({
     control,
-    name: "education",
+    name: "educations",
   });
 
   const { fields: expertFields, append: appendExpert } = useFieldArray({
@@ -169,11 +161,9 @@ export const FormProfesssors: FC<FormProfessorsProps> = ({ apiBase }) => {
 
   const onSubmit = async (data: FormData) => {
     setIsError(false);
-    console.log(data);
     try {
       const payload: ICreateProfessor = {
-        academicPositionId: data.academicPositionId!,
-        majorPositionId: data.majorPositionId!,
+        academicPositionID: data.academicPositionID!,
         firstNameTh: data.firstNameTh,
         lastNameTh: data.lastNameTh,
         firstNameEn: data.firstNameEn,
@@ -181,7 +171,7 @@ export const FormProfesssors: FC<FormProfessorsProps> = ({ apiBase }) => {
         email: data.email,
         phone: data.phone,
         profRoom: data.profRoom,
-        education: data.education.map((e) => e.value).join("/"),
+        educations: data.educations.map((e) => e.value).join("/"),
         expertFields: data.expertFields.map((e) => e.value).join("/"),
       };
       const reps = await professorService.createProfessor(
@@ -207,7 +197,6 @@ export const FormProfesssors: FC<FormProfessorsProps> = ({ apiBase }) => {
   useEffect(() => {
     const fetchData = async () => {
       const res = await masterDataService.getMasterData();
-      setMajorPositions(res.majorPositions);
       setAcadamicPositions(res.academicPositions);
     };
     fetchData();
@@ -269,38 +258,6 @@ export const FormProfesssors: FC<FormProfessorsProps> = ({ apiBase }) => {
           </div>
           <div className="flex h-[176px] flex-1 flex-col justify-between">
             <div className="flex flex-row gap-x-4">
-              <div className="flex-2">
-                <RHFSelect
-                  control={control}
-                  name="majorPositionId"
-                  label="ตำแหน่ง (ภาษาไทย)"
-                  variant="outlined"
-                  fullWidth
-                  required
-                  displayEmpty
-                  requiredMark
-                  renderValue={(value) => {
-                    if (!value) {
-                      return (
-                        <span style={{ color: "#9e9e9e" }}>
-                          ระบุตำแหน่ง (ภาษาไทย)
-                        </span>
-                      );
-                    }
-                    const selected = majorPositions.find(
-                      (item) => item.id === value,
-                    );
-                    return selected?.positionTh;
-                  }}
-                >
-                  {majorPositions.map((position) => (
-                    <MenuItem key={position.id} value={position.id}>
-                      {position.positionTh}
-                    </MenuItem>
-                  ))}
-                </RHFSelect>
-              </div>
-
               <div className="flex-4">
                 <RHFTextField
                   control={control}
@@ -328,38 +285,6 @@ export const FormProfesssors: FC<FormProfessorsProps> = ({ apiBase }) => {
               </div>
             </div>
             <div className="flex flex-row gap-x-4">
-              <div className="flex-2">
-                <RHFSelect
-                  control={control}
-                  name="majorPositionId"
-                  label="ตำแหน่ง (ภาษาอังกฤษ)"
-                  variant="outlined"
-                  fullWidth
-                  required
-                  displayEmpty
-                  requiredMark
-                  renderValue={(value) => {
-                    if (!value) {
-                      return (
-                        <span style={{ color: "#9e9e9e" }}>
-                          ระบุตำแหน่ง (ภาษาอังกฤษ)
-                        </span>
-                      );
-                    }
-                    const selected = majorPositions.find(
-                      (item) => item.id === value,
-                    );
-                    return selected?.positionEn;
-                  }}
-                >
-                  {majorPositions.map((position) => (
-                    <MenuItem key={position.id} value={position.id}>
-                      {position.positionEn}
-                    </MenuItem>
-                  ))}
-                </RHFSelect>
-              </div>
-
               <div className="flex-4">
                 <RHFTextField
                   control={control}
@@ -417,7 +342,7 @@ export const FormProfesssors: FC<FormProfessorsProps> = ({ apiBase }) => {
             <div className="flex-4">
               <RHFSelect
                 control={control}
-                name="academicPositionId"
+                name="academicPositionID"
                 label="ตำแหน่งในหลักสูตร"
                 fullWidth
                 required
@@ -434,13 +359,13 @@ export const FormProfesssors: FC<FormProfessorsProps> = ({ apiBase }) => {
                   const selected = acadamicPositions.find(
                     (item) => item.id === value,
                   );
-                  return selected?.positionTh;
+                  return selected?.nameTh;
                 }}
               >
                 <MenuItem value="" disabled />
-                {acadamicPositions.map((positon) => (
+                {acadamicPositions?.map((positon) => (
                   <MenuItem key={positon.id} value={positon.id}>
-                    {positon.positionTh}
+                    {positon.nameTh}
                   </MenuItem>
                 ))}
               </RHFSelect>
@@ -481,7 +406,7 @@ export const FormProfesssors: FC<FormProfessorsProps> = ({ apiBase }) => {
               <div className="flex-2">
                 <RHFTextField
                   control={control}
-                  name={`education.${index}.value`}
+                  name={`educations.${index}.value`}
                   label="ระดับการศึกษา"
                   fullWidth
                   placeholder="ระบุลำดับการศึกษา เช่น B.Sc. Mathematics King Mongkut's University of Technology Thonburi"

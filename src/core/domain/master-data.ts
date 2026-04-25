@@ -14,10 +14,11 @@ export interface MasterData {
 
 export interface Position {
   id: number;
-  positionTh: string;
-  positionEn: string;
-  createdDate: Date;
-  updatedDate: Date;
+  sequence: number;
+  nameTh: string;
+  nameEn: string;
+  shortNameTh: string;
+  shortNameEn: string;
 }
 
 export interface EducationLevel {
