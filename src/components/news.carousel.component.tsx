@@ -1,11 +1,11 @@
 import React from "react";
 import Link from "next/link";
-import ArrowBackIosIcon from "@mui/icons-material/ArrowBackIos";
-import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 import { Button } from "@mui/material";
 import { INews } from "@/core/domain/news";
 import EmptyState from "./emptyState";
 import { EmptyStateType } from "./emptyState";
+import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
+import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 
 interface NewsCarouselComponentProps {
   news: INews[];
@@ -55,14 +55,14 @@ export const NewsCarouselComponent = ({
         >
           อ่านทั้งหมด
           <span>
-            <ArrowForwardIosIcon fontSize="small" />
+            <ChevronRightIcon fontSize="small" />
           </span>
         </Link>
       </div>
       <div className="flex items-center justify-between">
         <div className="hidden items-center justify-between sm:flex">
           <Button onClick={handlePrevNews}>
-            <ArrowBackIosIcon fontSize="large" />
+            <ChevronLeftIcon fontSize="large" />
           </Button>
         </div>
         <div className="w-full">
@@ -81,7 +81,7 @@ export const NewsCarouselComponent = ({
         </div>
         <div className="hidden items-center justify-between sm:flex">
           <Button onClick={handleNextNews}>
-            <ArrowForwardIosIcon fontSize="large" />
+            <ChevronRightIcon fontSize="large" />
           </Button>
         </div>
       </div>
