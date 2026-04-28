@@ -1,15 +1,20 @@
 import { Pageable } from "@/interface/response";
-import { INews, ICreateNews , IUpdateNews , INewsInformation } from "../domain/news";
+import {
+  INews,
+  ICreateNews,
+  IUpdateNews,
+  INewsInformation,
+} from "../domain/news";
 import { INewsRepository } from "../ports/news.repository";
 export class NewsService {
-  constructor(private readonly newsRepository: INewsRepository) { }
+  constructor(private readonly newsRepository: INewsRepository) {}
 
   async createNews(data: ICreateNews, image: File): Promise<INews> {
     const formData = new FormData();
 
     formData.append("title", data.title);
     formData.append("detail", data.detail);
-    formData.append("tagId", String(data.tagId));
+    formData.append("tagID", String(data.tagID));
     formData.append("startDate", new Date(data.startDate).toISOString());
 
     if (data.dueDate) {
@@ -26,18 +31,20 @@ export class NewsService {
   async getNews(
     page: number,
     pageSize: number,
-    tagId?: number,
-    orderBy?:string,
-    sortBy?:string,
+    tagID?: number,
+    orderBy?: string,
+    sortBy?: string,
     search?: string,
+    searchBy?: string,
   ): Promise<Pageable<INews>> {
     const response = await this.newsRepository.getNews(
       page,
       pageSize,
-      tagId,
+      tagID,
       orderBy,
       sortBy,
       search,
+      searchBy,
     );
     return response.data;
   }
@@ -47,7 +54,7 @@ export class NewsService {
     return response.data;
   }
 
-  async updateNews(id: number, data:  IUpdateNews , image : File | null) {
+  async updateNews(id: number, data: IUpdateNews, image: File | null) {
     try {
       const formData = new FormData();
       Object.entries(data).forEach(([key, value]) => {
@@ -55,11 +62,11 @@ export class NewsService {
       });
 
       if (image) {
-      formData.append("image", image);
-    }
+        formData.append("image", image);
+      }
 
-    const response = await this.newsRepository.updateNews(id, formData);
-    return response.data;
+      const response = await this.newsRepository.updateNews(id, formData);
+      return response.data;
     } catch (error) {
       console.error("Failed to update news:", error);
       return null;
@@ -70,8 +77,8 @@ export class NewsService {
     page: number,
     pageSize: number,
     tagId?: number,
-    orderBy?:string,
-    sortBy?:string,
+    orderBy?: string,
+    sortBy?: string,
   ): Promise<Pageable<INewsInformation>> {
     const response = await this.newsRepository.getNewsInformations(
       page,
@@ -93,8 +100,8 @@ export class NewsService {
     return response.data;
   }
 
-  async deleteNews(id: number):Promise<INews> {
-    const response = await this.newsRepository.deleteNews(id)
+  async deleteNews(id: number): Promise<INews> {
+    const response = await this.newsRepository.deleteNews(id);
     return response.data;
   }
 }

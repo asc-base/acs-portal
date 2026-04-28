@@ -27,13 +27,13 @@ dayjs.locale("th");
 
 interface CraeteNewsProps {
   apiBase: string;
-  tags: Tag[];
+  categories: Tag[];
 }
 
 const Schema = z.object({
   title: z.string().min(1, "กรุณากรอกหัวข้อ"),
   detail: z.string().min(1, "กรุณากรอกรายละเอียด"),
-  tagId: z.number().min(1, "กรุณาเลือกหมวดหมู่"),
+  tagID: z.number().min(1, "กรุณาเลือกหมวดหมู่"),
   startDate: z
     .string()
     .min(1, "กรุณาเลือกวันที่เริ่มต้น")
@@ -57,7 +57,7 @@ const VisuallyHiddenInput = styled("input")({
   width: 1,
 });
 
-const CreateNewsForm = ({ apiBase, tags }: CraeteNewsProps) => {
+const CreateNewsForm = ({ apiBase, categories }: CraeteNewsProps) => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [confirmModal, setConfirmModal] = useState<ConfirmModalProps | null>(
     null,
@@ -78,7 +78,7 @@ const CreateNewsForm = ({ apiBase, tags }: CraeteNewsProps) => {
       title: "",
       startDate: undefined,
       dueDate: undefined,
-      tagId: 0,
+      tagID: 0,
       detail: "",
     },
   });
@@ -125,7 +125,7 @@ const CreateNewsForm = ({ apiBase, tags }: CraeteNewsProps) => {
         }
         const payload: ICreateNews = {
           title: data.title,
-          tagId: data.tagId,
+          tagID: data.tagID,
           detail: data.detail,
           startDate: dayjs(data.startDate).toISOString(),
           dueDate: data.dueDate ? dayjs(data.dueDate).toISOString() : undefined,
@@ -219,19 +219,19 @@ const CreateNewsForm = ({ apiBase, tags }: CraeteNewsProps) => {
             control={control}
             name="detail"
             label="รายละเอียด"
-            minRows={2}
+            minRows={4}
             multiline
             fullWidth
             requiredMark
           />
           <RHFSelect
-            name="tagId"
+            name="tagID"
             control={control}
             label="หมวดหมู่"
             requiredMark
             fullWidth
           >
-            {tags.map((tag) => (
+            {categories.map((tag) => (
               <MenuItem key={tag.id} value={tag.id}>
                 {tag.name}
               </MenuItem>
