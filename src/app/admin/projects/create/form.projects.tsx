@@ -1,83 +1,72 @@
 "use client";
-import React, { FC, useState, useMemo, useEffect } from "react";
+import React, { FC, useState } from "react";
 import { useForm, useFieldArray } from "react-hook-form";
-import { Button, Typography, IconButton } from "@mui/material";
+import { Button, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import AddIcon from "@mui/icons-material/Add";
 import MenuItem from "@mui/material/MenuItem";
 import Alert from "@mui/material/Alert";
 import Snackbar from "@mui/material/Snackbar";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
-import { MasterDataService } from "@/core/service/master-data.service";
-import { MasterDataRepository } from "@/infra/repositories/master-data.repository";
-import { ProfessorService } from "@/core/service/professor.service";
-import { ProfessorRepository } from "@/infra/repositories/professor.repository";
-import { Position } from "@/core/domain/master-data";
+import { Tag } from "@/core/domain/list-type";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { RHFTextField } from "@/components/form/RHFTextField";
 import { RHFSelect } from "@/components/form/RHFSelect";
-import { ICreateProfessor } from "@/core/domain/professor";
 import {
   ConfirmModal,
   ConfirmModalProps,
 } from "@/components/modal/confirmModal";
 import { AddCircleOutlineOutlined } from "@mui/icons-material";
 import DeleteIcon from "@mui/icons-material/Delete";
-import InputAdornment from "@mui/material/InputAdornment";
 import LinkIcon from "@mui/icons-material/Link";
 import DescriptionIcon from "@mui/icons-material/Description";
 import SlideshowIcon from "@mui/icons-material/Slideshow";
+import { ICourse } from "@/core/domain/course";
 
 interface FormProjectsProps {
   apiBase: string;
 }
 
 const Schema = z.object({
-  academicPositionId: z
-    .number()
-    .nullable()
-    .refine((v) => v !== null, {
-      message: "กรุณากรอกตำแหน่ง",
-    }),
-  education: z.array(
-    z.object({
-      value: z.string(),
-    }),
-  ),
-  expertFields: z.array(
-    z.object({
-      value: z.string(),
-    }),
-  ),
-  email: z.string().trim().email("อีเมลไม่ถูกต้อง"),
-  firstNameEn: z
+  title: z.string().trim().min(1, "กรุณากรอกชื่อโปรเจกต์"),
+
+  thumbnail: z
     .string()
     .trim()
-    .min(1, "กรุณากรอกชื่อภาษาอังกฤษ")
-    .optional()
-    .or(z.literal("")),
-  firstNameTh: z.string().trim().min(1, "กรุณากรอกชื่อภาษาไทย"),
-  lastNameEn: z
-    .string()
-    .trim()
-    .min(1, "กรุณากรอกนามสกุลภาษาอังกฤษ")
-    .optional()
-    .or(z.literal("")),
-  lastNameTh: z.string().trim().min(1, "กรุณากรอกนามสกุลภาษาไทย"),
-  majorPositionId: z
-    .number()
-    .nullable()
-    .refine((v) => v !== null, {
-      message: "กรุณากรอกตำแหน่ง",
-    }),
-  phone: z
-    .string()
-    .trim()
-    .min(9, "กรุณากรอกเบอร์โทร")
-    .regex(/^[0-9]+$/, "เบอร์โทรต้องเป็นตัวเลขเท่านั้น"),
-  profRoom: z.string().min(1, "กรุณากรอกชื่อห้อง"),
+    .min(1, "กรุณากรอกลิงก์รูป")
+    .url("ลิงก์รูปไม่ถูกต้อง"),
+
+  detail: z.string().trim().min(1, "กรุณากรอกรายละเอียด"),
+
+  youtube: z.string().trim().url("ลิงก์ YouTube ไม่ถูกต้อง"),
+  github: z.string().trim().url("ลิงก์ Github ไม่ถูกต้อง"),
+  document: z.string().trim().url("ลิงก์ Document ไม่ถูกต้อง"),
+  presentation: z.string().trim().url("ลิงก์ Presentation ไม่ถูกต้อง"),
+
+  projectCourses: z
+    .array(
+      z.object({
+        value: z.string().trim(),
+      }),
+    )
+    .min(1, "กรุณาเลือกอย่างน้อย 1 วิชา"),
+
+  projectTypes: z
+    .array(
+      z.object({
+        value: z.string().trim(),
+      }),
+    )
+    .min(1, "กรุณาเลือกประเภทโปรเจกต์"),
+
+  projectCategories: z
+    .array(
+      z.object({
+        value: z.string().trim(),
+      }),
+    )
+    .min(1, "กรุณาเลือกหมวดหมู่"),
 });
 
 type FormData = z.infer<typeof Schema>;
@@ -95,24 +84,15 @@ const VisuallyHiddenInput = styled("input")({
 });
 
 export const FormProjects: FC<FormProjectsProps> = ({ apiBase }) => {
-  const [majorPositions, setMajorPositions] = useState<Position[]>([]);
-  const [acadamicPositions, setAcadamicPositions] = useState<Position[]>([]);
+  const [courses, setCourses] = useState<ICourse[]>([]);
+  const [types, setTypes] = useState<Tag[]>([]);
+  const [categories, setCategories] = useState<Tag[]>([]);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isError, setIsError] = useState(false);
   const router = useRouter();
   const [confirmModal, setConfirmModal] = useState<ConfirmModalProps | null>(
     null,
   );
-
-  const masterDataService = useMemo(() => {
-    const masterdataRepository = new MasterDataRepository(apiBase);
-    return new MasterDataService(masterdataRepository);
-  }, [apiBase]);
-
-  const professorService = useMemo(() => {
-    const professorRepository = new ProfessorRepository(apiBase);
-    return new ProfessorService(professorRepository);
-  }, [apiBase]);
 
   const {
     control,
@@ -121,21 +101,37 @@ export const FormProjects: FC<FormProjectsProps> = ({ apiBase }) => {
   } = useForm<FormData>({
     resolver: zodResolver(Schema),
     defaultValues: {
-      academicPositionId: null,
-      education: [],
-      email: "",
-      expertFields: [],
-      firstNameEn: "",
-      firstNameTh: "",
-      lastNameEn: "",
-      lastNameTh: "",
-      majorPositionId: null,
-      phone: "",
-      profRoom: "",
+      title: "",
+      detail: "",
+      thumbnail: "",
+      youtube: "",
+      projectCourses: [{ value: "" }],
+      projectTypes: [{ value: "" }],
+      projectCategories: [{ value: "" }],
+      github: "",
+      document: "",
+      presentation: "",
     },
     mode: "onBlur",
-    reValidateMode: "onChange",
   });
+
+  const { fields: projectCoursesFields, append: appendProjectCourses } =
+    useFieldArray({
+      control,
+      name: "projectCourses",
+    });
+
+  const { fields: projectTypesFields, append: appendProjectTypes } =
+    useFieldArray({
+      control,
+      name: "projectTypes",
+    });
+
+  const { fields: projectCategoriesFields, append: appendProjectCategories } =
+    useFieldArray({
+      control,
+      name: "projectCategories",
+    });
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0] || null;
@@ -153,9 +149,9 @@ export const FormProjects: FC<FormProjectsProps> = ({ apiBase }) => {
         isOpen: true,
         type: "warning",
         onClose: () => setConfirmModal(null),
-        onConfirm: () => router.push(`/admin/professors`),
+        onConfirm: () => router.push(`/admin/projects`),
       });
-    } else router.push(`/admin/professors`);
+    } else router.push(`/admin/projects`);
   };
 
   const handleConfirmSubmit = handleSubmit(async (data) => {
@@ -163,49 +159,8 @@ export const FormProjects: FC<FormProjectsProps> = ({ apiBase }) => {
   });
 
   const onSubmit = async (data: FormData) => {
-    setIsError(false);
-    try {
-      const payload: ICreateProfessor = {
-        academicPositionId: data.academicPositionId!,
-        majorPositionId: data.majorPositionId!,
-        firstNameTh: data.firstNameTh,
-        lastNameTh: data.lastNameTh,
-        firstNameEn: data.firstNameEn,
-        lastNameEn: data.lastNameEn,
-        email: data.email,
-        phone: data.phone,
-        profRoom: data.profRoom,
-        education: data.education.map((e) => e.value).join("/"),
-        expertFields: data.expertFields.map((e) => e.value).join("/"),
-      };
-      const reps = await professorService.createProfessor(
-        payload,
-        selectedFile!,
-      );
-      if (!reps) {
-        setIsError(true);
-        return;
-      }
-      setConfirmModal({
-        isOpen: true,
-        type: "success",
-        onClose: () => setConfirmModal(null),
-        onConfirm: () => router.push(`/admin/professors`),
-      });
-    } catch (error) {
-      console.error(error);
-      setIsError(true);
-    }
+    console.log(data);
   };
-
-  useEffect(() => {
-    const fetchData = async () => {
-      const res = await masterDataService.getMasterData();
-      setMajorPositions(res.majorPositions);
-      setAcadamicPositions(res.academicPositions);
-    };
-    fetchData();
-  }, [apiBase, masterDataService]);
 
   return (
     <form className="space-y-4 p-8" onSubmit={handleSubmit(onSubmit)}>
@@ -264,7 +219,7 @@ export const FormProjects: FC<FormProjectsProps> = ({ apiBase }) => {
           <div className="flex h-[284px] flex-1 flex-col justify-between">
             <RHFTextField
               control={control}
-              name="firstNameEn"
+              name="title"
               label="หัวข้อ"
               variant="outlined"
               fullWidth
@@ -273,7 +228,7 @@ export const FormProjects: FC<FormProjectsProps> = ({ apiBase }) => {
             />
             <RHFTextField
               control={control}
-              name="lastNameEn"
+              name="detail"
               label="รายละเอียด"
               variant="outlined"
               fullWidth
@@ -283,7 +238,7 @@ export const FormProjects: FC<FormProjectsProps> = ({ apiBase }) => {
 
             <RHFTextField
               control={control}
-              name="lastNameEn"
+              name="youtube"
               label="ลิงค์คลิปวิดิโอ"
               variant="outlined"
               fullWidth
@@ -307,46 +262,54 @@ export const FormProjects: FC<FormProjectsProps> = ({ apiBase }) => {
                 <h2 className="text-lg font-semibold">วิชา</h2>
 
                 <button className="flex h-8 w-8 items-center justify-center">
-                  <AddCircleOutlineOutlined />
+                  <AddCircleOutlineOutlined
+                    className="cursor-pointer"
+                    onClick={() => appendProjectCourses({ value: "" })}
+                  />
                 </button>
               </div>
 
               <div className="space-y-2">
-                <div className="flex items-center justify-between gap-3">
-                  <div className="flex-1">
-                    <RHFSelect
-                      control={control}
-                      name="majorPositionId"
-                      label="วิชา"
-                      variant="outlined"
-                      fullWidth
-                      required
-                      displayEmpty
-                      requiredMark
-                      renderValue={(value) => {
-                        if (!value) {
-                          return (
-                            <span style={{ color: "#9e9e9e" }}>ระบุวิชา</span>
+                {projectCoursesFields.map((field) => (
+                  <div
+                    className="flex items-center justify-between gap-3"
+                    key={field.id}
+                  >
+                    <div className="flex-1">
+                      <RHFSelect
+                        control={control}
+                        name="projectCourses"
+                        label="วิชา"
+                        variant="outlined"
+                        fullWidth
+                        required
+                        displayEmpty
+                        requiredMark
+                        renderValue={(value) => {
+                          if (!value) {
+                            return (
+                              <span style={{ color: "#9e9e9e" }}>ระบุวิชา</span>
+                            );
+                          }
+                          const selected = courses.find(
+                            (item) => item.id === value,
                           );
-                        }
-                        const selected = majorPositions.find(
-                          (item) => item.id === value,
-                        );
-                        return selected?.positionEn;
-                      }}
-                    >
-                      {majorPositions?.map((position) => (
-                        <MenuItem key={position.id} value={position.id}>
-                          {position.positionEn}
-                        </MenuItem>
-                      ))}
-                    </RHFSelect>
-                  </div>
+                          return selected?.courseNameTh;
+                        }}
+                      >
+                        {courses?.map((course) => (
+                          <MenuItem key={course.id} value={course.id}>
+                            {course.courseNameTh}
+                          </MenuItem>
+                        ))}
+                      </RHFSelect>
+                    </div>
 
-                  <button className="mt-5 text-red-500 hover:text-red-600">
-                    <DeleteIcon />
-                  </button>
-                </div>
+                    <button className="mt-5 text-red-500 hover:text-red-600">
+                      <DeleteIcon />
+                    </button>
+                  </div>
+                ))}
               </div>
             </div>
             <div className="h-30 w-0.5 bg-gray-300"></div>
@@ -355,46 +318,56 @@ export const FormProjects: FC<FormProjectsProps> = ({ apiBase }) => {
                 <h2 className="text-lg font-semibold">ประเภท</h2>
 
                 <button className="flex h-8 w-8 items-center justify-center">
-                  <AddCircleOutlineOutlined />
+                  <AddCircleOutlineOutlined
+                    className="cursor-pointer"
+                    onClick={() => appendProjectTypes({ value: "" })}
+                  />
                 </button>
               </div>
 
               <div className="space-y-2">
-                <div className="flex items-center justify-between gap-3">
-                  <div className="flex-1">
-                    <RHFSelect
-                      control={control}
-                      name="majorPositionId"
-                      label="ประเภท"
-                      variant="outlined"
-                      fullWidth
-                      required
-                      displayEmpty
-                      requiredMark
-                      renderValue={(value) => {
-                        if (!value) {
-                          return (
-                            <span style={{ color: "#9e9e9e" }}>ระบุประเภท</span>
+                {projectTypesFields.map((field) => (
+                  <div
+                    className="flex items-center justify-between gap-3"
+                    key={field.id}
+                  >
+                    <div className="flex-1">
+                      <RHFSelect
+                        control={control}
+                        name="projectTypes"
+                        label="ประเภท"
+                        variant="outlined"
+                        fullWidth
+                        required
+                        displayEmpty
+                        requiredMark
+                        renderValue={(value) => {
+                          if (!value) {
+                            return (
+                              <span style={{ color: "#9e9e9e" }}>
+                                ระบุประเภท
+                              </span>
+                            );
+                          }
+                          const selected = types.find(
+                            (item) => item.id === value,
                           );
-                        }
-                        const selected = majorPositions.find(
-                          (item) => item.id === value,
-                        );
-                        return selected?.positionEn;
-                      }}
-                    >
-                      {majorPositions?.map((position) => (
-                        <MenuItem key={position.id} value={position.id}>
-                          {position.positionEn}
-                        </MenuItem>
-                      ))}
-                    </RHFSelect>
-                  </div>
+                          return selected?.name;
+                        }}
+                      >
+                        {types?.map((type) => (
+                          <MenuItem key={type.id} value={type.id}>
+                            {type.name}
+                          </MenuItem>
+                        ))}
+                      </RHFSelect>
+                    </div>
 
-                  <button className="mt-5 text-red-500 hover:text-red-600">
-                    <DeleteIcon />
-                  </button>
-                </div>
+                    <button className="mt-5 text-red-500 hover:text-red-600">
+                      <DeleteIcon />
+                    </button>
+                  </div>
+                ))}
               </div>
             </div>
             <div className="h-30 w-0.5 bg-gray-300"></div>
@@ -403,48 +376,56 @@ export const FormProjects: FC<FormProjectsProps> = ({ apiBase }) => {
                 <h2 className="text-lg font-semibold">หมวดหมู่</h2>
 
                 <button className="flex h-8 w-8 items-center justify-center">
-                  <AddCircleOutlineOutlined />
+                  <AddCircleOutlineOutlined
+                    className="cursor-pointer"
+                    onClick={() => appendProjectCategories({ value: "" })}
+                  />
                 </button>
               </div>
 
               <div className="space-y-2">
-                <div className="flex items-center justify-between gap-3">
-                  <div className="flex-1">
-                    <RHFSelect
-                      control={control}
-                      name="majorPositionId"
-                      label="หมวดหมู่"
-                      variant="outlined"
-                      fullWidth
-                      required
-                      displayEmpty
-                      requiredMark
-                      renderValue={(value) => {
-                        if (!value) {
-                          return (
-                            <span style={{ color: "#9e9e9e" }}>
-                              ระบุหมวดหมู่
-                            </span>
+                {projectCategoriesFields.map((field) => (
+                  <div
+                    className="flex items-center justify-between gap-3"
+                    key={field.id}
+                  >
+                    <div className="flex-1">
+                      <RHFSelect
+                        control={control}
+                        name="projectCategories"
+                        label="หมวดหมู่"
+                        variant="outlined"
+                        fullWidth
+                        required
+                        displayEmpty
+                        requiredMark
+                        renderValue={(value) => {
+                          if (!value) {
+                            return (
+                              <span style={{ color: "#9e9e9e" }}>
+                                ระบุหมวดหมู่
+                              </span>
+                            );
+                          }
+                          const selected = categories.find(
+                            (item) => item.id === value,
                           );
-                        }
-                        const selected = majorPositions.find(
-                          (item) => item.id === value,
-                        );
-                        return selected?.positionEn;
-                      }}
-                    >
-                      {majorPositions?.map((position) => (
-                        <MenuItem key={position.id} value={position.id}>
-                          {position.positionEn}
-                        </MenuItem>
-                      ))}
-                    </RHFSelect>
-                  </div>
+                          return selected?.name;
+                        }}
+                      >
+                        {categories?.map((categorie) => (
+                          <MenuItem key={categorie.id} value={categorie.id}>
+                            {categorie.name}
+                          </MenuItem>
+                        ))}
+                      </RHFSelect>
+                    </div>
 
-                  <button className="mt-5 text-red-500 hover:text-red-600">
-                    <DeleteIcon />
-                  </button>
-                </div>
+                    <button className="mt-5 text-red-500 hover:text-red-600">
+                      <DeleteIcon />
+                    </button>
+                  </div>
+                ))}
               </div>
             </div>
           </div>
@@ -456,7 +437,7 @@ export const FormProjects: FC<FormProjectsProps> = ({ apiBase }) => {
           <div className="flex flex-1 flex-col justify-between gap-5">
             <RHFTextField
               control={control}
-              name="firstNameEn"
+              name="github"
               label="Github"
               variant="outlined"
               fullWidth
@@ -466,7 +447,7 @@ export const FormProjects: FC<FormProjectsProps> = ({ apiBase }) => {
             />
             <RHFTextField
               control={control}
-              name="lastNameEn"
+              name="document"
               label="Document"
               variant="outlined"
               fullWidth
@@ -477,7 +458,7 @@ export const FormProjects: FC<FormProjectsProps> = ({ apiBase }) => {
 
             <RHFTextField
               control={control}
-              name="lastNameEn"
+              name="presentation"
               label="Presentation"
               variant="outlined"
               fullWidth
