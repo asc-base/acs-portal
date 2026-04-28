@@ -77,10 +77,12 @@ const NewsListComponent = (initValue: NewsListComponentProps) => {
     const delayDebounce = setTimeout(() => {
       const params = new URLSearchParams(searchParams.toString());
       if (watchedSearch) {
-        params.set("title", watchedSearch);
+        params.set("search", watchedSearch);
+        params.set("searchBy", "title");
         params.set("page", "1");
       } else {
-        params.delete("title");
+        params.delete("search");
+        params.delete("searchBy");
       }
       const newSearch = params.toString();
       if (searchParams.toString() !== newSearch) {
