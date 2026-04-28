@@ -14,6 +14,10 @@ const page = async ({ searchParams }: PageProps) => {
     search.page || 1,
     search.pageSize || 9,
     search.tagID,
+    search.orderBy || "createdAt",
+    search.sortBy || "desc",
+    search.search,
+    search.searchBy,
   );
 
   const tags = await masterDataService.getMasterData();
