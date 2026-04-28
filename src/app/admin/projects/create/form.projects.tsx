@@ -112,7 +112,7 @@ export const FormProjects: FC<FormProjectsProps> = ({ apiBase }) => {
       document: "",
       presentation: "",
     },
-    mode: "onBlur",
+    mode: "onChange",
   });
 
   const { fields: projectCoursesFields, append: appendProjectCourses } =
@@ -256,7 +256,7 @@ export const FormProjects: FC<FormProjectsProps> = ({ apiBase }) => {
               (สามารถเลือกได้มากกว่า 1 ในแต่ละคอลัมม์)
             </Typography>
           </div>
-          <div className="flex items-center justify-between gap-6">
+          <div className="flex items-start justify-between gap-6">
             <div className="w-full space-y-4">
               <div className="flex items-center justify-between">
                 <h2 className="text-lg font-semibold">วิชา</h2>
@@ -270,7 +270,7 @@ export const FormProjects: FC<FormProjectsProps> = ({ apiBase }) => {
               </div>
 
               <div className="space-y-2">
-                {projectCoursesFields.map((field) => (
+                {projectCoursesFields.map((field, index) => (
                   <div
                     className="flex items-center justify-between gap-3"
                     key={field.id}
@@ -278,7 +278,7 @@ export const FormProjects: FC<FormProjectsProps> = ({ apiBase }) => {
                     <div className="flex-1">
                       <RHFSelect
                         control={control}
-                        name="projectCourses"
+                        name={`projectCourses.${index}.value`}
                         label="วิชา"
                         variant="outlined"
                         fullWidth
@@ -326,7 +326,7 @@ export const FormProjects: FC<FormProjectsProps> = ({ apiBase }) => {
               </div>
 
               <div className="space-y-2">
-                {projectTypesFields.map((field) => (
+                {projectTypesFields.map((field, index) => (
                   <div
                     className="flex items-center justify-between gap-3"
                     key={field.id}
@@ -334,7 +334,7 @@ export const FormProjects: FC<FormProjectsProps> = ({ apiBase }) => {
                     <div className="flex-1">
                       <RHFSelect
                         control={control}
-                        name="projectTypes"
+                        name={`projectTypes.${index}.value`}
                         label="ประเภท"
                         variant="outlined"
                         fullWidth
@@ -384,7 +384,7 @@ export const FormProjects: FC<FormProjectsProps> = ({ apiBase }) => {
               </div>
 
               <div className="space-y-2">
-                {projectCategoriesFields.map((field) => (
+                {projectCategoriesFields.map((field, index) => (
                   <div
                     className="flex items-center justify-between gap-3"
                     key={field.id}
@@ -392,7 +392,7 @@ export const FormProjects: FC<FormProjectsProps> = ({ apiBase }) => {
                     <div className="flex-1">
                       <RHFSelect
                         control={control}
-                        name="projectCategories"
+                        name={`projectCategories.${index}.value`}
                         label="หมวดหมู่"
                         variant="outlined"
                         fullWidth
