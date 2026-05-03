@@ -12,6 +12,7 @@ interface NewsListComponentsProps {
   pageSize: number;
   page: number;
   category: string;
+  tagId?: number;
 }
 
 const NewsListComponents = ({
@@ -20,25 +21,26 @@ const NewsListComponents = ({
   pageSize,
   page,
   category,
+  tagId,
 }: NewsListComponentsProps) => {
   const router = useRouter();
 
   const handleNextPage = (currentPage: number) => {
     router.push(
-      `/news?category=${category}&page=${currentPage}&pageSize=${pageSize}`,
+      `/news?category=${category}&page=${currentPage}&pageSize=${pageSize}&tagId=${tagId}`,
     );
   };
 
   return (
-    <div className="container mx-auto px-16 py-5">
+    <div className="container mx-auto px-12 py-6 lg:py-8 md:px-8">
       <div className="flex flex-col items-start justify-start gap-2">
         <Breadcrumbs aria-label="breadcrumb" separator=">>" className="mb-4">
           <Link href="/">หน้าหลัก</Link>
           <p>ประชาสัมพันธ์</p>
           {category && <span>{category}</span>}
         </Breadcrumbs>
-        <h1 className="text-accent04 font-bold">{category}</h1>
       </div>
+       <h4 className="font-bold text-accent04 mt-2 lg:mt-3 mb-4 lg:mb-6 lg:text-2xl">{category}</h4>
       {news.length === 0 ? (
         <div className="flex h-96 flex-col items-center justify-center">
           <p className="text-gray-500">ไม่มีข่าวในหมวดหมู่นี้</p>

@@ -6,60 +6,59 @@ import {
   CardMedia,
   CardActions,
   Button,
-  IconButton,
   AvatarGroup,
-  Avatar
+  Avatar,
 } from "@mui/material";
 import VisibilityOutlinedIcon from "@mui/icons-material/VisibilityOutlined";
 import DeleteOutlineOutlinedIcon from "@mui/icons-material/DeleteOutlineOutlined";
-import EditIcon from "@mui/icons-material/Edit";
 import { AdminCardProps } from "@/interface/admincard";
 import { ICurriculum } from "@/core/domain/curriculum";
 import { IClassBook } from "@/core/domain/classbook";
 import { IProject } from "@/core/domain/project";
+import { INews } from "@/core/domain/news";
 
-const CurriculumContent: FC<{ curriculum: ICurriculum; onEdit?: () => void }> = ({ curriculum, onEdit }) => (
-  <div className="flex justify-between items-start">
-    <h3 className="font-bold mt-1">หลักสูตรปรับปรุง พ.ศ. {curriculum.year}</h3>
-    <IconButton onClick={onEdit}>
-      <EditIcon className="cursor-pointer text-primary03" />
-    </IconButton>
-  </div>
+const CurriculumContent: FC<{ curriculum: ICurriculum }> = ({ curriculum }) => (
+    <h3 className="mt-1 font-bold text-start">
+      {curriculum.title} พ.ศ. {curriculum.year}
+    </h3>
 );
 
-const ClassBookContent: FC<{ classbook: IClassBook; onEdit?: () => void }> = ({ classbook, onEdit }) => (
-  <div className="flex justify-between items-start">
+const ClassBookContent: FC<{ classbook: IClassBook }> = ({ classbook }) => (
+  <div className="flex items-start">
     <div>
-      <h3 className="font-bold mb-2">
-        รุ่น {classbook.classof}
-      </h3>
-      <h6>
-        ปีการศึกษา {classbook.firstYearAcademic}
-      </h6>
+      <h3 className="mb-2 font-bold">รุ่น {classbook.classof}</h3>
+      <h6>ปีการศึกษา {classbook.firstYearAcademic}</h6>
     </div>
-    <IconButton onClick={onEdit}>
-      <EditIcon className="cursor-pointer text-primary03 "/>
-    </IconButton>
   </div>
 );
 
 const ProjectContent: FC<{ project: IProject }> = ({ project }) => {
-  const categories = project.projectCategories?.map((category) => category.name).join(", ") || "";
+  const categories =
+    project.projectCategories?.map((category) => category.name).join(", ") ||
+    "";
   const types = project.projectTypes?.map((type) => type.name).join(", ") || "";
   return (
-    <div className="flex flex-col gap-1 items-start">
-      <p className="text-neutral04 text-sm line-clamp-1">
-        {categories} 
+    <div className="flex flex-col items-start gap-1">
+      <p className="text-neutral04 line-clamp-1 text-sm">
+        {categories}
         {categories && types ? " /" : ""} {types}
       </p>
-      <h4 className="font-bold line-clamp-2">
-        {project.title}
-      </h4>
-      
+      <h4 className="line-clamp-2 font-bold">{project.title}</h4>
+
       {project.projectMembers && (
-        <AvatarGroup max={4} sx={{ justifyContent: 'flex-end', '& .MuiAvatar-root': { width: 24, height: 24,} }}>
+        <AvatarGroup
+          max={4}
+          sx={{
+            justifyContent: "flex-end",
+            "& .MuiAvatar-root": { width: 24, height: 24 },
+          }}
+        >
           {project.projectMembers.map((member, idx) => (
-            <Avatar key={idx} alt={member.user.firstNameTh} src={member.user.imageUrl} />
+            <Avatar
+              key={idx}
+              alt={member.user.firstNameTh}
+              src={member.user.imageUrl}
+            />
           ))}
         </AvatarGroup>
       )}
@@ -67,27 +66,46 @@ const ProjectContent: FC<{ project: IProject }> = ({ project }) => {
   );
 };
 
+const NewsContent: FC<{ news: INews }> = ({ news }) => {
+  return (
+    <div className="flex flex-col items-start gap-1">
+      <h3 className="line-clamp-2 font-bold">{news.title}</h3>
+      <h6>
+        {" "}
+        {new Date(news.startDate).toLocaleDateString("th-TH", {
+          year: "numeric",
+          month: "long",
+          day: "numeric",
+        })}
+      </h6>
+    </div>
+  );
+};
+
 export const AdminCard: FC<AdminCardProps> = (props) => {
-  const { type, data, onView, onDelete, onEdit } = props;
+  const { type, data, onView, onDelete } = props;
   let image = "";
   let alt = "";
 
   if (type === "curriculum") {
-    image = data.imageUrl;
+    image = data.thumbnailURL;
     alt = data.year;
   } else if (type === "classBook") {
-    image = data.image;
-    alt = data.classof;
+    image = data.thumbnailURL;
+    alt = String(data.classof);
   } else if (type === "project") {
     image = data.thumbnail || "";
+    alt = data.title;
+  } else if (type === "news") {
+    image = data.image;
     alt = data.title;
   }
 
   return (
-    <Card className="w-[362px] !rounded-2xl shadow-sm py-5 flex flex-col">
-      <div className="px-7 pt-2 overflow-hidden">
+    <Card className="flex w-[362px] flex-col !rounded-2xl py-5 shadow-sm">
+      <div className="overflow-hidden px-7 pt-2">
         <CardMedia
-          sx={{ 
+          sx={{
             width: "315px",
             backgroundSize: "cover",
             backgroundPosition: "center",
@@ -102,10 +120,15 @@ export const AdminCard: FC<AdminCardProps> = (props) => {
         />
       </div>
 
-      <CardContent className="!px-7 flex-grow">
-        {type === "curriculum" && <CurriculumContent curriculum={data} onEdit={onEdit} />}
-        {type === "classBook" && <ClassBookContent classbook={data} onEdit={onEdit} />}
+      <CardContent className="flex-grow !px-7">
+        {type === "curriculum" && (
+          <CurriculumContent curriculum={data}/>
+        )}
+        {type === "classBook" && (
+          <ClassBookContent classbook={data}/>
+        )}
         {type === "project" && <ProjectContent project={data} />}
+        {type === "news" && <NewsContent news={data} />}
       </CardContent>
 
       <CardActions className="flex gap-2 !px-7 !pt-0">
@@ -114,12 +137,12 @@ export const AdminCard: FC<AdminCardProps> = (props) => {
             onClick={onView}
             fullWidth
             variant="outlined"
-            size= "large"
-            startIcon={<VisibilityOutlinedIcon fontSize="medium"/>}
-            sx={{ 
-              fontWeight: 700, 
-              borderWidth: "2px", 
-              py: 1.5, 
+            size="large"
+            startIcon={<VisibilityOutlinedIcon fontSize="medium" />}
+            sx={{
+              fontWeight: 700,
+              borderWidth: "2px",
+              py: 1.5,
             }}
           >
             ดูข้อมูล
@@ -131,8 +154,8 @@ export const AdminCard: FC<AdminCardProps> = (props) => {
             onClick={onDelete}
             fullWidth
             variant="outlined"
-            size= "large"
-            startIcon={<DeleteOutlineOutlinedIcon fontSize="medium"/>}
+            size="large"
+            startIcon={<DeleteOutlineOutlinedIcon fontSize="medium" />}
             sx={{
               fontWeight: 700,
               borderWidth: "2px",

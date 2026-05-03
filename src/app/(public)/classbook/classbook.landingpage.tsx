@@ -1,8 +1,8 @@
 import { ClassbookCard } from "@/components/ClassbookCard";
-import { Typography } from "@mui/material";
 import Link from "next/link";
 import { IClassBook } from "@/core/domain/classbook";
 import { FC } from "react";
+import { Breadcrumbs } from "@mui/material";
 
 interface PageProps {
   classBooks: IClassBook[];
@@ -10,34 +10,27 @@ interface PageProps {
 
 const ClassBookLandingPage: FC<PageProps> = ({ classBooks }) => {
   return (
-    <main className="container mx-auto px-6 py-6 xl:px-8">
-      <div className="text-neutral04 mb-1 text-sm">
-        <Link href="/home" className="cursor-pointer hover:underline">
-          หน้าหลัก
-        </Link>
-        <span className="mx-1">&gt;&gt;</span>
-        <span className="text-neutral04">ทำเนียบรุ่น</span>
+    <main className="container mx-auto px-6 py-6 md:px-16 lg:py-8 xl:px-8">
+      <div className="flex flex-col items-start justify-start gap-2">
+        <Breadcrumbs aria-label="breadcrumb" separator=">>">
+          <Link href="/">หน้าหลัก</Link>
+          <p>เกี่ยวกับเรา</p>
+          <p>ทำเนียบรุ่น</p>
+        </Breadcrumbs>
       </div>
 
-      {/* Title */}
-      <Typography
-        variant="h3"
-        className="!mt-3 !mb-6 text-left !font-extrabold text-black"
-        sx={{
-          fontSize: { xs: 16, sm: 20, md: 24, lg: 28 },
-        }}
-      >
+      <h4 className="text-accent04 mt-2 mb-4 font-bold lg:mt-3 lg:mb-6 lg:text-2xl">
         ทำเนียบรุ่น นักศึกษาวิทยาการคอมพิวเตอร์ประยุกต์
-      </Typography>
+      </h4>
 
       {/* Grid 2 คอลัมน์ (Desktop) / 1 คอลัมน์ (Mobile) */}
-      <div className="grid gap-6 md:gap-8 xl:grid-cols-2">
+      <div className="grid gap-6 px-1 md:gap-8 xl:grid-cols-2">
         {classBooks.map((item, i) => (
           <Link
             key={item.id}
-            href={`/students?page=1&pageSize=12&classBookId=${item.id}`}
+            href={`/students?page=1&pageSize=12&classBookID=${item.id}`}
           >
-            <ClassbookCard {...item} priority={i < 2} />
+            <ClassbookCard {...item} classof={item.classof} priority={i < 2} />
           </Link>
         ))}
       </div>

@@ -57,7 +57,7 @@ function ProjectCardBase({ data }: ProjectCardProps) {
             {projectMembers.slice(0, 3).map((member, i) => (
               <Avatar
                 key={`${member.id}-${i}`}
-                alt={member.studentId}
+                alt={member.studentCode}
                 src={
                   member.user.imageUrl ??
                   `https://i.pravatar.cc/80?img=${(i + id) % 70}`

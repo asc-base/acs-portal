@@ -6,7 +6,7 @@ import {
   DatePickerProps,
 } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
-import { Dayjs } from "dayjs";
+import dayjs from "dayjs";
 import Stack from "@mui/material/Stack";
 import FormLabel from "@mui/material/FormLabel";
 
@@ -16,6 +16,8 @@ type RHFDatePickerProps<T extends FieldValues> = {
   label?: string;
   placeholder?: string;
   adapterLocale?: string;
+  requiredMark?: boolean;
+  required?: boolean;
 } & Omit<DatePickerProps, "value" | "onChange" | "label">;
 
 export function RHFDatePickerDayjs<T extends FieldValues>({
@@ -24,6 +26,8 @@ export function RHFDatePickerDayjs<T extends FieldValues>({
   label,
   placeholder,
   adapterLocale = "th",
+  requiredMark,
+  required,
   ...props
 }: RHFDatePickerProps<T>) {
   return (
@@ -32,7 +36,11 @@ export function RHFDatePickerDayjs<T extends FieldValues>({
       control={control}
       render={({ field, fieldState }) => (
         <Stack spacing={0.5}>
-          {label && <FormLabel>{label}</FormLabel>}
+          {label && (
+            <FormLabel>
+              {requiredMark || required ? `${label} *` : label}
+            </FormLabel>
+          )}
 
           <LocalizationProvider
             dateAdapter={AdapterDayjs}
@@ -40,15 +48,17 @@ export function RHFDatePickerDayjs<T extends FieldValues>({
           >
             <DatePicker
               {...props}
-              value={(field.value as Dayjs | null) ?? null}
-              onChange={(val) => field.onChange(val)} // RHF เก็บเป็น Dayjs | null
+              value={field.value ? dayjs(field.value) : null}
+              onChange={(val) => field.onChange(val ? val.toISOString() : "")}
               slotProps={{
                 textField: {
+                  required: required,
                   placeholder,
                   fullWidth: true,
                   variant: "outlined",
                   error: !!fieldState.error,
                   helperText: fieldState.error?.message,
+                  size: "small",
                 },
               }}
             />

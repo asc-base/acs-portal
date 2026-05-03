@@ -1,15 +1,30 @@
 export interface ICurriculum {
   id: number;
   year: string;
-  fileUrl: string;
+  title: string;
+  documentURL: string;
   description: string;
-  imageUrl: string;
+  thumbnailURL: string;
 }
 
 export interface QueryCurriculum {
   page?: number;
   pageSize?: number;
-  search?: string,
-  sortBy?: string;
-  sortOrder?: "asc" | "desc";
+  search?: string;
+  orderBy?: string;
+  sortBy?: "asc" | "desc";
+}
+
+export interface ICreateCurriculum {
+  year: string;
+  title: string;
+  documentURL: string;
+  description: string;
+}
+
+export interface IUpdateCurriculum {
+  year?: string;
+  title?: string;
+  documentURL?: string;
+  description?: string;
 }

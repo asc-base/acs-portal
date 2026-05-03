@@ -1,15 +1,14 @@
 import React from "react";
 import StudentsListComponent from "./students.list.component";
-import { studentService } from "@/infra/container";
-import { classBookService } from "@/infra/container";
+import { studentService, classBookService } from "@/infra/container";
 
 interface PageProps {
   searchParams: Promise<{
     page?: number;
     pageSize?: number;
-    classBookId?: number;
-    sortBy?: string;
-    sortOrder?: "asc" | "desc";
+    classBookID?: number;
+    orderBy?: string;
+    sortBy?: "asc" | "desc";
   }>;
 }
 
@@ -19,13 +18,13 @@ const page = async ({ searchParams }: PageProps) => {
     await studentService.getStudents({
       page: resolvedSearchParams.page || 1,
       pageSize: resolvedSearchParams.pageSize || 10,
-      classBookId: resolvedSearchParams.classBookId || 1,
-      sortBy: resolvedSearchParams.sortBy || "studentId",
-      sortOrder: resolvedSearchParams.sortOrder || "asc",
+      classBookID: resolvedSearchParams.classBookID || 1,
+      orderBy: resolvedSearchParams.orderBy || "studentCode",
+      sortBy: resolvedSearchParams.sortBy || "asc",
     });
 
   const classBook = await classBookService.getClassBookById(
-    resolvedSearchParams.classBookId || 1,
+    resolvedSearchParams.classBookID || 1,
   );
 
   return (
@@ -34,7 +33,7 @@ const page = async ({ searchParams }: PageProps) => {
       totalRecords={totalRecords}
       pageSize={pageSize}
       page={page}
-      classBookId={resolvedSearchParams.classBookId || 1}
+      classBookId={resolvedSearchParams.classBookID || 1}
       classBook={classBook}
     />
   );

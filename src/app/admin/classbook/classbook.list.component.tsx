@@ -1,13 +1,14 @@
 "use client";
-import { useRouter } from "next/navigation";
 import { AdminCard } from "@/components/adminCard";
-import { IClassBook, QueryClassBook } from "@/core/domain/classbook";
+import { IClassBook } from "@/core/domain/classbook";
 import {
   MenuItem,
   Select,
   SelectChangeEvent,
   Button,
   Pagination,
+  Snackbar,
+  Alert,
 } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import DoneIcon from "@mui/icons-material/Done";
@@ -17,15 +18,25 @@ import CloseIcon from "@mui/icons-material/Close";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useEffect, useCallback } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import Link from "next/link";
+import { RHFTextField } from "@/components/form/RHFTextField";
+import { useRouter, usePathname, useSearchParams } from "next/navigation";
+import { ClassBookRepository } from "@/infra/repositories/class-book.repository";
+import { ClassBookService } from "@/core/service/class-book.service";
+import {
+  ConfirmModal,
+  ConfirmModalProps,
+} from "@/components/modal/confirmModal";
 
 interface ClassBookListComponentsProps {
   classbooks: IClassBook[];
   totalRecords: number;
   pageSize: number;
   page: number;
-  sortOrder?: string;
+  sortBy?: string;
   search?: string;
+  apiBase: string;
 }
 
 const searchSchema = z.object({
@@ -39,157 +50,175 @@ const ClassBookListComponents = ({
   totalRecords,
   pageSize,
   page,
-  sortOrder,
+  sortBy,
   search,
+  apiBase,
 }: ClassBookListComponentsProps) => {
   const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const [isError, setIsError] = useState(false);
+  const [confirmModal, setConfirmModal] = useState<ConfirmModalProps | null>(
+    null,
+  );
 
-  const { register, reset, watch } = useForm<SearchForm>({
+  const { control, reset, watch } = useForm<SearchForm>({
     resolver: zodResolver(searchSchema),
     defaultValues: { search },
   });
 
-  const watchedSearch = watch("search");
+  const handleResetSearch = () => {
+    reset({ search: "" });
+  };
 
-  const SearchClassBookUrl = useCallback(
-    (query: Partial<QueryClassBook>) => {
-      const searchClassOf = (query.search ?? watchedSearch ?? "").replace(
-        /\D/g,
-        "",
-      );
-
-      const params = new URLSearchParams({
-        page: query.page?.toString() || page.toString(),
-        pageSize: query.pageSize?.toString() || pageSize.toString(),
-        sortBy: "createdAt",
-        sortOrder: query.sortOrder ?? sortOrder ?? "desc",
-        search: searchClassOf,
-      });
-      return `/admin/classbook?${params.toString()}`;
+  const handleNextPage = useCallback(
+    (currentPage: number) => {
+      const params = new URLSearchParams(searchParams.toString());
+      params.set("page", currentPage.toString());
+      router.push(`${pathname}?${params.toString()}`);
     },
-    [page, pageSize, sortOrder, watchedSearch],
+    [pathname, router, searchParams],
   );
 
-  useEffect(() => {
-    const handler = setTimeout(() => {
-      router.push(SearchClassBookUrl({ page: 1, search: watchedSearch }));
-    }, 300);
-
-    return () => clearTimeout(handler);
-  }, [watchedSearch, SearchClassBookUrl, router]);
+  const watchedSearch = watch("search");
 
   const handleSortOrder = (event: SelectChangeEvent) => {
     const newSortOrder = event.target.value as "asc" | "desc";
-    router.push(SearchClassBookUrl({ sortOrder: newSortOrder }));
+    const params = new URLSearchParams(searchParams.toString());
+    params.set("orderBy", "createdAt");
+    params.set("sortBy", newSortOrder);
+    router.push(`${pathname}?${params.toString()}`);
   };
 
-  const handleClickAddClassBook = () => {
-    router.push("/admin/classbook/create");
+  const classBookService = useMemo(() => {
+    const classBookRepository = new ClassBookRepository(apiBase);
+    return new ClassBookService(classBookRepository);
+  }, [apiBase]);
+
+  const confirmDeleteClassbook = (id: number) => {
+    setConfirmModal({
+      isOpen: true,
+      type: "delete",
+      onClose: () => setConfirmModal(null),
+      onConfirm: () => {
+        deleteClassbook(id);
+        setConfirmModal(null);
+      },
+    });
   };
 
-  const handleNextPage = (currentPage: number) => {
-    router.push(SearchClassBookUrl({ page: currentPage }));
+  const deleteClassbook = async (id: number) => {
+    try {
+      const reps = await classBookService.deleteClassBook(id);
+      if (!reps) {
+        setIsError(true);
+        return;
+      }
+      setConfirmModal({
+        isOpen: true,
+        type: "success",
+        onClose: () => setConfirmModal(null),
+        onConfirm: () => {
+          setConfirmModal(null);
+          router.refresh();
+        },
+        title: "ลบข้อมูลสำเร็จ",
+        description: "ข้อมูลถูกลบออกจากระบบแล้ว",
+        confirmText: "เสร็จสิ้น",
+      });
+    } catch (error) {
+      console.error(error);
+      setIsError(true);
+    }
   };
+
+  const handleCloseAlert = () => {
+    setIsError(false);
+  };
+
+  useEffect(() => {
+    const delayDebounceFn = setTimeout(() => {
+      const params = new URLSearchParams(searchParams.toString());
+      if (watchedSearch) {
+        params.set("search", watchedSearch);
+        params.set("page", "1");
+      } else {
+        params.delete("search");
+      }
+      const newSearch = params.toString();
+      if (searchParams.toString() !== newSearch) {
+        router.push(`${pathname}?${newSearch}`, { scroll: false });
+      }
+    }, 500);
+
+    return () => clearTimeout(delayDebounceFn);
+  }, [watchedSearch, pathname, router, searchParams]);
 
   return (
     <div className="min-h-screen px-8 py-5">
+      <Snackbar
+        anchorOrigin={{ vertical: "top", horizontal: "right" }}
+        open={isError}
+        autoHideDuration={4000}
+        onClose={handleCloseAlert}
+      >
+        <Alert
+          severity="error"
+          onClose={handleCloseAlert}
+          sx={{ width: "100%" }}
+        >
+          ไม่สามารถลบรุ่นการศึกษาได้
+        </Alert>
+      </Snackbar>
       <div className="mb-6 flex items-center justify-between">
-        <h3 className="text-lg font-bold">ข้อมูลนักศึกษา</h3>
+        <h3 className="font-bold">ข้อมูลนักศึกษา</h3>
 
         <div className="flex items-center gap-3">
-          <form className="relative">
-            <div className="text-neutral04 absolute top-1/2 left-2 -translate-y-1/2">
-              <SearchIcon className="h-5 w-5" />
-            </div>
-            <input
-              type="text"
-              placeholder="ค้นหารุ่น"
-              {...register("search")}
-              className="border-neutral04 text-h4 h-[44px] w-[280px] rounded-sm border pl-10"
-            />
-            <button
-              type="button"
-              onClick={() => reset({ search: "" })}
-              disabled={!watchedSearch}
-              className={`text-neutral05 absolute top-1/2 right-2 -translate-y-1/2 ${
-                !watchedSearch
-                  ? "cursor-not-allowed opacity-50"
-                  : "hover:text-primary01 cursor-pointer"
-              }`}
-            >
-              <CloseIcon fontSize="small" />
-            </button>
-          </form>
+          <RHFTextField
+            name="search"
+            control={control}
+            startIcon={<SearchIcon />}
+            endIcon={
+              watchedSearch ? (
+                <CloseIcon onClick={handleResetSearch} />
+              ) : (
+                <span style={{ width: "24px" }} />
+              )
+            }
+            placeholder="ค้นหารุ่นนักศึกษา"
+            size="small"
+          />
 
           <Select
             onChange={handleSortOrder}
             size="small"
-            value={sortOrder ?? "desc"}
+            value={sortBy ?? "desc"}
             displayEmpty
             renderValue={() => "จัดเรียงตาม"}
-            sx={{
-              "& .MuiOutlinedInput-notchedOutline": {
-                borderColor: "var(--color-neutral04)",
-              },
-              py: 0.5,
-              width: "180px",
-              height: "44px",
-              color: "var(--color-neutral04)",
-            }}
+            sx={{ width: 200 }}
             IconComponent={ExpandMoreIcon}
-            MenuProps={{
-              MenuListProps: {
-                sx: { py: 0 },
-              },
-            }}
           >
             <MenuItem
               value="desc"
-              sx={{
-                color: "var(--color-neutral04)",
-                borderRadius: 1,
-                border: "1px solid var(--color-neutral04)",
-                display: "flex",
-                justifyContent: "space-between",
-              }}
             >
               ใหม่สุดไปเก่าสุด
-              {sortOrder === "desc" && <DoneIcon fontSize="small" />}
+              {sortBy === "desc" && <DoneIcon fontSize="small" />}
             </MenuItem>
 
             <MenuItem
               value="asc"
-              sx={{
-                color: "var(--color-neutral04)",
-                borderRadius: 1,
-                border: "1px solid var(--color-neutral04)",
-                display: "flex",
-                justifyContent: "space-between",
-              }}
             >
               เก่าสุดไปใหม่สุด
-              {sortOrder === "asc" && <DoneIcon fontSize="small" />}
+              {sortBy === "asc" && <DoneIcon fontSize="small" />}
             </MenuItem>
           </Select>
 
-          <Button
-            onClick={handleClickAddClassBook}
-            variant="contained"
-            sx={{
-              backgroundColor: "var(--color-primary02)",
-              color: "var(--color-neutral01)",
-              px: 2,
-              height: "44px",
-              fontWeight: "bold",
-              display: "flex",
-              alignItems: "center",
-              gap: 1,
-              "&:hover": { backgroundColor: "var(--color-primary03)" },
-            }}
-          >
-            <AddIcon />
-            เพิ่มรุ่นนักศึกษา
-          </Button>
+          <Link href="/admin/classbook/create">
+            <Button variant="contained" size="large">
+              <AddIcon />
+              เพิ่มรุ่นนักศึกษา
+            </Button>
+          </Link>
         </div>
       </div>
 
@@ -200,13 +229,12 @@ const ClassBookListComponents = ({
               key={classbook.id}
               type="classBook"
               data={classbook}
-              onEdit={() => router.push(`/admin/students/edit/${classbook.id}`)}
               onView={() =>
                 router.push(
-                  `/admin/students?page=1&pageSize=10&classBookId=${classbook.id}`,
+                  `/admin/students?page=1&pageSize=10&classBookID=${classbook.id}`,
                 )
               }
-              onDelete={() => console.log("Delete succeed:", classbook.id)}
+              onDelete={() => confirmDeleteClassbook(classbook.id)}
             />
           ))}
         </div>
@@ -220,6 +248,7 @@ const ClassBookListComponents = ({
           size="large"
         />
       </div>
+      {confirmModal && <ConfirmModal {...confirmModal} />}
     </div>
   );
 };

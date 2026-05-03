@@ -10,8 +10,8 @@ import { IUser } from "@/interface/user";
 import { authErrorHandler } from "@/lib/auth-error-handler";
 
 export class AuthRepository implements IAuthRepository {
-  private http: HttpHelper;
-  private baseUrl: string;
+  private readonly http: HttpHelper;
+  private readonly baseUrl: string;
 
   constructor(baseUrl: string) {
     this.baseUrl = baseUrl;
@@ -35,7 +35,7 @@ export class AuthRepository implements IAuthRepository {
 
   async LoginV2(data: LoginRequest): Promise<ApiResponse<IUser>> {
     const response = await this.http.post<ApiResponse<IUser>>(
-      `/v2/auth/login`,
+      `/v1/auth/login`,
       data,
     );
     console.log("response", response);
@@ -66,11 +66,17 @@ export class AuthRepository implements IAuthRepository {
 
   async getUser(): Promise<IUser | null> {
     return authErrorHandler.withAuthErrorHandling(async () => {
-      const response = await this.http.get<ApiResponse<IUser>>(`/v2/auth/me`);
+      const response = await this.http.get<ApiResponse<IUser>>(`/v1/auth/me`);
       if (response.data) {
         return response.data;
       }
       return null;
+    });
+  }
+
+  async Logout(): Promise<void> {
+    authErrorHandler.withAuthErrorHandling(async () => {
+      await this.http.post<void>(`/v1/auth/logout`);
     });
   }
 }

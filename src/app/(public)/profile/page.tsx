@@ -3,9 +3,7 @@ import ProfileForm from "./profileform";
 
 const page = async () => {
   return (
-    <>
       <ProfileForm />
-    </>
   );
 };
 

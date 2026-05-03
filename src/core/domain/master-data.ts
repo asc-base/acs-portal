@@ -1,19 +1,24 @@
+import { Tag, TagsGroups } from "./list-type";
+
 export interface MasterData {
   majorPositions: Position[];
   types: IType[];
   roles: Role[];
-  typeCourses: EducationLevel[];
+  typeCourses: TypeCourse[];
   listTypes: IType[];
   educationLevels: EducationLevel[];
   academicPositions: Position[];
+  tags: Tag[];
+  tagsGroups: TagsGroups[];
 }
 
 export interface Position {
   id: number;
-  positionTh: string;
-  positionEn: string;
-  createdDate: Date;
-  updatedDate: Date;
+  sequence: number;
+  nameTh: string;
+  nameEn: string;
+  shortNameTh: string;
+  shortNameEn: string;
 }
 
 export interface EducationLevel {
@@ -39,7 +44,7 @@ export interface IType {
 
 export interface TypeCourse {
   id: number;
-  name: string;
+  type: string;
   description: string;
   createdDate: Date;
   updatedDate: Date;

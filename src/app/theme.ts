@@ -33,7 +33,7 @@ export const Theme = createTheme({
               borderColor: "var(--color-primary03)",
               borderWidth: 3,
             },
-            "&:hover:not(.Mui-focused) .MuiOutlinedInput-notchedOutline": {
+            "&:hover:not(.Mui-focused):not(.Mui-disabled) .MuiOutlinedInput-notchedOutline": {
               borderColor: "var(--color-primary04)",
               borderWidth: 1,
             },
@@ -46,6 +46,19 @@ export const Theme = createTheme({
               borderWidth: 1,
             },
           },
+        },
+      },
+    },
+    MuiBreadcrumbs: {
+      styleOverrides: {
+        root: {
+          fontSize: "12px",
+          color: "var(--color-neutral04)",
+        },
+        separator: {
+          color: "var(--color-neutral04)",
+          marginLeft: 4,
+          marginRight: 4,
         },
       },
     },

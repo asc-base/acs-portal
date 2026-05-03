@@ -1,17 +1,13 @@
 "use client";
-import React, { useEffect, useCallback } from "react";
-import { useRouter } from "next/navigation";
-import { Pagination } from "@mui/material";
-import SearchIcon from "@mui/icons-material/Search";
-import CloseIcon from "@mui/icons-material/Close";
+import { useEffect, useCallback } from "react";
+import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import StudentTableComponents from "./students.table.component";
 import { IStudent } from "@/core/domain/student";
+import { ClassBookInfoComponent } from "@/app/admin/students/classbook.info.component";
 import { IClassBook } from "@/core/domain/classbook";
-import { QueryStudent } from "@/core/domain/student";
-
 interface StudentsLandingPageProps {
   students: IStudent[];
   totalRecords: number;
@@ -20,120 +16,114 @@ interface StudentsLandingPageProps {
   classBookId: number;
   classBook: IClassBook;
   search?: string;
-  sortBy?: string;
-  sortOrder?: "asc" | "desc";
+  orderBy?: string;
+  sortBy?: "asc" | "desc";
+  apiBase: string;
 }
 
 const searchSchema = z.object({
   search: z.string().optional(),
 });
 
-type SearchForm = z.infer<typeof searchSchema>;
+export type SearchForm = z.infer<typeof searchSchema>;
 
 const StudentsLandingpage = ({
   students,
   totalRecords,
   pageSize,
   page,
-  classBook,
   classBookId,
+  classBook,
   search,
   sortBy,
-  sortOrder,
+  orderBy,
+  apiBase,
 }: StudentsLandingPageProps) => {
   const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
 
-  const { register, reset, watch } = useForm<SearchForm>({
+  const {
+    control: searchControl,
+    reset: searchReset,
+    watch,
+  } = useForm<SearchForm>({
     resolver: zodResolver(searchSchema),
     defaultValues: { search },
   });
 
   const watchedSearch = watch("search");
 
-  const SearchStudentUrl = useCallback(
-    (query: Partial<QueryStudent>) => {
-      const params = new URLSearchParams({
-        page: query.page?.toString() || page.toString(),
-        pageSize: query.pageSize?.toString() || pageSize.toString(),
-        classBookId: query.classBookId?.toString() || classBookId.toString(),
-        search: query.search ?? watchedSearch ?? "",
-        sortBy: query.sortBy ?? sortBy ?? "studentId",
-        sortOrder: query.sortOrder ?? sortOrder ?? "desc",
-      });
+  const handleResetSearch = () => {
+    searchReset({ search: "" });
+    const params = new URLSearchParams(searchParams.toString());
+    params.delete("search");
+    router.push(`${pathname}?${params.toString()}`);
+  };
 
-      return `/admin/students?${params.toString()}`;
+  const handleNextPage = useCallback(
+    (currentPage: number) => {
+      const params = new URLSearchParams(searchParams.toString());
+      params.set("page", currentPage.toString());
+      router.push(`${pathname}?${params.toString()}`);
     },
-    [page, pageSize, classBookId, watchedSearch, sortBy, sortOrder],
+    [pathname, router, searchParams],
   );
 
+  const handleSort = (orderBy: string) => {
+    const params = new URLSearchParams(searchParams.toString());
+
+    const currentOrderBy = params.get("orderBy");
+    const currentSortBy = params.get("sortBy") as "asc" | "desc" | null;
+    const newOrder =
+      currentOrderBy === orderBy && currentSortBy === "desc" ? "asc" : "desc";
+
+    params.set("orderBy", orderBy);
+    params.set("sortBy", newOrder);
+    router.push(`${pathname}?${params.toString()}`, { scroll: false });
+  };
+
   useEffect(() => {
-    const handler = setTimeout(() => {
-      router.push(SearchStudentUrl({ page: 1, search: watchedSearch }));
-    }, 300);
+    const delayDebounceFn = setTimeout(() => {
+      const params = new URLSearchParams(searchParams.toString());
+      if (watchedSearch) {
+        params.set("search", watchedSearch);
+        params.set("page", "1");
+      } else {
+        params.delete("search");
+      }
+      const newSearch = params.toString();
+      if (searchParams.toString() !== newSearch) {
+        router.push(`${pathname}?${newSearch}`, { scroll: false });
+      }
+    }, 500);
 
-    return () => clearTimeout(handler);
-  }, [SearchStudentUrl, router, watchedSearch]);
-
-  const handleNextPage = (currentPage: number) => {
-    router.push(SearchStudentUrl({ page: currentPage }));
-  };
-
-  const handleSort = (newSortBy: string) => {
-    const newSortOrder =
-      sortBy === newSortBy && sortOrder === "desc" ? "asc" : "desc";
-    router.push(
-      SearchStudentUrl({ sortBy: newSortBy, sortOrder: newSortOrder }),
-    );
-  };
+    return () => clearTimeout(delayDebounceFn);
+  }, [watchedSearch, pathname, router, searchParams]);
 
   return (
     <div className="p-6">
-      <div className="mb-4 flex items-center justify-between">
+      <div className="mb-4 flex flex-col gap-6">
         <h3 className="font-bold">
           ข้อมูลนักศึกษา <span>{`>> รุ่นที่ ${classBook?.classof}`}</span>
         </h3>
-        <div className="flex gap-2">
-          <form className="relative">
-            <div className="text-neutral04 absolute top-1/2 left-2 -translate-y-1/2">
-              <SearchIcon className="h-5 w-5" />
-            </div>
-            <input
-              type="text"
-              placeholder="ค้นหา"
-              {...register("search")}
-              className="border-neutral04 text-h4 h-[44px] w-[280px] rounded-sm border pl-10"
-            />
-            <button
-              type="button"
-              onClick={() => reset({ search: "" })}
-              disabled={!watchedSearch}
-              className={`text-neutral05 absolute top-1/2 right-2 -translate-y-1/2 ${
-                !watchedSearch
-                  ? "cursor-not-allowed opacity-50"
-                  : "hover:text-primary01 cursor-pointer"
-              }`}
-            >
-              <CloseIcon fontSize="small" />
-            </button>
-          </form>
-        </div>
-      </div>
 
-      <StudentTableComponents
-        students={students}
-        onSort={handleSort}
-        sortBy={sortBy}
-        sortOrder={sortOrder}
-      />
+        <ClassBookInfoComponent classBook={classBook} apiBase={apiBase} />
 
-      <div className="mt-4 flex justify-center">
-        <Pagination
-          shape="rounded"
-          count={Math.ceil(totalRecords / pageSize)}
+        <StudentTableComponents
+          students={students}
+          onSort={handleSort}
+          orderBy={orderBy}
+          sortBy={sortBy}
+          control={searchControl}
+          watchedSearch={watchedSearch}
+          onResetSearch={handleResetSearch}
+          totalRecords={totalRecords}
+          classBookId={classBookId}
           page={page}
-          onChange={(_, currentPage) => handleNextPage(currentPage)}
-          color="primary"
-          size="large"
+          pageSize={pageSize}
+          handleNextPage={handleNextPage}
+          apiBase={apiBase}
         />
       </div>
     </div>

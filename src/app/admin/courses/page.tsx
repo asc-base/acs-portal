@@ -1,8 +1,7 @@
 import React from "react";
 import CoursesLandingpage from "./courses.landingpage";
-import { courseService } from "@/infra/container";
+import { courseService, masterDataService, curriculumService, baseUrl } from "@/infra/container";
 import { QueryCourse } from "@/core/domain/course";
-import { masterDataService } from "@/infra/container";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -18,16 +17,25 @@ const page = async ({ searchParams }: PageProps) => {
     page: search.page ?? 1,
     pageSize: search.pageSize ?? 10,
     curriculumId: search.curriculumId ?? 1,
-    typecourseId: search.typecourseId,
+    typeCourseId: search.typeCourseId,
     search: search.search ?? "",
-    sortBy: search.sortBy ?? "courseId",
-    sortOrder: search.sortOrder ?? "desc",
+    orderBy: search.sortBy ?? "courseCode",
+    sortBy: search.sortBy ?? "desc",
   };
-  
 
   const { rows, pageSize, page, totalRecords } = await courseService.getCourse(query);
   
   const typeCourses = await masterDataService.getMasterDataTypeCourse();
+
+  const curriculum = await curriculumService.getCurriculumById(query.curriculumId)
+
+  if (!curriculum) {
+  return (
+    <div className="flex items-center justify-center h-screen">
+      <h2 className="font-bold">No curriculum information</h2>
+    </div>
+  );
+  }
 
   return (
     <CoursesLandingpage
@@ -37,9 +45,11 @@ const page = async ({ searchParams }: PageProps) => {
       page={page}
       curriculumId={query.curriculumId}
       typeCourses={typeCourses}
-      typecourseId={query.typecourseId}
+      typeCourseId={query.typeCourseId}
       sortBy={query.sortBy}
-      sortOrder={query.sortOrder}
+      orderBy={query.orderBy}
+      curriculum={curriculum}
+      apiBase={baseUrl}
     />
   );
 };

@@ -8,20 +8,23 @@ import InstagramIcon from "@mui/icons-material/Instagram";
 import GitHubIcon from "@mui/icons-material/GitHub";
 import CloseIcon from "@mui/icons-material/Close";
 import { Typography } from "@mui/material";
-import { IStudent } from "@/interface/student";
 import Image from "next/image";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
+import { IStudent } from "@/core/domain/student";
+import { IClassBook } from "@/core/domain/classbook";
 
 interface StudentModalProps {
   student: IStudent;
   Open: boolean;
   onClose: () => void;
+  classBook: IClassBook | null;
 }
 
 export const StudentModal: React.FC<StudentModalProps> = ({
   student,
   Open,
   onClose,
+  classBook
 }) => {
   return (
     <Modal open={Open} onClose={onClose}>
@@ -78,8 +81,8 @@ export const StudentModal: React.FC<StudentModalProps> = ({
                 {student.user.firstNameTh} {student.user.lastNameTh}
               </Typography>
               <Typography className="!text-h5 md:!text-h4 lg:!text-h3 !text-primary01">
-                {student.user.nickName} {student.studentId} รุ่น{" "}
-                {student.classBook.classof}
+                {student.user.nickName} {student.studentCode} รุ่น{" "}
+                {classBook?.classof}
               </Typography>
 
               <div className="flex flex-wrap gap-2">
@@ -96,10 +99,10 @@ export const StudentModal: React.FC<StudentModalProps> = ({
                     />
                   </IconButton>
                 )}
-                {student.linkin && (
+                {student.linkedin && (
                   <IconButton
                     component="a"
-                    href={student.linkin}
+                    href={student.linkedin}
                     target="_blank"
                     rel="noopener noreferrer"
                     sx={{ p: 0, color: "var(--color-neutral04)" }}

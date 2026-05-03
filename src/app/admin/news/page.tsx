@@ -1,53 +1,47 @@
-"use client";
-import { useEffect, useState } from "react";
 import NewsListComponent from "./news.list.component";
-import { newsService } from "@/infra/container";
-import { INews } from "@/core/domain/news";
+import { baseUrl, newsService, masterDataService } from "@/infra/container";
+import { QueryNews } from "@/core/domain/news";
 
-export default function NewsPage() {
-  const [newsData, setNewsData] = useState<{
-    news: INews[];
-    totalRecords: number;
-    page: number;
-    pageSize: number;
-  } | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+export const dynamic = "force-dynamic";
 
-  useEffect(() => {
-    const fetchNews = async () => {
-      try {
-        const { rows, totalRecords, page, pageSize } =
-          await newsService.getNews(1, 9);
-        setNewsData({ news: rows, totalRecords, page, pageSize });
-      } catch (err) {
-        setError(err instanceof Error ? err.message : "Failed to fetch news");
-      } finally {
-        setLoading(false);
-      }
-    };
+interface PageProps {
+  searchParams: Promise<QueryNews>;
+}
 
-    fetchNews();
-  }, []);
+const page = async ({ searchParams }: PageProps) => {
+  const search = await searchParams;
+  const { rows, totalRecords, page, pageSize } = await newsService.getNews(
+    search.page || 1,
+    search.pageSize || 9,
+    search.tagID,
+    search.orderBy || "createdAt",
+    search.sortBy || "desc",
+    search.search,
+    search.searchBy,
+  );
 
-  if (loading) {
-    return <div>Loading...</div>;
-  }
-
-  if (error) {
-    return <div>Error: {error}</div>;
-  }
-
-  if (!newsData) {
-    return <div>No data available</div>;
-  }
-
+  const tags = await masterDataService.getMasterData();
+  const newsGroup = tags?.tagsGroups?.find(
+    (group: { name: string }) => group.name === "news",
+  );
+  
+  const categories = newsGroup
+    ? tags?.tags?.filter(
+        (tag: { tagsGroupsId: string | number }) =>
+          String(tag?.tagsGroupsId) === String(newsGroup?.id),
+      )
+    : [];
+    
   return (
     <NewsListComponent
-      news={newsData.news}
-      totalRecords={newsData.totalRecords}
-      page={newsData.page}
-      pageSize={newsData.pageSize}
+      news={rows}
+      totalRecords={totalRecords}
+      page={page}
+      pageSize={pageSize}
+      apiBase={baseUrl}
+      categories={categories}
     />
   );
-}
+};
+
+export default page;

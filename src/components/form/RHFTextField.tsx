@@ -1,26 +1,35 @@
-// RHFInput.tsx
-import { Controller, Control, FieldPath, FieldValues } from "react-hook-form";
-import TextField, { TextFieldProps } from "@mui/material/TextField";
-import FormLabel from "@mui/material/FormLabel";
-import Stack from "@mui/material/Stack";
+import { ReactNode, useState } from "react";
+import { Controller, FieldValues, Path, Control } from "react-hook-form";
+import {
+  TextField,
+  Stack,
+  FormLabel,
+  InputAdornment,
+  TextFieldProps,
+} from "@mui/material";
 
-type RHFInputProps<T extends FieldValues> = {
-  name: FieldPath<T>;
+interface RHFInputProps<T extends FieldValues>
+  extends Omit<TextFieldProps, "name" | "slotProps"> {
+  name: Path<T>;
   control: Control<T>;
   label?: string;
   requiredMark?: boolean;
-} & Omit<
-  TextFieldProps,
-  "name" | "value" | "onChange" | "error" | "helperText" | "label"
->;
-
+  startIcon?: ReactNode; // เพิ่ม optional startIcon
+  endIcon?: ReactNode; // เพิ่ม optional endIcon
+  slotProps?: TextFieldProps["slotProps"];
+}
 export function RHFTextField<T extends FieldValues>({
   name,
   control,
   label,
   requiredMark,
+  startIcon,
+  endIcon,
+  slotProps,
   ...props
-}: RHFInputProps<T>) {
+}: Readonly<RHFInputProps<T>>) {
+  const [focused, setFocused] = useState(false);
+
   return (
     <Controller
       name={name}
@@ -28,10 +37,14 @@ export function RHFTextField<T extends FieldValues>({
       render={({ field, fieldState }) => (
         <Stack spacing={0.5}>
           {label && (
-            <FormLabel>
-              {requiredMark && label ? `${label} *` : label}
+            <FormLabel
+              focused={focused}
+              error={!!fieldState.error}
+            >
+              {requiredMark ? `${label} *` : label}
             </FormLabel>
           )}
+
           <TextField
             {...props}
             {...field}
@@ -39,7 +52,35 @@ export function RHFTextField<T extends FieldValues>({
             error={!!fieldState.error}
             helperText={fieldState.error?.message}
             variant="outlined"
+            size={props.size ?? "small"}
             fullWidth
+            onFocus={(e) => {
+              setFocused(true);
+              props.onFocus?.(e);
+            }}
+            onBlur={(e) => {
+              setFocused(false);
+              field.onBlur();
+              props.onBlur?.(e);
+            }}
+            slotProps={{
+              ...slotProps,
+              input: {
+                ...slotProps?.input,
+                ...(startIcon && {
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      {startIcon}
+                    </InputAdornment>
+                  ),
+                }),
+                ...(endIcon && {
+                  endAdornment: (
+                    <InputAdornment position="end">{endIcon}</InputAdornment>
+                  ),
+                }),
+              },
+            }}
           />
         </Stack>
       )}

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import Image from "next/image";
 import {
   Button,
@@ -20,7 +20,6 @@ import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/store/auth";
 import { AuthRepository } from "@/infra/repositories/auth.repository";
 import { AuthService } from "@/core/service/auth.service";
-import { useMemo } from "react";
 
 const Schema = z.object({
   email: z.string().trim(),

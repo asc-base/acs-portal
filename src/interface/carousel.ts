@@ -1,7 +1,7 @@
-import { INewsMedia } from "@/core/domain/news";
+import { INewsInformation } from "@/core/domain/news";
 
 export interface CarouselProps {
-  items: INewsMedia[];
+  items: INewsInformation[];
   autoPlay?: boolean;
   autoPlayInterval?: number;
   showIndicators?: boolean;

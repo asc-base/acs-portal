@@ -1,7 +1,14 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { Button, TextField, Modal, Autocomplete } from "@mui/material";
+import {
+  Button,
+  TextField,
+  Modal,
+  Autocomplete,
+  Snackbar,
+  Alert,
+} from "@mui/material";
 import Image from "next/image";
 import { Controller, useForm } from "react-hook-form";
 import { z } from "zod";
@@ -10,10 +17,13 @@ import { CropImageCard } from "./cropimagecard";
 import { NewsRepository } from "@/infra/repositories/news.repository";
 import { NewsService } from "@/core/service/news.service";
 import { useRouter } from "next/navigation";
+import { ConfirmModal, ConfirmModalProps } from "@/components/modal/confirmModal";
+import { styled } from "@mui/material/styles";
 
 interface NewsInformationFormProps {
   type: string;
   apiBase: string;
+  tagId: number;
 }
 
 type NewsItem = {
@@ -28,13 +38,30 @@ const Schema = z.object({
 
 type FormValues = z.infer<typeof Schema>;
 
+const VisuallyHiddenInput = styled("input")({
+  clip: "rect(0 0 0 0)",
+  clipPath: "inset(50%)",
+  height: 1,
+  overflow: "hidden",
+  position: "absolute",
+  bottom: 0,
+  left: 0,
+  whiteSpace: "nowrap",
+  width: 1,
+});
+
 export const NewsInformationForm = ({
   type,
   apiBase,
+  tagId,
 }: NewsInformationFormProps) => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [croppedFile, setCroppedFile] = useState<File | null>(null);
   const [open, setOpen] = useState(false);
+  const [confirmModal, setConfirmModal] = useState<ConfirmModalProps | null>(
+    null,
+  );
+  const [isError, setIsError] = useState(false);
 
   const [options, setOptions] = useState<NewsItem[]>([]);
   const [loading, setLoading] = useState(false);
@@ -50,8 +77,7 @@ export const NewsInformationForm = ({
     control,
     handleSubmit,
     setValue,
-    formState: { errors },
-    setError,
+    formState: { errors, isDirty },
   } = useForm<FormValues>({
     resolver: zodResolver(Schema),
     mode: "onChange",
@@ -61,26 +87,39 @@ export const NewsInformationForm = ({
     },
   });
 
+  const cancelForm = () => {
+    if (isDirty) {
+      setConfirmModal({
+        isOpen: true,
+        type: "warning",
+        onClose: () => setConfirmModal(null),
+        onConfirm: () => router.push(`/admin/${type}`),
+      });
+    } else router.push(`/admin/newsinformation/${type}`);
+  };
+
   const onSubmit = async (data: FormValues) => {
     try {
       const formData = new FormData();
       formData.append("image", data.image);
       formData.append("newsId", data.newsId.toString());
+      formData.append("tagId", tagId.toString());
 
-      const response = await newsService.createNewsInformation(type, formData);
+      const response = await newsService.upsertNewsInformation(formData);
+
       if (response) {
-        router.push(`/admin/${type}`);
-      } else {
-        setError("newsId", {
-          type: "manual",
-          message: "ข้อมูลข่าวไม่ถูกต้อง",
+        setConfirmModal({
+          isOpen: true,
+          type: "success",
+          onClose: () => setConfirmModal(null),
+          onConfirm: () => router.push(`/admin/newsinformation/${type}`),
         });
+        return;
       }
+
+      setIsError(true);
     } catch {
-      setError("newsId", {
-        type: "manual",
-        message: "เกิดข้อผิดพลาด กรุณาลองใหม่",
-      });
+      setIsError(true);
     }
   };
 
@@ -102,10 +141,10 @@ export const NewsInformationForm = ({
     setOpen(false);
   };
 
-  const handleSearch = async (title: string) => {
+  const handleSearch = async ( search: string) => {
     setLoading(true);
     try {
-      const { rows } = await newsService.getNews(1, 10, title, "");
+      const { rows } = await newsService.getNews(1, 10, undefined, undefined, undefined, search);
       setOptions(rows);
     } finally {
       setLoading(false);
@@ -114,6 +153,16 @@ export const NewsInformationForm = ({
 
   return (
     <div className="px-[32px] py-[28px]">
+      <Snackbar
+        anchorOrigin={{ vertical: "top", horizontal: "right" }}
+        open={isError}
+        autoHideDuration={4000}
+        onClose={() => setIsError(false)}
+      >
+        <Alert severity="error" sx={{ width: "100%" }}>
+          ไม่สามารถบันทึกข้อมูลได้ในขณะนี้ กรุณาลองใหม่อีกครั้ง
+        </Alert>
+      </Snackbar>
       <div className="mb-4 flex flex-row items-end">
         <h3 className="font-bold">
           {type === "announcement" ? "ข่าวประชาสัมพันธ์" : "ข่าว Highlight"}
@@ -133,9 +182,8 @@ export const NewsInformationForm = ({
                 <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
                   <Button variant="contained" component="label">
                     เปลี่ยนรูปภาพ
-                    <input
+                    <VisuallyHiddenInput
                       type="file"
-                      hidden
                       accept="image/*"
                       onChange={handleFileChange}
                     />
@@ -145,9 +193,8 @@ export const NewsInformationForm = ({
             ) : (
               <Button variant="contained" component="label">
                 อัปโหลดรูปภาพ
-                <input
+                <VisuallyHiddenInput
                   type="file"
-                  hidden
                   accept="image/*"
                   onChange={handleFileChange}
                 />
@@ -156,7 +203,6 @@ export const NewsInformationForm = ({
           </div>
 
           <div className="w-full">
-            <h4 className="mb-2 font-bold">ข่าวสาร</h4>
             <Controller
               name="newsId"
               control={control}
@@ -174,6 +220,8 @@ export const NewsInformationForm = ({
                       {...params}
                       placeholder="ค้นหาข่าว"
                       error={!!errors.newsId}
+                      required
+                      label="ข่าวสาร"
                     />
                   )}
                 />
@@ -195,16 +243,15 @@ export const NewsInformationForm = ({
         </Modal>
 
         <div className="mt-6 flex justify-end gap-x-4">
-          <Button
-            variant="outlined"
-            onClick={() => router.push(`/admin/${type}`)}
-          >
+          <Button variant="outlined" onClick={cancelForm}>
             ยกเลิก
           </Button>
           <Button type="submit" variant="contained">
             บันทึกข้อมูล
           </Button>
         </div>
+        
+        {confirmModal && <ConfirmModal {...confirmModal} />}
       </form>
     </div>
   );

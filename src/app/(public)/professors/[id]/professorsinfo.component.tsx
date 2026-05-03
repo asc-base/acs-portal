@@ -12,8 +12,8 @@ interface ProfessorsInfoProps {
 const ProfessorsInfoComponent = ({ professorsInfo }: ProfessorsInfoProps) => {
 
     return (
-        <>
-            <div className="container mx-auto px-6 lg:px-16 py-5">
+
+            <div className="container mx-auto px-8 lg:px-16 py-5">
                 <Breadcrumbs aria-label="breadcrumb" separator=">>" className="mb-4">
                     <Link href="/">หน้าหลัก</Link>
                     <p>เกี่ยวกับเรา</p>
@@ -24,7 +24,7 @@ const ProfessorsInfoComponent = ({ professorsInfo }: ProfessorsInfoProps) => {
                 </Breadcrumbs>
 
                 <div className="flex flex-col md:flex-row gap-4 lg:gap-6 py-6 items-center md:items-start">
-                    <div className="md:basis-1/5">
+                    <div className="md:basis-1/5 pointer-events-none">
                         <ProfessorCard {...professorsInfo} />
                     </div>
 
@@ -37,10 +37,8 @@ const ProfessorsInfoComponent = ({ professorsInfo }: ProfessorsInfoProps) => {
                                 </h3>
                                 {professorsInfo.educations?.length ? (
                                     <ul className="list-disc pl-6 text-h4">
-                                        {professorsInfo.educations.map((edu,idx) => (
-                                            <li key={idx}>
-                                                {edu.level?.level}({edu.education}), {edu.university}
-                                            </li>
+                                        {professorsInfo.educations.map((edu) => (
+                                            <li key={edu}>{edu}</li>
                                         ))}
                                     </ul>
                                 ) : (
@@ -57,7 +55,7 @@ const ProfessorsInfoComponent = ({ professorsInfo }: ProfessorsInfoProps) => {
                                 {professorsInfo.expertFields?.length ? (
                                     <ul className="list-disc pl-6 text-h4">
                                         {professorsInfo.expertFields.map((exp) => (
-                                            <li key={exp.id}>{exp.field}</li>
+                                            <li key={exp}>{exp}</li>
                                         ))}
                                     </ul>
                                 ) : (
@@ -68,7 +66,6 @@ const ProfessorsInfoComponent = ({ professorsInfo }: ProfessorsInfoProps) => {
                     </div>
                 </div>
             </div>
-        </>
     );
 };
 

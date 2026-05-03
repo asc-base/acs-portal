@@ -26,7 +26,7 @@ export const CurriculumCard: FC<ICurriculumCard> = ({
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
 
-  const { id, year, description, imageUrl, fileUrl } = curriculum;
+  const { id, year, description, thumbnailURL, documentURL, title } = curriculum;
   const isFocused = focusCurriculum === id;
 
   return (
@@ -53,12 +53,12 @@ export const CurriculumCard: FC<ICurriculumCard> = ({
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          backgroundColor: !imageUrl ? "var(--color-neutral02)" : "transparent",
+          backgroundColor: thumbnailURL ? "transparent" : "var(--color-neutral02)",
         }}
       >
-        {imageUrl ? (
+        {thumbnailURL ? (
           <Image
-            src={imageUrl}
+            src={thumbnailURL}
             alt={`Curriculum ${year}`}
             fill
             style={{ objectFit: "cover" }}
@@ -87,9 +87,11 @@ export const CurriculumCard: FC<ICurriculumCard> = ({
         }}
       >
         <Box>
-          <p className="text-h2 mb-2 font-bold">หลักสูตรใหม่ปี พ.ศ. {year}</p>
-          <p className="text-h4">สำหรับนักศึกษา</p>
-          <p className="text-h4 line-clamp-1">{description}</p>
+          <h2 className="mb-2 font-bold">
+            {title} พ.ศ. {year}
+          </h2>
+          <h4>สำหรับนักศึกษา</h4>
+          <h4 className="line-clamp-1">{description}</h4>
         </Box>
         <Button
           variant="outlined"
@@ -103,7 +105,7 @@ export const CurriculumCard: FC<ICurriculumCard> = ({
             py: 1.5,
           }}
         >
-          <Link href={fileUrl} target="_blank" rel="noopener noreferrer">
+          <Link href={documentURL} target="_blank" rel="noopener noreferrer">
             อ่านรายละเอียดเพิ่มเติม
           </Link>
         </Button>

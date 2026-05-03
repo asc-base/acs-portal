@@ -1,7 +1,5 @@
-import React from "react";
 import HomePage from "./home";
 import { newsService } from "@/infra/container";
-import { API_URL } from "@/infra/container";
 
 // Force dynamic rendering to avoid build-time API calls
 export const dynamic = "force-dynamic";
@@ -17,31 +15,22 @@ const MainPage = async () => {
     initNewsComplete,
     initNewsActivityStudent,
     initAnnoucement,
-    initNewsHighlight,
+    // initNewsHighlight,
   ] = await Promise.all([
-    newsService
-      .getNews(1, 6, "", "ข่าวสารและกิจกรรม")
-      .catch(() => ({ rows: [] })),
-    newsService
-      .getNews(1, 6, "", "ความสำเร็จนักศึกษา")
-      .catch(() => ({ rows: [] })),
-    newsService
-      .getNews(1, 6, "", "งานกิจกรรมนักศึกษา")
-      .catch(() => ({ rows: [] })),
-    newsService.getNewsMedias("announcement", 1, 6).catch(() => []),
-    newsService.getNewsMedias("newshighlight", 1, 5).catch(() => []),
+    newsService.getNews(1, 6, 16).catch(() => ({ rows: [] })),
+    newsService.getNews(1, 6, 17).catch(() => ({ rows: [] })),
+    newsService.getNews(1, 6, 18).catch(() => ({ rows: [] })),
+    newsService.getNewsInformations(1, 6, 19).catch(() => ({ rows: [] })),
+    // newsService.getNewsInformations("newshighlight", 1, 5).catch(() => []),
   ]);
-
-  console.log("base url is", API_URL);
 
   return (
     <HomePage
       initNewsActivity={initNewsActivity.rows || []}
       initNewsComplete={initNewsComplete.rows || []}
       initNewsActivityStudent={initNewsActivityStudent.rows || []}
-      initAnnoucement={initAnnoucement || []}
-      initNewsHighlight={initNewsHighlight || []}
-      apibase={API_URL}
+      initAnnoucement={initAnnoucement.rows || []}
+      // initNewsHighlight={initNewsHighlight || []}
     />
   );
 };

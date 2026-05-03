@@ -5,10 +5,11 @@ import Link from "next/link";
 import { HeroCard } from "@/components/herocard";
 import classbookImage from "../../../../public/classbook.jpg";
 import { StudentCard } from "@/components/studentcard";
-import { IStudent } from "@/core/domain/student";
 import { StudentModal } from "@/components/studentmodal";
 import { useRouter } from "next/navigation";
 import { IClassBook } from "@/core/domain/classbook";
+import { IStudent } from "@/core/domain/student";
+import EmptyState from "@/components/emptyState";
 
 interface StudentsListComponentsProps {
   students: IStudent[];
@@ -48,10 +49,12 @@ const StudentsListComponent = ({
   return (
     <div>
       <HeroCard
-        image={classBook?.image ? classBook.image : classbookImage}
-        description={`รุ่น ${classBook?.classof} ปีการศึกษา ${classBook?.firstYearAcademic}`}
+        image={
+          classBook?.thumbnailURL ? classBook.thumbnailURL : classbookImage
+        }
+        header={`รุ่น ${classBook?.classof} ปีการศึกษา ${classBook?.firstYearAcademic}`}
       />
-      <div className="container mx-auto px-6 py-5 lg:px-16">
+      <div className="container mx-auto px-4 py-6 md:px-8 lg:py-8 xl:px-8">
         <div className="mb-2 flex flex-col items-start justify-start gap-2">
           <Breadcrumbs aria-label="breadcrumb" separator=">>">
             <Link href="/">หน้าหลัก</Link>
@@ -62,18 +65,16 @@ const StudentsListComponent = ({
           </Breadcrumbs>
         </div>
 
-        <h2 className="text-primary02 mb-4 lg:mb-6">
-          {`   นักศึกษารุ่น ${classBook?.classof} ปีการศึกษา ${classBook?.firstYearAcademic}`}
-        </h2>
+        <h4 className="text-accent04 mt-2 mb-4 font-bold lg:mt-3 lg:mb-6 lg:text-2xl">{`   นักศึกษารุ่น ${classBook?.classof} ปีการศึกษา ${classBook?.firstYearAcademic}`}</h4>
 
         {students.length === 0 ? (
           <div className="flex w-full flex-col items-center justify-center">
-            <p className="text-gray-500">ไม่พบข้อมูลนักศึกษาในรุ่นนี้</p>
+            <EmptyState type="student" />
           </div>
         ) : (
           <div>
-            <div className="ml-4 lg:ml-12 mb-10">
-              <div className="grid grid-cols-2 gap-y-4 md:grid-cols-4 lg:grid-cols-4 lg:gap-y-6">
+            <div className="mb-10">
+              <div className="grid grid-cols-2 justify-items-center gap-y-4 md:grid-cols-4 lg:grid-cols-4 lg:gap-y-6">
                 {students.map((item) => (
                   <div key={item.id} onClick={() => handleOpen(item)}>
                     <StudentCard {...item} />
@@ -81,16 +82,16 @@ const StudentsListComponent = ({
                 ))}
               </div>
             </div>
-              
+
             <div className="flex items-center justify-center">
-            <Pagination
-              shape="rounded"
-              count={Math.ceil(totalRecords / pageSize)}
-              page={page}
-              onChange={(_, currentPage) => handleNextPage(currentPage)}
-              color="primary"
-              size="large"
-            />
+              <Pagination
+                shape="rounded"
+                count={Math.ceil(totalRecords / pageSize)}
+                page={page}
+                onChange={(_, currentPage) => handleNextPage(currentPage)}
+                color="primary"
+                size="large"
+              />
             </div>
           </div>
         )}
@@ -100,6 +101,7 @@ const StudentsListComponent = ({
           student={selectedStudent}
           Open={true}
           onClose={handleClose}
+          classBook={classBook}
         />
       )}
     </div>

@@ -1,19 +1,25 @@
 import { ICurriculum } from "./curriculum";
 import { TypeCourse } from "./master-data";
 
+export interface ITypeCourse {
+  id: number;
+  name: string;
+  description: string;
+}
+
 export interface ICourse {
   id: number;
-  courseId: string;
+  courseCode: string;
   courseNameTh: string;
   courseNameEn: string;
   credits: string;
-  courseDetail: string;
+  detail: string;
   createdBy: number;
   updatedBy: number;
   createdDate: Date;
   updatedDate: Date;
   curriculum: ICurriculum;
-  preCourses: ICourse[];
+  // preCourses: ICourse[];
   typeCourse: TypeCourse;
 }
 
@@ -22,8 +28,30 @@ export interface QueryCourse {
   pageSize?: number;
   prerequisite?: boolean;
   curriculumId: number;
-  typecourseId?: number;
-  search?: string,
-  sortBy?: string,
-  sortOrder?: "asc" | "desc";
+  typeCourseId?: number;
+  search?: string;
+  orderBy?: string;
+  sortBy?: "asc" | "desc";
+}
+
+export interface ICreateCourse {
+  courseCode: string;
+  typeCourseId: number;
+  courseNameTh: string;
+  courseNameEn: string;
+  credits: string;
+  detail: string;
+  prerequisites?: number[];
+  curriculumId: number;
+}
+
+export interface IUpdateCourse {
+  courseCode?: string;
+  typeCourseId?: number;
+  courseNameTh?: string;
+  courseNameEn?: string;
+  credits?: string;
+  detail?: string;
+  prerequisites?: number[];
+  curriculumId: number;
 }
