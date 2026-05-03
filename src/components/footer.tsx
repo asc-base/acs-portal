@@ -5,13 +5,10 @@ import LOGOACS from "../../public/logoacs.png";
 import FacebookRoundedIcon from "@mui/icons-material/FacebookRounded";
 import InstagramIcon from "@mui/icons-material/Instagram";
 import YouTubeIcon from "@mui/icons-material/YouTube";
+import { ICurriculum } from "@/core/domain/curriculum";
 
 interface FooterProps {
-  curriculums?: {
-    id: number;
-    name: string;
-    fileUrl: string;
-  }[];
+  curriculums?: ICurriculum[];
 }
 export const Footer = ({ curriculums = [] }: FooterProps) => {
   const linkIcons = [
@@ -75,12 +72,12 @@ export const Footer = ({ curriculums = [] }: FooterProps) => {
             {curriculums.map((item) => (
               <Link
                 key={item.id}
-                href={item.fileUrl}
+                href={item.documentURL}
                 target="_blank"
                 rel="noopener noreferrer"
               >
                 <h5 className="text-neutral01 hover:text-secondary01 transition-colors">
-                  {item.name}
+                  {item.title}
                 </h5>
               </Link>
             ))}
