@@ -68,7 +68,7 @@ export class ProfessorRepository implements IProfessorRepository {
 
   async createProfessor(data: FormData): Promise<ApiResponse<IProfessor>> {
     const response = await this.http.post<ApiResponse<IProfessor>>(
-      `/v2/professors`,
+      `/v1/professors`,
       data,
     );
     return response;

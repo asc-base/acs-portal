@@ -37,8 +37,8 @@ export interface QueryProfessor {
 }
 
 export interface ICreateProfessor {
-  academicPositionId: number;
-  education?: string;
+  academicPositionID: number;
+  educations?: string;
   email: string;
   expertFields?: string;
   firstNameEn?: string;
@@ -46,7 +46,6 @@ export interface ICreateProfessor {
   image?: string;
   lastNameEn?: string;
   lastNameTh: string;
-  majorPositionId: number;
   phone: string;
   profRoom: string;
 }
