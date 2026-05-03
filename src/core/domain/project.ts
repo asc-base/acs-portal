@@ -25,6 +25,19 @@ export interface IProject {
   updatedBy: number;
 }
 
+export interface ICreateProject {
+  title: string;
+  thumbnail: string;
+  detail: string;
+  youtube: string;
+  projectCourses: string[];
+  projectTypes: string[];
+  projectCategories: string[];
+  github: string;
+  document: string;
+  presentation: string;
+}
+
 export interface QueryProject {
   page?: number;
   pageSize?: number;
