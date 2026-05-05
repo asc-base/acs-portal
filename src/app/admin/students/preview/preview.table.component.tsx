@@ -30,11 +30,10 @@ import { z } from "zod";
 
 interface PreviewStudentsProps {
   apiBase: string;
-  classbookId: number;
+  classBookID: number;
 }
 
 const studentSchema = z.object({
-  Timestamp: z.string(),
   firstNameTh: z.string().min(1, "ข้อมูลชื่อภาษาไทยไม่ถูกต้อง"),
   lastNameTh: z.string().min(1, "ข้อมูลนามสกุลภาษาไทยไม่ถูกต้อง"),
   firstNameEn: z.string().min(1, "ข้อมูลชื่อภาษาอังกฤษไม่ถูกต้อง"),
@@ -49,7 +48,7 @@ const studentSchema = z.object({
 
 export default function Preview_table_component({
   apiBase,
-  classbookId,
+  classBookID,
 }: PreviewStudentsProps) {
   const router = useRouter();
   const { importData, deleteByStudentId } = useImportStudentStore();
@@ -112,7 +111,7 @@ export default function Preview_table_component({
       firstNameEn: s.firstNameEn.trim(),
       lastNameEn: s.lastNameEn.trim(),
       email: s.email.trim(),
-      studentId: s.studentCode.trim(),
+      studentCode:  s.studentCode.trim(),
     }));
 
     const result = z.array(studentSchema).safeParse(cleanedStudents);
@@ -122,11 +121,10 @@ export default function Preview_table_component({
       return;
     }
     try {
-      const payload = result.data;
-      const response = await studentService.createStudent(
-        payload,
-        Number(classbookId),
-      );
+      const response = await studentService.createStudentBatch({
+        classBookID: Number(classBookID),
+        students: result.data,
+      });
       if (response) {
         setConfirmModal({
           isOpen: true,
@@ -134,7 +132,7 @@ export default function Preview_table_component({
           onClose: () => setConfirmModal(null),
           onConfirm: () => {
             router.push(
-              `/admin/students?page=1&pageSize=10&classBookId=${classbookId}`,
+              `/admin/students?page=1&pageSize=10&classBookID=${classBookID}`,
             );
           },
         });
@@ -195,7 +193,7 @@ export default function Preview_table_component({
           <Table>
             <TableHead>
               <TableRow
-                sx={{ borderBottom: "2px solid var(--color-neutral04)" }}
+                sx={{ borderBottom: "1px solid var(--color-neutral04)" }}
               >
                 <TableCell align="center">
                   <div className="flex items-center justify-center gap-1">
@@ -215,6 +213,7 @@ export default function Preview_table_component({
                 <TableCell align="center">
                   <h3 className="font-bold">อีเมล</h3>
                 </TableCell>
+                <TableCell/>
               </TableRow>
             </TableHead>
 
@@ -261,13 +260,13 @@ export default function Preview_table_component({
                         align="center"
                         sx={{ borderBottom: "none", fontSize: 18 }}
                       >
-                        <IconButton
+                        {/* <IconButton
                           color="primary"
                           size="small"
                           onClick={() => editStudentRowById(student.studentCode)}
                         >
                           <Edit />
-                        </IconButton>
+                        </IconButton> */}
                         <IconButton
                           color="error"
                           size="small"
@@ -300,7 +299,7 @@ export default function Preview_table_component({
         <Button
           variant="contained"
           size="large"
-          onClick={() => router.push("/admin/students")}
+          onClick={() => router.push("/admin/students?classBookID=2")}
         >
           ย้อนกลับ
         </Button>
