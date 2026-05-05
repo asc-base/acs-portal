@@ -94,7 +94,10 @@ const CurriculumListComponents = ({
         isOpen: true,
         type: "success",
         onClose: () => setConfirmModal(null),
-        onConfirm: () => setConfirmModal(null),
+        onConfirm: () => {
+          setConfirmModal(null);
+          router.refresh();
+        },
         title: "ลบข้อมูลสำเร็จ",
         description: "ข้อมูลถูกลบออกจากระบบแล้ว",
         confirmText: "เสร็จสิ้น",
@@ -126,7 +129,7 @@ const CurriculumListComponents = ({
     return () => clearTimeout(delayDebounce);
   }, [pathname, router, searchParams, watchedSearch]);
   return (
-    <div className="min-h-screen px-8 py-5">
+    <div className="flex min-h-screen flex-col px-8 py-5">
       <Snackbar
         anchorOrigin={{ vertical: "top", horizontal: "right" }}
         open={isError}
@@ -169,7 +172,7 @@ const CurriculumListComponents = ({
         </div>
       </div>
 
-      <div className="flex w-full flex-col items-center justify-center gap-10">
+      <div className="flex w-full flex-1 flex-col items-center">
         <div className="grid w-full grid-cols-3 justify-items-center gap-6">
           {curriculums.map((curriculum) => (
             <AdminCard
@@ -186,14 +189,18 @@ const CurriculumListComponents = ({
           ))}
         </div>
 
-        <Pagination
-          shape="rounded"
-          count={Math.ceil(totalRecords / pageSize)}
-          page={page}
-          onChange={(_, currentPage) => handleNextPage(currentPage)}
-          color="primary"
-          size="large"
-        />
+        {totalRecords > 0 && (
+          <div className="mt-auto pt-10">
+            <Pagination
+              shape="rounded"
+              count={Math.ceil(totalRecords / pageSize)}
+              page={page}
+              onChange={(_, currentPage) => handleNextPage(currentPage)}
+              color="primary"
+              size="large"
+            />
+          </div>
+        )}
       </div>
       {confirmModal && <ConfirmModal {...confirmModal} />}
     </div>

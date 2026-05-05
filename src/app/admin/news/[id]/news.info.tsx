@@ -174,7 +174,7 @@ const NewsInfo = ({ news, apiBase, categories }: NewsInfoProps) => {
         <div className="flex flex-col gap-4">
           <div className="bg-neutral02 flex items-center justify-center rounded-lg">
             {news || selectedFile ? (
-              <div className="group relative aspect-video w-full overflow-hidden rounded-xl">
+              <div className="group relative aspect-video w-full h-[560px] overflow-hidden rounded-xl">
                 <Image
                   src={previewSrc}
                   alt="Preview"
@@ -280,7 +280,7 @@ const NewsInfo = ({ news, apiBase, categories }: NewsInfoProps) => {
                 onClick={() => setIsEdit(true)}
                 size="large"
               >
-                แก้ไข
+                แก้ไขข้อมูล
               </Button>
             </div>
           )}

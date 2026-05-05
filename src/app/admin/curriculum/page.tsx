@@ -16,7 +16,7 @@ const page = async ({ searchParams }: PageProps) => {
 
   const query: QueryCurriculum = {
     page: search.page || 1,
-    pageSize: search.pageSize || 10,
+    pageSize: search.pageSize || 12,
     search: search.search ?? "",
   };
   const { rows, pageSize, page, totalRecords } =

@@ -79,7 +79,7 @@ export class NewsRepository implements INewsRepository {
     orderBy?: string,
     sortBy?: string,
   ): Promise<ApiResponse<Pageable<INewsInformation>>> {
-    let url = `/v1/news/news-features/?type=&page=${page}&pageSize=${pageSize}`;
+    let url = `/v1/news/news-features/?tagID=${tagId}&page=${page}&pageSize=${pageSize}`;
 
     if (tagId && tagId !== null) {
       url += `&tagID=${encodeURIComponent(tagId)}`;
@@ -103,7 +103,7 @@ export class NewsRepository implements INewsRepository {
     data: FormData,
   ): Promise<ApiResponse<INewsInformation>> {
     const response = await this.http.put<ApiResponse<INewsInformation>>(
-      `/v1/news/news-media/`,
+      `/v1/news/news-features/`,
       data,
     );
     return response;
@@ -113,7 +113,7 @@ export class NewsRepository implements INewsRepository {
     id: number,
   ): Promise<ApiResponse<INewsInformation>> {
     const response = await this.http.get<ApiResponse<INewsInformation>>(
-      `/v1/news/news-media/${id}`,
+      `/v1/news/news-features/${id}`,
     );
     return response;
   }

@@ -6,19 +6,19 @@ export const dynamic = "force-dynamic";
 
 interface PageProps {
   searchParams: Promise<{
-    curriculumId?: string;
+    curriculumID?: string;
   }>;
 }
 
 export default async function Page({ searchParams }: PageProps) {
   const params = await searchParams;
-  const curriculumId = Number(params.curriculumId);
+  const curriculumID = Number(params.curriculumID);
 
   return (
     <div className="w-full">
       <CourseForm
         apiBase={baseUrl}
-        curriculumId={curriculumId}
+        curriculumID={curriculumID}
       />
     </div>
   );

@@ -167,7 +167,7 @@ export const CurriculumInfoComponent = ({ apiBase, curriculum }: CurriculumInfoP
           <h3 className="mb-6 font-bold">ข้อมูลหลักสูตร</h3>
           <form className="space-y-4" onSubmit={handleSubmit(onSubmit)}>
             <div className="flex gap-x-10">
-              <div className="bg-neutral02 relative flex h-[248px] w-[200px] items-center justify-center overflow-hidden rounded-md">
+              <div className="bg-neutral02 relative flex h-[248px] w-[248px] items-center justify-center overflow-hidden rounded-md">
                 {previewSrc ? (
                   <div className="group relative h-full w-full">
                     <Image

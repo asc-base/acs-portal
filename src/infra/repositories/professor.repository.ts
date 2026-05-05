@@ -1,5 +1,5 @@
 import { IProfessorRepository } from "@/core/ports/professor.repository";
-import { IProfessor, IUpdateProfessor } from "@/core/domain/professor";
+import { IProfessor } from "@/core/domain/professor";
 import { HttpHelper } from "@/lib/http";
 import { ApiResponse, Pageable } from "@/interface/response";
 import { QueryProfessor } from "@/core/domain/professor";
@@ -56,10 +56,10 @@ export class ProfessorRepository implements IProfessorRepository {
   }
 
   async updateProfessor(
-    data: IUpdateProfessor,
+    data: FormData,
     id: string,
   ): Promise<ApiResponse<IProfessor>> {
-    const response = await this.http.put<ApiResponse<IProfessor>>(
+    const response = await this.http.patch<ApiResponse<IProfessor>>(
       `/v1/professors/${id}`,
       data,
     );
