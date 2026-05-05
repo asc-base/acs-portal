@@ -46,19 +46,15 @@ export const Footer = ({ curriculums = [] }: FooterProps) => {
             </div>
           </div>
 
-          <div className="w-full md:ml-10 md:flex-1">
-            <h4 className="text-secondary01 mb-2 font-bold">ติดต่อเรา</h4>
-            <h5 className="text-neutral01 leading-relaxed whitespace-nowrap">
-              ภาควิชาคณิตศาสตร์ คณะวิทยาศาสตร์ <br />
-              มหาวิทยาลัยเทคโนโลยีพระจอมเกล้าธนบุรี
-              <br />
-              126 ถนนประชาอุทิศ แขวงบางมด เขตทุ่งครุ กรุงเทพฯ 10140
-              <br />
-              โทรศัพท์ 02 470 8822, 02 470 9585
-              <br />
-              โทรสาร 02 428 4025
-            </h5>
-          </div>
+         <div className="w-full md:ml-10 md:flex-1">
+          <h4 className="text-secondary01 mb-2 font-bold">ติดต่อเรา</h4>
+          <h5 className="text-neutral01 leading-relaxed break-words">
+            <p>ภาควิชาคณิตศาสตร์ คณะวิทยาศาสตร์</p>
+            <p>มหาวิทยาลัยเทคโนโลยีพระจอมเกล้าธนบุรี</p>
+            <p>126 ถนนประชาอุทิศ แขวงบางมด เขตทุ่งครุ กรุงเทพฯ 10140</p>
+            <p>โทรศัพท์ 02 470 8822, 02 470 9585</p>
+            <p>โทรสาร 02 428 4025</p>
+          </h5>
         </div>
 
         <div className="flex w-full flex-wrap gap-4 overflow-hidden break-words lg:flex-[2]">
@@ -177,6 +173,7 @@ export const Footer = ({ curriculums = [] }: FooterProps) => {
           </div>
         </div>
       </div>
+    </div>
     </div>
   );
 };
