@@ -1,7 +1,7 @@
 "use client";
 import React, { FC, useState, useMemo, useEffect } from "react";
 import { useForm, useFieldArray } from "react-hook-form";
-import { Button, Typography } from "@mui/material";
+import { Button, Modal, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import AddIcon from "@mui/icons-material/Add";
 import MenuItem from "@mui/material/MenuItem";
@@ -24,6 +24,7 @@ import {
   ConfirmModalProps,
 } from "@/components/modal/confirmModal";
 import AddCircleOutlineRoundedIcon from "@mui/icons-material/AddCircleOutlineRounded";
+import { CropImageCard } from "@/components/cropimagecard";
 
 interface FormProfessorsProps {
   apiBase: string;
@@ -91,6 +92,7 @@ export const FormProfesssors: FC<FormProfessorsProps> = ({ apiBase }) => {
   const [confirmModal, setConfirmModal] = useState<ConfirmModalProps | null>(
     null,
   );
+  const [isCroping, setIsCroping] = useState(false);
 
   const masterDataService = useMemo(() => {
     const masterdataRepository = new MasterDataRepository(apiBase);
@@ -136,11 +138,21 @@ export const FormProfesssors: FC<FormProfessorsProps> = ({ apiBase }) => {
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0] || null;
+
     if (file) {
       setSelectedFile(file);
-    } else {
-      setSelectedFile(null);
+      setIsCroping(true);
     }
+  };
+
+  const handleCropComplete = (croppedFile: File) => {
+    setSelectedFile(croppedFile);
+    setIsCroping(false);
+  };
+
+  const handleCropCancel = () => {
+    setIsCroping(false);
+    setSelectedFile(null);
   };
 
   const cancelForm = () => {
@@ -463,6 +475,15 @@ export const FormProfesssors: FC<FormProfessorsProps> = ({ apiBase }) => {
         </Button>
       </div>
       {confirmModal && <ConfirmModal {...confirmModal} />}
+      {isCroping && selectedFile && (
+        <Modal open={isCroping} onClose={handleCropCancel} closeAfterTransition>
+          <CropImageCard
+            file={selectedFile}
+            onUploadComplete={handleCropComplete}
+            onCancel={handleCropCancel}
+          />
+        </Modal>
+      )}
     </form>
   );
 };

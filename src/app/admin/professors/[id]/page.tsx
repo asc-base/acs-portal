@@ -2,6 +2,7 @@ import React from "react";
 import { professorService } from "@/infra/container";
 import { masterDataService } from "@/infra/container";
 import ProfessorFormComponent from "./professor.form.component";
+import { baseUrl } from "@/infra/container";
 
 export const dynamic = "force-dynamic";
 
@@ -13,7 +14,6 @@ export default async function Page({ params }: PageProps) {
   const resolveParams = await params;
   const professor = await professorService.getProfessorById(resolveParams.id);
   const masterData = await masterDataService.getMasterData();
-  const majorPositions = masterData.majorPositions;
   const educationLevel = masterData.educationLevels;
   const academicPosition = masterData.academicPositions;
 
@@ -21,8 +21,8 @@ export default async function Page({ params }: PageProps) {
     <ProfessorFormComponent
       professor={professor}
       academicPosition={academicPosition}
-      majorPosition={majorPositions}
       educationLevel={educationLevel}
+      apiBase={baseUrl}
     />
   );
 }
