@@ -16,9 +16,9 @@ interface CoursesLandingPageProps {
   totalRecords: number;
   pageSize: number;
   page: number;
-  curriculumId: number;
+  curriculumID: number;
   typeCourses: TypeCourse[];
-  typeCourseId?: number;
+  typeCourseID?: number;
   search?: string;
   orderBy?: string;
   sortBy?: "asc" | "desc";
@@ -36,9 +36,9 @@ const CoursesLandingpage = ({
   courses,
   totalRecords,
   pageSize,
-  curriculumId,
+  curriculumID,
   typeCourses,
-  typeCourseId,
+  typeCourseID,
   page,
   search,
   sortBy,
@@ -110,9 +110,9 @@ const CoursesLandingpage = ({
     const params = new URLSearchParams(searchParams.toString());
 
     if (value === "all") {
-      params.delete("typeCourseId");
+      params.delete("typeCourseID");
     } else {
-      params.set("typeCourseId", value);
+      params.set("typeCourseID", value);
     }
 
     params.set("page", "1");
@@ -120,7 +120,7 @@ const CoursesLandingpage = ({
   };
 
   return (
-    <div className="p-6">
+    <div className="px-6 pt-6">
       <div className="mb-4 flex flex-col gap-6">
         <h3 className="font-bold">
           {" "}
@@ -137,13 +137,13 @@ const CoursesLandingpage = ({
           control={searchControl}
           watchedSearch={watchedSearch}
           onResetSearch={handleResetSearch}
-          curriculumId={curriculumId}
+          curriculumID={curriculumID}
           totalRecords={totalRecords}
           page={page}
           pageSize={pageSize}
           handleNextPage={handleNextPage}
           typeCourses={typeCourses}
-          typeCourseId={typeCourseId}
+          typeCourseID={typeCourseID}
           handleFilterTypeCourse={handleFilterTypeCourse}
           apiBase={apiBase}
         />
