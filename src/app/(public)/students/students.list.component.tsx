@@ -10,6 +10,7 @@ import { useRouter } from "next/navigation";
 import { IClassBook } from "@/core/domain/classbook";
 import { IStudent } from "@/core/domain/student";
 import EmptyState from "@/components/emptyState";
+import PersonIcon from "@mui/icons-material/Person";
 
 interface StudentsListComponentsProps {
   students: IStudent[];
@@ -69,7 +70,11 @@ const StudentsListComponent = ({
 
         {students.length === 0 ? (
           <div className="flex w-full flex-col items-center justify-center">
-            <EmptyState type="student" />
+            <EmptyState 
+             title="ไม่พบข้อมูลนักศึกษาในขณะนี้"
+             description="เมื่อมีข้อมูลนักศึกษา ข้อมูลจะปรากฏที่นี่"
+             icon={PersonIcon}
+             />
           </div>
         ) : (
           <div>
