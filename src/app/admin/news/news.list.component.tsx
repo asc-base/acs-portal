@@ -153,7 +153,7 @@ const NewsListComponent = (initValue: NewsListComponentProps) => {
   );
 
   return (
-    <div className="min-h-screen p-6">
+    <div className="flex min-h-screen flex-col px-8 py-5">
       <Snackbar
         anchorOrigin={{ vertical: "top", horizontal: "right" }}
         open={isError}
@@ -227,8 +227,8 @@ const NewsListComponent = (initValue: NewsListComponentProps) => {
         </div>
       </div>
 
-      <div className="mx-auto max-w-7xl">
-        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="flex w-full flex-1 flex-col items-center">
+        <div className="grid w-full grid-cols-3 justify-items-center gap-6">
           {initValue.news.map((news) => (
             <AdminCard
               key={news.id}
@@ -240,18 +240,19 @@ const NewsListComponent = (initValue: NewsListComponentProps) => {
           ))}
         </div>
 
-        <div className="mt-8 flex justify-center">
-          <Pagination
-            shape="rounded"
-            page={initValue.page}
-            count={Math.ceil(initValue.totalRecords / initValue.pageSize)}
-            onChange={(_, currentPage) => handleNextPage(currentPage)}
-            color="primary"
-            size="large"
-          />
-        </div>
+        {initValue.totalRecords > 0 && (
+          <div className="mt-auto pt-10">
+            <Pagination
+              shape="rounded"
+              page={initValue.page}
+              count={Math.ceil(initValue.totalRecords / initValue.pageSize)}
+              onChange={(_, currentPage) => handleNextPage(currentPage)}
+              color="primary"
+              size="large"
+            />
+          </div>
+        )}
       </div>
-
       {confirmModal && <ConfirmModal {...confirmModal} />}
     </div>
   );
