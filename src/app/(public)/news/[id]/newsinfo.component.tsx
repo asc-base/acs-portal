@@ -30,7 +30,7 @@ const NewsInfoComponent = ({ newsInfo, recommendNews }: NewsInfoProps) => {
         {newsInfo.title && <span>{newsInfo.title}</span>}
       </Breadcrumbs>
       <div>
-        <div className="relative aspect-video w-full overflow-hidden rounded-xl">
+        <div className="relative aspect-video w-full h-[560px] overflow-hidden rounded-xl">
           <Skeleton
             data-skeleton
             variant="rectangular"
@@ -44,7 +44,6 @@ const NewsInfoComponent = ({ newsInfo, recommendNews }: NewsInfoProps) => {
               alt={newsInfo?.title || "news image"}
               fill
               loading="lazy"
-              sizes="100vw"
               className="relative mt-3 rounded-xl object-cover"
               onLoadingComplete={(img) => {
                 const skeleton = img.parentElement?.querySelector(
