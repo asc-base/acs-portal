@@ -14,15 +14,14 @@ export interface IProfessor {
 
 export interface IUpdateProfessor {
   id: number;
-  academicPositionId: number;
-  majorPositionId: number;
+  academicPositionID: number;
   profRoom: string;
   phone: string;
   firstNameTh: string;
   lastNameTh: string;
   firstNameEn: string;
   lastNameEn: string;
-  mail: string;
+  email: string;
   expertFields?: string;
   educations?: string;
 }
