@@ -83,7 +83,7 @@ const ProfessorTableComponent = ({
                   align="left"
                   sx={{ borderBottom: "none", fontSize: 18 }}
                 >
-                  {prof.academicPosition.positionTh}
+                  {prof.academicPosition.nameTh}
                 </TableCell>
 
                 <TableCell

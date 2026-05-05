@@ -172,14 +172,13 @@ const CreateNewsForm = ({ apiBase, categories }: CraeteNewsProps) => {
       <h3 className="mb-6 font-bold">ข้อมูลข่าวสาร</h3>
       <form className="gap-4 p-4" onSubmit={handleSubmit(onSubmit)}>
         <div className="flex flex-col gap-4">
-          <div className="bg-neutral02 flex min-h-[500px] items-center justify-center rounded-lg">
+          <div className="bg-neutral02 flex h-[560px] items-center justify-center rounded-lg">
             {selectedFile ? (
-              <div className="group relative aspect-video w-full overflow-hidden rounded-xl">
+              <div className="group relative aspect-video w-full h-[560px] overflow-hidden rounded-xl">
                 <Image
                   src={URL.createObjectURL(selectedFile)}
                   alt="Preview"
                   fill
-                  sizes="100vw"
                   className="rounded-md object-cover"
                 />
 

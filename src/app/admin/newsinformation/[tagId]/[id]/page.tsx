@@ -4,41 +4,51 @@ import { baseUrl, newsService, masterDataService } from "@/infra/container";
 export const dynamic = "force-dynamic";
 
 interface PageProps {
-    params: Promise<{
-        type: string;
-        id: string;
-    }>;
+  params: Promise<{
+    tagId: string;
+    id: string;
+  }>;
 }
 
 const Page = async ({ params }: PageProps) => {
-    const { type, id } = await params;
-    const newsInformationId = Number(id);
+  const { tagId, id } = await params;
+  const newsInformationId = Number(id);
 
-    const newsInformation = await newsService.getNewsInformationById(newsInformationId);
+  const newsInformation = await newsService.getNewsInformationById(newsInformationId);
 
-    const types = await masterDataService.getMasterDataListType("news");
-    const selectedType = types.find(
-        (item) => item.name === type
-    );
+  const masterData = await masterDataService.getMasterData();
 
-    if (!selectedType) {
-        return (
-            <div className="flex items-center justify-center h-screen">
-                <h2 className="font-bold">Not found {type} </h2>
-            </div>
-        );
-    }
+  const tagIdNumber = Number(tagId);
 
+  const newsFeatureGroup = masterData?.tagsGroups?.find(
+    (group) => group.name === "news-feature"
+  );
+
+
+  const selectedType = masterData?.tags?.find(
+    (tag) =>
+      tag.id === tagIdNumber &&
+      tag.tagsGroupsId === newsFeatureGroup?.id
+  );
+
+  if (!selectedType) {
     return (
-        <div className="w-full">
-            <NewsInformationInfo
-                type={type}
-                apiBase={baseUrl}
-                typeId={selectedType.id}
-                newsInformation={newsInformation}
-            />
-        </div>
+      <div className="flex h-screen items-center justify-center">
+        <h2 className="font-bold">Not found {tagId}</h2>
+      </div>
     );
+  }
+
+  return (
+    <div className="w-full">
+      <NewsInformationInfo
+        type={selectedType.name}
+        apiBase={baseUrl}
+        tagID={selectedType.id}
+        newsInformation={newsInformation}
+      />
+    </div>
+  );
 };
 
 export default Page;

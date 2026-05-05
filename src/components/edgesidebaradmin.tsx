@@ -28,15 +28,16 @@ const sidebarItems = [
     name: "ข้อมูลผลงาน",
     href: "/admin/projects",
     icon: <DescriptionIcon />,
+    disabled: true,
   },
   {
     name: "ข่าวประชาสัมพันธ์",
-    href: "/admin/newsinformation/16",
+    href: "/admin/newsinformation/25",
     icon: <CampaignIcon />,
   },
   {
     name: "ข่าว Highlight",
-    href: "/admin/newsinformation/16",
+    href: "/admin/newsinformation/26",
     icon: <BorderColorIcon />,
   },
   {
@@ -50,11 +51,11 @@ const sidebarItems = [
     icon: <BookmarkIcon />,
     activePaths: ["/admin/courses"],
   },
-  {
-    name: "จัดการฝึกงาน",
-    href: "/admin/internships",
-    icon: <WorkIcon />,
-  },
+  // {
+  //   name: "จัดการฝึกงาน",
+  //   href: "/admin/internships",
+  //   icon: <WorkIcon />,
+  // },
 ];
 
 export const EdgeSidebarAdmin = ({ username }: { username: string }) => {
@@ -72,14 +73,23 @@ export const EdgeSidebarAdmin = ({ username }: { username: string }) => {
         <nav>
           <ul className="flex flex-col gap-y-2">
             {sidebarItems.map((item) => {
+              const isPathMatch = (basePath: string) =>
+                pathName === basePath || pathName.startsWith(`${basePath}/`);
+
               const isActive =
-                item.activePaths?.some((path) => pathName.startsWith(path)) ||
-                pathName == item.href;
+                isPathMatch(item.href) ||
+                item.activePaths?.some((path) => isPathMatch(path));
+
               return (
                 <li key={item.name}>
                   <Link
                     href={item.href}
-                    className={`group flex h-[44px] items-center gap-x-4 px-8 transition-colors ${isActive ? "bg-primary04/10 border-primary04 border-l-4" : "hover:bg-neutral02"}`}
+                    className={`group flex h-[44px] items-center gap-x-4 px-8 transition-colors 
+                       ${item.disabled ? "pointer-events-none opacity-50" : ""}
+                      ${isActive
+                        ? "bg-primary04/10 border-primary04 border-l-4"
+                        : "hover:bg-neutral02"
+                      }`}
                   >
                     <h3
                       className={`transition-colors ${isActive ? "text-primary04" : "text-neutral04 group-hover:text-primary04"}`}
