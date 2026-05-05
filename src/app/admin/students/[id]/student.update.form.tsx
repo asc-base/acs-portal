@@ -1,8 +1,8 @@
 "use client";
 import React, { useState, useMemo } from "react";
-import { useForm, useFieldArray } from "react-hook-form";
-import { Button, Typography, IconButton } from "@mui/material";
-import AddIcon from "@mui/icons-material/Add";
+import { useForm } from "react-hook-form";
+import { Button, Typography, Modal } from "@mui/material";
+// import AddIcon from "@mui/icons-material/Add";
 import Alert from "@mui/material/Alert";
 import Snackbar from "@mui/material/Snackbar";
 import { useRouter } from "next/navigation";
@@ -18,6 +18,7 @@ import {
   ConfirmModalProps,
 } from "@/components/modal/confirmModal";
 import { styled } from "@mui/material/styles";
+import { CropImageCard } from "@/components/cropimagecard";
 
 interface StudentUpdateFormProps {
   apiBase: string;
@@ -73,6 +74,7 @@ export const StudentUpdateForm = ({
   const [confirmModal, setConfirmModal] = useState<ConfirmModalProps | null>(
     null,
   );
+  const [isCroping, setIsCroping] = useState(false);
 
   const previewSrc = selectedFile
     ? URL.createObjectURL(selectedFile)
@@ -116,11 +118,21 @@ export const StudentUpdateForm = ({
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0] || null;
+
     if (file) {
       setSelectedFile(file);
-    } else {
-      setSelectedFile(null);
+      setIsCroping(true);
     }
+  };
+
+  const handleCropComplete = (croppedFile: File) => {
+    setSelectedFile(croppedFile);
+    setIsCroping(false);
+  };
+
+  const handleCropCancel = () => {
+    setIsCroping(false);
+    setSelectedFile(null);
   };
 
   const onSubmit = async (data: IUpdateStudent) => {
@@ -139,9 +151,7 @@ export const StudentUpdateForm = ({
           type: "success",
           onClose: () => setConfirmModal(null),
           onConfirm: () => {
-            router.push(
-              `/admin/students?classBookID=${classBookID}`,
-            );
+            router.push(`/admin/students?classBookID=${classBookID}`);
           },
         });
       }
@@ -376,9 +386,7 @@ export const StudentUpdateForm = ({
               type: "warning",
               onClose: () => setConfirmModal(null),
               onConfirm: () => {
-                router.push(
-                  `/admin/students?classBookID=${classBookID}`,
-                );
+                router.push(`/admin/students?classBookID=${classBookID}`);
               },
             });
           }}
@@ -396,6 +404,15 @@ export const StudentUpdateForm = ({
       </div>
 
       {confirmModal && <ConfirmModal {...confirmModal} />}
+      {isCroping && selectedFile && (
+        <Modal open={isCroping} onClose={handleCropCancel} closeAfterTransition>
+          <CropImageCard
+            file={selectedFile}
+            onUploadComplete={handleCropComplete}
+            onCancel={handleCropCancel}
+          />
+        </Modal>
+      )}
     </form>
   );
 };
