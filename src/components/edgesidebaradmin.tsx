@@ -28,6 +28,7 @@ const sidebarItems = [
     name: "ข้อมูลผลงาน",
     href: "/admin/projects",
     icon: <DescriptionIcon />,
+    disabled: true,
   },
   {
     name: "ข่าวประชาสัมพันธ์",
@@ -83,7 +84,9 @@ export const EdgeSidebarAdmin = ({ username }: { username: string }) => {
                 <li key={item.name}>
                   <Link
                     href={item.href}
-                    className={`group flex h-[44px] items-center gap-x-4 px-8 transition-colors ${isActive
+                    className={`group flex h-[44px] items-center gap-x-4 px-8 transition-colors 
+                       ${item.disabled ? "pointer-events-none opacity-50" : ""}
+                      ${isActive
                         ? "bg-primary04/10 border-primary04 border-l-4"
                         : "hover:bg-neutral02"
                       }`}
