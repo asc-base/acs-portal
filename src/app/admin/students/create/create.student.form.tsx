@@ -1,8 +1,8 @@
 "use client";
 import React, { FC, useState, useMemo } from "react";
-import { useForm, useFieldArray } from "react-hook-form";
-import { Button, Typography, IconButton } from "@mui/material";
-import AddIcon from "@mui/icons-material/Add";
+import { useForm } from "react-hook-form";
+import { Button, Typography, Modal } from "@mui/material";
+// import AddIcon from "@mui/icons-material/Add";
 import Alert from "@mui/material/Alert";
 import Snackbar from "@mui/material/Snackbar";
 import { useRouter } from "next/navigation";
@@ -18,6 +18,7 @@ import {
   ConfirmModalProps,
 } from "@/components/modal/confirmModal";
 import { styled } from "@mui/material/styles";
+import { CropImageCard } from "@/components/cropimagecard";
 
 interface FormProfessorsProps {
   apiBase: string;
@@ -71,6 +72,7 @@ export const CreateStudentForm: FC<FormProfessorsProps> = ({
   const [confirmModal, setConfirmModal] = useState<ConfirmModalProps | null>(
     null,
   );
+  const [isCroping, setIsCroping] = useState(false);
 
   const router = useRouter();
 
@@ -110,11 +112,21 @@ export const CreateStudentForm: FC<FormProfessorsProps> = ({
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0] || null;
+
     if (file) {
       setSelectedFile(file);
-    } else {
-      setSelectedFile(null);
+      setIsCroping(true);
     }
+  };
+
+  const handleCropComplete = (croppedFile: File) => {
+    setSelectedFile(croppedFile);
+    setIsCroping(false);
+  };
+
+  const handleCropCancel = () => {
+    setIsCroping(false);
+    setSelectedFile(null);
   };
 
   const onSubmit = async (data: FormData) => {
@@ -131,9 +143,12 @@ export const CreateStudentForm: FC<FormProfessorsProps> = ({
         linkedin: data.linkedin,
         instagram: data.instagram,
         github: data.github,
-        classBookID: classBookID
+        classBookID: classBookID,
       };
-      const response = await studentService.createStudent(payload, selectedFile);
+      const response = await studentService.createStudent(
+        payload,
+        selectedFile,
+      );
 
       if (!response) setIsError(true);
       else {
@@ -197,7 +212,7 @@ export const CreateStudentForm: FC<FormProfessorsProps> = ({
                 </div>
               </div>
             ) : (
-              <Button variant="contained" component="label" >
+              <Button variant="contained" component="label">
                 อัปโหลดรูปภาพ
                 <VisuallyHiddenInput
                   type="file"
@@ -270,7 +285,6 @@ export const CreateStudentForm: FC<FormProfessorsProps> = ({
           </div>
         </div>
       </div>
-
       <div className="flex flex-1 flex-col justify-between gap-y-8">
         <div className="grid grid-cols-2 gap-x-4">
           <RHFTextField
@@ -334,7 +348,6 @@ export const CreateStudentForm: FC<FormProfessorsProps> = ({
           </div>
         </div>
       </div>
-
       {/* <div className="mt-4 mb-3 w-full">
         <div className="mb-3 flex w-full items-center justify-between">
           <Typography variant="h6" fontWeight="bold">
@@ -368,7 +381,6 @@ export const CreateStudentForm: FC<FormProfessorsProps> = ({
           ))}
         </div>
       </div> */}
-
       <div className="mt-4 flex flex-row justify-end gap-x-4">
         <Button
           variant="outlined"
@@ -397,8 +409,16 @@ export const CreateStudentForm: FC<FormProfessorsProps> = ({
           บันทึกข้อมูล
         </Button>
       </div>
-
       {confirmModal && <ConfirmModal {...confirmModal} />}
+      {isCroping && selectedFile && (
+        <Modal open={isCroping} onClose={handleCropCancel} closeAfterTransition>
+          <CropImageCard
+            file={selectedFile}
+            onUploadComplete={handleCropComplete}
+            onCancel={handleCropCancel}
+          />
+        </Modal>
+      )}
     </form>
   );
 };
