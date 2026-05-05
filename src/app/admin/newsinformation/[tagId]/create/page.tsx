@@ -9,20 +9,30 @@ interface PageProps {
   }>;
 }
 
-const page = async ({params}: PageProps) => {
-  const { tagId } = await params; 
+const page = async ({ params }: PageProps) => {
+  const { tagId } = await params;
 
-  const types = await masterDataService.getMasterDataListType("news");
-  const selectedType = types.find(
-    (item) => item.id === tagId
+  const masterData = await masterDataService.getMasterData();
+
+  const tagIdNumber = Number(tagId);
+
+  const newsFeatureGroup = masterData?.tagsGroups?.find(
+    (group) => group.name === "news-feature"
+  );
+
+
+  const selectedType = masterData?.tags?.find(
+    (tag) =>
+      tag.id === tagIdNumber &&
+      tag.tagsGroupsId === newsFeatureGroup?.id
   );
 
   if (!selectedType) {
-  return (
-    <div className="flex items-center justify-center h-screen">
-      <h2 className="font-bold">Not found {tagId} </h2>
-    </div>
-  );
+    return (
+      <div className="flex items-center justify-center">
+        <h2 className="font-bold">Not found {tagId}</h2>
+      </div>
+    );
   }
 
   return (
@@ -30,7 +40,7 @@ const page = async ({params}: PageProps) => {
       <NewsInformationForm
         type={selectedType.name}
         apiBase={baseUrl}
-        tagId={selectedType.id}
+        tagID={selectedType.id}
       />
     </div>
   );
