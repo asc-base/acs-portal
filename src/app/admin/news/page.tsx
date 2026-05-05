@@ -12,10 +12,10 @@ const page = async ({ searchParams }: PageProps) => {
   const search = await searchParams;
   const { rows, totalRecords, page, pageSize } = await newsService.getNews(
     search.page || 1,
-    search.pageSize || 9,
+    search.pageSize || 12,
     search.tagID,
-    search.orderBy || "createdAt",
-    search.sortBy || "desc",
+    search.orderBy,
+    search.sortBy,
     search.search,
     search.searchBy,
   );
