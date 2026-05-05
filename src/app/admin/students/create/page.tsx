@@ -5,15 +5,15 @@ export const dynamic = "force-dynamic";
 
 interface PageProps {
   searchParams: Promise<{
-    classBookId?: string;
+    classBookID?: string;
   }>;
 }
 
 const page = async ({ searchParams }: PageProps) => {
   const resolveparams = await searchParams;
-  const classBookId = Number(resolveparams.classBookId);
+  const classBookID = Number(resolveparams.classBookID);
 
-  return <CreateStudentForm apiBase={baseUrl} classBookId={classBookId} />;
+  return <CreateStudentForm apiBase={baseUrl} classBookID={classBookID} />;
 };
 
 export default page;
