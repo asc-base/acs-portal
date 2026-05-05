@@ -8,22 +8,22 @@ interface PageProps {
     id: string;
   }>;
   searchParams: Promise<{
-    classBookId: string;
+    classBookID: string;
   }>;
 }
 
 const page = async ({ params, searchParams }: PageProps) => {
   const resolvesearchParams = await searchParams;
   const resolveParams = await params;
-  const classBookId = Number(resolvesearchParams.classBookId);
+  const classBookID = Number(resolvesearchParams.classBookID);
   const idNumber = Number(resolveParams.id);
 
-  const student = await studentService.getSrudentByUserId(idNumber);
+  const student = await studentService.getStudentByUserId(idNumber);
 
   return (
     <StudentUpdateForm
       apiBase={baseUrl}
-      classBookId={classBookId}
+      classBookID={classBookID}
       student={student}
     />
   );
