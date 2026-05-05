@@ -32,8 +32,8 @@ export class NewsService {
     page: number,
     pageSize: number,
     tagID?: number,
-    orderBy?: string,
-    sortBy?: string,
+    orderBy: string = "startDate",
+    sortBy: string = "desc",
     search?: string,
     searchBy?: string,
   ): Promise<Pageable<INews>> {
