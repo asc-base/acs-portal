@@ -219,7 +219,9 @@ export const FormClassbook: FC<FormClassbookProps> = ({ apiBase }) => {
                 return <span className="text-neutral-400">ระบุหลักสูตร</span>;
               }
               const selected = curriculums.find((item) => item.id === value);
-              return selected?.title;
+              return selected?.title && selected?.year
+                ? `${selected.title} ${selected.year}`
+                : <span className="text-neutral-400">ระบุหลักสูตร</span>;
             }}
           >
             {curriculums.map((curriculum) => (
