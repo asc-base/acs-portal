@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 
 const Layout = ({ children }: Readonly<{ children: ReactNode }>) => {
   const pathname = usePathname();
-  const hideSidebar = pathname === "/admin/login";
+  const hideSidebar = pathname === "/admin/auth";
   
   return (
     <div className="jun-layout flex h-screen">

@@ -61,7 +61,7 @@ export default function AdminLoginLandingPage({
       console.log("form data", loginRequest);
 
       if (response?.status) {
-        router.push(`/admin`);
+        router.push(`/admin/classbook`);
       }
     } catch {
       setError("password", {
