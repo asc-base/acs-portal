@@ -24,7 +24,7 @@ import { INewsInformation } from "@/core/domain/news";
 interface NewsInformationInfoProps {
     type: string;
     apiBase: string;
-    typeId: number;
+    tagID: number;
     newsInformation: INewsInformation;
 }
 
@@ -34,8 +34,8 @@ type NewsItem = {
 };
 
 const Schema = z.object({
-    thumbnailURL: z.instanceof(File).optional(),
-    newsId: z.number().min(1, "กรุณาเลือกข่าว"),
+    thumbnail: z.instanceof(File, { message: "กรุณาอัปโหลดรูปภาพ" }),
+    newsID: z.number().min(1, "กรุณาเลือกข่าว"),
 });
 
 type FormValues = z.infer<typeof Schema>;
@@ -55,7 +55,7 @@ const VisuallyHiddenInput = styled("input")({
 export const NewsInformationInfo = ({
     type,
     apiBase,
-    typeId,
+    tagID,
     newsInformation,
 }: NewsInformationInfoProps) => {
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -95,17 +95,18 @@ export const NewsInformationInfo = ({
         resolver: zodResolver(Schema),
         mode: "onChange",
         defaultValues: {
-            thumbnailURL: undefined,
-            newsId: newsInformation.news.id,
+            thumbnail: undefined,
+            newsID: newsInformation.news.id,
         },
     });
 
     const onSubmit = async (data: FormValues) => {
         try {
             const formData = new FormData();
-            if (data.thumbnailURL) formData.append("image", data.thumbnailURL);
-            formData.append("newsId", data.newsId.toString());
-            formData.append("typeId", typeId.toString());
+
+            formData.append("thumbnail", data.thumbnail);
+            formData.append("newsID", data.newsID.toString());
+            formData.append("tagID", tagID.toString());
             formData.append("id", newsInformation.id.toString());
 
             const response = await newsService.upsertNewsInformation(formData);
@@ -119,7 +120,7 @@ export const NewsInformationInfo = ({
                         reset();
                         setIsEdit(false);
                         setConfirmModal(null);
-                        router.push(`/admin/newsinformation/${type}`
+                        router.push(`/admin/newsinformation/${tagID}`
                         );
                     },
                 });
@@ -144,7 +145,7 @@ export const NewsInformationInfo = ({
     const handleUploadComplete = (file: File) => {
         setCroppedFile(file);
 
-        setValue("thumbnailURL", file, {
+        setValue("thumbnail", file, {
             shouldValidate: true,
             shouldDirty: true,
         });
@@ -183,7 +184,6 @@ export const NewsInformationInfo = ({
         }
     };
 
-    console.log("news:",)
     return (
         <div className="px-[32px] py-[28px]">
             <Snackbar
@@ -242,7 +242,7 @@ export const NewsInformationInfo = ({
                     <div className="w-full">
                         <h4 className="mb-2 font-bold">ข่าวสาร</h4>
                         <Controller
-                            name="newsId"
+                            name="newsID"
                             control={control}
                             render={({ field }) => (
                                 <Autocomplete
