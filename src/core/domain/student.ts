@@ -32,6 +32,11 @@ export interface ICreateStudent {
   firstNameEn: string;
   lastNameEn: string;
   nickName?: string;
+  linkedin?: string;
+  github?: string;
+  facebook?: string;
+  instagram?: string;
+  classBookID: number;
 }
 
 export interface IUpdateStudent {
@@ -50,7 +55,6 @@ export interface IUpdateStudent {
 }
 
 export interface ICreateStudentCsv {
-  Timestamp: string;
   studentCode: string;
   email: string;
   firstNameTh: string;

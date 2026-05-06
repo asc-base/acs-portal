@@ -11,7 +11,6 @@ import {
   Alert,
 } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-import DoneIcon from "@mui/icons-material/Done";
 import AddIcon from "@mui/icons-material/Add";
 import SearchIcon from "@mui/icons-material/Search";
 import CloseIcon from "@mui/icons-material/Close";
@@ -155,7 +154,7 @@ const ClassBookListComponents = ({
   }, [watchedSearch, pathname, router, searchParams]);
 
   return (
-    <div className="min-h-screen px-8 py-5">
+    <div className="flex min-h-screen flex-col px-8 py-5">
       <Snackbar
         anchorOrigin={{ vertical: "top", horizontal: "right" }}
         open={isError}
@@ -194,7 +193,6 @@ const ClassBookListComponents = ({
             size="small"
             value={sortBy ?? "desc"}
             displayEmpty
-            renderValue={() => "จัดเรียงตาม"}
             sx={{ width: 200 }}
             IconComponent={ExpandMoreIcon}
           >
@@ -202,14 +200,14 @@ const ClassBookListComponents = ({
               value="desc"
             >
               ใหม่สุดไปเก่าสุด
-              {sortBy === "desc" && <DoneIcon fontSize="small" />}
+              {sortBy === "desc"}
             </MenuItem>
 
             <MenuItem
               value="asc"
             >
               เก่าสุดไปใหม่สุด
-              {sortBy === "asc" && <DoneIcon fontSize="small" />}
+              {sortBy === "asc"}
             </MenuItem>
           </Select>
 
@@ -222,7 +220,7 @@ const ClassBookListComponents = ({
         </div>
       </div>
 
-      <div className="flex w-full flex-col items-center justify-center gap-10">
+      <div className="flex w-full flex-1 flex-col items-center">
         <div className="grid w-full grid-cols-3 justify-items-center gap-6">
           {classbooks.map((classbook) => (
             <AdminCard
@@ -239,14 +237,18 @@ const ClassBookListComponents = ({
           ))}
         </div>
 
-        <Pagination
-          shape="rounded"
-          count={Math.ceil(totalRecords / pageSize)}
-          page={page}
-          onChange={(_, currentPage) => handleNextPage(currentPage)}
-          color="primary"
-          size="large"
-        />
+        {totalRecords > 0 && (
+          <div className="mt-auto pt-10">
+            <Pagination
+              shape="rounded"
+              count={Math.ceil(totalRecords / pageSize)}
+              page={page}
+              onChange={(_, currentPage) => handleNextPage(currentPage)}
+              color="primary"
+              size="large"
+            />
+          </div>
+        )}
       </div>
       {confirmModal && <ConfirmModal {...confirmModal} />}
     </div>

@@ -9,6 +9,8 @@ import { StudentModal } from "@/components/studentmodal";
 import { useRouter } from "next/navigation";
 import { IClassBook } from "@/core/domain/classbook";
 import { IStudent } from "@/core/domain/student";
+import EmptyState from "@/components/emptyState";
+import PersonIcon from "@mui/icons-material/Person";
 
 interface StudentsListComponentsProps {
   students: IStudent[];
@@ -48,10 +50,12 @@ const StudentsListComponent = ({
   return (
     <div>
       <HeroCard
-        image={classBook?.thumbnailURL ? classBook.thumbnailURL : classbookImage}
+        image={
+          classBook?.thumbnailURL ? classBook.thumbnailURL : classbookImage
+        }
         header={`รุ่น ${classBook?.classof} ปีการศึกษา ${classBook?.firstYearAcademic}`}
       />
-      <div className="container mx-auto px-4 py-6 lg:py-8 md:px-8 xl:px-8">
+      <div className="container mx-auto px-4 py-6 md:px-8 lg:py-8 xl:px-8">
         <div className="mb-2 flex flex-col items-start justify-start gap-2">
           <Breadcrumbs aria-label="breadcrumb" separator=">>">
             <Link href="/">หน้าหลัก</Link>
@@ -62,16 +66,20 @@ const StudentsListComponent = ({
           </Breadcrumbs>
         </div>
 
-         <h4 className="font-bold text-accent04 mt-2 lg:mt-3 mb-4 lg:mb-6 lg:text-2xl">{`   นักศึกษารุ่น ${classBook?.classof} ปีการศึกษา ${classBook?.firstYearAcademic}`}</h4>
+        <h4 className="text-accent04 mt-2 mb-4 font-bold lg:mt-3 lg:mb-6 lg:text-2xl">{`   นักศึกษารุ่น ${classBook?.classof} ปีการศึกษา ${classBook?.firstYearAcademic}`}</h4>
 
         {students.length === 0 ? (
           <div className="flex w-full flex-col items-center justify-center">
-            <p className="text-gray-500">ไม่พบข้อมูลนักศึกษาในรุ่นนี้</p>
+            <EmptyState 
+             title="ไม่พบข้อมูลนักศึกษาในขณะนี้"
+             description="เมื่อมีข้อมูลนักศึกษา ข้อมูลจะปรากฏที่นี่"
+             icon={PersonIcon}
+             />
           </div>
         ) : (
           <div>
             <div className="mb-10">
-              <div className="grid grid-cols-2 gap-y-4 md:grid-cols-4 lg:grid-cols-4 lg:gap-y-6 justify-items-center">
+              <div className="grid grid-cols-2 justify-items-center gap-y-4 md:grid-cols-4 lg:grid-cols-4 lg:gap-y-6">
                 {students.map((item) => (
                   <div key={item.id} onClick={() => handleOpen(item)}>
                     <StudentCard {...item} />

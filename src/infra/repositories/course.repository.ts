@@ -25,10 +25,10 @@ export class CourseRepository implements ICourseRepository {
       params.append("pageSize", query.pageSize.toString());
     if (query.prerequisite !== undefined)
       params.append("prerequisite", String(query.prerequisite));
-    if (query.curriculumId !== undefined)
-      params.append("curriculumId", query.curriculumId.toString());
-    if (query.typeCourseId !== undefined)
-      params.append("typeCourseId", query.typeCourseId.toString());
+    if (query.curriculumID !== undefined)
+      params.append("curriculumID", query.curriculumID.toString());
+    if (query.typeCourseID !== undefined)
+      params.append("typeCourseID", query.typeCourseID.toString());
     if (query.search !== undefined)
       params.append("search", query.search.toString());
     if (query.orderBy !== undefined)

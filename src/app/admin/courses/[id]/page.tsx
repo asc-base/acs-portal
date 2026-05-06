@@ -8,7 +8,7 @@ interface PageProps {
     id: string;
   }>;
   searchParams: Promise<{
-    curriculumId?: string;
+    curriculumID?: string;
   }>;
 }
 
@@ -17,7 +17,7 @@ export default async function Page({ params, searchParams }: PageProps) {
   const queryParams = await searchParams;
   
   const courseId = Number(id);
-  const curriculumId = Number(queryParams.curriculumId);
+  const curriculumID = Number(queryParams.curriculumID);
 
   const course = await courseService.getCourseById(courseId);
 
@@ -33,7 +33,7 @@ export default async function Page({ params, searchParams }: PageProps) {
     <div className="w-full">
       <CourseInfo
         apiBase={baseUrl}
-        curriculumId={curriculumId}
+        curriculumID={curriculumID}
         course={course}
       />
     </div>

@@ -1,8 +1,8 @@
 "use client";
 import React, { useState, useMemo } from "react";
-import { useForm, useFieldArray } from "react-hook-form";
-import { Button, Typography, IconButton } from "@mui/material";
-import AddIcon from "@mui/icons-material/Add";
+import { useForm } from "react-hook-form";
+import { Button, Typography, Modal } from "@mui/material";
+// import AddIcon from "@mui/icons-material/Add";
 import Alert from "@mui/material/Alert";
 import Snackbar from "@mui/material/Snackbar";
 import { useRouter } from "next/navigation";
@@ -18,10 +18,11 @@ import {
   ConfirmModalProps,
 } from "@/components/modal/confirmModal";
 import { styled } from "@mui/material/styles";
+import { CropImageCard } from "@/components/cropimagecard";
 
 interface StudentUpdateFormProps {
   apiBase: string;
-  classBookId: number;
+  classBookID: number;
   student: IStudent;
 }
 
@@ -36,19 +37,17 @@ const Schema = z.object({
     .regex(/^[0-9]+$/, "รหัสนักศึกษาต้องเป็นตัวเลขเท่านั้น"),
   nickname: z.string().min(1, "กรุณากรอกชื่อเล่น"),
   email: z.string().email("อีเมลไม่ถูกต้อง"),
-  yearOfFirstAdmission: z.string().optional(),
-  yearOfCompletion: z.string().optional(),
   facebook: z.string().optional(),
   linkedin: z.string().optional(),
   instagram: z.string().optional(),
   github: z.string().optional(),
-  otherProjects: z
-    .array(
-      z.object({
-        value: z.string().trim(),
-      }),
-    )
-    .optional(),
+  // otherProjects: z
+  //   .array(
+  //     z.object({
+  //       value: z.string().trim(),
+  //     }),
+  //   )
+  //   .optional(),
 });
 
 type FormData = z.infer<typeof Schema>;
@@ -67,7 +66,7 @@ const VisuallyHiddenInput = styled("input")({
 
 export const StudentUpdateForm = ({
   apiBase,
-  classBookId,
+  classBookID,
   student,
 }: StudentUpdateFormProps) => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -75,6 +74,7 @@ export const StudentUpdateForm = ({
   const [confirmModal, setConfirmModal] = useState<ConfirmModalProps | null>(
     null,
   );
+  const [isCroping, setIsCroping] = useState(false);
 
   const previewSrc = selectedFile
     ? URL.createObjectURL(selectedFile)
@@ -101,30 +101,38 @@ export const StudentUpdateForm = ({
       studentCode: student.studentCode,
       nickname: student.user.nickName,
       email: student.user.email,
-      // yearOfFirstAdmission: student.yearOfFirstAdmission || "",
-      // yearOfCompletion: student.yearOfCompletion || "",
       facebook: student.facebook || undefined,
       linkedin: student.linkedin || undefined,
       instagram: student.instragram || undefined,
       github: student.github || undefined,
-      otherProjects: [{ value: "" }],
+      // otherProjects: [{ value: "" }],
     },
     mode: "onBlur",
     reValidateMode: "onChange",
   });
 
-  const { fields: otherProjects, append: appendOtherProjects } = useFieldArray({
-    control,
-    name: "otherProjects",
-  });
+  // const { fields: otherProjects, append: appendOtherProjects } = useFieldArray({
+  //   control,
+  //   name: "otherProjects",
+  // });
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0] || null;
+
     if (file) {
       setSelectedFile(file);
-    } else {
-      setSelectedFile(null);
+      setIsCroping(true);
     }
+  };
+
+  const handleCropComplete = (croppedFile: File) => {
+    setSelectedFile(croppedFile);
+    setIsCroping(false);
+  };
+
+  const handleCropCancel = () => {
+    setIsCroping(false);
+    setSelectedFile(null);
   };
 
   const onSubmit = async (data: IUpdateStudent) => {
@@ -132,7 +140,7 @@ export const StudentUpdateForm = ({
       const response = await studentService.updateStudent(
         data,
         selectedFile,
-        classBookId,
+        classBookID,
         student.id,
       );
 
@@ -143,9 +151,7 @@ export const StudentUpdateForm = ({
           type: "success",
           onClose: () => setConfirmModal(null),
           onConfirm: () => {
-            router.push(
-              `/admin/students?page=1&pageSize=10&classBookId=${classBookId}`,
-            );
+            router.push(`/admin/students?classBookID=${classBookID}`);
           },
         });
       }
@@ -273,28 +279,6 @@ export const StudentUpdateForm = ({
       </div>
 
       <div className="flex flex-1 flex-col justify-between gap-y-8">
-        <div className="flex flex-row gap-x-4">
-          <div className="flex-4">
-            <RHFTextField
-              control={control}
-              name="yearOfFirstAdmission"
-              label="ปีที่เข้าศึกษา"
-              variant="outlined"
-              fullWidth
-              placeholder="ระบุปีที่เข้าศึกษา"
-            />
-          </div>
-          <div className="flex-4">
-            <RHFTextField
-              control={control}
-              name="yearOfCompletion"
-              label="ปีที่จบการศึกษา"
-              variant="outlined"
-              fullWidth
-              placeholder="ระบุปีที่จบการศึกษา"
-            />
-          </div>
-        </div>
         <div className="grid grid-cols-2 gap-x-4">
           <RHFTextField
             control={control}
@@ -358,7 +342,7 @@ export const StudentUpdateForm = ({
         </div>
       </div>
 
-      <div className="mt-4 mb-3 w-full">
+      {/* <div className="mt-4 mb-3 w-full">
         <div className="mb-3 flex w-full items-center justify-between">
           <Typography variant="h6" fontWeight="bold">
             โปรเจกต์อื่นๆ
@@ -390,7 +374,7 @@ export const StudentUpdateForm = ({
             </div>
           ))}
         </div>
-      </div>
+      </div> */}
 
       <div className="mt-4 flex flex-row justify-end gap-x-4">
         <Button
@@ -402,9 +386,7 @@ export const StudentUpdateForm = ({
               type: "warning",
               onClose: () => setConfirmModal(null),
               onConfirm: () => {
-                router.push(
-                  `/admin/students?page=1&pageSize=10&classBookId=${classBookId}`,
-                );
+                router.push(`/admin/students?classBookID=${classBookID}`);
               },
             });
           }}
@@ -422,6 +404,15 @@ export const StudentUpdateForm = ({
       </div>
 
       {confirmModal && <ConfirmModal {...confirmModal} />}
+      {isCroping && selectedFile && (
+        <Modal open={isCroping} onClose={handleCropCancel} closeAfterTransition>
+          <CropImageCard
+            file={selectedFile}
+            onUploadComplete={handleCropComplete}
+            onCancel={handleCropCancel}
+          />
+        </Modal>
+      )}
     </form>
   );
 };

@@ -1,8 +1,8 @@
 "use client";
 import React, { FC, useState, useMemo } from "react";
-import { useForm, useFieldArray } from "react-hook-form";
-import { Button, Typography, IconButton } from "@mui/material";
-import AddIcon from "@mui/icons-material/Add";
+import { useForm } from "react-hook-form";
+import { Button, Typography, Modal } from "@mui/material";
+// import AddIcon from "@mui/icons-material/Add";
 import Alert from "@mui/material/Alert";
 import Snackbar from "@mui/material/Snackbar";
 import { useRouter } from "next/navigation";
@@ -18,10 +18,11 @@ import {
   ConfirmModalProps,
 } from "@/components/modal/confirmModal";
 import { styled } from "@mui/material/styles";
+import { CropImageCard } from "@/components/cropimagecard";
 
 interface FormProfessorsProps {
   apiBase: string;
-  classBookId: number;
+  classBookID: number;
 }
 
 const Schema = z.object({
@@ -33,21 +34,19 @@ const Schema = z.object({
     .string()
     .min(11, "กรุณากรอกรหัสนักศึกษา")
     .regex(/^[0-9]+$/, "รหัสนักศึกษาต้องเป็นตัวเลขเท่านั้น"),
-  nickname: z.string().min(1, "กรุณากรอกชื่อเล่น"),
+  nickname: z.string().optional(),
   email: z.string().email("อีเมลไม่ถูกต้อง"),
-  yearOfFirstAdmission: z.string().optional(),
-  yearOfCompletion: z.string().optional(),
   facebook: z.string().optional(),
   linkedin: z.string().optional(),
   instagram: z.string().optional(),
   github: z.string().optional(),
-  otherProjects: z
-    .array(
-      z.object({
-        value: z.string().trim(),
-      }),
-    )
-    .optional(),
+  // otherProjects: z
+  //   .array(
+  //     z.object({
+  //       value: z.string().trim(),
+  //     }),
+  //   )
+  //   .optional(),
 });
 
 type FormData = z.infer<typeof Schema>;
@@ -66,13 +65,14 @@ const VisuallyHiddenInput = styled("input")({
 
 export const CreateStudentForm: FC<FormProfessorsProps> = ({
   apiBase,
-  classBookId,
+  classBookID,
 }) => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isError, setIsError] = useState(false);
   const [confirmModal, setConfirmModal] = useState<ConfirmModalProps | null>(
     null,
   );
+  const [isCroping, setIsCroping] = useState(false);
 
   const router = useRouter();
 
@@ -95,37 +95,60 @@ export const CreateStudentForm: FC<FormProfessorsProps> = ({
       studentCode: "",
       nickname: "",
       email: "",
-      yearOfFirstAdmission: "",
-      yearOfCompletion: "",
       facebook: undefined,
       linkedin: undefined,
       instagram: undefined,
       github: undefined,
-      otherProjects: [{ value: "" }],
+      // otherProjects: [{ value: "" }],
     },
     mode: "onBlur",
     reValidateMode: "onChange",
   });
 
-  const { fields: otherProjects, append: appendOtherProjects } = useFieldArray({
-    control,
-    name: "otherProjects",
-  });
+  // const { fields: otherProjects, append: appendOtherProjects } = useFieldArray({
+  //   control,
+  //   name: "otherProjects",
+  // });
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0] || null;
+
     if (file) {
       setSelectedFile(file);
-    } else {
-      setSelectedFile(null);
+      setIsCroping(true);
     }
   };
 
-  const onSubmit = async (data: ICreateStudent) => {
-    try {
-      const payload = [data];
+  const handleCropComplete = (croppedFile: File) => {
+    setSelectedFile(croppedFile);
+    setIsCroping(false);
+  };
 
-      const response = await studentService.createStudent(payload, classBookId);
+  const handleCropCancel = () => {
+    setIsCroping(false);
+    setSelectedFile(null);
+  };
+
+  const onSubmit = async (data: FormData) => {
+    try {
+      const payload: ICreateStudent = {
+        firstNameTh: data.firstNameTh,
+        lastNameTh: data.lastNameTh,
+        firstNameEn: data.firstNameEn,
+        lastNameEn: data.lastNameEn,
+        studentCode: data.studentCode,
+        nickName: data.nickname,
+        email: data.email,
+        facebook: data.facebook,
+        linkedin: data.linkedin,
+        instagram: data.instagram,
+        github: data.github,
+        classBookID: classBookID,
+      };
+      const response = await studentService.createStudent(
+        payload,
+        selectedFile,
+      );
 
       if (!response) setIsError(true);
       else {
@@ -135,7 +158,7 @@ export const CreateStudentForm: FC<FormProfessorsProps> = ({
           onClose: () => setConfirmModal(null),
           onConfirm: () => {
             router.push(
-              `/admin/students?page=1&pageSize=10&classBookId=${classBookId}`,
+              `/admin/students?page=1&pageSize=10&classBookID=${classBookID}`,
             );
           },
         });
@@ -178,7 +201,7 @@ export const CreateStudentForm: FC<FormProfessorsProps> = ({
                   className="h-full w-full rounded-md object-cover"
                 />
                 <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
-                  <Button variant="contained" component="label" size="large">
+                  <Button variant="contained" component="label">
                     อัปโหลดรูปภาพ
                     <VisuallyHiddenInput
                       type="file"
@@ -189,7 +212,7 @@ export const CreateStudentForm: FC<FormProfessorsProps> = ({
                 </div>
               </div>
             ) : (
-              <Button variant="outlined" component="label" size="large">
+              <Button variant="contained" component="label">
                 อัปโหลดรูปภาพ
                 <VisuallyHiddenInput
                   type="file"
@@ -262,30 +285,7 @@ export const CreateStudentForm: FC<FormProfessorsProps> = ({
           </div>
         </div>
       </div>
-
       <div className="flex flex-1 flex-col justify-between gap-y-8">
-        <div className="flex flex-row gap-x-4">
-          <div className="flex-4">
-            <RHFTextField
-              control={control}
-              name="yearOfFirstAdmission"
-              label="ปีที่เข้าศึกษา"
-              variant="outlined"
-              fullWidth
-              placeholder="ระบุปีที่เข้าศึกษา"
-            />
-          </div>
-          <div className="flex-4">
-            <RHFTextField
-              control={control}
-              name="yearOfCompletion"
-              label="ปีที่จบการศึกษา"
-              variant="outlined"
-              fullWidth
-              placeholder="ระบุปีที่จบการศึกษา"
-            />
-          </div>
-        </div>
         <div className="grid grid-cols-2 gap-x-4">
           <RHFTextField
             control={control}
@@ -348,8 +348,7 @@ export const CreateStudentForm: FC<FormProfessorsProps> = ({
           </div>
         </div>
       </div>
-
-      <div className="mt-4 mb-3 w-full">
+      {/* <div className="mt-4 mb-3 w-full">
         <div className="mb-3 flex w-full items-center justify-between">
           <Typography variant="h6" fontWeight="bold">
             โปรเจกต์อื่นๆ
@@ -381,8 +380,7 @@ export const CreateStudentForm: FC<FormProfessorsProps> = ({
             </div>
           ))}
         </div>
-      </div>
-
+      </div> */}
       <div className="mt-4 flex flex-row justify-end gap-x-4">
         <Button
           variant="outlined"
@@ -394,7 +392,7 @@ export const CreateStudentForm: FC<FormProfessorsProps> = ({
               onClose: () => setConfirmModal(null),
               onConfirm: () => {
                 router.push(
-                  `/admin/students?page=1&pageSize=10&classBookId=${classBookId}`,
+                  `/admin/students?page=1&pageSize=10&classBookID=${classBookID}`,
                 );
               },
             });
@@ -411,8 +409,16 @@ export const CreateStudentForm: FC<FormProfessorsProps> = ({
           บันทึกข้อมูล
         </Button>
       </div>
-
       {confirmModal && <ConfirmModal {...confirmModal} />}
+      {isCroping && selectedFile && (
+        <Modal open={isCroping} onClose={handleCropCancel} closeAfterTransition>
+          <CropImageCard
+            file={selectedFile}
+            onUploadComplete={handleCropComplete}
+            onCancel={handleCropCancel}
+          />
+        </Modal>
+      )}
     </form>
   );
 };

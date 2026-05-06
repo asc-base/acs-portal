@@ -27,7 +27,7 @@ export class AuthRepository implements IAuthRepository {
   }
 
   async getUserData(token: string): Promise<ApiResponse<IUser>> {
-    const response = await this.http.get<ApiResponse<IUser>>(`/v1/auth/me`, {
+    const response = await this.http.get<ApiResponse<IUser>>(`/v1/users/profile`, {
       Authorization: `Bearer ${token}`,
     });
     return response;
@@ -66,11 +66,11 @@ export class AuthRepository implements IAuthRepository {
 
   async getUser(): Promise<IUser | null> {
     return authErrorHandler.withAuthErrorHandling(async () => {
-      const response = await this.http.get<ApiResponse<IUser>>(`/v1/auth/me`);
-      if (response.data) {
-        return response.data;
+      const response = await this.http.get<ApiResponse<IUser>>(`/v1/users/profile`);
+      if (!response.data) {
+        return null;
       }
-      return null;
+      return response.data;
     });
   }
 

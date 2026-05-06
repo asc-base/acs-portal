@@ -15,19 +15,19 @@ const page = async ({ searchParams }: PageProps) => {
 
   const query: QueryCourse = {
     page: search.page ?? 1,
-    pageSize: search.pageSize ?? 10,
-    curriculumId: search.curriculumId ?? 1,
-    typeCourseId: search.typeCourseId,
+    pageSize: 7,
+    curriculumID: search.curriculumID ?? 1,
+    typeCourseID: search.typeCourseID,
     search: search.search ?? "",
-    orderBy: search.sortBy ?? "courseCode",
-    sortBy: search.sortBy ?? "desc",
+    orderBy: search.orderBy ?? "courseCode",
+    sortBy: search.sortBy ?? "asc",
   };
 
   const { rows, pageSize, page, totalRecords } = await courseService.getCourse(query);
   
-  const typeCourses = await masterDataService.getMasterDataTypeCourse();
+  const { typeCourses } = await masterDataService.getMasterData();
 
-  const curriculum = await curriculumService.getCurriculumById(query.curriculumId)
+  const curriculum = await curriculumService.getCurriculumById(query.curriculumID)
 
   if (!curriculum) {
   return (
@@ -43,9 +43,9 @@ const page = async ({ searchParams }: PageProps) => {
       totalRecords={totalRecords}
       pageSize={pageSize}
       page={page}
-      curriculumId={query.curriculumId}
+      curriculumID={query.curriculumID}
       typeCourses={typeCourses}
-      typeCourseId={query.typeCourseId}
+      typeCourseID={query.typeCourseID}
       sortBy={query.sortBy}
       orderBy={query.orderBy}
       curriculum={curriculum}

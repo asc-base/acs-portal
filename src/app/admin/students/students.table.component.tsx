@@ -40,6 +40,8 @@ import {
 } from "@/components/modal/confirmModal";
 import Alert from "@mui/material/Alert";
 import Snackbar from "@mui/material/Snackbar";
+import EmptyState from "@/components/emptyState";
+import PersonIcon from '@mui/icons-material/Person';
 
 interface StudentTableComponentsProps {
   students: IStudent[];
@@ -50,7 +52,7 @@ interface StudentTableComponentsProps {
   watchedSearch?: string;
   onResetSearch: () => void;
   totalRecords: number;
-  classBookId: number;
+  classBookID: number;
   page: number;
   pageSize: number;
   handleNextPage: (page: number) => void;
@@ -66,7 +68,7 @@ const StudentTableComponents = ({
   watchedSearch,
   onResetSearch,
   totalRecords,
-  classBookId,
+  classBookID,
   page,
   pageSize,
   handleNextPage,
@@ -85,8 +87,8 @@ const StudentTableComponents = ({
     return new StudentService(repo);
   }, [apiBase]);
 
-  const handleEdit = (userId: number) => {
-    router.push(`/admin/students/${userId}?classBookId=${classBookId}`);
+  const handleEdit = (studentId: number) => {
+    router.push(`/admin/students/${studentId}?classBookID=${classBookID}`);
   };
 
   const handleDelete = (id: number) => {
@@ -112,7 +114,7 @@ const StudentTableComponents = ({
           onConfirm: () => {
             setConfirmModal(null);
             router.push(
-              `/admin/students?page=1&pageSize=10&classBookId=${classBookId}`,
+              `/admin/students?page=1&pageSize=10&classBookID=${classBookID}`,
             );
           },
           title: "ลบข้อมูลสำเร็จ",
@@ -141,13 +143,13 @@ const StudentTableComponents = ({
       complete: (result) => {
         const data: ICreateStudentCsv[] = result.data as ICreateStudentCsv[];
         setImportData(data);
-        router.push(`/admin/students/preview?classbookId=${classBookId}`);
+        router.push(`/admin/students/preview?classBookID=${classBookID}`);
       },
     });
   };
 
   return (
-    <Card>
+     <Card sx={{ height: 700, display: "flex", flexDirection: "column" }}>
       <Snackbar
         anchorOrigin={{ vertical: "top", horizontal: "right" }}
         open={isError}
@@ -180,8 +182,8 @@ const StudentTableComponents = ({
             size="small"
           />
           <Button variant="contained" size="large">
-            <Link href={`/admin/students/create?classBookId=${classBookId}`}>
-              <Add /> เพิ่มนักศึกษา(บุคคล)
+            <Link href={`/admin/students/create?classBookID=${classBookID}`}>
+              <Add /> เพิ่มนักศึกษา (บุคคล)
             </Link>
           </Button>
           <input
@@ -201,17 +203,21 @@ const StudentTableComponents = ({
           </Button>
         </div>
       </div>
-      <TableContainer component={Paper} sx={{ boxShadow: "none" }}>
-        <Table>
+
+      <TableContainer
+        component={Paper}
+        sx={{ boxShadow: "none", flex: 1 }}
+      >
+        <Table stickyHeader sx={{ tableLayout: "fixed" }}>
           <TableHead>
-            <TableRow sx={{ borderBottom: "2px solid var(--color-neutral04)" }}>
-              <TableCell align="center">
+            <TableRow sx={{ borderBottom: "1px solid var(--color-neutral04)" }}>
+              <TableCell align="center" sx={{ width: "15%" }}>
                 <h3 className="font-bold">รูปภาพ</h3>
               </TableCell>
-              <TableCell align="center">
+              <TableCell align="center" sx={{ width: "18%" }}>
                 <div className="flex items-center justify-center gap-1">
                   <h3 className="font-bold">รหัสนักศึกษา</h3>
-                  <IconButton size="small" onClick={() => onSort("studentId")}>
+                  <IconButton size="small" onClick={() => onSort("studentCode")}>
                     {orderBy === "studentCode" ? (
                       sortBy === "asc" ? (
                         <ArrowUpward
@@ -237,45 +243,31 @@ const StudentTableComponents = ({
               <TableCell align="center">
                 <div className="flex items-center justify-center gap-1">
                   <h3 className="font-bold">ชื่อ นามสกุล</h3>
-                  <IconButton
-                    size="small"
-                    onClick={() => onSort("firstNameTh")}
-                  >
-                    {orderBy === "firstNameTh" ? (
-                      sortBy === "asc" ? (
-                        <ArrowUpward
-                          fontSize="small"
-                          sx={{ color: "var(--color-primary01)" }}
-                        />
-                      ) : (
-                        <ArrowDownward
-                          fontSize="small"
-                          sx={{ color: "var(--color-primary01)" }}
-                        />
-                      )
-                    ) : (
-                      <ArrowDownward
-                        fontSize="small"
-                        sx={{ color: "var(--color-neutral04)" }}
-                      />
-                    )}
-                  </IconButton>
                 </div>
               </TableCell>
 
-              <TableCell align="center">
+              <TableCell align="center" sx={{ width: "10%" }}>
                 <h3 className="font-bold">ชื่อเล่น</h3>
               </TableCell>
               <TableCell align="center">
                 <h3 className="font-bold">อีเมล</h3>
               </TableCell>
+              <TableCell sx={{ width: "15%" }} />
             </TableRow>
           </TableHead>
 
           <TableBody>
             {students?.length > 0 ? (
               students.map((student) => (
-                <TableRow key={student.id}>
+                <TableRow 
+                  key={student.id}
+                   sx={{
+                    "& td": {
+                      borderBottom: "none",
+                      fontSize: 18,
+                    },
+                  }}
+                  >
                   <TableCell align="center" sx={{ borderBottom: "none" }}>
                     {student.user?.imageUrl ? (
                       <Avatar
@@ -294,38 +286,25 @@ const StudentTableComponents = ({
                       />
                     )}
                   </TableCell>
-                  <TableCell
-                    align="left"
-                    sx={{ borderBottom: "none", fontSize: 18 }}
-                  >
+                  <TableCell align="center" sx={{ pr: 4 }}>
                     {student.studentCode}
                   </TableCell>
-                  <TableCell
-                    align="left"
-                    sx={{ borderBottom: "none", fontSize: 18 }}
-                  >
+                  <TableCell align="left">
                     {`${student.user?.firstNameTh || ""} ${student.user?.lastNameTh || ""}`}
                   </TableCell>
-                  <TableCell
-                    align="left"
-                    sx={{ borderBottom: "none", fontSize: 18 }}
-                  >
+                  <TableCell align="center">
                     {student.user?.nickName}
                   </TableCell>
-                  <TableCell
-                    align="left"
-                    sx={{ borderBottom: "none", fontSize: 18 }}
-                  >
+                  <TableCell align="left">
                     {student.user?.email}
                   </TableCell>
                   <TableCell
-                    align="left"
-                    sx={{ borderBottom: "none", fontSize: 18 }}
+                    align="center"
                   >
                     <IconButton
                       color="primary"
                       size="small"
-                      onClick={() => handleEdit(student.user.id)}
+                      onClick={() => handleEdit(student.id)}
                     >
                       <Edit />
                     </IconButton>
@@ -340,29 +319,40 @@ const StudentTableComponents = ({
                 </TableRow>
               ))
             ) : (
-              <TableRow>
-                <TableCell
-                  colSpan={6}
-                  align="center"
-                  sx={{ py: 4, color: "text.secondary" }}
-                >
-                  ไม่พบนักศึกษาในรุ่นนี้
+              <TableRow
+                sx={{
+                  "& td": {
+                    borderBottom: "none",
+                  },
+                }}
+              >
+                <TableCell colSpan={6}>
+                  <div className="flex items-center justify-center min-h-[460px]">
+                    <EmptyState
+                      title="ไม่พบข้อมูลนักศึกษาในขณะนี้"
+                      description="ไม่พบนักศึกษาในรุ่นนี้ กรุณาเพิ่มข้อมูลนักศึกษา"
+                      iconColor="var(--color-primary06)"
+                      icon={PersonIcon}
+                    />
+                  </div>
                 </TableCell>
               </TableRow>
             )}
           </TableBody>
         </Table>
       </TableContainer>
-      <div className="mb-4 flex justify-center">
-        <Pagination
-          shape="rounded"
-          count={Math.ceil(totalRecords / pageSize)}
-          page={page}
-          onChange={(_, currentPage) => handleNextPage(currentPage)}
-          color="primary"
-          size="large"
-        />
-      </div>
+      {totalRecords > 0 && (
+        <div className="mb-6 flex justify-center mt-auto">
+          <Pagination
+            shape="rounded"
+            count={Math.ceil(totalRecords / pageSize)}
+            page={page}
+            onChange={(_, currentPage) => handleNextPage(currentPage)}
+            color="primary"
+            size="large"
+          />
+        </div>
+      )}
       {confirmModal && <ConfirmModal {...confirmModal} />}
     </Card>
   );

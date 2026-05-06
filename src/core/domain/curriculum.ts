@@ -10,7 +10,7 @@ export interface ICurriculum {
 export interface QueryCurriculum {
   page?: number;
   pageSize?: number;
-  search?: string;
+  year?: string;
   orderBy?: string;
   sortBy?: "asc" | "desc";
 }

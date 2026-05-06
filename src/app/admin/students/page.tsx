@@ -15,11 +15,11 @@ const page = async ({ searchParams }: PageProps) => {
 
   const query: QueryStudent = {
     page: search.page || 1,
-    pageSize: search.pageSize || 10,
+    pageSize: 5,
     classBookID: search.classBookID || 1,
     search: search.search ?? "",
-    orderBy: search.orderBy ?? "studentId",
-    sortBy: search.sortBy || "desc",
+    orderBy: search.orderBy ?? "studentCode",
+    sortBy: search.sortBy || "asc",
   };
   const { rows, pageSize, page, totalRecords } =
     await studentService.getStudents(query);
@@ -42,7 +42,7 @@ const page = async ({ searchParams }: PageProps) => {
       totalRecords={totalRecords}
       pageSize={pageSize}
       page={page}
-      classBookId={search.classBookID}
+      classBookID={search.classBookID}
       sortBy={query.sortBy}
       orderBy={query.orderBy}
       apiBase={baseUrl}

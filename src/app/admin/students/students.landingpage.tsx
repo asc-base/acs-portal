@@ -13,7 +13,7 @@ interface StudentsLandingPageProps {
   totalRecords: number;
   pageSize: number;
   page: number;
-  classBookId: number;
+  classBookID: number;
   classBook: IClassBook;
   search?: string;
   orderBy?: string;
@@ -32,7 +32,7 @@ const StudentsLandingpage = ({
   totalRecords,
   pageSize,
   page,
-  classBookId,
+  classBookID,
   classBook,
   search,
   sortBy,
@@ -72,7 +72,6 @@ const StudentsLandingpage = ({
 
   const handleSort = (orderBy: string) => {
     const params = new URLSearchParams(searchParams.toString());
-
     const currentOrderBy = params.get("orderBy");
     const currentSortBy = params.get("sortBy") as "asc" | "desc" | null;
     const newOrder =
@@ -102,7 +101,7 @@ const StudentsLandingpage = ({
   }, [watchedSearch, pathname, router, searchParams]);
 
   return (
-    <div className="p-6">
+    <div className="px-6 pt-6">
       <div className="mb-4 flex flex-col gap-6">
         <h3 className="font-bold">
           ข้อมูลนักศึกษา <span>{`>> รุ่นที่ ${classBook?.classof}`}</span>
@@ -119,7 +118,7 @@ const StudentsLandingpage = ({
           watchedSearch={watchedSearch}
           onResetSearch={handleResetSearch}
           totalRecords={totalRecords}
-          classBookId={classBookId}
+          classBookID={classBookID}
           page={page}
           pageSize={pageSize}
           handleNextPage={handleNextPage}

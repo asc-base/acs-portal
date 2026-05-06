@@ -16,8 +16,8 @@ const page = async ({ searchParams }: PageProps) => {
 
   const query: QueryCurriculum = {
     page: search.page || 1,
-    pageSize: search.pageSize || 10,
-    search: search.search ?? "",
+    pageSize: search.pageSize || 12,
+    year: search.year ?? "",
   };
   const { rows, pageSize, page, totalRecords } =
     await curriculumService.getCurriculum(query);

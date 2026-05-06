@@ -30,7 +30,7 @@ const NewsInfoComponent = ({ newsInfo, recommendNews }: NewsInfoProps) => {
         {newsInfo.title && <span>{newsInfo.title}</span>}
       </Breadcrumbs>
       <div>
-        <div className="relative aspect-video w-full overflow-hidden rounded-xl">
+        <div className="relative aspect-video w-full h-[560px] overflow-hidden rounded-xl">
           <Skeleton
             data-skeleton
             variant="rectangular"
@@ -44,7 +44,6 @@ const NewsInfoComponent = ({ newsInfo, recommendNews }: NewsInfoProps) => {
               alt={newsInfo?.title || "news image"}
               fill
               loading="lazy"
-              sizes="100vw"
               className="relative mt-3 rounded-xl object-cover"
               onLoadingComplete={(img) => {
                 const skeleton = img.parentElement?.querySelector(
@@ -70,9 +69,9 @@ const NewsInfoComponent = ({ newsInfo, recommendNews }: NewsInfoProps) => {
         <h3 className="text-accent04 font-bold lg:text-2xl">
           ข่าวที่น่าสนใจอื่นๆ
         </h3>
-        <div className="grid grid-cols-1 justify-center justify-items-center gap-4 md:grid-cols-2 lg:grid-cols-3">
+        <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
           {recommendNews?.map((news) => (
-            <Link key={news.id} href={`/news/${news.id}`}>
+            <Link key={news.id} href={`/news/${news.id}`} className="block w-full">
               <NewsCard news={news} />
             </Link>
           ))}
