@@ -14,21 +14,20 @@ const Page = async ({ params }: PageProps) => {
   const { tagId, id } = await params;
   const newsInformationId = Number(id);
 
-  const newsInformation = await newsService.getNewsInformationById(newsInformationId);
+  const newsInformation =
+    await newsService.getNewsInformationById(newsInformationId);
 
   const masterData = await masterDataService.getMasterData();
 
   const tagIdNumber = Number(tagId);
 
   const newsFeatureGroup = masterData?.tagsGroups?.find(
-    (group) => group.name === "news-feature"
+    (group) => group.name === "news-feature",
   );
-
 
   const selectedType = masterData?.tags?.find(
     (tag) =>
-      tag.id === tagIdNumber &&
-      tag.tagsGroupsId === newsFeatureGroup?.id
+      tag.id === tagIdNumber && tag.tagsGroupsId === newsFeatureGroup?.id,
   );
 
   if (!selectedType) {
@@ -44,7 +43,7 @@ const Page = async ({ params }: PageProps) => {
       <NewsInformationInfo
         type={selectedType.name}
         apiBase={baseUrl}
-        tagID={selectedType.id}
+        tagID={tagIdNumber}
         newsInformation={newsInformation}
       />
     </div>
