@@ -1,5 +1,6 @@
 import { professorService } from "@/infra/container";
 import ProfessorLandingpage from "./professors.landingpage";
+import { baseUrl } from "@/infra/container";
 
 export const dynamic = "force-dynamic";
 
@@ -26,6 +27,7 @@ const page = async ({ searchParams }: PageProps) => {
       totalRecords={totalRecords}
       pageSize={pageSize}
       page={page}
+      apiBase={baseUrl}
     />
   );
 };

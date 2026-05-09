@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React from "react";
 import { IProfessor } from "@/core/domain/professor";
 import {
   Table,
@@ -11,85 +11,27 @@ import {
   TableRow,
   Paper,
   Avatar,
-  Alert,
-  Snackbar,
   IconButton,
 } from "@mui/material";
 import { Edit, Delete } from "@mui/icons-material";
 import { useRouter } from "next/navigation";
 import EmptyState from "@/components/emptyState";
-import {
-  ConfirmModal,
-  ConfirmModalProps,
-} from "@/components/modal/confirmModal";
 
 const ProfessorTableComponent = ({
   professor,
-  onDeleteProfessor
+  onDeleteProfessor,
 }: {
   professor: IProfessor[];
-  onDeleteProfessor: (professorId: number) => Promise<void>;
+  onDeleteProfessor: (professorId: number) => void;
 }) => {
   const router = useRouter();
-
-  const [isError, setIsError] = useState(false);
-  const [confirmModal, setConfirmModal] = useState<ConfirmModalProps | null>(
-    null,
-  );
 
   const handleEdit = (professorId: number) => {
     router.push(`/admin/professors/${professorId}`);
   };
 
-  const confirmDeleteProfessor = (professorId: number) => {
-    setConfirmModal({
-      isOpen: true,
-      type: "delete",
-      onClose: () => setConfirmModal(null),
-      onConfirm: async () => {
-        try {
-          setConfirmModal(null);
-
-          await onDeleteProfessor(professorId);
-
-          setConfirmModal({
-            isOpen: true,
-            type: "success",
-            onClose: () => setConfirmModal(null),
-            onConfirm: () => setConfirmModal(null),
-            title: "ลบข้อมูลสำเร็จ",
-            description: "ข้อมูลอาจารย์ถูกลบออกจากระบบแล้ว",
-            confirmText: "เสร็จสิ้น",
-          });
-        } catch (error) {
-          console.error(error);
-          setIsError(true);
-        }
-      },
-    });
-  };
-
-  const handleCloseAlert = () => {
-    setIsError(false);
-  };
-
   return (
     <TableContainer component={Paper} sx={{ boxShadow: "none" }}>
-      <Snackbar
-        anchorOrigin={{ vertical: "top", horizontal: "right" }}
-        open={isError}
-        autoHideDuration={4000}
-        onClose={handleCloseAlert}
-      >
-        <Alert
-          severity="error"
-          onClose={handleCloseAlert}
-          sx={{ width: "100%" }}
-        >
-          ไม่สามารถลบข้อมูลอาจารย์ได้
-        </Alert>
-      </Snackbar>
-
       <Table>
         <TableHead>
           <TableRow sx={{ borderBottom: "1px solid var(--color-neutral04)" }}>
@@ -132,7 +74,11 @@ const ProfessorTableComponent = ({
                     <Avatar
                       src={prof.user.imageUrl}
                       alt={prof.user.firstNameTh || "Professor"}
-                      sx={{ width: 50, height: 50, margin: "0 auto" }}
+                      sx={{
+                        width: 50,
+                        height: 50,
+                        margin: "0 auto",
+                      }}
                     />
                   ) : (
                     <Avatar
@@ -174,7 +120,7 @@ const ProfessorTableComponent = ({
                   <IconButton
                     color="error"
                     size="small"
-                    onClick={() => confirmDeleteProfessor(prof.id)}
+                    onClick={() => onDeleteProfessor(prof.id)}
                   >
                     <Delete />
                   </IconButton>
@@ -190,7 +136,7 @@ const ProfessorTableComponent = ({
               }}
             >
               <TableCell colSpan={7}>
-                <div className="flex min-h-[460px] items-center justify-center">
+                <div className="flex min-h-[600px] items-center justify-center">
                   <EmptyState
                     title="ไม่พบข้อมูลอาจารย์ในขณะนี้"
                     description="ไม่พบข้อมูลอาจารย์ กรุณาเพิ่มข้อมูลอาจารย์"
@@ -202,8 +148,6 @@ const ProfessorTableComponent = ({
           )}
         </TableBody>
       </Table>
-
-      {confirmModal && <ConfirmModal {...confirmModal} />}
     </TableContainer>
   );
 };
