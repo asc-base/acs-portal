@@ -1,4 +1,4 @@
-import { professorService } from "@/infra/container";
+import { professorService,  baseUrl } from "@/infra/container";
 import ProfessorLandingpage from "./professors.landingpage";
 import { baseUrl } from "@/infra/container";
 
@@ -8,6 +8,8 @@ interface PageProps {
   searchParams: Promise<{
     page?: number;
     pageSize?: number;
+    search?: string;
+    searchBy?: string;
   }>;
 }
 
@@ -18,6 +20,8 @@ const page = async ({ searchParams }: PageProps) => {
     page: Number(resolvedSearchParams.page) || 1,
     pageSize: Number(resolvedSearchParams.pageSize) || 10,
     academicPosition: "true",
+    search: resolvedSearchParams.search || "",
+    searchBy: resolvedSearchParams.searchBy || "firstNameTh",
   };
   const { rows, totalRecords, pageSize, page } =
     await professorService.getProfessors(query);
