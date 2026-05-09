@@ -92,19 +92,19 @@ const ProfessorTableComponent = ({
                   )}
                 </TableCell>
 
-                <TableCell align="left">
+                <TableCell align="center">
                   {prof.academicPosition?.nameTh}
                 </TableCell>
 
-                <TableCell align="left">
+                <TableCell align="center">
                   {`${prof.user?.firstNameTh || ""} ${
                     prof.user?.lastNameTh || ""
                   }`}
                 </TableCell>
 
-                <TableCell align="left">{prof.profRoom}</TableCell>
+                <TableCell align="center">{prof.profRoom}</TableCell>
 
-                <TableCell align="left">{prof.phone}</TableCell>
+                <TableCell align="center">{prof.phone}</TableCell>
 
                 <TableCell align="left">{prof.user?.email}</TableCell>
 

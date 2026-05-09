@@ -1,6 +1,5 @@
-import { professorService,  baseUrl } from "@/infra/container";
+import { professorService, baseUrl } from "@/infra/container";
 import ProfessorLandingpage from "./professors.landingpage";
-import { baseUrl } from "@/infra/container";
 
 export const dynamic = "force-dynamic";
 
