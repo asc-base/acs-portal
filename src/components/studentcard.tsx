@@ -16,7 +16,7 @@ import { IStudent } from "@/core/domain/student";
 
 export const StudentCard: FC<IStudent> = (props) => {
   return (
-    <Card className="flex flex-col !min-h-[300px] max-h-[340px] !w-[162px] cursor-pointer !rounded-2xl xl:!w-[268px]  transition-all duration-300 hover:-translate-y-1 cursor-pointer">
+    <Card className="flex max-h-[340px] !min-h-[300px] !w-[162px] cursor-pointer flex-col !rounded-2xl transition-all duration-300 hover:-translate-y-1 xl:!w-[268px]">
       {props.user.imageUrl ? (
         <CardMedia
           sx={{
@@ -46,7 +46,7 @@ export const StudentCard: FC<IStudent> = (props) => {
           />
         </Box>
       )}
-      <CardContent className="flex flex-1 flex-col items-center justify-center text-center gap-2">
+      <CardContent className="flex flex-1 flex-col items-center justify-center gap-2 text-center">
         <Typography className="!text-h4 lg:!text-h3 !text-primary01 text-center !font-bold">
           <span className="lg:hidden">
             {`${props.user.firstNameTh} ${props.user.lastNameTh}`.length >=
@@ -68,7 +68,7 @@ export const StudentCard: FC<IStudent> = (props) => {
           <Typography className="!text-h5 lg:!text-h4 !text-primary01">
             {`${props.studentCode.slice(0, 2)}-${props.studentCode.slice(-3)}`}
           </Typography>
-          <Box className="flex mt-2 md:m-0">
+          <Box className="mt-2 flex md:m-0">
             {props.facebook && (
               <IconButton
                 component="a"
@@ -93,10 +93,10 @@ export const StudentCard: FC<IStudent> = (props) => {
                 <LinkedInIcon fontSize="small" />
               </IconButton>
             )}
-            {props.instragram && (
+            {props.instagram && (
               <IconButton
                 component="a"
-                href={props.instragram}
+                href={props.instagram}
                 target="_blank"
                 rel="noopener noreferrer"
                 sx={{ p: "2px", color: "var(--color-neutral05)" }}
