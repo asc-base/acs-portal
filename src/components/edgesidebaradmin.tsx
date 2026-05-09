@@ -34,11 +34,13 @@ const sidebarItems = [
     name: "ข่าวประชาสัมพันธ์",
     href: "/admin/newsinformation/25",
     icon: <CampaignIcon />,
+    disabled: true,
   },
   {
     name: "ข่าว Highlight",
     href: "/admin/newsinformation/26",
     icon: <BorderColorIcon />,
+    disabled: true,
   },
   {
     name: "จัดการข่าวสาร",
@@ -84,12 +86,11 @@ export const EdgeSidebarAdmin = ({ username }: { username: string }) => {
                 <li key={item.name}>
                   <Link
                     href={item.href}
-                    className={`group flex h-[44px] items-center gap-x-4 px-8 transition-colors 
-                       ${item.disabled ? "pointer-events-none opacity-50" : ""}
-                      ${isActive
+                    className={`group flex h-[44px] items-center gap-x-4 px-8 transition-colors ${item.disabled ? "pointer-events-none opacity-50" : ""} ${
+                      isActive
                         ? "bg-primary04/10 border-primary04 border-l-4"
                         : "hover:bg-neutral02"
-                      }`}
+                    }`}
                   >
                     <h3
                       className={`transition-colors ${isActive ? "text-primary04" : "text-neutral04 group-hover:text-primary04"}`}
