@@ -12,4 +12,5 @@ export interface IProfessorRepository {
     id: string,
   ): Promise<ApiResponse<IProfessor>>;
   createProfessor(data: FormData): Promise<ApiResponse<IProfessor>>;
+  deleteProfessor(id: number): Promise<ApiResponse<IProfessor>>;
 }
