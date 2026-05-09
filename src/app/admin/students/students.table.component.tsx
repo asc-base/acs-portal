@@ -41,7 +41,7 @@ import {
 import Alert from "@mui/material/Alert";
 import Snackbar from "@mui/material/Snackbar";
 import EmptyState from "@/components/emptyState";
-import PersonIcon from '@mui/icons-material/Person';
+import PersonIcon from "@mui/icons-material/Person";
 
 interface StudentTableComponentsProps {
   students: IStudent[];
@@ -149,7 +149,7 @@ const StudentTableComponents = ({
   };
 
   return (
-     <Card sx={{ height: 700, display: "flex", flexDirection: "column" }}>
+    <Card sx={{ height: 700, display: "flex", flexDirection: "column" }}>
       <Snackbar
         anchorOrigin={{ vertical: "top", horizontal: "right" }}
         open={isError}
@@ -204,10 +204,7 @@ const StudentTableComponents = ({
         </div>
       </div>
 
-      <TableContainer
-        component={Paper}
-        sx={{ boxShadow: "none", flex: 1 }}
-      >
+      <TableContainer component={Paper} sx={{ boxShadow: "none", flex: 1 }}>
         <Table stickyHeader sx={{ tableLayout: "fixed" }}>
           <TableHead>
             <TableRow sx={{ borderBottom: "1px solid var(--color-neutral04)" }}>
@@ -217,7 +214,10 @@ const StudentTableComponents = ({
               <TableCell align="center" sx={{ width: "18%" }}>
                 <div className="flex items-center justify-center gap-1">
                   <h3 className="font-bold">รหัสนักศึกษา</h3>
-                  <IconButton size="small" onClick={() => onSort("studentCode")}>
+                  <IconButton
+                    size="small"
+                    onClick={() => onSort("studentCode")}
+                  >
                     {orderBy === "studentCode" ? (
                       sortBy === "asc" ? (
                         <ArrowUpward
@@ -259,15 +259,15 @@ const StudentTableComponents = ({
           <TableBody>
             {students?.length > 0 ? (
               students.map((student) => (
-                <TableRow 
+                <TableRow
                   key={student.id}
-                   sx={{
+                  sx={{
                     "& td": {
                       borderBottom: "none",
                       fontSize: 18,
                     },
                   }}
-                  >
+                >
                   <TableCell align="center" sx={{ borderBottom: "none" }}>
                     {student.user?.imageUrl ? (
                       <Avatar
@@ -292,15 +292,14 @@ const StudentTableComponents = ({
                   <TableCell align="left">
                     {`${student.user?.firstNameTh || ""} ${student.user?.lastNameTh || ""}`}
                   </TableCell>
-                  <TableCell align="center">
-                    {student.user?.nickName}
-                  </TableCell>
-                  <TableCell align="left">
+                  <TableCell align="center">{student.user?.nickName}</TableCell>
+                  <TableCell
+                    align="left"
+                    className="max-w-[200px] break-words whitespace-normal"
+                  >
                     {student.user?.email}
                   </TableCell>
-                  <TableCell
-                    align="center"
-                  >
+                  <TableCell align="center">
                     <IconButton
                       color="primary"
                       size="small"
@@ -327,7 +326,7 @@ const StudentTableComponents = ({
                 }}
               >
                 <TableCell colSpan={6}>
-                  <div className="flex items-center justify-center min-h-[460px]">
+                  <div className="flex min-h-[460px] items-center justify-center">
                     <EmptyState
                       title="ไม่พบข้อมูลนักศึกษาในขณะนี้"
                       description="ไม่พบนักศึกษาในรุ่นนี้ กรุณาเพิ่มข้อมูลนักศึกษา"
@@ -342,7 +341,7 @@ const StudentTableComponents = ({
         </Table>
       </TableContainer>
       {totalRecords > 0 && (
-        <div className="mb-6 flex justify-center mt-auto">
+        <div className="mt-auto mb-6 flex justify-center">
           <Pagination
             shape="rounded"
             count={Math.ceil(totalRecords / pageSize)}
