@@ -19,8 +19,8 @@ export class AuthService {
     return response.data;
   }
 
-  async LoginV2(data: { email: string; password: string }) {
-    return this.authRepository.LoginV2(data);
+  async Login(data: { email: string; password: string }) {
+    return this.authRepository.Login(data);
   }
 
   async createCredentailForgetPassowrd(
