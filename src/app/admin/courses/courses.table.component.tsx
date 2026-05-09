@@ -38,7 +38,6 @@ import {
 } from "@/components/modal/confirmModal";
 import EmptyState from "@/components/emptyState";
 
-
 interface CourseTableComponentsProps {
   courses: ICourse[];
   onSort: (sortBy: string) => void;
@@ -189,16 +188,13 @@ const CourseTableComponents = ({
         </div>
       </div>
 
-      <TableContainer
-        component={Paper}
-        sx={{ boxShadow: "none", flex: 1 }}
-      >
+      <TableContainer component={Paper} sx={{ boxShadow: "none", flex: 1 }}>
         <Table stickyHeader sx={{ tableLayout: "fixed" }}>
           <TableHead>
             <TableRow sx={{ borderBottom: "1px solid var(--color-neutral04)" }}>
               <TableCell align="center" sx={{ width: "15%" }}>
                 <div className="flex items-center justify-center gap-1">
-                  <h3 className="font-bold ml-2">รหัสวิชา</h3>
+                  <h3 className="ml-2 font-bold">รหัสวิชา</h3>
                   <IconButton size="small" onClick={() => onSort("courseCode")}>
                     {orderBy === "courseCode" ? (
                       sortBy === "asc" ? (
@@ -234,7 +230,7 @@ const CourseTableComponents = ({
               <TableCell align="center">
                 <h3 className="font-bold">หมวดหมู่</h3>
               </TableCell>
-              <TableCell sx={{ width: "15%" }}/>
+              <TableCell sx={{ width: "15%" }} />
             </TableRow>
           </TableHead>
 
@@ -250,14 +246,14 @@ const CourseTableComponents = ({
                     },
                   }}
                 >
-                  <TableCell align="center" >{course.courseCode}</TableCell>
-                  <TableCell align="left" sx={{ maxWidth: 320 }}>
+                  <TableCell align="center">{course.courseCode}</TableCell>
+                  <TableCell align="center" sx={{ maxWidth: 320 }}>
                     {course.courseNameEn}
                   </TableCell>
-                  <TableCell align="left" sx={{ maxWidth: 320 }}>
+                  <TableCell align="center" sx={{ maxWidth: 320 }}>
                     {course.courseNameTh}
                   </TableCell>
-                  <TableCell align="left">{course.credits}</TableCell>
+                  <TableCell align="center">{course.credits}</TableCell>
                   <TableCell align="left">{course.typeCourse.type}</TableCell>
                   <TableCell align="center" sx={{ pr: 4 }}>
                     <IconButton
@@ -286,7 +282,7 @@ const CourseTableComponents = ({
                 }}
               >
                 <TableCell colSpan={6}>
-                  <div className="flex items-center justify-center min-h-[460px]">
+                  <div className="flex min-h-[460px] items-center justify-center">
                     <EmptyState
                       title="ไม่พบข้อมูลรายวิชาในขณะนี้"
                       description="ไม่พบรายวิชาในหลักสูตรนี้ กรุณาเพิ่มข้อมูลรายวิชา"
@@ -301,7 +297,7 @@ const CourseTableComponents = ({
       </TableContainer>
 
       {totalRecords > 0 && (
-        <div className="mb-6 flex justify-center mt-auto">
+        <div className="mt-auto mb-6 flex justify-center">
           <Pagination
             shape="rounded"
             count={Math.ceil(totalRecords / pageSize)}
