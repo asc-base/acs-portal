@@ -254,7 +254,7 @@ export const FormProfesssors: FC<FormProfessorsProps> = ({ apiBase }) => {
                 </div>
               </>
             ) : (
-              <Button variant="outlined" component="label">
+              <Button variant="contained" component="label">
                 <VisuallyHiddenInput
                   type="file"
                   accept="image/*"
@@ -297,7 +297,7 @@ export const FormProfesssors: FC<FormProfessorsProps> = ({ apiBase }) => {
                   ))}
                 </RHFSelect>
               </div>
-            
+
               <div className="flex-4">
                 <RHFTextField
                   control={control}
@@ -325,7 +325,7 @@ export const FormProfesssors: FC<FormProfessorsProps> = ({ apiBase }) => {
               </div>
             </div>
             <div className="flex flex-row gap-x-4">
-                 <div className="flex-2">
+              <div className="flex-2">
                 <RHFSelect
                   control={control}
                   name="academicPositionID"
