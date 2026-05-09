@@ -46,7 +46,7 @@ export class StudentService {
       Object.entries(data).forEach(([key, value]) => {
         formData.append(key, value?.toString() ?? "");
       });
-      if (image) formData.append("image", image);
+      if (image) formData.append("imageFile", image);
       formData.append("classBookID", classBookID.toString());
 
       const response = await this.studentRepository.updateStudent(formData, studentID)

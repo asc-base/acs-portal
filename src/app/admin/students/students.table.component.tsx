@@ -289,7 +289,7 @@ const StudentTableComponents = ({
                   <TableCell align="center" sx={{ pr: 4 }}>
                     {student.studentCode}
                   </TableCell>
-                  <TableCell align="left">
+                  <TableCell align="center">
                     {`${student.user?.firstNameTh || ""} ${student.user?.lastNameTh || ""}`}
                   </TableCell>
                   <TableCell align="center">{student.user?.nickName}</TableCell>
