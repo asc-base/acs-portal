@@ -1,6 +1,14 @@
 "use client";
 import React, { FC, useEffect, useMemo, useState } from "react";
-import { Button, MenuItem, Alert, Snackbar, IconButton, Autocomplete, TextField } from "@mui/material";
+import {
+  Button,
+  MenuItem,
+  Alert,
+  Snackbar,
+  IconButton,
+  Autocomplete,
+  TextField,
+} from "@mui/material";
 import AddCircleOutlineRoundedIcon from "@mui/icons-material/AddCircleOutlineRounded";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { useForm, useFieldArray, Controller } from "react-hook-form";
@@ -111,8 +119,8 @@ export const CourseForm: FC<CoursesFormProps> = ({ apiBase, curriculumID }) => {
         detail: data.detail,
         preCoursesID: data.preCoursesID
           ? data.preCoursesID
-            .map((p) => p.id)
-            .filter((id): id is number => id !== undefined && id !== 0)
+              .map((p) => p.id)
+              .filter((id): id is number => id !== undefined && id !== 0)
           : [],
         curriculumID: curriculumID,
       };
@@ -268,7 +276,7 @@ export const CourseForm: FC<CoursesFormProps> = ({ apiBase, curriculumID }) => {
             <div key={item.id} className="mb-3 flex items-center gap-2">
               <div className="flex-1">
                 <p className="text-neutral05 mb-1">
-                  {index + 1}. คำอธิบายรายวิชา
+                  {index + 1}. รหัสวิชาและชื่อวิชา
                 </p>
 
                 <Controller
@@ -277,7 +285,7 @@ export const CourseForm: FC<CoursesFormProps> = ({ apiBase, curriculumID }) => {
                   render={({ field }) => (
                     <Autocomplete
                       options={courses.filter(
-                        (c) => !selectedIds.includes(c.id)
+                        (c) => !selectedIds.includes(c.id),
                       )}
                       value={courses.find((c) => c.id === field.value) ?? null}
                       getOptionLabel={(option) =>

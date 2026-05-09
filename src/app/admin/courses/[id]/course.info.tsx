@@ -1,6 +1,14 @@
 "use client";
 import React, { FC, useEffect, useMemo, useState } from "react";
-import { Button, MenuItem, Alert, Snackbar, IconButton, Autocomplete, TextField } from "@mui/material";
+import {
+  Button,
+  MenuItem,
+  Alert,
+  Snackbar,
+  IconButton,
+  Autocomplete,
+  TextField,
+} from "@mui/material";
 import AddCircleOutlineRoundedIcon from "@mui/icons-material/AddCircleOutlineRounded";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { useForm, useFieldArray, Controller } from "react-hook-form";
@@ -14,7 +22,10 @@ import { MasterDataRepository } from "@/infra/repositories/master-data.repositor
 import { MasterDataService } from "@/core/service/master-data.service";
 import { useRouter } from "next/navigation";
 import { ICourse, IUpdateCourse } from "@/core/domain/course";
-import { ConfirmModal, ConfirmModalProps } from "@/components/modal/confirmModal";
+import {
+  ConfirmModal,
+  ConfirmModalProps,
+} from "@/components/modal/confirmModal";
 import { TypeCourse } from "@/core/domain/master-data";
 
 interface CoursesFormProps {
@@ -34,19 +45,25 @@ const Schema = z.object({
     .array(
       z.object({
         id: z.number().optional(),
-      })
+      }),
     )
     .optional(),
 });
 
 type FormData = z.infer<typeof Schema>;
 
-export const CourseInfo: FC<CoursesFormProps> = ({ apiBase, curriculumID, course }) => {
+export const CourseInfo: FC<CoursesFormProps> = ({
+  apiBase,
+  curriculumID,
+  course,
+}) => {
   const router = useRouter();
   const [typeCourses, setTypeCourses] = useState<TypeCourse[]>([]);
   const [courses, setCourses] = useState<ICourse[]>([]);
   const [isError, setIsError] = useState(false);
-  const [confirmModal, setConfirmModal] = useState<ConfirmModalProps | null>(null);
+  const [confirmModal, setConfirmModal] = useState<ConfirmModalProps | null>(
+    null,
+  );
   const currentCourseId = course?.id;
 
   const courseService = useMemo(() => {
@@ -59,7 +76,12 @@ export const CourseInfo: FC<CoursesFormProps> = ({ apiBase, curriculumID, course
     return new MasterDataService(typeCourseRepository);
   }, [apiBase]);
 
-  const { control, handleSubmit, watch, formState: { isDirty } } = useForm<FormData>({
+  const {
+    control,
+    handleSubmit,
+    watch,
+    formState: { isDirty },
+  } = useForm<FormData>({
     resolver: zodResolver(Schema),
     defaultValues: {
       typeCourseID: course.typeCourse.id,
@@ -68,9 +90,10 @@ export const CourseInfo: FC<CoursesFormProps> = ({ apiBase, curriculumID, course
       courseNameEn: course.courseNameEn,
       courseNameTh: course.courseNameTh,
       detail: course.detail,
-      preCoursesID: course.prerequisites?.map(p => ({
-        id: p.id,
-      })) ?? [],
+      preCoursesID:
+        course.prerequisites?.map((p) => ({
+          id: p.id,
+        })) ?? [],
     },
   });
 
@@ -98,18 +121,17 @@ export const CourseInfo: FC<CoursesFormProps> = ({ apiBase, curriculumID, course
     setIsError(false);
 
     try {
-      const oldPrecourseIds =
-        course.prerequisites?.map((p) => p.id) ?? [];
+      const oldPrecourseIds = course.prerequisites?.map((p) => p.id) ?? [];
 
       const currentPrecourseIds = (data.preCoursesID ?? [])
         .map((p) => p.id)
         .filter((id): id is number => typeof id === "number" && id !== 0);
 
       const newPrecourseId = currentPrecourseIds.filter(
-        (id) => !oldPrecourseIds.includes(id)
+        (id) => !oldPrecourseIds.includes(id),
       );
       const deletePrecourseId = oldPrecourseIds.filter(
-        (id) => !currentPrecourseIds.includes(id)
+        (id) => !currentPrecourseIds.includes(id),
       );
 
       const updateData: IUpdateCourse = {
@@ -121,7 +143,7 @@ export const CourseInfo: FC<CoursesFormProps> = ({ apiBase, curriculumID, course
         detail: data.detail,
         newPrecourseId,
         deletePrecourseId,
-        curriculumID: curriculumID
+        curriculumID: curriculumID,
       };
       console.log("SEND UPDATE DATA", updateData);
       const response = await courseService.updateCourse(course.id, updateData);
@@ -135,11 +157,11 @@ export const CourseInfo: FC<CoursesFormProps> = ({ apiBase, curriculumID, course
         isOpen: true,
         type: "success",
         onClose: () => setConfirmModal(null),
-        onConfirm: () => router.push(
-          `/admin/courses?page=1&pageSize=10&curriculumID=${curriculumID}`
-        ),
+        onConfirm: () =>
+          router.push(
+            `/admin/courses?page=1&pageSize=10&curriculumID=${curriculumID}`,
+          ),
       });
-
     } catch (error) {
       console.error("Update Course Error:", error);
       setIsError(true);
@@ -155,7 +177,7 @@ export const CourseInfo: FC<CoursesFormProps> = ({ apiBase, curriculumID, course
             curriculumID,
             orderBy: "courseCode",
             sortBy: "asc",
-          })
+          }),
         ]);
 
         setTypeCourses(typeRes.typeCourses);
@@ -178,12 +200,16 @@ export const CourseInfo: FC<CoursesFormProps> = ({ apiBase, curriculumID, course
         autoHideDuration={4000}
         onClose={handleCloseAlert}
       >
-        <Alert severity="error" onClose={handleCloseAlert} sx={{ width: "100%" }}>
+        <Alert
+          severity="error"
+          onClose={handleCloseAlert}
+          sx={{ width: "100%" }}
+        >
           ไม่สามารถบันทึกข้อมูลได้ในขณะนี้ กรุณาลองใหม่อีกครั้ง
         </Alert>
       </Snackbar>
 
-      <h3 className="font-bold text-lg mb-4">แก้ไขข้อมูลรายวิชา</h3>
+      <h3 className="mb-4 text-lg font-bold">แก้ไขข้อมูลรายวิชา</h3>
 
       <div className="grid grid-cols-3 gap-4">
         <RHFSelect
@@ -270,12 +296,14 @@ export const CourseInfo: FC<CoursesFormProps> = ({ apiBase, curriculumID, course
         {fields.map((item, index) => {
           const selectedIds = watchedPreCourses
             ?.map((preCourse, i) => (i === index ? null : preCourse?.id))
-            .filter((id): id is number => Boolean(id))
+            .filter((id): id is number => Boolean(id));
 
           return (
             <div key={item.id} className="mb-3 flex items-center gap-2">
               <div className="flex-1">
-                <p className="text-neutral05 mb-1">{index + 1}. คำอธิบายรายวิชา</p>
+                <p className="text-neutral05 mb-1">
+                  {index + 1}. รหัสวิชาและชื่อวิชา
+                </p>
 
                 <Controller
                   name={`preCoursesID.${index}.id`}
@@ -285,7 +313,7 @@ export const CourseInfo: FC<CoursesFormProps> = ({ apiBase, curriculumID, course
                       options={courses.filter(
                         (c) =>
                           c.id !== currentCourseId &&
-                          !selectedIds?.includes(c.id)
+                          !selectedIds?.includes(c.id),
                       )}
                       value={courses.find((c) => c.id === field.value) ?? null}
                       getOptionLabel={(option) =>
@@ -294,11 +322,7 @@ export const CourseInfo: FC<CoursesFormProps> = ({ apiBase, curriculumID, course
                       isOptionEqualToValue={(a, b) => a.id === b.id}
                       onChange={(_, value) => field.onChange(value?.id ?? 0)}
                       renderInput={(params) => (
-                        <TextField
-                          {...params}
-                          size="small"
-                          fullWidth
-                        />
+                        <TextField {...params} size="small" fullWidth />
                       )}
                     />
                   )}
@@ -326,11 +350,7 @@ export const CourseInfo: FC<CoursesFormProps> = ({ apiBase, curriculumID, course
         >
           ยกเลิก
         </Button>
-        <Button
-          variant="contained"
-          size="large"
-          type="submit"
-        >
+        <Button variant="contained" size="large" type="submit">
           บันทึกข้อมูล
         </Button>
       </div>
