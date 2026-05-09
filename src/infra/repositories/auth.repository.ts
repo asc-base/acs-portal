@@ -33,7 +33,7 @@ export class AuthRepository implements IAuthRepository {
     return response;
   }
 
-  async LoginV2(data: LoginRequest): Promise<ApiResponse<IUser>> {
+  async Login(data: LoginRequest): Promise<ApiResponse<IUser>> {
     const response = await this.http.post<ApiResponse<IUser>>(
       `/v1/auth/login`,
       data,

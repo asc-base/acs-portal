@@ -18,6 +18,12 @@ import { ProfessorRepository } from "@/infra/repositories/professor.repository";
 import { RHFSelect } from "@/components/form/RHFSelect";
 import AddCircleOutlineRoundedIcon from "@mui/icons-material/AddCircleOutlineRounded";
 import IconButton from "@mui/material/IconButton";
+import {
+  ConfirmModal,
+  ConfirmModalProps,
+} from "@/components/modal/confirmModal";
+import { useRouter } from "next/navigation";
+
 
 const VisuallyHiddenInput = styled("input")({
   clip: "rect(0 0 0 0)",
@@ -33,7 +39,7 @@ const VisuallyHiddenInput = styled("input")({
 
 interface ProfessorFormComponentProps {
   professor: IProfessor;
-  academicPosition: Position[];
+  academicPositions: Position[];
   educationLevel: EducationLevel[];
   apiBase: string;
 }
@@ -45,7 +51,7 @@ const Schema = z.object({
   lastNameEn: z.string().min(1, "กรุณากรอกนามสกุล (ภาษาอังกฤษ)"),
   phone: z.string().regex(/^[0-9]{9,10}$/, "กรุณากรอกเบอร์โทรให้ถูกต้อง"),
   email: z.string().email("รูปแบบอีเมลไม่ถูกต้อง"),
-  academicPosition: z.number().min(1, "กรุณากรอกตำแหน่งในหลักสูตร"),
+  academicPositionID: z.number().min(1, "กรุณากรอกตำแหน่ง"),
   profRoom: z.string().min(1, "กรุณากรอกห้องพักอาจารย์"),
   education: z.array(
     z.object({
@@ -63,7 +69,7 @@ type FormValues = z.infer<typeof Schema>;
 
 const ProfessorFormComponent = ({
   professor,
-  academicPosition,
+  academicPositions,
   apiBase,
 }: ProfessorFormComponentProps) => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -73,23 +79,27 @@ const ProfessorFormComponent = ({
   const [previewUrl, setPreviewUrl] = useState<string | null>(
     professor.user?.imageUrl ?? null,
   );
+  const [confirmModal, setConfirmModal] = useState<ConfirmModalProps | null>(
+    null,
+  );
+  const router = useRouter();
 
   const professorService = useMemo(() => {
     const professorRepository = new ProfessorRepository(apiBase);
     return new ProfessorService(professorRepository);
   }, [apiBase]);
 
-  const { control, handleSubmit, reset } = useForm<FormValues>({
+  const { control, handleSubmit, reset, formState: { isValid, isDirty } } = useForm<FormValues>({
     resolver: zodResolver(Schema),
     defaultValues: {
-      firstNameTh: "",
-      lastNameTh: "",
-      firstNameEn: "",
-      lastNameEn: "",
-      phone: "",
-      email: "",
-      academicPosition: 1,
-      profRoom: "",
+      firstNameTh: professor.user.firstNameTh || "",
+      lastNameTh: professor.user.lastNameTh || "",
+      firstNameEn: professor.user.firstNameEn || "",
+      lastNameEn: professor.user.lastNameEn || "",
+      phone: professor.phone || "",
+      email: professor.user.email || "",
+      academicPositionID: professor.academicPosition?.id || 1,
+      profRoom: professor.profRoom || "",
       education: [],
       expertFields: [],
     },
@@ -103,7 +113,7 @@ const ProfessorFormComponent = ({
       lastNameEn: professor.user.lastNameEn || "",
       phone: professor.phone || "",
       email: professor.user.email || "",
-      academicPosition: professor.academicPosition?.id || 1,
+      academicPositionID: professor.academicPosition?.id || 1,
       profRoom: professor.profRoom || "",
       education: professor.educations?.map((e) => ({ value: e })) || [],
       expertFields: professor.expertFields?.map((e) => ({ value: e })) || [],
@@ -149,8 +159,23 @@ const ProfessorFormComponent = ({
   };
 
   const handleCancel = () => {
-    reset();
-    setSelectedFile(null);
+    const hasChanged = isDirty || !!selectedFile;
+
+    if (hasChanged) {
+      setConfirmModal({
+        isOpen: true,
+        type: "warning",
+        onClose: () => setConfirmModal(null),
+        onConfirm: () => {
+          setConfirmModal(null);
+          reset();
+          setSelectedFile(null);
+          setIsEdit(false);
+        },
+      });
+      return;
+    }
+
     setIsEdit(false);
   };
 
@@ -159,7 +184,7 @@ const ProfessorFormComponent = ({
     try {
       const updateData: IUpdateProfessor = {
         id: professor.id,
-        academicPositionID: data.academicPosition,
+        academicPositionID: data.academicPositionID,
         profRoom: data.profRoom,
         phone: data.phone,
         firstNameTh: data.firstNameTh,
@@ -181,13 +206,20 @@ const ProfessorFormComponent = ({
         setIsError(true);
         return;
       }
-
+      setConfirmModal({
+        isOpen: true,
+        type: "success",
+        onClose: () => setConfirmModal(null),
+        onConfirm: () => router.push(`/admin/professors`),
+      });
       setIsEdit(false);
     } catch (error) {
       console.error(error);
       setIsError(true);
     }
   };
+
+
 
   return (
     <form className="space-y-4 p-8" onSubmit={handleSubmit(onSubmit)}>
@@ -238,7 +270,7 @@ const ProfessorFormComponent = ({
                 </div>
               </>
             ) : (
-              <Button variant="outlined" component="label" disabled={!isEdit}>
+              <Button variant="contained" component="label" disabled={!isEdit}>
                 <VisuallyHiddenInput
                   type="file"
                   accept="image/*"
@@ -250,6 +282,39 @@ const ProfessorFormComponent = ({
           </div>
           <div className="flex h-[176px] flex-1 flex-col justify-between">
             <div className="flex flex-row gap-x-4">
+              <div className="flex-2">
+                <RHFSelect
+                  control={control}
+                  name="academicPositionID"
+                  label="ตำแหน่ง (ภาษาไทย)"
+                  variant="outlined"
+                  fullWidth
+                  required
+                  displayEmpty
+                  requiredMark
+                  disabled={!isEdit}
+                  renderValue={(value) => {
+                    if (!value) {
+                      return (
+                        <span style={{ color: "#9e9e9e" }}>
+                          ระบุตำแหน่ง (ภาษาไทย)
+                        </span>
+                      );
+                    }
+                    const selected = academicPositions.find(
+                      (item) => item.id === value,
+                    );
+                    return selected?.nameTh;
+                  }}
+                >
+                  {academicPositions.map((position) => (
+                    <MenuItem key={position.id} value={position.id}>
+                      {position.nameTh}
+                    </MenuItem>
+                  ))}
+                </RHFSelect>
+              </div>
+
               <div className="flex-4">
                 <RHFTextField
                   control={control}
@@ -278,6 +343,38 @@ const ProfessorFormComponent = ({
               </div>
             </div>
             <div className="flex flex-row gap-x-4">
+              <div className="flex-2">
+                <RHFSelect
+                  control={control}
+                  name="academicPositionID"
+                  label="ตำแหน่ง (ภาษาอังกฤษ)"
+                  variant="outlined"
+                  fullWidth
+                  required
+                  displayEmpty
+                  requiredMark
+                  disabled={!isEdit}
+                  renderValue={(value) => {
+                    if (!value) {
+                      return (
+                        <span style={{ color: "#9e9e9e" }}>
+                          ระบุตำแหน่ง (ภาษาอังกฤษ)
+                        </span>
+                      );
+                    }
+                    const selected = academicPositions.find(
+                      (item) => item.id === value,
+                    );
+                    return selected?.nameEn;
+                  }}
+                >
+                  {academicPositions.map((position) => (
+                    <MenuItem key={position.id} value={position.id}>
+                      {position.nameEn}
+                    </MenuItem>
+                  ))}
+                </RHFSelect>
+              </div>
               <div className="flex-4">
                 <RHFTextField
                   control={control}
@@ -337,38 +434,6 @@ const ProfessorFormComponent = ({
           </div>
           <div className="flex flex-row gap-x-4">
             <div className="flex-4">
-              <RHFSelect
-                control={control}
-                name="academicPosition"
-                label="ตำแหน่งในหลักสูตร"
-                fullWidth
-                required
-                displayEmpty
-                requiredMark
-                disabled={!isEdit}
-                renderValue={(value) => {
-                  if (!value) {
-                    return (
-                      <span style={{ color: "#9e9e9e" }}>
-                        ระบุตำแหน่งในหลักสูตร
-                      </span>
-                    );
-                  }
-                  const selected = academicPosition.find(
-                    (item) => item.id === value,
-                  );
-                  return selected?.nameTh;
-                }}
-              >
-                <MenuItem value="" disabled />
-                {academicPosition?.map((position) => (
-                  <MenuItem key={position.id} value={position.id}>
-                    {position.nameTh}
-                  </MenuItem>
-                ))}
-              </RHFSelect>
-            </div>
-            <div className="flex-4">
               <RHFTextField
                 control={control}
                 name="profRoom"
@@ -381,6 +446,7 @@ const ProfessorFormComponent = ({
                 disabled={!isEdit}
               />
             </div>
+            <div className="flex-4" />
           </div>
         </div>
 
@@ -498,6 +564,15 @@ const ProfessorFormComponent = ({
             onCancel={handleCropCancel}
           />
         </Modal>
+      )}
+
+      {confirmModal && (
+        <ConfirmModal
+          isOpen={confirmModal.isOpen}
+          type={confirmModal.type}
+          onClose={confirmModal.onClose}
+          onConfirm={confirmModal.onConfirm}
+        />
       )}
     </form>
   );

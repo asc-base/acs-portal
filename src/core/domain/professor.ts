@@ -33,6 +33,8 @@ export interface QueryProfessor {
   expertFields?: string;
   majorPosition?: string;
   academicPosition?: string;
+  search?: string;
+  searchBy?: string;
 }
 
 export interface ICreateProfessor {
