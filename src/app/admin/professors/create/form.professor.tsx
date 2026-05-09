@@ -85,7 +85,7 @@ const VisuallyHiddenInput = styled("input")({
 });
 
 export const FormProfesssors: FC<FormProfessorsProps> = ({ apiBase }) => {
-  const [acadamicPositions, setAcadamicPositions] = useState<Position[]>([]);
+  const [academicPositions, setAcademicPositions] = useState<Position[]>([]);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isError, setIsError] = useState(false);
   const router = useRouter();
@@ -167,10 +167,6 @@ export const FormProfesssors: FC<FormProfessorsProps> = ({ apiBase }) => {
     } else router.push(`/admin/professors`);
   };
 
-  const handleConfirmSubmit = handleSubmit(async (data) => {
-    await onSubmit(data);
-  });
-
   const onSubmit = async (data: FormData) => {
     setIsError(false);
     try {
@@ -209,7 +205,7 @@ export const FormProfesssors: FC<FormProfessorsProps> = ({ apiBase }) => {
   useEffect(() => {
     const fetchData = async () => {
       const res = await masterDataService.getMasterData();
-      setAcadamicPositions(res.academicPositions);
+      setAcademicPositions(res.academicPositions);
     };
     fetchData();
   }, [apiBase, masterDataService]);
@@ -270,6 +266,38 @@ export const FormProfesssors: FC<FormProfessorsProps> = ({ apiBase }) => {
           </div>
           <div className="flex h-[176px] flex-1 flex-col justify-between">
             <div className="flex flex-row gap-x-4">
+              <div className="flex-2">
+                <RHFSelect
+                  control={control}
+                  name="academicPositionID"
+                  label="ตำแหน่ง (ภาษาไทย)"
+                  variant="outlined"
+                  fullWidth
+                  required
+                  displayEmpty
+                  requiredMark
+                  renderValue={(value) => {
+                    if (!value) {
+                      return (
+                        <span style={{ color: "#9e9e9e" }}>
+                          ระบุตำแหน่ง (ภาษาไทย)
+                        </span>
+                      );
+                    }
+                    const selected = academicPositions.find(
+                      (item) => item.id === value,
+                    );
+                    return selected?.nameTh;
+                  }}
+                >
+                  {academicPositions.map((position) => (
+                    <MenuItem key={position.id} value={position.id}>
+                      {position.nameTh}
+                    </MenuItem>
+                  ))}
+                </RHFSelect>
+              </div>
+            
               <div className="flex-4">
                 <RHFTextField
                   control={control}
@@ -297,6 +325,37 @@ export const FormProfesssors: FC<FormProfessorsProps> = ({ apiBase }) => {
               </div>
             </div>
             <div className="flex flex-row gap-x-4">
+                 <div className="flex-2">
+                <RHFSelect
+                  control={control}
+                  name="academicPositionID"
+                  label="ตำแหน่ง (ภาษาอังกฤษ)"
+                  variant="outlined"
+                  fullWidth
+                  required
+                  displayEmpty
+                  requiredMark
+                  renderValue={(value) => {
+                    if (!value) {
+                      return (
+                        <span style={{ color: "#9e9e9e" }}>
+                          ระบุตำแหน่ง (ภาษาอังกฤษ)
+                        </span>
+                      );
+                    }
+                    const selected = academicPositions.find(
+                      (item) => item.id === value,
+                    );
+                    return selected?.nameEn;
+                  }}
+                >
+                  {academicPositions.map((position) => (
+                    <MenuItem key={position.id} value={position.id}>
+                      {position.nameEn}
+                    </MenuItem>
+                  ))}
+                </RHFSelect>
+              </div>
               <div className="flex-4">
                 <RHFTextField
                   control={control}
@@ -352,37 +411,6 @@ export const FormProfesssors: FC<FormProfessorsProps> = ({ apiBase }) => {
           </div>
           <div className="flex flex-row gap-x-4">
             <div className="flex-4">
-              <RHFSelect
-                control={control}
-                name="academicPositionID"
-                label="ตำแหน่งในหลักสูตร"
-                fullWidth
-                required
-                displayEmpty
-                requiredMark
-                renderValue={(value) => {
-                  if (!value) {
-                    return (
-                      <span style={{ color: "#9e9e9e" }}>
-                        ระบุตำแหน่งในหลักสูตร
-                      </span>
-                    );
-                  }
-                  const selected = acadamicPositions.find(
-                    (item) => item.id === value,
-                  );
-                  return selected?.nameTh;
-                }}
-              >
-                <MenuItem value="" disabled />
-                {acadamicPositions?.map((positon) => (
-                  <MenuItem key={positon.id} value={positon.id}>
-                    {positon.nameTh}
-                  </MenuItem>
-                ))}
-              </RHFSelect>
-            </div>
-            <div className="flex-4">
               <RHFTextField
                 control={control}
                 name="profRoom"
@@ -394,6 +422,7 @@ export const FormProfesssors: FC<FormProfessorsProps> = ({ apiBase }) => {
                 requiredMark
               />
             </div>
+            <div className="flex-4" />
           </div>
         </div>
         <div className="mt-[12px] mb-[8px] flex items-center justify-between">
@@ -468,7 +497,6 @@ export const FormProfesssors: FC<FormProfessorsProps> = ({ apiBase }) => {
           type="submit"
           variant="contained"
           size="large"
-          onClick={handleConfirmSubmit}
           disabled={!isValid}
         >
           บันทึกข้อมูล

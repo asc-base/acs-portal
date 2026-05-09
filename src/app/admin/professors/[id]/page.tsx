@@ -20,7 +20,7 @@ export default async function Page({ params }: PageProps) {
   return (
     <ProfessorFormComponent
       professor={professor}
-      academicPosition={academicPosition}
+      academicPositions={academicPosition}
       educationLevel={educationLevel}
       apiBase={baseUrl}
     />
