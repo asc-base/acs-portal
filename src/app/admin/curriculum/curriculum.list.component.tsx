@@ -28,7 +28,7 @@ interface CurriculumListComponentsProps {
 }
 
 const searchSchema = z.object({
-  search: z.string().optional(),
+  year: z.string().optional(),
 });
 
 type SearchForm = z.infer<typeof searchSchema>;
@@ -55,13 +55,13 @@ const CurriculumListComponents = ({
 
   const { control, reset, watch } = useForm<SearchForm>({
     resolver: zodResolver(searchSchema),
-    defaultValues: { search: "" },
+    defaultValues: { year: "" },
   });
 
-  const watchedSearch = watch("search");
+  const watchedSearch = watch("year");
 
   const handleResetSearch = () => {
-    reset({ search: "" });
+    reset({ year: "" });
   };
 
   const handleNextPage = (currentPage: number) => {
@@ -116,10 +116,10 @@ const CurriculumListComponents = ({
     const delayDebounce = setTimeout(() => {
       const params = new URLSearchParams(searchParams.toString());
       if (watchedSearch) {
-        params.set("search", watchedSearch);
+        params.set("year", watchedSearch);
         params.set("page", "1");
       } else {
-        params.delete("search");
+        params.delete("year");
       }
       const newSearch = params.toString();
       if (searchParams.toString() !== newSearch) {
@@ -149,7 +149,7 @@ const CurriculumListComponents = ({
 
         <div className="flex items-center gap-4">
           <RHFTextField
-            name="search"
+            name="year"
             control={control}
             startIcon={<SearchIcon />}
             endIcon={

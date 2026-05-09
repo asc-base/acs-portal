@@ -44,8 +44,6 @@ export default function StudentAuthLandingPage({
     return new AuthService(authRepository);
   }, [apiBase]);
 
-  console.log("API URL", apiBase);
-
   const {
     control,
     handleSubmit,
@@ -72,9 +70,9 @@ export default function StudentAuthLandingPage({
         password: data.password,
       };
 
-      const reps = await authService.LoginV2(loginRequest);
+      const reps = await authService.Login(loginRequest);
 
-      if (reps.status && reps.statusCode === 200 && reps.data) {
+      if (reps.status && reps.status === 200 && reps.data) {
         // Store user data in the auth store
         setUser(reps.data);
         console.log("Login successful, user stored in auth store:", reps.data);
