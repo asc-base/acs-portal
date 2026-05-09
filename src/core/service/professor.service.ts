@@ -54,7 +54,7 @@ export class ProfessorService {
     }
   }
   
-  async deleteProfessor(id: number): Promise<IProfessor> {
+  async deleteProfessor(id: number): Promise<IProfessor | null> {
     const response = await this.professorRepository.deleteProfessor(id);
     return response.data;
   }
