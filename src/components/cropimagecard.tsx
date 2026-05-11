@@ -6,12 +6,16 @@ import ImageIcon from "@mui/icons-material/Image";
 
 interface CropImageCardProps {
   file: File;
+  width: number;
+  height: number;
   onUploadComplete: (file: File) => void;
   onCancel: () => void;
 }
 
 export const CropImageCard = ({
   file,
+  width,
+  height,
   onUploadComplete,
   onCancel,
 }: CropImageCardProps) => {
@@ -30,8 +34,8 @@ export const CropImageCard = ({
   const lastDistance = useRef<number | null>(null);
 
   const CONTAINER = {
-    w: 590,
-    h: 440,
+    w: width,
+    h: height,
   };
 
   // =========================
@@ -64,7 +68,7 @@ export const CropImageCard = ({
     return () => {
       URL.revokeObjectURL(url);
     };
-  }, [file]);
+  }, [file, width, height]);
 
   const getFinalScale = () => {
     return baseScaleRef.current * zoomRef.current;
@@ -277,7 +281,11 @@ export const CropImageCard = ({
         <h2 className="mb-4 text-2xl font-bold">Crop Photo</h2>
 
         <div
-          className="relative h-[440px] w-[590px] cursor-grab touch-none overflow-hidden rounded-md bg-gray-100 active:cursor-grabbing"
+          className="relative cursor-grab touch-none overflow-hidden rounded-md bg-gray-100 active:cursor-grabbing"
+          style={{
+            width: `${CONTAINER.w}px`,
+            height: `${CONTAINER.h}px`,
+          }}
           onMouseDown={handleMouseDown}
           onTouchStart={handleTouchStart}
           onTouchMove={handleTouchMove}
