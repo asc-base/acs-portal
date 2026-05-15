@@ -4,9 +4,7 @@ import NewsMediaListComponent from "@/components/newsinformation.list.component"
 export const dynamic = "force-dynamic";
 
 interface PageProps {
-  params: Promise<{
-    tagId: number;
-  }>;
+  params: { tagId: number }
 }
 
 const page = async ({params}: PageProps) => {
@@ -14,14 +12,14 @@ const page = async ({params}: PageProps) => {
   const { tagId } = await params;
 
   const { rows } = await newsService.getNewsInformations(
-    tagId,
     1,
     pageSize,
+    tagId,
   );
   return (
     <NewsMediaListComponent
       newsInformation={rows}
-      tagId={tagId}
+      tagID={tagId}
       pageSize={pageSize}
     />
   );

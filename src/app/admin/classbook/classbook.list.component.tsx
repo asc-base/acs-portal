@@ -11,7 +11,6 @@ import {
   Alert,
 } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-import DoneIcon from "@mui/icons-material/Done";
 import AddIcon from "@mui/icons-material/Add";
 import SearchIcon from "@mui/icons-material/Search";
 import CloseIcon from "@mui/icons-material/Close";
@@ -85,7 +84,8 @@ const ClassBookListComponents = ({
   const handleSortOrder = (event: SelectChangeEvent) => {
     const newSortOrder = event.target.value as "asc" | "desc";
     const params = new URLSearchParams(searchParams.toString());
-    params.set("sortOrder", newSortOrder);
+    params.set("orderBy", "createdAt");
+    params.set("sortBy", newSortOrder);
     router.push(`${pathname}?${params.toString()}`);
   };
 
@@ -154,7 +154,7 @@ const ClassBookListComponents = ({
   }, [watchedSearch, pathname, router, searchParams]);
 
   return (
-    <div className="min-h-screen px-8 py-5">
+    <div className="flex min-h-screen flex-col px-8 py-5">
       <Snackbar
         anchorOrigin={{ vertical: "top", horizontal: "right" }}
         open={isError}
@@ -193,48 +193,21 @@ const ClassBookListComponents = ({
             size="small"
             value={sortBy ?? "desc"}
             displayEmpty
-            renderValue={() => "จัดเรียงตาม"}
-            sx={{
-              "& .MuiOutlinedInput-notchedOutline": {
-                borderColor: "var(--color-neutral03)",
-              },
-              py: 0.5,
-              width: "180px",
-              color: "var(--color-neutral04)",
-            }}
+            sx={{ width: 200 }}
             IconComponent={ExpandMoreIcon}
-            MenuProps={{
-              MenuListProps: {
-                sx: { py: 0 },
-              },
-            }}
           >
             <MenuItem
               value="desc"
-              sx={{
-                color: "var(--color-neutral04)",
-                borderRadius: 1,
-                border: "1px solid var(--color-neutral04)",
-                display: "flex",
-                justifyContent: "space-between",
-              }}
             >
               ใหม่สุดไปเก่าสุด
-              {sortBy === "desc" && <DoneIcon fontSize="small" />}
+              {sortBy === "desc"}
             </MenuItem>
 
             <MenuItem
               value="asc"
-              sx={{
-                color: "var(--color-neutral04)",
-                borderRadius: 1,
-                border: "1px solid var(--color-neutral04)",
-                display: "flex",
-                justifyContent: "space-between",
-              }}
             >
               เก่าสุดไปใหม่สุด
-              {sortBy === "asc" && <DoneIcon fontSize="small" />}
+              {sortBy === "asc"}
             </MenuItem>
           </Select>
 
@@ -247,7 +220,7 @@ const ClassBookListComponents = ({
         </div>
       </div>
 
-      <div className="flex w-full flex-col items-center justify-center gap-10">
+      <div className="flex w-full flex-1 flex-col items-center">
         <div className="grid w-full grid-cols-3 justify-items-center gap-6">
           {classbooks.map((classbook) => (
             <AdminCard
@@ -256,7 +229,7 @@ const ClassBookListComponents = ({
               data={classbook}
               onView={() =>
                 router.push(
-                  `/admin/students?page=1&pageSize=10&classBookId=${classbook.id}`,
+                  `/admin/students?page=1&pageSize=10&classBookID=${classbook.id}`,
                 )
               }
               onDelete={() => confirmDeleteClassbook(classbook.id)}
@@ -264,14 +237,18 @@ const ClassBookListComponents = ({
           ))}
         </div>
 
-        <Pagination
-          shape="rounded"
-          count={Math.ceil(totalRecords / pageSize)}
-          page={page}
-          onChange={(_, currentPage) => handleNextPage(currentPage)}
-          color="primary"
-          size="large"
-        />
+        {totalRecords > 0 && (
+          <div className="mt-auto pt-10">
+            <Pagination
+              shape="rounded"
+              count={Math.ceil(totalRecords / pageSize)}
+              page={page}
+              onChange={(_, currentPage) => handleNextPage(currentPage)}
+              color="primary"
+              size="large"
+            />
+          </div>
+        )}
       </div>
       {confirmModal && <ConfirmModal {...confirmModal} />}
     </div>

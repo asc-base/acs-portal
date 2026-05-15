@@ -58,6 +58,7 @@ export function RHFDatePickerDayjs<T extends FieldValues>({
                   variant: "outlined",
                   error: !!fieldState.error,
                   helperText: fieldState.error?.message,
+                  size: "small",
                 },
               }}
             />

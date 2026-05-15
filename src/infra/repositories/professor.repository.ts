@@ -1,12 +1,12 @@
 import { IProfessorRepository } from "@/core/ports/professor.repository";
-import { IProfessor, IUpdateProfessor } from "@/core/domain/professor";
+import { IProfessor } from "@/core/domain/professor";
 import { HttpHelper } from "@/lib/http";
 import { ApiResponse, Pageable } from "@/interface/response";
 import { QueryProfessor } from "@/core/domain/professor";
 
 export class ProfessorRepository implements IProfessorRepository {
-  private http: HttpHelper;
-  private baseUrl: string;
+  private readonly http: HttpHelper;
+  private readonly baseUrl: string;
 
   constructor(baseUrl: string) {
     this.baseUrl = baseUrl;
@@ -23,6 +23,8 @@ export class ProfessorRepository implements IProfessorRepository {
       expertFields,
       majorPosition,
       academicPosition,
+      search,
+      searchBy,
     } = query;
 
     const params = new URLSearchParams();
@@ -41,6 +43,12 @@ export class ProfessorRepository implements IProfessorRepository {
     if (academicPosition && academicPosition.length > 0) {
       params.append("academicPosition", academicPosition);
     }
+    if (search) {
+      params.append("search", search);
+    }
+    if (searchBy) {
+      params.append("searchBy", searchBy);
+    }
     const queryString = params.toString() ? `?${params.toString()}` : "";
     const url = `/v1/professors${queryString}`;
     const response =
@@ -56,10 +64,10 @@ export class ProfessorRepository implements IProfessorRepository {
   }
 
   async updateProfessor(
-    data: IUpdateProfessor,
+    data: FormData,
     id: string,
   ): Promise<ApiResponse<IProfessor>> {
-    const response = await this.http.put<ApiResponse<IProfessor>>(
+    const response = await this.http.patch<ApiResponse<IProfessor>>(
       `/v1/professors/${id}`,
       data,
     );
@@ -68,9 +76,18 @@ export class ProfessorRepository implements IProfessorRepository {
 
   async createProfessor(data: FormData): Promise<ApiResponse<IProfessor>> {
     const response = await this.http.post<ApiResponse<IProfessor>>(
-      `/v2/professors`,
+      `/v1/professors`,
       data,
     );
     return response;
   }
+
+async deleteProfessor(id: number): Promise<ApiResponse<IProfessor>> {
+
+  const response = await this.http.delete<ApiResponse<IProfessor>>(
+    `/v1/professors/${id}`,
+  );
+
+  return response;
+}
 }

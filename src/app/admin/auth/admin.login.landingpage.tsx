@@ -56,12 +56,12 @@ export default function AdminLoginLandingPage({
         password: data.password,
       };
 
-      const response = await authService.LoginV2(loginRequest);
+      const response = await authService.Login(loginRequest);
 
       console.log("form data", loginRequest);
 
       if (response?.status) {
-        router.push(`/admin`);
+        router.push(`/admin/classbook`);
       }
     } catch {
       setError("password", {

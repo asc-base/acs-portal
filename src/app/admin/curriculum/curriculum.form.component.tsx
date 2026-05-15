@@ -19,7 +19,6 @@ interface CurriculumFormProps {
 }
 
 const Schema = z.object({
-  thumbnailFile: z.instanceof(File, { message: "กรุณาอัปโหลดรูปภาพ" }),
   title: z.string().min(1, "กรุณาระบุชื่อหลักสูตร"),
   year: z.string().min(1, "กรุณาระบุปีการศึกษา"),
   documentURL: z.url({ message: "กรุณาระบุลิงก์ที่ถูกต้อง" }),
@@ -51,18 +50,21 @@ export const CurriculumForm = ({ apiBase }: CurriculumFormProps) => {
     return new CurriculumService(repo);
   }, [apiBase]);
 
-  const { handleSubmit, control, setValue, formState: { isDirty } } = useForm<FormValues>({
+  const { handleSubmit, control, formState: { isDirty } } = useForm<FormValues>({
     resolver: zodResolver(Schema),
     mode: "onChange",
+    defaultValues: {
+      title: "",
+      year: "",
+      documentURL: "",
+      description: "",
+    },
   });
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
       setSelectedFile(file);
-      setValue("thumbnailFile", file, { shouldValidate: true });
-    } else {
-      setSelectedFile(null);
     }
   };
 
@@ -85,14 +87,16 @@ export const CurriculumForm = ({ apiBase }: CurriculumFormProps) => {
       const response = await curriculumService.createCurriculum({
         ...data,
         year,
-      });
-      
+      },
+        selectedFile!
+      );
+
       if (response) {
         setConfirmModal({
-            isOpen: true,
-            type: "success",
-            onClose: () => setConfirmModal(null),
-            onConfirm: () => router.push(`/admin/curriculum`),
+          isOpen: true,
+          type: "success",
+          onClose: () => setConfirmModal(null),
+          onConfirm: () => router.push(`/admin/curriculum`),
         });
       }
     } catch (error) {
@@ -105,7 +109,7 @@ export const CurriculumForm = ({ apiBase }: CurriculumFormProps) => {
       <h3 className="mb-6 font-bold">เพิ่มหลักสูตร</h3>
       <form className="space-y-4" onSubmit={handleSubmit(onSubmit)}>
         <div className="flex gap-x-10 gap-y-2">
-          <div className="bg-neutral02 border-neutral04 relative flex h-[248px] w-[200px] flex-col items-center justify-center overflow-hidden rounded-md">
+          <div className="bg-neutral02 border-neutral04 relative flex h-[248px] w-[248px] flex-col items-center justify-center overflow-hidden rounded-md">
             {selectedFile ? (
               <div className="group relative h-full w-full">
                 <Image
@@ -143,8 +147,7 @@ export const CurriculumForm = ({ apiBase }: CurriculumFormProps) => {
               name="title"
               label="ชื่อหลักสูตร"
               variant="outlined"
-              size="small"
-              required
+              requiredMark
             />
             <RHFDatePickerDayjs
               control={control}
@@ -159,8 +162,7 @@ export const CurriculumForm = ({ apiBase }: CurriculumFormProps) => {
               name="documentURL"
               label="ลิงก์ไฟล์หลักสูตร (Google Drive หรือ OneDrive)"
               variant="outlined"
-              size="small"
-              required
+              requiredMark
             />
           </div>
         </div>
@@ -171,11 +173,10 @@ export const CurriculumForm = ({ apiBase }: CurriculumFormProps) => {
             name="description"
             label="รายละเอียด"
             variant="outlined"
-            size="small"
             fullWidth
             multiline
             rows={4}
-            required
+            requiredMark
           />
         </div>
 

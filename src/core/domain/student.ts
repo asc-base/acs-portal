@@ -1,6 +1,5 @@
 import { IUser } from "./user";
 // import { IProject } from "./project";
-import { IClassBook } from "./classbook";
 export interface IStudent {
   id: number;
   studentCode: string;
@@ -10,7 +9,7 @@ export interface IStudent {
   // yearOfCompletion:string | null;
   linkedin?: string | null;
   facebook?: string | null;
-  instragram?: string | null;
+  instagram?: string | null;
   github?: string | null;
   // projects: IProject[];
 }
@@ -32,6 +31,11 @@ export interface ICreateStudent {
   firstNameEn: string;
   lastNameEn: string;
   nickName?: string;
+  linkedin?: string;
+  github?: string;
+  facebook?: string;
+  instagram?: string;
+  classBookID: number;
 }
 
 export interface IUpdateStudent {
@@ -42,15 +46,13 @@ export interface IUpdateStudent {
   firstNameEn?: string;
   lastNameEn?: string;
   nickName?: string;
-  classBook?: IClassBook;
   linkedin?: string | null;
   facebook?: string | null;
-  instragram?: string | null;
+  instagram?: string | null;
   github?: string | null;
 }
 
 export interface ICreateStudentCsv {
-  Timestamp: string;
   studentCode: string;
   email: string;
   firstNameTh: string;

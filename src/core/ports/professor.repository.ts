@@ -1,5 +1,5 @@
 import { ApiResponse, Pageable } from "@/interface/response";
-import { IProfessor, IUpdateProfessor } from "../domain/professor";
+import { IProfessor} from "../domain/professor";
 import { QueryProfessor } from "../domain/professor";
 
 export interface IProfessorRepository {
@@ -8,8 +8,9 @@ export interface IProfessorRepository {
   ): Promise<ApiResponse<Pageable<IProfessor>>>;
   getProfessorById(id: string): Promise<ApiResponse<IProfessor>>;
   updateProfessor(
-    data: IUpdateProfessor,
+    data: FormData,
     id: string,
   ): Promise<ApiResponse<IProfessor>>;
   createProfessor(data: FormData): Promise<ApiResponse<IProfessor>>;
+  deleteProfessor(id: number): Promise<ApiResponse<IProfessor>>;
 }

@@ -20,7 +20,7 @@ export const NewsCard: FC<NewsCardProps> = (props) => {
   })} ${new Date(news.startDate).getFullYear() + 543}`;
 
   return (
-    <Card className="flex max-h-85 min-h-70 max-w-84 min-w-74 flex-col !rounded-xl shadow-md lg:!rounded-2xl transition-all duration-300 hover:-translate-y-2 cursor-pointer">
+    <Card className="flex h-85 max-w-84 min-w-75 cursor-pointer flex-col !rounded-xl shadow-md transition-all duration-300 hover:drop-shadow-lg lg:!rounded-2xl">
       <div className="px-6 pt-4">
         <CardMedia
           className="h-[180px] w-full rounded-xl object-cover lg:h-[240px]"

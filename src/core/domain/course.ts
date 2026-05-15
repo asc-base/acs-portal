@@ -19,7 +19,7 @@ export interface ICourse {
   createdDate: Date;
   updatedDate: Date;
   curriculum: ICurriculum;
-  // preCourses: ICourse[];
+  prerequisites: ICourse[];
   typeCourse: TypeCourse;
 }
 
@@ -27,8 +27,8 @@ export interface QueryCourse {
   page?: number;
   pageSize?: number;
   prerequisite?: boolean;
-  curriculumId: number;
-  typeCourseId?: number;
+  curriculumID: number;
+  typeCourseID?: number;
   search?: string;
   orderBy?: string;
   sortBy?: "asc" | "desc";
@@ -36,22 +36,23 @@ export interface QueryCourse {
 
 export interface ICreateCourse {
   courseCode: string;
-  typeCourseId: number;
+  typeCourseID: number;
   courseNameTh: string;
   courseNameEn: string;
   credits: string;
   detail: string;
-  prerequisites?: number[];
-  curriculumId: number;
+  preCoursesID?: number[];
+  curriculumID: number;
 }
 
 export interface IUpdateCourse {
   courseCode?: string;
-  typeCourseId?: number;
+  typeCourseID?: number;
   courseNameTh?: string;
   courseNameEn?: string;
   credits?: string;
   detail?: string;
-  prerequisites?: number[];
-  curriculumId: number;
+  curriculumID: number;
+  newPrecourseId?: number[];
+  deletePrecourseId?: number[];
 }

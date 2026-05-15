@@ -27,15 +27,15 @@ export class AuthRepository implements IAuthRepository {
   }
 
   async getUserData(token: string): Promise<ApiResponse<IUser>> {
-    const response = await this.http.get<ApiResponse<IUser>>(`/v1/auth/me`, {
+    const response = await this.http.get<ApiResponse<IUser>>(`/v1/users/profile`, {
       Authorization: `Bearer ${token}`,
     });
     return response;
   }
 
-  async LoginV2(data: LoginRequest): Promise<ApiResponse<IUser>> {
+  async Login(data: LoginRequest): Promise<ApiResponse<IUser>> {
     const response = await this.http.post<ApiResponse<IUser>>(
-      `/v2/auth/login`,
+      `/v1/auth/login`,
       data,
     );
     console.log("response", response);
@@ -66,17 +66,17 @@ export class AuthRepository implements IAuthRepository {
 
   async getUser(): Promise<IUser | null> {
     return authErrorHandler.withAuthErrorHandling(async () => {
-      const response = await this.http.get<ApiResponse<IUser>>(`/v2/auth/me`);
-      if (response.data) {
-        return response.data;
+      const response = await this.http.get<ApiResponse<IUser>>(`/v1/users/profile`);
+      if (!response.data) {
+        return null;
       }
-      return null;
+      return response.data;
     });
   }
 
   async Logout(): Promise<void> {
     authErrorHandler.withAuthErrorHandling(async () => {
-      await this.http.post<void>(`/v2/auth/logout`);
+      await this.http.post<void>(`/v1/auth/logout`);
     });
   }
 }

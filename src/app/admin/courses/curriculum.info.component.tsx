@@ -23,7 +23,6 @@ interface CurriculumInfoProps {
 }
 
 const curriculumSchema = z.object({
-  thumbnailFile: z.instanceof(File).optional(),
   title: z.string().min(1, "กรุณาระบุชื่อหลักสูตร"),
   year: z.string().min(1, "กรุณาระบุปีการศึกษา"),
   documentURL: z.url({ message: "กรุณาระบุลิงก์ที่ถูกต้อง" }),
@@ -85,8 +84,6 @@ export const CurriculumInfoComponent = ({ apiBase, curriculum }: CurriculumInfoP
     const file = e.target.files?.[0];
     if (file) {
       setSelectedFile(file);
-    } else {
-      setSelectedFile(null);
     }
   };
 
@@ -99,8 +96,8 @@ export const CurriculumInfoComponent = ({ apiBase, curriculum }: CurriculumInfoP
         {
           ...data,
           year,
-          ...(selectedFile ? { image: selectedFile } : {}),
-        }
+        },
+        selectedFile
       );
 
       if (response) {
@@ -112,7 +109,7 @@ export const CurriculumInfoComponent = ({ apiBase, curriculum }: CurriculumInfoP
             setConfirmModal(null)
             setIsEdit(false);
             router.push(
-              `/admin/courses?page=1&pageSize=10&curriculumId=${curriculum.id}`
+              `/admin/courses?page=1&pageSize=10&curriculumID=${curriculum.id}`
             );
           },
         });
@@ -170,7 +167,7 @@ export const CurriculumInfoComponent = ({ apiBase, curriculum }: CurriculumInfoP
           <h3 className="mb-6 font-bold">ข้อมูลหลักสูตร</h3>
           <form className="space-y-4" onSubmit={handleSubmit(onSubmit)}>
             <div className="flex gap-x-10">
-              <div className="bg-neutral02 relative flex h-[248px] w-[200px] items-center justify-center overflow-hidden rounded-md">
+              <div className="bg-neutral02 relative flex h-[248px] w-[248px] items-center justify-center overflow-hidden rounded-md">
                 {previewSrc ? (
                   <div className="group relative h-full w-full">
                     <Image

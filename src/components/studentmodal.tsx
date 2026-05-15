@@ -24,7 +24,7 @@ export const StudentModal: React.FC<StudentModalProps> = ({
   student,
   Open,
   onClose,
-  classBook
+  classBook,
 }) => {
   return (
     <Modal open={Open} onClose={onClose}>
@@ -125,10 +125,10 @@ export const StudentModal: React.FC<StudentModalProps> = ({
                     />
                   </IconButton>
                 )}
-                {student.instragram && (
+                {student.instagram && (
                   <IconButton
                     component="a"
-                    href={student.instragram}
+                    href={student.instagram}
                     target="_blank"
                     rel="noopener noreferrer"
                     sx={{ p: 0, color: "var(--color-neutral04)" }}
@@ -146,7 +146,6 @@ export const StudentModal: React.FC<StudentModalProps> = ({
             <Typography className="!text-h3 md:!text-h2 !text-primary01 !mb-2 !font-bold">
               โปรเจกต์ในรายวิชา
             </Typography>
-
             {/* Mock title project in course*/}
             <ul className="text-h5 md:text-h4 max-h-[450px] list-disc overflow-y-auto px-4 pr-2 pl-6">
               <li>
@@ -180,9 +179,7 @@ export const StudentModal: React.FC<StudentModalProps> = ({
                 Swift{" "}
               </li>
             </ul>
-
             {/* Show project titel that come from real data */}
-
             {/* {student.projects.length === 0 ? (
               <Typography className="text-gray-500 !text-h5 md:!text-h4">
                 ไม่พบโปรเจกต์

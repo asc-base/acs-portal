@@ -1,7 +1,7 @@
 "use client";
 import React, { FC, useState, useMemo, useEffect } from "react";
 import { useForm, useFieldArray } from "react-hook-form";
-import { Button, Typography, IconButton } from "@mui/material";
+import { Button, Modal, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import AddIcon from "@mui/icons-material/Add";
 import MenuItem from "@mui/material/MenuItem";
@@ -13,35 +13,40 @@ import { MasterDataService } from "@/core/service/master-data.service";
 import { MasterDataRepository } from "@/infra/repositories/master-data.repository";
 import { ProfessorService } from "@/core/service/professor.service";
 import { ProfessorRepository } from "@/infra/repositories/professor.repository";
-import { Position} from "@/core/domain/master-data";
+import { Position } from "@/core/domain/master-data";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { RHFTextField } from "@/components/form/RHFTextField";
 import { RHFSelect } from "@/components/form/RHFSelect";
 import { ICreateProfessor } from "@/core/domain/professor";
-import { ConfirmModal, ConfirmModalProps } from "@/components/modal/confirmModal";
+import {
+  ConfirmModal,
+  ConfirmModalProps,
+} from "@/components/modal/confirmModal";
+import AddCircleOutlineRoundedIcon from "@mui/icons-material/AddCircleOutlineRounded";
+import { CropImageCard } from "@/components/cropimagecard";
 
 interface FormProfessorsProps {
   apiBase: string;
 }
 
 const Schema = z.object({
-  academicPositionId: z
+  academicPositionID: z
     .number()
     .nullable()
     .refine((v) => v !== null, {
       message: "กรุณากรอกตำแหน่ง",
     }),
- education: z.array(
-  z.object({
-    value: z.string(),
-  })
-),
-expertFields: z.array(
-  z.object({
-    value: z.string(),
-  })
-),
+  educations: z.array(
+    z.object({
+      value: z.string(),
+    }),
+  ),
+  expertFields: z.array(
+    z.object({
+      value: z.string(),
+    }),
+  ),
   email: z.string().trim().email("อีเมลไม่ถูกต้อง"),
   firstNameEn: z
     .string()
@@ -57,12 +62,6 @@ expertFields: z.array(
     .optional()
     .or(z.literal("")),
   lastNameTh: z.string().trim().min(1, "กรุณากรอกนามสกุลภาษาไทย"),
-  majorPositionId: z
-    .number()
-    .nullable()
-    .refine((v) => v !== null, {
-      message: "กรุณากรอกตำแหน่ง",
-    }),
   phone: z
     .string()
     .trim()
@@ -86,14 +85,14 @@ const VisuallyHiddenInput = styled("input")({
 });
 
 export const FormProfesssors: FC<FormProfessorsProps> = ({ apiBase }) => {
-  const [majorPositions, setMajorPositions] = useState<Position[]>([]);
-  const [acadamicPositions, setAcadamicPositions] = useState<Position[]>([]);
+  const [academicPositions, setAcademicPositions] = useState<Position[]>([]);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isError, setIsError] = useState(false);
   const router = useRouter();
   const [confirmModal, setConfirmModal] = useState<ConfirmModalProps | null>(
     null,
   );
+  const [isCroping, setIsCroping] = useState(false);
 
   const masterDataService = useMemo(() => {
     const masterdataRepository = new MasterDataRepository(apiBase);
@@ -112,15 +111,14 @@ export const FormProfesssors: FC<FormProfessorsProps> = ({ apiBase }) => {
   } = useForm<FormData>({
     resolver: zodResolver(Schema),
     defaultValues: {
-      academicPositionId: null,
-      education: [],
+      academicPositionID: null,
+      educations: [],
       email: "",
       expertFields: [],
       firstNameEn: "",
       firstNameTh: "",
       lastNameEn: "",
       lastNameTh: "",
-      majorPositionId: null,
       phone: "",
       profRoom: "",
     },
@@ -128,25 +126,33 @@ export const FormProfesssors: FC<FormProfessorsProps> = ({ apiBase }) => {
     reValidateMode: "onChange",
   });
 
-  const { fields: educationFields, append: appendEducation } =
-  useFieldArray({
+  const { fields: educationFields, append: appendEducation } = useFieldArray({
     control,
-    name: "education",
+    name: "educations",
   });
 
-const { fields: expertFields, append: appendExpert } =
-  useFieldArray({
+  const { fields: expertFields, append: appendExpert } = useFieldArray({
     control,
     name: "expertFields",
   });
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0] || null;
+
     if (file) {
       setSelectedFile(file);
-    } else {
-      setSelectedFile(null);
+      setIsCroping(true);
     }
+  };
+
+  const handleCropComplete = (croppedFile: File) => {
+    setSelectedFile(croppedFile);
+    setIsCroping(false);
+  };
+
+  const handleCropCancel = () => {
+    setIsCroping(false);
+    setSelectedFile(null);
   };
 
   const cancelForm = () => {
@@ -161,16 +167,11 @@ const { fields: expertFields, append: appendExpert } =
     } else router.push(`/admin/professors`);
   };
 
-  const handleConfirmSubmit = handleSubmit(async (data) => {
-    await onSubmit(data);
-  });
-
   const onSubmit = async (data: FormData) => {
     setIsError(false);
     try {
       const payload: ICreateProfessor = {
-        academicPositionId: data.academicPositionId!,
-        majorPositionId: data.majorPositionId!,
+        academicPositionID: data.academicPositionID!,
         firstNameTh: data.firstNameTh,
         lastNameTh: data.lastNameTh,
         firstNameEn: data.firstNameEn,
@@ -178,7 +179,7 @@ const { fields: expertFields, append: appendExpert } =
         email: data.email,
         phone: data.phone,
         profRoom: data.profRoom,
-        education: data.education.map((e) => e.value).join("/"),
+        educations: data.educations.map((e) => e.value).join("/"),
         expertFields: data.expertFields.map((e) => e.value).join("/"),
       };
       const reps = await professorService.createProfessor(
@@ -204,8 +205,7 @@ const { fields: expertFields, append: appendExpert } =
   useEffect(() => {
     const fetchData = async () => {
       const res = await masterDataService.getMasterData();
-      setMajorPositions(res.majorPositions);
-      setAcadamicPositions(res.academicPositions);
+      setAcademicPositions(res.academicPositions);
     };
     fetchData();
   }, [apiBase, masterDataService]);
@@ -254,7 +254,7 @@ const { fields: expertFields, append: appendExpert } =
                 </div>
               </>
             ) : (
-              <Button variant="outlined" component="label">
+              <Button variant="contained" component="label">
                 <VisuallyHiddenInput
                   type="file"
                   accept="image/*"
@@ -269,7 +269,7 @@ const { fields: expertFields, append: appendExpert } =
               <div className="flex-2">
                 <RHFSelect
                   control={control}
-                  name="majorPositionId"
+                  name="academicPositionID"
                   label="ตำแหน่ง (ภาษาไทย)"
                   variant="outlined"
                   fullWidth
@@ -284,15 +284,15 @@ const { fields: expertFields, append: appendExpert } =
                         </span>
                       );
                     }
-                    const selected = majorPositions.find(
+                    const selected = academicPositions.find(
                       (item) => item.id === value,
                     );
-                    return selected?.positionTh;
+                    return selected?.nameTh;
                   }}
                 >
-                  {majorPositions.map((position) => (
+                  {academicPositions.map((position) => (
                     <MenuItem key={position.id} value={position.id}>
-                      {position.positionTh}
+                      {position.nameTh}
                     </MenuItem>
                   ))}
                 </RHFSelect>
@@ -328,7 +328,7 @@ const { fields: expertFields, append: appendExpert } =
               <div className="flex-2">
                 <RHFSelect
                   control={control}
-                  name="majorPositionId"
+                  name="academicPositionID"
                   label="ตำแหน่ง (ภาษาอังกฤษ)"
                   variant="outlined"
                   fullWidth
@@ -343,20 +343,19 @@ const { fields: expertFields, append: appendExpert } =
                         </span>
                       );
                     }
-                    const selected = majorPositions.find(
+                    const selected = academicPositions.find(
                       (item) => item.id === value,
                     );
-                    return selected?.positionEn;
+                    return selected?.nameEn;
                   }}
                 >
-                  {majorPositions.map((position) => (
+                  {academicPositions.map((position) => (
                     <MenuItem key={position.id} value={position.id}>
-                      {position.positionEn}
+                      {position.nameEn}
                     </MenuItem>
                   ))}
                 </RHFSelect>
               </div>
-
               <div className="flex-4">
                 <RHFTextField
                   control={control}
@@ -393,7 +392,7 @@ const { fields: expertFields, append: appendExpert } =
                 variant="outlined"
                 fullWidth
                 required
-                placeholder="ระบุเบอร์โทร"
+                placeholder="ระบุเบอร์โทรศัพท์"
                 requiredMark
               />
             </div>
@@ -412,37 +411,6 @@ const { fields: expertFields, append: appendExpert } =
           </div>
           <div className="flex flex-row gap-x-4">
             <div className="flex-4">
-              <RHFSelect
-                control={control}
-                name="academicPositionId"
-                label="ตำแหน่งในหลักสูตร"
-                fullWidth
-                required
-                displayEmpty
-                requiredMark
-                renderValue={(value) => {
-                  if (!value) {
-                    return (
-                      <span style={{ color: "#9e9e9e" }}>
-                        ระบุตำแหน่งในหลักสูตร
-                      </span>
-                    );
-                  }
-                  const selected = acadamicPositions.find(
-                    (item) => item.id === value,
-                  );
-                  return selected?.positionTh;
-                }}
-              >
-                <MenuItem value="" disabled />
-                {acadamicPositions.map((positon) => (
-                  <MenuItem key={positon.id} value={positon.id}>
-                    {positon.positionTh}
-                  </MenuItem>
-                ))}
-              </RHFSelect>
-            </div>
-            <div className="flex-4">
               <RHFTextField
                 control={control}
                 name="profRoom"
@@ -454,24 +422,24 @@ const { fields: expertFields, append: appendExpert } =
                 requiredMark
               />
             </div>
+            <div className="flex-4" />
           </div>
         </div>
         <div className="mt-[12px] mb-[8px] flex items-center justify-between">
           <Typography variant="h6" fontWeight="bold">
             ประวัติการศึกษา
           </Typography>
-          <IconButton
+          <AddCircleOutlineRoundedIcon
             color="primary"
             onClick={() => appendEducation({ value: "" })}
             sx={{
-              border: "1px solid #120554",
               color: "#120554",
-              backgroundColor: "#fff",
-              "&:hover": { backgroundColor: "#e3e8fd" },
+              fontSize: 32,
+              cursor: "pointer",
             }}
           >
             <AddIcon />
-          </IconButton>
+          </AddCircleOutlineRoundedIcon>
         </div>
         <div>
           {educationFields.map((field, index) => (
@@ -479,10 +447,10 @@ const { fields: expertFields, append: appendExpert } =
               <div className="flex-2">
                 <RHFTextField
                   control={control}
-                  name={`education.${index}`}
-                  label="การศึกษา"
+                  name={`educations.${index}.value`}
+                  label="ระดับการศึกษา"
                   fullWidth
-                  placeholder="ระบุมการศึกษา"
+                  placeholder="ระบุลำดับการศึกษา เช่น B.Sc. Mathematics King Mongkut's University of Technology Thonburi"
                 />
               </div>
             </div>
@@ -493,18 +461,17 @@ const { fields: expertFields, append: appendExpert } =
             <Typography variant="h6" fontWeight="bold">
               สาขาที่เชี่ยวชาญ
             </Typography>
-            <IconButton
+            <AddCircleOutlineRoundedIcon
               color="primary"
               sx={{
-                border: "1px solid #120554",
                 color: "#120554",
-                backgroundColor: "#fff",
-                "&:hover": { backgroundColor: "#e3e8fd" },
+                fontSize: 32,
+                cursor: "pointer",
               }}
               onClick={() => appendExpert({ value: "" })}
             >
               <AddIcon />
-            </IconButton>
+            </AddCircleOutlineRoundedIcon>
           </div>
           {expertFields.map((field, index) => {
             return (
@@ -512,7 +479,7 @@ const { fields: expertFields, append: appendExpert } =
                 <RHFTextField
                   key={field.id}
                   control={control}
-                  name={`expertFields.${index}`}
+                  name={`expertFields.${index}.value`}
                   label="สาขาที่เชี่ยวชาญ"
                   fullWidth
                   placeholder="ระบุสาขาที่เชี่ยวชาญ"
@@ -530,13 +497,21 @@ const { fields: expertFields, append: appendExpert } =
           type="submit"
           variant="contained"
           size="large"
-          onClick={handleConfirmSubmit}
           disabled={!isValid}
         >
           บันทึกข้อมูล
         </Button>
       </div>
       {confirmModal && <ConfirmModal {...confirmModal} />}
+      {isCroping && selectedFile && (
+        <Modal open={isCroping} onClose={handleCropCancel} closeAfterTransition>
+          <CropImageCard
+            file={selectedFile}
+            onUploadComplete={handleCropComplete}
+            onCancel={handleCropCancel}
+          />
+        </Modal>
+      )}
     </form>
   );
 };

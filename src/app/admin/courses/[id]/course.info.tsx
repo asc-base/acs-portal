@@ -1,9 +1,17 @@
 "use client";
 import React, { FC, useEffect, useMemo, useState } from "react";
-import { Button, MenuItem, Alert, Snackbar, IconButton } from "@mui/material";
+import {
+  Button,
+  MenuItem,
+  Alert,
+  Snackbar,
+  IconButton,
+  Autocomplete,
+  TextField,
+} from "@mui/material";
 import AddCircleOutlineRoundedIcon from "@mui/icons-material/AddCircleOutlineRounded";
 import DeleteIcon from "@mui/icons-material/Delete";
-import { useForm, useFieldArray } from "react-hook-form";
+import { useForm, useFieldArray, Controller } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { RHFTextField } from "@/components/form/RHFTextField";
@@ -14,39 +22,49 @@ import { MasterDataRepository } from "@/infra/repositories/master-data.repositor
 import { MasterDataService } from "@/core/service/master-data.service";
 import { useRouter } from "next/navigation";
 import { ICourse, IUpdateCourse } from "@/core/domain/course";
-import { ConfirmModal, ConfirmModalProps } from "@/components/modal/confirmModal";
+import {
+  ConfirmModal,
+  ConfirmModalProps,
+} from "@/components/modal/confirmModal";
 import { TypeCourse } from "@/core/domain/master-data";
 
 interface CoursesFormProps {
   apiBase: string;
-  curriculumId: number;
+  curriculumID: number;
   course: ICourse;
 }
 
 const Schema = z.object({
-  typeCourseId: z.number().min(1, "กรุณาเลือกกลุ่มวิชา"),
+  typeCourseID: z.number().min(1, "กรุณาเลือกกลุ่มวิชา"),
   courseCode: z.string().min(1, "กรุณากรอกรหัสวิชา"),
   credits: z.string().min(1, "กรุณากรอกหน่วยกิต"),
   courseNameEn: z.string().min(1, "กรุณากรอกชื่อวิชาภาษาอังกฤษ"),
   courseNameTh: z.string().min(1, "กรุณากรอกชื่อวิชาภาษาไทย"),
   detail: z.string().min(1, "กรุณากรอกลักษณะการเรียน"),
-  prerequisites: z
+  preCoursesID: z
     .array(
       z.object({
         id: z.number().optional(),
-      })
+      }),
     )
     .optional(),
 });
 
 type FormData = z.infer<typeof Schema>;
 
-export const CourseInfo: FC<CoursesFormProps> = ({ apiBase, curriculumId, course }) => {
+export const CourseInfo: FC<CoursesFormProps> = ({
+  apiBase,
+  curriculumID,
+  course,
+}) => {
   const router = useRouter();
   const [typeCourses, setTypeCourses] = useState<TypeCourse[]>([]);
   const [courses, setCourses] = useState<ICourse[]>([]);
   const [isError, setIsError] = useState(false);
-  const [confirmModal, setConfirmModal] = useState<ConfirmModalProps | null>(null);
+  const [confirmModal, setConfirmModal] = useState<ConfirmModalProps | null>(
+    null,
+  );
+  const currentCourseId = course?.id;
 
   const courseService = useMemo(() => {
     const courseRepository = new CourseRepository(apiBase);
@@ -58,24 +76,32 @@ export const CourseInfo: FC<CoursesFormProps> = ({ apiBase, curriculumId, course
     return new MasterDataService(typeCourseRepository);
   }, [apiBase]);
 
-  const { control, handleSubmit, formState: { isDirty } } = useForm<FormData>({
+  const {
+    control,
+    handleSubmit,
+    watch,
+    formState: { isDirty },
+  } = useForm<FormData>({
     resolver: zodResolver(Schema),
     defaultValues: {
-      typeCourseId: course.typeCourse.id,
+      typeCourseID: course.typeCourse.id,
       courseCode: course.courseCode,
       credits: course.credits,
       courseNameEn: course.courseNameEn,
       courseNameTh: course.courseNameTh,
       detail: course.detail,
-      // prerequisites: course.preCourses?.map(p => ({
-      //   id: p.id,
-      // })) ?? [],
+      preCoursesID:
+        course.prerequisites?.map((p) => ({
+          id: p.id,
+        })) ?? [],
     },
   });
 
+  const watchedPreCourses = watch("preCoursesID");
+
   const { fields, append, remove } = useFieldArray({
     control,
-    name: "prerequisites",
+    name: "preCoursesID",
   });
 
   const handleCancel = () => {
@@ -95,19 +121,29 @@ export const CourseInfo: FC<CoursesFormProps> = ({ apiBase, curriculumId, course
     setIsError(false);
 
     try {
+      const oldPrecourseIds = course.prerequisites?.map((p) => p.id) ?? [];
+
+      const currentPrecourseIds = (data.preCoursesID ?? [])
+        .map((p) => p.id)
+        .filter((id): id is number => typeof id === "number" && id !== 0);
+
+      const newPrecourseId = currentPrecourseIds.filter(
+        (id) => !oldPrecourseIds.includes(id),
+      );
+      const deletePrecourseId = oldPrecourseIds.filter(
+        (id) => !currentPrecourseIds.includes(id),
+      );
+
       const updateData: IUpdateCourse = {
         courseCode: data.courseCode,
-        typeCourseId: Number(data.typeCourseId),
+        typeCourseID: Number(data.typeCourseID),
         courseNameTh: data.courseNameTh,
         courseNameEn: data.courseNameEn,
         credits: data.credits,
         detail: data.detail,
-        // prerequisites: data.prerequisites
-        //   ? data.prerequisites
-        //     .map((p) => p.id)
-        //     .filter((id): id is number => id !== undefined) ?? []
-        //   : [],
-        curriculumId: curriculumId
+        newPrecourseId,
+        deletePrecourseId,
+        curriculumID: curriculumID,
       };
       console.log("SEND UPDATE DATA", updateData);
       const response = await courseService.updateCourse(course.id, updateData);
@@ -121,11 +157,11 @@ export const CourseInfo: FC<CoursesFormProps> = ({ apiBase, curriculumId, course
         isOpen: true,
         type: "success",
         onClose: () => setConfirmModal(null),
-        onConfirm: () => router.push(
-          `/admin/courses?page=1&pageSize=10&curriculumId=${curriculumId}`
-        ),
+        onConfirm: () =>
+          router.push(
+            `/admin/courses?page=1&pageSize=10&curriculumID=${curriculumID}`,
+          ),
       });
-
     } catch (error) {
       console.error("Update Course Error:", error);
       setIsError(true);
@@ -136,15 +172,15 @@ export const CourseInfo: FC<CoursesFormProps> = ({ apiBase, curriculumId, course
     const fetchData = async () => {
       try {
         const [typeRes, courseRes] = await Promise.all([
-          typeCourseService.getMasterDataTypeCourse(),
+          typeCourseService.getMasterData(),
           courseService.getCourse({
-            curriculumId,
-            orderBy: "courseId",
+            curriculumID,
+            orderBy: "courseCode",
             sortBy: "asc",
-          })
+          }),
         ]);
 
-        setTypeCourses(typeRes);
+        setTypeCourses(typeRes.typeCourses);
         setCourses(courseRes.rows);
       } catch (err) {
         console.error(err);
@@ -152,7 +188,7 @@ export const CourseInfo: FC<CoursesFormProps> = ({ apiBase, curriculumId, course
       }
     };
     fetchData();
-  }, [curriculumId, courseService, typeCourseService]);
+  }, [curriculumID, courseService, typeCourseService]);
 
   const handleCloseAlert = () => setIsError(false);
 
@@ -164,21 +200,24 @@ export const CourseInfo: FC<CoursesFormProps> = ({ apiBase, curriculumId, course
         autoHideDuration={4000}
         onClose={handleCloseAlert}
       >
-        <Alert severity="error" onClose={handleCloseAlert} sx={{ width: "100%" }}>
+        <Alert
+          severity="error"
+          onClose={handleCloseAlert}
+          sx={{ width: "100%" }}
+        >
           ไม่สามารถบันทึกข้อมูลได้ในขณะนี้ กรุณาลองใหม่อีกครั้ง
         </Alert>
       </Snackbar>
 
-      <h3 className="font-bold text-lg mb-4">แก้ไขข้อมูลรายวิชา</h3>
+      <h3 className="mb-4 text-lg font-bold">แก้ไขข้อมูลรายวิชา</h3>
 
       <div className="grid grid-cols-3 gap-4">
         <RHFSelect
-          name="typeCourseId"
+          name="typeCourseID"
           control={control}
           label="กลุ่มวิชา"
           variant="outlined"
           size="small"
-          required
           requiredMark
         >
           {typeCourses.map((typeCourse) => (
@@ -234,7 +273,7 @@ export const CourseInfo: FC<CoursesFormProps> = ({ apiBase, curriculumId, course
       <RHFTextField
         control={control}
         name="detail"
-        label="ลักษณะการเรียน"
+        label="คำอธิบายรายวิชา"
         variant="outlined"
         fullWidth
         multiline
@@ -254,51 +293,66 @@ export const CourseInfo: FC<CoursesFormProps> = ({ apiBase, curriculumId, course
           </IconButton>
         </div>
 
-        {fields.map((item, index) => (
-          <div key={item.id} className="mb-3 flex items-end gap-2">
-            <div className="flex-1">
-              <RHFSelect
-                name={`prerequisites.${index}.id`}
-                control={control}
-                label={`${index + 1}. รหัสวิชาและชื่อวิชา`}
-                variant="outlined"
-                size="small"
-                fullWidth
-              >
-                {courses.map((c) => (
-                  <MenuItem key={c.id} value={c.id}>
-                    {c.courseCode}   {c.courseNameTh}
-                  </MenuItem>
-                ))}
-              </RHFSelect>
-            </div>
+        {fields.map((item, index) => {
+          const selectedIds = watchedPreCourses
+            ?.map((preCourse, i) => (i === index ? null : preCourse?.id))
+            .filter((id): id is number => Boolean(id));
 
-            <IconButton
-              color="error"
-              onClick={() => remove(index)}
-            >
-              <DeleteIcon />
-            </IconButton>
-          </div>
-        ))}
+          return (
+            <div key={item.id} className="mb-3 flex items-center gap-2">
+              <div className="flex-1">
+                <p className="text-neutral05 mb-1">
+                  {index + 1}. รหัสวิชาและชื่อวิชา
+                </p>
+
+                <Controller
+                  name={`preCoursesID.${index}.id`}
+                  control={control}
+                  render={({ field }) => (
+                    <Autocomplete
+                      options={courses.filter(
+                        (c) =>
+                          c.id !== currentCourseId &&
+                          !selectedIds?.includes(c.id),
+                      )}
+                      value={courses.find((c) => c.id === field.value) ?? null}
+                      getOptionLabel={(option) =>
+                        `${option.courseCode} ${option.courseNameTh}`
+                      }
+                      isOptionEqualToValue={(a, b) => a.id === b.id}
+                      onChange={(_, value) => field.onChange(value?.id ?? 0)}
+                      renderInput={(params) => (
+                        <TextField {...params} size="small" fullWidth />
+                      )}
+                    />
+                  )}
+                />
+              </div>
+
+              <IconButton
+                sx={{ mt: 1 }}
+                color="error"
+                onClick={() => remove(index)}
+              >
+                <DeleteIcon />
+              </IconButton>
+            </div>
+          );
+        })}
       </div>
 
       <div className="flex justify-end gap-x-4 pt-6">
-            <Button
-              type="button"
-              variant="outlined"
-              size="large"
-              onClick={handleCancel}
-            >
-              ยกเลิก
-            </Button>
-            <Button
-              variant="contained"
-              size="large"
-              type="submit"
-            >
-              บันทึกข้อมูล
-            </Button>
+        <Button
+          type="button"
+          variant="outlined"
+          size="large"
+          onClick={handleCancel}
+        >
+          ยกเลิก
+        </Button>
+        <Button variant="contained" size="large" type="submit">
+          บันทึกข้อมูล
+        </Button>
       </div>
 
       {confirmModal && <ConfirmModal {...confirmModal} />}

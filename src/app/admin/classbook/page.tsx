@@ -15,9 +15,10 @@ const page = async ({ searchParams }: PageProps) => {
 
   const query: QueryClassBook = {
     page: resolvedSearchParams.page || 1,
-    pageSize: resolvedSearchParams.pageSize || 10,
+    pageSize: resolvedSearchParams.pageSize || 12,
     orderBy: "createdAt",
     sortBy: resolvedSearchParams.sortBy ?? "desc",
+    searchBy: "classof",
     search: resolvedSearchParams.search ?? "",
   };
   const { rows, totalRecords, pageSize, page } =

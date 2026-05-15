@@ -29,6 +29,7 @@ import {
 } from "@/components/modal/confirmModal";
 import Alert from "@mui/material/Alert";
 import Snackbar from "@mui/material/Snackbar";
+import { Tag } from "@/core/domain/list-type";
 
 interface NewsListComponentProps {
   news: INews[];
@@ -36,6 +37,7 @@ interface NewsListComponentProps {
   page?: number;
   pageSize: number;
   apiBase: string;
+  categories: Tag[];
 }
 
 const searchSchema = z.object({
@@ -75,10 +77,12 @@ const NewsListComponent = (initValue: NewsListComponentProps) => {
     const delayDebounce = setTimeout(() => {
       const params = new URLSearchParams(searchParams.toString());
       if (watchedSearch) {
-        params.set("title", watchedSearch);
+        params.set("search", watchedSearch);
+        params.set("searchBy", "title");
         params.set("page", "1");
       } else {
-        params.delete("title");
+        params.delete("search");
+        params.delete("searchBy");
       }
       const newSearch = params.toString();
       if (searchParams.toString() !== newSearch) {
@@ -94,9 +98,9 @@ const NewsListComponent = (initValue: NewsListComponentProps) => {
     const params = new URLSearchParams(searchParams.toString());
 
     if (value === "all") {
-      params.delete("category");
+      params.delete("tagID");
     } else {
-      params.set("category", value);
+      params.set("tagID", value);
     }
     params.set("page", "1");
     router.push(`${pathname}?${params.toString()}`, { scroll: false });
@@ -149,7 +153,7 @@ const NewsListComponent = (initValue: NewsListComponentProps) => {
   );
 
   return (
-    <div className="min-h-screen p-6">
+    <div className="flex min-h-screen flex-col px-8 py-5">
       <Snackbar
         anchorOrigin={{ vertical: "top", horizontal: "right" }}
         open={isError}
@@ -189,7 +193,12 @@ const NewsListComponent = (initValue: NewsListComponentProps) => {
             value={category ?? "all"}
             displayEmpty
             onChange={handleFilterCategory}
-            renderValue={(value) => (value === "all" ? "ทั้งหมด" : value)}
+            renderValue={(value) => {
+              if (value === "all") return "ทั้งหมด";
+              return (
+                initValue.categories.find((tag) => String(tag.id) === value)?.name || "ทั้งหมด"
+              );
+            }}
             IconComponent={ExpandMoreIcon}
             sx={{ width: 200 }}
           >
@@ -200,14 +209,10 @@ const NewsListComponent = (initValue: NewsListComponentProps) => {
               )}
             </MenuItem>
 
-            {[
-              "ข่าวประชาสัมพันธ์",
-              "ความสำเร็จนักศึกษา",
-              "งานกิจกรรมนักศึกษา",
-            ].map((item) => (
-              <MenuItem key={item} value={item}>
-                {item}
-                {category === item && (
+            {initValue.categories.map((tag) => (
+              <MenuItem key={tag.id} value={String(tag.id)}>
+                {tag.name}
+                {category === String(tag.id) && (
                   <DoneIcon fontSize="small" sx={{ ml: 1 }} />
                 )}
               </MenuItem>
@@ -222,8 +227,8 @@ const NewsListComponent = (initValue: NewsListComponentProps) => {
         </div>
       </div>
 
-      <div className="mx-auto max-w-7xl">
-        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="flex w-full flex-1 flex-col items-center">
+        <div className="grid w-full grid-cols-3 justify-items-center gap-6">
           {initValue.news.map((news) => (
             <AdminCard
               key={news.id}
@@ -235,19 +240,20 @@ const NewsListComponent = (initValue: NewsListComponentProps) => {
           ))}
         </div>
 
-        <div className="mt-8 flex justify-center">
-          <Pagination
-            shape="rounded"
-            page={initValue.page}
-            count={Math.ceil(initValue.totalRecords / initValue.pageSize)}
-            onChange={(_, currentPage) => handleNextPage(currentPage)}
-            color="primary"
-            size="large"
-          />
-        </div>
+        {initValue.totalRecords > 0 && (
+          <div className="mt-auto pt-10">
+            <Pagination
+              shape="rounded"
+              page={initValue.page}
+              count={Math.ceil(initValue.totalRecords / initValue.pageSize)}
+              onChange={(_, currentPage) => handleNextPage(currentPage)}
+              color="primary"
+              size="large"
+            />
+          </div>
+        )}
       </div>
-
-       {confirmModal && <ConfirmModal {...confirmModal} />}
+      {confirmModal && <ConfirmModal {...confirmModal} />}
     </div>
   );
 };

@@ -14,7 +14,10 @@ import { ICurriculum } from "@/core/domain/curriculum";
 import { ClassBookRepository } from "@/infra/repositories/class-book.repository";
 import { ClassBookService } from "@/core/service/class-book.service";
 import { useRouter } from "next/navigation";
-import { ConfirmModal, ConfirmModalProps } from "@/components/modal/confirmModal";
+import {
+  ConfirmModal,
+  ConfirmModalProps,
+} from "@/components/modal/confirmModal";
 
 interface FormClassbookProps {
   apiBase: string;
@@ -23,7 +26,7 @@ interface FormClassbookProps {
 const Schema = z.object({
   classof: z.string().min(1, "กรุณากรอกรุ่นการศึกษา"),
   firstYearAcademic: z.string().min(1, "กรุณากรอกปีการศึกษา"),
-  curriculumId: z.number().min(1, "กรุณาเลือกหลักสูตร"),
+  curriculumID: z.number().min(1, "กรุณาเลือกหลักสูตร"),
 });
 
 type FormData = z.infer<typeof Schema>;
@@ -68,7 +71,7 @@ export const FormClassbook: FC<FormClassbookProps> = ({ apiBase }) => {
     defaultValues: {
       classof: "",
       firstYearAcademic: "",
-      curriculumId: 0,
+      curriculumID: 0,
     },
     mode: "onBlur",
     reValidateMode: "onChange",
@@ -146,18 +149,18 @@ export const FormClassbook: FC<FormClassbookProps> = ({ apiBase }) => {
         </Alert>
       </Snackbar>
       <h3 className="font-bold">เพิ่มรุ่นการศึกษา</h3>
-      <div className="flex flex-row">
-        <div className="flex w-full items-center justify-center">
-          <div className="bg-neutral02 group relative flex h-80 w-96 items-center justify-center">
+      <div className="mt-[28px] flex w-full justify-between gap-x-10">
+        <div className="flex h-[284px] w-[400px] items-center justify-center">
+          <div className="bg-neutral02 group relative flex h-full w-full items-center justify-center rounded-xl">
             {selectedFile ? (
               <>
                 <Image
                   src={URL.createObjectURL(selectedFile)}
                   alt="Preview"
-                  width={384}
-                  height={192}
+                  width={400}
+                  height={284}
                   style={{ objectFit: "cover" }}
-                  className="h-full w-full object-cover"
+                  className="h-full w-full rounded-xl object-cover"
                 />
                 <div className="bg-opacity-40 absolute inset-0 flex items-center justify-center bg-black/60 opacity-0 transition-opacity group-hover:opacity-100">
                   <Button variant="contained" component="label">
@@ -171,7 +174,7 @@ export const FormClassbook: FC<FormClassbookProps> = ({ apiBase }) => {
                 </div>
               </>
             ) : (
-              <Button variant="outlined" component="label">
+              <Button variant="contained" component="label">
                 <VisuallyHiddenInput
                   type="file"
                   accept="image/*"
@@ -191,28 +194,39 @@ export const FormClassbook: FC<FormClassbookProps> = ({ apiBase }) => {
             size="small"
             fullWidth
             requiredMark
+            placeholder="ระบุรุ่นการศึกษา"
           />
           <RHFTextField
             control={control}
             name="firstYearAcademic"
-            label="ปีการศึกษาแรก"
+            label="ปีการศึกษา"
             variant="outlined"
             size="small"
             fullWidth
             requiredMark
+            placeholder="ระบุปีการศึกษา"
           />
           <RHFSelect
-            name="curriculumId"
+            name="curriculumID"
             control={control}
             label="หลักสูตร"
             variant="outlined"
             size="small"
             fullWidth
             requiredMark
+            renderValue={(value) => {
+              if (!value) {
+                return <span className="text-neutral-400">ระบุหลักสูตร</span>;
+              }
+              const selected = curriculums.find((item) => item.id === value);
+              return selected?.title && selected?.year
+                ? `${selected.title} ${selected.year}`
+                : <span className="text-neutral-400">ระบุหลักสูตร</span>;
+            }}
           >
             {curriculums.map((curriculum) => (
               <MenuItem key={curriculum.id} value={curriculum.id}>
-                หลักสูตร ({curriculum.year})
+                {curriculum.title} {curriculum.year}
               </MenuItem>
             ))}
           </RHFSelect>

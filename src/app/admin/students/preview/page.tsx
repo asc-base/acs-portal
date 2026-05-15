@@ -5,16 +5,16 @@ export const dynamic = "force-dynamic";
 
 interface PageProps {
   searchParams: Promise<{
-    classbookId?: number;
+    classBookID?: number;
   }>;
 }
 
 const page = async ({ searchParams }: PageProps) => {
   const resolveparams = await searchParams;
-  const classbookId = Number(resolveparams.classbookId);
+  const classBookID = Number(resolveparams.classBookID);
 
   return (
-    <Preview_table_component apiBase={baseUrl} classbookId={classbookId} />
+    <Preview_table_component apiBase={baseUrl} classBookID={classBookID} />
   );
 };
 

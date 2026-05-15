@@ -1,9 +1,17 @@
 "use client";
 import React, { FC, useEffect, useMemo, useState } from "react";
-import { Button, MenuItem, Alert, Snackbar, IconButton } from "@mui/material";
+import {
+  Button,
+  MenuItem,
+  Alert,
+  Snackbar,
+  IconButton,
+  Autocomplete,
+  TextField,
+} from "@mui/material";
 import AddCircleOutlineRoundedIcon from "@mui/icons-material/AddCircleOutlineRounded";
 import DeleteIcon from "@mui/icons-material/Delete";
-import { useForm, useFieldArray } from "react-hook-form";
+import { useForm, useFieldArray, Controller } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { RHFTextField } from "@/components/form/RHFTextField";
@@ -22,17 +30,17 @@ import {
 
 interface CoursesFormProps {
   apiBase: string;
-  curriculumId: number;
+  curriculumID: number;
 }
 
 const Schema = z.object({
-  typeCourseId: z.number().min(1, "กรุณาเลือกกลุ่มวิชา"),
+  typeCourseID: z.number().min(1, "กรุณาเลือกกลุ่มวิชา"),
   courseCode: z.string().min(1, "กรุณากรอกรหัสวิชา"),
   credits: z.string().min(1, "กรุณากรอกหน่วยกิต"),
   courseNameEn: z.string().min(1, "กรุณากรอกชื่อวิชาภาษาอังกฤษ"),
   courseNameTh: z.string().min(1, "กรุณากรอกชื่อวิชาภาษาไทย"),
   detail: z.string().min(1, "กรุณากรอกลักษณะการเรียน"),
-  prerequisites: z.array(
+  preCoursesID: z.array(
     z.object({
       id: z.number().optional(),
     }),
@@ -41,7 +49,7 @@ const Schema = z.object({
 
 type FormData = z.infer<typeof Schema>;
 
-export const CourseForm: FC<CoursesFormProps> = ({ apiBase, curriculumId }) => {
+export const CourseForm: FC<CoursesFormProps> = ({ apiBase, curriculumID }) => {
   const router = useRouter();
   const [typeCourses, setTypeCourses] = useState<TypeCourse[]>([]);
   const [courses, setCourses] = useState<ICourse[]>([]);
@@ -63,23 +71,26 @@ export const CourseForm: FC<CoursesFormProps> = ({ apiBase, curriculumId }) => {
   const {
     control,
     handleSubmit,
+    watch,
     formState: { isDirty },
   } = useForm<FormData>({
     resolver: zodResolver(Schema),
     defaultValues: {
-      typeCourseId: 0,
+      typeCourseID: 0,
       courseCode: "",
       credits: "",
       courseNameEn: "",
       courseNameTh: "",
       detail: "",
-      prerequisites: [],
+      preCoursesID: [],
     },
   });
 
+  const watchedPreCourses = watch("preCoursesID");
+
   const { fields, append, remove } = useFieldArray({
     control,
-    name: "prerequisites",
+    name: "preCoursesID",
   });
 
   const handleCancel = () => {
@@ -101,17 +112,17 @@ export const CourseForm: FC<CoursesFormProps> = ({ apiBase, curriculumId }) => {
     try {
       const CreateData: ICreateCourse = {
         courseCode: data.courseCode,
-        typeCourseId: Number(data.typeCourseId),
+        typeCourseID: Number(data.typeCourseID),
         courseNameTh: data.courseNameTh,
         courseNameEn: data.courseNameEn,
         credits: data.credits,
         detail: data.detail,
-        prerequisites: data.prerequisites
-          ? data.prerequisites
+        preCoursesID: data.preCoursesID
+          ? data.preCoursesID
               .map((p) => p.id)
               .filter((id): id is number => id !== undefined && id !== 0)
           : [],
-        curriculumId: curriculumId,
+        curriculumID: curriculumID,
       };
 
       const response = await courseService.createCourse(CreateData);
@@ -127,7 +138,7 @@ export const CourseForm: FC<CoursesFormProps> = ({ apiBase, curriculumId }) => {
         onClose: () => setConfirmModal(null),
         onConfirm: () =>
           router.push(
-            `/admin/courses?page=1&pageSize=10&curriculumId=${curriculumId}`,
+            `/admin/courses?page=1&pageSize=10&curriculumID=${curriculumID}`,
           ),
       });
     } catch (error) {
@@ -140,15 +151,15 @@ export const CourseForm: FC<CoursesFormProps> = ({ apiBase, curriculumId }) => {
     const fetchData = async () => {
       try {
         const [typeRes, courseRes] = await Promise.all([
-          typeCourseService.getMasterDataTypeCourse(),
+          typeCourseService.getMasterData(),
           courseService.getCourse({
-            curriculumId,
+            curriculumID,
             orderBy: "courseCode",
             sortBy: "asc",
           }),
         ]);
 
-        setTypeCourses(typeRes);
+        setTypeCourses(typeRes.typeCourses);
         setCourses(courseRes.rows);
       } catch (err) {
         console.error(err);
@@ -156,7 +167,7 @@ export const CourseForm: FC<CoursesFormProps> = ({ apiBase, curriculumId }) => {
       }
     };
     fetchData();
-  }, [curriculumId, courseService, typeCourseService]);
+  }, [curriculumID, courseService, typeCourseService]);
 
   const handleCloseAlert = () => setIsError(false);
 
@@ -181,12 +192,12 @@ export const CourseForm: FC<CoursesFormProps> = ({ apiBase, curriculumId }) => {
 
       <div className="grid grid-cols-3 gap-4">
         <RHFSelect
-          name="typeCourseId"
+          name="typeCourseID"
           control={control}
           label="กลุ่มวิชา"
           variant="outlined"
           size="small"
-          required
+          requiredMark
         >
           {typeCourses.map((typeCourse) => (
             <MenuItem key={typeCourse.id} value={typeCourse.id}>
@@ -201,7 +212,7 @@ export const CourseForm: FC<CoursesFormProps> = ({ apiBase, curriculumId }) => {
           label="รหัสวิชา"
           variant="outlined"
           size="small"
-          required
+          requiredMark
         />
 
         <RHFTextField
@@ -210,7 +221,7 @@ export const CourseForm: FC<CoursesFormProps> = ({ apiBase, curriculumId }) => {
           label="หน่วยกิต"
           variant="outlined"
           size="small"
-          required
+          requiredMark
         />
       </div>
 
@@ -221,7 +232,7 @@ export const CourseForm: FC<CoursesFormProps> = ({ apiBase, curriculumId }) => {
         variant="outlined"
         size="small"
         fullWidth
-        required
+        requiredMark
       />
 
       <RHFTextField
@@ -231,18 +242,18 @@ export const CourseForm: FC<CoursesFormProps> = ({ apiBase, curriculumId }) => {
         variant="outlined"
         size="small"
         fullWidth
-        required
+        requiredMark
       />
 
       <RHFTextField
         control={control}
         name="detail"
-        label="ลักษณะการเรียน"
+        label="คำอธิบายรายวิชา"
         variant="outlined"
         fullWidth
         multiline
         rows={6}
-        required
+        requiredMark
       />
 
       <div className="mt-6">
@@ -256,30 +267,54 @@ export const CourseForm: FC<CoursesFormProps> = ({ apiBase, curriculumId }) => {
           </IconButton>
         </div>
 
-        {fields.map((item, index) => (
-          <div key={item.id} className="mb-3 flex items-end gap-2">
-            <div className="flex-1">
-              <RHFSelect
-                name={`prerequisites.${index}.id`}
-                control={control}
-                label={`${index + 1}. รหัสวิชาและชื่อวิชา`}
-                variant="outlined"
-                size="small"
-                fullWidth
-              >
-                {courses.map((c) => (
-                  <MenuItem key={c.id} value={c.id}>
-                    {c.courseCode} {c.courseNameTh}
-                  </MenuItem>
-                ))}
-              </RHFSelect>
-            </div>
+        {fields.map((item, index) => {
+          const selectedIds = watchedPreCourses
+            ?.map((preCourse, i) => (i === index ? null : preCourse?.id))
+            .filter((id): id is number => Boolean(id));
 
-            <IconButton color="error" onClick={() => remove(index)}>
-              <DeleteIcon />
-            </IconButton>
-          </div>
-        ))}
+          return (
+            <div key={item.id} className="mb-3 flex items-center gap-2">
+              <div className="flex-1">
+                <p className="text-neutral05 mb-1">
+                  {index + 1}. รหัสวิชาและชื่อวิชา
+                </p>
+
+                <Controller
+                  name={`preCoursesID.${index}.id`}
+                  control={control}
+                  render={({ field }) => (
+                    <Autocomplete
+                      options={courses.filter(
+                        (c) => !selectedIds.includes(c.id),
+                      )}
+                      value={courses.find((c) => c.id === field.value) ?? null}
+                      getOptionLabel={(option) =>
+                        `${option.courseCode} ${option.courseNameTh}`
+                      }
+                      isOptionEqualToValue={(option, value) =>
+                        option.id === value.id
+                      }
+                      onChange={(_, value) => {
+                        field.onChange(value?.id ?? 0);
+                      }}
+                      renderInput={(params) => (
+                        <TextField {...params} size="small" fullWidth />
+                      )}
+                    />
+                  )}
+                />
+              </div>
+
+              <IconButton
+                sx={{ mt: 1 }}
+                color="error"
+                onClick={() => remove(index)}
+              >
+                <DeleteIcon />
+              </IconButton>
+            </div>
+          );
+        })}
       </div>
 
       <div className="flex justify-end gap-x-4 pt-6">

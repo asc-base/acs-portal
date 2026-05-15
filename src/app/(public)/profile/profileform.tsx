@@ -1,6 +1,6 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import { Button, InputAdornment } from "@mui/material";
+import { Button, InputAdornment, Modal } from "@mui/material";
 import { RHFTextField } from "@/components/form/RHFTextField";
 import { styled } from "@mui/material/styles";
 // import AddCircleOutlineRoundedIcon from "@mui/icons-material/AddCircleOutlineRounded";
@@ -13,6 +13,7 @@ import { useForm } from "react-hook-form";
 import { IStudent } from "@/core/domain/student";
 import { useAuthStore } from "@/store/auth";
 import { studentService } from "@/infra/container";
+import { CropImageCard } from "@/components/cropimagecard";
 
 const VisuallyHiddenInput = styled("input")({
   clip: "rect(0 0 0 0)",
@@ -30,7 +31,7 @@ interface FormData {
   github: string;
   linkedin: string;
   facebook: string;
-  instragram: string;
+  instagram: string;
   projects: { title: string }[];
   file: string | File | null;
 }
@@ -43,26 +44,40 @@ const ProfileForm = () => {
   const user = useAuthStore((state) => state.user);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [studentData, setStudentData] = useState<IStudent | null>(null);
-  const { handleSubmit, control, setValue } = useForm<FormData>({
+  const { handleSubmit, control } = useForm<FormData>({
     defaultValues: {
       github: studentData?.github || "",
       linkedin: studentData?.linkedin || "",
       facebook: studentData?.facebook || "",
-      instragram: studentData?.instragram || "",
+      instagram: studentData?.instagram || "",
       // projects:
       //   studentData?.projects?.map((project) => ({ title: project.title })) ||
       //   [],
       file: studentData?.user?.imageUrl || null,
     },
   });
+  const [isCroping, setIsCroping] = useState(false);
 
   const { nickName, firstNameTh, firstNameEn, lastNameTh, lastNameEn } =
     studentData?.user ?? {};
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0] || null;
-    setSelectedFile(file);
-    setValue("file", file);
+
+    if (file) {
+      setSelectedFile(file);
+      setIsCroping(true);
+    }
+  };
+
+  const handleCropComplete = (croppedFile: File) => {
+    setSelectedFile(croppedFile);
+    setIsCroping(false);
+  };
+
+  const handleCropCancel = () => {
+    setIsCroping(false);
+    setSelectedFile(null);
   };
 
   const onSubmit = (data: FormData) => {
@@ -74,7 +89,7 @@ const ProfileForm = () => {
       if (!user) {
         return;
       }
-      const student = await studentService.getSrudentByUserId(user.id);
+      const student = await studentService.getStudentByUserId(user.id);
       setStudentData(student);
     };
     getStudentData();
@@ -286,11 +301,11 @@ const ProfileForm = () => {
               />
             </div>
             <div className="group md:w-1/2">
-              <h4 className="group-focus-within:text-primary03">Instragram</h4>
+              <h4 className="group-focus-within:text-primary03">Instagram</h4>
               <RHFTextField
-                name="instragram"
+                name="instagram"
                 control={control}
-                placeholder="https://instragram.com/"
+                placeholder="https://instagram.com/"
                 fullWidth
                 variant="outlined"
                 sx={{
@@ -374,6 +389,19 @@ const ProfileForm = () => {
             บันทึกข้อมูล
           </Button>
         </div>
+        {isCroping && selectedFile && (
+          <Modal
+            open={isCroping}
+            onClose={handleCropCancel}
+            closeAfterTransition
+          >
+            <CropImageCard
+              file={selectedFile}
+              onUploadComplete={handleCropComplete}
+              onCancel={handleCropCancel}
+            />
+          </Modal>
+        )}
       </form>
     </div>
   );

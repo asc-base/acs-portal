@@ -16,8 +16,8 @@ interface PageProps {
 const page = async ({ searchParams }: PageProps) => {
   const resolvedSearchParams = await searchParams;
   const { rows, totalRecords } = await courseService.getCourse({
-    curriculumId: resolvedSearchParams.curriculumId,
-    typeCourseId: resolvedSearchParams.typeCourseId,
+    curriculumID: resolvedSearchParams.curriculumId,
+    typeCourseID: resolvedSearchParams.typeCourseId,
   });
 
   return (
