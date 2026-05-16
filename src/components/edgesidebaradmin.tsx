@@ -10,7 +10,6 @@ import BookmarkIcon from "@mui/icons-material/Bookmark";
 import CampaignIcon from "@mui/icons-material/Campaign";
 import BorderColorIcon from "@mui/icons-material/BorderColor";
 import Link from "next/link";
-import { useAuthStore } from "@/store/auth";
 import { usePathname } from "next/navigation";
 
 const sidebarItems = [
@@ -64,8 +63,6 @@ const sidebarItems = [
 export const EdgeSidebarAdmin = ({ username }: { username: string }) => {
   const pathName = usePathname();
 
-  const user = useAuthStore((state) => state.user)
-
   return (
     <aside className="bg-neutral01 flex h-full w-full flex-col shadow-lg">
       <div>
@@ -74,7 +71,7 @@ export const EdgeSidebarAdmin = ({ username }: { username: string }) => {
             fontSize="large"
             className="text-neutral05"
           />
-          <h3>{user ? `${user.firstNameTh} ${user.lastNameTh}` : "Admin"}</h3>
+          <h3>{username}</h3>
         </div>
         <nav>
           <ul className="flex flex-col gap-y-2">
