@@ -9,7 +9,6 @@ const Layout = ({ children }: Readonly<{ children: ReactNode }>) => {
   const hideSidebar = pathname === "/admin/auth";
 
   const user = useAuthStore((state) => state.user);
-  console.log("ข้อมูล User ใน Store คือ:", user);
   
   return (
     <div className="jun-layout flex h-screen">
