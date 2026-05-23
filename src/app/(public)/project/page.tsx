@@ -49,7 +49,7 @@ const Page = async ({ searchParams }: LocalPageProps) => {
   const categories = await masterDataService.getMasterDataListType("category");
   const fields = await masterDataService.getMasterDataListType("field");
   const types = await masterDataService.getMasterDataListType("type");
-  const courses = await courseService.getCourse({ curriculumId: 1 });
+  const courses = await courseService.getCourse({ curriculumID: 1 });
   const classBooks = await classBookService.getClassBooks({
     page: 1,
     pageSize: 4,

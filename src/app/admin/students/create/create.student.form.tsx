@@ -280,7 +280,6 @@ export const CreateStudentForm: FC<FormProfessorsProps> = ({
               label="ชื่อเล่น"
               fullWidth
               placeholder="ระบุชื่อเล่น"
-              requiredMark
             />
           </div>
         </div>

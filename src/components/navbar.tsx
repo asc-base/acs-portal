@@ -21,6 +21,7 @@ import Logout from "@mui/icons-material/Logout";
 import { AuthRepository } from "@/infra/repositories/auth.repository";
 import { AuthService } from "@/core/service/auth.service";
 import { usePathname } from "next/navigation";
+import { useRouter } from "next/navigation";
 
 type SubMenuItem = {
   id: number;
@@ -231,6 +232,7 @@ export const NavbarMain = ({ baseUrl }: { baseUrl: string }) => {
   const [userAuth, setUserAuth] = useState<IUser | null>(null);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const openMenu = Boolean(anchorEl);
+  const router = useRouter();
 
   const authService = useMemo(() => {
     const authRepository = new AuthRepository(baseUrl);
@@ -248,6 +250,7 @@ export const NavbarMain = ({ baseUrl }: { baseUrl: string }) => {
   const handleLogout = () => {
     authService.logout();
     handleMenuClose();
+    router.push("/auth/student");
   };
 
   useEffect(() => {
@@ -369,9 +372,9 @@ export const NavbarMain = ({ baseUrl }: { baseUrl: string }) => {
       );
     } else {
       return (
-        <Link href="/auth/student">
-          <h4>เข้าสู่ระบบ</h4>
-        </Link>
+        // <Link href="/auth/student">
+        <h4 className="!text-gray-300">เข้าสู่ระบบ</h4>
+        // </Link>
       );
     }
   };

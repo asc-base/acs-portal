@@ -31,7 +31,7 @@ interface FormData {
   github: string;
   linkedin: string;
   facebook: string;
-  instragram: string;
+  instagram: string;
   projects: { title: string }[];
   file: string | File | null;
 }
@@ -49,7 +49,7 @@ const ProfileForm = () => {
       github: studentData?.github || "",
       linkedin: studentData?.linkedin || "",
       facebook: studentData?.facebook || "",
-      instragram: studentData?.instragram || "",
+      instagram: studentData?.instagram || "",
       // projects:
       //   studentData?.projects?.map((project) => ({ title: project.title })) ||
       //   [],
@@ -301,11 +301,11 @@ const ProfileForm = () => {
               />
             </div>
             <div className="group md:w-1/2">
-              <h4 className="group-focus-within:text-primary03">Instragram</h4>
+              <h4 className="group-focus-within:text-primary03">Instagram</h4>
               <RHFTextField
-                name="instragram"
+                name="instagram"
                 control={control}
-                placeholder="https://instragram.com/"
+                placeholder="https://instagram.com/"
                 fullWidth
                 variant="outlined"
                 sx={{

@@ -35,7 +35,7 @@ const Schema = z.object({
     .string()
     .min(11, "กรุณากรอกรหัสนักศึกษา")
     .regex(/^[0-9]+$/, "รหัสนักศึกษาต้องเป็นตัวเลขเท่านั้น"),
-  nickname: z.string().min(1, "กรุณากรอกชื่อเล่น"),
+  nickName: z.string().min(1, "กรุณากรอกชื่อเล่น"),
   email: z.string().email("อีเมลไม่ถูกต้อง"),
   facebook: z.string().optional(),
   linkedin: z.string().optional(),
@@ -99,11 +99,11 @@ export const StudentUpdateForm = ({
       firstNameEn: student.user.firstNameEn,
       lastNameEn: student.user.lastNameEn,
       studentCode: student.studentCode,
-      nickname: student.user.nickName,
+      nickName: student.user.nickName,
       email: student.user.email,
       facebook: student.facebook || undefined,
       linkedin: student.linkedin || undefined,
-      instagram: student.instragram || undefined,
+      instagram: student.instagram || undefined,
       github: student.github || undefined,
       // otherProjects: [{ value: "" }],
     },
@@ -137,8 +137,21 @@ export const StudentUpdateForm = ({
 
   const onSubmit = async (data: IUpdateStudent) => {
     try {
+      const payload: IUpdateStudent = {
+        firstNameTh: data.firstNameTh,
+        lastNameTh: data.lastNameTh,
+        firstNameEn: data.firstNameEn,
+        lastNameEn: data.lastNameEn,
+        studentCode: data.studentCode,
+        nickName: data.nickName,
+        email: data.email,
+        facebook: data.facebook,
+        linkedin: data.linkedin,
+        instagram: data.instagram,
+        github: data.github,
+      };
       const response = await studentService.updateStudent(
-        data,
+        payload,
         selectedFile,
         classBookID,
         student.id,
@@ -268,11 +281,10 @@ export const StudentUpdateForm = ({
             />
             <RHFTextField
               control={control}
-              name="nickname"
+              name="nickName"
               label="ชื่อเล่น"
               fullWidth
               placeholder="ระบุชื่อเล่น"
-              requiredMark
             />
           </div>
         </div>

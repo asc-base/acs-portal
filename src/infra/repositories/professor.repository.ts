@@ -5,8 +5,8 @@ import { ApiResponse, Pageable } from "@/interface/response";
 import { QueryProfessor } from "@/core/domain/professor";
 
 export class ProfessorRepository implements IProfessorRepository {
-  private http: HttpHelper;
-  private baseUrl: string;
+  private readonly http: HttpHelper;
+  private readonly baseUrl: string;
 
   constructor(baseUrl: string) {
     this.baseUrl = baseUrl;
@@ -23,6 +23,8 @@ export class ProfessorRepository implements IProfessorRepository {
       expertFields,
       majorPosition,
       academicPosition,
+      search,
+      searchBy,
     } = query;
 
     const params = new URLSearchParams();
@@ -40,6 +42,12 @@ export class ProfessorRepository implements IProfessorRepository {
     }
     if (academicPosition && academicPosition.length > 0) {
       params.append("academicPosition", academicPosition);
+    }
+    if (search) {
+      params.append("search", search);
+    }
+    if (searchBy) {
+      params.append("searchBy", searchBy);
     }
     const queryString = params.toString() ? `?${params.toString()}` : "";
     const url = `/v1/professors${queryString}`;
@@ -73,4 +81,13 @@ export class ProfessorRepository implements IProfessorRepository {
     );
     return response;
   }
+
+async deleteProfessor(id: number): Promise<ApiResponse<IProfessor>> {
+
+  const response = await this.http.delete<ApiResponse<IProfessor>>(
+    `/v1/professors/${id}`,
+  );
+
+  return response;
+}
 }

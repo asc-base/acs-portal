@@ -53,6 +53,12 @@ export const CurriculumForm = ({ apiBase }: CurriculumFormProps) => {
   const { handleSubmit, control, formState: { isDirty } } = useForm<FormValues>({
     resolver: zodResolver(Schema),
     mode: "onChange",
+    defaultValues: {
+      title: "",
+      year: "",
+      documentURL: "",
+      description: "",
+    },
   });
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -82,15 +88,15 @@ export const CurriculumForm = ({ apiBase }: CurriculumFormProps) => {
         ...data,
         year,
       },
-      selectedFile!
-    );
-      
+        selectedFile!
+      );
+
       if (response) {
         setConfirmModal({
-            isOpen: true,
-            type: "success",
-            onClose: () => setConfirmModal(null),
-            onConfirm: () => router.push(`/admin/curriculum`),
+          isOpen: true,
+          type: "success",
+          onClose: () => setConfirmModal(null),
+          onConfirm: () => router.push(`/admin/curriculum`),
         });
       }
     } catch (error) {
