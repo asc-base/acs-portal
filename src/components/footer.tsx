@@ -157,7 +157,7 @@ export const Footer = ({ curriculums = [] }: FooterProps) => {
               <h5 className="text-neutral01">Sola.Kmutt</h5>
             </Link>
             <Link
-              href="https://science.kmutt.ac.th/สำนักงานคณะบดีฯ/"
+              href="https://science.kmutt.ac.th/%E0%B8%AA%E0%B8%B3%E0%B8%99%E0%B8%B1%E0%B8%81%E0%B8%87%E0%B8%B2%E0%B8%99%E0%B8%84%E0%B8%93%E0%B8%9A%E0%B8%94%E0%B8%B5%E0%B8%AF/"
               target="_blank"
               rel="noopener noreferrer"
             >
