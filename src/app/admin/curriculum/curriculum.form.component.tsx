@@ -12,16 +12,34 @@ import { CurriculumService } from "@/core/service/curriculum.service";
 import { styled } from "@mui/material/styles";
 import { RHFTextField } from "@/components/form/RHFTextField";
 import { RHFDatePickerDayjs } from "@/components/form/RHFDatePicker";
-import { ConfirmModal, ConfirmModalProps } from "@/components/modal/confirmModal";
+import {
+  ConfirmModal,
+  ConfirmModalProps,
+} from "@/components/modal/confirmModal";
 
 interface CurriculumFormProps {
   apiBase: string;
 }
 
+const fileUrlSchema = z
+  .string()
+  .url()
+  .refine((url) => {
+    const hostname = new URL(url).hostname;
+
+    return (
+      hostname === "drive.google.com" ||
+      hostname === "docs.google.com" ||
+      hostname === "1drv.ms" ||
+      hostname === "onedrive.live.com" ||
+      hostname.endsWith(".sharepoint.com")
+    );
+  }, "อนุญาตเฉพาะลิงก์จาก Google Drive, OneDrive หรือ SharePoint เท่านั้น");
+
 const Schema = z.object({
   title: z.string().min(1, "กรุณาระบุชื่อหลักสูตร"),
   year: z.string().min(1, "กรุณาระบุปีการศึกษา"),
-  documentURL: z.url({ message: "กรุณาระบุลิงก์ที่ถูกต้อง" }),
+  documentURL: fileUrlSchema,
   description: z.string().min(1, "กรุณาระบุรายละเอียด"),
 });
 
@@ -43,14 +61,20 @@ export const CurriculumForm = ({ apiBase }: CurriculumFormProps) => {
   const router = useRouter();
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
-  const [confirmModal, setConfirmModal] = useState<ConfirmModalProps | null>(null);
+  const [confirmModal, setConfirmModal] = useState<ConfirmModalProps | null>(
+    null,
+  );
 
   const curriculumService = useMemo(() => {
     const repo = new CurriculumRepository(apiBase);
     return new CurriculumService(repo);
   }, [apiBase]);
 
-  const { handleSubmit, control, formState: { isDirty } } = useForm<FormValues>({
+  const {
+    handleSubmit,
+    control,
+    formState: { isDirty },
+  } = useForm<FormValues>({
     resolver: zodResolver(Schema),
     mode: "onChange",
     defaultValues: {
@@ -84,11 +108,12 @@ export const CurriculumForm = ({ apiBase }: CurriculumFormProps) => {
   const onSubmit = async (data: FormValues) => {
     try {
       const year = dayjs(data.year).year().toString();
-      const response = await curriculumService.createCurriculum({
-        ...data,
-        year,
-      },
-        selectedFile!
+      const response = await curriculumService.createCurriculum(
+        {
+          ...data,
+          year,
+        },
+        selectedFile!,
       );
 
       if (response) {
