@@ -25,7 +25,9 @@ interface FormClassbookProps {
 
 const Schema = z.object({
   classof: z.string().min(1, "กรุณากรอกรุ่นการศึกษา"),
-  firstYearAcademic: z.string().min(1, "กรุณากรอกปีการศึกษา"),
+  firstYearAcademic: z.string()
+    .min(1, "กรุณากรอกปีการศึกษา")
+    .regex(/^\d{4}$/, "กรุณากรอกปีการศึกษาให้ถูกต้อง"),
   curriculumID: z.number().min(1, "กรุณาเลือกหลักสูตร"),
 });
 
