@@ -111,7 +111,7 @@ export default function Preview_table_component({
       firstNameEn: s.firstNameEn.trim(),
       lastNameEn: s.lastNameEn.trim(),
       email: s.email.trim(),
-      studentCode:  s.studentCode.trim(),
+      studentCode: s.studentCode.trim(),
     }));
 
     const result = z.array(studentSchema).safeParse(cleanedStudents);
@@ -213,7 +213,7 @@ export default function Preview_table_component({
                 <TableCell align="center">
                   <h3 className="font-bold">อีเมล</h3>
                 </TableCell>
-                <TableCell/>
+                <TableCell />
               </TableRow>
             </TableHead>
 
@@ -299,7 +299,9 @@ export default function Preview_table_component({
         <Button
           variant="contained"
           size="large"
-          onClick={() => router.push("/admin/students?classBookID=2")}
+          onClick={() =>
+            router.push(`/admin/students?classBookID=${classBookID}`)
+          }
         >
           ย้อนกลับ
         </Button>
