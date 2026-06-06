@@ -507,6 +507,8 @@ export const FormProfesssors: FC<FormProfessorsProps> = ({ apiBase }) => {
         <Modal open={isCroping} onClose={handleCropCancel} closeAfterTransition>
           <CropImageCard
             file={selectedFile}
+            width={512}
+            height={512}
             onUploadComplete={handleCropComplete}
             onCancel={handleCropCancel}
           />
