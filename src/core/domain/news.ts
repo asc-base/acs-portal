@@ -3,7 +3,8 @@ import { Tag } from "./list-type";
 export interface INews {
   id: number;
   title: string;
-  image: string;
+  thumbnailURL: string;
+  highlightURL: string;
   detail: string;
   startDate: Date;
   dueDate: Date | null;
