@@ -5,14 +5,16 @@ import { ICourse } from "./course";
 export interface IProject {
   id: number;
   title: string;
-  thumbnail: string;
-  detail: string;
-  github: string;
-  presentation: string;
-  document: string;
-  figma: string;
-  youtube: string;
-  projectAssets: IProjectAssets[];
+  thumbnailURL: string;
+  details: string;
+  githubURL: string;
+  presentationURL: string;
+  documentURL: string;
+  figmaURL: string;
+  youtubeURL: string;
+  //assetsURL: IProjectAssets[]; ดึงมาตามinterface แต่ว่าข้อมูลที่ได้จากbackendเป็น arrayของstringธรรมดา(พอดูในfigmaเหมือนจะเป็นภาพ)
+  assetsURL: string[];
+  techStacks: string[];
   projectMembers: IStudent[];
   projectCategories: ListType[];
   projectFields: ListType[];
