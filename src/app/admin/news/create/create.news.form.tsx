@@ -1,5 +1,5 @@
 "use client";
-import { Button, MenuItem, Alert, Snackbar } from "@mui/material";
+import { Button, MenuItem, Alert, Snackbar, IconButton } from "@mui/material";
 import React, { useState, useMemo } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
 import Image from "next/image";
@@ -58,12 +58,15 @@ const VisuallyHiddenInput = styled("input")({
 });
 
 const CreateNewsForm = ({ apiBase, categories }: CraeteNewsProps) => {
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [coverFile, setCoverFile] = useState<File | null>(null);
+  const [headerFile, setHeaderFile] = useState<File | null>(null);
   const [confirmModal, setConfirmModal] = useState<ConfirmModalProps | null>(
     null,
   );
   const [isError, setIsError] = useState(false);
-  const [imageError, setImageError] = useState(false);
+  
+  const [coverError, setCoverError] = useState(false);
+  const [headerError, setHeaderError] = useState(false);
 
   const router = useRouter();
 
@@ -88,41 +91,53 @@ const CreateNewsForm = ({ apiBase, categories }: CraeteNewsProps) => {
     return new NewsService(newsRepository);
   }, [apiBase]);
 
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleCoverChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
-      setSelectedFile(file);
-      setImageError(false);
+      setCoverFile(file);
+      setCoverError(false);
+    }
+  };
+
+  const handleHeaderChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      setHeaderFile(file);
+      setHeaderError(false);
     }
   };
 
   const handleCancel = () => {
-    if (isDirty || selectedFile) {
+    if (isDirty || coverFile || headerFile) {
       setConfirmModal({
         isOpen: true,
         type: "warning",
         onClose: () => setConfirmModal(null),
         onConfirm: () => {
           reset();
-          setSelectedFile(null);
+          setCoverFile(null);
+          setHeaderFile(null);
           setConfirmModal(null);
           router.push(`/admin/news?page=1&pageSize=9&category=&title=`);
         },
       });
     } else {
       reset();
-      setSelectedFile(null);
+      setCoverFile(null);
+      setHeaderFile(null);
       router.push(`/admin/news?page=1&pageSize=9&category=&title=`);
     }
   };
 
   const onSubmit: SubmitHandler<FormData> = async (data) => {
-    if (isDirty || selectedFile) {
+    if (!coverFile || !headerFile) {
+      if (!coverFile) setCoverError(true);
+      if (!headerFile) setHeaderError(true);
+      return;
+    }
+
+    if (isDirty || coverFile || headerFile) {
       try {
-        if (!selectedFile) {
-          setImageError(true);
-          return;
-        }
         const payload: ICreateNews = {
           title: data.title,
           tagID: data.tagID,
@@ -131,7 +146,7 @@ const CreateNewsForm = ({ apiBase, categories }: CraeteNewsProps) => {
           dueDate: data.dueDate ? dayjs(data.dueDate).toISOString() : undefined,
         };
 
-        const response = await newsService.createNews(payload, selectedFile);
+        const response = await newsService.createNews(payload, coverFile); 
 
         if (response) {
           setConfirmModal({
@@ -169,48 +184,92 @@ const CreateNewsForm = ({ apiBase, categories }: CraeteNewsProps) => {
           ไม่สามารถเพิ่มข่าวสารได้
         </Alert>
       </Snackbar>
-      <h3 className="mb-6 font-bold">ข้อมูลข่าวสาร</h3>
-      <form className="gap-4 p-4" onSubmit={handleSubmit(onSubmit)}>
-        <div className="flex flex-col gap-4">
-          <div className="bg-neutral02 flex h-[560px] items-center justify-center rounded-lg">
-            {selectedFile ? (
-              <div className="group relative aspect-video w-full h-[560px] overflow-hidden rounded-xl">
-                <Image
-                  src={URL.createObjectURL(selectedFile)}
-                  alt="Preview"
-                  fill
-                  className="rounded-md object-cover"
-                />
-
-                <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
-                  <Button variant="contained" component="label">
+      
+      <h3 className="mb-6 font-bold text-xl">ข้อมูลข่าวสาร</h3>
+      
+      <form className="gap-4 p-4 bg-white rounded-lg" onSubmit={handleSubmit(onSubmit)}>
+        <div className="flex flex-col gap-6">
+          
+          <div className="grid grid-cols-5 gap-6">
+            
+            <div className="col-span-2 flex flex-col gap-2">
+              <label className="text-sm text-gray-500">ภาพหน้าปก</label>
+              <div className={`bg-gray-100 flex items-center justify-center rounded-lg relative aspect-[4/3] w-full overflow-hidden ${coverError ? 'border border-red-500' : ''}`}>
+                {coverFile ? (
+                  <div className="group relative w-full h-full">
+                    <Image
+                      src={URL.createObjectURL(coverFile)}
+                      alt="Cover Preview"
+                      fill
+                      className="object-cover"
+                    />
+                    <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
+                      <Button variant="contained" component="label" sx={{ bgcolor: 'rgba(255,255,255,0.2)', backdropFilter: 'blur(4px)' }}>
+                        เปลี่ยนรูปภาพ
+                        <VisuallyHiddenInput
+                          type="file"
+                          accept="image/*"
+                          onChange={handleCoverChange}
+                        />
+                      </Button>
+                    </div>
+                  </div>
+                ) : (
+                  <Button variant="text" component="label" sx={{ color: 'gray' }}>
+                    อัปโหลดรูปภาพ
                     <VisuallyHiddenInput
                       type="file"
                       accept="image/*"
-                      onChange={handleFileChange}
+                      onChange={handleCoverChange}
                     />
-                    อัปโหลดรูปภาพ
                   </Button>
-                </div>
+                )}
               </div>
-            ) : (
-              <Button variant="contained" component="label" size="large">
-                อัปโหลดรูปภาพ
-                <VisuallyHiddenInput
-                  type="file"
-                  accept="image/*"
-                  onChange={handleFileChange}
-                />
-              </Button>
-            )}
+              {coverError && <p className="text-sm text-red-600">กรุณาอัปโหลดภาพหน้าปก</p>}
+            </div>
+
+            <div className="col-span-3 flex flex-col gap-2">
+              <label className="text-sm text-gray-500">ภาพหัวเรื่อง</label>
+              <div className={`bg-gray-100 flex items-center justify-center rounded-lg relative aspect-[2/1] w-full overflow-hidden ${headerError ? 'border border-red-500' : ''}`}>
+                {headerFile ? (
+                  <div className="group relative w-full h-full">
+                    <Image
+                      src={URL.createObjectURL(headerFile)}
+                      alt="Header Preview"
+                      fill
+                      className="object-cover"
+                    />
+                    <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
+                      <Button variant="contained" component="label" sx={{ bgcolor: 'rgba(255,255,255,0.2)', backdropFilter: 'blur(4px)' }}>
+                        เปลี่ยนรูปภาพ
+                        <VisuallyHiddenInput
+                          type="file"
+                          accept="image/*"
+                          onChange={handleHeaderChange}
+                        />
+                      </Button>
+                    </div>
+                  </div>
+                ) : (
+                  <Button variant="text" component="label" sx={{ color: 'gray' }}>
+                    อัปโหลดรูปภาพ
+                    <VisuallyHiddenInput
+                      type="file"
+                      accept="image/*"
+                      onChange={handleHeaderChange}
+                    />
+                  </Button>
+                )}
+              </div>
+              {headerError && <p className="text-sm text-red-600">กรุณาอัปโหลดภาพหัวเรื่อง</p>}
+            </div>
+
           </div>
-          {imageError && (
-            <p className="mt-1 text-sm text-red-600">กรุณาอัปโหลดรูปภาพ</p>
-          )}
+
           <RHFTextField
             name="title"
             control={control}
-            label="หัวข้อข่าว"
+            label="หัวข้อ"
             requiredMark
             fullWidth
           />
@@ -236,6 +295,7 @@ const CreateNewsForm = ({ apiBase, categories }: CraeteNewsProps) => {
               </MenuItem>
             ))}
           </RHFSelect>
+          
           <div className="grid grid-cols-2 gap-x-4">
             <RHFDatePickerDayjs
               name="startDate"
@@ -248,23 +308,29 @@ const CreateNewsForm = ({ apiBase, categories }: CraeteNewsProps) => {
             <RHFDatePickerDayjs
               name="dueDate"
               control={control}
-              label="วันที่สิ้นสุด"
+              label="วันที่ครบกำหนด"
               format="D MMMM YYYY"
-              placeholder="เลือกวันที่สิ้นสุด"
+              placeholder="เลือกวันที่ครบกำหนด"
             />
           </div>
         </div>
-        <div className="mt-4 flex justify-end">
-          <div className="flex gap-x-4">
-            <Button variant="outlined" onClick={handleCancel} size="large">
-              ยกเลิก
-            </Button>
-            <Button variant="contained" type="submit" size="large">
-              บันทึก
-            </Button>
-          </div>
+
+        <div className="mt-8 flex justify-end">
+          <Button 
+            variant="contained" 
+            type="submit" 
+            size="large"
+            sx={{ 
+              bgcolor: '#1a0b59',
+              '&:hover': { bgcolor: '#130842' },
+              px: 6 
+            }}
+          >
+            แก้ไขข้อมูล
+          </Button>
         </div>
       </form>
+      
       {confirmModal && <ConfirmModal {...confirmModal} />}
     </div>
   );
