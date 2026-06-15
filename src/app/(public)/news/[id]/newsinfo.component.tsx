@@ -38,9 +38,9 @@ const NewsInfoComponent = ({ newsInfo, recommendNews }: NewsInfoProps) => {
             sx={{ width: "100%", height: "100%" }}
             animation="wave"
           />
-          {newsInfo?.image && (
+          {newsInfo?.highlightURL && (
             <Image
-              src={newsInfo.image}
+              src={newsInfo.highlightURL}
               alt={newsInfo?.title || "news image"}
               fill
               loading="lazy"
