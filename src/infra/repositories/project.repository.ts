@@ -16,13 +16,13 @@ export class ProjectRepository implements IProjectRepository {
     query: URLSearchParams,
   ): Promise<ApiResponse<Pageable<IProject>>> {
     const queryString = query.toString() ? `?${query.toString()}` : "";
-    const url = `/v1/projects${queryString}`;
+    const url = `/v1/project${queryString}`;
     const response = await this.http.get<ApiResponse<Pageable<IProject>>>(url);
     return response;
   }
 
   async getProjectById(id: string): Promise<ApiResponse<IProject>> {
-    const url = `/v1/projects/${id}`;
+    const url = `/v1/project/${id}`;
     const response = await this.http.get<ApiResponse<IProject>>(url);
     return response;
   }

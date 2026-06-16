@@ -59,7 +59,7 @@ export const Footer = ({ curriculums = [] }: FooterProps) => {
 
         <div className="flex w-full flex-wrap gap-4 overflow-hidden break-words lg:flex-[2]">
           <div className="flex min-w-[100px] flex-1 flex-col gap-2">
-            <Link href="/home">
+            <Link href="https://admission.kmutt.ac.th/">
               <h4 className="text-secondary01 font-bold">สมัครเรียน</h4>
             </Link>
             <Link href="/curriculum">
