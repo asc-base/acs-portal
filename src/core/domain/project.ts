@@ -1,11 +1,12 @@
 import { IStudent } from "./student";
 import { ListType } from "@/interface/type";
 import { ICourse } from "./course";
+import { IUser } from "./user";
 
 export interface IProject {
   id: number;
   title: string;
-  thumbnail: string;
+  thumbnailURL: string;
   detail: string;
   github: string;
   presentation: string;
@@ -13,8 +14,8 @@ export interface IProject {
   figma: string;
   youtube: string;
   projectAssets: IProjectAssets[];
-  projectMembers: IStudent[];
-  projectCategories: ListType[];
+  member: IUser[];
+  tag: ListType[];
   projectFields: ListType[];
   projectTypes: ListType[];
   projectCourses: ICourse[];

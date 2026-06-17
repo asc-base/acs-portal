@@ -17,25 +17,4 @@ export class MasterDataRepository implements IMasterDataRepository {
       await this.http.get<ApiResponse<MasterData>>(`/v1/master-data`);
     return response;
   }
-
-  async getMasterDataType(): Promise<ApiResponse<IType[]>> {
-    const response =
-      await this.http.get<ApiResponse<IType[]>>(`/v1/master-data/type`);
-    return response;
-  }
-
-  async getMasterDataListType(type: string): Promise<ApiResponse<IType[]>> {
-    const url = type
-      ? `/v1/master-data/type/list?type=${type}`
-      : `/v1/master-data/type/list`;
-    const response = await this.http.get<ApiResponse<IType[]>>(url);
-    return response;
-  }
-
-  async getMasterDataTypeCourse(): Promise<ApiResponse<TypeCourse[]>> {
-    const response = await this.http.get<ApiResponse<TypeCourse[]>>(
-      `/v1/master-data/typecourse`,
-    );
-    return response;
-  }
 }
