@@ -13,7 +13,7 @@ function ProjectCardBase({ data }: ProjectCardProps) {
   const {
     id,
     title,
-    thumbnail,
+    thumbnailURL,
     projectMembers,
     projectCategories,
     projectFields,
@@ -25,7 +25,7 @@ function ProjectCardBase({ data }: ProjectCardProps) {
       <div className="p-3 pb-2">
         <div className="relative aspect-[4/3] w-full overflow-hidden rounded-xl">
           <Image
-            src={thumbnail}
+            src={thumbnailURL}
             alt={title}
             fill
             className="object-cover"

@@ -28,6 +28,7 @@ const page = async ({ searchParams }: PageProps) => {
       pageSize={pageSize}
       page={page}
       sortOrder={query.sortOrder}
+      search={query.search}
     />
   );
 };

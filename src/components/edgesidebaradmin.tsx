@@ -28,7 +28,6 @@ const sidebarItems = [
     name: "ข้อมูลผลงาน",
     href: "/admin/projects",
     icon: <DescriptionIcon />,
-    disabled: true,
   },
   {
     name: "ข่าวประชาสัมพันธ์",
