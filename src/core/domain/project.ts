@@ -13,7 +13,7 @@ export interface IProject {
   documentURL: string;
   figmaURL: string;
   youtubeURL: string;
-  assetsURL: IProjectAssets[];
+  assetsURL: string[];
   techStacks: string[];
   member: IUser[];
   tag: ListType[];
