@@ -1,6 +1,7 @@
 import { IStudent } from "./student";
 import { ListType } from "@/interface/type";
 import { ICourse } from "./course";
+import { IUser } from "./user";
 
 export interface IProject {
   id: number;
@@ -12,14 +13,11 @@ export interface IProject {
   documentURL: string;
   figmaURL: string;
   youtubeURL: string;
-  //assetsURL: IProjectAssets[]; ดึงมาตามinterface แต่ว่าข้อมูลที่ได้จากbackendเป็น arrayของstringธรรมดา(พอดูในfigmaเหมือนจะเป็นภาพ)
   assetsURL: string[];
   techStacks: string[];
-  projectMembers: IStudent[];
-  projectCategories: ListType[];
-  projectFields: ListType[];
-  projectTypes: ListType[];
-  projectCourses: ICourse[];
+  member: IUser[];
+  tag: ListType[];
+  course: ICourse[];
   createdAt: Date;
   updatedAt: Date;
   deletedAt: null;

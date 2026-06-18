@@ -7,56 +7,53 @@ import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { ICourse } from "@/core/domain/course";
 import Checkbox from "@mui/material/Checkbox";
 import { IClassBook } from "@/core/domain/classbook";
+import { Tag } from "@/core/domain/list-type";
+import { useRouter, usePathname, useSearchParams } from "next/navigation";
 
 interface FilterComponentProps {
   header: string;
-  list: IType[] | ICourse[] | IClassBook[];
+  list: IType[] | ICourse[] | IClassBook[] | Tag[];
   searchBy: string;
 }
 
 interface FilterListProps {
-  categories: IType[];
-  fields: IType[];
-  types: IType[];
+  categories: Tag[];
+  fields: Tag[];
+  types: Tag[];
   courses: ICourse[];
   classBooks: IClassBook[];
 }
 
 const FilterComponent = ({ header, list, searchBy }: FilterComponentProps) => {
   const [isOpen, setIsOpen] = React.useState(true);
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+
   const [checkedItems, setCheckedItems] = React.useState<Set<string>>(
     new Set(),
   );
 
-  // Initialize checked items from URL search params on mount
   React.useEffect(() => {
-    const searchParams = new URLSearchParams(window.location.search);
-    const values = searchParams.getAll(searchBy);
-    setCheckedItems(new Set(values));
-  }, [searchBy]);
+    setCheckedItems(new Set(searchParams.getAll(searchBy)));
+  }, [searchParams, searchBy]);
 
   const handleSearchParamChange = (itemId: string, checked: boolean) => {
-    const searchParams = new URLSearchParams(window.location.search);
+    const params = new URLSearchParams(searchParams.toString());
 
-    // Update local state
-    const newCheckedItems = new Set(checkedItems);
     if (checked) {
-      searchParams.append(searchBy, itemId);
-      newCheckedItems.add(itemId);
+      params.append(searchBy, itemId);
     } else {
-      const values = searchParams.getAll(searchBy);
-      searchParams.delete(searchBy);
+      const values = params.getAll(searchBy);
+      params.delete(searchBy);
       values
         .filter((v) => v !== itemId)
-        .forEach((v) => {
-          searchParams.append(searchBy, v);
-        });
-      newCheckedItems.delete(itemId);
+        .forEach((v) => params.append(searchBy, v));
     }
-
-    setCheckedItems(newCheckedItems);
-    const newUrl = `${window.location.pathname}?${searchParams.toString()}`;
-    window.history.pushState({}, "", newUrl);
+    params.set("page", "1");
+    router.push(`${pathname}?${params.toString()}`, {
+      scroll: false,
+    });
   };
 
   if (list.length === 0) {
@@ -149,7 +146,7 @@ export const FilterList = ({
           <FilterComponent
             header="ค้นหาตามรายวิชา"
             list={courses}
-            searchBy="course"
+            searchBy="courses"
           />
           <FilterComponent
             header="ค้นหาผลงานตามประเภท"
