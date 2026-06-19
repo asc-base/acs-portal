@@ -214,8 +214,8 @@ export const FormProjects: FC<FormProjectsProps> = ({ apiBase }) => {
       const allTags = [...data.projectTypes, ...data.projectCategories];
       allTags.forEach((tag) => formData.append("tagsID", tag.value.toString()));
 
-      const formattedStudents = data.students.map(s => ({ userID: s.userID, roleID: 1 }));
-      const formattedAdvisors = data.advisors.map(a => ({ userID: a.userID, roleID: 2 }));
+      const formattedStudents = data.students.map(s => ({ userID: s.userID, roleID: 2 }));
+      const formattedAdvisors = data.advisors.map(a => ({ userID: a.userID, roleID: 3 }));
       const allMembers = [...formattedStudents, ...formattedAdvisors];
       
       allMembers.forEach((member, index) => {
@@ -513,6 +513,8 @@ export const FormProjects: FC<FormProjectsProps> = ({ apiBase }) => {
                     <RHFSelect control={control} name={`students.${index}.userID`} label="รหัสนักศึกษา" variant="outlined" fullWidth displayEmpty requiredMark>
                       {students.map((s) => <MenuItem key={s.id} value={s.id}>{s.studentID}</MenuItem>)}
                     </RHFSelect>
+                  </div>
+                  <div className="flex-1">
                     <RHFSelect control={control} name={`students.${index}.userID`} label="ชื่อ-นามสกุล" variant="outlined" fullWidth displayEmpty requiredMark>
                       {students.map((s) => <MenuItem key={s.id} value={s.id}>{s.name}</MenuItem>)}
                     </RHFSelect>
