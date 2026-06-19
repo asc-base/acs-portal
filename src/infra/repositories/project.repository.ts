@@ -1,5 +1,5 @@
 import { IProjectRepository } from "@/core/ports/project.repository";
-import { IProject } from "@/core/domain/project";
+import { IProject, QueryProject } from "@/core/domain/project";
 import { Pageable } from "@/interface/response";
 import { HttpHelper } from "@/lib/http";
 import { ApiResponse } from "@/interface/response";
@@ -13,10 +13,10 @@ export class ProjectRepository implements IProjectRepository {
   }
 
   async getProjects(
-    query: URLSearchParams,
+    query: QueryProject,
   ): Promise<ApiResponse<Pageable<IProject>>> {
     const queryString = query.toString() ? `?${query.toString()}` : "";
-    const url = `/v1/project${queryString}`;
+    const url = `/v1/projects${queryString}`;
     const response = await this.http.get<ApiResponse<Pageable<IProject>>>(url);
     return response;
   }

@@ -28,7 +28,6 @@ const sidebarItems = [
     name: "ข้อมูลผลงาน",
     href: "/admin/projects",
     icon: <DescriptionIcon />,
-    disabled: true,
   },
   {
     name: "ข่าวประชาสัมพันธ์",
@@ -62,6 +61,7 @@ const sidebarItems = [
 
 export const EdgeSidebarAdmin = ({ username }: { username: string }) => {
   const pathName = usePathname();
+
   return (
     <aside className="bg-neutral01 flex h-full w-full flex-col shadow-lg">
       <div>
