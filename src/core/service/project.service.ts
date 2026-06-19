@@ -34,4 +34,9 @@ export class ProjectService {
     const response = await this.projectRepository.getProjectById(id);
     return response.data;
   }
+
+  async createProject(formData: FormData): Promise<any> {
+    const response = await this.projectRepository.createProject(formData);
+    return response.data;
+  }
 }

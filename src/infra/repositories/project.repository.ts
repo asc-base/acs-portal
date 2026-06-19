@@ -44,4 +44,11 @@ export class ProjectRepository implements IProjectRepository {
     const response = await this.http.get<ApiResponse<IProject>>(url);
     return response;
   }
+
+  async createProject(formData: FormData): Promise<ApiResponse<any>> {
+    const url = `/v1/project`;
+    const response = await this.http.post<ApiResponse<any>>(url, formData);
+    
+    return response;
+  }
 }
