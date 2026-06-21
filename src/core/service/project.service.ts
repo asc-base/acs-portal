@@ -2,7 +2,7 @@ import { Pageable } from "@/interface/response";
 import { IProject, QueryProject } from "../domain/project";
 import { IProjectRepository } from "../ports/project.repository";
 export class ProjectService {
-  constructor(private projectRepository: IProjectRepository) {}
+  constructor(private projectRepository: IProjectRepository) { }
 
   async getProjects(query: QueryProject): Promise<Pageable<IProject>> {
     const params = new URLSearchParams();
@@ -21,7 +21,7 @@ export class ProjectService {
       params.set("courses", query.courses.join(","));
     if (query.classBooks && query.classBooks.length > 0)
       params.set("classBooks", query.classBooks.join(","));
-    if(query.search)params.set("search", query.search);
+    if (query.search) params.set("search", query.search);
 
     console.log("params", params.toString());
     console.log("query", query);
@@ -32,6 +32,11 @@ export class ProjectService {
 
   async getProjectById(id: string): Promise<IProject> {
     const response = await this.projectRepository.getProjectById(id);
+    return response.data;
+  }
+
+  async updateProject(id: string, data: FormData): Promise<IProject> {
+    const response = await this.projectRepository.updateProject(id, data);
     return response.data;
   }
 }

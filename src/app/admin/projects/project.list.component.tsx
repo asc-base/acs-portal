@@ -107,11 +107,10 @@ const ProjectListComponents = ({
               type="button"
               onClick={() => reset({ search: "" })}
               disabled={!watchedSearch}
-              className={`text-neutral05 absolute top-1/2 right-2 -translate-y-1/2 ${
-                !watchedSearch
-                  ? "cursor-not-allowed opacity-50"
-                  : "hover:text-primary01 cursor-pointer"
-              }`}
+              className={`text-neutral05 absolute top-1/2 right-2 -translate-y-1/2 ${!watchedSearch
+                ? "cursor-not-allowed opacity-50"
+                : "hover:text-primary01 cursor-pointer"
+                }`}
             >
               <CloseIcon fontSize="small" />
             </button>
@@ -189,7 +188,7 @@ const ProjectListComponents = ({
         </div>
       </div>
 
-            <div className="flex w-full flex-col items-center justify-center gap-10">
+      <div className="flex w-full flex-col items-center justify-center gap-10">
         {projects.length > 0 ? (
           <>
             <div className="grid w-full grid-cols-3 justify-items-center gap-6">
@@ -200,7 +199,7 @@ const ProjectListComponents = ({
                   data={project}
                   onView={() =>
                     router.push(
-                      `/project/${project.id}`,
+                      `/admin/projects/${project.id}`,
                     )
                   }
                 />
