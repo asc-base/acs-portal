@@ -48,6 +48,7 @@ export function RHFTextField<T extends FieldValues>({
           <TextField
             {...props}
             {...field}
+            id={props.id ?? name}
             value={field.value ?? ""}
             error={!!fieldState.error}
             helperText={fieldState.error?.message}

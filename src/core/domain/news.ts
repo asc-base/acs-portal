@@ -5,6 +5,7 @@ export interface INews {
   title: string;
   thumbnailURL: string;
   highlightURL: string;
+  image?: string;
   detail: string;
   startDate: Date;
   dueDate: Date | null;

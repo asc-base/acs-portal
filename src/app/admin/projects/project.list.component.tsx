@@ -17,7 +17,10 @@ import EmptyState from "@/components/emptyState";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useEffect, useCallback } from "react";
+import { useEffect, useCallback, useState } from "react";
+import { ConfirmModal, ConfirmModalProps } from "@/components/modal/confirmModal";
+import { Alert, Snackbar } from "@mui/material";
+import { projectService } from "@/infra/container";
 import { IProject, QueryProject } from "@/core/domain/project";
 
 interface ProjectListComponentsProps {
@@ -44,6 +47,41 @@ const ProjectListComponents = ({
   search,
 }: ProjectListComponentsProps) => {
   const router = useRouter();
+
+  const [confirmModal, setConfirmModal] = useState<ConfirmModalProps | null>(null);
+  const [isError, setIsError] = useState(false);
+
+  const onDelete = async (id: string) => {
+    try {
+      await projectService.deleteProject(id);
+      setConfirmModal({
+        isOpen: true,
+        type: "success",
+        onClose: () => setConfirmModal(null),
+        onConfirm: () => {
+          setConfirmModal(null);
+          router.refresh();
+        },
+        title: "ลบข้อมูลสำเร็จ",
+        description: "ข้อมูลถูกลบออกจากฐานข้อมูลแล้ว",
+        confirmText: "เสร็จสิ้น",
+      });
+    } catch (error) {
+      console.error(error);
+      setIsError(true);
+    }
+  };
+
+  const confirmDeleteProject = (id: string) => {
+    setConfirmModal({
+      isOpen: true,
+      type: "delete",
+      onClose: () => setConfirmModal(null),
+      onConfirm: () => {
+        onDelete(id);
+      },
+    });
+  };
 
   const { register, reset, watch } = useForm<SearchForm>({
     resolver: zodResolver(searchSchema),
@@ -188,6 +226,21 @@ const ProjectListComponents = ({
         </div>
       </div>
 
+      <Snackbar
+        anchorOrigin={{ vertical: "top", horizontal: "right" }}
+        open={isError}
+        autoHideDuration={4000}
+        onClose={() => setIsError(false)}
+      >
+        <Alert
+          severity="error"
+          onClose={() => setIsError(false)}
+          sx={{ width: "100%" }}
+        >
+          ไม่สามารถลบข้อมูลผลงานได้ในขณะนี้ กรุณาลองใหม่อีกครั้ง
+        </Alert>
+      </Snackbar>
+
       <div className="flex w-full flex-col items-center justify-center gap-10">
         {projects.length > 0 ? (
           <>
@@ -202,6 +255,7 @@ const ProjectListComponents = ({
                       `/admin/projects/${project.id}`,
                     )
                   }
+                  onDelete={() => confirmDeleteProject(project.id.toString())}
                 />
               ))}
             </div>
@@ -225,6 +279,7 @@ const ProjectListComponents = ({
           </div>
         )}
       </div>
+      {confirmModal && <ConfirmModal {...confirmModal} />}
     </div>
   );
 };

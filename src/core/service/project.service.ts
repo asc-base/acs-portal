@@ -38,7 +38,7 @@ export class ProjectService {
     console.log("params", params.toString());
     console.log("query", query);
 
-    const response = await this.projectRepository.getProjects(params);
+    const response = await this.projectRepository.getProjects(query);
     return response.data;
   }
 
@@ -71,6 +71,11 @@ export class ProjectService {
     }
 
     const response = await this.projectRepository.updateProject(id, data);
+    return response.data;
+  }
+
+  async deleteProject(id: string): Promise<any> {
+    const response = await this.projectRepository.deleteProject(id);
     return response.data;
   }
 }
