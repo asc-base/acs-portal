@@ -3,7 +3,7 @@ import React, { useState, useEffect } from "react";
 import { Button, InputAdornment, Modal } from "@mui/material";
 import { RHFTextField } from "@/components/form/RHFTextField";
 import { styled } from "@mui/material/styles";
-// import AddCircleOutlineRoundedIcon from "@mui/icons-material/AddCircleOutlineRounded";
+import { IUser } from "@/interface/user";
 import GitHubIcon from "@mui/icons-material/GitHub";
 import FacebookRoundedIcon from "@mui/icons-material/FacebookRounded";
 import LinkedInIcon from "@mui/icons-material/LinkedIn";
@@ -40,26 +40,24 @@ interface FormData {
 //   studentData: IStudent;
 // }
 
-const ProfileForm = () => {
-  const user = useAuthStore((state) => state.user);
+const ProfileForm = ({ student }: { student: IStudent }) => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [studentData, setStudentData] = useState<IStudent | null>(null);
   const { handleSubmit, control } = useForm<FormData>({
     defaultValues: {
-      github: studentData?.github || "",
-      linkedin: studentData?.linkedin || "",
-      facebook: studentData?.facebook || "",
-      instagram: studentData?.instagram || "",
+      github: student?.github || "",
+      linkedin: student?.linkedin || "",
+      facebook: student?.facebook || "",
+      instagram: student?.instagram || "",
       // projects:
       //   studentData?.projects?.map((project) => ({ title: project.title })) ||
       //   [],
-      file: studentData?.user?.imageUrl || null,
+      file: student?.user?.imageUrl || null,
     },
   });
   const [isCroping, setIsCroping] = useState(false);
 
   const { nickName, firstNameTh, firstNameEn, lastNameTh, lastNameEn } =
-    studentData?.user ?? {};
+    student?.user ?? {};
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0] || null;
@@ -83,17 +81,6 @@ const ProfileForm = () => {
   const onSubmit = (data: FormData) => {
     console.log("Form data:", data);
   };
-
-  useEffect(() => {
-    const getStudentData = async () => {
-      if (!user) {
-        return;
-      }
-      const student = await studentService.getStudentByUserId(user.id);
-      setStudentData(student);
-    };
-    getStudentData();
-  }, [user, studentData]);
 
   return (
     <div className="w-full flex-col px-20 py-6">
@@ -123,12 +110,12 @@ const ProfileForm = () => {
                   "&:hover": { backgroundColor: "#E2E2E2" },
                 }}
               >
-                {(selectedFile || studentData?.user?.imageUrl) && (
+                {(selectedFile || student?.user?.imageUrl) && (
                   <Image
                     src={
                       selectedFile
                         ? URL.createObjectURL(selectedFile)
-                        : (studentData?.user?.imageUrl ?? "")
+                        : (student?.user?.imageUrl ?? "")
                     }
                     alt="Profile"
                     width={300}
@@ -138,7 +125,7 @@ const ProfileForm = () => {
                 )}
                 <div
                   className={`flex items-center justify-center ${
-                    selectedFile || studentData?.user?.imageUrl
+                    selectedFile || student?.user?.imageUrl
                       ? "absolute inset-0 z-10 h-full w-full bg-black/40 opacity-0 transition-opacity duration-300 hover:opacity-100"
                       : "relative h-full w-full opacity-100"
                   } `}
@@ -164,7 +151,7 @@ const ProfileForm = () => {
               <div className="text-gray-500">รหัสนักศึกษา</div>
               <div className="text-center">:</div>
               <div className="font-bold text-neutral-800">
-                {studentData?.studentCode || "6009050401"}
+                {student?.studentCode || "6009050401"}
               </div>
 
               {/* Row 2: Nickname */}
@@ -178,7 +165,7 @@ const ProfileForm = () => {
               <div className="text-gray-500">ชื่อ - นามสกุล (ภาษาไทย)</div>
               <div className="text-center">:</div>
               <div className="font-bold text-neutral-800">
-                {studentData?.user
+                {student?.user
                   ? `${firstNameTh} ${lastNameTh}`.trim()
                   : "สมชาย ใจดี"}
               </div>
@@ -187,7 +174,7 @@ const ProfileForm = () => {
               <div className="text-gray-500">ชื่อ - นามสกุล (ภาษาอังกฤษ)</div>
               <div className="text-center">:</div>
               <div className="font-bold text-neutral-800">
-                {studentData?.user
+                {student?.user
                   ? `${firstNameEn} ${lastNameEn}`.trim()
                   : "Somchai Jaidee"}
               </div>
@@ -396,6 +383,8 @@ const ProfileForm = () => {
             closeAfterTransition
           >
             <CropImageCard
+              width={200}
+              height={200}
               file={selectedFile}
               onUploadComplete={handleCropComplete}
               onCancel={handleCropCancel}
