@@ -1,6 +1,18 @@
 import { Pageable } from "@/interface/response";
 import { IProject, QueryProject } from "../domain/project";
 import { IProjectRepository } from "../ports/project.repository";
+import { z } from "zod";
+
+const updateSchema = z.object({
+  title: z.string().trim().min(1, "กรุณากรอกชื่อโปรเจกต์"),
+  details: z.string().trim().min(1, "กรุณากรอกรายละเอียด"),
+  youtubeURL: z.string().trim().url("ลิงก์ YouTube ไม่ถูกต้อง").or(z.literal("")),
+  githubURL: z.string().trim().url("ลิงก์ Github ไม่ถูกต้อง").or(z.literal("")),
+  documentURL: z.string().trim().url("ลิงก์ Document ไม่ถูกต้อง").or(z.literal("")),
+  presentationURL: z.string().trim().url("ลิงก์ Presentation ไม่ถูกต้อง").or(z.literal("")),
+  figmaURL: z.string().trim().url("ลิงก์ Figma ไม่ถูกต้อง").or(z.literal("")),
+});
+
 export class ProjectService {
   constructor(private projectRepository: IProjectRepository) { }
 
@@ -34,8 +46,30 @@ export class ProjectService {
     const response = await this.projectRepository.getProjectById(id);
     return response.data;
   }
-
   async updateProject(id: string, data: FormData): Promise<IProject> {
+    const title = (data.get("title") as string) || "";
+    const details = (data.get("details") as string) || "";
+    const youtubeURL = (data.get("youtubeURL") as string) || "";
+    const githubURL = (data.get("githubURL") as string) || "";
+    const documentURL = (data.get("documentURL") as string) || "";
+    const presentationURL = (data.get("presentationURL") as string) || "";
+    const figmaURL = (data.get("figmaURL") as string) || "";
+
+    const validation = updateSchema.safeParse({
+      title,
+      details,
+      youtubeURL,
+      githubURL,
+      documentURL,
+      presentationURL,
+      figmaURL,
+    });
+
+    if (!validation.success) {
+      const errorMsg = validation.error.issues.map((issue) => issue.message).join(", ");
+      throw new Error(`การตรวจสอบข้อมูลล้มเหลว: ${errorMsg}`);
+    }
+
     const response = await this.projectRepository.updateProject(id, data);
     return response.data;
   }
