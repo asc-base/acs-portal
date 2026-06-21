@@ -15,8 +15,8 @@ export interface IStudent {
 }
 
 export interface QueryStudent {
-  page: number;
-  pageSize: number;
+  page?: number;
+  pageSize?: number;
   classBookID: number;
   search?: string;
   orderBy?: string;

@@ -61,3 +61,22 @@ export interface IProjectAssets {
   createdBy: number;
   updatedBy: number;
 }
+
+export interface IUpdateProjectData {
+  title: string;
+  details: string;
+  youtubeURL: string;
+  githubURL: string;
+  documentURL: string;
+  presentationURL: string;
+  figmaURL: string;
+  thumbnailFile?: File | null;
+  assets?: File[];
+  newtagsID?: number[];
+  deletedtagsID?: number[];
+  newMembers?: { userID: number; roleID: number }[];
+  deletedmembersID?: number[];
+  newCoursesID?: number[];
+  deletedCoursesID?: number[];
+  techStacks?: string[];
+}

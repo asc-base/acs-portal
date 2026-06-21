@@ -1,8 +1,20 @@
 import { Pageable } from "@/interface/response";
-import { IProject, QueryProject } from "../domain/project";
+import { IProject, QueryProject, IUpdateProjectData } from "../domain/project";
 import { IProjectRepository } from "../ports/project.repository";
+import { z } from "zod";
+
+const updateSchema = z.object({
+  title: z.string().trim().min(1, "กรุณากรอกชื่อโปรเจกต์"),
+  details: z.string().trim().min(1, "กรุณากรอกรายละเอียด"),
+  youtubeURL: z.string().trim().url("ลิงก์ YouTube ไม่ถูกต้อง").or(z.literal("")),
+  githubURL: z.string().trim().url("ลิงก์ Github ไม่ถูกต้อง").or(z.literal("")),
+  documentURL: z.string().trim().url("ลิงก์ Document ไม่ถูกต้อง").or(z.literal("")),
+  presentationURL: z.string().trim().url("ลิงก์ Presentation ไม่ถูกต้อง").or(z.literal("")),
+  figmaURL: z.string().trim().url("ลิงก์ Figma ไม่ถูกต้อง").or(z.literal("")),
+});
+
 export class ProjectService {
-  constructor(private projectRepository: IProjectRepository) {}
+  constructor(private projectRepository: IProjectRepository) { }
 
   async getProjects(query: QueryProject): Promise<Pageable<IProject>> {
     const params = new URLSearchParams();
@@ -21,17 +33,33 @@ export class ProjectService {
       params.set("courses", query.courses.join(","));
     if (query.classBooks && query.classBooks.length > 0)
       params.set("classBooks", query.classBooks.join(","));
-    if(query.search)params.set("search", query.search);
+    if (query.search) params.set("search", query.search);
 
     console.log("params", params.toString());
     console.log("query", query);
 
-    const response = await this.projectRepository.getProjects(params);
+    const response = await this.projectRepository.getProjects(query);
     return response.data;
   }
 
   async getProjectById(id: string): Promise<IProject> {
     const response = await this.projectRepository.getProjectById(id);
     return response.data;
+  }
+
+  async updateProject(id: string, data: IUpdateProjectData): Promise<IProject> {
+    const validation = updateSchema.safeParse(data);
+
+    if (!validation.success) {
+      const errorMsg = validation.error.issues.map((issue) => issue.message).join(", ");
+      throw new Error(`การตรวจสอบข้อมูลล้มเหลว: ${errorMsg}`);
+    }
+
+    const response = await this.projectRepository.updateProject(id, data);
+    return response.data;
+  }
+
+  async deleteProject(id: string): Promise<void> {
+    await this.projectRepository.deleteProject(id);
   }
 }
