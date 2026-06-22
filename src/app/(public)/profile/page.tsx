@@ -11,9 +11,7 @@ const page = async () => {
   }
 
   const user = await authService.getUserData(token);
-  console.log(user);
   const student = await studentService.getStudentByUserId(user.id);
-  console.log(student);
   return <ProfileForm student={student} />;
 };
 

@@ -41,8 +41,9 @@ interface FormData {
 // }
 
 const ProfileForm = ({ student }: { student: IStudent }) => {
+  const [isEditing, setIsEditing] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const { handleSubmit, control } = useForm<FormData>({
+  const { handleSubmit, control, reset } = useForm<FormData>({
     defaultValues: {
       github: student?.github || "",
       linkedin: student?.linkedin || "",
@@ -55,6 +56,17 @@ const ProfileForm = ({ student }: { student: IStudent }) => {
     },
   });
   const [isCroping, setIsCroping] = useState(false);
+
+  useEffect(() => {
+    reset({
+      github: student?.github || "",
+      linkedin: student?.linkedin || "",
+      facebook: student?.facebook || "",
+      instagram: student?.instagram || "",
+      file: student?.user?.imageUrl || null,
+    });
+    setSelectedFile(null);
+  }, [student, reset]);
 
   const { nickName, firstNameTh, firstNameEn, lastNameTh, lastNameEn } =
     student?.user ?? {};
@@ -78,8 +90,34 @@ const ProfileForm = ({ student }: { student: IStudent }) => {
     setSelectedFile(null);
   };
 
-  const onSubmit = (data: FormData) => {
-    console.log("Form data:", data);
+  const handleEdit = () => {
+    setIsEditing(true);
+  };
+
+  const handleCancel = () => {
+    reset({
+      github: student?.github || "",
+      linkedin: student?.linkedin || "",
+      facebook: student?.facebook || "",
+      instagram: student?.instagram || "",
+      file: student?.user?.imageUrl || null,
+    });
+    setSelectedFile(null);
+    setIsEditing(false);
+  };
+
+  const onSubmit = async (data: FormData) => {
+    try {
+      setIsEditing(false);
+      const res = await studentService.updateStudent(
+        data,
+        selectedFile,
+        student.classBookID!,
+        student.id,
+      );
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   return (
@@ -98,7 +136,8 @@ const ProfileForm = ({ student }: { student: IStudent }) => {
           <div className="mt-6 mb-16 flex flex-row items-center gap-x-8">
             <div className="relative inline-block">
               <Button
-                component="label"
+                component={isEditing ? "label" : "div"}
+                disabled={!isEditing}
                 className="group relative flex items-center justify-center overflow-hidden rounded-2xl p-0"
                 sx={{
                   borderRadius: "16px",
@@ -107,7 +146,10 @@ const ProfileForm = ({ student }: { student: IStudent }) => {
                   padding: 0,
                   minWidth: 0,
                   backgroundColor: "#F2F2F2",
-                  "&:hover": { backgroundColor: "#E2E2E2" },
+                  "&:hover": {
+                    backgroundColor: isEditing ? "#E2E2E2" : "#F2F2F2",
+                  },
+                  cursor: isEditing ? "pointer" : "default",
                 }}
               >
                 {(selectedFile || student?.user?.imageUrl) && (
@@ -123,24 +165,33 @@ const ProfileForm = ({ student }: { student: IStudent }) => {
                     className="h-full w-full object-cover transition-opacity"
                   />
                 )}
-                <div
-                  className={`flex items-center justify-center ${
-                    selectedFile || student?.user?.imageUrl
-                      ? "absolute inset-0 z-10 h-full w-full bg-black/40 opacity-0 transition-opacity duration-300 hover:opacity-100"
-                      : "relative h-full w-full opacity-100"
-                  } `}
-                >
-                  <div className="flex items-center justify-center rounded-lg border border-gray-300 bg-white/70 px-6 py-3 shadow-sm backdrop-blur-sm">
-                    <span className="text-base font-medium text-gray-700">
-                      อัปโหลดรูปภาพ
-                    </span>
+                {isEditing && (
+                  <div
+                    className={`flex items-center justify-center ${
+                      selectedFile || student?.user?.imageUrl
+                        ? "absolute inset-0 z-10 h-full w-full bg-black/40 opacity-0 transition-opacity duration-300 hover:opacity-100"
+                        : "relative h-full w-full opacity-100"
+                    } `}
+                  >
+                    <div className="flex items-center justify-center rounded-lg border border-gray-300 bg-white/70 px-6 py-3 shadow-sm backdrop-blur-sm">
+                      <span className="text-base font-medium text-gray-700">
+                        อัปโหลดรูปภาพ
+                      </span>
+                    </div>
                   </div>
-                </div>
-                <VisuallyHiddenInput
-                  type="file"
-                  accept="image/*"
-                  onChange={handleFileChange}
-                />
+                )}
+                {!(selectedFile || student?.user?.imageUrl) && !isEditing && (
+                  <span className="text-sm font-medium text-gray-400">
+                    ไม่มีรูปโปรไฟล์
+                  </span>
+                )}
+                {isEditing && (
+                  <VisuallyHiddenInput
+                    type="file"
+                    accept="image/*"
+                    onChange={handleFileChange}
+                  />
+                )}
               </Button>
             </div>
           </div>
@@ -193,6 +244,7 @@ const ProfileForm = ({ student }: { student: IStudent }) => {
                 placeholder="http://github.com/"
                 fullWidth
                 variant="outlined"
+                disabled={!isEditing}
                 sx={{
                   "& .MuiOutlinedInput-root": {
                     "& fieldset": {
@@ -226,6 +278,7 @@ const ProfileForm = ({ student }: { student: IStudent }) => {
                 placeholder="https://www.linkin.com/in/"
                 fullWidth
                 variant="outlined"
+                disabled={!isEditing}
                 sx={{
                   "& .MuiOutlinedInput-root": {
                     "& fieldset": {
@@ -262,6 +315,7 @@ const ProfileForm = ({ student }: { student: IStudent }) => {
                 placeholder="https://facebook.com/"
                 fullWidth
                 variant="outlined"
+                disabled={!isEditing}
                 sx={{
                   "& .MuiOutlinedInput-root": {
                     "& fieldset": {
@@ -295,6 +349,7 @@ const ProfileForm = ({ student }: { student: IStudent }) => {
                 placeholder="https://instagram.com/"
                 fullWidth
                 variant="outlined"
+                disabled={!isEditing}
                 sx={{
                   "& .MuiOutlinedInput-root": {
                     "& fieldset": {
@@ -357,24 +412,38 @@ const ProfileForm = ({ student }: { student: IStudent }) => {
         ))} */}
 
         <div className="mt-6 flex w-full flex-row justify-center gap-x-4 align-bottom md:justify-end">
-          <Button
-            variant="outlined"
-            color="primary"
-            size="medium"
-            className="px-16 py-8"
-          >
-            ยกเลิก
-          </Button>
-          <Button
-            type="submit"
-            variant="contained"
-            color="primary"
-            size="medium"
-            className="px-16 py-8"
-          >
-            {" "}
-            บันทึกข้อมูล
-          </Button>
+          {!isEditing ? (
+            <Button
+              variant="contained"
+              color="primary"
+              size="medium"
+              className="px-16 py-8"
+              onClick={handleEdit}
+            >
+              แก้ไขข้อมูล
+            </Button>
+          ) : (
+            <>
+              <Button
+                variant="outlined"
+                color="primary"
+                size="medium"
+                className="px-16 py-8"
+                onClick={handleCancel}
+              >
+                ยกเลิก
+              </Button>
+              <Button
+                type="submit"
+                variant="contained"
+                color="primary"
+                size="medium"
+                className="px-16 py-8"
+              >
+                บันทึกข้อมูล
+              </Button>
+            </>
+          )}
         </div>
         {isCroping && selectedFile && (
           <Modal
