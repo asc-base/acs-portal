@@ -1,8 +1,7 @@
 import { ReactNode } from "react";
 import { NavbarMain } from "@/components/navbar";
 import { Footer } from "@/components/footer";
-import { baseUrl } from "@/infra/container";
-import { curriculumService } from "@/infra/container";
+import { baseUrl, curriculumService } from "@/infra/container";
 import { QueryCurriculum } from "@/core/domain/curriculum";
 
 export const dynamic = "force-dynamic";

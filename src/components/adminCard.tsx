@@ -18,9 +18,9 @@ import { IProject } from "@/core/domain/project";
 import { INews } from "@/core/domain/news";
 
 const CurriculumContent: FC<{ curriculum: ICurriculum }> = ({ curriculum }) => (
-    <h3 className="mt-1 font-bold text-start">
-      {curriculum.title} พ.ศ. {curriculum.year}
-    </h3>
+  <h3 className="mt-1 text-start font-bold">
+    {curriculum.title} พ.ศ. {curriculum.year}
+  </h3>
 );
 
 const ClassBookContent: FC<{ classbook: IClassBook }> = ({ classbook }) => (
@@ -97,7 +97,7 @@ export const AdminCard: FC<AdminCardProps> = (props) => {
     image = data.thumbnail || "";
     alt = data.title;
   } else if (type === "news") {
-    image = data.image;
+    image = data.thumbnailURL || "";
     alt = data.title;
   }
 
@@ -121,12 +121,8 @@ export const AdminCard: FC<AdminCardProps> = (props) => {
       </div>
 
       <CardContent className="flex-grow !px-7">
-        {type === "curriculum" && (
-          <CurriculumContent curriculum={data}/>
-        )}
-        {type === "classBook" && (
-          <ClassBookContent classbook={data}/>
-        )}
+        {type === "curriculum" && <CurriculumContent curriculum={data} />}
+        {type === "classBook" && <ClassBookContent classbook={data} />}
         {type === "project" && <ProjectContent project={data} />}
         {type === "news" && <NewsContent news={data} />}
       </CardContent>
