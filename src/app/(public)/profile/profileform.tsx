@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { Button, InputAdornment, Modal } from "@mui/material";
 import { RHFTextField } from "@/components/form/RHFTextField";
 import { styled } from "@mui/material/styles";
@@ -12,7 +12,8 @@ import Image from "next/image";
 import { useForm } from "react-hook-form";
 import { IStudent } from "@/core/domain/student";
 import { useAuthStore } from "@/store/auth";
-import { studentService } from "@/infra/container";
+import { StudentRepository } from "@/infra/repositories/student.repository";
+import { StudentService } from "@/core/service/student.service";
 import { CropImageCard } from "@/components/cropimagecard";
 
 const VisuallyHiddenInput = styled("input")({
@@ -40,7 +41,13 @@ interface FormData {
 //   studentData: IStudent;
 // }
 
-const ProfileForm = ({ student }: { student: IStudent }) => {
+const ProfileForm = ({
+  student,
+  apiBase,
+}: {
+  student: IStudent;
+  apiBase: string;
+}) => {
   const [isEditing, setIsEditing] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const { handleSubmit, control, reset } = useForm<FormData>({
@@ -105,6 +112,11 @@ const ProfileForm = ({ student }: { student: IStudent }) => {
     setSelectedFile(null);
     setIsEditing(false);
   };
+
+  const studentService = useMemo(() => {
+    const repository = new StudentRepository(apiBase);
+    return new StudentService(repository);
+  }, [apiBase]);
 
   const onSubmit = async (data: FormData) => {
     try {

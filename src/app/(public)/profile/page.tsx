@@ -1,5 +1,5 @@
 import ProfileForm from "./profileform";
-import { authService, studentService } from "@/infra/container";
+import { authService, studentService, baseUrl } from "@/infra/container";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
@@ -12,7 +12,7 @@ const page = async () => {
 
   const user = await authService.getUserData(token);
   const student = await studentService.getStudentByUserId(user.id);
-  return <ProfileForm student={student} />;
+  return <ProfileForm student={student} apiBase={baseUrl} />;
 };
 
 export default page;
