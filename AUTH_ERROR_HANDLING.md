@@ -96,7 +96,7 @@ try {
 Make sure your API URL is correctly configured:
 
 ```env
-NEXT_PUBLIC_API_URL=http://localhost:8000
+API_URL=http://localhost:8000
 ```
 
 Note: Your current `.env` file has `localhost:8000`, while `.env.example` shows `localhost:8080`. Make sure this matches your backend server.
