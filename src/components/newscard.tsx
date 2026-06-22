@@ -25,7 +25,7 @@ export const NewsCard: FC<NewsCardProps> = (props) => {
         <CardMedia
           className="h-[180px] w-full rounded-xl object-cover lg:h-[240px]"
           component="img"
-          image={news.image}
+          image={news.thumbnailURL}
           alt={news.title}
         />
       </div>
