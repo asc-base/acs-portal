@@ -17,7 +17,10 @@ import { CropImageCard } from "./cropimagecard";
 import { NewsRepository } from "@/infra/repositories/news.repository";
 import { NewsService } from "@/core/service/news.service";
 import { useRouter } from "next/navigation";
-import { ConfirmModal, ConfirmModalProps } from "@/components/modal/confirmModal";
+import {
+  ConfirmModal,
+  ConfirmModalProps,
+} from "@/components/modal/confirmModal";
 import { styled } from "@mui/material/styles";
 
 interface NewsInformationFormProps {
@@ -141,10 +144,17 @@ export const NewsInformationForm = ({
     setOpen(false);
   };
 
-  const handleSearch = async ( search: string) => {
+  const handleSearch = async (search: string) => {
     setLoading(true);
     try {
-      const { rows } = await newsService.getNews(1, 10, undefined, undefined, undefined, search);
+      const { rows } = await newsService.getNews(
+        1,
+        10,
+        undefined,
+        undefined,
+        undefined,
+        search,
+      );
       setOptions(rows);
     } finally {
       setLoading(false);
@@ -234,6 +244,8 @@ export const NewsInformationForm = ({
           <div>
             {selectedFile && (
               <CropImageCard
+                width={564}
+                height={496}
                 file={selectedFile}
                 onUploadComplete={handleUploadComplete}
                 onCancel={() => setOpen(false)}
@@ -250,7 +262,7 @@ export const NewsInformationForm = ({
             บันทึกข้อมูล
           </Button>
         </div>
-        
+
         {confirmModal && <ConfirmModal {...confirmModal} />}
       </form>
     </div>

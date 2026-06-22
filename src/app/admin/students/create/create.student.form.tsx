@@ -412,6 +412,8 @@ export const CreateStudentForm: FC<FormProfessorsProps> = ({
       {isCroping && selectedFile && (
         <Modal open={isCroping} onClose={handleCropCancel} closeAfterTransition>
           <CropImageCard
+            width={512}
+            height={512}
             file={selectedFile}
             onUploadComplete={handleCropComplete}
             onCancel={handleCropCancel}

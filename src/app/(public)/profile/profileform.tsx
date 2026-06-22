@@ -396,6 +396,8 @@ const ProfileForm = () => {
             closeAfterTransition
           >
             <CropImageCard
+              width={512}
+              height={512}
               file={selectedFile}
               onUploadComplete={handleCropComplete}
               onCancel={handleCropCancel}
