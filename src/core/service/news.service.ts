@@ -9,7 +9,7 @@ import { INewsRepository } from "../ports/news.repository";
 export class NewsService {
   constructor(private readonly newsRepository: INewsRepository) {}
 
-  async createNews(data: ICreateNews, image: File): Promise<INews> {
+  async createNews(data: ICreateNews, thumbnail: File, highlight: File): Promise<INews> {
     const formData = new FormData();
 
     formData.append("title", data.title);
@@ -21,8 +21,11 @@ export class NewsService {
       formData.append("dueDate", new Date(data.dueDate).toISOString());
     }
 
-    if (image) {
-      formData.append("image", image);
+    if (thumbnail) {
+      formData.append("thumbnail", thumbnail);
+    }
+    if (highlight) {
+      formData.append("highlight", highlight);
     }
     const response = await this.newsRepository.createNews(formData);
     return response.data;
@@ -54,15 +57,25 @@ export class NewsService {
     return response.data;
   }
 
-  async updateNews(id: number, data: IUpdateNews, image: File | null) {
+  async updateNews(
+    id: number,
+    data: IUpdateNews,
+    thumbnail: File | null,
+    highlight: File | null,
+  ) {
     try {
       const formData = new FormData();
       Object.entries(data).forEach(([key, value]) => {
-        formData.append(key, value?.toString() ?? "");
+        if (value !== undefined && value !== null) {
+          formData.append(key, value.toString());
+        }
       });
 
-      if (image) {
-        formData.append("image", image);
+      if (thumbnail) {
+        formData.append("thumbnail", thumbnail);
+      }
+      if (highlight) {
+        formData.append("highlight", highlight);
       }
 
       const response = await this.newsRepository.updateNews(id, formData);

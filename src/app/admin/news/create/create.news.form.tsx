@@ -146,7 +146,7 @@ const CreateNewsForm = ({ apiBase, categories }: CraeteNewsProps) => {
           dueDate: data.dueDate ? dayjs(data.dueDate).toISOString() : undefined,
         };
 
-        const response = await newsService.createNews(payload, coverFile); 
+        const response = await newsService.createNews(payload, coverFile, headerFile); 
 
         if (response) {
           setConfirmModal({
