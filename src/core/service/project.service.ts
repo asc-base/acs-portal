@@ -1,6 +1,7 @@
 import { Pageable } from "@/interface/response";
-import { IProject, QueryProject } from "../domain/project";
+import { IProject, QueryProject, ICreateProject } from "../domain/project";
 import { IProjectRepository } from "../ports/project.repository";
+
 export class ProjectService {
   constructor(private projectRepository: IProjectRepository) {}
 
@@ -35,7 +36,20 @@ export class ProjectService {
     return response.data;
   }
 
-  async createProject(formData: FormData): Promise<any> {
+  async createProject(payload: ICreateProject, files: { thumbnailFile: File; assets: File[] }): Promise<any> {
+    const formData = new FormData();
+
+    Object.entries(payload).forEach(([key, value]) => {
+      if (Array.isArray(value) || typeof value === 'object') {
+        formData.append(key, JSON.stringify(value));
+      } else {
+        formData.append(key, value?.toString() ?? "");
+      }
+    });
+
+    formData.append("thumbnailFile", files.thumbnailFile);
+    files.assets.forEach((file) => formData.append("assets", file));
+
     const response = await this.projectRepository.createProject(formData);
     return response.data;
   }

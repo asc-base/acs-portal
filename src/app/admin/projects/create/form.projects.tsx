@@ -1,7 +1,7 @@
 "use client";
-import React, { FC, useState, useEffect } from "react";
-import { useForm, useFieldArray } from "react-hook-form";
-import { Button, Typography, IconButton } from "@mui/material";
+import React, { FC, useState, useEffect, useMemo } from "react";
+import { useForm, useFieldArray, SubmitHandler } from "react-hook-form";
+import { Button, Typography, IconButton, Modal } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import MenuItem from "@mui/material/MenuItem";
 import Alert from "@mui/material/Alert";
@@ -22,19 +22,26 @@ import DescriptionIcon from "@mui/icons-material/Description";
 import SlideshowIcon from "@mui/icons-material/Slideshow";
 import { ICourse } from "@/core/domain/course";
 import { CropImageCard } from "@/components/cropimagecard"; 
-import { projectService, courseService, masterDataService, studentService, professorService } from "@/infra/container";
+import { ProjectRepository } from "@/infra/repositories/project.repository";
+import { ProjectService } from "@/core/service/project.service";
+import { ICreateProject } from "@/core/domain/project";
+import { courseService, masterDataService, studentService, professorService } from "@/infra/container";
 
 interface FormProjectsProps {
   apiBase: string;
+  initialCourses: ICourse[];
+  initialMasterData: any;
+  initialStudents: any[];
+  initialProfessors: any[];
 }
 
 const Schema = z.object({
   title: z.string().trim().min(1, "กรุณากรอกหัวข้อ"),
   details: z.string().trim().min(1, "กรุณากรอกรายละเอียด"),
   youtubeURL: z.string().trim().url("กรุณากรอกลิงก์ YouTube ให้ถูกต้อง (ต้องเป็น URL)"),
-  githubURL: z.string().trim().url("ลิงก์ Github ไม่ถูกต้อง").or(z.literal("")).optional(),
-  documentURL: z.string().trim().url("ลิงก์ Document ไม่ถูกต้อง").or(z.literal("")).optional(),
-  presentationURL: z.string().trim().url("ลิงก์ Presentation ไม่ถูกต้อง").or(z.literal("")).optional(),
+  githubURL: z.string().trim().url("กรุณากรอกลิงก์ Github ให้ถูกต้อง (ต้องเป็น URL)"),
+  documentURL: z.string().trim().url("กรุณากรอกลิงก์ Document ให้ถูกต้อง (ต้องเป็น URL)"),
+  presentationURL: z.string().trim().url("กรุณากรอกลิงก์ Presentation ให้ถูกต้อง (ต้องเป็น URL)"),
   projectCourses: z.array(z.object({ value: z.number().min(1, "กรุณาเลือกวิชา") })).min(1, "กรุณาเลือกวิชาอย่างน้อย 1 วิชา"),
   projectTypes: z.array(z.object({ value: z.number().min(1, "กรุณาเลือกประเภท") })).min(1, "กรุณาเลือกประเภทอย่างน้อย 1 ประเภท"),
   projectCategories: z.array(z.object({ value: z.number().min(1, "กรุณาเลือกหมวดหมู่") })).min(1, "กรุณาเลือกหมวดหมู่อย่างน้อย 1 หมวดหมู่"),
@@ -65,72 +72,53 @@ const VisuallyHiddenInput = styled("input")({
   width: 1,
 });
 
-export const FormProjects: FC<FormProjectsProps> = ({ apiBase }) => {
-  const [courses, setCourses] = useState<ICourse[]>([]);
-  const [types, setTypes] = useState<Tag[]>([]);
-  const [categories, setCategories] = useState<Tag[]>([]);
-  const [students, setStudentsList] = useState<any[]>([]);
-  const [professors, setProfessorsList] = useState<any[]>([]);
+export const FormProjects: FC<FormProjectsProps> = ({ apiBase, initialCourses, initialMasterData, initialStudents, initialProfessors }) => {
 
+  const projectsService = useMemo(() => {
+    const projectsRepository = new ProjectRepository(apiBase);
+    return new ProjectService(projectsRepository);
+  }, [apiBase]);
+
+  const courses = initialCourses;
+  const students = initialStudents;
+  const professors = initialProfessors;
+  const types: Tag[] = initialMasterData?.tags?.filter((t: any) => t.tagsGroupsId === 1) || [];
+  const categories: Tag[] = initialMasterData?.tags?.filter((t: any) => t.tagsGroupsId === 3) || [];
 
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [selectedVideoFile, setSelectedVideoFile] = useState<File | null>(null);
+  const [imageError, setImageError] = useState(false);
+  const [assetsError, setAssetsError] = useState(false);
+  const [isCroping, setIsCroping] = useState(false);
   const [selectedAssets, setSelectedAssets] = useState<File[]>([]);
 
   const [draggedItemIndex, setDraggedItemIndex] = useState<number | null>(null);
   const [dragOverItemIndex, setDragOverItemIndex] = useState<number | null>(null);
 
   const [tempThumbFile, setTempThumbFile] = useState<File | null>(null);
-  const [tempVideoFile, setTempVideoFile] = useState<File | null>(null);
 
   const [errorMsg, setErrorMsg] = useState("");
   const [isError, setIsError] = useState(false);
   const router = useRouter();
   const [confirmModal, setConfirmModal] = useState<ConfirmModalProps | null>(null);
 
-  useEffect(() => {
-  const fetchData = async () => {
-    try {
-      const CURRICULUM_ID = 1; // ใส่ ID จริง
-      const CLASS_BOOK_ID = 1; // ใส่ ID รุ่น/ปีการศึกษาจริง — ต้องเช็คว่าค่าไหนถูก
-
-      const [coursesRes, masterData, studentsRes, professorsRes] = await Promise.all([
-        courseService.getCourse({ page: 1, pageSize: 100, curriculumID: CURRICULUM_ID }),
-        masterDataService.getMasterData(),
-        studentService.getStudents({ page: 1, pageSize: 100, classBookID: CLASS_BOOK_ID }),
-        professorService.getProfessors({ page: 1, pageSize: 100 }),
-      ]);
-
-      console.log("coursesRes:", coursesRes);
-      console.log("masterData:", masterData);
-      console.log("studentsRes:", studentsRes);
-      console.log("professorsRes:", professorsRes);
-
-      setCourses(coursesRes.rows);
-
-      const typeGroup = masterData.tagsGroups.find((g) => g.name === "type");
-      const categoryGroup = masterData.tagsGroups.find((g) => g.name === "category");
-
-      setTypes(masterData.tags.filter((t) => t.tagsGroupsId === typeGroup?.id));
-      setCategories(masterData.tags.filter((t) => t.tagsGroupsId === categoryGroup?.id));
-
-      setStudentsList(studentsRes.rows);
-      setProfessorsList(professorsRes.rows);
-    } catch (error) {
-      console.error(error);
-    }
-  };
-  fetchData();
-}, []);
   const { control, handleSubmit, formState: { isValid, isDirty } } = useForm<ProjectFormValues>({
     resolver: zodResolver(Schema),
     defaultValues: {
-      title: "", details: "", youtubeURL: "", githubURL: "", documentURL: "", presentationURL: "",
-      projectCourses: [{ value: 0 }], projectTypes: [{ value: 0 }], projectCategories: [{ value: 0 }],
-      techStacks: [{ value: "" }], students: [{ userID: 0 }], advisors: [{ userID: 0 }],
+      title: "", 
+      details: "", 
+      youtubeURL: "", 
+      githubURL: "", 
+      documentURL: "", 
+      presentationURL: "",
+      projectCourses: [{ value: "" as any }], 
+      projectTypes: [{ value: "" as any }], 
+      projectCategories: [{ value: "" as any }],
+      techStacks: [{ value: "" }], 
+      students: [{ userID: "" as any }], 
+      advisors: [{ userID: "" as any }],
     },
-    mode: "onSubmit",
-  });
+    mode: "onChange",
+});
 
   const { fields: projectCoursesFields, append: appendProjectCourses, remove: removeProjectCourses } = useFieldArray({ control, name: "projectCourses" });
   const { fields: projectTypesFields, append: appendProjectTypes, remove: removeProjectTypes } = useFieldArray({ control, name: "projectTypes" });
@@ -141,14 +129,23 @@ export const FormProjects: FC<FormProjectsProps> = ({ apiBase }) => {
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
-    if (file) setTempThumbFile(file);
+    if (file) {
+      setTempThumbFile(file);
+      setIsCroping(true);
+    }
     event.target.value = ""; 
   };
 
-  const handleVideoFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) setTempVideoFile(file);
-    event.target.value = ""; 
+  const handleCropComplete = (croppedFile: File) => {
+  setSelectedFile(croppedFile);
+  setImageError(false);
+  setIsCroping(false);
+  setTempThumbFile(null);
+  };
+
+  const handleCropCancel = () => {
+  setIsCroping(false);
+  setTempThumbFile(null);
   };
 
   const handleAssetsChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -158,6 +155,7 @@ export const FormProjects: FC<FormProjectsProps> = ({ apiBase }) => {
         const combined = [...prev, ...newFiles];
         return combined.slice(0, 10);
       });
+      setAssetsError(false);
     }
   };
 
@@ -185,111 +183,103 @@ export const FormProjects: FC<FormProjectsProps> = ({ apiBase }) => {
   };
 
   const cancelForm = () => {
-    const hasAnyValue = isDirty || !!selectedFile || !!selectedVideoFile || selectedAssets.length > 0;
+    const hasAnyValue = isDirty || !!selectedFile || selectedAssets.length > 0;
     if (hasAnyValue) {
       setConfirmModal({ isOpen: true, type: "warning", onClose: () => setConfirmModal(null), onConfirm: () => router.push(`/admin/projects`) });
     } else router.push(`/admin/projects`);
   };
 
-  const handleConfirmSubmit = handleSubmit(async (data: ProjectFormValues) => {
+  const onSubmit: SubmitHandler<ProjectFormValues> = async (data) => {
+    if (!selectedFile) {
+    setImageError(true);
+    return;
+    }
+
+    if (selectedAssets.length === 0) {
+      setAssetsError(true);
+      return;
+    }
+
     try {
-      if (!selectedFile) { setErrorMsg("กรุณาอัปโหลดรูปภาพหลัก"); setIsError(true); return; }
-      if (!selectedVideoFile) { setErrorMsg("กรุณาอัปโหลดรูปภาพ Thumbnail วิดีโอ"); setIsError(true); return; }
 
-      const formData = new FormData();
-      formData.append("thumbnailFile", selectedFile);
-      formData.append("videoThumbnailFile", selectedVideoFile); 
-      selectedAssets.forEach((file) => formData.append("assets", file));
+      const payload: ICreateProject = {
+        title: data.title,
+        details: data.details,
+        youtubeURL: data.youtubeURL,
+        githubURL: data.githubURL,
+        documentURL: data.documentURL,
+        presentationURL: data.presentationURL,
+        figmaURL: "",
+        coursesID: data.projectCourses.map((c) => Number(c.value)),
+        tagsID: [...data.projectTypes, ...data.projectCategories].map((tag) => Number(tag.value)),
+        techStacks: data.techStacks.map((t) => t.value),
+        members: [
+          ...data.students.map(s => ({ userID: Number(s.userID), roleID: 2 })),
+          ...data.advisors.map(a => ({ userID: Number(a.userID), roleID: 3 }))
+        ]
+      };
 
-      formData.append("title", data.title);
-      formData.append("details", data.details);
-      formData.append("youtubeURL", data.youtubeURL);
-      if (data.githubURL) formData.append("githubURL", data.githubURL);
-      if (data.documentURL) formData.append("documentURL", data.documentURL);
-      if (data.presentationURL) formData.append("presentationURL", data.presentationURL);
+      const files = {
+        thumbnailFile: selectedFile,
+        assets: selectedAssets
+      };
 
-      data.projectCourses.forEach((c) => formData.append("coursesID", c.value.toString()));
-      data.techStacks.forEach((t) => formData.append("techStacks", t.value));
+      const response = await projectsService.createProject(payload, files);
       
-      const allTags = [...data.projectTypes, ...data.projectCategories];
-      allTags.forEach((tag) => formData.append("tagsID", tag.value.toString()));
+      if (!response) {
+      setErrorMsg("ไม่สามารถบันทึกข้อมูลได้ กรุณาลองใหม่อีกครั้ง");
+      setIsError(true);
+      return;
+      }
 
-      const formattedStudents = data.students.map(s => ({ userID: s.userID, roleID: 2 }));
-      const formattedAdvisors = data.advisors.map(a => ({ userID: a.userID, roleID: 3 }));
-      const allMembers = [...formattedStudents, ...formattedAdvisors];
-      
-      allMembers.forEach((member, index) => {
-        formData.append(`members[${index}][userID]`, member.userID.toString());
-        formData.append(`members[${index}][roleID]`, member.roleID.toString());
+      setConfirmModal({
+        isOpen: true,
+        type: "success",
+        onClose: () => setConfirmModal(null),
+        onConfirm: () => router.push(`/admin/projects`),
       });
 
-      await projectService.createProject(formData);
-      router.push(`/admin/projects`);
-      
     } catch (error) {
       console.error(error);
       setErrorMsg("ไม่สามารถบันทึกข้อมูลได้ กรุณาลองใหม่อีกครั้ง");
       setIsError(true);
     }
-  });
+  };
 
   return (
-    <div className="space-y-4 p-8 relative">
+    <form className="space-y-4 p-8 relative" onSubmit={handleSubmit(onSubmit)}>
       <Snackbar anchorOrigin={{ vertical: "top", horizontal: "right" }} open={isError} autoHideDuration={4000} onClose={() => setIsError(false)}>
         <Alert severity="error" onClose={() => setIsError(false)} sx={{ width: "100%" }}>{errorMsg}</Alert>
       </Snackbar>
-
-      {tempThumbFile && (
-        <div className="fixed inset-0 z-[9999] bg-black/60 flex items-center justify-center">
-          <CropImageCard 
-            file={tempThumbFile} 
-            width={400} 
-            height={284} 
-            onUploadComplete={(croppedFile) => {
-              setSelectedFile(croppedFile);
-              setTempThumbFile(null);
-            }} 
-            onCancel={() => setTempThumbFile(null)} 
-          />
-        </div>
-      )}
-
-      {tempVideoFile && (
-        <div className="fixed inset-0 z-[9999] bg-black/60 flex items-center justify-center">
-          <CropImageCard 
-            file={tempVideoFile} 
-            width={400} 
-            height={284} 
-            onUploadComplete={(croppedFile) => {
-              setSelectedVideoFile(croppedFile);
-              setTempVideoFile(null);
-            }} 
-            onCancel={() => setTempVideoFile(null)} 
-          />
-        </div>
-      )}
 
       <div>
         <Typography variant="h6" fontWeight="bold">ข้อมูลผลงาน</Typography>
 
         <div className="mt-6 mb-8 flex flex-row items-stretch gap-x-8 h-auto">
-          <div className="w-[400px] shrink-0 bg-gray-50 rounded-xl overflow-hidden border border-gray-300 relative flex flex-col justify-center items-center group">
-            {selectedFile ? (
-              <>
-                <Image src={URL.createObjectURL(selectedFile)} alt="Preview" fill style={{ objectFit: "cover" }} className="absolute inset-0 z-0" />
-                <div className="absolute inset-0 z-10 flex items-center justify-center bg-black/60 opacity-0 transition-opacity group-hover:opacity-100">
-                  <Button variant="contained" component="label" sx={{ backgroundColor: "var(--color-primary02)" }}>
-                    <VisuallyHiddenInput type="file" accept="image/*" onChange={handleFileChange} />
-                    อัปโหลดรูปภาพ
-                  </Button>
-                </div>
-              </>
-            ) : (
-              <Button variant="contained" component="label" sx={{ backgroundColor: "var(--color-primary02)", zIndex: 10 }}>
-                <VisuallyHiddenInput type="file" accept="image/*" onChange={handleFileChange} />
-                อัปโหลดรูปภาพ
-              </Button>
+          <div className="w-[400px] shrink-0 flex flex-col gap-2">
+            <div className="bg-gray-50 rounded-xl overflow-hidden border border-gray-300 relative flex flex-col justify-center items-center group h-full">
+              {selectedFile ? (
+                <>
+                  <Image src={URL.createObjectURL(selectedFile)} alt="Preview" fill style={{ objectFit: "cover" }} className="absolute inset-0 z-0" />
+                  <div className="absolute inset-0 z-10 flex items-center justify-center bg-black/60 opacity-0 transition-opacity group-hover:opacity-100">
+                    <Button variant="contained" component="label" sx={{ backgroundColor: "var(--color-primary02)" }}>
+                      <VisuallyHiddenInput type="file" accept="image/*" onChange={handleFileChange} />
+                      อัปโหลดรูปภาพ
+                    </Button>
+                  </div>
+                </>
+              ) : (
+                <Button variant="contained" component="label" sx={{ backgroundColor: "var(--color-primary02)", zIndex: 10 }}>
+                  <VisuallyHiddenInput type="file" accept="image/*" onChange={handleFileChange} />
+                  อัปโหลดรูปภาพ
+                </Button>
+              )}
+            </div>
+
+            {imageError && (
+              <p className="text-sm text-red-600">กรุณาอัปโหลดรูปภาพหลัก</p>
             )}
+            
           </div>
           
           <div className="flex flex-1 flex-col gap-4">
@@ -386,38 +376,16 @@ export const FormProjects: FC<FormProjectsProps> = ({ apiBase }) => {
           </div>
         </div>
 
-        <div className="my-10 flex flex-row items-stretch gap-x-8 pt-4 h-auto">
-          <div className="w-[400px] shrink-0 flex flex-col">
-            <Typography variant="h6" fontWeight="bold" className="mb-4">Thumbnail วิดีโอ</Typography>
-            <div className="bg-gray-50 flex-1 relative rounded-xl overflow-hidden border border-gray-300 flex flex-col justify-center items-center group">
-              {selectedVideoFile ? (
-                <>
-                  <Image src={URL.createObjectURL(selectedVideoFile)} alt="Video Preview" fill style={{ objectFit: "cover" }} className="absolute inset-0 z-0" />
-                  <div className="absolute inset-0 z-10 flex items-center justify-center bg-black/60 opacity-0 transition-opacity group-hover:opacity-100">
-                    <Button variant="contained" component="label" sx={{ backgroundColor: "var(--color-primary02)" }}>
-                      <VisuallyHiddenInput type="file" accept="image/*" onChange={handleVideoFileChange} />
-                      อัปโหลดรูปภาพ
-                    </Button>
-                  </div>
-                </>
-              ) : (
-                <Button variant="contained" component="label" sx={{ backgroundColor: "var(--color-primary02)", zIndex: 10 }}>
-                  <VisuallyHiddenInput type="file" accept="image/*" onChange={handleVideoFileChange} />
-                  อัปโหลดรูปภาพ
-                </Button>
-              )}
-            </div>
-          </div>
+        <div className="my-10 pt-4 flex flex-col gap-4">
+          <Typography variant="h6" fontWeight="bold">ลิงก์คลิปวิดีโอ</Typography>
+          <RHFTextField control={control} name="youtubeURL" label="URL Youtube" variant="outlined" fullWidth requiredMark />
+        </div>
 
-          <div className="flex flex-1 flex-col gap-5">
-            <Typography variant="h6" fontWeight="bold">ลิงก์คลิปวิดีโอ</Typography>
-            <RHFTextField control={control} name="youtubeURL" label="URL Youtube" variant="outlined" fullWidth requiredMark />
-            
-            <Typography variant="h6" fontWeight="bold" className="mt-2">ลิงก์ต่างๆ</Typography>
-            <RHFTextField control={control} name="githubURL" label="Github" variant="outlined" fullWidth startIcon={<LinkIcon fontSize="small" />} />
-            <RHFTextField control={control} name="documentURL" label="Document" variant="outlined" fullWidth startIcon={<DescriptionIcon fontSize="small" />} />
-            <RHFTextField control={control} name="presentationURL" label="Presentation" variant="outlined" fullWidth startIcon={<SlideshowIcon fontSize="small" />} />
-          </div>
+        <div className="my-10 pt-4 flex flex-col gap-4">
+          <Typography variant="h6" fontWeight="bold">ลิงก์ต่างๆ</Typography>
+          <RHFTextField control={control} name="githubURL" label="Github" variant="outlined" fullWidth requiredMark startIcon={<LinkIcon fontSize="small" />} />
+          <RHFTextField control={control} name="documentURL" label="Document" variant="outlined" fullWidth requiredMark startIcon={<DescriptionIcon fontSize="small" />} />
+          <RHFTextField control={control} name="presentationURL" label="Presentation" variant="outlined" fullWidth requiredMark startIcon={<SlideshowIcon fontSize="small" />} />
         </div>
 
         <div className="my-10 pt-4">
@@ -433,14 +401,17 @@ export const FormProjects: FC<FormProjectsProps> = ({ apiBase }) => {
           </div>
           
           {selectedAssets.length === 0 ? (
-            <div className="w-full flex items-center justify-center p-10 bg-gray-50 border border-solid border-gray-200 rounded-lg min-h-[200px]">
+            <div className="w-full flex flex-col items-center justify-center gap-2 p-10 bg-white border-2 border-dashed border-gray-300 rounded-lg min-h-[200px]">
               <Button variant="contained" component="label" sx={{ backgroundColor: "var(--color-primary02)" }}>
                   <VisuallyHiddenInput type="file" accept="image/*" multiple onChange={handleAssetsChange} />
                   อัปโหลดรูปภาพ
               </Button>
+              {assetsError && (
+                <p className="text-sm text-red-600">กรุณาอัปโหลดรูปภาพเพิ่มเติมอย่างน้อย 1 รูป</p>
+              )}
             </div>
           ) : (
-            <div className="grid grid-cols-6 gap-4 items-start rounded-lg min-h-[160px]">
+            <div className="grid grid-cols-5 gap-4 items-start rounded-lg min-h-[160px]">
               {selectedAssets.map((file, index) => (
                 <div 
                   key={`${file.name}-${index}`} 
@@ -488,7 +459,7 @@ export const FormProjects: FC<FormProjectsProps> = ({ apiBase }) => {
               <div key={field.id} className="flex items-center gap-4">
                 <span className="font-semibold text-gray-400 w-6">{index + 1}.</span>
                 <div className="flex-1">
-                  <RHFTextField control={control} name={`techStacks.${index}.value`} variant="outlined" fullWidth />
+                  <RHFTextField control={control} name={`techStacks.${index}.value`} variant="outlined" fullWidth requiredMark />
                 </div>
                 <IconButton onClick={() => removeTechStacks(index)} disabled={techStacksFields.length === 1} sx={{ color: techStacksFields.length === 1 ? '#e0e0e0' : 'error.main' }}>
                   <DeleteIcon />
@@ -555,11 +526,28 @@ export const FormProjects: FC<FormProjectsProps> = ({ apiBase }) => {
         <Button variant="outlined" size="large" onClick={cancelForm} sx={{ borderColor: 'var(--color-primary02)', color: 'var(--color-primary02)' }}>
           ยกเลิก
         </Button>
-        <Button type="submit" variant="contained" size="large" onClick={handleConfirmSubmit} disabled={!isValid} sx={{ backgroundColor: 'var(--color-primary02)' }}>
+        <Button
+          type="submit"
+          variant="contained"
+          size="large"
+          disabled={!isValid}
+          sx={{ backgroundColor: 'var(--color-primary02)' }}
+        >
           บันทึกข้อมูล
         </Button>
       </div>
       {confirmModal && <ConfirmModal {...confirmModal} />}
-    </div>
+    {isCroping && tempThumbFile && (
+      <Modal open={isCroping} onClose={handleCropCancel} closeAfterTransition>
+        <CropImageCard
+          file={tempThumbFile}
+          width={400}
+          height={284}
+          onUploadComplete={handleCropComplete}
+          onCancel={handleCropCancel}
+        />
+      </Modal>
+    )}
+    </form>
   );
 };
