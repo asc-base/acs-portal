@@ -1,20 +1,21 @@
 "use client";
 import React, { useState, useEffect, useMemo } from "react";
-import { Button, InputAdornment, Modal } from "@mui/material";
+import { Button, InputAdornment, Modal, CircularProgress } from "@mui/material";
 import { RHFTextField } from "@/components/form/RHFTextField";
 import { styled } from "@mui/material/styles";
-import { IUser } from "@/interface/user";
 import GitHubIcon from "@mui/icons-material/GitHub";
 import FacebookRoundedIcon from "@mui/icons-material/FacebookRounded";
 import LinkedInIcon from "@mui/icons-material/LinkedIn";
 import InstagramIcon from "@mui/icons-material/Instagram";
 import Image from "next/image";
 import { useForm } from "react-hook-form";
+import { CropImageCard } from "@/components/cropimagecard";
+import { useRouter } from "next/navigation";
 import { IStudent } from "@/core/domain/student";
-import { useAuthStore } from "@/store/auth";
+import { AuthRepository } from "@/infra/repositories/auth.repository";
+import { AuthService } from "@/core/service/auth.service";
 import { StudentRepository } from "@/infra/repositories/student.repository";
 import { StudentService } from "@/core/service/student.service";
-import { CropImageCard } from "@/components/cropimagecard";
 
 const VisuallyHiddenInput = styled("input")({
   clip: "rect(0 0 0 0)",
@@ -41,15 +42,47 @@ interface FormData {
 //   studentData: IStudent;
 // }
 
-const ProfileForm = ({
-  student,
-  apiBase,
-}: {
-  student: IStudent;
-  apiBase: string;
-}) => {
+const ProfileForm = ({ apiBase }: { apiBase: string }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [student, setStudent] = useState<IStudent | null>(null);
+  const [loading, setLoading] = useState(true);
+  const router = useRouter();
+
+  const authService = useMemo(() => {
+    const authRepo = new AuthRepository(apiBase);
+    const authSerivce = new AuthService(authRepo);
+    return authSerivce;
+  }, [apiBase]);
+
+  const studentService = useMemo(() => {
+    const studentRepo = new StudentRepository(apiBase);
+    const studentSerivce = new StudentService(studentRepo);
+    return studentSerivce;
+  }, [apiBase]);
+
+  useEffect(() => {
+    const fetchStudent = async () => {
+      try {
+        const user = await authService.getUser();
+        if (!user) {
+          router.push("/auth/student");
+          return;
+        }
+        const studentResponse = await studentService.getStudentByUserId(
+          user.id,
+        );
+        setStudent(studentResponse);
+      } catch (error) {
+        console.error("Error fetching student profile:", error);
+        router.push("/auth/student");
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchStudent();
+  }, [router]);
+
   const { handleSubmit, control, reset } = useForm<FormData>({
     defaultValues: {
       github: student?.github || "",
@@ -113,24 +146,37 @@ const ProfileForm = ({
     setIsEditing(false);
   };
 
-  const studentService = useMemo(() => {
-    const repository = new StudentRepository(apiBase);
-    return new StudentService(repository);
-  }, [apiBase]);
-
   const onSubmit = async (data: FormData) => {
     try {
       setIsEditing(false);
-      const res = await studentService.updateStudent(
+      const id = student?.id;
+      const classBookID = student?.classBookID;
+
+      if (!id || !classBookID) {
+        return;
+      }
+
+      const response = await studentService.updateStudent(
         data,
         selectedFile,
-        student.classBookID!,
-        student.id,
+        classBookID,
+        id,
       );
+      if (response) {
+        setStudent(response);
+      }
     } catch (error) {
       console.log(error);
     }
   };
+
+  if (loading) {
+    return (
+      <div className="flex h-[50vh] w-full items-center justify-center">
+        <CircularProgress />
+      </div>
+    );
+  }
 
   return (
     <div className="w-full flex-col px-20 py-6">
