@@ -1,5 +1,5 @@
+import { IProject, QueryProject, IUpdateProjectData } from "@/core/domain/project";
 import { IProjectRepository } from "@/core/ports/project.repository";
-import { IProject, QueryProject } from "@/core/domain/project";
 import { Pageable } from "@/interface/response";
 import { HttpHelper } from "@/lib/http";
 import { ApiResponse } from "@/interface/response";
@@ -17,8 +17,8 @@ export class ProjectRepository implements IProjectRepository {
   ): Promise<ApiResponse<Pageable<IProject>>> {
     const params = new URLSearchParams();
 
-    if (query.sortBy) params.set("sortBy", query.sortBy);
-    if (query.sortOrder) params.set("sortOrder", query.sortOrder);
+    if (query.sortBy) params.set("orderBy", query.sortBy);
+    if (query.sortOrder) params.set("sortBy", query.sortOrder);
     if (query.page) params.set("page", query.page.toString());
     if (query.pageSize) params.set("pageSize", query.pageSize.toString());
     if (query.fields && query.fields.length > 0)
@@ -42,6 +42,12 @@ export class ProjectRepository implements IProjectRepository {
   async getProjectById(id: string): Promise<ApiResponse<IProject>> {
     const url = `/v1/project/${id}`;
     const response = await this.http.get<ApiResponse<IProject>>(url);
+    return response;
+  }
+
+  async updateProject(id: string, data: FormData): Promise<ApiResponse<IProject>> {
+    const url = `/v1/project/${id}`;
+    const response = await this.http.put<ApiResponse<IProject>>(url, data);
     return response;
   }
 }

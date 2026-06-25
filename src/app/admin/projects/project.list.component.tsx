@@ -19,6 +19,7 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect, useCallback } from "react";
 import { IProject, QueryProject } from "@/core/domain/project";
+import { projectService } from "@/infra/container";
 
 interface ProjectListComponentsProps {
   projects: IProject[];
@@ -90,7 +91,7 @@ const ProjectListComponents = ({
   return (
     <div className="min-h-screen px-8 py-5">
       <div className="mb-6 flex items-center justify-between">
-        <h3 className="text-lg font-bold">จัดการผลงาน</h3>
+        <h3 className="text-h3 font-bold">จัดการผลงาน</h3>
 
         <div className="flex items-center gap-3">
           <form className="relative">
@@ -107,11 +108,10 @@ const ProjectListComponents = ({
               type="button"
               onClick={() => reset({ search: "" })}
               disabled={!watchedSearch}
-              className={`text-neutral05 absolute top-1/2 right-2 -translate-y-1/2 ${
-                !watchedSearch
-                  ? "cursor-not-allowed opacity-50"
-                  : "hover:text-primary01 cursor-pointer"
-              }`}
+              className={`text-neutral05 absolute top-1/2 right-2 -translate-y-1/2 ${!watchedSearch
+                ? "cursor-not-allowed opacity-50"
+                : "hover:text-primary01 cursor-pointer"
+                }`}
             >
               <CloseIcon fontSize="small" />
             </button>
@@ -189,7 +189,7 @@ const ProjectListComponents = ({
         </div>
       </div>
 
-            <div className="flex w-full flex-col items-center justify-center gap-10">
+      <div className="flex w-full flex-col items-center justify-center gap-10">
         {projects.length > 0 ? (
           <>
             <div className="grid w-full grid-cols-3 justify-items-center gap-6">
@@ -200,7 +200,7 @@ const ProjectListComponents = ({
                   data={project}
                   onView={() =>
                     router.push(
-                      `/project/${project.id}`,
+                      `/admin/projects/${project.id}`,
                     )
                   }
                 />

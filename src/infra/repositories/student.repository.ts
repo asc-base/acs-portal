@@ -65,9 +65,9 @@ export class StudentRepository implements IStudentRepository {
   }
 
   async createStudentBatch(data: { classBookID: number, students: ICreateStudentCsv[] }): Promise<ApiResponse<IStudent[]>> {
-  return await this.http.post<ApiResponse<IStudent[]>>(
-    `/v1/students/batch`,
-    data
-  );
-}
+    return await this.http.post<ApiResponse<IStudent[]>>(
+      `/v1/students/batch`,
+      data
+    );
+  }
 }
