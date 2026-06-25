@@ -31,7 +31,6 @@ export class AuthRepository implements IAuthRepository {
       `/v1/users/profile`,
       {
         Authorization: `Bearer ${token}`,
-        Cookie: `accessToken=${token}`,
       },
     );
     return response;
