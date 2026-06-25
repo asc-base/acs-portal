@@ -136,7 +136,7 @@ const ProjectListComponents = ({
   return (
     <div className="min-h-screen px-8 py-5">
       <div className="mb-6 flex items-center justify-between">
-        <h3 className="text-lg font-bold">จัดการผลงาน</h3>
+        <h3 className="font-bold">จัดการผลงาน</h3>
 
         <div className="flex items-center gap-3">
           <form className="relative">
@@ -217,15 +217,12 @@ const ProjectListComponents = ({
             onClick={handleClickAddProject}
             variant="contained"
             sx={{
-              backgroundColor: "var(--color-primary02)",
-              color: "var(--color-neutral01)",
               px: 2,
               height: "44px",
               fontWeight: "bold",
               display: "flex",
               alignItems: "center",
               gap: 1,
-              "&:hover": { backgroundColor: "var(--color-primary03)" },
             }}
           >
             <AddIcon />
