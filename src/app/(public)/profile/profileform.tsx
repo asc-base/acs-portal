@@ -1,6 +1,6 @@
 "use client";
 import React, { useState, useEffect, useMemo } from "react";
-import { Button, InputAdornment, Modal, CircularProgress } from "@mui/material";
+import { Button, InputAdornment, Modal } from "@mui/material";
 import { RHFTextField } from "@/components/form/RHFTextField";
 import { styled } from "@mui/material/styles";
 import GitHubIcon from "@mui/icons-material/GitHub";
@@ -46,7 +46,6 @@ const ProfileForm = ({ apiBase }: { apiBase: string }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [student, setStudent] = useState<IStudent | null>(null);
-  const [loading, setLoading] = useState(true);
   const router = useRouter();
 
   const authService = useMemo(() => {
@@ -76,8 +75,6 @@ const ProfileForm = ({ apiBase }: { apiBase: string }) => {
       } catch (error) {
         console.error("Error fetching student profile:", error);
         router.push("/auth/student");
-      } finally {
-        setLoading(false);
       }
     };
     fetchStudent();
@@ -169,14 +166,6 @@ const ProfileForm = ({ apiBase }: { apiBase: string }) => {
       console.log(error);
     }
   };
-
-  if (loading) {
-    return (
-      <div className="flex h-[50vh] w-full items-center justify-center">
-        <CircularProgress />
-      </div>
-    );
-  }
 
   return (
     <div className="w-full flex-col px-20 py-6">
