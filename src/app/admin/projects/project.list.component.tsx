@@ -13,6 +13,7 @@ import DoneIcon from "@mui/icons-material/Done";
 import AddIcon from "@mui/icons-material/Add";
 import SearchIcon from "@mui/icons-material/Search";
 import CloseIcon from "@mui/icons-material/Close";
+import EmptyState from "@/components/emptyState";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -188,31 +189,42 @@ const ProjectListComponents = ({
         </div>
       </div>
 
-      <div className="flex w-full flex-col items-center justify-center gap-10">
-        <div className="grid w-full grid-cols-3 justify-items-center gap-6">
-          {projects.map((project) => (
-            <AdminCard
-              key={project.id}
-              type="project"
-              data={project}
-              onView={() =>
-                router.push(
-                  `/admin/projects/${project.id}`,
-                )
-              }
-              onDelete={() => console.log("Delete succeed:", project.id)}
-            />
-          ))}
-        </div>
+            <div className="flex w-full flex-col items-center justify-center gap-10">
+        {projects.length > 0 ? (
+          <>
+            <div className="grid w-full grid-cols-3 justify-items-center gap-6">
+              {projects.map((project) => (
+                <AdminCard
+                  key={project.id}
+                  type="project"
+                  data={project}
+                  onView={() =>
+                    router.push(
+                      `/project/${project.id}`,
+                    )
+                  }
+                />
+              ))}
+            </div>
 
-        <Pagination
-          shape="rounded"
-          count={Math.ceil(totalRecords / pageSize)}
-          page={page}
-          onChange={(_, currentPage) => handleNextPage(currentPage)}
-          color="primary"
-          size="large"
-        />
+            <Pagination
+              shape="rounded"
+              count={Math.ceil(totalRecords / pageSize) || 1}
+              page={page}
+              onChange={(_, currentPage) => handleNextPage(currentPage)}
+              color="primary"
+              size="large"
+            />
+          </>
+        ) : (
+          <div className="flex min-h-[600px] items-center justify-center">
+            <EmptyState
+              title="ไม่พบข้อมูลผลงานในขณะนี้"
+              description="ยังไม่มีโปรเจกต์ในระบบ หรือไม่พบผลลัพธ์จากการค้นหา"
+              iconColor="var(--color-primary06)"
+            />
+          </div>
+        )}
       </div>
     </div>
   );

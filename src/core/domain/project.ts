@@ -1,23 +1,23 @@
 import { IStudent } from "./student";
 import { ListType } from "@/interface/type";
 import { ICourse } from "./course";
+import { IUser } from "./user";
 
 export interface IProject {
   id: number;
   title: string;
-  thumbnail: string;
-  detail: string;
-  github: string;
-  presentation: string;
-  document: string;
-  figma: string;
-  youtube: string;
-  projectAssets: IProjectAssets[];
-  projectMembers: IStudent[];
-  projectCategories: ListType[];
-  projectFields: ListType[];
-  projectTypes: ListType[];
-  projectCourses: ICourse[];
+  thumbnailURL: string;
+  details: string;
+  githubURL: string;
+  presentationURL: string;
+  documentURL: string;
+  figmaURL: string;
+  youtubeURL: string;
+  assetsURL: string[];
+  techStacks: string[];
+  member: IUser[];
+  tag: ListType[];
+  course: ICourse[];
   createdAt: Date;
   updatedAt: Date;
   deletedAt: null;
