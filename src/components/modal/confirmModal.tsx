@@ -107,21 +107,54 @@ export const ConfirmModal: FC<ConfirmModalProps> = ({
             </h2>
           </div>
           <div className="flex w-full justify-center gap-x-4">
-            {type !== "success" && (
-              <Button variant="outlined" onClick={onClose} className="w-full">
-                {cancelText ?? defaultCancelText[type]}
+            {type === "success" ? (
+              <Button
+                variant="contained"
+                onClick={onConfirm}
+                sx={{
+                  bgcolor: "#120554",
+                  "&:hover": { bgcolor: "#1c0b78" },
+                  px: 6,
+                  py: 1,
+                  borderRadius: "8px",
+                  textTransform: "none",
+                  width: "80%",
+                }}
+              >
+                {confirmText ?? defaultConfirmText[type]}
               </Button>
+            ) : (
+              <>
+                <Button 
+                  variant="outlined" 
+                  onClick={onClose} 
+                  className="w-full"
+                  sx={{
+                    borderColor: "#cccccc",
+                    color: "#666666",
+                    "&:hover": { borderColor: "#999999", bgcolor: "#f9f9f9" },
+                    borderRadius: "8px",
+                    textTransform: "none",
+                  }}
+                >
+                  {cancelText ?? defaultCancelText[type]}
+                </Button>
+                <Button
+                  className="w-full"
+                  variant="contained"
+                  onClick={onConfirm}
+                  sx={{
+                    bgcolor: type === "warning" ? "#FACC15" : "#EF4444",
+                    color: "#ffffff",
+                    "&:hover": { bgcolor: type === "warning" ? "#EAB308" : "#DC2626" },
+                    borderRadius: "8px",
+                    textTransform: "none",
+                  }}
+                >
+                  {confirmText ?? defaultConfirmText[type]}
+                </Button>
+              </>
             )}
-            <Button
-              className="w-full"
-              variant="contained"
-              color={colorMap[type] ?? "primary"}
-              onClick={() => {
-                onConfirm();
-              }}
-            >
-              {confirmText ?? defaultConfirmText[type]}
-            </Button>
           </div>
         </div>
       </Box>

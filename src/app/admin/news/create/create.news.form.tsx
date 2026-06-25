@@ -1,5 +1,5 @@
 "use client";
-import { Button, MenuItem, Alert, Snackbar, IconButton } from "@mui/material";
+import { Button, MenuItem, Alert, Snackbar, IconButton, Modal } from "@mui/material";
 import React, { useState, useMemo } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
 import Image from "next/image";
@@ -21,11 +21,12 @@ import {
 import { useRouter } from "next/navigation";
 import { styled } from "@mui/material/styles";
 import { Tag } from "@/core/domain/list-type";
+import { CropImageCard } from "@/components/cropimagecard";
 
 dayjs.extend(buddhistEra);
 dayjs.locale("th");
 
-interface CraeteNewsProps {
+interface CreateNewsProps {
   apiBase: string;
   categories: Tag[];
 }
@@ -57,16 +58,19 @@ const VisuallyHiddenInput = styled("input")({
   width: 1,
 });
 
-const CreateNewsForm = ({ apiBase, categories }: CraeteNewsProps) => {
-  const [coverFile, setCoverFile] = useState<File | null>(null);
-  const [headerFile, setHeaderFile] = useState<File | null>(null);
+const CreateNewsForm = ({ apiBase, categories }: CreateNewsProps) => {
+  const [thumbnailFile, setThumbnailFile] = useState<File | null>(null);
+  const [highlightFile, setHighlightFile] = useState<File | null>(null);
   const [confirmModal, setConfirmModal] = useState<ConfirmModalProps | null>(
     null,
   );
   const [isError, setIsError] = useState(false);
   
-  const [coverError, setCoverError] = useState(false);
-  const [headerError, setHeaderError] = useState(false);
+  const [thumbnailError, setThumbnailError] = useState(false);
+  const [highlightError, setHighlightError] = useState(false);
+
+  const [croppingFile, setCroppingFile] = useState<File | null>(null);
+  const [cropTarget, setCropTarget] = useState<"thumbnail" | "highlight" | null>(null);
 
   const router = useRouter();
 
@@ -94,49 +98,63 @@ const CreateNewsForm = ({ apiBase, categories }: CraeteNewsProps) => {
   const handleCoverChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
-      setCoverFile(file);
-      setCoverError(false);
+      setCroppingFile(file);
+      setCropTarget("thumbnail");
+      event.target.value = "";
     }
   };
 
   const handleHeaderChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
-      setHeaderFile(file);
-      setHeaderError(false);
+      setCroppingFile(file);
+      setCropTarget("highlight");
+      event.target.value = "";
     }
   };
 
+  const handleUploadComplete = (file: File) => {
+    if (cropTarget === "thumbnail") {
+      setThumbnailFile(file);
+      setThumbnailError(false);
+    } else if (cropTarget === "highlight") {
+      setHighlightFile(file);
+      setHighlightError(false);
+    }
+    setCroppingFile(null);
+    setCropTarget(null);
+  };
+
   const handleCancel = () => {
-    if (isDirty || coverFile || headerFile) {
+    if (isDirty || thumbnailFile || highlightFile) {
       setConfirmModal({
         isOpen: true,
         type: "warning",
         onClose: () => setConfirmModal(null),
         onConfirm: () => {
           reset();
-          setCoverFile(null);
-          setHeaderFile(null);
+          setThumbnailFile(null);
+          setHighlightFile(null);
           setConfirmModal(null);
           router.push(`/admin/news?page=1&pageSize=9&category=&title=`);
         },
       });
     } else {
       reset();
-      setCoverFile(null);
-      setHeaderFile(null);
+      setThumbnailFile(null);
+      setHighlightFile(null);
       router.push(`/admin/news?page=1&pageSize=9&category=&title=`);
     }
   };
 
   const onSubmit: SubmitHandler<FormData> = async (data) => {
-    if (!coverFile || !headerFile) {
-      if (!coverFile) setCoverError(true);
-      if (!headerFile) setHeaderError(true);
+    if (!thumbnailFile || !highlightFile) {
+      if (!thumbnailFile) setThumbnailError(true);
+      if (!highlightFile) setHighlightError(true);
       return;
     }
 
-    if (isDirty || coverFile || headerFile) {
+    if (isDirty || thumbnailFile || highlightFile) {
       try {
         const payload: ICreateNews = {
           title: data.title,
@@ -146,7 +164,7 @@ const CreateNewsForm = ({ apiBase, categories }: CraeteNewsProps) => {
           dueDate: data.dueDate ? dayjs(data.dueDate).toISOString() : undefined,
         };
 
-        const response = await newsService.createNews(payload, coverFile, headerFile); 
+        const response = await newsService.createNews(payload, thumbnailFile, highlightFile); 
 
         if (response) {
           setConfirmModal({
@@ -185,84 +203,84 @@ const CreateNewsForm = ({ apiBase, categories }: CraeteNewsProps) => {
         </Alert>
       </Snackbar>
       
-      <h3 className="mb-6 font-bold text-xl">ข้อมูลข่าวสาร</h3>
+      <h3 className="mb-6 font-bold">ข้อมูลข่าวสาร</h3>
       
-      <form className="gap-4 p-4 bg-white rounded-lg" onSubmit={handleSubmit(onSubmit)}>
+      <form className="gap-4 p-4" onSubmit={handleSubmit(onSubmit)}>
         <div className="flex flex-col gap-6">
           
           <div className="grid grid-cols-5 gap-6">
             
-            <div className="col-span-2 flex flex-col gap-2">
-              <label className="text-sm text-gray-500">ภาพหน้าปก</label>
-              <div className={`bg-gray-100 flex items-center justify-center rounded-lg relative aspect-[4/3] w-full overflow-hidden ${coverError ? 'border border-red-500' : ''}`}>
-                {coverFile ? (
-                  <div className="group relative w-full h-full">
-                    <Image
-                      src={URL.createObjectURL(coverFile)}
-                      alt="Cover Preview"
-                      fill
-                      className="object-cover"
-                    />
-                    <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
-                      <Button variant="contained" component="label" sx={{ bgcolor: 'rgba(255,255,255,0.2)', backdropFilter: 'blur(4px)' }}>
-                        เปลี่ยนรูปภาพ
-                        <VisuallyHiddenInput
-                          type="file"
-                          accept="image/*"
-                          onChange={handleCoverChange}
-                        />
-                      </Button>
-                    </div>
-                  </div>
-                ) : (
-                  <Button variant="text" component="label" sx={{ color: 'gray' }}>
-                    อัปโหลดรูปภาพ
-                    <VisuallyHiddenInput
-                      type="file"
-                      accept="image/*"
-                      onChange={handleCoverChange}
-                    />
-                  </Button>
-                )}
-              </div>
-              {coverError && <p className="text-sm text-red-600">กรุณาอัปโหลดภาพหน้าปก</p>}
-            </div>
-
-            <div className="col-span-3 flex flex-col gap-2">
-              <label className="text-sm text-gray-500">ภาพหัวเรื่อง</label>
-              <div className={`bg-gray-100 flex items-center justify-center rounded-lg relative aspect-[2/1] w-full overflow-hidden ${headerError ? 'border border-red-500' : ''}`}>
-                {headerFile ? (
-                  <div className="group relative w-full h-full">
-                    <Image
-                      src={URL.createObjectURL(headerFile)}
-                      alt="Header Preview"
-                      fill
-                      className="object-cover"
-                    />
-                    <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
-                      <Button variant="contained" component="label" sx={{ bgcolor: 'rgba(255,255,255,0.2)', backdropFilter: 'blur(4px)' }}>
-                        เปลี่ยนรูปภาพ
-                        <VisuallyHiddenInput
-                          type="file"
-                          accept="image/*"
-                          onChange={handleHeaderChange}
-                        />
-                      </Button>
-                    </div>
-                  </div>
-                ) : (
-                  <Button variant="text" component="label" sx={{ color: 'gray' }}>
-                    อัปโหลดรูปภาพ
-                    <VisuallyHiddenInput
-                      type="file"
-                      accept="image/*"
-                      onChange={handleHeaderChange}
-                    />
-                  </Button>
-                )}
-              </div>
-              {headerError && <p className="text-sm text-red-600">กรุณาอัปโหลดภาพหัวเรื่อง</p>}
-            </div>
+             <div className="col-span-2 flex flex-col gap-2">
+               <label className="text-sm text-neutral04">ภาพหน้าปก</label>
+               <div className={`bg-neutral02 flex items-center justify-center rounded-lg relative aspect-[4/3] w-full overflow-hidden ${thumbnailError ? 'border border-accent04' : ''}`}>
+                 {thumbnailFile ? (
+                   <div className="group relative w-full h-full">
+                     <Image
+                       src={URL.createObjectURL(thumbnailFile)}
+                       alt="Cover Preview"
+                       fill
+                       className="object-cover"
+                     />
+                     <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
+                       <Button variant="contained" component="label">
+                         อัปโหลดรูปภาพ
+                         <VisuallyHiddenInput
+                           type="file"
+                           accept="image/*"
+                           onChange={handleCoverChange}
+                         />
+                       </Button>
+                     </div>
+                   </div>
+                 ) : (
+                   <Button variant="text" component="label" className="text-neutral04">
+                     อัปโหลดรูปภาพ
+                     <VisuallyHiddenInput
+                       type="file"
+                       accept="image/*"
+                       onChange={handleCoverChange}
+                     />
+                   </Button>
+                 )}
+               </div>
+               {thumbnailError && <p className="text-sm text-accent04">กรุณาอัปโหลดภาพหน้าปก</p>}
+             </div>
+ 
+             <div className="col-span-3 flex flex-col gap-2">
+               <label className="text-sm text-neutral04">ภาพหัวเรื่อง</label>
+               <div className={`bg-neutral02 flex items-center justify-center rounded-lg relative aspect-[2/1] w-full overflow-hidden ${highlightError ? 'border border-accent04' : ''}`}>
+                 {highlightFile ? (
+                   <div className="group relative w-full h-full">
+                     <Image
+                       src={URL.createObjectURL(highlightFile)}
+                       alt="Header Preview"
+                       fill
+                       className="object-cover"
+                     />
+                     <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
+                       <Button variant="contained" component="label">
+                         อัปโหลดรูปภาพ
+                         <VisuallyHiddenInput
+                           type="file"
+                           accept="image/*"
+                           onChange={handleHeaderChange}
+                         />
+                       </Button>
+                     </div>
+                   </div>
+                 ) : (
+                   <Button variant="text" component="label" className="text-neutral04">
+                     อัปโหลดรูปภาพ
+                     <VisuallyHiddenInput
+                       type="file"
+                       accept="image/*"
+                       onChange={handleHeaderChange}
+                     />
+                   </Button>
+                 )}
+               </div>
+               {highlightError && <p className="text-sm text-accent04">กรุณาอัปโหลดภาพหัวเรื่อง</p>}
+             </div>
 
           </div>
 
@@ -315,22 +333,43 @@ const CreateNewsForm = ({ apiBase, categories }: CraeteNewsProps) => {
           </div>
         </div>
 
-        <div className="mt-8 flex justify-end">
+        <div className="mt-8 flex justify-end gap-x-4">
+          <Button 
+            variant="outlined" 
+            onClick={handleCancel} 
+            size="large"
+            className="w-37.5"
+          >
+            ยกเลิก
+          </Button>
           <Button 
             variant="contained" 
             type="submit" 
             size="large"
-            sx={{ 
-              bgcolor: '#1a0b59',
-              '&:hover': { bgcolor: '#130842' },
-              px: 6 
-            }}
+            className="w-37.5"
           >
-            แก้ไขข้อมูล
+            บันทึกข้อมูล
           </Button>
         </div>
       </form>
       
+      <Modal open={!!croppingFile} onClose={() => setCroppingFile(null)}>
+        <div>
+          {croppingFile && cropTarget && (
+            <CropImageCard
+              file={croppingFile}
+              width={cropTarget === "thumbnail" ? 400 : 800}
+              height={cropTarget === "thumbnail" ? 300 : 400}
+              onUploadComplete={handleUploadComplete}
+              onCancel={() => {
+                setCroppingFile(null);
+                setCropTarget(null);
+              }}
+            />
+          )}
+        </div>
+      </Modal>
+
       {confirmModal && <ConfirmModal {...confirmModal} />}
     </div>
   );
