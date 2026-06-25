@@ -17,11 +17,12 @@ import EmptyState from "@/components/emptyState";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useEffect, useCallback, useState } from "react";
+import { useEffect, useCallback, useState, useMemo } from "react";
 import { ConfirmModal, ConfirmModalProps } from "@/components/modal/confirmModal";
 import { Alert, Snackbar } from "@mui/material";
-import { projectService } from "@/infra/container";
 import { IProject, QueryProject } from "@/core/domain/project";
+import { ProjectRepository } from "@/infra/repositories/project.repository";
+import { ProjectService } from "@/core/service/project.service";
 
 interface ProjectListComponentsProps {
   projects: IProject[];
@@ -30,6 +31,7 @@ interface ProjectListComponentsProps {
   page: number;
   sortOrder?: string;
   search?: string;
+  apiBase: string;
 }
 
 const searchSchema = z.object({
@@ -45,11 +47,17 @@ const ProjectListComponents = ({
   page,
   sortOrder,
   search,
+  apiBase,
 }: ProjectListComponentsProps) => {
   const router = useRouter();
 
   const [confirmModal, setConfirmModal] = useState<ConfirmModalProps | null>(null);
   const [isError, setIsError] = useState(false);
+
+  const projectService = useMemo(() => {
+    const projectRepository = new ProjectRepository(apiBase);
+    return new ProjectService(projectRepository);
+  }, [apiBase]);
 
   const onDelete = async (id: string) => {
     try {
