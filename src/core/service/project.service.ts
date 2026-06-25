@@ -1,17 +1,6 @@
 import { Pageable } from "@/interface/response";
 import { IProject, QueryProject, IUpdateProjectData } from "../domain/project";
 import { IProjectRepository } from "../ports/project.repository";
-import { z } from "zod";
-
-const updateSchema = z.object({
-  title: z.string().trim().min(1, "กรุณากรอกชื่อโปรเจกต์"),
-  details: z.string().trim().min(1, "กรุณากรอกรายละเอียด"),
-  youtubeURL: z.string().trim().url("ลิงก์ YouTube ไม่ถูกต้อง").or(z.literal("")),
-  githubURL: z.string().trim().url("ลิงก์ Github ไม่ถูกต้อง").or(z.literal("")),
-  documentURL: z.string().trim().url("ลิงก์ Document ไม่ถูกต้อง").or(z.literal("")),
-  presentationURL: z.string().trim().url("ลิงก์ Presentation ไม่ถูกต้อง").or(z.literal("")),
-  figmaURL: z.string().trim().url("ลิงก์ Figma ไม่ถูกต้อง").or(z.literal("")),
-});
 
 export class ProjectService {
   constructor(private projectRepository: IProjectRepository) { }
@@ -48,18 +37,49 @@ export class ProjectService {
   }
 
   async updateProject(id: string, data: IUpdateProjectData): Promise<IProject> {
-    const validation = updateSchema.safeParse(data);
+    const formData = new FormData();
+    if (data.title !== undefined) formData.append("title", data.title);
+    if (data.details !== undefined) formData.append("details", data.details);
+    if (data.youtubeURL !== undefined) formData.append("youtubeURL", data.youtubeURL);
+    if (data.githubURL !== undefined) formData.append("githubURL", data.githubURL);
+    if (data.documentURL !== undefined) formData.append("documentURL", data.documentURL);
+    if (data.presentationURL !== undefined) formData.append("presentationURL", data.presentationURL);
+    if (data.figmaURL !== undefined) formData.append("figmaURL", data.figmaURL);
 
-    if (!validation.success) {
-      const errorMsg = validation.error.issues.map((issue) => issue.message).join(", ");
-      throw new Error(`การตรวจสอบข้อมูลล้มเหลว: ${errorMsg}`);
+    if (data.thumbnailFile) {
+      formData.append("thumbnailFile", data.thumbnailFile);
     }
 
-    const response = await this.projectRepository.updateProject(id, data);
-    return response.data;
-  }
+    if (data.techStacks) {
+      formData.append("techStacks", JSON.stringify(data.techStacks));
+    }
 
-  async deleteProject(id: string): Promise<void> {
-    await this.projectRepository.deleteProject(id);
+    if (data.newtagsID) {
+      formData.append("newtagsID", JSON.stringify(data.newtagsID));
+    }
+    if (data.deletedtagsID) {
+      formData.append("deletedtagsID", JSON.stringify(data.deletedtagsID));
+    }
+    if (data.newMembers) {
+      formData.append("newMembers", JSON.stringify(data.newMembers));
+    }
+    if (data.deletedmembersID) {
+      formData.append("deletedmembersID", JSON.stringify(data.deletedmembersID));
+    }
+    if (data.newCoursesID) {
+      formData.append("newCoursesID", JSON.stringify(data.newCoursesID));
+    }
+    if (data.deletedCoursesID) {
+      formData.append("deletedCoursesID", JSON.stringify(data.deletedCoursesID));
+    }
+
+    if (data.assets && data.assets.length > 0) {
+      data.assets.forEach((file) => {
+        formData.append("assets", file);
+      });
+    }
+
+    const response = await this.projectRepository.updateProject(id, formData);
+    return response.data;
   }
 }

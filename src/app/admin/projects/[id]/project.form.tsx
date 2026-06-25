@@ -17,7 +17,6 @@ import LinkIcon from "@mui/icons-material/Link";
 import DescriptionIcon from "@mui/icons-material/Description";
 import SlideshowIcon from "@mui/icons-material/Slideshow";
 import CloseIcon from "@mui/icons-material/Close";
-import { motion, AnimatePresence } from "framer-motion";
 import { projectService } from "@/infra/container";
 import { IProject, IUpdateProjectData } from "@/core/domain/project";
 import { Tag } from "@/core/domain/list-type";
@@ -408,7 +407,7 @@ export const ProjectForm: FC<ProjectFormProps> = ({
   };
 
   return (
-    <div className="min-h-screen bg-[#EEF3F8] p-8">
+    <div className="min-h-screen bg-neutral02 p-8">
         <Snackbar
           anchorOrigin={{ vertical: "top", horizontal: "right" }}
           open={isError}
@@ -421,7 +420,7 @@ export const ProjectForm: FC<ProjectFormProps> = ({
         </Snackbar>
 
         <div className="mx-auto max-w-5xl mb-6">
-          <h1 className="text-3xl font-bold text-[#1E518E]">
+          <h1 className="text-h1-1 font-bold text-primary02">
             {isEdit ? "แก้ไขข้อมูลผลงาน" : "ดูข้อมูลผลงาน"}
           </h1>
         </div>
@@ -753,17 +752,17 @@ export const ProjectForm: FC<ProjectFormProps> = ({
             </div>
 
             {/* Section 5: รูปภาพเพิ่มเติม */}
-            <div className="space-y-4 border-t border-gray-100 pt-6">
+            <div className="space-y-4 border-t border-neutral02 pt-6">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <span className="text-lg font-bold text-gray-700">รูปภาพเพิ่มเติม *</span>
-                  <span className="text-sm text-gray-400">{assets.length} รูป - สูงสุด 10</span>
+                  <span className="text-h3 font-bold text-neutral05">รูปภาพเพิ่มเติม *</span>
+                  <span className="text-h5 text-neutral04">{assets.length} รูป - สูงสุด 10</span>
                 </div>
                 {isEdit && assets.length > 0 && (
                   <button
                     type="button"
                     onClick={handleClearAllAssets}
-                    className="text-sm font-semibold text-red-500 hover:text-red-700"
+                    className="text-h5 font-semibold text-accent03 hover:text-accent04"
                   >
                     ล้างทั้งหมด
                   </button>
@@ -774,54 +773,47 @@ export const ProjectForm: FC<ProjectFormProps> = ({
               {assets.length > 0 ? (
                 <div>
                   <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-5">
-                    <AnimatePresence mode="popLayout">
-                      {assets.map((asset, index) => {
-                        if (!asset || !asset.url) return null;
-                        return (
-                          <motion.div
-                            key={asset.id}
-                            layout
-                            initial={{ opacity: 0, scale: 0.8 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            exit={{ opacity: 0, scale: 0.8 }}
-                            transition={{ type: "spring", stiffness: 350, damping: 25 }}
-                            draggable={isEdit}
-                            onDragStart={(e) => handleDragStart(e, index)}
-                            onDragOver={(e) => handleDragOver(e, index)}
-                            onDrop={(e) => handleDrop(e, index)}
-                            onDragEnd={handleDragEnd}
-                            className={`group relative h-[120px] rounded-lg bg-gray-100 transition-all duration-300 select-none overflow-hidden
-                              ${isEdit ? "cursor-grab active:cursor-grabbing hover:scale-105 hover:shadow-lg ring-1 ring-black/5 hover:ring-primary02/50" : ""}
-                              ${draggedIndex === index ? "opacity-30 scale-95 border-2 border-dashed border-primary02" : ""}
-                              ${dragOverIndex === index && draggedIndex !== index ? "scale-105 ring-2 ring-primary02 shadow-lg" : ""}
-                            `}
-                          >
-                            <img
-                              src={asset.url}
-                              alt={`Asset ${index + 1}`}
-                              className="h-full w-full rounded-lg object-cover pointer-events-none"
-                            />
-                            {isEdit && (
-                              <div className="absolute inset-0 flex flex-col justify-between bg-black/40 p-2 opacity-0 transition-opacity duration-200 group-hover:opacity-100 rounded-lg">
-                                {/* Close / Delete Button */}
-                                <div className="flex justify-end">
-                                  <button
-                                    type="button"
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      handleRemoveAsset(asset.id);
-                                    }}
-                                    className="rounded-full bg-red-600 p-1 text-white hover:bg-red-700 pointer-events-auto transition-transform hover:scale-110 active:scale-95"
-                                  >
-                                    <CloseIcon fontSize="small" />
-                                  </button>
-                                </div>
+                    {assets.map((asset, index) => {
+                      if (!asset || !asset.url) return null;
+                      return (
+                        <div
+                          key={asset.id}
+                          draggable={isEdit}
+                          onDragStart={(e) => handleDragStart(e, index)}
+                          onDragOver={(e) => handleDragOver(e, index)}
+                          onDrop={(e) => handleDrop(e, index)}
+                          onDragEnd={handleDragEnd}
+                          className={`group relative h-[120px] rounded-lg bg-neutral02 transition-all duration-300 select-none overflow-hidden
+                            ${isEdit ? "cursor-grab active:cursor-grabbing hover:scale-105 hover:shadow-lg ring-1 ring-black/5 hover:ring-primary02/50" : ""}
+                            ${draggedIndex === index ? "opacity-30 scale-95 border-2 border-dashed border-primary02" : ""}
+                            ${dragOverIndex === index && draggedIndex !== index ? "scale-105 ring-2 ring-primary02 shadow-lg" : ""}
+                          `}
+                        >
+                          <img
+                            src={asset.url}
+                            alt={`Asset ${index + 1}`}
+                            className="h-full w-full rounded-lg object-cover pointer-events-none"
+                          />
+                          {isEdit && (
+                            <div className="absolute inset-0 flex flex-col justify-between bg-black/40 p-2 opacity-0 transition-opacity duration-200 group-hover:opacity-100 rounded-lg">
+                              {/* Close / Delete Button */}
+                              <div className="flex justify-end">
+                                <button
+                                  type="button"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleRemoveAsset(asset.id);
+                                  }}
+                                  className="rounded-full bg-accent03 p-1 text-neutral01 hover:bg-accent04 pointer-events-auto transition-transform hover:scale-110 active:scale-95"
+                                >
+                                  <CloseIcon fontSize="small" />
+                                </button>
                               </div>
-                            )}
-                          </motion.div>
-                        );
-                      })}
-                    </AnimatePresence>
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
                   </div>
                   {isEdit && assets.length < 10 && (
                     <div className="mt-4 flex justify-start">

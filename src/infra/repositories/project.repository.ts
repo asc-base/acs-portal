@@ -45,57 +45,9 @@ export class ProjectRepository implements IProjectRepository {
     return response;
   }
 
-  async updateProject(id: string, data: IUpdateProjectData): Promise<ApiResponse<IProject>> {
-    const formData = new FormData();
-    formData.append("title", data.title);
-    formData.append("details", data.details);
-    formData.append("youtubeURL", data.youtubeURL);
-    formData.append("githubURL", data.githubURL);
-    formData.append("documentURL", data.documentURL);
-    formData.append("presentationURL", data.presentationURL);
-    formData.append("figmaURL", data.figmaURL);
-
-    if (data.thumbnailFile) {
-      formData.append("thumbnailFile", data.thumbnailFile);
-    }
-
-    if (data.techStacks) {
-      formData.append("techStacks", JSON.stringify(data.techStacks));
-    }
-
-    if (data.newtagsID) {
-      formData.append("newtagsID", JSON.stringify(data.newtagsID));
-    }
-    if (data.deletedtagsID) {
-      formData.append("deletedtagsID", JSON.stringify(data.deletedtagsID));
-    }
-    if (data.newMembers) {
-      formData.append("newMembers", JSON.stringify(data.newMembers));
-    }
-    if (data.deletedmembersID) {
-      formData.append("deletedmembersID", JSON.stringify(data.deletedmembersID));
-    }
-    if (data.newCoursesID) {
-      formData.append("newCoursesID", JSON.stringify(data.newCoursesID));
-    }
-    if (data.deletedCoursesID) {
-      formData.append("deletedCoursesID", JSON.stringify(data.deletedCoursesID));
-    }
-
-    if (data.assets && data.assets.length > 0) {
-      data.assets.forEach((file) => {
-        formData.append("assets", file);
-      });
-    }
-
+  async updateProject(id: string, data: FormData): Promise<ApiResponse<IProject>> {
     const url = `/v1/project/${id}`;
-    const response = await this.http.put<ApiResponse<IProject>>(url, formData);
-    return response;
-  }
-
-  async deleteProject(id: string): Promise<ApiResponse<void>> {
-    const url = `/v1/project/${id}`;
-    const response = await this.http.delete<ApiResponse<void>>(url);
+    const response = await this.http.put<ApiResponse<IProject>>(url, data);
     return response;
   }
 }

@@ -63,13 +63,13 @@ export interface IProjectAssets {
 }
 
 export interface IUpdateProjectData {
-  title: string;
-  details: string;
-  youtubeURL: string;
-  githubURL: string;
-  documentURL: string;
-  presentationURL: string;
-  figmaURL: string;
+  title?: string;
+  details?: string;
+  youtubeURL?: string;
+  githubURL?: string;
+  documentURL?: string;
+  presentationURL?: string;
+  figmaURL?: string;
   thumbnailFile?: File | null;
   assets?: File[];
   newtagsID?: number[];

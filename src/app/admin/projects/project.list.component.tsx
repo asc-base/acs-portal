@@ -17,12 +17,9 @@ import EmptyState from "@/components/emptyState";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useEffect, useCallback, useState } from "react";
+import { useEffect, useCallback } from "react";
 import { IProject, QueryProject } from "@/core/domain/project";
 import { projectService } from "@/infra/container";
-import { ConfirmModal, ConfirmModalProps } from "@/components/modal/confirmModal";
-import Snackbar from "@mui/material/Snackbar";
-import Alert from "@mui/material/Alert";
 
 interface ProjectListComponentsProps {
   projects: IProject[];
@@ -48,40 +45,6 @@ const ProjectListComponents = ({
   search,
 }: ProjectListComponentsProps) => {
   const router = useRouter();
-  const [confirmModal, setConfirmModal] = useState<ConfirmModalProps | null>(null);
-  const [isError, setIsError] = useState(false);
-
-  const onDelete = async (id: number) => {
-    try {
-      await projectService.deleteProject(id.toString());
-      setConfirmModal({
-        isOpen: true,
-        type: "success",
-        onClose: () => setConfirmModal(null),
-        onConfirm: () => {
-          setConfirmModal(null);
-          router.refresh();
-        },
-        title: "ลบข้อมูลสำเร็จ",
-        description: "ข้อมูลถูกลบออกจากฐานข้อมูลแล้ว",
-        confirmText: "เสร็จสิ้น",
-      });
-    } catch (error) {
-      console.error(error);
-      setIsError(true);
-    }
-  };
-
-  const confirmDeleteProject = (id: number) => {
-    setConfirmModal({
-      isOpen: true,
-      type: "delete",
-      onClose: () => setConfirmModal(null),
-      onConfirm: () => {
-        onDelete(id);
-      },
-    });
-  };
 
   const { register, reset, watch } = useForm<SearchForm>({
     resolver: zodResolver(searchSchema),
@@ -128,7 +91,7 @@ const ProjectListComponents = ({
   return (
     <div className="min-h-screen px-8 py-5">
       <div className="mb-6 flex items-center justify-between">
-        <h3 className="text-lg font-bold">จัดการผลงาน</h3>
+        <h3 className="text-h3 font-bold">จัดการผลงาน</h3>
 
         <div className="flex items-center gap-3">
           <form className="relative">
@@ -240,7 +203,6 @@ const ProjectListComponents = ({
                       `/admin/projects/${project.id}`,
                     )
                   }
-                  onDelete={() => confirmDeleteProject(project.id)}
                 />
               ))}
             </div>
@@ -264,23 +226,6 @@ const ProjectListComponents = ({
           </div>
         )}
       </div>
-
-      <Snackbar
-        anchorOrigin={{ vertical: "top", horizontal: "right" }}
-        open={isError}
-        autoHideDuration={4000}
-        onClose={() => setIsError(false)}
-      >
-        <Alert
-          severity="error"
-          onClose={() => setIsError(false)}
-          sx={{ width: "100%" }}
-        >
-          ไม่สามารถลบข้อมูลผลงานได้ในขณะนี้ กรุณาลองใหม่อีกครั้ง
-        </Alert>
-      </Snackbar>
-
-      {confirmModal && <ConfirmModal {...confirmModal} />}
     </div>
   );
 };
