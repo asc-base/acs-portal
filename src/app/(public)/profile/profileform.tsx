@@ -249,7 +249,7 @@ const ProfileForm = ({ apiBase }: { apiBase: string }) => {
               <div className="text-gray-500">รหัสนักศึกษา</div>
               <div className="text-center">:</div>
               <div className="font-bold text-neutral-800">
-                {student?.studentCode || "6009050401"}
+                {student?.studentCode || "XXXXXXXXXX"}
               </div>
 
               {/* Row 2: Nickname */}
