@@ -94,10 +94,10 @@ export const AdminCard: FC<AdminCardProps> = (props) => {
     image = data.thumbnailURL;
     alt = String(data.classof);
   } else if (type === "project") {
-    image = data.thumbnail || "";
+    image = data.thumbnailURL || "";
     alt = data.title;
   } else if (type === "news") {
-    image = data.image;
+    image = data.thumbnailURL;
     alt = data.title;
   }
 

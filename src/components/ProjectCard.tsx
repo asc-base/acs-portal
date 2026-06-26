@@ -10,7 +10,14 @@ export interface ProjectCardProps {
 }
 
 function ProjectCardBase({ data }: ProjectCardProps) {
-  const { id, title, thumbnailURL, member, tag } = data;
+  const {
+    id,
+    title,
+    thumbnailURL,
+    projectMembers,
+    projectCategories,
+    projectFields,
+  } = data;
 
   return (
     <>
