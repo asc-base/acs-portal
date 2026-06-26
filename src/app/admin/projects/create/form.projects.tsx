@@ -1,5 +1,5 @@
 "use client";
-import React, { FC, useState, useEffect, useMemo } from "react";
+import React, { FC, useState, useMemo } from "react";
 import { useForm, useFieldArray, SubmitHandler } from "react-hook-form";
 import { Button, Typography, IconButton, Modal } from "@mui/material";
 import { styled } from "@mui/material/styles";
@@ -25,14 +25,16 @@ import { CropImageCard } from "@/components/cropimagecard";
 import { ProjectRepository } from "@/infra/repositories/project.repository";
 import { ProjectService } from "@/core/service/project.service";
 import { ICreateProject } from "@/core/domain/project";
-import { courseService, masterDataService, studentService, professorService } from "@/infra/container";
+import { MasterData } from "@/core/domain/master-data";
+import { IStudent } from "@/core/domain/student";
+import { IProfessor } from "@/core/domain/professor";
 
 interface FormProjectsProps {
   apiBase: string;
   initialCourses: ICourse[];
-  initialMasterData: any;
-  initialStudents: any[];
-  initialProfessors: any[];
+  initialMasterData: MasterData;
+  initialStudents: IStudent[];
+  initialProfessors: IProfessor[];
 }
 
 const Schema = z.object({
@@ -82,8 +84,8 @@ export const FormProjects: FC<FormProjectsProps> = ({ apiBase, initialCourses, i
   const courses = initialCourses;
   const students = initialStudents;
   const professors = initialProfessors;
-  const types: Tag[] = initialMasterData?.tags?.filter((t: any) => t.tagsGroupsId === 1) || [];
-  const categories: Tag[] = initialMasterData?.tags?.filter((t: any) => t.tagsGroupsId === 3) || [];
+  const types: Tag[] = initialMasterData?.tags?.filter((t) => t.tagsGroupsId === 1) || [];
+  const categories: Tag[] = initialMasterData?.tags?.filter((t) => t.tagsGroupsId === 3) || [];
 
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [imageError, setImageError] = useState(false);
@@ -110,12 +112,12 @@ export const FormProjects: FC<FormProjectsProps> = ({ apiBase, initialCourses, i
       githubURL: "", 
       documentURL: "", 
       presentationURL: "",
-      projectCourses: [{ value: "" as any }], 
-      projectTypes: [{ value: "" as any }], 
-      projectCategories: [{ value: "" as any }],
+      projectCourses: [{ value: 0 }], 
+      projectTypes: [{ value: 0 }], 
+      projectCategories: [{ value: 0 }],
       techStacks: [{ value: "" }], 
-      students: [{ userID: "" as any }], 
-      advisors: [{ userID: "" as any }],
+      students: [{ userID: 0 }], 
+      advisors: [{ userID: 0 }],
     },
     mode: "onChange",
 });
@@ -261,15 +263,15 @@ export const FormProjects: FC<FormProjectsProps> = ({ apiBase, initialCourses, i
               {selectedFile ? (
                 <>
                   <Image src={URL.createObjectURL(selectedFile)} alt="Preview" fill style={{ objectFit: "cover" }} className="absolute inset-0 z-0" />
-                  <div className="absolute inset-0 z-10 flex items-center justify-center bg-black/60 opacity-0 transition-opacity group-hover:opacity-100">
-                    <Button variant="contained" component="label" sx={{ backgroundColor: "var(--color-primary02)" }}>
+                  <div className="absolute inset-0 z-10 flex items-center justify-center bg-black/40 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
+                    <Button variant="contained" component="label">
                       <VisuallyHiddenInput type="file" accept="image/*" onChange={handleFileChange} />
                       อัปโหลดรูปภาพ
                     </Button>
                   </div>
                 </>
               ) : (
-                <Button variant="contained" component="label" sx={{ backgroundColor: "var(--color-primary02)", zIndex: 10 }}>
+                <Button variant="contained" component="label" sx={{ zIndex: 10 }}>
                   <VisuallyHiddenInput type="file" accept="image/*" onChange={handleFileChange} />
                   อัปโหลดรูปภาพ
                 </Button>
@@ -277,7 +279,7 @@ export const FormProjects: FC<FormProjectsProps> = ({ apiBase, initialCourses, i
             </div>
 
             {imageError && (
-              <p className="text-sm text-red-600">กรุณาอัปโหลดรูปภาพหลัก</p>
+              <p className="text-sm" style={{ color: "var(--color-accent04)" }}>กรุณาอัปโหลดรูปภาพหลัก</p>
             )}
             
           </div>
@@ -309,8 +311,12 @@ export const FormProjects: FC<FormProjectsProps> = ({ apiBase, initialCourses, i
           <div className="flex items-stretch justify-between gap-6">
             <div className="flex-1 space-y-4">
               <div className="flex items-center justify-between">
-                <h2 className="text-lg font-semibold">วิชา</h2>
-                <IconButton onClick={() => appendProjectCourses({ value: 0 })} color="primary"><AddCircleOutlineOutlined /></IconButton>
+                <Typography sx={{ fontSize: "var(--text-h3)", fontWeight: 600 }}>
+                  วิชา
+                </Typography>
+                <IconButton onClick={() => appendProjectCourses({ value: 0 })} sx={{ color: "var(--color-primary03)" }}>
+                  <AddCircleOutlineOutlined />
+                </IconButton>
               </div>
               <div className="space-y-2">
                 {projectCoursesFields.map((field, index) => (
@@ -320,7 +326,7 @@ export const FormProjects: FC<FormProjectsProps> = ({ apiBase, initialCourses, i
                         {courses?.map((course) => <MenuItem key={course.id} value={course.id}>{course.courseNameTh}</MenuItem>)}
                       </RHFSelect>
                     </div>
-                    <IconButton onClick={() => removeProjectCourses(index)} disabled={projectCoursesFields.length === 1} sx={{ color: projectCoursesFields.length === 1 ? '#e0e0e0' : 'error.main', mt: 3.5 }}>
+                    <IconButton onClick={() => removeProjectCourses(index)} disabled={projectCoursesFields.length === 1} color="error" sx={{ mt: 3.5 }}>
                       <DeleteIcon />
                     </IconButton>
                   </div>
@@ -328,12 +334,16 @@ export const FormProjects: FC<FormProjectsProps> = ({ apiBase, initialCourses, i
               </div>
             </div>
             
-            <div className="w-[1px] bg-gray-200 mt-10"></div>
+            <div className="w-[1px] bg-[var(--color-neutral03)] mt-10"></div>
             
             <div className="flex-1 space-y-4">
               <div className="flex items-center justify-between">
-                <h2 className="text-lg font-semibold">ประเภท</h2>
-                <IconButton onClick={() => appendProjectTypes({ value: 0 })} color="primary"><AddCircleOutlineOutlined /></IconButton>
+                <Typography sx={{ fontSize: "var(--text-h3)", fontWeight: 600 }}>
+                  ประเภท
+                </Typography>
+                <IconButton onClick={() => appendProjectTypes({ value: 0 })} sx={{ color: "var(--color-primary03)" }}>
+                  <AddCircleOutlineOutlined />
+                </IconButton>
               </div>
               <div className="space-y-2">
                 {projectTypesFields.map((field, index) => (
@@ -343,7 +353,7 @@ export const FormProjects: FC<FormProjectsProps> = ({ apiBase, initialCourses, i
                         {types?.map((type) => <MenuItem key={type.id} value={type.id}>{type.name}</MenuItem>)}
                       </RHFSelect>
                     </div>
-                    <IconButton onClick={() => removeProjectTypes(index)} disabled={projectTypesFields.length === 1} sx={{ color: projectTypesFields.length === 1 ? '#e0e0e0' : 'error.main', mt: 3.5 }}>
+                    <IconButton onClick={() => removeProjectTypes(index)} disabled={projectTypesFields.length === 1} color="error" sx={{ mt: 3.5 }}>
                       <DeleteIcon />
                     </IconButton>
                   </div>
@@ -351,12 +361,16 @@ export const FormProjects: FC<FormProjectsProps> = ({ apiBase, initialCourses, i
               </div>
             </div>
 
-            <div className="w-[1px] bg-gray-200 mt-10"></div>
+            <div className="w-[1px] bg-[var(--color-neutral03)] mt-10"></div>
             
             <div className="flex-1 space-y-4">
               <div className="flex items-center justify-between">
-                <h2 className="text-lg font-semibold">หมวดหมู่</h2>
-                <IconButton onClick={() => appendProjectCategories({ value: 0 })} color="primary"><AddCircleOutlineOutlined /></IconButton>
+                <Typography sx={{ fontSize: "var(--text-h3)", fontWeight: 600 }}>
+                  หมวดหมู่
+                </Typography>
+                <IconButton onClick={() => appendProjectCategories({ value: 0 })} sx={{ color: "var(--color-primary03)" }}>
+                  <AddCircleOutlineOutlined />
+                </IconButton>
               </div>
               <div className="space-y-2">
                 {projectCategoriesFields.map((field, index) => (
@@ -366,7 +380,7 @@ export const FormProjects: FC<FormProjectsProps> = ({ apiBase, initialCourses, i
                         {categories?.map((cat) => <MenuItem key={cat.id} value={cat.id}>{cat.name}</MenuItem>)}
                       </RHFSelect>
                     </div>
-                    <IconButton onClick={() => removeProjectCategories(index)} disabled={projectCategoriesFields.length === 1} sx={{ color: projectCategoriesFields.length === 1 ? '#e0e0e0' : 'error.main', mt: 3.5 }}>
+                    <IconButton onClick={() => removeProjectCategories(index)} disabled={projectCategoriesFields.length === 1} color="error" sx={{ mt: 3.5 }}>
                       <DeleteIcon />
                     </IconButton>
                   </div>
@@ -391,10 +405,10 @@ export const FormProjects: FC<FormProjectsProps> = ({ apiBase, initialCourses, i
         <div className="my-10 pt-4">
           <div className="flex items-center justify-between mb-4">
             <Typography variant="h6" fontWeight="bold">
-              รูปภาพเพิ่มเติม (ลากเพื่อเปลี่ยนลำดับรูป) <span className="text-gray-500 font-normal text-sm ml-2">{selectedAssets.length} รูป - สูงสุด 10</span>
+              รูปภาพเพิ่มเติม (ลากเพื่อเปลี่ยนลำดับรูป) <span className="text-[var(--color-neutral04)] font-normal text-sm ml-2">{selectedAssets.length} รูป - สูงสุด 10</span>
             </Typography>
             {selectedAssets.length > 0 && (
-              <button type="button" onClick={removeAllAssets} className="text-red-500 hover:text-red-700 font-bold text-sm underline cursor-pointer">
+              <button type="button" onClick={removeAllAssets} className="font-bold text-sm underline cursor-pointer" style={{ color: "var(--color-accent04)" }}>
                 ลบทั้งหมด
               </button>
             )}
@@ -402,12 +416,12 @@ export const FormProjects: FC<FormProjectsProps> = ({ apiBase, initialCourses, i
           
           {selectedAssets.length === 0 ? (
             <div className="w-full flex flex-col items-center justify-center gap-2 p-10 bg-white border-2 border-dashed border-gray-300 rounded-lg min-h-[200px]">
-              <Button variant="contained" component="label" sx={{ backgroundColor: "var(--color-primary02)" }}>
+              <Button variant="contained" component="label">
                   <VisuallyHiddenInput type="file" accept="image/*" multiple onChange={handleAssetsChange} />
                   อัปโหลดรูปภาพ
               </Button>
               {assetsError && (
-                <p className="text-sm text-red-600">กรุณาอัปโหลดรูปภาพเพิ่มเติมอย่างน้อย 1 รูป</p>
+                <p className="text-sm" style={{ color: "var(--color-accent04)" }}>กรุณาอัปโหลดรูปภาพเพิ่มเติมอย่างน้อย 1 รูป</p>
               )}
             </div>
           ) : (
@@ -439,7 +453,7 @@ export const FormProjects: FC<FormProjectsProps> = ({ apiBase, initialCourses, i
 
               {selectedAssets.length < 10 && (
                 <div className="aspect-video w-full rounded-md bg-gray-50 flex items-center justify-center border border-gray-200">
-                  <Button variant="contained" component="label" sx={{ height: "40px", backgroundColor: "var(--color-primary02)" }}>
+                  <Button variant="contained" component="label" sx={{ height: "40px" }}>
                     <VisuallyHiddenInput type="file" accept="image/*" multiple onChange={handleAssetsChange} />
                     อัปโหลดรูปภาพ
                   </Button>
@@ -452,16 +466,18 @@ export const FormProjects: FC<FormProjectsProps> = ({ apiBase, initialCourses, i
         <div className="my-10 pt-4">
           <div className="flex items-center justify-between mb-4">
              <Typography variant="h6" fontWeight="bold">Tech Stack</Typography>
-             <IconButton onClick={() => appendTechStacks({ value: "" })} color="primary"><AddCircleOutlineOutlined /></IconButton>
+             <IconButton onClick={() => appendTechStacks({ value: "" })} sx={{ color: "var(--color-primary03)" }}>
+              <AddCircleOutlineOutlined />
+             </IconButton>
           </div>
           <div className="space-y-4">
             {techStacksFields.map((field, index) => (
               <div key={field.id} className="flex items-center gap-4">
-                <span className="font-semibold text-gray-400 w-6">{index + 1}.</span>
+                <span className="font-semibold text-[var(--color-neutral04)] w-6">{index + 1}.</span>
                 <div className="flex-1">
                   <RHFTextField control={control} name={`techStacks.${index}.value`} variant="outlined" fullWidth requiredMark />
                 </div>
-                <IconButton onClick={() => removeTechStacks(index)} disabled={techStacksFields.length === 1} sx={{ color: techStacksFields.length === 1 ? '#e0e0e0' : 'error.main' }}>
+                <IconButton onClick={() => removeTechStacks(index)} disabled={techStacksFields.length === 1} color="error">
                   <DeleteIcon />
                 </IconButton>
               </div>
@@ -474,23 +490,25 @@ export const FormProjects: FC<FormProjectsProps> = ({ apiBase, initialCourses, i
           
           <div className="mb-8">
             <div className="flex items-center justify-between mb-4">
-              <Typography variant="subtitle1" fontWeight="bold">คณะผู้จัดทำ</Typography>
-              <IconButton onClick={() => appendStudents({ userID: 0 })} color="primary"><AddCircleOutlineOutlined /></IconButton>
+              <Typography sx={{ fontSize: "var(--text-h3)" }} fontWeight="bold">คณะผู้จัดทำ</Typography>
+              <IconButton onClick={() => appendStudents({ userID: 0 })} sx={{ color: "var(--color-primary03)" }}>
+                <AddCircleOutlineOutlined />
+              </IconButton>
             </div>
             <div className="space-y-4">
               {studentsFields.map((field, index) => (
                 <div key={field.id} className="flex gap-4 items-start">
                   <div className="flex-1">
                     <RHFSelect control={control} name={`students.${index}.userID`} label="รหัสนักศึกษา" variant="outlined" fullWidth displayEmpty requiredMark>
-                      {students.map((s) => <MenuItem key={s.id} value={s.id}>{s.studentID}</MenuItem>)}
+                      {students.map((s) => <MenuItem key={s.id} value={s.user.id}>{s.studentCode}</MenuItem>)}
                     </RHFSelect>
                   </div>
                   <div className="flex-1">
                     <RHFSelect control={control} name={`students.${index}.userID`} label="ชื่อ-นามสกุล" variant="outlined" fullWidth displayEmpty requiredMark>
-                      {students.map((s) => <MenuItem key={s.id} value={s.id}>{s.name}</MenuItem>)}
+                      {students.map((s) => <MenuItem key={s.id} value={s.user.id}>{`${s.user.firstNameTh} ${s.user.lastNameTh}`}</MenuItem>)}
                     </RHFSelect>
                   </div>
-                  <IconButton onClick={() => removeStudents(index)} disabled={studentsFields.length === 1} sx={{ color: studentsFields.length === 1 ? '#e0e0e0' : 'error.main', mt: 3.5 }}>
+                  <IconButton onClick={() => removeStudents(index)} disabled={studentsFields.length === 1} color="error" sx={{ mt: 3.5 }}>
                     <DeleteIcon />
                   </IconButton>
                 </div>
@@ -500,18 +518,20 @@ export const FormProjects: FC<FormProjectsProps> = ({ apiBase, initialCourses, i
 
           <div>
             <div className="flex items-center justify-between mb-4">
-              <Typography variant="subtitle1" fontWeight="bold">อาจารย์ที่ปรึกษา</Typography>
-              <IconButton onClick={() => appendAdvisors({ userID: 0 })} color="primary"><AddCircleOutlineOutlined /></IconButton>
+              <Typography sx={{ fontSize: "var(--text-h3)" }} fontWeight="bold">อาจารย์ที่ปรึกษา</Typography>
+              <IconButton onClick={() => appendAdvisors({ userID: 0 })} sx={{ color: "var(--color-primary03)" }}>
+                <AddCircleOutlineOutlined />
+              </IconButton>
             </div>
             <div className="space-y-4">
               {advisorsFields.map((field, index) => (
                 <div key={field.id} className="flex gap-4 items-start">
                   <div className="flex-[2]">
                     <RHFSelect control={control} name={`advisors.${index}.userID`} label="อาจารย์ที่ปรึกษา" variant="outlined" fullWidth displayEmpty requiredMark>
-                      {professors.map((p) => <MenuItem key={p.id} value={p.id}>{p.name}</MenuItem>)}
+                      {professors.map((p) => <MenuItem key={p.id} value={p.user.id}>{`${p.user.firstNameTh} ${p.user.lastNameTh}`}</MenuItem>)}
                     </RHFSelect>
                   </div>
-                  <IconButton onClick={() => removeAdvisors(index)} disabled={advisorsFields.length === 1} sx={{ color: advisorsFields.length === 1 ? '#e0e0e0' : 'error.main', mt: 3.5 }}>
+                  <IconButton onClick={() => removeAdvisors(index)} disabled={advisorsFields.length === 1} color="error" sx={{ mt: 3.5 }}>
                     <DeleteIcon />
                   </IconButton>
                 </div>
@@ -523,7 +543,7 @@ export const FormProjects: FC<FormProjectsProps> = ({ apiBase, initialCourses, i
       </div>
 
       <div className="flex flex-row justify-end gap-x-4 mt-10">
-        <Button variant="outlined" size="large" onClick={cancelForm} sx={{ borderColor: 'var(--color-primary02)', color: 'var(--color-primary02)' }}>
+        <Button variant="outlined" size="large" onClick={cancelForm}>
           ยกเลิก
         </Button>
         <Button
@@ -531,7 +551,6 @@ export const FormProjects: FC<FormProjectsProps> = ({ apiBase, initialCourses, i
           variant="contained"
           size="large"
           disabled={!isValid}
-          sx={{ backgroundColor: 'var(--color-primary02)' }}
         >
           บันทึกข้อมูล
         </Button>
