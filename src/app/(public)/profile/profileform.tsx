@@ -172,7 +172,7 @@ const ProfileForm = ({ apiBase }: { apiBase: string }) => {
       <h2 className="text-primary01 mb-4 font-bold">แก้ไขโปรไฟล์</h2>
       <h3 className="text-primary01 text-xl font-bold">
         ข้อมูลส่วนตัว
-        <span className="ml-2 text-sm font-bold text-accent04">
+        <span className="text-accent04 ml-2 text-sm font-bold">
           (หากต้องการแก้ไขติดต่อแอดมิน)
         </span>
       </h3>
@@ -222,15 +222,15 @@ const ProfileForm = ({ apiBase }: { apiBase: string }) => {
                         : "relative h-full w-full opacity-100"
                     } `}
                   >
-                    <div className="flex items-center justify-center rounded-lg border border-neutral03 bg-neutral01/70 px-6 py-3 shadow-sm backdrop-blur-sm">
-                      <span className="text-base font-medium text-neutral05">
+                    <div className="border-neutral03 bg-neutral01/70 flex items-center justify-center rounded-lg border px-6 py-3 shadow-sm backdrop-blur-sm">
+                      <span className="text-neutral05 text-base font-medium">
                         อัปโหลดรูปภาพ
                       </span>
                     </div>
                   </div>
                 )}
                 {!(selectedFile || student?.user?.imageUrl) && !isEditing && (
-                  <span className="text-sm font-medium text-neutral04">
+                  <span className="text-neutral04 text-sm font-medium">
                     ไม่มีรูปโปรไฟล์
                   </span>
                 )}
@@ -250,21 +250,21 @@ const ProfileForm = ({ apiBase }: { apiBase: string }) => {
               {/* Row 1: Student ID */}
               <div className="text-neutral04">รหัสนักศึกษา</div>
               <div className="text-center">:</div>
-              <div className="font-bold text-primary01">
+              <div className="text-primary01 font-bold">
                 {student?.studentCode || "XXXXXXXXXX"}
               </div>
 
               {/* Row 2: Nickname */}
               <div className="text-neutral04">ชื่อเล่น</div>
               <div className="text-center">:</div>
-              <div className="font-bold text-primary01">
+              <div className="text-primary01 font-bold">
                 {nickName || "ก้องภพ"}
               </div>
 
               {/* Row 3: Full Name TH */}
               <div className="text-neutral04">ชื่อ - นามสกุล (ภาษาไทย)</div>
               <div className="text-center">:</div>
-              <div className="font-bold text-primary01">
+              <div className="text-primary01 font-bold">
                 {student?.user
                   ? `${firstNameTh} ${lastNameTh}`.trim()
                   : "สมชาย ใจดี"}
@@ -273,7 +273,7 @@ const ProfileForm = ({ apiBase }: { apiBase: string }) => {
               {/* Row 4: Full Name EN */}
               <div className="text-neutral04">ชื่อ - นามสกุล (ภาษาอังกฤษ)</div>
               <div className="text-center">:</div>
-              <div className="font-bold text-primary01">
+              <div className="text-primary01 font-bold">
                 {student?.user
                   ? `${firstNameEn} ${lastNameEn}`.trim()
                   : "Somchai Jaidee"}
@@ -295,6 +295,14 @@ const ProfileForm = ({ apiBase }: { apiBase: string }) => {
                 variant="outlined"
                 disabled={!isEditing}
                 sx={{
+                  "& .MuiOutlinedInput-root": {
+                    "& fieldset": {
+                      borderColor: "neutral03",
+                    },
+                    "&.Mui-focused fieldset": {
+                      borderColor: "primary03",
+                    },
+                  },
                   "& .MuiOutlinedInput-root.Mui-focused .MuiInputAdornment-root .MuiSvgIcon-root":
                     {
                       color: "primary.main",
@@ -321,6 +329,14 @@ const ProfileForm = ({ apiBase }: { apiBase: string }) => {
                 variant="outlined"
                 disabled={!isEditing}
                 sx={{
+                  "& .MuiOutlinedInput-root": {
+                    "& fieldset": {
+                      borderColor: "neutral03",
+                    },
+                    "&.Mui-focused fieldset": {
+                      borderColor: "primary03",
+                    },
+                  },
                   "& .MuiOutlinedInput-root.Mui-focused .MuiInputAdornment-root .MuiSvgIcon-root":
                     {
                       color: "primary.main",
@@ -350,6 +366,14 @@ const ProfileForm = ({ apiBase }: { apiBase: string }) => {
                 variant="outlined"
                 disabled={!isEditing}
                 sx={{
+                  "& .MuiOutlinedInput-root": {
+                    "& fieldset": {
+                      borderColor: "neutral03",
+                    },
+                    "&.Mui-focused fieldset": {
+                      borderColor: "primary03",
+                    },
+                  },
                   "& .MuiOutlinedInput-root.Mui-focused .MuiInputAdornment-root .MuiSvgIcon-root":
                     {
                       color: "primary.main",
@@ -376,6 +400,14 @@ const ProfileForm = ({ apiBase }: { apiBase: string }) => {
                 variant="outlined"
                 disabled={!isEditing}
                 sx={{
+                  "& .MuiOutlinedInput-root": {
+                    "& fieldset": {
+                      borderColor: "neutral03",
+                    },
+                    "&.Mui-focused fieldset": {
+                      borderColor: "primary03",
+                    },
+                  },
                   "& .MuiOutlinedInput-root.Mui-focused .MuiInputAdornment-root .MuiSvgIcon-root":
                     {
                       color: "primary.main",
