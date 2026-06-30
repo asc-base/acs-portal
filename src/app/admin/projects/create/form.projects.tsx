@@ -50,12 +50,12 @@ const Schema = z.object({
   techStacks: z.array(z.object({ value: z.string().trim().min(1, "ระบุ Tech Stack") })).min(1, "ระบุอย่างน้อย 1 Tech Stack"),
   students: z.array(
     z.object({
-      userID: z.number().min(1, "เลือกนักศึกษา"),
+      userID: z.number().min(1, "กรุณาเลือกนักศึกษา"),
     })
   ).min(1, "กรุณาเพิ่มผู้จัดทำอย่างน้อย 1 คน"),
   advisors: z.array(
     z.object({
-      userID: z.number().min(1, "เลือกอาจารย์"),
+      userID: z.number().min(1, "กรุณาเลือกอาจารย์"),
     })
   ).min(1, "กรุณาเพิ่มอาจารย์ที่ปรึกษาอย่างน้อย 1 คน"),
 });
@@ -255,14 +255,13 @@ export const FormProjects: FC<FormProjectsProps> = ({ apiBase, initialCourses, i
       </Snackbar>
 
       <div>
-        <Typography variant="h6" fontWeight="bold">ข้อมูลผลงาน</Typography>
-
+        <h3 className="font-bold">ข้อมูลผลงาน</h3>
         <div className="mt-6 mb-8 flex flex-row items-stretch gap-x-8 h-auto">
           <div className="w-[400px] shrink-0 flex flex-col gap-2">
             <div className="bg-gray-50 rounded-xl overflow-hidden border border-gray-300 relative flex flex-col justify-center items-center group h-full">
               {selectedFile ? (
                 <>
-                  <Image src={URL.createObjectURL(selectedFile)} alt="Preview" fill style={{ objectFit: "cover" }} className="absolute inset-0 z-0" />
+                  <Image src={URL.createObjectURL(selectedFile)} alt="Preview" fill className="absolute inset-0 z-0 object-cover" />
                   <div className="absolute inset-0 z-10 flex items-center justify-center bg-black/40 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
                     <Button variant="contained" component="label">
                       <VisuallyHiddenInput type="file" accept="image/*" onChange={handleFileChange} />
@@ -279,13 +278,20 @@ export const FormProjects: FC<FormProjectsProps> = ({ apiBase, initialCourses, i
             </div>
 
             {imageError && (
-              <p className="text-sm" style={{ color: "var(--color-accent04)" }}>กรุณาอัปโหลดรูปภาพหลัก</p>
+              <p className="text-h5 text-accent04">กรุณาอัปโหลดรูปภาพหลัก</p>
             )}
             
           </div>
           
           <div className="flex flex-1 flex-col gap-4">
-            <RHFTextField control={control} name="title" label="หัวข้อ" variant="outlined" fullWidth requiredMark />
+            <RHFTextField
+              control={control}
+              name="title"
+              label="หัวข้อ"
+              variant="outlined"
+              fullWidth
+              requiredMark
+            />
             <div className="flex-1 flex flex-col">
                <RHFTextField 
                   control={control} 
@@ -296,7 +302,10 @@ export const FormProjects: FC<FormProjectsProps> = ({ apiBase, initialCourses, i
                   multiline 
                   rows={8} 
                   requiredMark 
-                  sx={{ flex: 1, '& .MuiInputBase-root': { height: '100%', alignItems: 'flex-start' } }} 
+                  sx={{ 
+                    flex: 1, 
+                    '& .MuiInputBase-root': { height: '100%', alignItems: 'flex-start' } 
+                  }} 
                />
             </div>
           </div>
@@ -304,84 +313,121 @@ export const FormProjects: FC<FormProjectsProps> = ({ apiBase, initialCourses, i
 
         <div className="mb-8 flex flex-1 flex-col gap-y-5">
           <div className="flex gap-2">
-            <Typography variant="h6" fontWeight="bold">ข้อมูลการจัดหมวดหมู่</Typography>
-            <Typography variant="h6" fontWeight="regular">(สามารถเลือกได้มากกว่า 1 ในแต่ละคอลัมม์)</Typography>
+            <h3 className="font-bold">ข้อมูลการจัดหมวดหมู่</h3>
+            <p className="text-h3 font-normal">(สามารถเลือกได้มากกว่า 1 ในแต่ละคอลัมม์)</p>
           </div>
           
           <div className="flex items-stretch justify-between gap-6">
             <div className="flex-1 space-y-4">
               <div className="flex items-center justify-between">
-                <Typography sx={{ fontSize: "var(--text-h3)", fontWeight: 600 }}>
-                  วิชา
-                </Typography>
-                <IconButton onClick={() => appendProjectCourses({ value: 0 })} sx={{ color: "var(--color-primary03)" }}>
-                  <AddCircleOutlineOutlined />
+                <h3 className="font-bold">วิชา</h3>
+                <IconButton 
+                  onClick={() => appendProjectCourses({ value: 0 })} 
+                  sx={{ color: "var(--color-primary03)" }}
+                  >
+                    <AddCircleOutlineOutlined sx={{ fontSize: 36 }} />
                 </IconButton>
               </div>
               <div className="space-y-2">
                 {projectCoursesFields.map((field, index) => (
                   <div className="flex items-start justify-between gap-3" key={field.id}>
                     <div className="flex-1">
-                      <RHFSelect control={control} name={`projectCourses.${index}.value`} label="วิชา" variant="outlined" fullWidth displayEmpty requiredMark>
-                        {courses?.map((course) => <MenuItem key={course.id} value={course.id}>{course.courseNameTh}</MenuItem>)}
+                      <RHFSelect
+                        control={control}
+                        name={`projectCourses.${index}.value`}
+                        label="วิชา"
+                        fullWidth
+                        displayEmpty
+                        requiredMark
+                      >
+                        {courses?.map((course) => (
+                          <MenuItem key={course.id} value={course.id}>
+                            {course.courseNameTh}
+                          </MenuItem>
+                        ))}
                       </RHFSelect>
                     </div>
-                    <IconButton onClick={() => removeProjectCourses(index)} disabled={projectCoursesFields.length === 1} color="error" sx={{ mt: 3.5 }}>
-                      <DeleteIcon />
+                    <IconButton 
+                      onClick={() => removeProjectCourses(index)} disabled={projectCoursesFields.length === 1} color="error" sx={{ mt: 2.8 }}>
+                      <DeleteIcon sx={{ fontSize: 34 }}/>
                     </IconButton>
                   </div>
                 ))}
               </div>
             </div>
             
-            <div className="w-[1px] bg-[var(--color-neutral03)] mt-10"></div>
+            <div className="w-[1px] bg-neutral03 mt-10"></div>
             
             <div className="flex-1 space-y-4">
               <div className="flex items-center justify-between">
-                <Typography sx={{ fontSize: "var(--text-h3)", fontWeight: 600 }}>
-                  ประเภท
-                </Typography>
-                <IconButton onClick={() => appendProjectTypes({ value: 0 })} sx={{ color: "var(--color-primary03)" }}>
-                  <AddCircleOutlineOutlined />
+                <h3 className="font-bold">ประเภท</h3>
+                <IconButton 
+                  onClick={() => appendProjectTypes({ value: 0 })} 
+                  sx={{ color: "var(--color-primary03)" }}
+                  >
+                    <AddCircleOutlineOutlined sx={{ fontSize: 36 }} />
                 </IconButton>
               </div>
               <div className="space-y-2">
                 {projectTypesFields.map((field, index) => (
                   <div className="flex items-start justify-between gap-3" key={field.id}>
                     <div className="flex-1">
-                      <RHFSelect control={control} name={`projectTypes.${index}.value`} label="ประเภท" variant="outlined" fullWidth displayEmpty requiredMark>
-                        {types?.map((type) => <MenuItem key={type.id} value={type.id}>{type.name}</MenuItem>)}
+                      <RHFSelect
+                        control={control}
+                        name={`projectTypes.${index}.value`}
+                        label="ประเภท"
+                        fullWidth
+                        displayEmpty
+                        requiredMark
+                      >
+                        {types?.map((type) => (
+                          <MenuItem key={type.id} value={type.id}>
+                            {type.name}
+                          </MenuItem>
+                        ))}
                       </RHFSelect>
                     </div>
-                    <IconButton onClick={() => removeProjectTypes(index)} disabled={projectTypesFields.length === 1} color="error" sx={{ mt: 3.5 }}>
-                      <DeleteIcon />
+                    <IconButton onClick={() => removeProjectTypes(index)} disabled={projectTypesFields.length === 1} color="error" sx={{ mt: 2.8 }}>
+                      <DeleteIcon sx={{ fontSize: 34 }}/>
                     </IconButton>
                   </div>
                 ))}
               </div>
             </div>
 
-            <div className="w-[1px] bg-[var(--color-neutral03)] mt-10"></div>
+            <div className="w-[1px] bg-neutral03 mt-10"></div>
             
             <div className="flex-1 space-y-4">
               <div className="flex items-center justify-between">
-                <Typography sx={{ fontSize: "var(--text-h3)", fontWeight: 600 }}>
-                  หมวดหมู่
-                </Typography>
-                <IconButton onClick={() => appendProjectCategories({ value: 0 })} sx={{ color: "var(--color-primary03)" }}>
-                  <AddCircleOutlineOutlined />
+                <h3 className="font-bold">หมวดหมู่</h3>
+                <IconButton 
+                  onClick={() => appendProjectCategories({ value: 0 })} 
+                  sx={{ color: "var(--color-primary03)" }}
+                  >
+                    <AddCircleOutlineOutlined sx={{ fontSize: 36 }} />
                 </IconButton>
               </div>
               <div className="space-y-2">
                 {projectCategoriesFields.map((field, index) => (
                   <div className="flex items-start justify-between gap-3" key={field.id}>
                     <div className="flex-1">
-                      <RHFSelect control={control} name={`projectCategories.${index}.value`} label="หมวดหมู่" variant="outlined" fullWidth displayEmpty requiredMark>
-                        {categories?.map((cat) => <MenuItem key={cat.id} value={cat.id}>{cat.name}</MenuItem>)}
+                      <RHFSelect
+                        control={control}
+                        name={`projectCategories.${index}.value`}
+                        label="หมวดหมู่"
+                        fullWidth
+                        displayEmpty
+                        requiredMark
+                      >
+                        {categories?.map((cat) => (
+                          <MenuItem key={cat.id} value={cat.id}>
+                            {cat.name}
+                          </MenuItem>
+                        ))}
                       </RHFSelect>
                     </div>
-                    <IconButton onClick={() => removeProjectCategories(index)} disabled={projectCategoriesFields.length === 1} color="error" sx={{ mt: 3.5 }}>
-                      <DeleteIcon />
+                    <IconButton onClick={() => removeProjectCategories(index)} disabled={projectCategoriesFields.length === 1} color="error" sx={{ mt: 2.8 }}>
+                      <DeleteIcon sx={{ fontSize: 34 }}/>
                     </IconButton>
                   </div>
                 ))}
@@ -391,24 +437,55 @@ export const FormProjects: FC<FormProjectsProps> = ({ apiBase, initialCourses, i
         </div>
 
         <div className="my-10 pt-4 flex flex-col gap-4">
-          <Typography variant="h6" fontWeight="bold">ลิงก์คลิปวิดีโอ</Typography>
-          <RHFTextField control={control} name="youtubeURL" label="URL Youtube" variant="outlined" fullWidth requiredMark />
+          <h3 className="font-bold">ลิงก์คลิปวิดีโอ</h3>
+          <RHFTextField
+            control={control}
+            name="youtubeURL"
+            label="URL Youtube"
+            variant="outlined"
+            fullWidth
+            requiredMark
+          />
         </div>
 
         <div className="my-10 pt-4 flex flex-col gap-4">
-          <Typography variant="h6" fontWeight="bold">ลิงก์ต่างๆ</Typography>
-          <RHFTextField control={control} name="githubURL" label="Github" variant="outlined" fullWidth requiredMark startIcon={<LinkIcon fontSize="small" />} />
-          <RHFTextField control={control} name="documentURL" label="Document" variant="outlined" fullWidth requiredMark startIcon={<DescriptionIcon fontSize="small" />} />
-          <RHFTextField control={control} name="presentationURL" label="Presentation" variant="outlined" fullWidth requiredMark startIcon={<SlideshowIcon fontSize="small" />} />
+          <h3 className="font-bold">ลิงก์ต่างๆ</h3>
+          <RHFTextField
+            control={control}
+            name="githubURL"
+            label="Github"
+            variant="outlined"
+            fullWidth
+            requiredMark
+            startIcon={<LinkIcon fontSize="small" />}
+          />
+          <RHFTextField
+            control={control}
+            name="documentURL"
+            label="Document"
+            variant="outlined"
+            fullWidth
+            requiredMark
+            startIcon={<DescriptionIcon fontSize="small" />}
+          />
+          <RHFTextField
+            control={control}
+            name="presentationURL"
+            label="Presentation"
+            variant="outlined"
+            fullWidth
+            requiredMark
+            startIcon={<SlideshowIcon fontSize="small" />}
+          />
         </div>
 
         <div className="my-10 pt-4">
           <div className="flex items-center justify-between mb-4">
-            <Typography variant="h6" fontWeight="bold">
-              รูปภาพเพิ่มเติม (ลากเพื่อเปลี่ยนลำดับรูป) <span className="text-[var(--color-neutral04)] font-normal text-sm ml-2">{selectedAssets.length} รูป - สูงสุด 10</span>
-            </Typography>
+            <h3 className="font-bold">
+              รูปภาพเพิ่มเติม (ลากเพื่อเปลี่ยนลำดับรูป) <span className=" text-h4 text-neutral04 font-normal ml-2">{selectedAssets.length} รูป - สูงสุด 10</span>
+            </h3>
             {selectedAssets.length > 0 && (
-              <button type="button" onClick={removeAllAssets} className="font-bold text-sm underline cursor-pointer" style={{ color: "var(--color-accent04)" }}>
+              <button type="button" onClick={removeAllAssets} className="font-bold text-h5 underline cursor-pointer text-accent04">
                 ลบทั้งหมด
               </button>
             )}
@@ -421,7 +498,7 @@ export const FormProjects: FC<FormProjectsProps> = ({ apiBase, initialCourses, i
                   อัปโหลดรูปภาพ
               </Button>
               {assetsError && (
-                <p className="text-sm" style={{ color: "var(--color-accent04)" }}>กรุณาอัปโหลดรูปภาพเพิ่มเติมอย่างน้อย 1 รูป</p>
+                <p className="text-h5 text-accent04">กรุณาอัปโหลดรูปภาพเพิ่มเติมอย่างน้อย 1 รูป</p>
               )}
             </div>
           ) : (
@@ -439,11 +516,11 @@ export const FormProjects: FC<FormProjectsProps> = ({ apiBase, initialCourses, i
                     ${dragOverItemIndex === index ? 'border-[var(--color-primary02)] border-dashed scale-105' : 'border-gray-200 border-solid'} 
                     ${draggedItemIndex === index ? 'opacity-40' : 'opacity-100'} group`}
                 >
-                  <Image src={URL.createObjectURL(file)} alt="asset" fill style={{ objectFit: "cover", pointerEvents: "none" }} draggable={false} />
+                  <Image src={URL.createObjectURL(file)} alt="asset" fill className="object-cover pointer-events-none"  draggable={false} />
                   
-                  <IconButton 
+                  <IconButton
                     size="small" 
-                    sx={{ position: 'absolute', top: 8, right: 8, zIndex: 10, width: 24, height: 24, backgroundColor: 'rgba(0,0,0,0.6)', color: 'white', '&:hover': { backgroundColor: 'rgba(0,0,0,0.8)' } }} 
+                    sx={{ position: 'absolute', top: 8, right: 8, zIndex: 10, width: 24, height: 24, backgroundColor: 'rgba(0,0,0,0.6)', color: 'white', padding: 0, '&:hover': { backgroundColor: 'rgba(0,0,0,0.8)' } }} 
                     onClick={() => removeAsset(index)}
                   >
                     <CloseIcon sx={{ fontSize: 16 }} />
@@ -465,20 +542,29 @@ export const FormProjects: FC<FormProjectsProps> = ({ apiBase, initialCourses, i
 
         <div className="my-10 pt-4">
           <div className="flex items-center justify-between mb-4">
-             <Typography variant="h6" fontWeight="bold">Tech Stack</Typography>
-             <IconButton onClick={() => appendTechStacks({ value: "" })} sx={{ color: "var(--color-primary03)" }}>
-              <AddCircleOutlineOutlined />
-             </IconButton>
+             <h3 className="font-bold">Tech Stack</h3>
+            <IconButton 
+              onClick={() => appendTechStacks({ value: "" })} 
+              sx={{ color: "var(--color-primary03)"}}
+              >
+                <AddCircleOutlineOutlined sx={{ fontSize: 36 }} />
+            </IconButton>
           </div>
           <div className="space-y-4">
             {techStacksFields.map((field, index) => (
               <div key={field.id} className="flex items-center gap-4">
-                <span className="font-semibold text-[var(--color-neutral04)] w-6">{index + 1}.</span>
+                <span className="text-neutral04 w-6 shrink-0">{index + 1}.</span>
                 <div className="flex-1">
-                  <RHFTextField control={control} name={`techStacks.${index}.value`} variant="outlined" fullWidth requiredMark />
+                  <RHFTextField
+                    control={control}
+                    name={`techStacks.${index}.value`}
+                    variant="outlined"
+                    fullWidth
+                    requiredMark
+                  />
                 </div>
                 <IconButton onClick={() => removeTechStacks(index)} disabled={techStacksFields.length === 1} color="error">
-                  <DeleteIcon />
+                  <DeleteIcon sx={{ fontSize: 34 }} />
                 </IconButton>
               </div>
             ))}
@@ -486,30 +572,55 @@ export const FormProjects: FC<FormProjectsProps> = ({ apiBase, initialCourses, i
         </div>
 
         <div className="my-10 pt-4">
-          <Typography variant="h6" fontWeight="bold" className="mb-6">คณะผู้จัดทำและอาจารย์ที่ปรึกษา</Typography>
+          <h3 className="font-bold">คณะผู้จัดทำและอาจารย์ที่ปรึกษา</h3>
           
           <div className="mb-8">
             <div className="flex items-center justify-between mb-4">
-              <Typography sx={{ fontSize: "var(--text-h3)" }} fontWeight="bold">คณะผู้จัดทำ</Typography>
-              <IconButton onClick={() => appendStudents({ userID: 0 })} sx={{ color: "var(--color-primary03)" }}>
-                <AddCircleOutlineOutlined />
+              <h3 className="font-bold">คณะผู้จัดทำ</h3>
+              <IconButton 
+                onClick={() => appendStudents({ userID: 0 })} 
+                sx={{ color: "var(--color-primary03)" }}
+                >
+                  <AddCircleOutlineOutlined sx={{ fontSize: 36 }} />
               </IconButton>
             </div>
             <div className="space-y-4">
               {studentsFields.map((field, index) => (
                 <div key={field.id} className="flex gap-4 items-start">
                   <div className="flex-1">
-                    <RHFSelect control={control} name={`students.${index}.userID`} label="รหัสนักศึกษา" variant="outlined" fullWidth displayEmpty requiredMark>
-                      {students.map((s) => <MenuItem key={s.id} value={s.user.id}>{s.studentCode}</MenuItem>)}
+                    <RHFSelect
+                      control={control}
+                      name={`students.${index}.userID`}
+                      label="รหัสนักศึกษา"
+                      fullWidth
+                      displayEmpty
+                      requiredMark
+                    >
+                      {students.map((s) => (
+                        <MenuItem key={s.id} value={s.user.id}>
+                          {s.studentCode}
+                        </MenuItem>
+                      ))}
                     </RHFSelect>
                   </div>
                   <div className="flex-1">
-                    <RHFSelect control={control} name={`students.${index}.userID`} label="ชื่อ-นามสกุล" variant="outlined" fullWidth displayEmpty requiredMark>
-                      {students.map((s) => <MenuItem key={s.id} value={s.user.id}>{`${s.user.firstNameTh} ${s.user.lastNameTh}`}</MenuItem>)}
+                    <RHFSelect
+                      control={control}
+                      name={`students.${index}.userID`}
+                      label="ชื่อ-นามสกุล"
+                      fullWidth
+                      displayEmpty
+                      requiredMark
+                    >
+                      {students.map((s) => (
+                        <MenuItem key={s.id} value={s.user.id}>
+                          {`${s.user.firstNameTh} ${s.user.lastNameTh}`}
+                        </MenuItem>
+                      ))}
                     </RHFSelect>
                   </div>
-                  <IconButton onClick={() => removeStudents(index)} disabled={studentsFields.length === 1} color="error" sx={{ mt: 3.5 }}>
-                    <DeleteIcon />
+                  <IconButton onClick={() => removeStudents(index)} disabled={studentsFields.length === 1} color="error" sx={{ mt: 2.8 }}>
+                    <DeleteIcon sx={{ fontSize: 34 }} />
                   </IconButton>
                 </div>
               ))}
@@ -518,21 +629,35 @@ export const FormProjects: FC<FormProjectsProps> = ({ apiBase, initialCourses, i
 
           <div>
             <div className="flex items-center justify-between mb-4">
-              <Typography sx={{ fontSize: "var(--text-h3)" }} fontWeight="bold">อาจารย์ที่ปรึกษา</Typography>
-              <IconButton onClick={() => appendAdvisors({ userID: 0 })} sx={{ color: "var(--color-primary03)" }}>
-                <AddCircleOutlineOutlined />
+              <h3 className="font-bold">อาจารย์ที่ปรึกษา</h3>
+              <IconButton 
+                onClick={() => appendAdvisors({ userID: 0 })} 
+                sx={{ color: "var(--color-primary03)"}}
+                >
+                  <AddCircleOutlineOutlined sx={{ fontSize: 36 }}/>
               </IconButton>
             </div>
             <div className="space-y-4">
               {advisorsFields.map((field, index) => (
                 <div key={field.id} className="flex gap-4 items-start">
                   <div className="flex-[2]">
-                    <RHFSelect control={control} name={`advisors.${index}.userID`} label="อาจารย์ที่ปรึกษา" variant="outlined" fullWidth displayEmpty requiredMark>
-                      {professors.map((p) => <MenuItem key={p.id} value={p.user.id}>{`${p.user.firstNameTh} ${p.user.lastNameTh}`}</MenuItem>)}
+                    <RHFSelect
+                      control={control}
+                      name={`advisors.${index}.userID`}
+                      label="อาจารย์ที่ปรึกษา"
+                      fullWidth
+                      displayEmpty
+                      requiredMark
+                    >
+                      {professors.map((p) => (
+                        <MenuItem key={p.id} value={p.user.id}>
+                          {`${p.user.firstNameTh} ${p.user.lastNameTh}`}
+                        </MenuItem>
+                      ))}
                     </RHFSelect>
                   </div>
-                  <IconButton onClick={() => removeAdvisors(index)} disabled={advisorsFields.length === 1} color="error" sx={{ mt: 3.5 }}>
-                    <DeleteIcon />
+                  <IconButton onClick={() => removeAdvisors(index)} disabled={advisorsFields.length === 1} color="error" sx={{ mt: 2.8 }}>
+                    <DeleteIcon sx={{ fontSize: 34 }} />
                   </IconButton>
                 </div>
               ))}
@@ -542,31 +667,32 @@ export const FormProjects: FC<FormProjectsProps> = ({ apiBase, initialCourses, i
 
       </div>
 
-      <div className="flex flex-row justify-end gap-x-4 mt-10">
-        <Button variant="outlined" size="large" onClick={cancelForm}>
-          ยกเลิก
-        </Button>
+      <div className="flex flex-row justify-end gap-x-4">
         <Button
           type="submit"
-          variant="contained"
-          size="large"
-          disabled={!isValid}
+          variant="outlined"
+          color="primary"
+          size="medium"
+          onClick={cancelForm}
         >
+          ยกเลิก
+        </Button>
+        <Button type="submit" variant="contained" color="primary" size="medium">
           บันทึกข้อมูล
         </Button>
       </div>
       {confirmModal && <ConfirmModal {...confirmModal} />}
-    {isCroping && tempThumbFile && (
-      <Modal open={isCroping} onClose={handleCropCancel} closeAfterTransition>
-        <CropImageCard
-          file={tempThumbFile}
-          width={400}
-          height={284}
-          onUploadComplete={handleCropComplete}
-          onCancel={handleCropCancel}
-        />
-      </Modal>
-    )}
+      {isCroping && tempThumbFile && (
+        <Modal open={isCroping} onClose={handleCropCancel} closeAfterTransition>
+          <CropImageCard
+            file={tempThumbFile}
+            width={512}
+            height={512}
+            onUploadComplete={handleCropComplete}
+            onCancel={handleCropCancel}
+          />
+        </Modal>
+      )}
     </form>
   );
 };

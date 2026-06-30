@@ -36,7 +36,7 @@ export class ProjectService {
     return response.data;
   }
 
-  async createProject(payload: ICreateProject, files: { thumbnailFile: File; assets: File[] }): Promise<any> {
+  async createProject(payload: ICreateProject, files: { thumbnailFile: File; assets: File[] }): Promise<IProject> {
     const formData = new FormData();
 
     Object.entries(payload).forEach(([key, value]) => {
