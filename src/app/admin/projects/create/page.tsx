@@ -19,10 +19,16 @@ export default async function page({ searchParams }: PageProps) {
   const resolvedParams = await searchParams;
 
   const [coursesRes, masterData, studentsRes, professorsRes] = await Promise.all([
-  courseService.getCourse({} as any),
+  courseService.getCourse({}),
   masterDataService.getMasterData(),
-  studentService.getStudents({} as any),
-  professorService.getProfessors({} as any), 
+  studentService.getStudents({
+      page: 1,
+      pageSize: 1000,
+      search: "",
+      orderBy: "studentCode",
+      sortBy: "asc",
+    }),
+  professorService.getProfessors({}), 
   ]);
 
   return (
