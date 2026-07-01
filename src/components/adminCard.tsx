@@ -34,9 +34,9 @@ const ClassBookContent: FC<{ classbook: IClassBook }> = ({ classbook }) => (
 
 const ProjectContent: FC<{ project: IProject }> = ({ project }) => {
   const categories =
-    project.projectCategories?.map((category) => category.name).join(", ") ||
+    project.tag?.filter((t: any) => t.type === "category").map((category: any) => category.name).join(", ") ||
     "";
-  const types = project.projectTypes?.map((type) => type.name).join(", ") || "";
+  const types = project.tag?.filter((t: any) => t.type === "type").map((type: any) => type.name).join(", ") || "";
   return (
     <div className="flex flex-col items-start gap-1">
       <p className="text-neutral04 line-clamp-1 text-sm">
@@ -45,7 +45,7 @@ const ProjectContent: FC<{ project: IProject }> = ({ project }) => {
       </p>
       <h4 className="line-clamp-2 font-bold">{project.title}</h4>
 
-      {project.projectMembers && (
+      {project.member && (
         <AvatarGroup
           max={4}
           sx={{
@@ -53,11 +53,11 @@ const ProjectContent: FC<{ project: IProject }> = ({ project }) => {
             "& .MuiAvatar-root": { width: 24, height: 24 },
           }}
         >
-          {project.projectMembers.map((member, idx) => (
+          {project.member.map((m: any, idx: number) => (
             <Avatar
               key={idx}
-              alt={member.user.firstNameTh}
-              src={member.user.imageUrl}
+              alt={m.firstNameTh}
+              src={m.imageUrl}
             />
           ))}
         </AvatarGroup>

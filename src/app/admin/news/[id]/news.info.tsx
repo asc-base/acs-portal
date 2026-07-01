@@ -211,10 +211,10 @@ const previewHighlightSrc = useMemo(() => {
           <div className="grid grid-cols-1 md:grid-cols-5 gap-6">
             
             <div className="col-span-2 flex flex-col gap-2">
-              <label className={`text-sm font-medium ${isEdit ? "text-gray-700" : "text-gray-500"}`}>
+              <label className={`text-sm font-medium ${isEdit ? "text-neutral05" : "text-neutral04"}`}>
                 ภาพหน้าปก
               </label>
-              <div className="group relative aspect-[4/3] w-full overflow-hidden rounded-xl bg-gray-100 border border-gray-200">
+              <div className="group relative aspect-[4/3] w-full overflow-hidden rounded-xl bg-neutral02 border border-neutral03">
                 <Image
                   src={previewThumbnailSrc}
                   alt="Thumbnail Preview"
@@ -223,7 +223,7 @@ const previewHighlightSrc = useMemo(() => {
                 />
                 {isEdit && (
                   <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
-                    <Button variant="contained" component="label" sx={{ bgcolor: "#1E1B4B", "&:hover": { bgcolor: "#312E81" } }}>
+                    <Button variant="contained" component="label">
                       อัปโหลดรูปภาพ
                       <VisuallyHiddenInput
                         type="file"
@@ -237,10 +237,10 @@ const previewHighlightSrc = useMemo(() => {
             </div>
 
             <div className="col-span-3 flex flex-col gap-2">
-              <label className={`text-sm font-medium ${isEdit ? "text-gray-700" : "text-gray-500"}`}>
+              <label className={`text-sm font-medium ${isEdit ? "text-neutral05" : "text-neutral04"}`}>
                 ภาพหัวเรื่อง
               </label>
-              <div className="group relative aspect-[2/1] md:aspect-auto md:flex-1 w-full overflow-hidden rounded-xl bg-gray-100 border border-gray-200">
+              <div className="group relative aspect-[2/1] md:aspect-auto md:flex-1 w-full overflow-hidden rounded-xl bg-neutral02 border border-neutral03">
                 <Image
                   src={previewHighlightSrc}
                   alt="Highlight Preview"
@@ -249,7 +249,7 @@ const previewHighlightSrc = useMemo(() => {
                 />
                 {isEdit && (
                   <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
-                    <Button variant="contained" component="label" sx={{ bgcolor: "#1E1B4B", "&:hover": { bgcolor: "#312E81" } }}>
+                    <Button variant="contained" component="label">
                       อัปโหลดรูปภาพ
                       <VisuallyHiddenInput
                         type="file"
@@ -327,7 +327,7 @@ const previewHighlightSrc = useMemo(() => {
                 variant="outlined" 
                 onClick={handleCancel} 
                 size="large"
-                sx={{ borderColor: "#1E1B4B", color: "#1E1B4B", px: 4 }}
+                className="w-37.5"
               >
                 ยกเลิก
               </Button>
@@ -335,7 +335,7 @@ const previewHighlightSrc = useMemo(() => {
                 variant="contained" 
                 type="submit" 
                 size="large"
-                sx={{ bgcolor: "#1E1B4B", "&:hover": { bgcolor: "#312E81" }, px: 4 }}
+                className="w-37.5"
               >
                 บันทึกข้อมูล
               </Button>
@@ -346,7 +346,7 @@ const previewHighlightSrc = useMemo(() => {
                 variant="contained"
                 onClick={() => setIsEdit(true)}
                 size="large"
-                sx={{ bgcolor: "#1E1B4B", "&:hover": { bgcolor: "#312E81" }, px: 4 }}
+                className="w-37.5"
               >
                 แก้ไขข้อมูล
               </Button>

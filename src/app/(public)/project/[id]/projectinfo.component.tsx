@@ -88,12 +88,9 @@ const ProjectInfoComponent: FC<ProjectInfoProps> = ({ project }) => {
       {/*Project detail*/}
       <div className="mb-4">
         <h5>
-          {project?.projectCategories?.[0]?.name &&
-          project?.projectFields?.[0]?.name
-            ? `${project.projectCategories[0].name} / ${project.projectFields[0].name}`
-            : project?.projectCategories?.[0]?.name ||
-              project?.projectFields?.[0]?.name ||
-              "Uncategorized"}
+          {project?.tag?.[0]?.name && project?.course?.[0]?.courseNameTh
+            ? `${project.tag[0].name} / ${project.course[0].courseNameTh}`
+            : project?.tag?.[0]?.name || project?.course?.[0]?.courseNameTh || "Uncategorized"}
         </h5>
         <h2 className="font-bold">{project?.title}</h2>
         <h4>{project?.details}</h4>
@@ -212,8 +209,8 @@ const ProjectInfoComponent: FC<ProjectInfoProps> = ({ project }) => {
           <div className="mt-12">
             <h2 className="mb-6 text-2xl font-bold">คณะผู้จัดทำและอาจารย์ที่ปรึกษา</h2>
             <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-              {project?.projectMembers?.map((member, index) => (
-                <StudentCard key={index} {...member} />
+              {project?.member?.map((m: any, index: number) => (
+                <StudentCard key={index} {...m} />
                 //<ProfessorCard key={index} {...member} />
               ))}
             </div>

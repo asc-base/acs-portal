@@ -14,9 +14,9 @@ function ProjectCardBase({ data }: ProjectCardProps) {
     id,
     title,
     thumbnailURL,
-    projectMembers,
-    projectCategories,
-    projectFields,
+    member = [],
+    tag = [],
+    course = [],
   } = data;
 
   return (
@@ -39,7 +39,7 @@ function ProjectCardBase({ data }: ProjectCardProps) {
       {/* content */}
       <div className="px-4 pb-4">
         <p className="text-neutral04 text-[14px] font-medium">
-          {tag[2]?.name} / {tag[1]?.name}
+          {tag?.[0]?.name} / {course?.[0]?.courseNameTh}
         </p>
 
         <h3 className="text-primary01 mt-1 line-clamp-2 text-[16px] leading-snug font-extrabold">
@@ -54,13 +54,13 @@ function ProjectCardBase({ data }: ProjectCardProps) {
               "& .MuiAvatar-root": { width: 28, height: 28, fontSize: 12 },
             }}
           >
-            {member.slice(0, 3).map((member, i) => (
+            {member?.slice(0, 3).map((m: any, i: number) => (
               <Avatar
-                key={`${member.id}-${i}`}
-                alt={member.email}
+                key={`${m.id}-${i}`}
+                alt={m.email}
                 src={
-                  member.imageUrl
-                    ? member.imageUrl
+                  m.imageUrl
+                    ? m.imageUrl
                     : `https://i.pravatar.cc/80?img=${(i + id) % 70}`
                 }
                 imgProps={{ referrerPolicy: "no-referrer" }}
