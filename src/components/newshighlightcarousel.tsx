@@ -59,7 +59,7 @@ const NewsHighlightCarousel = ({
               sx={{ borderRadius: "10px", overflow: "hidden" }}
             >
               <Image
-                src={item.news.image}
+                src={item.news.highlightURL || item.news.thumbnailURL}
                 alt={item.news.title}
                 fill
                 style={{ objectFit: "cover" }}
@@ -78,7 +78,7 @@ const NewsHighlightCarousel = ({
             sx={{ borderRadius: "10px", overflow: "hidden" }}
           >
             <Image
-              src={item.news.image}
+              src={item.news.highlightURL || item.news.thumbnailURL}
               alt={item.news.title}
               fill
               style={{ objectFit: "cover" }}
