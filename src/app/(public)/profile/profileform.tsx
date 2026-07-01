@@ -1,19 +1,21 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { Button, InputAdornment, Modal } from "@mui/material";
 import { RHFTextField } from "@/components/form/RHFTextField";
 import { styled } from "@mui/material/styles";
-// import AddCircleOutlineRoundedIcon from "@mui/icons-material/AddCircleOutlineRounded";
 import GitHubIcon from "@mui/icons-material/GitHub";
 import FacebookRoundedIcon from "@mui/icons-material/FacebookRounded";
 import LinkedInIcon from "@mui/icons-material/LinkedIn";
 import InstagramIcon from "@mui/icons-material/Instagram";
 import Image from "next/image";
 import { useForm } from "react-hook-form";
-import { IStudent } from "@/core/domain/student";
-import { useAuthStore } from "@/store/auth";
-import { studentService } from "@/infra/container";
 import { CropImageCard } from "@/components/cropimagecard";
+import { useRouter } from "next/navigation";
+import { IStudent } from "@/core/domain/student";
+import { AuthRepository } from "@/infra/repositories/auth.repository";
+import { AuthService } from "@/core/service/auth.service";
+import { StudentRepository } from "@/infra/repositories/student.repository";
+import { StudentService } from "@/core/service/student.service";
 
 const VisuallyHiddenInput = styled("input")({
   clip: "rect(0 0 0 0)",
@@ -40,26 +42,71 @@ interface FormData {
 //   studentData: IStudent;
 // }
 
-const ProfileForm = () => {
-  const user = useAuthStore((state) => state.user);
+const ProfileForm = ({ apiBase }: { apiBase: string }) => {
+  const [isEditing, setIsEditing] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [studentData, setStudentData] = useState<IStudent | null>(null);
-  const { handleSubmit, control } = useForm<FormData>({
+  const [student, setStudent] = useState<IStudent | null>(null);
+  const router = useRouter();
+
+  const authService = useMemo(() => {
+    const authRepo = new AuthRepository(apiBase);
+    const authSerivce = new AuthService(authRepo);
+    return authSerivce;
+  }, [apiBase]);
+
+  const studentService = useMemo(() => {
+    const studentRepo = new StudentRepository(apiBase);
+    const studentSerivce = new StudentService(studentRepo);
+    return studentSerivce;
+  }, [apiBase]);
+
+  useEffect(() => {
+    const fetchStudent = async () => {
+      try {
+        const user = await authService.getUser();
+        if (!user) {
+          router.push("/auth/student");
+          return;
+        }
+        const studentResponse = await studentService.getStudentByUserId(
+          user.id,
+        );
+        setStudent(studentResponse);
+      } catch (error) {
+        console.error("Error fetching student profile:", error);
+        router.push("/auth/student");
+      }
+    };
+    fetchStudent();
+  }, [router]);
+
+  const { handleSubmit, control, reset } = useForm<FormData>({
     defaultValues: {
-      github: studentData?.github || "",
-      linkedin: studentData?.linkedin || "",
-      facebook: studentData?.facebook || "",
-      instagram: studentData?.instagram || "",
+      github: student?.github || "",
+      linkedin: student?.linkedin || "",
+      facebook: student?.facebook || "",
+      instagram: student?.instagram || "",
       // projects:
       //   studentData?.projects?.map((project) => ({ title: project.title })) ||
       //   [],
-      file: studentData?.user?.imageUrl || null,
+      file: student?.user?.imageUrl || null,
     },
   });
   const [isCroping, setIsCroping] = useState(false);
 
+  useEffect(() => {
+    reset({
+      github: student?.github || "",
+      linkedin: student?.linkedin || "",
+      facebook: student?.facebook || "",
+      instagram: student?.instagram || "",
+      file: student?.user?.imageUrl || null,
+    });
+    setSelectedFile(null);
+  }, [student, reset]);
+
   const { nickName, firstNameTh, firstNameEn, lastNameTh, lastNameEn } =
-    studentData?.user ?? {};
+    student?.user ?? {};
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0] || null;
@@ -80,27 +127,52 @@ const ProfileForm = () => {
     setSelectedFile(null);
   };
 
-  const onSubmit = (data: FormData) => {
-    console.log("Form data:", data);
+  const handleEdit = () => {
+    setIsEditing(true);
   };
 
-  useEffect(() => {
-    const getStudentData = async () => {
-      if (!user) {
+  const handleCancel = () => {
+    reset({
+      github: student?.github || "",
+      linkedin: student?.linkedin || "",
+      facebook: student?.facebook || "",
+      instagram: student?.instagram || "",
+      file: student?.user?.imageUrl || null,
+    });
+    setSelectedFile(null);
+    setIsEditing(false);
+  };
+
+  const onSubmit = async (data: FormData) => {
+    try {
+      setIsEditing(false);
+      const id = student?.id;
+      const classBookID = student?.classBookID;
+
+      if (!id || !classBookID) {
         return;
       }
-      const student = await studentService.getStudentByUserId(user.id);
-      setStudentData(student);
-    };
-    getStudentData();
-  }, [user, studentData]);
+
+      const response = await studentService.updateStudent(
+        data,
+        selectedFile,
+        classBookID,
+        id,
+      );
+      if (response) {
+        setStudent(response);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   return (
     <div className="w-full flex-col px-20 py-6">
       <h2 className="text-primary01 mb-4 font-bold">แก้ไขโปรไฟล์</h2>
       <h3 className="text-primary01 text-xl font-bold">
         ข้อมูลส่วนตัว
-        <span className="ml-2 text-sm font-bold text-red-500">
+        <span className="text-accent04 ml-2 text-sm font-bold">
           (หากต้องการแก้ไขติดต่อแอดมิน)
         </span>
       </h3>
@@ -111,7 +183,8 @@ const ProfileForm = () => {
           <div className="mt-6 mb-16 flex flex-row items-center gap-x-8">
             <div className="relative inline-block">
               <Button
-                component="label"
+                component={isEditing ? "label" : "div"}
+                disabled={!isEditing}
                 className="group relative flex items-center justify-center overflow-hidden rounded-2xl p-0"
                 sx={{
                   borderRadius: "16px",
@@ -119,16 +192,21 @@ const ProfileForm = () => {
                   height: "176px",
                   padding: 0,
                   minWidth: 0,
-                  backgroundColor: "#F2F2F2",
-                  "&:hover": { backgroundColor: "#E2E2E2" },
+                  backgroundColor: "var(--color-neutral02)",
+                  "&:hover": {
+                    backgroundColor: isEditing
+                      ? "var(--color-neutral03)"
+                      : "var(--color-neutral02)",
+                  },
+                  cursor: isEditing ? "pointer" : "default",
                 }}
               >
-                {(selectedFile || studentData?.user?.imageUrl) && (
+                {(selectedFile || student?.user?.imageUrl) && (
                   <Image
                     src={
                       selectedFile
                         ? URL.createObjectURL(selectedFile)
-                        : (studentData?.user?.imageUrl ?? "")
+                        : (student?.user?.imageUrl ?? "")
                     }
                     alt="Profile"
                     width={300}
@@ -136,24 +214,33 @@ const ProfileForm = () => {
                     className="h-full w-full object-cover transition-opacity"
                   />
                 )}
-                <div
-                  className={`flex items-center justify-center ${
-                    selectedFile || studentData?.user?.imageUrl
-                      ? "absolute inset-0 z-10 h-full w-full bg-black/40 opacity-0 transition-opacity duration-300 hover:opacity-100"
-                      : "relative h-full w-full opacity-100"
-                  } `}
-                >
-                  <div className="flex items-center justify-center rounded-lg border border-gray-300 bg-white/70 px-6 py-3 shadow-sm backdrop-blur-sm">
-                    <span className="text-base font-medium text-gray-700">
-                      อัปโหลดรูปภาพ
-                    </span>
+                {isEditing && (
+                  <div
+                    className={`flex items-center justify-center ${
+                      selectedFile || student?.user?.imageUrl
+                        ? "absolute inset-0 z-10 h-full w-full bg-black/40 opacity-0 transition-opacity duration-300 hover:opacity-100"
+                        : "relative h-full w-full opacity-100"
+                    } `}
+                  >
+                    <div className="border-neutral03 bg-neutral01/70 flex items-center justify-center rounded-lg border px-6 py-3 shadow-sm backdrop-blur-sm">
+                      <span className="text-neutral05 text-base font-medium">
+                        อัปโหลดรูปภาพ
+                      </span>
+                    </div>
                   </div>
-                </div>
-                <VisuallyHiddenInput
-                  type="file"
-                  accept="image/*"
-                  onChange={handleFileChange}
-                />
+                )}
+                {!(selectedFile || student?.user?.imageUrl) && !isEditing && (
+                  <span className="text-neutral04 text-sm font-medium">
+                    ไม่มีรูปโปรไฟล์
+                  </span>
+                )}
+                {isEditing && (
+                  <VisuallyHiddenInput
+                    type="file"
+                    accept="image/*"
+                    onChange={handleFileChange}
+                  />
+                )}
               </Button>
             </div>
           </div>
@@ -161,33 +248,33 @@ const ProfileForm = () => {
           <div className="text-neutral04 w-full">
             <div className="grid grid-cols-[1fr_auto_1fr] gap-y-6 text-base md:grid-cols-[max-content_24px_1fr]">
               {/* Row 1: Student ID */}
-              <div className="text-gray-500">รหัสนักศึกษา</div>
+              <div className="text-neutral04">รหัสนักศึกษา</div>
               <div className="text-center">:</div>
-              <div className="font-bold text-neutral-800">
-                {studentData?.studentCode || "6009050401"}
+              <div className="text-primary01 font-bold">
+                {student?.studentCode || "XXXXXXXXXX"}
               </div>
 
               {/* Row 2: Nickname */}
-              <div className="text-gray-500">ชื่อเล่น</div>
+              <div className="text-neutral04">ชื่อเล่น</div>
               <div className="text-center">:</div>
-              <div className="font-bold text-neutral-800">
+              <div className="text-primary01 font-bold">
                 {nickName || "ก้องภพ"}
               </div>
 
               {/* Row 3: Full Name TH */}
-              <div className="text-gray-500">ชื่อ - นามสกุล (ภาษาไทย)</div>
+              <div className="text-neutral04">ชื่อ - นามสกุล (ภาษาไทย)</div>
               <div className="text-center">:</div>
-              <div className="font-bold text-neutral-800">
-                {studentData?.user
+              <div className="text-primary01 font-bold">
+                {student?.user
                   ? `${firstNameTh} ${lastNameTh}`.trim()
                   : "สมชาย ใจดี"}
               </div>
 
               {/* Row 4: Full Name EN */}
-              <div className="text-gray-500">ชื่อ - นามสกุล (ภาษาอังกฤษ)</div>
+              <div className="text-neutral04">ชื่อ - นามสกุล (ภาษาอังกฤษ)</div>
               <div className="text-center">:</div>
-              <div className="font-bold text-neutral-800">
-                {studentData?.user
+              <div className="text-primary01 font-bold">
+                {student?.user
                   ? `${firstNameEn} ${lastNameEn}`.trim()
                   : "Somchai Jaidee"}
               </div>
@@ -206,6 +293,7 @@ const ProfileForm = () => {
                 placeholder="http://github.com/"
                 fullWidth
                 variant="outlined"
+                disabled={!isEditing}
                 sx={{
                   "& .MuiOutlinedInput-root": {
                     "& fieldset": {
@@ -239,6 +327,7 @@ const ProfileForm = () => {
                 placeholder="https://www.linkin.com/in/"
                 fullWidth
                 variant="outlined"
+                disabled={!isEditing}
                 sx={{
                   "& .MuiOutlinedInput-root": {
                     "& fieldset": {
@@ -275,6 +364,7 @@ const ProfileForm = () => {
                 placeholder="https://facebook.com/"
                 fullWidth
                 variant="outlined"
+                disabled={!isEditing}
                 sx={{
                   "& .MuiOutlinedInput-root": {
                     "& fieldset": {
@@ -308,6 +398,7 @@ const ProfileForm = () => {
                 placeholder="https://instagram.com/"
                 fullWidth
                 variant="outlined"
+                disabled={!isEditing}
                 sx={{
                   "& .MuiOutlinedInput-root": {
                     "& fieldset": {
@@ -370,24 +461,38 @@ const ProfileForm = () => {
         ))} */}
 
         <div className="mt-6 flex w-full flex-row justify-center gap-x-4 align-bottom md:justify-end">
-          <Button
-            variant="outlined"
-            color="primary"
-            size="medium"
-            className="px-16 py-8"
-          >
-            ยกเลิก
-          </Button>
-          <Button
-            type="submit"
-            variant="contained"
-            color="primary"
-            size="medium"
-            className="px-16 py-8"
-          >
-            {" "}
-            บันทึกข้อมูล
-          </Button>
+          {!isEditing ? (
+            <Button
+              variant="contained"
+              color="primary"
+              size="medium"
+              className="px-16 py-8"
+              onClick={handleEdit}
+            >
+              แก้ไขข้อมูล
+            </Button>
+          ) : (
+            <>
+              <Button
+                variant="outlined"
+                color="primary"
+                size="medium"
+                className="px-16 py-8"
+                onClick={handleCancel}
+              >
+                ยกเลิก
+              </Button>
+              <Button
+                type="submit"
+                variant="contained"
+                color="primary"
+                size="medium"
+                className="px-16 py-8"
+              >
+                บันทึกข้อมูล
+              </Button>
+            </>
+          )}
         </div>
         {isCroping && selectedFile && (
           <Modal
@@ -396,6 +501,8 @@ const ProfileForm = () => {
             closeAfterTransition
           >
             <CropImageCard
+              width={200}
+              height={200}
               file={selectedFile}
               onUploadComplete={handleCropComplete}
               onCancel={handleCropCancel}
