@@ -1,4 +1,4 @@
-import { IProject, QueryProject, IUpdateProjectData } from "@/core/domain/project";
+import { IProject, QueryProject } from "@/core/domain/project";
 import { IProjectRepository } from "@/core/ports/project.repository";
 import { Pageable } from "@/interface/response";
 import { HttpHelper } from "@/lib/http";
@@ -45,9 +45,9 @@ export class ProjectRepository implements IProjectRepository {
     return response;
   }
 
-  async updateProject(id: string, data: FormData): Promise<ApiResponse<IProject>> {
+  async deleteProject(id: string): Promise<ApiResponse<void>> {
     const url = `/v1/project/${id}`;
-    const response = await this.http.put<ApiResponse<IProject>>(url, data);
+    const response = await this.http.delete<ApiResponse<void>>(url);
     return response;
   }
 }

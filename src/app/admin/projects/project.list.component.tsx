@@ -17,9 +17,12 @@ import EmptyState from "@/components/emptyState";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useEffect, useCallback } from "react";
+import { useEffect, useCallback, useState, useMemo } from "react";
+import { ConfirmModal, ConfirmModalProps } from "@/components/modal/confirmModal";
 import { IProject, QueryProject } from "@/core/domain/project";
-import { projectService } from "@/infra/container";
+import { ProjectService } from "@/core/service/project.service";
+import { ProjectRepository } from "@/infra/repositories/project.repository";
+import { RHFTextField } from "@/components/form/RHFTextField";
 
 interface ProjectListComponentsProps {
   projects: IProject[];
@@ -28,6 +31,7 @@ interface ProjectListComponentsProps {
   page: number;
   sortOrder?: string;
   search?: string;
+  apiBase: string;
 }
 
 const searchSchema = z.object({
@@ -36,19 +40,18 @@ const searchSchema = z.object({
 
 type SearchForm = z.infer<typeof searchSchema>;
 
-const ProjectListComponents = ({
-  projects,
-  totalRecords,
-  pageSize,
-  page,
-  sortOrder,
-  search,
-}: ProjectListComponentsProps) => {
+const ProjectListComponents = (initValue: ProjectListComponentsProps) => {
   const router = useRouter();
+  const [confirmModal, setConfirmModal] = useState<ConfirmModalProps | null>(null);
 
-  const { register, reset, watch } = useForm<SearchForm>({
+  const projectService = useMemo(() => {
+    const repo = new ProjectRepository(initValue.apiBase);
+    return new ProjectService(repo);
+  }, [initValue.apiBase]);
+
+  const { control, reset, watch } = useForm<SearchForm>({
     resolver: zodResolver(searchSchema),
-    defaultValues: { search },
+    defaultValues: { search: initValue.search },
   });
 
   const watchedSearch = watch("search");
@@ -56,15 +59,15 @@ const ProjectListComponents = ({
   const SearchProjectUrl = useCallback(
     (query: Partial<QueryProject>) => {
       const params = new URLSearchParams({
-        page: (query.page ?? page ?? 1).toString(),
-        pageSize: (query.pageSize ?? pageSize ?? 10).toString(),
+        page: (query.page ?? initValue.page ?? 1).toString(),
+        pageSize: (query.pageSize ?? initValue.pageSize ?? 10).toString(),
         sortBy: "createdAt",
-        sortOrder: query.sortOrder ?? sortOrder ?? "desc",
+        sortOrder: query.sortOrder ?? initValue.sortOrder ?? "desc",
         search: query.search ?? watchedSearch ?? "",
       });
       return `/admin/projects?${params.toString()}`;
     },
-    [page, pageSize, sortOrder, watchedSearch],
+    [initValue.page, initValue.pageSize, initValue.sortOrder, watchedSearch],
   );
 
   useEffect(() => {
@@ -88,83 +91,75 @@ const ProjectListComponents = ({
     router.push(SearchProjectUrl({ page: currentPage }));
   };
 
+  const onDelete = async (id: number) => {
+    try {
+      await projectService.deleteProject(id.toString());
+      setConfirmModal({
+        isOpen: true,
+        type: "success",
+        onClose: () => setConfirmModal(null),
+        onConfirm: () => {
+          setConfirmModal(null);
+          router.refresh();
+        },
+        title: "ลบข้อมูลสำเร็จ",
+        description: "ข้อมูลถูกลบออกจากฐานข้อมูลแล้ว",
+        confirmText: "เสร็จสิ้น",
+      });
+    } catch (error) {
+      console.log(error);
+      setConfirmModal(null);
+    }
+  };
+
+  const handleDeleteClick = (project: IProject) => {
+    setConfirmModal({
+      isOpen: true,
+      type: "delete",
+      onClose: () => setConfirmModal(null),
+      onConfirm: () => {
+        onDelete(project.id);
+      },
+    });
+  };
+
   return (
     <div className="min-h-screen px-8 py-5">
       <div className="mb-6 flex items-center justify-between">
         <h3 className="text-h3 font-bold">จัดการผลงาน</h3>
-
         <div className="flex items-center gap-3">
-          <form className="relative">
-            <div className="text-neutral04 absolute top-1/2 left-2 -translate-y-1/2">
-              <SearchIcon className="h-5 w-5" />
-            </div>
-            <input
-              type="text"
-              placeholder="ค้นหา"
-              {...register("search")}
-              className="border-neutral04 text-h4 h-[44px] w-[280px] rounded-sm border pl-10"
-            />
-            <button
-              type="button"
-              onClick={() => reset({ search: "" })}
-              disabled={!watchedSearch}
-              className={`text-neutral05 absolute top-1/2 right-2 -translate-y-1/2 ${!watchedSearch
-                ? "cursor-not-allowed opacity-50"
-                : "hover:text-primary01 cursor-pointer"
-                }`}
-            >
-              <CloseIcon fontSize="small" />
-            </button>
-          </form>
+          <RHFTextField
+            name="search"
+            control={control}
+            startIcon={<SearchIcon />}
+            endIcon={
+              watchedSearch ? (
+                <CloseIcon onClick={() => reset({ search: "" })} className="cursor-pointer" />
+              ) : (
+                <span style={{ width: "24px" }} />
+              )
+            }
+            placeholder="ค้นหา"
+            size="small"
+          />
 
           <Select
             onChange={handleSortOrder}
             size="small"
-            value={sortOrder ?? "desc"}
+            value={initValue.sortOrder ?? "desc"}
             displayEmpty
             renderValue={() => "จัดเรียงตาม"}
-            sx={{
-              "& .MuiOutlinedInput-notchedOutline": {
-                borderColor: "var(--color-neutral04)",
-              },
-              py: 0.5,
-              width: "180px",
-              height: "44px",
-              color: "var(--color-neutral04)",
-            }}
             IconComponent={ExpandMoreIcon}
-            MenuProps={{
-              MenuListProps: {
-                sx: { py: 0 },
-              },
-            }}
+            sx={{ width: 180 }}
           >
-            <MenuItem
-              value="desc"
-              sx={{
-                color: "var(--color-neutral04)",
-                borderRadius: 1,
-                border: "1px solid var(--color-neutral04)",
-                display: "flex",
-                justifyContent: "space-between",
-              }}
-            >
+            <MenuItem value="desc">
               ใหม่สุดไปเก่าสุด
-              {sortOrder === "desc" && <DoneIcon fontSize="small" />}
+              {initValue.sortOrder === "desc" && <DoneIcon fontSize="small" sx={{ ml: 1 }} />}
             </MenuItem>
 
-            <MenuItem
-              value="asc"
-              sx={{
-                color: "var(--color-neutral04)",
-                borderRadius: 1,
-                border: "1px solid var(--color-neutral04)",
-                display: "flex",
-                justifyContent: "space-between",
-              }}
-            >
+            <MenuItem value="asc">
               เก่าสุดไปใหม่สุด
-              {sortOrder === "asc" && <DoneIcon fontSize="small" />}
+              {initValue.sortOrder === "asc" && <DoneIcon fontSize="small" sx={{ ml: 1 }} />}
             </MenuItem>
           </Select>
 
@@ -172,15 +167,11 @@ const ProjectListComponents = ({
             onClick={handleClickAddProject}
             variant="contained"
             sx={{
-              backgroundColor: "var(--color-primary02)",
-              color: "var(--color-neutral01)",
               px: 2,
-              height: "44px",
               fontWeight: "bold",
               display: "flex",
               alignItems: "center",
               gap: 1,
-              "&:hover": { backgroundColor: "var(--color-primary03)" },
             }}
           >
             <AddIcon />
@@ -190,10 +181,10 @@ const ProjectListComponents = ({
       </div>
 
       <div className="flex w-full flex-col items-center justify-center gap-10">
-        {projects.length > 0 ? (
+        {initValue.projects.length > 0 ? (
           <>
-            <div className="grid w-full grid-cols-3 justify-items-center gap-6">
-              {projects.map((project) => (
+            <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
+              {initValue.projects.map((project) => (
                 <AdminCard
                   key={project.id}
                   type="project"
@@ -203,18 +194,23 @@ const ProjectListComponents = ({
                       `/admin/projects/${project.id}`,
                     )
                   }
+                  onDelete={() => handleDeleteClick(project)}
                 />
               ))}
             </div>
 
-            <Pagination
-              shape="rounded"
-              count={Math.ceil(totalRecords / pageSize) || 1}
-              page={page}
-              onChange={(_, currentPage) => handleNextPage(currentPage)}
-              color="primary"
-              size="large"
-            />
+            {initValue.totalRecords > initValue.pageSize && (
+              <div className="mt-8 flex justify-end">
+                <Pagination
+                  shape="rounded"
+                  count={Math.ceil(initValue.totalRecords / initValue.pageSize) || 1}
+                  page={initValue.page}
+                  onChange={(_, currentPage) => handleNextPage(currentPage)}
+                  color="primary"
+                  size="large"
+                />
+              </div>
+            )}
           </>
         ) : (
           <div className="flex min-h-[600px] items-center justify-center">
@@ -226,6 +222,8 @@ const ProjectListComponents = ({
           </div>
         )}
       </div>
+
+      {confirmModal && <ConfirmModal {...confirmModal} />}
     </div>
   );
 };

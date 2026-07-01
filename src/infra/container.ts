@@ -20,9 +20,7 @@ import { ClassBookService } from "@/core/service/class-book.service";
 // Use process.env directly in server-side code (container.ts is server-only)
 // The /api/config endpoint is only for client-side usage
 export const API_URL =
-  process.env.NEXT_PUBLIC_API_URL ||
-  process.env.API_URL ||
-  "https://acs-dev.service.narutchai.com";
+  process.env.API_URL || "https://acs-dev.service.narutchai.com";
 
 export const baseUrl = `${API_URL}/api`;
 

@@ -1,5 +1,5 @@
 import React from "react";
-import { projectService } from "@/infra/container";
+import { projectService, baseUrl } from "@/infra/container";
 import ProjectListComponents from "./project.list.component";
 import { QueryProject } from "@/core/domain/project";
 
@@ -29,6 +29,7 @@ const page = async ({ searchParams }: PageProps) => {
       page={page}
       sortOrder={query.sortOrder}
       search={query.search}
+      apiBase={baseUrl}
     />
   );
 };
