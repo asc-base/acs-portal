@@ -10,7 +10,20 @@ import {
 
 export const dynamic = "force-dynamic";
 
-export default async function page() {
+interface PageProps {
+  searchParams: Promise<{ 
+    page:number;
+    pageSize:number;
+    classBookID:number;
+    search?:string;
+    orderBy?:string;
+    sortBy?:"asc" | "desc";}>;
+}
+
+export default async function page({ searchParams }: PageProps) {
+
+  const resolvedParams = await searchParams;
+
   const [coursesRes, masterData, studentsRes, professorsRes] = await Promise.all([
   courseService.getCourse({}),
   masterDataService.getMasterData(),
