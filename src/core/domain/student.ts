@@ -4,6 +4,7 @@ export interface IStudent {
   id: number;
   studentCode: string;
   user: IUser;
+  classBookID: number | null;
   // classBook: IClassBook;
   // yearOfFirstAdmission:string | null;
   // yearOfCompletion:string | null;

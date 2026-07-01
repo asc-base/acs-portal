@@ -18,7 +18,7 @@ const page = async ({ params, searchParams }: PageProps) => {
   const classBookID = Number(resolvesearchParams.classBookID);
   const idNumber = Number(resolveParams.id);
 
-  const student = await studentService.getStudentByUserId(idNumber);
+  const student = await studentService.getStudentById(idNumber);
 
   return (
     <StudentUpdateForm

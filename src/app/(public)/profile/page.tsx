@@ -1,10 +1,8 @@
-import React from "react";
 import ProfileForm from "./profileform";
+import { baseUrl } from "@/infra/container";
 
 const page = async () => {
-  return (
-      <ProfileForm />
-  );
+  return <ProfileForm apiBase={baseUrl} />;
 };
 
 export default page;

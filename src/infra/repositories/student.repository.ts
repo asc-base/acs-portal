@@ -1,5 +1,9 @@
 import { IStudentRepository } from "@/core/ports/student.repository";
-import { IStudent, QueryStudent, ICreateStudentCsv } from "@/core/domain/student";
+import {
+  IStudent,
+  QueryStudent,
+  ICreateStudentCsv,
+} from "@/core/domain/student";
 import { HttpHelper } from "@/lib/http";
 import { ApiResponse, Pageable } from "@/interface/response";
 
@@ -13,7 +17,7 @@ export class StudentRepository implements IStudentRepository {
   }
 
   async getStudents(
-    query: QueryStudent
+    query: QueryStudent,
   ): Promise<ApiResponse<Pageable<IStudent>>> {
     const searchParams = new URLSearchParams({
       page: query.page?.toString() || "1",
@@ -38,38 +42,53 @@ export class StudentRepository implements IStudentRepository {
     const response = await this.http.get<ApiResponse<Pageable<IStudent>>>(url);
     return response;
   }
-  async getStudentByUserId(id: number): Promise<ApiResponse<IStudent>> {
+  async getStudentById(id: number): Promise<ApiResponse<IStudent>> {
     const response = await this.http.get<ApiResponse<IStudent>>(
       `/v1/students/${id}`,
     );
     return response;
   }
 
-  async createStudent(data: FormData,): Promise<ApiResponse<IStudent>> {
+  async getStudentByUserId(userId: number): Promise<ApiResponse<IStudent>> {
+    const response = await this.http.get<ApiResponse<IStudent>>(
+      `/v1/students/user/${userId}`,
+    );
+    return response;
+  }
+
+  async createStudent(data: FormData): Promise<ApiResponse<IStudent>> {
     const response = await this.http.post<ApiResponse<IStudent>>(
       `/v1/students`,
-      data
+      data,
     );
     return response;
   }
 
-  async deleteStudent(id :number): Promise<ApiResponse<IStudent>> {
+  async deleteStudent(id: number): Promise<ApiResponse<IStudent>> {
     const response = await this.http.delete<ApiResponse<IStudent>>(
-      `/v1/students/${id}`);
-    return response;
-  }
-
-  async updateStudent(data: FormData, studentId: number): Promise<ApiResponse<IStudent>> {
-    const response = await this.http.patch<ApiResponse<IStudent>>(
-      `/v1/students/${studentId}`, data
+      `/v1/students/${id}`,
     );
     return response;
   }
 
-  async createStudentBatch(data: { classBookID: number, students: ICreateStudentCsv[] }): Promise<ApiResponse<IStudent[]>> {
-  return await this.http.post<ApiResponse<IStudent[]>>(
-    `/v1/students/batch`,
-    data
-  );
-}
+  async updateStudent(
+    data: FormData,
+    studentId: number,
+  ): Promise<ApiResponse<IStudent>> {
+    const response = await this.http.patch<ApiResponse<IStudent>>(
+      `/v1/students/${studentId}`,
+      data,
+    );
+    return response;
+  }
+
+  async createStudentBatch(data: {
+    classBookID: number;
+    students: ICreateStudentCsv[];
+  }): Promise<ApiResponse<IStudent[]>> {
+    return await this.http.post<ApiResponse<IStudent[]>>(
+      `/v1/students/batch`,
+      data,
+    );
+  }
 }
