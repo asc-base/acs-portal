@@ -22,8 +22,10 @@ export class StudentRepository implements IStudentRepository {
     const searchParams = new URLSearchParams({
       page: query.page?.toString() || "1",
       pageSize: query.pageSize?.toString() || "10",
-      classBookID: query.classBookID.toString(),
     });
+    if (query.classBookID) {
+      searchParams.append("classBookID", query.classBookID.toString());
+    }
     if (query.search) {
       searchParams.append("search", query.search);
     }
