@@ -1,5 +1,9 @@
 import { IStudentRepository } from "@/core/ports/student.repository";
-import { IStudent, QueryStudent, ICreateStudentCsv } from "@/core/domain/student";
+import {
+  IStudent,
+  QueryStudent,
+  ICreateStudentCsv,
+} from "@/core/domain/student";
 import { HttpHelper } from "@/lib/http";
 import { ApiResponse, Pageable } from "@/interface/response";
 
@@ -13,14 +17,15 @@ export class StudentRepository implements IStudentRepository {
   }
 
   async getStudents(
-    query: QueryStudent
+    query: QueryStudent,
   ): Promise<ApiResponse<Pageable<IStudent>>> {
     const searchParams = new URLSearchParams({
       page: query.page?.toString() || "1",
       pageSize: query.pageSize?.toString() || "10",
-      classBookID: query.classBookID.toString(),
     });
-    
+    if (query.classBookID) {
+      searchParams.append("classBookID", query.classBookID.toString());
+    }
     if (query.search) {
       searchParams.append("search", query.search);
     }
@@ -35,7 +40,6 @@ export class StudentRepository implements IStudentRepository {
     const response = await this.http.get<ApiResponse<Pageable<IStudent>>>(url);
     return response;
   }
-
   async getStudentById(id: number): Promise<ApiResponse<IStudent>> {
     const response = await this.http.get<ApiResponse<IStudent>>(
       `/v1/students/${id}`
@@ -45,7 +49,7 @@ export class StudentRepository implements IStudentRepository {
 
   async getStudentByUserId(userId: number): Promise<ApiResponse<IStudent>> {
     const response = await this.http.get<ApiResponse<IStudent>>(
-      `/v1/students/user/${userId}`
+      `/v1/students/user/${userId}`,
     );
     return response;
   }
@@ -53,25 +57,25 @@ export class StudentRepository implements IStudentRepository {
   async createStudent(data: FormData): Promise<ApiResponse<IStudent>> {
     const response = await this.http.post<ApiResponse<IStudent>>(
       `/v1/students`,
-      data
+      data,
     );
     return response;
   }
 
   async deleteStudent(id: number): Promise<ApiResponse<IStudent>> {
     const response = await this.http.delete<ApiResponse<IStudent>>(
-      `/v1/students/${id}`
+      `/v1/students/${id}`,
     );
     return response;
   }
 
   async updateStudent(
-    data: FormData, 
-    studentId: number
+    data: FormData,
+    studentId: number,
   ): Promise<ApiResponse<IStudent>> {
     const response = await this.http.patch<ApiResponse<IStudent>>(
-      `/v1/students/${studentId}`, 
-      data
+      `/v1/students/${studentId}`,
+      data,
     );
     return response;
   }
@@ -82,7 +86,7 @@ export class StudentRepository implements IStudentRepository {
   }): Promise<ApiResponse<IStudent[]>> {
     return await this.http.post<ApiResponse<IStudent[]>>(
       `/v1/students/batch`,
-      data
+      data,
     );
   }
 }

@@ -27,15 +27,16 @@ export interface IProject {
 
 export interface ICreateProject {
   title: string;
-  thumbnail: string;
-  detail: string;
-  youtube: string;
-  projectCourses: string[];
-  projectTypes: string[];
-  projectCategories: string[];
-  github: string;
-  document: string;
-  presentation: string;
+  details: string;
+  youtubeURL: string;
+  githubURL: string;
+  documentURL: string;
+  presentationURL: string;
+  figmaURL: string | null;
+  coursesID: number[];
+  tagsID: number[];
+  techStacks: string[];
+  members: { userID: number; roleID: number }[];
 }
 
 export interface QueryProject {
