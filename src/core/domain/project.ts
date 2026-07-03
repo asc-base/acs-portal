@@ -75,7 +75,7 @@ export interface IUpdateProjectData {
   githubURL?: string;
   documentURL?: string;
   presentationURL?: string;
-  figmaURL?: string;
+  figmaURL?: string | null;
   thumbnailFile?: File | null;
   assets?: File[];
   newtagsID?: number[];

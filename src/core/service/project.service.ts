@@ -1,5 +1,5 @@
 import { Pageable } from "@/interface/response";
-import { IProject, QueryProject, IUpdateProjectData } from "../domain/project";
+import { IProject, QueryProject, IUpdateProjectData, ICreateProject } from "../domain/project";
 import { IProjectRepository } from "../ports/project.repository";
 import { z } from "zod";
 
@@ -73,7 +73,24 @@ export class ProjectService {
     return response.data;
   }
 
-  async deleteProject(id: string): Promise<void> {
-    await this.projectRepository.deleteProject(id);
+  async updateProject(id: string, payload: IUpdateProjectData): Promise<IProject> {
+    const formData = new FormData();
+    Object.entries(payload).forEach(([key, value]) => {
+      if (value !== undefined && value !== null) {
+        if (Array.isArray(value) || typeof value === 'object') {
+          if (key === 'thumbnailFile' && value instanceof File) {
+            formData.append(key, value);
+          } else if (key === 'assets' && Array.isArray(value)) {
+            value.forEach((file: File) => formData.append(key, file));
+          } else {
+            formData.append(key, JSON.stringify(value));
+          }
+        } else {
+          formData.append(key, value.toString());
+        }
+      }
+    });
+    const response = await this.projectRepository.updateProject(id, formData);
+    return response.data;
   }
 }

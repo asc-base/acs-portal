@@ -18,9 +18,9 @@ import { IProject } from "@/core/domain/project";
 import { INews } from "@/core/domain/news";
 
 const CurriculumContent: FC<{ curriculum: ICurriculum }> = ({ curriculum }) => (
-    <h3 className="mt-1 font-bold text-start">
-      {curriculum.title} พ.ศ. {curriculum.year}
-    </h3>
+  <h3 className="mt-1 font-bold text-start">
+    {curriculum.title} พ.ศ. {curriculum.year}
+  </h3>
 );
 
 const ClassBookContent: FC<{ classbook: IClassBook }> = ({ classbook }) => (
@@ -33,19 +33,15 @@ const ClassBookContent: FC<{ classbook: IClassBook }> = ({ classbook }) => (
 );
 
 const ProjectContent: FC<{ project: IProject }> = ({ project }) => {
-  const categories =
-    project.projectCategories?.map((category) => category.name).join(", ") ||
-    "";
-  const types = project.projectTypes?.map((type) => type.name).join(", ") || "";
+  const categories = project.tag?.map((t: any) => t.name).join(", ") || "";
   return (
     <div className="flex flex-col items-start gap-1">
       <p className="text-neutral04 line-clamp-1 text-sm">
         {categories}
-        {categories && types ? " /" : ""} {types}
       </p>
       <h4 className="line-clamp-2 font-bold">{project.title}</h4>
 
-      {project.projectMembers && (
+      {project.member && (
         <AvatarGroup
           max={4}
           sx={{
@@ -53,13 +49,16 @@ const ProjectContent: FC<{ project: IProject }> = ({ project }) => {
             "& .MuiAvatar-root": { width: 24, height: 24 },
           }}
         >
-          {project.projectMembers.map((member, idx) => (
-            <Avatar
-              key={idx}
-              alt={member.user.firstNameTh}
-              src={member.user.imageUrl}
-            />
-          ))}
+          {project.member.map((m: any, idx: number) => {
+            const user = m.user || m;
+            return (
+              <Avatar
+                key={idx}
+                alt={user.firstNameTh}
+                src={user.imageUrl}
+              />
+            );
+          })}
         </AvatarGroup>
       )}
     </div>
@@ -122,10 +121,10 @@ export const AdminCard: FC<AdminCardProps> = (props) => {
 
       <CardContent className="flex-grow !px-7">
         {type === "curriculum" && (
-          <CurriculumContent curriculum={data}/>
+          <CurriculumContent curriculum={data} />
         )}
         {type === "classBook" && (
-          <ClassBookContent classbook={data}/>
+          <ClassBookContent classbook={data} />
         )}
         {type === "project" && <ProjectContent project={data} />}
         {type === "news" && <NewsContent news={data} />}
