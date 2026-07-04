@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-// import Image from "next/image";
+import Image from "next/image";
 import { Button, Typography, IconButton, InputAdornment } from "@mui/material";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
 import { useForm } from "react-hook-form";
