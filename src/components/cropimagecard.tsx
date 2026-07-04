@@ -6,16 +6,16 @@ import ImageIcon from "@mui/icons-material/Image";
 
 interface CropImageCardProps {
   file: File;
-  width: number;
-  height: number;
+  width?: number;
+  height?: number;
   onUploadComplete: (file: File) => void;
   onCancel: () => void;
 }
 
 export const CropImageCard = ({
   file,
-  width,
-  height,
+  width = 590,
+  height = 440,
   onUploadComplete,
   onCancel,
 }: CropImageCardProps) => {

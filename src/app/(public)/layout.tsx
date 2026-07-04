@@ -12,9 +12,15 @@ const query: QueryCurriculum = {
   pageSize: 2,
 };
 
-const { rows } = await curriculumService.getCurriculum(query);
+const layout = async ({ children }: Readonly<{ children: ReactNode }>) => {
+  let rows: any[] = [];
+  try {
+    const result = await curriculumService.getCurriculum(query);
+    rows = result.rows || [];
+  } catch (error) {
+    console.error("Failed to fetch curriculums during build:", error);
+  }
 
-const layout = ({ children }: Readonly<{ children: ReactNode }>) => {
   return (
     <div className="jun-layout w-full">
       <header className="jun-header jun-layout-h-[7.375rem] h-full">

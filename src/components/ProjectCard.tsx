@@ -17,6 +17,8 @@ function ProjectCardBase({ data }: ProjectCardProps) {
     projectMembers,
     projectCategories,
     projectFields,
+    member,
+    tag,
   } = data;
 
   return (

@@ -3,6 +3,8 @@ import { baseUrl, masterDataService } from "@/infra/container";
 
 import React from "react";
 
+export const dynamic = "force-dynamic";
+
 const Page = async () => {
   const tags = await masterDataService.getMasterData();
 
