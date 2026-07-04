@@ -52,9 +52,18 @@ export class ProjectRepository implements IProjectRepository {
     return response;
   }
 
-  async updateProject(id: string, formData: FormData): Promise<ApiResponse<IProject>> {
+  async updateProject(
+    id: string,
+    formData: FormData | IUpdateProjectData,
+  ): Promise<ApiResponse<IProject>> {
     const url = `/v1/project/${id}`;
     const response = await this.http.put<ApiResponse<IProject>>(url, formData);
+    return response;
+  }
+
+  async deleteProject(id: string): Promise<ApiResponse<void>> {
+    const url = `/v1/project/${id}`;
+    const response = await this.http.delete<ApiResponse<void>>(url);
     return response;
   }
 }

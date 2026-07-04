@@ -58,9 +58,35 @@ export class ProjectService {
     const response = await this.projectRepository.getProjectById(id);
     return response.data;
   }
+  async createProject(
+    payload: ICreateProject,
+    files: { thumbnailFile: File | null; assets: File[] },
+  ): Promise<IProject> {
+    const formData = new FormData();
 
-  async updateProject(id: string, data: IUpdateProjectData): Promise<IProject> {
-    const validation = updateSchema.safeParse(data);
+    Object.entries(payload).forEach(([key, value]) => {
+      if (value !== undefined && value !== null) {
+        if (Array.isArray(value) || typeof value === "object") {
+          formData.append(key, JSON.stringify(value));
+        } else {
+          formData.append(key, value.toString());
+        }
+      }
+    });
+
+    if (files.thumbnailFile) {
+      formData.append("thumbnailFile", files.thumbnailFile);
+    }
+    if (files.assets && files.assets.length > 0) {
+      files.assets.forEach((file) => formData.append("assets", file));
+    }
+
+    const response = await this.projectRepository.createProject(formData);
+    return response.data;
+  }
+
+  async updateProject(id: string, payload: IUpdateProjectData): Promise<IProject> {
+    const validation = updateSchema.safeParse(payload);
 
     if (!validation.success) {
       const errorMsg = validation.error.issues
@@ -69,18 +95,13 @@ export class ProjectService {
       throw new Error(`การตรวจสอบข้อมูลล้มเหลว: ${errorMsg}`);
     }
 
-    const response = await this.projectRepository.updateProject(id, data);
-    return response.data;
-  }
-
-  async updateProject(id: string, payload: IUpdateProjectData): Promise<IProject> {
     const formData = new FormData();
     Object.entries(payload).forEach(([key, value]) => {
       if (value !== undefined && value !== null) {
-        if (Array.isArray(value) || typeof value === 'object') {
-          if (key === 'thumbnailFile' && value instanceof File) {
+        if (Array.isArray(value) || typeof value === "object") {
+          if (key === "thumbnailFile" && value instanceof File) {
             formData.append(key, value);
-          } else if (key === 'assets' && Array.isArray(value)) {
+          } else if (key === "assets" && Array.isArray(value)) {
             value.forEach((file: File) => formData.append(key, file));
           } else {
             formData.append(key, JSON.stringify(value));
@@ -92,5 +113,9 @@ export class ProjectService {
     });
     const response = await this.projectRepository.updateProject(id, formData);
     return response.data;
+  }
+
+  async deleteProject(id: string): Promise<void> {
+    await this.projectRepository.deleteProject(id);
   }
 }
