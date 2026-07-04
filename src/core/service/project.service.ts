@@ -5,8 +5,11 @@ export class ProjectService {
   constructor(private projectRepository: IProjectRepository) {}
 
   async getProjects(query: QueryProject): Promise<Pageable<IProject>> {
+<<<<<<< HEAD
     console.log("query", query);
 
+=======
+>>>>>>> 3426d5d (feat: implement project service and infrastructure repository with port abstraction)
     const response = await this.projectRepository.getProjects(query);
     return response.data;
   }
