@@ -76,7 +76,7 @@ export const NewsInformationInfo = ({
             return URL.createObjectURL(croppedFile as File);
         }
         return newsInformation.thumbnailURL;
-    }, [croppedFile, newsInformation.thumbnailURL]);
+    }, [croppedFile, newsInformation.thumbnailURL, selectedFile]);
 
 
 

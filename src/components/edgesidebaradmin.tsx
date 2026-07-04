@@ -4,7 +4,6 @@ import PersonIcon from "@mui/icons-material/Person";
 import HailIcon from "@mui/icons-material/Hail";
 import DescriptionIcon from "@mui/icons-material/Description";
 import NewspaperIcon from "@mui/icons-material/Newspaper";
-import WorkIcon from "@mui/icons-material/Work";
 import LogoutIcon from "@mui/icons-material/Logout";
 import BookmarkIcon from "@mui/icons-material/Bookmark";
 import CampaignIcon from "@mui/icons-material/Campaign";

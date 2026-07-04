@@ -4,5 +4,5 @@ import { ApiResponse, Pageable } from "@/interface/response";
 export interface IProjectRepository {
   getProjects(query: QueryProject): Promise<ApiResponse<Pageable<IProject>>>;
   getProjectById(id: string): Promise<ApiResponse<IProject>>;
-  createProject(formData: FormData): Promise<ApiResponse<any>>;
+  createProject(formData: FormData): Promise<ApiResponse<IProject>>;
 }

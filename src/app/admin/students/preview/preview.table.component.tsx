@@ -15,7 +15,7 @@ import {
   AlertTitle,
   Snackbar,
 } from "@mui/material";
-import { Edit, Delete } from "@mui/icons-material";
+import { Delete } from "@mui/icons-material";
 import { useImportStudentStore } from "@/store/preview-data";
 import { useState, useMemo, useEffect } from "react";
 import { ICreateStudentCsv } from "@/core/domain/student";
@@ -99,9 +99,6 @@ export default function Preview_table_component({
     });
   };
 
-  const editStudentRowById = (studentId: string) => {
-    console.log(`edit student id ${studentId}`);
-  };
 
   const onSubmit = async () => {
     const cleanedStudents = students.map((s) => ({

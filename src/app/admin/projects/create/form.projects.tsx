@@ -1,7 +1,7 @@
 "use client";
 import React, { FC, useState, useMemo } from "react";
 import { useForm, useFieldArray, SubmitHandler } from "react-hook-form";
-import { Button, Typography, IconButton, Modal } from "@mui/material";
+import { Button, IconButton, Modal } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import MenuItem from "@mui/material/MenuItem";
 import Alert from "@mui/material/Alert";
@@ -103,7 +103,7 @@ export const FormProjects: FC<FormProjectsProps> = ({ apiBase, initialCourses, i
   const router = useRouter();
   const [confirmModal, setConfirmModal] = useState<ConfirmModalProps | null>(null);
 
-  const { control, handleSubmit, formState: { isValid, isDirty } } = useForm<ProjectFormValues>({
+  const { control, handleSubmit, formState: { isDirty } } = useForm<ProjectFormValues>({
     resolver: zodResolver(Schema),
     defaultValues: {
       title: "", 
