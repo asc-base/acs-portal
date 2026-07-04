@@ -4,6 +4,7 @@ export interface IStudent {
   id: number;
   studentCode: string;
   user: IUser;
+  classBookID: number | null;
   // classBook: IClassBook;
   // yearOfFirstAdmission:string | null;
   // yearOfCompletion:string | null;
@@ -15,9 +16,9 @@ export interface IStudent {
 }
 
 export interface QueryStudent {
-  page: number;
-  pageSize: number;
-  classBookID: number;
+  page?: number;
+  pageSize?: number;
+  classBookID?: number;
   search?: string;
   orderBy?: string;
   sortBy?: "asc" | "desc";
