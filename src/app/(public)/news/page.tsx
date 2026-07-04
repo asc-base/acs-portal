@@ -2,6 +2,9 @@ import React from "react";
 import { newsService } from "@/infra/container";
 import NewsListComponents from "./news.list.components";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 interface PageProps {
   searchParams: Promise<{
     page?: number;

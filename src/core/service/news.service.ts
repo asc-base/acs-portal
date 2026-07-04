@@ -54,15 +54,23 @@ export class NewsService {
     return response.data;
   }
 
-  async updateNews(id: number, data: IUpdateNews, image: File | null) {
+  async updateNews(
+    id: number,
+    data: IUpdateNews,
+    thumbnail: File | null,
+    highlight: File | null,
+  ) {
     try {
       const formData = new FormData();
       Object.entries(data).forEach(([key, value]) => {
         formData.append(key, value?.toString() ?? "");
       });
 
-      if (image) {
-        formData.append("image", image);
+      if (thumbnail) {
+        formData.append("thumbnail", thumbnail);
+      }
+      if (highlight) {
+        formData.append("highlight", highlight);
       }
 
       const response = await this.newsRepository.updateNews(id, formData);

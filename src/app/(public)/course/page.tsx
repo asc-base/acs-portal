@@ -2,6 +2,9 @@ import React from "react";
 import { courseService } from "@/infra/container";
 import CourseListComponents from "./course.list.components";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 interface PageProps {
   searchParams: Promise<{
     page: number;

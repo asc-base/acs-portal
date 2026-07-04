@@ -282,6 +282,8 @@ export const NewsInformationInfo = ({
                         {selectedFile && (
                             <CropImageCard
                                 file={selectedFile}
+                                width={590}
+                                height={440}
                                 onUploadComplete={handleUploadComplete}
                                 onCancel={() => setOpenCrop(false)}
                             />

@@ -27,7 +27,7 @@ const page = async ({ searchParams }: PageProps) => {
   
   const { typeCourses } = await masterDataService.getMasterData();
 
-  const curriculum = await curriculumService.getCurriculumById(query.curriculumID)
+  const curriculum = await curriculumService.getCurriculumById(query.curriculumID!)
 
   if (!curriculum) {
   return (
@@ -43,7 +43,7 @@ const page = async ({ searchParams }: PageProps) => {
       totalRecords={totalRecords}
       pageSize={pageSize}
       page={page}
-      curriculumID={query.curriculumID}
+      curriculumID={query.curriculumID!}
       typeCourses={typeCourses}
       typeCourseID={query.typeCourseID}
       sortBy={query.sortBy}

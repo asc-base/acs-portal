@@ -42,7 +42,7 @@ const page = async ({ searchParams }: PageProps) => {
       totalRecords={totalRecords}
       pageSize={pageSize}
       page={page}
-      classBookID={search.classBookID}
+      classBookID={query.classBookID!}
       sortBy={query.sortBy}
       orderBy={query.orderBy}
       apiBase={baseUrl}

@@ -3,7 +3,7 @@ import { NavbarMain } from "@/components/navbar";
 import { Footer } from "@/components/footer";
 import { baseUrl } from "@/infra/container";
 import { curriculumService } from "@/infra/container";
-import { QueryCurriculum } from "@/core/domain/curriculum";
+import { QueryCurriculum, ICurriculum } from "@/core/domain/curriculum";
 
 export const dynamic = "force-dynamic";
 
@@ -12,9 +12,15 @@ const query: QueryCurriculum = {
   pageSize: 2,
 };
 
-const { rows } = await curriculumService.getCurriculum(query);
+const layout = async ({ children }: Readonly<{ children: ReactNode }>) => {
+  let rows: ICurriculum[] = [];
+  try {
+    const result = await curriculumService.getCurriculum(query);
+    rows = result.rows;
+  } catch (err) {
+    console.error("Failed to fetch curriculums in public layout:", err);
+  }
 
-const layout = ({ children }: Readonly<{ children: ReactNode }>) => {
   return (
     <div className="jun-layout w-full">
       <header className="jun-header jun-layout-h-[7.375rem] h-full">
