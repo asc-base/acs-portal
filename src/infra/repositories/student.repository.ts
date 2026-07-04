@@ -64,7 +64,7 @@ export class StudentRepository implements IStudentRepository {
     return response;
   }
 
-  async deleteStudent(id: number): Promise<ApiResponse<IStudent>> {
+  async deleteStudent(id :number): Promise<ApiResponse<IStudent>> {
     const response = await this.http.delete<ApiResponse<IStudent>>(
       `/v1/students/${id}`,
     );
