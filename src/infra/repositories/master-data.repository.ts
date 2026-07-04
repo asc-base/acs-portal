@@ -1,6 +1,6 @@
 import { IMasterDataRepository } from "@/core/ports/master-data.repository";
 import { ApiResponse } from "@/interface/response";
-import { MasterData, IType, TypeCourse } from "@/core/domain/master-data";
+import { MasterData } from "@/core/domain/master-data";
 import { HttpHelper } from "@/lib/http";
 
 export class MasterDataRepository implements IMasterDataRepository {
