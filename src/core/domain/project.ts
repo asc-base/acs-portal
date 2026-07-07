@@ -18,6 +18,11 @@ export interface IProject {
   member: IUser[];
   tag: ListType[];
   course: ICourse[];
+  projectMembers: IStudent[];
+  projectCategories: ListType[];
+  projectFields: ListType[];
+  projectTypes: ListType[];
+  projectCourses: ICourse[];
   createdAt: Date;
   updatedAt: Date;
   deletedAt: null;

@@ -78,7 +78,7 @@ const ProfileForm = ({ apiBase }: { apiBase: string }) => {
       }
     };
     fetchStudent();
-  }, [router]);
+  }, [router, authService, studentService]);
 
   const { handleSubmit, control, reset } = useForm<FormData>({
     defaultValues: {

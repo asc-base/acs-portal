@@ -76,7 +76,7 @@ export const NewsInformationInfo = ({
             return URL.createObjectURL(croppedFile as File);
         }
         return newsInformation.thumbnailURL;
-    }, [croppedFile, newsInformation.thumbnailURL]);
+    }, [croppedFile, newsInformation.thumbnailURL, selectedFile]);
 
 
 
@@ -282,6 +282,8 @@ export const NewsInformationInfo = ({
                         {selectedFile && (
                             <CropImageCard
                                 file={selectedFile}
+                                width={590}
+                                height={440}
                                 onUploadComplete={handleUploadComplete}
                                 onCancel={() => setOpenCrop(false)}
                             />
