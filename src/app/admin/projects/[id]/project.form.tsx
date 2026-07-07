@@ -1,7 +1,7 @@
 "use client";
 import React, { FC, useState, useEffect } from "react";
 import { useForm, useFieldArray } from "react-hook-form";
-import { Button, Typography, Modal, MenuItem, Select, Alert, Snackbar } from "@mui/material";
+import { Button, Typography, Modal, MenuItem, Alert, Snackbar } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
@@ -19,15 +19,17 @@ import SlideshowIcon from "@mui/icons-material/Slideshow";
 import CloseIcon from "@mui/icons-material/Close";
 import { projectService } from "@/infra/container";
 import { IProject, IUpdateProjectData } from "@/core/domain/project";
-import { Tag } from "@/core/domain/list-type";
 import { ICourse } from "@/core/domain/course";
 import { IStudent } from "@/core/domain/student";
 import { IProfessor } from "@/core/domain/professor";
-
+import { MasterData } from "@/core/domain/master-data";
+import { IUser } from "@/core/domain/user";
+import { Tag } from "@/core/domain/list-type";
+import { ListType} from "@/interface/type";
 interface ProjectFormProps {
   project: IProject | null;
   courses: ICourse[];
-  masterData: any;
+  masterData: MasterData;
   students: IStudent[];
   professors: IProfessor[];
 }
@@ -112,20 +114,23 @@ export const ProjectForm: FC<ProjectFormProps> = ({
   const [confirmModal, setConfirmModal] = useState<ConfirmModalProps | null>(null);
 
   // Categories/Types mapping from Master Data
-  const categoriesList = masterData?.tags?.filter((e: any) => e.tagsGroupsId === 3) || [];
-  const typesList = masterData?.tags?.filter((e: any) => e.tagsGroupsId === 1) || [];
+  const categoriesList = masterData?.tags?.filter((e: Tag) => e.tagsGroupsId === 3) || [];
+  const typesList = masterData?.tags?.filter((e: Tag) => e.tagsGroupsId === 1) || [];
 
   // Parse Initial Form Values
   const initialCourses = (project?.course && project.course.length > 0)
     ? project.course.map((c) => ({ value: c.id.toString() }))
     : [{ value: "" }];
-  const initialTypes = (project?.tag && project.tag.filter((t: any) => t.tagsGroupsId === 1).length > 0)
-    ? project.tag.filter((t: any) => t.tagsGroupsId === 1).map((t) => ({ value: t.id.toString() }))
+  const filteredTypes = project?.tag?.filter((t) => (t as ListType & { tagsGroupsId?: number }).tagsGroupsId === 1) || [];
+  const initialTypes = filteredTypes.length > 0
+    ? filteredTypes.map((t) => ({ value: t.id.toString() }))
     : [{ value: "" }];
-  const initialCategories = (project?.tag && project.tag.filter((t: any) => t.tagsGroupsId === 3).length > 0)
-    ? project.tag.filter((t: any) => t.tagsGroupsId === 3).map((t) => ({ value: t.id.toString() }))
+
+  const filteredCategories = project?.tag?.filter((t) => (t as ListType & { tagsGroupsId?: number }).tagsGroupsId === 3) || [];
+  const initialCategories = filteredCategories.length > 0
+    ? filteredCategories.map((t) => ({ value: t.id.toString() }))
     : [{ value: "" }];
-  const getMemberUserId = (m: any) => {
+  const getMemberUserId = (m: IUser & { user?: { id: number | string } }) => {
     if (m.user && m.user.id) {
       return m.user.id.toString();
     }
@@ -133,13 +138,12 @@ export const ProjectForm: FC<ProjectFormProps> = ({
   };
 
   const initialTech = project?.techStacks?.map((tech) => ({ value: tech })) || [];
-  const initialMembers = project?.member?.filter((m: any) => m.role.id === 2).map((m) => ({ userID: getMemberUserId(m) })) || [];
-  const initialAdvisors = project?.member?.filter((m: any) => m.role.id === 3).map((m) => ({ userID: getMemberUserId(m) })) || [];
+  const initialMembers = project?.member?.filter((m: IUser & { role?: { id: number | string } }) => m.role?.id === 2).map((m) => ({ userID: getMemberUserId(m) })) || [];
+  const initialAdvisors = project?.member?.filter((m: IUser & { role?: { id: number | string } }) => m.role?.id === 3).map((m) => ({ userID: getMemberUserId(m) })) || [];
 
   const {
     control,
     handleSubmit,
-    setValue,
     watch,
     reset,
     formState: { isValid, isDirty },
@@ -245,7 +249,7 @@ export const ProjectForm: FC<ProjectFormProps> = ({
   };
 
   // Drag and Drop Handlers
-  const handleDragStart = (e: any, index: number) => {
+  const handleDragStart = (e: React.DragEvent, index: number) => {
     setDraggedIndex(index);
     if (e.dataTransfer) {
       e.dataTransfer.effectAllowed = "move";
@@ -334,8 +338,9 @@ export const ProjectForm: FC<ProjectFormProps> = ({
       const deletedtagsID = originalTagIDs.filter(id => !currentTagIDs.includes(id));
 
       const currentMemberIDs = data.members.map(m => parseInt(m.userID)).filter(Boolean);
-      const originalMemberIDs = project.member.filter(m => (m as any).role.id === 2).map(m => {
-        const uid = (m as any).user?.id || m.id;
+      const originalMemberIDs = project.member.filter(m => (m as IUser & { role?: { id: number } }).role?.id === 2).map(m => {
+        const memberData = m as IUser & { user?: { id: number | string } };
+        const uid = memberData.user?.id || memberData.id;
         return typeof uid === "string" ? parseInt(uid) : uid;
       });
       const newMembers = currentMemberIDs
@@ -344,8 +349,9 @@ export const ProjectForm: FC<ProjectFormProps> = ({
       const deletedmembersID = originalMemberIDs.filter(id => !currentMemberIDs.includes(id));
 
       const currentAdvisorIDs = data.advisors.map(a => parseInt(a.userID)).filter(Boolean);
-      const originalAdvisorIDs = project.member.filter(m => (m as any).role.id === 3).map(m => {
-        const uid = (m as any).user?.id || m.id;
+      const originalAdvisorIDs = project.member.filter(m => (m as IUser & { role?: { id: number } }).role?.id === 3).map(m => {
+        const memberData = m as IUser & { user?: { id: number | string } };
+        const uid = memberData.user?.id || memberData.id;
         return typeof uid === "string" ? parseInt(uid) : uid;
       });
       const newAdvisors = currentAdvisorIDs
@@ -399,630 +405,256 @@ export const ProjectForm: FC<ProjectFormProps> = ({
           },
         });
       }
-    } catch (err: any) {
+    } catch (err) {
       console.error(err);
-      setErrorMessage(err?.message || "ไม่สามารถบันทึกข้อมูลผลงานได้");
+      setErrorMessage((err as Error)?.message || "ไม่สามารถบันทึกข้อมูลผลงานได้");
       setIsError(true);
     }
   };
 
   return (
     <div className="min-h-screen bg-neutral02 p-8">
-        <Snackbar
-          anchorOrigin={{ vertical: "top", horizontal: "right" }}
-          open={isError}
-          autoHideDuration={4000}
-          onClose={() => setIsError(false)}
-        >
-          <Alert severity="error" onClose={() => setIsError(false)} sx={{ width: "100%" }}>
-            {errorMessage}
-          </Alert>
-        </Snackbar>
+      <Snackbar
+        anchorOrigin={{ vertical: "top", horizontal: "right" }}
+        open={isError}
+        autoHideDuration={4000}
+        onClose={() => setIsError(false)}
+      >
+        <Alert severity="error" onClose={() => setIsError(false)} sx={{ width: "100%" }}>
+          {errorMessage}
+        </Alert>
+      </Snackbar>
 
-        <div className="mx-auto max-w-5xl mb-6">
-          <h1 className="text-h1-1 font-bold text-primary02">
-            {isEdit ? "แก้ไขข้อมูลผลงาน" : "ดูข้อมูลผลงาน"}
-          </h1>
-        </div>
+      <div className="mx-auto max-w-5xl mb-6">
+        <h1 className="text-h1-1 font-bold text-primary02">
+          {isEdit ? "แก้ไขข้อมูลผลงาน" : "ดูข้อมูลผลงาน"}
+        </h1>
+      </div>
 
-        <div className="mx-auto max-w-5xl rounded-2xl bg-white p-8 shadow-sm">
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
-            {/* Section 1: ข้อมูลผลงาน */}
-            <div className="space-y-4">
-              <Typography variant="h6" fontWeight="bold" className="text-gray-700">
-                ข้อมูลผลงาน
-              </Typography>
-              <div className="flex flex-col gap-6 md:flex-row">
-                <div className="relative flex h-[284px] w-full items-center justify-center rounded-xl bg-gray-100 md:w-[400px]">
-                  {thumbnailPreview ? (
-                    <div className="group relative h-full w-full">
-                      <Image
-                        src={thumbnailPreview}
-                        alt="Thumbnail"
-                        fill
-                        className="rounded-xl object-cover"
-                      />
-                      {isEdit && (
-                        <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
-                          <Button variant="contained" component="label">
-                            อัปโหลดรูปภาพ
-                            <VisuallyHiddenInput
-                              type="file"
-                              accept="image/*"
-                              onChange={handleFileChange}
-                            />
-                          </Button>
-                        </div>
-                      )}
-                    </div>
-                  ) : (
-                    <Button variant="outlined" component="label" disabled={!isEdit}>
-                      อัปโหลดรูปภาพ
-                      <VisuallyHiddenInput
-                        type="file"
-                        accept="image/*"
-                        onChange={handleFileChange}
-                      />
-                    </Button>
-                  )}
-                </div>
-
-                <div className="flex-1 space-y-4">
-                  <RHFTextField
-                    control={control}
-                    name="title"
-                    label="หัวข้อ"
-                    variant="outlined"
-                    fullWidth
-                    disabled={!isEdit}
-                    placeholder="ระบุหัวข้อ"
-                    requiredMark
-                  />
-                  <RHFTextField
-                    control={control}
-                    name="details"
-                    label="รายละเอียด"
-                    variant="outlined"
-                    fullWidth
-                    multiline
-                    rows={4}
-                    disabled={!isEdit}
-                    placeholder="ระบุรายละเอียด"
-                    requiredMark
-                  />
-                </div>
-              </div>
-            </div>
-
-            {/* Section 2: ข้อมูลการจัดหมวดหมู่ */}
-            <div className="space-y-4 border-t border-gray-100 pt-6">
-              <div className="flex gap-2">
-                <Typography variant="h6" fontWeight="bold" className="text-gray-700">
-                  ข้อมูลการจัดหมวดหมู่
-                </Typography>
-                <Typography variant="h6" className="text-gray-400 font-normal">
-                  (สามารถเลือกได้มากกว่า 1 ในแต่ละคอลัมน์)
-                </Typography>
-              </div>
-
-              <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
-                {/* วิชา */}
-                <div className="space-y-4 rounded-xl border border-gray-200 p-4">
-                  <div className="flex items-center justify-between">
-                    <span className="font-semibold text-gray-700">วิชา *</span>
+      <div className="mx-auto max-w-5xl rounded-2xl bg-white p-8 shadow-sm">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
+          {/* Section 1: ข้อมูลผลงาน */}
+          <div className="space-y-4">
+            <Typography variant="h6" fontWeight="bold" className="text-gray-700">
+              ข้อมูลผลงาน
+            </Typography>
+            <div className="flex flex-col gap-6 md:flex-row">
+              <div className="relative flex h-[284px] w-full items-center justify-center rounded-xl bg-gray-100 md:w-[400px]">
+                {thumbnailPreview ? (
+                  <div className="group relative h-full w-full">
+                    <Image
+                      src={thumbnailPreview}
+                      alt="Thumbnail"
+                      fill
+                      className="rounded-xl object-cover"
+                    />
                     {isEdit && (
-                      <AddCircleOutlineOutlined
-                        className="cursor-pointer text-primary02"
-                        onClick={() => appendCourse({ value: "" })}
-                      />
-                    )}
-                  </div>
-                  <div className="space-y-3">
-                    {courseFields.map((field, index) => (
-                      <div key={field.id} className="flex items-center gap-2">
-                        <div className="flex-1">
-                          <RHFSelect
-                            control={control}
-                            name={`projectCourses.${index}.value`}
-                            label=""
-                            variant="outlined"
-                            fullWidth
-                            disabled={!isEdit}
-                            displayEmpty
-                            renderValue={(val: any) => {
-                              if (!val) return <span className="text-gray-400">ระบุวิชา</span>;
-                              const c = courses.find((x) => x.id.toString() === val);
-                              return (c?.courseNameTh || val) as React.ReactNode;
-                            }}
-                          >
-                            {courses.map((c) => (
-                              <MenuItem key={c.id} value={c.id.toString()}>
-                                {c.courseNameTh}
-                              </MenuItem>
-                            ))}
-                          </RHFSelect>
-                        </div>
-                        {isEdit && courseFields.length > 1 && (
-                          <button
-                            type="button"
-                            onClick={() => removeCourse(index)}
-                            className="text-red-500 hover:text-red-700"
-                          >
-                            <DeleteIcon />
-                          </button>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                {/* ประเภท */}
-                <div className="space-y-4 rounded-xl border border-gray-200 p-4">
-                  <div className="flex items-center justify-between">
-                    <span className="font-semibold text-gray-700">ประเภท *</span>
-                    {isEdit && (
-                      <AddCircleOutlineOutlined
-                        className="cursor-pointer text-primary02"
-                        onClick={() => appendType({ value: "" })}
-                      />
-                    )}
-                  </div>
-                  <div className="space-y-3">
-                    {typeFields.map((field, index) => (
-                      <div key={field.id} className="flex items-center gap-2">
-                        <div className="flex-1">
-                          <RHFSelect
-                            control={control}
-                            name={`projectTypes.${index}.value`}
-                            label=""
-                            variant="outlined"
-                            fullWidth
-                            disabled={!isEdit}
-                            displayEmpty
-                            renderValue={(val: any) => {
-                              if (!val) return <span className="text-gray-400">ระบุประเภท</span>;
-                              const t = typesList.find((x: any) => x.id.toString() === val);
-                              return (t?.name || val) as React.ReactNode;
-                            }}
-                          >
-                            {typesList.map((t: any) => (
-                              <MenuItem key={t.id} value={t.id.toString()}>
-                                {t.name}
-                              </MenuItem>
-                            ))}
-                          </RHFSelect>
-                        </div>
-                        {isEdit && typeFields.length > 1 && (
-                          <button
-                            type="button"
-                            onClick={() => removeType(index)}
-                            className="text-red-500 hover:text-red-700"
-                          >
-                            <DeleteIcon />
-                          </button>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                {/* หมวดหมู่ */}
-                <div className="space-y-4 rounded-xl border border-gray-200 p-4">
-                  <div className="flex items-center justify-between">
-                    <span className="font-semibold text-gray-700">หมวดหมู่ *</span>
-                    {isEdit && (
-                      <AddCircleOutlineOutlined
-                        className="cursor-pointer text-primary02"
-                        onClick={() => appendCategory({ value: "" })}
-                      />
-                    )}
-                  </div>
-                  <div className="space-y-3">
-                    {categoryFields.map((field, index) => (
-                      <div key={field.id} className="flex items-center gap-2">
-                        <div className="flex-1">
-                          <RHFSelect
-                            control={control}
-                            name={`projectCategories.${index}.value`}
-                            label=""
-                            variant="outlined"
-                            fullWidth
-                            disabled={!isEdit}
-                            displayEmpty
-                            renderValue={(val: any) => {
-                              if (!val) return <span className="text-gray-400">ระบุหมวดหมู่</span>;
-                              const c = categoriesList.find((x: any) => x.id.toString() === val);
-                              return (c?.name || val) as React.ReactNode;
-                            }}
-                          >
-                            {categoriesList.map((c: any) => (
-                              <MenuItem key={c.id} value={c.id.toString()}>
-                                {c.name}
-                              </MenuItem>
-                            ))}
-                          </RHFSelect>
-                        </div>
-                        {isEdit && categoryFields.length > 1 && (
-                          <button
-                            type="button"
-                            onClick={() => removeCategory(index)}
-                            className="text-red-500 hover:text-red-700"
-                          >
-                            <DeleteIcon />
-                          </button>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Section 3: Thumbnail วิดีโอ & ลิงก์ต่างๆ */}
-            <div className="grid grid-cols-1 gap-6 border-t border-gray-100 pt-6 md:grid-cols-2">
-              {/* Left Column: Thumbnail วิดีโอ */}
-              <div className="space-y-4">
-                <Typography variant="h6" fontWeight="bold" className="text-gray-700">
-                  Thumbnail วิดีโอ
-                </Typography>
-                <div className="relative flex h-[440px] w-full items-center justify-center rounded-xl bg-gray-100 overflow-hidden">
-                  {youtubeThumbnail ? (
-                    <img
-                      src={youtubeThumbnail}
-                      alt="Youtube Thumbnail"
-                      className="h-full w-full object-cover"
-                    />
-                  ) : (
-                    <span className="text-gray-400">ดึงรูปภาพโดยอัตโนมัติจากลิงก์ YouTube</span>
-                  )}
-                </div>
-              </div>
-
-              {/* Right Column: ลิงก์คลิปวิดีโอ & ลิงก์ต่างๆ */}
-              <div className="space-y-6">
-                {/* ลิงก์คลิปวิดีโอ */}
-                <div className="space-y-4">
-                  <Typography variant="h6" fontWeight="bold" className="text-gray-700">
-                    ลิงก์คลิปวิดีโอ
-                  </Typography>
-                  <RHFTextField
-                    control={control}
-                    name="youtubeURL"
-                    label="URL Youtube"
-                    variant="outlined"
-                    fullWidth
-                    disabled={!isEdit}
-                    placeholder="ระบุ URL Youtube"
-                    requiredMark
-                  />
-                </div>
-
-                {/* ลิงก์ต่างๆ */}
-                <div className="space-y-4">
-                  <Typography variant="h6" fontWeight="bold" className="text-gray-700">
-                    ลิงก์ต่างๆ
-                  </Typography>
-                  <div className="space-y-4">
-                    <RHFTextField
-                      control={control}
-                      name="githubURL"
-                      label="Github"
-                      variant="outlined"
-                      fullWidth
-                      disabled={!isEdit}
-                      placeholder="ระบุลิงก์ Github"
-                      requiredMark
-                      startIcon={<LinkIcon fontSize="small" />}
-                    />
-                    <RHFTextField
-                      control={control}
-                      name="documentURL"
-                      label="Document"
-                      variant="outlined"
-                      fullWidth
-                      disabled={!isEdit}
-                      placeholder="ระบุลิงก์ Document"
-                      requiredMark
-                      startIcon={<DescriptionIcon fontSize="small" />}
-                    />
-                    <RHFTextField
-                      control={control}
-                      name="presentationURL"
-                      label="Presentation"
-                      variant="outlined"
-                      fullWidth
-                      disabled={!isEdit}
-                      placeholder="ระบุลิงก์ Presentation"
-                      requiredMark
-                      startIcon={<SlideshowIcon fontSize="small" />}
-                    />
-                    <RHFTextField
-                      control={control}
-                      name="figmaURL"
-                      label="Figma"
-                      variant="outlined"
-                      fullWidth
-                      disabled={!isEdit}
-                      placeholder="ระบุลิงก์ Figma"
-                      startIcon={<LinkIcon fontSize="small" />}
-                    />
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Section 5: รูปภาพเพิ่มเติม */}
-            <div className="space-y-4 border-t border-neutral02 pt-6">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <span className="text-h3 font-bold text-neutral05">รูปภาพเพิ่มเติม *</span>
-                  <span className="text-h5 text-neutral04">{assets.length} รูป - สูงสุด 10</span>
-                </div>
-                {isEdit && assets.length > 0 && (
-                  <button
-                    type="button"
-                    onClick={handleClearAllAssets}
-                    className="text-h5 font-semibold text-accent03 hover:text-accent04"
-                  >
-                    ล้างทั้งหมด
-                  </button>
-                )}
-              </div>
-
-              {/* Assets Gallery Grid */}
-              {assets.length > 0 ? (
-                <div>
-                  <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-5">
-                    {assets.map((asset, index) => {
-                      if (!asset || !asset.url) return null;
-                      return (
-                        <div
-                          key={asset.id}
-                          draggable={isEdit}
-                          onDragStart={(e) => handleDragStart(e, index)}
-                          onDragOver={(e) => handleDragOver(e, index)}
-                          onDrop={(e) => handleDrop(e, index)}
-                          onDragEnd={handleDragEnd}
-                          className={`group relative h-[120px] rounded-lg bg-neutral02 transition-all duration-300 select-none overflow-hidden
-                            ${isEdit ? "cursor-grab active:cursor-grabbing hover:scale-105 hover:shadow-lg ring-1 ring-black/5 hover:ring-primary02/50" : ""}
-                            ${draggedIndex === index ? "opacity-30 scale-95 border-2 border-dashed border-primary02" : ""}
-                            ${dragOverIndex === index && draggedIndex !== index ? "scale-105 ring-2 ring-primary02 shadow-lg" : ""}
-                          `}
-                        >
-                          <img
-                            src={asset.url}
-                            alt={`Asset ${index + 1}`}
-                            className="h-full w-full rounded-lg object-cover pointer-events-none"
+                      <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
+                        <Button variant="contained" component="label">
+                          อัปโหลดรูปภาพ
+                          <VisuallyHiddenInput
+                            type="file"
+                            accept="image/*"
+                            onChange={handleFileChange}
                           />
-                          {isEdit && (
-                            <div className="absolute inset-0 flex flex-col justify-between bg-black/40 p-2 opacity-0 transition-opacity duration-200 group-hover:opacity-100 rounded-lg">
-                              {/* Close / Delete Button */}
-                              <div className="flex justify-end">
-                                <button
-                                  type="button"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    handleRemoveAsset(asset.id);
-                                  }}
-                                  className="rounded-full bg-accent03 p-1 text-neutral01 hover:bg-accent04 pointer-events-auto transition-transform hover:scale-110 active:scale-95"
-                                >
-                                  <CloseIcon fontSize="small" />
-                                </button>
-                              </div>
-                            </div>
-                          )}
-                        </div>
-                      );
-                    })}
-                  </div>
-                  {isEdit && assets.length < 10 && (
-                    <div className="mt-4 flex justify-start">
-                      <Button
-                        variant="contained"
-                        component="label"
-                        sx={{
-                          backgroundColor: "var(--color-primary02)",
-                          "&:hover": { backgroundColor: "var(--color-primary03)" },
-                          borderRadius: "8px",
-                          px: 3,
-                          py: 1,
-                        }}
-                      >
-                        อัปโหลดรูปภาพ
-                        <VisuallyHiddenInput
-                          type="file"
-                          multiple
-                          accept="image/*"
-                          onChange={handleAssetsChange}
-                        />
-                      </Button>
-                    </div>
-                  )}
-                </div>
-              ) : (
-                isEdit && (
-                  <label className="flex h-[150px] w-full cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed border-gray-300 bg-white hover:bg-gray-50 transition-colors">
-                    <AddCircleOutlineOutlined className="text-gray-400 text-3xl" />
-                    <span className="mt-1 text-sm text-gray-500 font-semibold">อัปโหลดรูปภาพ</span>
-                    <input
-                      type="file"
-                      multiple
-                      accept="image/*"
-                      className="hidden"
-                      onChange={handleAssetsChange}
-                    />
-                  </label>
-                )
-              )}
-            </div>
-
-            {/* Section 6: Tech Stack */}
-            <div className="space-y-4 border-t border-gray-100 pt-6">
-              <div className="flex items-center justify-between">
-                <span className="text-lg font-bold text-gray-700">Tech Stack *</span>
-                {isEdit && (
-                  <AddCircleOutlineOutlined
-                    className="cursor-pointer text-primary02"
-                    onClick={() => appendTech({ value: "" })}
-                  />
-                )}
-              </div>
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                {techFields.map((field, index) => (
-                  <div key={field.id} className="flex items-center gap-2">
-                    <span className="text-gray-400">{index + 1}.</span>
-                    <RHFTextField
-                      control={control}
-                      name={`techStacks.${index}.value`}
-                      placeholder="เช่น React, Node.js"
-                      variant="outlined"
-                      fullWidth
-                      disabled={!isEdit}
-                    />
-                    {isEdit && (
-                      <button
-                        type="button"
-                        onClick={() => removeTech(index)}
-                        className="text-red-500 hover:text-red-700"
-                      >
-                        <DeleteIcon />
-                      </button>
+                        </Button>
+                      </div>
                     )}
                   </div>
-                ))}
+                ) : (
+                  <Button variant="outlined" component="label" disabled={!isEdit}>
+                    อัปโหลดรูปภาพ
+                    <VisuallyHiddenInput
+                      type="file"
+                      accept="image/*"
+                      onChange={handleFileChange}
+                    />
+                  </Button>
+                )}
+              </div>
+
+              <div className="flex-1 space-y-4">
+                <RHFTextField
+                  control={control}
+                  name="title"
+                  label="หัวข้อ"
+                  variant="outlined"
+                  fullWidth
+                  disabled={!isEdit}
+                  placeholder="ระบุหัวข้อ"
+                  requiredMark
+                />
+                <RHFTextField
+                  control={control}
+                  name="details"
+                  label="รายละเอียด"
+                  variant="outlined"
+                  fullWidth
+                  multiline
+                  rows={4}
+                  disabled={!isEdit}
+                  placeholder="ระบุรายละเอียด"
+                  requiredMark
+                />
               </div>
             </div>
+          </div>
 
-            {/* Section 7: ผู้จัดทำ & อาจารย์ที่ปรึกษา */}
-            <div className="border-t border-gray-100 pt-6">
-              <h2 className="text-lg font-bold text-gray-700 mb-4">คณะผู้จัดทำและอาจารย์ที่ปรึกษา</h2>
+          {/* Section 2: ข้อมูลการจัดหมวดหมู่ */}
+          <div className="space-y-4 border-t border-gray-100 pt-6">
+            <div className="flex gap-2">
+              <Typography variant="h6" fontWeight="bold" className="text-gray-700">
+                ข้อมูลการจัดหมวดหมู่
+              </Typography>
+              <Typography variant="h6" className="text-gray-400 font-normal">
+                (สามารถเลือกได้มากกว่า 1 ในแต่ละคอลัมน์)
+              </Typography>
+            </div>
 
-              {/* คณะผู้จัดทำ */}
-              <div className="space-y-4 mb-6">
+            <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
+              {/* วิชา */}
+              <div className="space-y-4 rounded-xl border border-gray-200 p-4">
                 <div className="flex items-center justify-between">
-                  <span className="font-semibold text-gray-700">คณะผู้จัดทำ *</span>
+                  <span className="font-semibold text-gray-700">วิชา *</span>
                   {isEdit && (
                     <AddCircleOutlineOutlined
                       className="cursor-pointer text-primary02"
-                      onClick={() => appendMember({ userID: "" })}
+                      onClick={() => appendCourse({ value: "" })}
                     />
                   )}
                 </div>
-
                 <div className="space-y-3">
-                  {memberFields.map((field, index) => (
-                    <div key={field.id} className="grid grid-cols-1 gap-4 sm:grid-cols-2 items-center">
-                      <RHFSelect
-                        control={control}
-                        name={`members.${index}.userID`}
-                        label="รหัสนักศึกษา"
-                        variant="outlined"
-                        fullWidth
-                        disabled={!isEdit}
-                        displayEmpty
-                        renderValue={(val: any) => {
-                          if (!val) return <span className="text-gray-400">เลือกรหัสนักศึกษา</span>;
-                          const s = students.find(x => x.user.id.toString() === val);
-                          return (s?.studentCode || val) as React.ReactNode;
-                        }}
-                      >
-                        {students.map((s) => (
-                          <MenuItem key={s.id} value={s.user.id.toString()}>
-                            {s.studentCode} ({s.user.firstNameTh} {s.user.lastNameTh})
-                          </MenuItem>
-                        ))}
-                      </RHFSelect>
-
-                      <div className="flex items-center gap-2 w-full">
-                        <div className="flex-1">
-                          <RHFSelect
-                            control={control}
-                            name={`members.${index}.userID`}
-                            label="ชื่อ-นามสกุล"
-                            variant="outlined"
-                            fullWidth
-                            disabled={!isEdit}
-                            displayEmpty
-                            renderValue={(val: any) => {
-                              if (!val) return <span className="text-gray-400">เลือกชื่อ-นามสกุล</span>;
-                              const s = students.find(x => x.user.id.toString() === val);
-                              if (s) return `${s.user.firstNameTh} ${s.user.lastNameTh}` as React.ReactNode;
-                              const m = project?.member?.find(x => ((x as any).user?.id || x.id).toString() === val);
-                              if (m) {
-                                const u = (m as any).user || m;
-                                return `${u.firstNameTh} ${u.lastNameTh}` as React.ReactNode;
-                              }
-                              return val as React.ReactNode;
-                            }}
-                          >
-                            {students.map((s) => (
-                              <MenuItem key={s.id} value={s.user.id.toString()}>
-                                {s.user.firstNameTh} {s.user.lastNameTh} ({s.studentCode})
-                              </MenuItem>
-                            ))}
-                          </RHFSelect>
-                        </div>
-                        {isEdit && (
-                          <button
-                            type="button"
-                            onClick={() => removeMember(index)}
-                            className="text-red-500 hover:text-red-700"
-                          >
-                            <DeleteIcon />
-                          </button>
-                        )}
+                  {courseFields.map((field, index) => (
+                    <div key={field.id} className="flex items-center gap-2">
+                      <div className="flex-1">
+                        <RHFSelect
+                          control={control}
+                          name={`projectCourses.${index}.value`}
+                          label=""
+                          variant="outlined"
+                          fullWidth
+                          disabled={!isEdit}
+                          displayEmpty
+                          renderValue={(val: unknown) => {
+                            if (!val) return <span className="text-gray-400">ระบุวิชา</span>;
+                            const strVal = String(val);
+                            const c = courses.find((x) => x.id.toString() === strVal);
+                            return (c?.courseNameTh || strVal) as React.ReactNode;
+                          }}
+                        >
+                          {courses.map((c) => (
+                            <MenuItem key={c.id} value={c.id.toString()}>
+                              {c.courseNameTh}
+                            </MenuItem>
+                          ))}
+                        </RHFSelect>
                       </div>
+                      {isEdit && courseFields.length > 1 && (
+                        <button
+                          type="button"
+                          onClick={() => removeCourse(index)}
+                          className="text-red-500 hover:text-red-700"
+                        >
+                          <DeleteIcon />
+                        </button>
+                      )}
                     </div>
                   ))}
                 </div>
               </div>
 
-              {/* อาจารย์ที่ปรึกษา */}
-              <div className="space-y-4">
+              {/* ประเภท */}
+              <div className="space-y-4 rounded-xl border border-gray-200 p-4">
                 <div className="flex items-center justify-between">
-                  <span className="font-semibold text-gray-700">อาจารย์ที่ปรึกษา *</span>
+                  <span className="font-semibold text-gray-700">ประเภท *</span>
                   {isEdit && (
                     <AddCircleOutlineOutlined
                       className="cursor-pointer text-primary02"
-                      onClick={() => appendAdvisor({ userID: "" })}
+                      onClick={() => appendType({ value: "" })}
                     />
                   )}
                 </div>
-
                 <div className="space-y-3">
-                  {advisorFields.map((field, index) => (
+                  {typeFields.map((field, index) => (
                     <div key={field.id} className="flex items-center gap-2">
                       <div className="flex-1">
                         <RHFSelect
                           control={control}
-                          name={`advisors.${index}.userID`}
-                          label="อาจารย์ที่ปรึกษา"
+                          name={`projectTypes.${index}.value`}
+                          label=""
                           variant="outlined"
                           fullWidth
                           disabled={!isEdit}
-                          renderValue={(val: any) => {
-                            if (!val) return <span className="text-gray-400">เลือกอาจารย์ที่ปรึกษา</span>;
-                            const p = professors.find(x => x.user.id.toString() === val);
-                            if (p) return `${p.user.firstNameTh} ${p.user.lastNameTh}` as React.ReactNode;
-                            const m = project?.member?.find(x => ((x as any).user?.id || x.id).toString() === val);
-                            if (m) {
-                              const u = (m as any).user || m;
-                              return `${u.firstNameTh} ${u.lastNameTh}` as React.ReactNode;
-                            }
-                            return val as React.ReactNode;
+                          displayEmpty
+                          renderValue={(val: unknown) => {
+                            if (!val) return <span className="text-gray-400">ระบุประเภท</span>;
+                            const strVal = String(val);
+                            const t = typesList.find((x: Tag) => x.id.toString() === strVal);
+                            return (t?.name || strVal) as React.ReactNode;
                           }}
                         >
-                          {professors.map((p) => (
-                            <MenuItem key={p.id} value={p.user.id.toString()}>
-                              {p.user.firstNameTh} {p.user.lastNameTh}
+                          {typesList.map((t: Tag) => (
+                            <MenuItem key={t.id} value={t.id.toString()}>
+                              {t.name}
                             </MenuItem>
                           ))}
                         </RHFSelect>
                       </div>
-                      {isEdit && (
+                      {isEdit && typeFields.length > 1 && (
                         <button
                           type="button"
-                          onClick={() => removeAdvisor(index)}
+                          onClick={() => removeType(index)}
+                          className="text-red-500 hover:text-red-700"
+                        >
+                          <DeleteIcon />
+                        </button>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* หมวดหมู่ */}
+              <div className="space-y-4 rounded-xl border border-gray-200 p-4">
+                <div className="flex items-center justify-between">
+                  <span className="font-semibold text-gray-700">หมวดหมู่ *</span>
+                  {isEdit && (
+                    <AddCircleOutlineOutlined
+                      className="cursor-pointer text-primary02"
+                      onClick={() => appendCategory({ value: "" })}
+                    />
+                  )}
+                </div>
+                <div className="space-y-3">
+                  {categoryFields.map((field, index) => (
+                    <div key={field.id} className="flex items-center gap-2">
+                      <div className="flex-1">
+                        <RHFSelect
+                          control={control}
+                          name={`projectCategories.${index}.value`}
+                          label=""
+                          variant="outlined"
+                          fullWidth
+                          disabled={!isEdit}
+                          displayEmpty
+                          renderValue={(val: unknown) => {
+                            if (!val) return <span className="text-gray-400">ระบุหมวดหมู่</span>;
+                            const strVal = String(val);
+                            const c = categoriesList.find((x: Tag) => x.id.toString() === strVal);
+                            return (c?.name || strVal) as React.ReactNode;
+                          }}
+                        >
+                          {categoriesList.map((c: Tag) => (
+                            <MenuItem key={c.id} value={c.id.toString()}>
+                              {c.name}
+                            </MenuItem>
+                          ))}
+                        </RHFSelect>
+                      </div>
+                      {isEdit && categoryFields.length > 1 && (
+                        <button
+                          type="button"
+                          onClick={() => removeCategory(index)}
                           className="text-red-500 hover:text-red-700"
                         >
                           <DeleteIcon />
@@ -1033,60 +665,442 @@ export const ProjectForm: FC<ProjectFormProps> = ({
                 </div>
               </div>
             </div>
+          </div>
 
-            {/* Action Buttons */}
-            <div className="flex justify-end gap-4 border-t border-gray-100 pt-6">
-              {isEdit ? (
-                <>
-                  <Button variant="outlined" size="large" onClick={handleCancel}>
-                    ยกเลิก
-                  </Button>
-                  <Button
-                    type="submit"
-                    variant="contained"
-                    size="large"
-                    disabled={!isValid}
-                    sx={{
-                      backgroundColor: "var(--color-primary02)",
-                      "&:hover": { backgroundColor: "var(--color-primary03)" },
-                    }}
-                  >
-                    บันทึกข้อมูล
-                  </Button>
-                </>
-              ) : (
+          {/* Section 3: Thumbnail วิดีโอ & ลิงก์ต่างๆ */}
+          <div className="grid grid-cols-1 gap-6 border-t border-gray-100 pt-6 md:grid-cols-2">
+            {/* Left Column: Thumbnail วิดีโอ */}
+            <div className="space-y-4">
+              <Typography variant="h6" fontWeight="bold" className="text-gray-700">
+                Thumbnail วิดีโอ
+              </Typography>
+              <div className="relative flex h-[440px] w-full items-center justify-center rounded-xl bg-gray-100 overflow-hidden">
+                {youtubeThumbnail ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={youtubeThumbnail}
+                    alt="Youtube Thumbnail"
+                    className="h-full w-full object-cover"
+                  />
+                ) : (
+                  <span className="text-gray-400">ดึงรูปภาพโดยอัตโนมัติจากลิงก์ YouTube</span>
+                )}
+              </div>
+            </div>
+
+            {/* Right Column: ลิงก์คลิปวิดีโอ & ลิงก์ต่างๆ */}
+            <div className="space-y-6">
+              {/* ลิงก์คลิปวิดีโอ */}
+              <div className="space-y-4">
+                <Typography variant="h6" fontWeight="bold" className="text-gray-700">
+                  ลิงก์คลิปวิดีโอ
+                </Typography>
+                <RHFTextField
+                  control={control}
+                  name="youtubeURL"
+                  label="URL Youtube"
+                  variant="outlined"
+                  fullWidth
+                  disabled={!isEdit}
+                  placeholder="ระบุ URL Youtube"
+                  requiredMark
+                />
+              </div>
+
+              {/* ลิงก์ต่างๆ */}
+              <div className="space-y-4">
+                <Typography variant="h6" fontWeight="bold" className="text-gray-700">
+                  ลิงก์ต่างๆ
+                </Typography>
+                <div className="space-y-4">
+                  <RHFTextField
+                    control={control}
+                    name="githubURL"
+                    label="Github"
+                    variant="outlined"
+                    fullWidth
+                    disabled={!isEdit}
+                    placeholder="ระบุลิงก์ Github"
+                    requiredMark
+                    startIcon={<LinkIcon fontSize="small" />}
+                  />
+                  <RHFTextField
+                    control={control}
+                    name="documentURL"
+                    label="Document"
+                    variant="outlined"
+                    fullWidth
+                    disabled={!isEdit}
+                    placeholder="ระบุลิงก์ Document"
+                    requiredMark
+                    startIcon={<DescriptionIcon fontSize="small" />}
+                  />
+                  <RHFTextField
+                    control={control}
+                    name="presentationURL"
+                    label="Presentation"
+                    variant="outlined"
+                    fullWidth
+                    disabled={!isEdit}
+                    placeholder="ระบุลิงก์ Presentation"
+                    requiredMark
+                    startIcon={<SlideshowIcon fontSize="small" />}
+                  />
+                  <RHFTextField
+                    control={control}
+                    name="figmaURL"
+                    label="Figma"
+                    variant="outlined"
+                    fullWidth
+                    disabled={!isEdit}
+                    placeholder="ระบุลิงก์ Figma"
+                    startIcon={<LinkIcon fontSize="small" />}
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Section 5: รูปภาพเพิ่มเติม */}
+          <div className="space-y-4 border-t border-neutral02 pt-6">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <span className="text-h3 font-bold text-neutral05">รูปภาพเพิ่มเติม *</span>
+                <span className="text-h5 text-neutral04">{assets.length} รูป - สูงสุด 10</span>
+              </div>
+              {isEdit && assets.length > 0 && (
+                <button
+                  type="button"
+                  onClick={handleClearAllAssets}
+                  className="text-h5 font-semibold text-accent03 hover:text-accent04"
+                >
+                  ล้างทั้งหมด
+                </button>
+              )}
+            </div>
+
+            {/* Assets Gallery Grid */}
+            {assets.length > 0 ? (
+              <div>
+                <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-5">
+                  {assets.map((asset, index) => {
+                    if (!asset || !asset.url) return null;
+                    return (
+                      <div
+                        key={asset.id}
+                        draggable={isEdit}
+                        onDragStart={(e) => handleDragStart(e, index)}
+                        onDragOver={(e) => handleDragOver(e, index)}
+                        onDrop={(e) => handleDrop(e, index)}
+                        onDragEnd={handleDragEnd}
+                        className={`group relative h-[120px] rounded-lg bg-neutral02 transition-all duration-300 select-none overflow-hidden
+                            ${isEdit ? "cursor-grab active:cursor-grabbing hover:scale-105 hover:shadow-lg ring-1 ring-black/5 hover:ring-primary02/50" : ""}
+                            ${draggedIndex === index ? "opacity-30 scale-95 border-2 border-dashed border-primary02" : ""}
+                            ${dragOverIndex === index && draggedIndex !== index ? "scale-105 ring-2 ring-primary02 shadow-lg" : ""}
+                          `}
+                      >
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
+                          src={asset.url}
+                          alt={`Asset ${index + 1}`}
+                          className="h-full w-full rounded-lg object-cover pointer-events-none"
+                        />
+                        {isEdit && (
+                          <div className="absolute inset-0 flex flex-col justify-between bg-black/40 p-2 opacity-0 transition-opacity duration-200 group-hover:opacity-100 rounded-lg">
+                            {/* Close / Delete Button */}
+                            <div className="flex justify-end">
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleRemoveAsset(asset.id);
+                                }}
+                                className="rounded-full bg-accent03 p-1 text-neutral01 hover:bg-accent04 pointer-events-auto transition-transform hover:scale-110 active:scale-95"
+                              >
+                                <CloseIcon fontSize="small" />
+                              </button>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+                {isEdit && assets.length < 10 && (
+                  <div className="mt-4 flex justify-start">
+                    <Button
+                      variant="contained"
+                      component="label"
+                      sx={{
+                        backgroundColor: "var(--color-primary02)",
+                        "&:hover": { backgroundColor: "var(--color-primary03)" },
+                        borderRadius: "8px",
+                        px: 3,
+                        py: 1,
+                      }}
+                    >
+                      อัปโหลดรูปภาพ
+                      <VisuallyHiddenInput
+                        type="file"
+                        multiple
+                        accept="image/*"
+                        onChange={handleAssetsChange}
+                      />
+                    </Button>
+                  </div>
+                )}
+              </div>
+            ) : (
+              isEdit && (
+                <label className="flex h-[150px] w-full cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed border-gray-300 bg-white hover:bg-gray-50 transition-colors">
+                  <AddCircleOutlineOutlined className="text-gray-400 text-3xl" />
+                  <span className="mt-1 text-sm text-gray-500 font-semibold">อัปโหลดรูปภาพ</span>
+                  <input
+                    type="file"
+                    multiple
+                    accept="image/*"
+                    className="hidden"
+                    onChange={handleAssetsChange}
+                  />
+                </label>
+              )
+            )}
+          </div>
+
+          {/* Section 6: Tech Stack */}
+          <div className="space-y-4 border-t border-gray-100 pt-6">
+            <div className="flex items-center justify-between">
+              <span className="text-lg font-bold text-gray-700">Tech Stack *</span>
+              {isEdit && (
+                <AddCircleOutlineOutlined
+                  className="cursor-pointer text-primary02"
+                  onClick={() => appendTech({ value: "" })}
+                />
+              )}
+            </div>
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              {techFields.map((field, index) => (
+                <div key={field.id} className="flex items-center gap-2">
+                  <span className="text-gray-400">{index + 1}.</span>
+                  <RHFTextField
+                    control={control}
+                    name={`techStacks.${index}.value`}
+                    placeholder="เช่น React, Node.js"
+                    variant="outlined"
+                    fullWidth
+                    disabled={!isEdit}
+                  />
+                  {isEdit && (
+                    <button
+                      type="button"
+                      onClick={() => removeTech(index)}
+                      className="text-red-500 hover:text-red-700"
+                    >
+                      <DeleteIcon />
+                    </button>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Section 7: ผู้จัดทำ & อาจารย์ที่ปรึกษา */}
+          <div className="border-t border-gray-100 pt-6">
+            <h2 className="text-lg font-bold text-gray-700 mb-4">คณะผู้จัดทำและอาจารย์ที่ปรึกษา</h2>
+
+            {/* คณะผู้จัดทำ */}
+            <div className="space-y-4 mb-6">
+              <div className="flex items-center justify-between">
+                <span className="font-semibold text-gray-700">คณะผู้จัดทำ *</span>
+                {isEdit && (
+                  <AddCircleOutlineOutlined
+                    className="cursor-pointer text-primary02"
+                    onClick={() => appendMember({ userID: "" })}
+                  />
+                )}
+              </div>
+
+              <div className="space-y-3">
+                {memberFields.map((field, index) => (
+                  <div key={field.id} className="grid grid-cols-1 gap-4 sm:grid-cols-2 items-center">
+                    <RHFSelect
+                      control={control}
+                      name={`members.${index}.userID`}
+                      label="รหัสนักศึกษา"
+                      variant="outlined"
+                      fullWidth
+                      disabled={!isEdit}
+                      displayEmpty
+                      renderValue={(val: unknown) => {
+                        if (!val) return <span className="text-gray-400">เลือกรหัสนักศึกษา</span>;
+                        const strVal = String(val);
+                        const s = students.find(x => x.user.id.toString() === strVal);
+                        return (s?.studentCode || strVal) as React.ReactNode;
+                      }}
+                    >
+                      {students.map((s) => (
+                        <MenuItem key={s.id} value={s.user.id.toString()}>
+                          {s.studentCode} ({s.user.firstNameTh} {s.user.lastNameTh})
+                        </MenuItem>
+                      ))}
+                    </RHFSelect>
+
+                    <div className="flex items-center gap-2 w-full">
+                      <div className="flex-1">
+                        <RHFSelect
+                          control={control}
+                          name={`members.${index}.userID`}
+                          label="ชื่อ-นามสกุล"
+                          variant="outlined"
+                          fullWidth
+                          disabled={!isEdit}
+                          displayEmpty
+                          renderValue={(val: unknown) => {
+                            if (!val) return <span className="text-gray-400">เลือกชื่อ-นามสกุล</span>;
+                            const strVal = String(val);
+                            const s = students.find(x => x.user.id.toString() === strVal);
+                            if (s) return `${s.user.firstNameTh} ${s.user.lastNameTh}` as React.ReactNode;
+                            const m = project?.member?.find(x => ((x as IUser & { user?: { id: number | string } }).user?.id || x.id).toString() === strVal);
+                            if (m) {
+                              const u = (m as IUser & { user?: IUser }).user || m;
+                              return `${u.firstNameTh} ${u.lastNameTh}` as React.ReactNode;
+                            }
+                            return strVal as React.ReactNode;
+                          }}
+                        >
+                          {students.map((s) => (
+                            <MenuItem key={s.id} value={s.user.id.toString()}>
+                              {s.user.firstNameTh} {s.user.lastNameTh} ({s.studentCode})
+                            </MenuItem>
+                          ))}
+                        </RHFSelect>
+                      </div>
+                      {isEdit && (
+                        <button
+                          type="button"
+                          onClick={() => removeMember(index)}
+                          className="text-red-500 hover:text-red-700"
+                        >
+                          <DeleteIcon />
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* อาจารย์ที่ปรึกษา */}
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <span className="font-semibold text-gray-700">อาจารย์ที่ปรึกษา *</span>
+                {isEdit && (
+                  <AddCircleOutlineOutlined
+                    className="cursor-pointer text-primary02"
+                    onClick={() => appendAdvisor({ userID: "" })}
+                  />
+                )}
+              </div>
+
+              <div className="space-y-3">
+                {advisorFields.map((field, index) => (
+                  <div key={field.id} className="flex items-center gap-2">
+                    <div className="flex-1">
+                      <RHFSelect
+                        control={control}
+                        name={`advisors.${index}.userID`}
+                        label="อาจารย์ที่ปรึกษา"
+                        variant="outlined"
+                        fullWidth
+                        disabled={!isEdit}
+                        renderValue={(val: unknown) => {
+                          if (!val) return <span className="text-gray-400">เลือกอาจารย์ที่ปรึกษา</span>;
+                          const strVal = String(val);
+                          const p = professors.find(x => x.user.id.toString() === strVal);
+                          if (p) return `${p.user.firstNameTh} ${p.user.lastNameTh}` as React.ReactNode;
+                          const m = project?.member?.find(x => ((x as IUser & { user?: { id: number | string } }).user?.id || x.id).toString() === strVal);
+                          if (m) {
+                            const u = (m as IUser & { user?: IUser }).user || m;
+                            return `${u.firstNameTh} ${u.lastNameTh}` as React.ReactNode;
+                          }
+                          return strVal as React.ReactNode;
+                        }}
+                      >
+                        {professors.map((p) => (
+                          <MenuItem key={p.id} value={p.user.id.toString()}>
+                            {p.user.firstNameTh} {p.user.lastNameTh}
+                          </MenuItem>
+                        ))}
+                      </RHFSelect>
+                    </div>
+                    {isEdit && (
+                      <button
+                        type="button"
+                        onClick={() => removeAdvisor(index)}
+                        className="text-red-500 hover:text-red-700"
+                      >
+                        <DeleteIcon />
+                      </button>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Action Buttons */}
+          <div className="flex justify-end gap-4 border-t border-gray-100 pt-6">
+            {isEdit ? (
+              <>
+                <Button variant="outlined" size="large" onClick={handleCancel}>
+                  ยกเลิก
+                </Button>
                 <Button
+                  type="submit"
                   variant="contained"
                   size="large"
-                  onClick={() => setIsEdit(true)}
+                  disabled={!isValid}
                   sx={{
                     backgroundColor: "var(--color-primary02)",
                     "&:hover": { backgroundColor: "var(--color-primary03)" },
                   }}
                 >
-                  แก้ไขข้อมูล
+                  บันทึกข้อมูล
                 </Button>
-              )}
-            </div>
-          </form>
-        </div>
-
-        {/* Modal Confirmations */}
-        {confirmModal && <ConfirmModal {...confirmModal} />}
-
-        {/* Image Cropping Modal */}
-        {isCropping && thumbnailFile && (
-          <Modal open={isCropping} onClose={handleCropCancel} closeAfterTransition>
-            <CropImageCard
-              file={thumbnailFile}
-              width={400}
-              height={284}
-              onUploadComplete={handleCropComplete}
-              onCancel={handleCropCancel}
-            />
-          </Modal>
-        )}
+              </>
+            ) : (
+              <Button
+                variant="contained"
+                size="large"
+                onClick={() => setIsEdit(true)}
+                sx={{
+                  backgroundColor: "var(--color-primary02)",
+                  "&:hover": { backgroundColor: "var(--color-primary03)" },
+                }}
+              >
+                แก้ไขข้อมูล
+              </Button>
+            )}
+          </div>
+        </form>
       </div>
+
+      {/* Modal Confirmations */}
+      {confirmModal && <ConfirmModal {...confirmModal} />}
+
+      {/* Image Cropping Modal */}
+      {isCropping && thumbnailFile && (
+        <Modal open={isCropping} onClose={handleCropCancel} closeAfterTransition>
+          <CropImageCard
+            file={thumbnailFile}
+            width={400}
+            height={284}
+            onUploadComplete={handleCropComplete}
+            onCancel={handleCropCancel}
+          />
+        </Modal>
+      )}
+    </div>
   );
 };
 
