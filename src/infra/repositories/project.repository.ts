@@ -51,4 +51,10 @@ export class ProjectRepository implements IProjectRepository {
     
     return response;
   }
+
+  async deleteProject(id: string): Promise<ApiResponse<void>> {
+    const url = `/v1/project/${id}`;
+    const response = await this.http.delete<ApiResponse<void>>(url);
+    return response;
+  }
 }

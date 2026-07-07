@@ -32,4 +32,8 @@ export class ProjectService {
     const response = await this.projectRepository.createProject(formData);
     return response.data;
   }
+
+  async deleteProject(id: string): Promise<void> {
+    await this.projectRepository.deleteProject(id);
+  }
 }
