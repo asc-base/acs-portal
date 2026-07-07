@@ -16,6 +16,7 @@ import { ICurriculum } from "@/core/domain/curriculum";
 import { IClassBook } from "@/core/domain/classbook";
 import { IProject } from "@/core/domain/project";
 import { INews } from "@/core/domain/news";
+import { IUser } from "@/core/domain/user";
 
 const CurriculumContent: FC<{ curriculum: ICurriculum }> = ({ curriculum }) => (
   <h3 className="mt-1 font-bold text-start">
@@ -33,7 +34,7 @@ const ClassBookContent: FC<{ classbook: IClassBook }> = ({ classbook }) => (
 );
 
 const ProjectContent: FC<{ project: IProject }> = ({ project }) => {
-  const categories = project.tag?.map((t: any) => t.name).join(", ") || "";
+  const categories = project.tag?.map((t) => t.name).join(", ") || "";
   return (
     <div className="flex flex-col items-start gap-1">
       <p className="text-neutral04 line-clamp-1 text-sm">
@@ -49,8 +50,9 @@ const ProjectContent: FC<{ project: IProject }> = ({ project }) => {
             "& .MuiAvatar-root": { width: 24, height: 24 },
           }}
         >
-          {project.member.map((m: any, idx: number) => {
-            const user = m.user || m;
+          {project.member.map((m, idx: number) => {
+            const memberData = m as IUser & { user?: IUser };
+            const user = memberData.user || memberData;
             return (
               <Avatar
                 key={idx}

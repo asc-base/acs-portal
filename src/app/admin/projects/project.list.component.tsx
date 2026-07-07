@@ -19,7 +19,7 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect, useCallback } from "react";
 import { IProject, QueryProject } from "@/core/domain/project";
-import { projectService } from "@/infra/container";
+
 
 interface ProjectListComponentsProps {
   projects: IProject[];
