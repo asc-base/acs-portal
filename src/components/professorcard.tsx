@@ -1,8 +1,5 @@
 import React, { FC } from "react";
 import { CardMedia, CardContent, Typography } from "@mui/material";
-import ApartmentIcon from "@mui/icons-material/Apartment";
-import MailOutlineIcon from "@mui/icons-material/MailOutline";
-import LocalPhoneOutlinedIcon from '@mui/icons-material/LocalPhoneOutlined';
 import { IProfessor } from "@/core/domain/professor";
 
 export const ProfessorCard: FC<IProfessor> = (props) => {
@@ -21,48 +18,27 @@ export const ProfessorCard: FC<IProfessor> = (props) => {
         image={props.user.imageUrl}
         alt={`${props.user.firstNameTh} ${props.user.lastNameTh}`}
       />
-      <CardContent className="flex flex-col items-center justify-start p-4 text-center gap-2">
-        <div>
-          <Typography
-            className={
-              "!text-primary01 !font-bold " +
-              ((props.user.firstNameTh + props.user.lastNameTh).length > 18
-                ? "!text-h3"
-                : "!text-h2")
-            }
-          >
-            {props.user.firstNameTh} {props.user.lastNameTh}
-          </Typography>
-
-          <Typography
-            className={
-              "!text-primary01 !font-bold " +
-              ((props.user.firstNameEn + props.user.lastNameEn).length > 18
-                ? "!text-h3"
-                : "!text-h2")
-            }
-          >
-            {props.user.firstNameEn} {props.user.lastNameEn}
-          </Typography>
-        </div>
-
-        <Typography className="!text-h5 !text-primary01 flex items-center gap-3 ">
-          <span className="flex items-center gap-1">
-            <ApartmentIcon fontSize="small" className="!text-neutral04" />
-            {props.profRoom}
+      <CardContent className="flex flex-1 flex-col justify-center gap-1 p-3 !pb-3 text-left lg:p-4 lg:!pb-4">
+        <Typography className="!text-h3 !text-primary01 text-left !font-bold">
+          <span className="lg:hidden">
+            {`${props.user.firstNameTh} ${props.user.lastNameTh}`.length >=
+            16 ? (
+              <>
+                {props.user.firstNameTh}
+                <br />
+                {props.user.lastNameTh}
+              </>
+            ) : (
+              `${props.user.firstNameTh} ${props.user.lastNameTh}`
+            )}
           </span>
-
-          <span className="flex items-center gap-1">
-            <LocalPhoneOutlinedIcon fontSize="small" className="!text-neutral04" />
-            {props.phone}
+          <span className="hidden lg:inline">
+            {props.user.firstNameTh} {props.user.lastNameTh}
           </span>
         </Typography>
 
-        <Typography className="!text-h5 !text-primary01">
-          <span>
-            <MailOutlineIcon fontSize="small" className="!text-neutral04" />{" "}
-            {props.user.email}
-          </span>
+        <Typography className="!text-h4 !text-neutral05 text-left">
+          {props.user.firstNameEn} {props.user.lastNameEn}
         </Typography>
       </CardContent>
     </div>
