@@ -38,8 +38,6 @@ const formSchema = z.object({
   dueDate: z.custom<Dayjs>().nullable(),
   tag: z.number(),
   detail: z.string().optional(),
-  thumbnail: z.instanceof(File).optional(),
-  highlight: z.instanceof(File).optional(),
 });
 
 type Inputs = z.infer<typeof formSchema>;
@@ -58,11 +56,17 @@ const VisuallyHiddenInput = styled("input")({
 
 const NewsInfo = ({ news, apiBase, categories }: NewsInfoProps) => {
   const [isEdit, setIsEdit] = useState(false);
-  const [confirmModal, setConfirmModal] = useState<ConfirmModalProps | null>(null,);
+  const [confirmModal, setConfirmModal] = useState<ConfirmModalProps | null>(
+    null,
+  );
   const [isError, setIsError] = useState(false);
+  const [thumbnailFile, setThumbnailFile] = useState<File | null>(null);
+  const [highlightFile, setHighlightFile] = useState<File | null>(null);
 
   const [croppingFile, setCroppingFile] = useState<File | null>(null);
-  const [cropTarget, setCropTarget] = useState<"thumbnail" | "highlight" | null>(null);
+  const [cropTarget, setCropTarget] = useState<
+    "thumbnail" | "highlight" | null
+  >(null);
 
   const router = useRouter();
 
@@ -74,8 +78,6 @@ const NewsInfo = ({ news, apiBase, categories }: NewsInfoProps) => {
   const {
     control,
     handleSubmit,
-    setValue,
-    watch,
     reset,
     formState: { isDirty },
   } = useForm<Inputs>({
@@ -86,55 +88,40 @@ const NewsInfo = ({ news, apiBase, categories }: NewsInfoProps) => {
       dueDate: news.dueDate ? dayjs(news.dueDate) : undefined,
       tag: news.tag.id,
       detail: news.detail,
-      thumbnail: undefined,
-      highlight: undefined,
     },
   });
 
-  const thumbnailFile = watch("thumbnail");
-  const highlightFile = watch("highlight");
-
-  const previewThumbnailSrc = useMemo(() => {
-    if (thumbnailFile instanceof File) return URL.createObjectURL(thumbnailFile);
-
-    const baseUrl = (news)?.thumbnailURL;
-    return baseUrl ? `${baseUrl}?t=${Date.now()}` : "https://picsum.photos/400/300";
-  }, [thumbnailFile, news]);
-
-const previewHighlightSrc = useMemo(() => {
-    if (highlightFile instanceof File) return URL.createObjectURL(highlightFile);
-    
-    const baseUrl = (news)?.highlightURL;
-    return baseUrl ? `${baseUrl}?t=${Date.now()}` : "https://picsum.photos/800/400";
-}, [highlightFile, news]);
-
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>,target: "thumbnail"|"highlight") => {
+  const handleFileChange = (
+    event: React.ChangeEvent<HTMLInputElement>,
+    target: "thumbnail" | "highlight",
+  ) => {
     const file = event.target.files?.[0];
     if (!file) return;
     setCroppingFile(file);
     setCropTarget(target);
     event.target.value = "";
-      
   };
 
   const handleUploadComplete = (file: File) => {
     if (cropTarget === "thumbnail") {
-      setValue("thumbnail", file, { shouldValidate: true, shouldDirty: true });
+      setThumbnailFile(file);
     } else if (cropTarget === "highlight") {
-      setValue("highlight", file, { shouldValidate: true, shouldDirty: true });
+      setHighlightFile(file);
     }
     setCroppingFile(null);
     setCropTarget(null);
   };
 
   const handleCancel = () => {
-    if (isDirty) {
+    if (isDirty || thumbnailFile || highlightFile) {
       setConfirmModal({
         isOpen: true,
         type: "warning",
         onClose: () => setConfirmModal(null),
         onConfirm: () => {
           reset();
+          setThumbnailFile(null);
+          setHighlightFile(null);
           setIsEdit(false);
           setConfirmModal(null);
         },
@@ -145,9 +132,12 @@ const previewHighlightSrc = useMemo(() => {
     }
   };
 
-  
   const onSubmit: SubmitHandler<Inputs> = async (data) => {
-    if (isDirty || thumbnailFile instanceof File || highlightFile instanceof File) {
+    if (
+      isDirty ||
+      thumbnailFile instanceof File ||
+      highlightFile instanceof File
+    ) {
       try {
         const payload: IUpdateNews = {
           title: data.title,
@@ -160,13 +150,13 @@ const previewHighlightSrc = useMemo(() => {
         const response = await newsService.updateNews(
           news.id,
           payload,
-          thumbnailFile instanceof File ? thumbnailFile : null,
-          highlightFile instanceof File ? highlightFile : null
+          thumbnailFile || null,
+          highlightFile || null,
         );
 
         if (!response) {
-            setIsError(true);
-            return;
+          setIsError(true);
+          return;
         }
 
         setConfirmModal({
@@ -205,25 +195,39 @@ const previewHighlightSrc = useMemo(() => {
           ไม่สามารถเพิ่มข่าวสารได้
         </Alert>
       </Snackbar>
-      <h3 className="mb-6 font-bold">{isEdit ? "แก้ไขข้อมูลข่าวสาร" : "ข้อมูลข่าวสาร"}</h3>
+      <h3 className="mb-6 font-bold">
+        {isEdit ? "แก้ไขข้อมูลข่าวสาร" : "ข้อมูลข่าวสาร"}
+      </h3>
       <form className="gap-4 p-4" onSubmit={handleSubmit(onSubmit)}>
         <div className="flex flex-col gap-6">
-          <div className="grid grid-cols-1 md:grid-cols-5 gap-6">
-            
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-5">
             <div className="col-span-2 flex flex-col gap-2">
-              <label className={`text-sm font-medium ${isEdit ? "text-gray-700" : "text-gray-500"}`}>
+              <label
+                className={`text-sm font-medium ${isEdit ? "text-gray-700" : "text-gray-500"}`}
+              >
                 ภาพหน้าปก
               </label>
-              <div className="group relative aspect-[4/3] w-full overflow-hidden rounded-xl bg-gray-100 border border-gray-200">
+              <div className="group relative aspect-[4/3] w-full overflow-hidden rounded-xl border border-gray-200 bg-gray-100">
                 <Image
-                  src={previewThumbnailSrc}
+                  src={
+                    thumbnailFile
+                      ? URL.createObjectURL(thumbnailFile)
+                      : news.thumbnailURL
+                  }
                   alt="Thumbnail Preview"
                   fill
                   className="object-cover"
                 />
                 {isEdit && (
                   <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
-                    <Button variant="contained" component="label" sx={{ bgcolor: "#1E1B4B", "&:hover": { bgcolor: "#312E81" } }}>
+                    <Button
+                      variant="contained"
+                      component="label"
+                      sx={{
+                        bgcolor: "#1E1B4B",
+                        "&:hover": { bgcolor: "#312E81" },
+                      }}
+                    >
                       อัปโหลดรูปภาพ
                       <VisuallyHiddenInput
                         type="file"
@@ -237,19 +241,32 @@ const previewHighlightSrc = useMemo(() => {
             </div>
 
             <div className="col-span-3 flex flex-col gap-2">
-              <label className={`text-sm font-medium ${isEdit ? "text-gray-700" : "text-gray-500"}`}>
+              <label
+                className={`text-sm font-medium ${isEdit ? "text-gray-700" : "text-gray-500"}`}
+              >
                 ภาพหัวเรื่อง
               </label>
-              <div className="group relative aspect-[2/1] md:aspect-auto md:flex-1 w-full overflow-hidden rounded-xl bg-gray-100 border border-gray-200">
+              <div className="group relative aspect-[2/1] w-full overflow-hidden rounded-xl border border-gray-200 bg-gray-100 md:aspect-auto md:flex-1">
                 <Image
-                  src={previewHighlightSrc}
+                  src={
+                    highlightFile
+                      ? URL.createObjectURL(highlightFile)
+                      : news.highlightURL
+                  }
                   alt="Highlight Preview"
                   fill
                   className="object-cover"
                 />
                 {isEdit && (
                   <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
-                    <Button variant="contained" component="label" sx={{ bgcolor: "#1E1B4B", "&:hover": { bgcolor: "#312E81" } }}>
+                    <Button
+                      variant="contained"
+                      component="label"
+                      sx={{
+                        bgcolor: "#1E1B4B",
+                        "&:hover": { bgcolor: "#312E81" },
+                      }}
+                    >
                       อัปโหลดรูปภาพ
                       <VisuallyHiddenInput
                         type="file"
@@ -261,7 +278,6 @@ const previewHighlightSrc = useMemo(() => {
                 )}
               </div>
             </div>
-  
           </div>
 
           <RHFTextField
@@ -312,7 +328,7 @@ const previewHighlightSrc = useMemo(() => {
             <RHFDatePickerDayjs
               name="dueDate"
               control={control}
-              label="วันที่ครบกำหนด" 
+              label="วันที่ครบกำหนด"
               format="D MMMM YYYY"
               placeholder="เลือกวันที่ครบกำหนด"
               disabled={!isEdit}
@@ -323,19 +339,23 @@ const previewHighlightSrc = useMemo(() => {
         <div className="mt-8 flex justify-end">
           {isEdit ? (
             <div className="flex gap-x-4">
-              <Button 
-                variant="outlined" 
-                onClick={handleCancel} 
+              <Button
+                variant="outlined"
+                onClick={handleCancel}
                 size="large"
                 sx={{ borderColor: "#1E1B4B", color: "#1E1B4B", px: 4 }}
               >
                 ยกเลิก
               </Button>
-              <Button 
-                variant="contained" 
-                type="submit" 
+              <Button
+                variant="contained"
+                type="submit"
                 size="large"
-                sx={{ bgcolor: "#1E1B4B", "&:hover": { bgcolor: "#312E81" }, px: 4 }}
+                sx={{
+                  bgcolor: "#1E1B4B",
+                  "&:hover": { bgcolor: "#312E81" },
+                  px: 4,
+                }}
               >
                 บันทึกข้อมูล
               </Button>
@@ -346,7 +366,11 @@ const previewHighlightSrc = useMemo(() => {
                 variant="contained"
                 onClick={() => setIsEdit(true)}
                 size="large"
-                sx={{ bgcolor: "#1E1B4B", "&:hover": { bgcolor: "#312E81" }, px: 4 }}
+                sx={{
+                  bgcolor: "#1E1B4B",
+                  "&:hover": { bgcolor: "#312E81" },
+                  px: 4,
+                }}
               >
                 แก้ไขข้อมูล
               </Button>
