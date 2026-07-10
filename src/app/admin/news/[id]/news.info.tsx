@@ -203,11 +203,11 @@ const NewsInfo = ({ news, apiBase, categories }: NewsInfoProps) => {
           <div className="grid grid-cols-1 gap-6 md:grid-cols-5">
             <div className="col-span-2 flex flex-col gap-2">
               <label
-                className={`text-sm font-medium ${isEdit ? "text-gray-700" : "text-gray-500"}`}
+                className={`text-sm font-medium ${isEdit ? "text-neutral05" : "text-neutral04"}`}
               >
                 ภาพหน้าปก
               </label>
-              <div className="group relative aspect-[4/3] w-full overflow-hidden rounded-xl border border-gray-200 bg-gray-100">
+              <div className="group border-neutral03 bg-neutral02 relative aspect-[4/3] w-full overflow-hidden rounded-xl border">
                 <Image
                   src={
                     thumbnailFile
@@ -219,15 +219,8 @@ const NewsInfo = ({ news, apiBase, categories }: NewsInfoProps) => {
                   className="object-cover"
                 />
                 {isEdit && (
-                  <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
-                    <Button
-                      variant="contained"
-                      component="label"
-                      sx={{
-                        bgcolor: "#1E1B4B",
-                        "&:hover": { bgcolor: "#312E81" },
-                      }}
-                    >
+                  <div className="bg-neutral05/40 absolute inset-0 flex items-center justify-center opacity-0 transition-opacity duration-200 group-hover:opacity-100">
+                    <Button variant="contained" component="label">
                       อัปโหลดรูปภาพ
                       <VisuallyHiddenInput
                         type="file"
@@ -242,11 +235,11 @@ const NewsInfo = ({ news, apiBase, categories }: NewsInfoProps) => {
 
             <div className="col-span-3 flex flex-col gap-2">
               <label
-                className={`text-sm font-medium ${isEdit ? "text-gray-700" : "text-gray-500"}`}
+                className={`text-sm font-medium ${isEdit ? "text-neutral05" : "text-neutral04"}`}
               >
                 ภาพหัวเรื่อง
               </label>
-              <div className="group relative aspect-[2/1] w-full overflow-hidden rounded-xl border border-gray-200 bg-gray-100 md:aspect-auto md:flex-1">
+              <div className="group border-neutral03 bg-neutral02 relative aspect-[2/1] w-full overflow-hidden rounded-xl border md:aspect-auto md:flex-1">
                 <Image
                   src={
                     highlightFile
@@ -258,15 +251,8 @@ const NewsInfo = ({ news, apiBase, categories }: NewsInfoProps) => {
                   className="object-cover"
                 />
                 {isEdit && (
-                  <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
-                    <Button
-                      variant="contained"
-                      component="label"
-                      sx={{
-                        bgcolor: "#1E1B4B",
-                        "&:hover": { bgcolor: "#312E81" },
-                      }}
-                    >
+                  <div className="bg-neutral05/40 absolute inset-0 flex items-center justify-center opacity-0 transition-opacity duration-200 group-hover:opacity-100">
+                    <Button variant="contained" component="label">
                       อัปโหลดรูปภาพ
                       <VisuallyHiddenInput
                         type="file"
@@ -339,24 +325,10 @@ const NewsInfo = ({ news, apiBase, categories }: NewsInfoProps) => {
         <div className="mt-8 flex justify-end">
           {isEdit ? (
             <div className="flex gap-x-4">
-              <Button
-                variant="outlined"
-                onClick={handleCancel}
-                size="large"
-                sx={{ borderColor: "#1E1B4B", color: "#1E1B4B", px: 4 }}
-              >
+              <Button variant="outlined" onClick={handleCancel} size="large">
                 ยกเลิก
               </Button>
-              <Button
-                variant="contained"
-                type="submit"
-                size="large"
-                sx={{
-                  bgcolor: "#1E1B4B",
-                  "&:hover": { bgcolor: "#312E81" },
-                  px: 4,
-                }}
-              >
+              <Button variant="contained" type="submit" size="large">
                 บันทึกข้อมูล
               </Button>
             </div>
@@ -366,11 +338,6 @@ const NewsInfo = ({ news, apiBase, categories }: NewsInfoProps) => {
                 variant="contained"
                 onClick={() => setIsEdit(true)}
                 size="large"
-                sx={{
-                  bgcolor: "#1E1B4B",
-                  "&:hover": { bgcolor: "#312E81" },
-                  px: 4,
-                }}
               >
                 แก้ไขข้อมูล
               </Button>

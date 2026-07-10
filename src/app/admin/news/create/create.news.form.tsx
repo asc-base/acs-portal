@@ -199,10 +199,10 @@ const CreateNewsForm = ({ apiBase, categories }: CraeteNewsProps) => {
         <div className="flex flex-col gap-4">
           <div className="grid grid-cols-1 gap-6 md:grid-cols-5">
             <div className="col-span-2 flex flex-col gap-2">
-              <label className="text-sm font-medium text-gray-700">
+              <label className="text-neutral05 text-sm font-medium">
                 ภาพหน้าปก
               </label>
-              <div className="group relative flex aspect-[4/3] w-full items-center justify-center overflow-hidden rounded-xl border border-gray-200 bg-gray-100">
+              <div className="group border-neutral03 bg-neutral02 relative flex aspect-[4/3] w-full items-center justify-center overflow-hidden rounded-xl border">
                 {thumbnailFile ? (
                   <>
                     <Image
@@ -211,15 +211,8 @@ const CreateNewsForm = ({ apiBase, categories }: CraeteNewsProps) => {
                       fill
                       className="object-cover"
                     />
-                    <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
-                      <Button
-                        variant="contained"
-                        component="label"
-                        sx={{
-                          bgcolor: "#1E1B4B",
-                          "&:hover": { bgcolor: "#312E81" },
-                        }}
-                      >
+                    <div className="bg-neutral05/40 absolute inset-0 flex items-center justify-center opacity-0 transition-opacity duration-200 group-hover:opacity-100">
+                      <Button variant="contained" component="label">
                         อัปโหลดรูปภาพ
                         <VisuallyHiddenInput
                           type="file"
@@ -230,14 +223,7 @@ const CreateNewsForm = ({ apiBase, categories }: CraeteNewsProps) => {
                     </div>
                   </>
                 ) : (
-                  <Button
-                    variant="contained"
-                    component="label"
-                    sx={{
-                      bgcolor: "#1E1B4B",
-                      "&:hover": { bgcolor: "#312E81" },
-                    }}
-                  >
+                  <Button variant="contained" component="label">
                     อัปโหลดรูปภาพ
                     <VisuallyHiddenInput
                       type="file"
@@ -250,10 +236,10 @@ const CreateNewsForm = ({ apiBase, categories }: CraeteNewsProps) => {
             </div>
 
             <div className="col-span-3 flex flex-col gap-2">
-              <label className="text-sm font-medium text-gray-700">
+              <label className="text-neutral05 text-sm font-medium">
                 ภาพหัวเรื่อง
               </label>
-              <div className="group relative flex aspect-[2/1] w-full items-center justify-center overflow-hidden rounded-xl border border-gray-200 bg-gray-100 md:aspect-auto md:flex-1">
+              <div className="group border-neutral03 bg-neutral02 relative flex aspect-[2/1] w-full items-center justify-center overflow-hidden rounded-xl border md:aspect-auto md:flex-1">
                 {highlightFile ? (
                   <>
                     <Image
@@ -262,15 +248,8 @@ const CreateNewsForm = ({ apiBase, categories }: CraeteNewsProps) => {
                       fill
                       className="object-cover"
                     />
-                    <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
-                      <Button
-                        variant="contained"
-                        component="label"
-                        sx={{
-                          bgcolor: "#1E1B4B",
-                          "&:hover": { bgcolor: "#312E81" },
-                        }}
-                      >
+                    <div className="bg-neutral05/40 absolute inset-0 flex items-center justify-center opacity-0 transition-opacity duration-200 group-hover:opacity-100">
+                      <Button variant="contained" component="label">
                         อัปโหลดรูปภาพ
                         <VisuallyHiddenInput
                           type="file"
@@ -281,14 +260,7 @@ const CreateNewsForm = ({ apiBase, categories }: CraeteNewsProps) => {
                     </div>
                   </>
                 ) : (
-                  <Button
-                    variant="contained"
-                    component="label"
-                    sx={{
-                      bgcolor: "#1E1B4B",
-                      "&:hover": { bgcolor: "#312E81" },
-                    }}
-                  >
+                  <Button variant="contained" component="label">
                     อัปโหลดรูปภาพ
                     <VisuallyHiddenInput
                       type="file"
@@ -347,10 +319,10 @@ const CreateNewsForm = ({ apiBase, categories }: CraeteNewsProps) => {
             />
           </div>
           {!thumbnailFile && (
-            <p className="text-sm text-red-600">กรุณาอัปโหลดภาพหน้าปก</p>
+            <p className="text-accent04 text-sm">กรุณาอัปโหลดภาพหน้าปก</p>
           )}
           {!highlightFile && (
-            <p className="text-sm text-red-600">กรุณาอัปโหลดภาพหัวเรื่อง</p>
+            <p className="text-accent04 text-sm">กรุณาอัปโหลดภาพหัวเรื่อง</p>
           )}
         </div>
         <div className="mt-4 flex justify-end">
