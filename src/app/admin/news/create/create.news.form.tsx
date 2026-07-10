@@ -21,6 +21,8 @@ import {
 import { useRouter } from "next/navigation";
 import { styled } from "@mui/material/styles";
 import { Tag } from "@/core/domain/list-type";
+import { Modal } from "@mui/material";
+import { CropImageCard } from "@/components/cropimagecard";
 
 dayjs.extend(buddhistEra);
 dayjs.locale("th");
@@ -58,12 +60,16 @@ const VisuallyHiddenInput = styled("input")({
 });
 
 const CreateNewsForm = ({ apiBase, categories }: CraeteNewsProps) => {
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [thumbnailFile, setThumbnailFile] = useState<File | null>(null);
+  const [highlightFile, setHighlightFile] = useState<File | null>(null);
   const [confirmModal, setConfirmModal] = useState<ConfirmModalProps | null>(
     null,
   );
   const [isError, setIsError] = useState(false);
-  const [imageError, setImageError] = useState(false);
+  const [croppingFile, setCroppingFile] = useState<File | null>(null);
+  const [cropTarget, setCropTarget] = useState<
+    "thumbnail" | "highlight" | null
+  >(null);
 
   const router = useRouter();
 
@@ -88,39 +94,54 @@ const CreateNewsForm = ({ apiBase, categories }: CraeteNewsProps) => {
     return new NewsService(newsRepository);
   }, [apiBase]);
 
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = (
+    event: React.ChangeEvent<HTMLInputElement>,
+    target: "thumbnail" | "highlight",
+  ) => {
     const file = event.target.files?.[0];
-    if (file) {
-      setSelectedFile(file);
-      setImageError(false);
+    if (!file) return;
+    setCroppingFile(file);
+    setCropTarget(target);
+    event.target.value = "";
+  };
+
+  const handleUploadComplete = (file: File) => {
+    if (cropTarget === "thumbnail") {
+      setThumbnailFile(file);
+    } else if (cropTarget === "highlight") {
+      setHighlightFile(file);
     }
+    setCroppingFile(null);
+    setCropTarget(null);
   };
 
   const handleCancel = () => {
-    if (isDirty || selectedFile) {
+    if (isDirty || thumbnailFile || highlightFile) {
       setConfirmModal({
         isOpen: true,
         type: "warning",
         onClose: () => setConfirmModal(null),
         onConfirm: () => {
           reset();
-          setSelectedFile(null);
+          setThumbnailFile(null);
+          setHighlightFile(null);
           setConfirmModal(null);
           router.push(`/admin/news?page=1&pageSize=9&category=&title=`);
         },
       });
     } else {
       reset();
-      setSelectedFile(null);
+      setThumbnailFile(null);
+      setHighlightFile(null);
       router.push(`/admin/news?page=1&pageSize=9&category=&title=`);
     }
   };
 
   const onSubmit: SubmitHandler<FormData> = async (data) => {
-    if (isDirty || selectedFile) {
+    if (isDirty || thumbnailFile || highlightFile) {
       try {
-        if (!selectedFile) {
-          setImageError(true);
+        if (!thumbnailFile || !highlightFile) {
+          setIsError(true);
           return;
         }
         const payload: ICreateNews = {
@@ -131,7 +152,11 @@ const CreateNewsForm = ({ apiBase, categories }: CraeteNewsProps) => {
           dueDate: data.dueDate ? dayjs(data.dueDate).toISOString() : undefined,
         };
 
-        const response = await newsService.createNews(payload, selectedFile);
+        const response = await newsService.createNewsWithImages(
+          payload,
+          thumbnailFile,
+          highlightFile,
+        );
 
         if (response) {
           setConfirmModal({
@@ -172,41 +197,109 @@ const CreateNewsForm = ({ apiBase, categories }: CraeteNewsProps) => {
       <h3 className="mb-6 font-bold">ข้อมูลข่าวสาร</h3>
       <form className="gap-4 p-4" onSubmit={handleSubmit(onSubmit)}>
         <div className="flex flex-col gap-4">
-          <div className="bg-neutral02 flex h-[560px] items-center justify-center rounded-lg">
-            {selectedFile ? (
-              <div className="group relative aspect-video w-full h-[560px] overflow-hidden rounded-xl">
-                <Image
-                  src={URL.createObjectURL(selectedFile)}
-                  alt="Preview"
-                  fill
-                  className="rounded-md object-cover"
-                />
-
-                <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
-                  <Button variant="contained" component="label">
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-5">
+            <div className="col-span-2 flex flex-col gap-2">
+              <label className="text-sm font-medium text-gray-700">
+                ภาพหน้าปก
+              </label>
+              <div className="group relative flex aspect-[4/3] w-full items-center justify-center overflow-hidden rounded-xl border border-gray-200 bg-gray-100">
+                {thumbnailFile ? (
+                  <>
+                    <Image
+                      src={URL.createObjectURL(thumbnailFile)}
+                      alt="Thumbnail Preview"
+                      fill
+                      className="object-cover"
+                    />
+                    <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
+                      <Button
+                        variant="contained"
+                        component="label"
+                        sx={{
+                          bgcolor: "#1E1B4B",
+                          "&:hover": { bgcolor: "#312E81" },
+                        }}
+                      >
+                        อัปโหลดรูปภาพ
+                        <VisuallyHiddenInput
+                          type="file"
+                          accept="image/*"
+                          onChange={(e) => handleFileChange(e, "thumbnail")}
+                        />
+                      </Button>
+                    </div>
+                  </>
+                ) : (
+                  <Button
+                    variant="contained"
+                    component="label"
+                    sx={{
+                      bgcolor: "#1E1B4B",
+                      "&:hover": { bgcolor: "#312E81" },
+                    }}
+                  >
+                    อัปโหลดรูปภาพ
                     <VisuallyHiddenInput
                       type="file"
                       accept="image/*"
-                      onChange={handleFileChange}
+                      onChange={(e) => handleFileChange(e, "thumbnail")}
                     />
-                    อัปโหลดรูปภาพ
                   </Button>
-                </div>
+                )}
               </div>
-            ) : (
-              <Button variant="contained" component="label" size="large">
-                อัปโหลดรูปภาพ
-                <VisuallyHiddenInput
-                  type="file"
-                  accept="image/*"
-                  onChange={handleFileChange}
-                />
-              </Button>
-            )}
+            </div>
+
+            <div className="col-span-3 flex flex-col gap-2">
+              <label className="text-sm font-medium text-gray-700">
+                ภาพหัวเรื่อง
+              </label>
+              <div className="group relative flex aspect-[2/1] w-full items-center justify-center overflow-hidden rounded-xl border border-gray-200 bg-gray-100 md:aspect-auto md:flex-1">
+                {highlightFile ? (
+                  <>
+                    <Image
+                      src={URL.createObjectURL(highlightFile)}
+                      alt="Highlight Preview"
+                      fill
+                      className="object-cover"
+                    />
+                    <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
+                      <Button
+                        variant="contained"
+                        component="label"
+                        sx={{
+                          bgcolor: "#1E1B4B",
+                          "&:hover": { bgcolor: "#312E81" },
+                        }}
+                      >
+                        อัปโหลดรูปภาพ
+                        <VisuallyHiddenInput
+                          type="file"
+                          accept="image/*"
+                          onChange={(e) => handleFileChange(e, "highlight")}
+                        />
+                      </Button>
+                    </div>
+                  </>
+                ) : (
+                  <Button
+                    variant="contained"
+                    component="label"
+                    sx={{
+                      bgcolor: "#1E1B4B",
+                      "&:hover": { bgcolor: "#312E81" },
+                    }}
+                  >
+                    อัปโหลดรูปภาพ
+                    <VisuallyHiddenInput
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => handleFileChange(e, "highlight")}
+                    />
+                  </Button>
+                )}
+              </div>
+            </div>
           </div>
-          {imageError && (
-            <p className="mt-1 text-sm text-red-600">กรุณาอัปโหลดรูปภาพ</p>
-          )}
           <RHFTextField
             name="title"
             control={control}
@@ -253,6 +346,12 @@ const CreateNewsForm = ({ apiBase, categories }: CraeteNewsProps) => {
               placeholder="เลือกวันที่สิ้นสุด"
             />
           </div>
+          {!thumbnailFile && (
+            <p className="text-sm text-red-600">กรุณาอัปโหลดภาพหน้าปก</p>
+          )}
+          {!highlightFile && (
+            <p className="text-sm text-red-600">กรุณาอัปโหลดภาพหัวเรื่อง</p>
+          )}
         </div>
         <div className="mt-4 flex justify-end">
           <div className="flex gap-x-4">
@@ -265,6 +364,24 @@ const CreateNewsForm = ({ apiBase, categories }: CraeteNewsProps) => {
           </div>
         </div>
       </form>
+
+      <Modal open={!!croppingFile} onClose={() => setCroppingFile(null)}>
+        <div>
+          {croppingFile && cropTarget && (
+            <CropImageCard
+              file={croppingFile}
+              width={cropTarget === "thumbnail" ? 400 : 800}
+              height={cropTarget === "thumbnail" ? 300 : 400}
+              onUploadComplete={handleUploadComplete}
+              onCancel={() => {
+                setCroppingFile(null);
+                setCropTarget(null);
+              }}
+            />
+          )}
+        </div>
+      </Modal>
+
       {confirmModal && <ConfirmModal {...confirmModal} />}
     </div>
   );

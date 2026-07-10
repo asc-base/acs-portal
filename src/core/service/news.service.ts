@@ -28,6 +28,27 @@ export class NewsService {
     return response.data;
   }
 
+  async createNewsWithImages(
+    data: ICreateNews,
+    thumbnail: File,
+    highlight: File,
+  ): Promise<INews> {
+     const formData = new FormData();
+      Object.entries(data).forEach(([key, value]) => {
+        formData.append(key, value?.toString() ?? "");
+      });
+
+    if (thumbnail) {
+      formData.append("thumbnail", thumbnail);
+    }
+    if (highlight) {
+      formData.append("highlight", highlight);
+    }
+
+    const response = await this.newsRepository.createNews(formData);
+    return response.data;
+  }
+
   async getNews(
     page: number,
     pageSize: number,
