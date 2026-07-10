@@ -33,13 +33,13 @@ const ProfessorsInfoComponent = ({ professorsInfo }: ProfessorsInfoProps) => {
                             {professorsInfo.academicPosition?.shortNameTh}
                             {professorsInfo.user.firstNameTh} {professorsInfo.user.lastNameTh}
                         </h1>
-                        <h2 className="text-h2 font-light text-primary01">
+                        <h2 className="font-light text-primary01">
                             {professorsInfo.academicPosition?.shortNameEn}{" "}
                             {professorsInfo.user.firstNameEn} {professorsInfo.user.lastNameEn}
                         </h2>
                     </div>
                     <div className="flex flex-col gap-2">
-                        <h3 className="text-[18px] font-semibold text-primary01 leading-none">
+                        <h3 className="font-semibold text-primary01 leading-none">
                             สาขาวิชาที่เชี่ยวชาญ
                         </h3>
                         {professorsInfo.expertFields?.length ? (
@@ -54,7 +54,7 @@ const ProfessorsInfoComponent = ({ professorsInfo }: ProfessorsInfoProps) => {
                     </div>  
 
                     <div className="flex flex-col gap-2">
-                        <h3 className="text-[18px] font-semibold text-primary01 leading-none">
+                        <h3 className="font-semibold text-primary01 leading-none">
                             ประวัติการศึกษา
                         </h3>
                         {professorsInfo.educations?.length ? (
