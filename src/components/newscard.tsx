@@ -1,50 +1,58 @@
 "use client";
 import { NewsCardProps } from "@/interface/newscard";
-import { FC } from "react";
+import { FC, useState, useEffect } from "react";
 import {
   Button,
   Card,
   CardContent,
   CardMedia,
   CardActions,
+  Typography,
 } from "@mui/material";
 import DeleteOutlineOutlinedIcon from "@mui/icons-material/DeleteOutlineOutlined";
 
 export const NewsCard: FC<NewsCardProps> = (props) => {
   const { news, onDelete, onEdit } = props;
+  const [date, setDate] = useState<string>("");
 
-  const date = `${new Date(news.startDate).getDate()} ${new Date(
-    news.startDate,
-  ).toLocaleString("th-TH", {
-    month: "long",
-  })} ${new Date(news.startDate).getFullYear() + 543}`;
+  useEffect(() => {
+    const date = `${new Date(news.startDate).getDate()} ${new Date(
+      news.startDate,
+    ).toLocaleString("th-TH", {
+      month: "long",
+    })} ${new Date(news.startDate).getFullYear() + 543}`;
+    setDate(date);
+  }, [news.startDate]);
 
   return (
     <Card className="flex h-85 max-w-84 min-w-75 cursor-pointer flex-col !rounded-xl shadow-md transition-all duration-300 hover:drop-shadow-lg lg:!rounded-2xl">
-      <div className="px-6 pt-4">
-        <CardMedia
-          className="h-[180px] w-full rounded-xl object-cover lg:h-[240px]"
-          component="img"
-          image={news.thumbnailURL}
-          alt={news.title}
-        />
-      </div>
-      <CardContent className="flex-grow !px-6">
-        <h3 className="line-clamp-1 text-lg font-bold lg:text-xl">
+      <CardMedia
+        className="h-[180px] w-full object-cover lg:h-[240px]"
+        component="img"
+        image={news.thumbnailURL}
+        alt={news.title}
+      />
+      <CardContent className="flex-grow p-4 lg:p-6">
+        <Typography
+          component="h2"
+          className="line-clamp-1 !font-bold text-[#0c0836]"
+        >
           {news.title}
-        </h3>
-        <h6 className="mt-1 line-clamp-2 text-sm text-gray-500">{date}</h6>
+        </Typography>
+        <Typography component="h4" className="mt-2 text-gray-800">
+          {date}
+        </Typography>
       </CardContent>
 
       <CardActions className="p-4 pt-0">
         {onEdit && (
-          <Button size="small" variant="contained" fullWidth onClick={onEdit}>
+          <Button size="small" fullWidth onClick={onEdit}>
             <DeleteOutlineOutlinedIcon fontSize="small" />
             ดูข้อมูล
           </Button>
         )}
         {onDelete && (
-          <Button size="small" variant="outlined" fullWidth onClick={onDelete}>
+          <Button size="small" fullWidth onClick={onDelete}>
             <DeleteOutlineOutlinedIcon fontSize="small" />
             ลบ
           </Button>
