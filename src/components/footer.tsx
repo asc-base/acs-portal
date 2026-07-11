@@ -2,7 +2,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import LOGOACS from "../../public/logoacs.png";
-import FacebookRoundedIcon from "@mui/icons-material/FacebookRounded";
+import FacebookIcon from "@mui/icons-material/Facebook";
 import InstagramIcon from "@mui/icons-material/Instagram";
 import YouTubeIcon from "@mui/icons-material/YouTube";
 import { ICurriculum } from "@/core/domain/curriculum";
@@ -13,7 +13,7 @@ interface FooterProps {
 export const Footer = ({ curriculums = [] }: FooterProps) => {
   const linkIcons = [
     {
-      icon: <FacebookRoundedIcon />,
+      icon: <FacebookIcon />,
       href: "https://www.facebook.com/profile.php?id=100086247692906",
     },
     {
