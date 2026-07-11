@@ -4,7 +4,7 @@ import { IProfessor } from "@/core/domain/professor";
 
 export const ProfessorCard: FC<IProfessor> = (props) => {
   return (
-    <div className="h-full w-[280px] overflow-hidden rounded-2xl shadow-lg transition-all duration-300 hover:-translate-y-2 cursor-pointer">
+    <div className="h-full w-[280px] cursor-pointer overflow-hidden rounded-2xl shadow-lg transition-all duration-300 hover:-translate-y-2">
       <CardMedia
         sx={{
           height: "200px",
@@ -19,7 +19,10 @@ export const ProfessorCard: FC<IProfessor> = (props) => {
         alt={`${props.user.firstNameTh} ${props.user.lastNameTh}`}
       />
       <CardContent className="flex flex-1 flex-col justify-center gap-1 p-3 !pb-3 text-left lg:p-4 lg:!pb-4">
-        <Typography className="!text-h3 !text-primary01 text-left !font-bold">
+        <Typography
+          component="h3"
+          className="!text-primary01 text-left !font-bold"
+        >
           <span className="lg:hidden">
             {`${props.user.firstNameTh} ${props.user.lastNameTh}`.length >=
             16 ? (
@@ -37,7 +40,7 @@ export const ProfessorCard: FC<IProfessor> = (props) => {
           </span>
         </Typography>
 
-        <Typography className="!text-h4 !text-neutral05 text-left">
+        <Typography component="h4" className="!text-neutral05 text-left">
           {props.user.firstNameEn} {props.user.lastNameEn}
         </Typography>
       </CardContent>
