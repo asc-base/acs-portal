@@ -36,7 +36,7 @@ export const StudentCard: FC<IStudent> = (props) => {
         </Box>
       )}
       <CardContent className="flex flex-1 flex-col justify-center gap-1 p-3 !pb-3 text-left lg:p-4 lg:!pb-4">
-        <Typography className="!text-h2 !text-primary01 text-left !font-bold">
+        <Typography component="h2" className="!text-primary01 text-left !font-bold">
           <span className="lg:hidden">
             {`${props.user.firstNameTh} ${props.user.lastNameTh}`.length >=
             16 ? (
@@ -54,10 +54,10 @@ export const StudentCard: FC<IStudent> = (props) => {
           </span>
         </Typography>
         <Box className="mt-1 flex w-full flex-row items-center justify-between">
-          <Typography className="!text-h4 !text-neutral05">
+          <Typography component="h4" className="!text-neutral05">
             รุ่นที่ {props.classBookID}
           </Typography>
-          <Typography className="!text-h4 !text-neutral05">
+          <Typography component="h4" className="!text-neutral05">
             {`${props.studentCode.slice(0, 2)}-${props.studentCode.slice(-3)}`}
           </Typography>
         </Box>
