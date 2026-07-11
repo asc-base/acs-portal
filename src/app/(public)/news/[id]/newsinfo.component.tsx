@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { INews } from "@/core/domain/news";
 import Image from "next/image";
 import { NewsCard } from "@/components/newscard";
@@ -12,11 +12,15 @@ interface NewsInfoProps {
 }
 
 const NewsInfoComponent = ({ newsInfo, recommendNews }: NewsInfoProps) => {
-  const date = `${new Date(newsInfo.startDate).getDate()} ${new Date(
-    newsInfo.startDate,
-  ).toLocaleString("th-TH", {
-    month: "long",
-  })} ${new Date(newsInfo.startDate).getFullYear() + 543}`;
+  const [date, setDate] = useState<string>("");
+  useEffect(() => {
+    const formattedDate = `${new Date(newsInfo.startDate).getDate()} ${new Date(
+      newsInfo.startDate,
+    ).toLocaleString("th-TH", {
+      month: "long",
+    })} ${new Date(newsInfo.startDate).getFullYear() + 543}`;
+    setDate(formattedDate);
+  }, [newsInfo.startDate]);
 
   return (
     <div className="container mx-auto px-8 py-5">
