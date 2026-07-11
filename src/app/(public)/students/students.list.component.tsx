@@ -49,12 +49,12 @@ const StudentsListComponent = ({
 
   return (
     <div>
-      {/* <HeroCard
+      <HeroCard
         image={
           classBook?.thumbnailURL ? classBook.thumbnailURL : classbookImage
         }
         header={`รุ่น ${classBook?.classof} ปีการศึกษา ${classBook?.firstYearAcademic}`}
-      /> */}
+      />
       <div className="container mx-auto px-4 py-6 md:px-8 lg:py-8 xl:px-8">
         <div className="mb-2 flex flex-col items-start justify-start gap-2">
           <Breadcrumbs aria-label="breadcrumb" separator=">>">
