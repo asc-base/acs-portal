@@ -1,6 +1,6 @@
 "use client";
 import React, { useState, useEffect, useMemo } from "react";
-import { Button, InputAdornment, Modal, TextField, Chip } from "@mui/material";
+import { Button, InputAdornment, Modal, Chip } from "@mui/material";
 import { RHFTextField } from "@/components/form/RHFTextField";
 import { styled } from "@mui/material/styles";
 import GitHubIcon from "@mui/icons-material/GitHub";
@@ -37,6 +37,7 @@ interface FormData {
   projects: { title: string }[];
   file: string | File | null;
   skills: string[];
+  skillInput?: string;
 }
 
 // interface ProfileFormProps {
@@ -92,12 +93,11 @@ const ProfileForm = ({ apiBase }: { apiBase: string }) => {
       //   [],
       file: student?.user?.imageUrl || null,
       skills: [],
+      skillInput: "",
     },
   });
 
-  const [skillInput, setSkillInput] = useState("");
-
-
+  const skillInput = watch("skillInput") || "";
   const currentSkills = watch("skills") || []; 
 
 
@@ -105,7 +105,7 @@ const ProfileForm = ({ apiBase }: { apiBase: string }) => {
     const trimmed = skillInput.trim();
     if (trimmed && !currentSkills.includes(trimmed)) {
       setValue("skills", [...currentSkills, trimmed], { shouldDirty: true });
-      setSkillInput(""); 
+      setValue("skillInput", "", { shouldDirty: true });
     }
   };
 
@@ -126,6 +126,7 @@ const ProfileForm = ({ apiBase }: { apiBase: string }) => {
       instagram: student?.instagram || "",
       file: student?.user?.imageUrl || null,
       skills: [],
+      skillInput: "",
     });
     setSelectedFile(null);
   }, [student, reset]);
@@ -163,6 +164,8 @@ const ProfileForm = ({ apiBase }: { apiBase: string }) => {
       facebook: student?.facebook || "",
       instagram: student?.instagram || "",
       file: student?.user?.imageUrl || null,
+      skills: [],
+      skillInput: "",
     });
     setSelectedFile(null);
     setIsEditing(false);
@@ -178,8 +181,11 @@ const ProfileForm = ({ apiBase }: { apiBase: string }) => {
         return;
       }
 
+      const submitData = { ...data };
+      delete submitData.skillInput;
+
       const response = await studentService.updateStudent(
-        data,
+        submitData,
         selectedFile,
         classBookID,
         id,
@@ -453,17 +459,17 @@ const ProfileForm = ({ apiBase }: { apiBase: string }) => {
         </div>
 
         
-       <div className="text-neutral04 mt-6 flex flex-col gap-4">
+       <div className="group text-neutral04 mt-6 flex flex-col">
           <h4 className="group-focus-within:text-primary03">Skills</h4>
-          <div className="flex flex-col gap-4 md:flex-row md:items-center">
+          <div className="flex flex-col gap-2 md:flex-row md:items-center">
             <div className="grow">
-              <TextField
+              <RHFTextField
+                name="skillInput"
+                control={control}
                 fullWidth
                 variant="outlined"
                 placeholder="เพิ่ม skills ของคุณ ..."
-                value={skillInput}
                 disabled={!isEditing}
-                onChange={(e) => setSkillInput(e.target.value)}
                 onKeyDown={(e) => {
                   if (e.key === "Enter") {
                     e.preventDefault();
@@ -485,7 +491,7 @@ const ProfileForm = ({ apiBase }: { apiBase: string }) => {
               sx={{
                 backgroundColor: "var(--color-primary02)", 
                 color: "var(--color-neutral01)",
-                height: "56px",
+                height: "40px",
                 minWidth: "100px",
                 "&:hover": { backgroundColor: "var(--color-primary01)" }, 
               }}
