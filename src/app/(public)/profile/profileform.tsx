@@ -1,6 +1,6 @@
 "use client";
 import React, { useState, useEffect, useMemo } from "react";
-import { Button, InputAdornment, Modal } from "@mui/material";
+import { Button, InputAdornment, Modal, TextField, Chip } from "@mui/material";
 import { RHFTextField } from "@/components/form/RHFTextField";
 import { styled } from "@mui/material/styles";
 import GitHubIcon from "@mui/icons-material/GitHub";
@@ -36,6 +36,7 @@ interface FormData {
   instagram: string;
   projects: { title: string }[];
   file: string | File | null;
+  skills: string[];
 }
 
 // interface ProfileFormProps {
@@ -80,7 +81,7 @@ const ProfileForm = ({ apiBase }: { apiBase: string }) => {
     fetchStudent();
   }, [router, authService, studentService]);
 
-  const { handleSubmit, control, reset } = useForm<FormData>({
+  const { handleSubmit, control, reset, watch, setValue } = useForm<FormData>({
     defaultValues: {
       github: student?.github || "",
       linkedin: student?.linkedin || "",
@@ -90,8 +91,31 @@ const ProfileForm = ({ apiBase }: { apiBase: string }) => {
       //   studentData?.projects?.map((project) => ({ title: project.title })) ||
       //   [],
       file: student?.user?.imageUrl || null,
+      skills: [],
     },
   });
+
+  const [skillInput, setSkillInput] = useState("");
+
+
+  const currentSkills = watch("skills") || []; 
+
+
+  const handleAddSkill = () => {
+    const trimmed = skillInput.trim();
+    if (trimmed && !currentSkills.includes(trimmed)) {
+      setValue("skills", [...currentSkills, trimmed], { shouldDirty: true });
+      setSkillInput(""); 
+    }
+  };
+
+  const handleDeleteSkill = (skillToDelete: string) => {
+    setValue(
+      "skills",
+      currentSkills.filter((skill) => skill !== skillToDelete),
+      { shouldDirty: true }
+    );
+  };
   const [isCroping, setIsCroping] = useState(false);
 
   useEffect(() => {
@@ -101,6 +125,7 @@ const ProfileForm = ({ apiBase }: { apiBase: string }) => {
       facebook: student?.facebook || "",
       instagram: student?.instagram || "",
       file: student?.user?.imageUrl || null,
+      skills: [],
     });
     setSelectedFile(null);
   }, [student, reset]);
@@ -425,6 +450,71 @@ const ProfileForm = ({ apiBase }: { apiBase: string }) => {
               />
             </div>
           </div>
+        </div>
+
+        
+       <div className="text-neutral04 mt-6 flex flex-col gap-4">
+          <h4 className="group-focus-within:text-primary03">Skills</h4>
+          <div className="flex flex-col gap-4 md:flex-row md:items-center">
+            <div className="grow">
+              <TextField
+                fullWidth
+                variant="outlined"
+                placeholder="เพิ่ม skills ของคุณ ..."
+                value={skillInput}
+                disabled={!isEditing}
+                onChange={(e) => setSkillInput(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    handleAddSkill();
+                  }
+                }}
+                sx={{
+                  "& .MuiOutlinedInput-root": {
+                    "& fieldset": { borderColor: "var(--color-neutral03)" },
+                    "&.Mui-focused fieldset": { borderColor: "var(--color-primary03)" },
+                  },
+                }}
+              />
+            </div>
+            <Button
+              variant="contained"
+              disabled={!isEditing || !skillInput.trim()}
+              onClick={handleAddSkill}
+              sx={{
+                backgroundColor: "var(--color-primary02)", 
+                color: "var(--color-neutral01)",
+                height: "56px",
+                minWidth: "100px",
+                "&:hover": { backgroundColor: "var(--color-primary01)" }, 
+              }}
+            >
+              เพิ่ม
+            </Button>
+          </div>
+
+          {currentSkills.length > 0 && (
+            <div className="mt-2 flex flex-wrap gap-2">
+              {currentSkills.map((skill, index) => (
+                <Chip
+                  key={index}
+                  label={skill}
+                  onDelete={isEditing ? () => handleDeleteSkill(skill) : undefined}
+                  sx={{
+                    backgroundColor: "var(--color-neutral02)", 
+                    borderRadius: "16px",
+                    fontSize: "var(--text-h5)", 
+                    color: "var(--color-neutral05)", 
+                    "& .MuiChip-deleteIcon": {
+                      color: "var(--color-neutral04)",
+                      "&:hover": { color: "var(--color-neutral05)" },
+                    },
+                  }}
+                />
+              ))}
+            </div>
+          )}
         </div>
 
         {/* Section 3: Projects */}
