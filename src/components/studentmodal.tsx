@@ -148,12 +148,12 @@ export const StudentModal: React.FC<StudentModalProps> = ({
                 </Typography>
                 <div className="flex flex-wrap gap-3">
                   {mockSkills.map((skill) => (
-                    <span
+                    <Typography
                       key={skill}
                       className="rounded-full bg-neutral02 px-4 py-2 text-h5 text-primary01 shadow-sm md:px-5 md:text-h4"
                     >
                       {skill}
-                    </span>
+                    </Typography>
                   ))}
                 </div>
               </div>
