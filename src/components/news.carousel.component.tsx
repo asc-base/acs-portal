@@ -6,8 +6,7 @@ import EmptyState from "./emptyState";
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import DescriptionOutlinedIcon from "@mui/icons-material/DescriptionOutlined";
-import EmojiEventsOutlinedIcon from "@mui/icons-material/EmojiEventsOutlined";
-import SportsKabaddiOutlinedIcon from "@mui/icons-material/SportsKabaddiOutlined";
+
 
 interface NewsCarouselComponentProps {
   news: INews[];
