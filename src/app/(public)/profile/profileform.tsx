@@ -1,6 +1,6 @@
 "use client";
 import React, { useState, useEffect, useMemo } from "react";
-import { Button, InputAdornment, Modal, Chip } from "@mui/material";
+import { Button, InputAdornment, Modal, Chip, TextField } from "@mui/material";
 import { RHFTextField } from "@/components/form/RHFTextField";
 import { styled } from "@mui/material/styles";
 import GitHubIcon from "@mui/icons-material/GitHub";
@@ -37,7 +37,6 @@ interface FormData {
   projects: { title: string }[];
   file: string | File | null;
   skills: string[];
-  skillInput?: string;
 }
 
 // interface ProfileFormProps {
@@ -48,6 +47,7 @@ const ProfileForm = ({ apiBase }: { apiBase: string }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [student, setStudent] = useState<IStudent | null>(null);
+  const [skillInput, setSkillInput] = useState("");
   const router = useRouter();
 
   const authService = useMemo(() => {
@@ -93,11 +93,9 @@ const ProfileForm = ({ apiBase }: { apiBase: string }) => {
       //   [],
       file: student?.user?.imageUrl || null,
       skills: [],
-      skillInput: "",
     },
   });
 
-  const skillInput = watch("skillInput") || "";
   const currentSkills = watch("skills") || []; 
 
 
@@ -105,7 +103,7 @@ const ProfileForm = ({ apiBase }: { apiBase: string }) => {
     const trimmed = skillInput.trim();
     if (trimmed && !currentSkills.includes(trimmed)) {
       setValue("skills", [...currentSkills, trimmed], { shouldDirty: true });
-      setValue("skillInput", "", { shouldDirty: true });
+      setSkillInput("");
     }
   };
 
@@ -126,8 +124,8 @@ const ProfileForm = ({ apiBase }: { apiBase: string }) => {
       instagram: student?.instagram || "",
       file: student?.user?.imageUrl || null,
       skills: [],
-      skillInput: "",
     });
+    setSkillInput("");
     setSelectedFile(null);
   }, [student, reset]);
 
@@ -165,8 +163,8 @@ const ProfileForm = ({ apiBase }: { apiBase: string }) => {
       instagram: student?.instagram || "",
       file: student?.user?.imageUrl || null,
       skills: [],
-      skillInput: "",
     });
+    setSkillInput("");
     setSelectedFile(null);
     setIsEditing(false);
   };
@@ -181,11 +179,8 @@ const ProfileForm = ({ apiBase }: { apiBase: string }) => {
         return;
       }
 
-      const submitData = { ...data };
-      delete submitData.skillInput;
-
       const response = await studentService.updateStudent(
-        submitData,
+        data,
         selectedFile,
         classBookID,
         id,
@@ -461,13 +456,14 @@ const ProfileForm = ({ apiBase }: { apiBase: string }) => {
         
        <div className="group text-neutral04 mt-6 flex flex-col">
           <h4 className="group-focus-within:text-primary03">Skills</h4>
-          <div className="flex flex-col gap-2 md:flex-row md:items-center">
+          <div className="flex flex-col gap-2 md:flex-row md:items-start">
             <div className="grow">
-              <RHFTextField
-                name="skillInput"
-                control={control}
+              <TextField
+                value={skillInput}
+                onChange={(e) => setSkillInput(e.target.value)}
                 fullWidth
                 variant="outlined"
+                size="small"
                 placeholder="เพิ่ม skills ของคุณ ..."
                 disabled={!isEditing}
                 onKeyDown={(e) => {
@@ -493,6 +489,7 @@ const ProfileForm = ({ apiBase }: { apiBase: string }) => {
                 color: "var(--color-neutral01)",
                 height: "40px",
                 minWidth: "100px",
+                alignSelf: "flex-start",
                 "&:hover": { backgroundColor: "var(--color-primary01)" }, 
               }}
             >
@@ -501,7 +498,7 @@ const ProfileForm = ({ apiBase }: { apiBase: string }) => {
           </div>
 
           {currentSkills.length > 0 && (
-            <div className="mt-2 flex flex-wrap gap-2">
+            <div className="mt-1 flex flex-wrap gap-2">
               {currentSkills.map((skill, index) => (
                 <Chip
                   key={index}
