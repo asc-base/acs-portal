@@ -44,12 +44,12 @@ const EmptyStateMap: Record<
   achievement: {
     title: "ไม่พบข้อมูลความสำเร็จในขณะนี้",
     description: "เมื่อมีข่าวสารใหม่ๆ ข้อมูลจะปรากฏที่นี่",
-    icon: EmojiEventsOutlinedIcon,
+    icon: DescriptionOutlinedIcon,
   },
   activity: {
     title: "ไม่พบข้อมูลกิจกรรมในขณะนี้",
     description: "เมื่อมีข่าวสารใหม่ๆ ข้อมูลจะปรากฏที่นี่",
-    icon: SportsKabaddiOutlinedIcon,
+    icon: DescriptionOutlinedIcon,
   },
 };
 
