@@ -36,11 +36,11 @@ export const NewsCard: FC<NewsCardProps> = (props) => {
         <Typography
           variant="h2"
           fontWeight="bold"
-          className="line-clamp-1 text-[#0c0836]"
+          className="text-primary01 line-clamp-1"
         >
           {news.title}
         </Typography>
-        <Typography variant="h4" className="mt-2 text-gray-800">
+        <Typography variant="h4" className="text-primary01 mt-2">
           {date}
         </Typography>
       </CardContent>
