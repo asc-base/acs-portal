@@ -15,11 +15,14 @@ export class ProjectService {
     return response.data;
   }
 
-  async createProject(payload: ICreateProject, files: { thumbnailFile: File; assets: File[] }): Promise<IProject> {
+  async createProject(
+    payload: ICreateProject,
+    files: { thumbnailFile: File; assets: File[] },
+  ): Promise<IProject> {
     const formData = new FormData();
 
     Object.entries(payload).forEach(([key, value]) => {
-      if (Array.isArray(value) || typeof value === 'object') {
+      if (Array.isArray(value) || typeof value === "object") {
         formData.append(key, JSON.stringify(value));
       } else {
         formData.append(key, value?.toString() ?? "");
@@ -30,6 +33,11 @@ export class ProjectService {
     files.assets.forEach((file) => formData.append("assets", file));
 
     const response = await this.projectRepository.createProject(formData);
+    return response.data;
+  }
+
+  async deleteProject(id: number): Promise<IProject> {
+    const response = await this.projectRepository.deleteProject(id);
     return response.data;
   }
 }
