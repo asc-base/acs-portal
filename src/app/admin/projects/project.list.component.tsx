@@ -7,6 +7,8 @@ import {
   SelectChangeEvent,
   Button,
   Pagination,
+  Snackbar,
+  Alert,
 } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import DoneIcon from "@mui/icons-material/Done";
@@ -17,8 +19,14 @@ import EmptyState from "@/components/emptyState";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useEffect, useCallback } from "react";
+import { useEffect, useCallback, useState, useMemo } from "react";
+import {
+  ConfirmModal,
+  ConfirmModalProps,
+} from "@/components/modal/confirmModal";
 import { IProject, QueryProject } from "@/core/domain/project";
+import { ProjectService } from "@/core/service/project.service";
+import { ProjectRepository } from "@/infra/repositories/project.repository";
 
 interface ProjectListComponentsProps {
   projects: IProject[];
@@ -27,6 +35,7 @@ interface ProjectListComponentsProps {
   page: number;
   sortOrder?: string;
   search?: string;
+  apiBase: string;
 }
 
 const searchSchema = z.object({
@@ -42,8 +51,55 @@ const ProjectListComponents = ({
   page,
   sortOrder,
   search,
+  apiBase,
 }: ProjectListComponentsProps) => {
   const router = useRouter();
+  const [confirmModal, setConfirmModal] = useState<ConfirmModalProps | null>(
+    null,
+  );
+  const [isError, setIsError] = useState(false);
+
+  const projectService = useMemo(() => {
+    const repo = new ProjectRepository(apiBase);
+    return new ProjectService(repo);
+  }, [apiBase]);
+
+  const onDelete = async (id: number) => {
+    try {
+      const response = await projectService.deleteProject(id);
+
+      if (response) {
+        setConfirmModal({
+          isOpen: true,
+          type: "success",
+          onClose: () => setConfirmModal(null),
+          onConfirm: () => {
+            setConfirmModal(null);
+            router.refresh();
+          },
+          title: "ลบข้อมูลสำเร็จ",
+          description: "ข้อมูลถูกลบออกจากฐานข้อมูลแล้ว",
+          confirmText: "เสร็จสิ้น",
+        });
+      } else {
+        setIsError(true);
+      }
+    } catch (error) {
+      console.log(error);
+      setIsError(true);
+    }
+  };
+
+  const confirmDeleteProject = (id: number) => {
+    setConfirmModal({
+      isOpen: true,
+      type: "delete",
+      onClose: () => setConfirmModal(null),
+      onConfirm: () => {
+        onDelete(id);
+      },
+    });
+  };
 
   const { register, reset, watch } = useForm<SearchForm>({
     resolver: zodResolver(searchSchema),
@@ -89,6 +145,21 @@ const ProjectListComponents = ({
 
   return (
     <div className="min-h-screen px-8 py-5">
+      <Snackbar
+        anchorOrigin={{ vertical: "top", horizontal: "right" }}
+        open={isError}
+        autoHideDuration={4000}
+        onClose={() => setIsError(false)}
+      >
+        <Alert
+          severity="error"
+          onClose={() => setIsError(false)}
+          sx={{ width: "100%" }}
+        >
+          ไม่สามารถลบข้อมูลผลงานได้ในขณะนี้ กรุณาลองใหม่อีกครั้ง
+        </Alert>
+      </Snackbar>
+
       <div className="mb-6 flex items-center justify-between">
         <h3 className="text-lg font-bold">จัดการผลงาน</h3>
 
@@ -189,7 +260,7 @@ const ProjectListComponents = ({
         </div>
       </div>
 
-            <div className="flex w-full flex-col items-center justify-center gap-10">
+      <div className="flex w-full flex-col items-center justify-center gap-10">
         {projects.length > 0 ? (
           <>
             <div className="grid w-full grid-cols-3 justify-items-center gap-6">
@@ -198,11 +269,8 @@ const ProjectListComponents = ({
                   key={project.id}
                   type="project"
                   data={project}
-                  onView={() =>
-                    router.push(
-                      `/project/${project.id}`,
-                    )
-                  }
+                  onView={() => router.push(`/project/${project.id}`)}
+                  onDelete={() => confirmDeleteProject(project.id)}
                 />
               ))}
             </div>
@@ -226,6 +294,7 @@ const ProjectListComponents = ({
           </div>
         )}
       </div>
+      {confirmModal && <ConfirmModal {...confirmModal} />}
     </div>
   );
 };
