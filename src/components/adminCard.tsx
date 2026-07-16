@@ -67,22 +67,24 @@ const ProjectContent: FC<{ project: IProject }> = ({ project }) => {
 };
 
 const NewsContent: FC<{ news: INews }> = ({ news }) => {
-  const [isMounted, setIsMounted] = useState(false);
+  const [date, setDate] = useState<string>("");
 
   useEffect(() => {
-    setIsMounted(true);
-  }, []);
-
+    if (news?.startDate) {
+      const formattedDate = new Date(news.startDate).toLocaleDateString("th-TH", {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      });
+      setDate(formattedDate);
+    }
+  }, [news.startDate]);
   return (
     <div className="flex flex-col items-start gap-1">
       <h3 className="line-clamp-2 font-bold">{news.title}</h3>
       <h6>
-        {isMounted ? (
-          new Date(news.startDate).toLocaleDateString("th-TH", {
-            year: "numeric",
-            month: "long",
-            day: "numeric",
-          })
+        {date ? (
+          date
         ) : (
           <span className="text-transparent">กำลังโหลดวันที่...</span>
         )}
@@ -93,13 +95,12 @@ const NewsContent: FC<{ news: INews }> = ({ news }) => {
 
 export const AdminCard: FC<AdminCardProps> = (props) => {
   const { type, data, onView, onDelete } = props;
-  const [isMounted, setIsMounted] = useState(false);
   let image = "";
   let alt = "";
 
-  useEffect(() => {
-    setIsMounted(true);
-  }, []);
+  if (!data){
+    return <></>
+  }
 
   if (type === "curriculum") {
     image = data.thumbnailURL;
@@ -146,7 +147,7 @@ export const AdminCard: FC<AdminCardProps> = (props) => {
       </CardContent>
 
       <CardActions className="flex gap-2 !px-7 !pt-0">
-        {isMounted && onView && (
+        {onView && (
           <Button
             onClick={onView}
             fullWidth
@@ -163,7 +164,7 @@ export const AdminCard: FC<AdminCardProps> = (props) => {
           </Button>
         )}
 
-        {isMounted && onDelete && (
+        {onDelete && (
           <Button
             onClick={onDelete}
             fullWidth
