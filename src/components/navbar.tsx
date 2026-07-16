@@ -79,7 +79,7 @@ const MenuBar = () => {
     {
       id: 3,
       label: "หลักสูตร",
-      // href: "/curriculum?sortBy=year&sortOrder=desc",
+      href: "/curriculum?orderBy=year&sortBy=desc",
       submenu: [],
     },
     {
