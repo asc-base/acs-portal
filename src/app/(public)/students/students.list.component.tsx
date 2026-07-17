@@ -10,7 +10,6 @@ import { useRouter } from "next/navigation";
 import { IClassBook } from "@/core/domain/classbook";
 import { IStudent } from "@/core/domain/student";
 import EmptyState from "@/components/emptyState";
-import DescriptionOutlinedIcon from "@mui/icons-material/DescriptionOutlined";
 
 interface StudentsListComponentsProps {
   students: IStudent[];
@@ -73,7 +72,6 @@ const StudentsListComponent = ({
             <EmptyState 
              title="ไม่พบข้อมูลนักศึกษาในขณะนี้"
              description="เมื่อมีข้อมูลนักศึกษา ข้อมูลจะปรากฏที่นี่"
-             icon={DescriptionOutlinedIcon}
              />
           </div>
         ) : (
