@@ -41,7 +41,6 @@ import {
 import Alert from "@mui/material/Alert";
 import Snackbar from "@mui/material/Snackbar";
 import EmptyState from "@/components/emptyState";
-import DescriptionOutlinedIcon from "@mui/icons-material/DescriptionOutlined";
 
 interface StudentTableComponentsProps {
   students: IStudent[];
@@ -330,8 +329,6 @@ const StudentTableComponents = ({
                     <EmptyState
                       title="ไม่พบข้อมูลนักศึกษาในขณะนี้"
                       description="ไม่พบนักศึกษาในรุ่นนี้ กรุณาเพิ่มข้อมูลนักศึกษา"
-                      iconColor="var(--color-primary06)"
-                      icon={DescriptionOutlinedIcon}
                     />
                   </div>
                 </TableCell>

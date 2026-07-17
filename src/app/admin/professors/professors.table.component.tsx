@@ -16,7 +16,6 @@ import {
 import { Edit, Delete } from "@mui/icons-material";
 import { useRouter } from "next/navigation";
 import EmptyState from "@/components/emptyState";
-import DescriptionOutlinedIcon from "@mui/icons-material/DescriptionOutlined";
 
 const ProfessorTableComponent = ({
   professor,
@@ -140,7 +139,6 @@ const ProfessorTableComponent = ({
                   <EmptyState
                     title="ไม่พบข้อมูลอาจารย์ในขณะนี้"
                     description="ไม่พบข้อมูลอาจารย์ กรุณาเพิ่มข้อมูลอาจารย์"
-                    icon={DescriptionOutlinedIcon}
                   />
                 </div>
               </TableCell>
