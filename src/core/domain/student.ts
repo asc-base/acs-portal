@@ -12,6 +12,7 @@ export interface IStudent {
   facebook?: string | null;
   instagram?: string | null;
   github?: string | null;
+  skills?: string[];
   // projects: IProject[];
 }
 
