@@ -92,7 +92,7 @@ const ProfileForm = ({ apiBase }: { apiBase: string }) => {
       //   studentData?.projects?.map((project) => ({ title: project.title })) ||
       //   [],
       file: student?.user?.imageUrl || null,
-      skills: [],
+      skills: student?.skills || [],
     },
   });
 
@@ -123,7 +123,7 @@ const ProfileForm = ({ apiBase }: { apiBase: string }) => {
       facebook: student?.facebook || "",
       instagram: student?.instagram || "",
       file: student?.user?.imageUrl || null,
-      skills: [],
+      skills: student?.skills || [],
     });
     setSkillInput("");
     setSelectedFile(null);
@@ -162,7 +162,7 @@ const ProfileForm = ({ apiBase }: { apiBase: string }) => {
       facebook: student?.facebook || "",
       instagram: student?.instagram || "",
       file: student?.user?.imageUrl || null,
-      skills: [],
+      skills: student?.skills || [],
     });
     setSkillInput("");
     setSelectedFile(null);

@@ -12,6 +12,7 @@ export interface IStudent {
   facebook?: string | null;
   instagram?: string | null;
   github?: string | null;
+  skills?: string[];
   // projects: IProject[];
 }
 
@@ -51,7 +52,7 @@ export interface IUpdateStudent {
   facebook?: string | null;
   instagram?: string | null;
   github?: string | null;
-  skill?: string[];
+  skills?: string[];
 }
 
 export interface ICreateStudentCsv {
