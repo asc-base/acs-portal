@@ -37,6 +37,7 @@ import {
   ConfirmModalProps,
 } from "@/components/modal/confirmModal";
 import EmptyState from "@/components/emptyState";
+import DescriptionOutlinedIcon from "@mui/icons-material/DescriptionOutlined";
 
 interface CourseTableComponentsProps {
   courses: ICourse[];
@@ -286,7 +287,7 @@ const CourseTableComponents = ({
                     <EmptyState
                       title="ไม่พบข้อมูลรายวิชาในขณะนี้"
                       description="ไม่พบรายวิชาในหลักสูตรนี้ กรุณาเพิ่มข้อมูลรายวิชา"
-                      iconColor="var(--color-primary06)"
+                      icon={DescriptionOutlinedIcon}
                     />
                   </div>
                 </TableCell>

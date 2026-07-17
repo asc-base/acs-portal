@@ -27,6 +27,7 @@ import {
 import { IProject, QueryProject } from "@/core/domain/project";
 import { ProjectService } from "@/core/service/project.service";
 import { ProjectRepository } from "@/infra/repositories/project.repository";
+import DescriptionOutlinedIcon from "@mui/icons-material/DescriptionOutlined";
 
 interface ProjectListComponentsProps {
   projects: IProject[];
@@ -289,7 +290,7 @@ const ProjectListComponents = ({
             <EmptyState
               title="ไม่พบข้อมูลผลงานในขณะนี้"
               description="ยังไม่มีโปรเจกต์ในระบบ หรือไม่พบผลลัพธ์จากการค้นหา"
-              iconColor="var(--color-primary06)"
+              icon={DescriptionOutlinedIcon}
             />
           </div>
         )}
