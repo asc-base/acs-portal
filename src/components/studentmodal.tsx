@@ -26,7 +26,6 @@ export const StudentModal: React.FC<StudentModalProps> = ({
   onClose,
   classBook,
 }) => {
-  const mockSkills = ["UX/UI Design", "Full-stack Dev", "Project Management"];
 
   return (
     <Modal open={Open} onClose={onClose}>
@@ -147,14 +146,20 @@ export const StudentModal: React.FC<StudentModalProps> = ({
                   Skills
                 </Typography>
                 <div className="flex flex-wrap gap-3">
-                  {mockSkills.map((skill) => (
-                    <Typography
-                      key={skill}
-                      className="rounded-full bg-neutral02 px-4 py-2 text-h5 text-primary01 shadow-sm md:px-5 md:text-h4"
-                    >
-                      {skill}
+                  {student.skills && student.skills.length > 0 ? (
+                    student.skills.map((skill) => (
+                      <Typography
+                        key={skill}
+                        className="rounded-full bg-neutral02 px-4 py-2 text-h5 text-primary01 shadow-sm md:px-5 md:text-h4"
+                      >
+                        {skill}
+                      </Typography>
+                    ))
+                  ) : (
+                    <Typography className="text-neutral04 text-h5">
+                      ไม่มีข้อมูลทักษะ
                     </Typography>
-                  ))}
+                  )}
                 </div>
               </div>
             </div>
