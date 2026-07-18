@@ -98,22 +98,18 @@ export const AdminCard: FC<AdminCardProps> = (props) => {
   let image = "";
   let alt = "";
 
-  if (!data){
-    return <></>
-  }
-
   if (type === "curriculum") {
-    image = data.thumbnailURL;
-    alt = data.year;
+    image = data.thumbnailURL || "";
+    alt = String(data.year || "");
   } else if (type === "classBook") {
-    image = data.thumbnailURL;
-    alt = String(data.classof);
+    image = data.thumbnailURL || "";
+    alt = String(data.classof || "");
   } else if (type === "project") {
     image = data.thumbnailURL || "";
-    alt = data.title;
+    alt = String(data.title || "");
   } else if (type === "news") {
-    image = data.thumbnailURL;
-    alt = data.title;
+    image = data.thumbnailURL || "";
+    alt = String(data.title || "");
   }
 
   return (
