@@ -44,7 +44,19 @@ export interface ICreateProject {
   members: { userID: number; roleID: number }[];
 }
 
-//export interface IUpdateProject {}
+export interface IUpdateProject {
+  title: string;
+  details: string;
+  youtubeURL: string;
+  githubURL: string;
+  documentURL: string;
+  presentationURL: string;
+  figmaURL: string | null;
+  coursesID: number[];
+  tagsID: number[];
+  techStacks: string[];
+  members: { userID: number; roleID: number }[];
+}
 
 export interface QueryProject {
   page?: number;

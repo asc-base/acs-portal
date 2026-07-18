@@ -1,11 +1,11 @@
 "use client";
-import React, { FC, useState } from "react";
+import React, { FC, useState, useMemo } from "react";
 import { useForm, useFieldArray, SubmitHandler } from "react-hook-form";
 import { Button, IconButton, Modal, Box, Snackbar } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import MenuItem from "@mui/material/MenuItem";
 import Alert from "@mui/material/Alert";
-// import { useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { Tag } from "@/core/domain/list-type";
 import { z } from "zod";
@@ -21,9 +21,9 @@ import DescriptionIcon from "@mui/icons-material/Description";
 import SlideshowIcon from "@mui/icons-material/Slideshow";
 import { ICourse } from "@/core/domain/course";
 import { CropImageCard } from "@/components/cropimagecard"; 
-//import { ProjectRepository } from "@/infra/repositories/project.repository";
-//import { ProjectService } from "@/core/service/project.service";
-//import { ICreateProject, IUpdateProject } from "@/core/domain/project";
+import { ProjectRepository } from "@/infra/repositories/project.repository";
+import { ProjectService } from "@/core/service/project.service";
+import { IUpdateProject } from "@/core/domain/project";
 import { MasterData } from "@/core/domain/master-data";
 import { IStudent } from "@/core/domain/student";
 import { IProfessor } from "@/core/domain/professor";
@@ -76,12 +76,12 @@ const VisuallyHiddenInput = styled("input")({
   width: 1,
 });
 
-export const FormUpdateProject: FC<FormUpdateProjectProps> = ({ initialProject, initialCourses, initialMasterData, initialStudents, initialProfessors }) => {
+export const FormUpdateProject: FC<FormUpdateProjectProps> = ({ apiBase, projectId, initialProject, initialCourses, initialMasterData, initialStudents, initialProfessors }) => {
 
-  // const projectsService = useMemo(() => {
-  //   const projectsRepository = new ProjectRepository(apiBase);
-  //   return new ProjectService(projectsRepository);
-  // }, [apiBase]);
+  const projectsService = useMemo(() => {
+    const projectsRepository = new ProjectRepository(apiBase);
+    return new ProjectService(projectsRepository);
+  }, [apiBase]);
 
   const courses = initialCourses;
   const students = initialStudents;
@@ -102,9 +102,16 @@ export const FormUpdateProject: FC<FormUpdateProjectProps> = ({ initialProject, 
 
   const [errorMsg, setErrorMsg] = useState("");
   const [isError, setIsError] = useState(false);
-  // const router = useRouter();
+  const router = useRouter();
   const [confirmModal, setConfirmModal] = useState<ConfirmModalProps | null>(null);
   const [isEditMode, setIsEditMode] = useState(false);
+
+  const initCourses = initialProject.course?.map((c: ICourse) => ({ value: c.id })) || [];
+  const initTypes = (initialProject.tag as unknown as Tag[])?.filter((t) => t.tagsGroupsId === 1).map((t) => ({ value: t.id })) || [];
+  const initCategories = (initialProject.tag as unknown as Tag[])?.filter((t) => t.tagsGroupsId === 3).map((t) => ({ value: t.id })) || [];
+  const initTechStacks = initialProject.techStacks?.map((ts: string) => ({ value: ts })) || [];
+  const initStudents = (initialProject.member as unknown as { id: number; roleID: number; roleId: number }[])?.filter((m) => m.roleID === 2 || m.roleId === 2).map((m) => ({ userID: m.id })) || [];
+  const initAdvisors = (initialProject.member as unknown as { id: number; roleID: number; roleId: number }[])?.filter((m) => m.roleID === 3 || m.roleId === 3).map((m) => ({ userID: m.id })) || [];
 
   const { control, handleSubmit, reset, formState: { isDirty } } = useForm<ProjectFormValues>({
     resolver: zodResolver(Schema),
@@ -210,22 +217,30 @@ export const FormUpdateProject: FC<FormUpdateProjectProps> = ({ initialProject, 
   const onSubmit: SubmitHandler<ProjectFormValues> = async (data) => {
     try {
       console.log("Form data:", data);
-      // const payload = {
-      //   title: data.title,
-      //   details: data.details,
-      //   youtubeURL: data.youtubeURL,
-      //   githubURL: data.githubURL,
-      //   documentURL: data.documentURL,
-      //   presentationURL: data.presentationURL,
-      //   coursesID: data.projectCourses.map((c) => c.value),
-      //   tagsID: data.projectTypes.map((t) => t.value),
-      //   members: [
-      //     ...data.students.map((c) => ({ userID: c.userID, roleID: 2 })),
-      //     ...data.advisors.map((a) => ({ userID: a.userID, roleID: 3 })),
-      //   ],
-      // };
+      const payload: IUpdateProject = {
+        title: data.title,
+        details: data.details,
+        youtubeURL: data.youtubeURL,
+        githubURL: data.githubURL,
+        documentURL: data.documentURL,
+        presentationURL: data.presentationURL,
+        figmaURL: null,
+        coursesID: data.projectCourses.map((c) => Number(c.value)),
+        tagsID: [...data.projectTypes, ...data.projectCategories].map((t) => Number(t.value)),
+        techStacks: data.techStacks.map((t) => t.value),
+        members: [
+          ...data.students.map((c) => ({ userID: Number(c.userID), roleID: 2 })),
+          ...data.advisors.map((a) => ({ userID: Number(a.userID), roleID: 3 })),
+        ],
+      };
       
-      // const response = await projectsService.updateProject(projectId, payload, files);
+      const files = {
+        thumbnailFile: selectedFile || null,
+        assets: selectedAssets.length > 0 ? selectedAssets : undefined
+      };
+
+      await projectsService.updateProject(projectId, payload, files);
+      router.push("/admin/projects");
       
     } catch (error) {
       console.error(error);
