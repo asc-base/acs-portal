@@ -1,11 +1,11 @@
 "use client";
-import React, { FC, useState, useMemo } from "react";
+import React, { FC, useState } from "react";
 import { useForm, useFieldArray, SubmitHandler } from "react-hook-form";
 import { Button, IconButton, Modal, Box, Snackbar } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import MenuItem from "@mui/material/MenuItem";
 import Alert from "@mui/material/Alert";
-import { useRouter } from "next/navigation";
+// import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { Tag } from "@/core/domain/list-type";
 import { z } from "zod";
@@ -21,8 +21,8 @@ import DescriptionIcon from "@mui/icons-material/Description";
 import SlideshowIcon from "@mui/icons-material/Slideshow";
 import { ICourse } from "@/core/domain/course";
 import { CropImageCard } from "@/components/cropimagecard"; 
-import { ProjectRepository } from "@/infra/repositories/project.repository";
-import { ProjectService } from "@/core/service/project.service";
+//import { ProjectRepository } from "@/infra/repositories/project.repository";
+//import { ProjectService } from "@/core/service/project.service";
 //import { ICreateProject, IUpdateProject } from "@/core/domain/project";
 import { MasterData } from "@/core/domain/master-data";
 import { IStudent } from "@/core/domain/student";
@@ -258,7 +258,7 @@ export const FormUpdateProject: FC<FormUpdateProjectProps> = ({ initialProject, 
                 </>
               ) : initialProject.thumbnailURL ? (
                 <>
-                  <img src={initialProject.thumbnailURL} alt="Preview" className="absolute inset-0 z-0 object-cover w-full h-full" />
+                  <Image src={initialProject.thumbnailURL} alt="Preview" fill unoptimized className="absolute inset-0 z-0 object-cover" />
                   {isEditMode && <div className="absolute inset-0 z-10 flex items-center justify-center bg-black/40 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
                     <Button variant="contained" component="label">
                       <VisuallyHiddenInput type="file" accept="image/*" onChange={handleFileChange} />
