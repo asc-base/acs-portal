@@ -1,11 +1,10 @@
 "use client";
 import React, { FC, useState, useMemo } from "react";
 import { useForm, useFieldArray, SubmitHandler } from "react-hook-form";
-import { Button, IconButton, Modal } from "@mui/material";
+import { Button, IconButton, Modal, Box, Snackbar } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import MenuItem from "@mui/material/MenuItem";
 import Alert from "@mui/material/Alert";
-import Snackbar from "@mui/material/Snackbar";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { Tag } from "@/core/domain/list-type";
@@ -28,11 +27,12 @@ import { ProjectService } from "@/core/service/project.service";
 import { MasterData } from "@/core/domain/master-data";
 import { IStudent } from "@/core/domain/student";
 import { IProfessor } from "@/core/domain/professor";
+import { IProject } from "@/core/domain/project";
 
 interface FormUpdateProjectProps {
   apiBase: string;
   projectId: string;
-  initialProject: any;
+  initialProject: Partial<IProject>;
   initialCourses: ICourse[];
   initialMasterData: MasterData;
   initialStudents: IStudent[];
@@ -76,18 +76,18 @@ const VisuallyHiddenInput = styled("input")({
   width: 1,
 });
 
-export const FormUpdateProject: FC<FormUpdateProjectProps> = ({ apiBase, projectId, initialProject, initialCourses, initialMasterData, initialStudents, initialProfessors }) => {
+export const FormUpdateProject: FC<FormUpdateProjectProps> = ({ initialProject, initialCourses, initialMasterData, initialStudents, initialProfessors }) => {
 
-  const projectsService = useMemo(() => {
-    const projectsRepository = new ProjectRepository(apiBase);
-    return new ProjectService(projectsRepository);
-  }, [apiBase]);
+  // const projectsService = useMemo(() => {
+  //   const projectsRepository = new ProjectRepository(apiBase);
+  //   return new ProjectService(projectsRepository);
+  // }, [apiBase]);
 
   const courses = initialCourses;
   const students = initialStudents;
   const professors = initialProfessors;
-  const types: Tag[] = initialMasterData?.tags?.filter((t: any) => t.tagsGroupsId === 1) || [];
-  const categories: Tag[] = initialMasterData?.tags?.filter((t: any) => t.tagsGroupsId === 3) || [];
+  const types: Tag[] = initialMasterData?.tags?.filter((t: Tag) => t.tagsGroupsId === 1) || [];
+  const categories: Tag[] = initialMasterData?.tags?.filter((t: Tag) => t.tagsGroupsId === 3) || [];
 
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [imageError, setImageError] = useState(false);
@@ -102,7 +102,7 @@ export const FormUpdateProject: FC<FormUpdateProjectProps> = ({ apiBase, project
 
   const [errorMsg, setErrorMsg] = useState("");
   const [isError, setIsError] = useState(false);
-  const router = useRouter();
+  // const router = useRouter();
   const [confirmModal, setConfirmModal] = useState<ConfirmModalProps | null>(null);
   const [isEditMode, setIsEditMode] = useState(false);
 
@@ -115,12 +115,12 @@ export const FormUpdateProject: FC<FormUpdateProjectProps> = ({ apiBase, project
       githubURL: initialProject.githubURL || "", 
       documentURL: initialProject.documentURL || "", 
       presentationURL: initialProject.presentationURL || "",
-      projectCourses: initialProject.course?.map((c: any) => ({ value: c.id })) || [{ value: 0 }], 
-      projectTypes: initialProject.tag?.filter((t: any) => t.tagsGroupsId === 1).map((t: any) => ({ value: t.id })) || [{ value: 0 }], 
-      projectCategories: initialProject.tag?.filter((t: any) => t.tagsGroupsId === 3).map((t: any) => ({ value: t.id })) || [{ value: 0 }],
+      projectCourses: initialProject.course?.map((c: ICourse) => ({ value: c.id })) || [{ value: 0 }], 
+      projectTypes: initialProject.tag?.filter((t: Tag) => t.tagsGroupsId === 1).map((t: Tag) => ({ value: t.id })) || [{ value: 0 }], 
+      projectCategories: initialProject.tag?.filter((t: Tag) => t.tagsGroupsId === 3).map((t: Tag) => ({ value: t.id })) || [{ value: 0 }],
       techStacks: initialProject.techStacks?.map((ts: string) => ({ value: ts })) || [{ value: "" }], 
-      students: initialProject.member?.filter((m: any) => m.roleId === 1).map((m: any) => ({ userID: m.id })) || [{ userID: 0 }], 
-      advisors: initialProject.member?.filter((m: any) => m.roleId === 2).map((m: any) => ({ userID: m.id })) || [{ userID: 0 }],
+      students: initialProject.member?.filter((m: { id: number; roleId: number }) => m.roleId === 2).map((m: { id: number; roleId: number }) => ({ userID: m.id })) || [{ userID: 0 }], 
+      advisors: initialProject.member?.filter((m: { id: number; roleId: number }) => m.roleId === 3).map((m: { id: number; roleId: number }) => ({ userID: m.id })) || [{ userID: 0 }],
     },
     mode: "onChange",
 });
@@ -209,20 +209,21 @@ export const FormUpdateProject: FC<FormUpdateProjectProps> = ({ apiBase, project
 
   const onSubmit: SubmitHandler<ProjectFormValues> = async (data) => {
     try {
-      const payload = {
-        title: data.title,
-        details: data.details,
-        youtubeURL: data.youtubeURL,
-        githubURL: data.githubURL,
-        documentURL: data.documentURL,
-        presentationURL: data.presentationURL,
-        coursesID: data.projectCourses.map((c) => c.value),
-        tagsID: data.projectTypes.map((t) => t.value),
-        members: [
-          ...data.students.map((c) => ({ userID: c.userID, roleID: 2 })),
-          ...data.advisors.map((a) => ({ userID: a.userID, roleID: 3 })),
-        ],
-      };
+      console.log("Form data:", data);
+      // const payload = {
+      //   title: data.title,
+      //   details: data.details,
+      //   youtubeURL: data.youtubeURL,
+      //   githubURL: data.githubURL,
+      //   documentURL: data.documentURL,
+      //   presentationURL: data.presentationURL,
+      //   coursesID: data.projectCourses.map((c) => c.value),
+      //   tagsID: data.projectTypes.map((t) => t.value),
+      //   members: [
+      //     ...data.students.map((c) => ({ userID: c.userID, roleID: 2 })),
+      //     ...data.advisors.map((a) => ({ userID: a.userID, roleID: 3 })),
+      //   ],
+      // };
       
       // const response = await projectsService.updateProject(projectId, payload, files);
       
@@ -235,18 +236,29 @@ export const FormUpdateProject: FC<FormUpdateProjectProps> = ({ apiBase, project
 
   return (
     <form className="space-y-4 p-8 relative" onSubmit={handleSubmit(onSubmit)}>
-      <Snackbar anchorOrigin={{ vertical: "top", horizontal: "right" }} open={isError} autoHideDuration={4000} onClose={() => setIsError(false)}>
-        <Alert severity="error" onClose={() => setIsError(false)} sx={{ width: "100%" }}>{errorMsg}</Alert>
-      </Snackbar>
+      <Box sx={{ "& .MuiInputBase-root.Mui-disabled": { backgroundColor: "#f3f4f6" } }}>
+        <Snackbar anchorOrigin={{ vertical: "top", horizontal: "right" }} open={isError} autoHideDuration={4000} onClose={() => setIsError(false)}>
+          <Alert severity="error" onClose={() => setIsError(false)} sx={{ width: "100%" }}>{errorMsg}</Alert>
+        </Snackbar>
 
-      <div>
-        <h3 className="font-bold">ข้อมูลผลงาน</h3>
+        <div>
+          <h3 className="font-bold">ข้อมูลผลงาน</h3>
         <div className="mt-6 mb-8 flex flex-row items-stretch gap-x-8 h-auto">
           <div className="w-[400px] shrink-0 flex flex-col gap-2">
             <div className="bg-gray-50 rounded-xl overflow-hidden border border-gray-300 relative flex flex-col justify-center items-center group h-full">
               {selectedFile ? (
                 <>
                   <Image src={URL.createObjectURL(selectedFile)} alt="Preview" fill className="absolute inset-0 z-0 object-cover" />
+                  {isEditMode && <div className="absolute inset-0 z-10 flex items-center justify-center bg-black/40 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
+                    <Button variant="contained" component="label">
+                      <VisuallyHiddenInput type="file" accept="image/*" onChange={handleFileChange} />
+                      อัปโหลดรูปภาพ
+                    </Button>
+                  </div>}
+                </>
+              ) : initialProject.thumbnailURL ? (
+                <>
+                  <img src={initialProject.thumbnailURL} alt="Preview" className="absolute inset-0 z-0 object-cover w-full h-full" />
                   {isEditMode && <div className="absolute inset-0 z-10 flex items-center justify-center bg-black/40 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
                     <Button variant="contained" component="label">
                       <VisuallyHiddenInput type="file" accept="image/*" onChange={handleFileChange} />
@@ -688,6 +700,7 @@ export const FormUpdateProject: FC<FormUpdateProjectProps> = ({ apiBase, project
           />
         </Modal>
       )}
+      </Box>
     </form>
   );
 };
