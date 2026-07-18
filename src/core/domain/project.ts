@@ -44,6 +44,8 @@ export interface ICreateProject {
   members: { userID: number; roleID: number }[];
 }
 
+//export interface IUpdateProject {}
+
 export interface QueryProject {
   page?: number;
   pageSize?: number;
