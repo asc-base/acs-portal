@@ -200,7 +200,7 @@ const ProjectListComponents = ({
                   data={project}
                   onView={() =>
                     router.push(
-                      `/project/${project.id}`,
+                      `/admin/projects/${project.id}`,
                     )
                   }
                 />
