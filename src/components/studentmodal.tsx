@@ -81,10 +81,10 @@ export const StudentModal: React.FC<StudentModalProps> = ({
 
         {/* Two-Column Grid */}
         <div className="flex flex-col gap-8 md:flex-row pt-4">
-          
+
           {/* Left Panel: Profile and Skills */}
           <div className="flex flex-col gap-6 md:w-[35%] w-full">
-            
+
             {/* Profile Card */}
             <div className="flex flex-col items-center rounded-2xl border border-neutral02 bg-white p-6 shadow-sm">
               <div className="mb-4 overflow-hidden rounded-2xl w-full flex justify-center">
@@ -163,13 +163,13 @@ export const StudentModal: React.FC<StudentModalProps> = ({
             </div>
 
             {/* Skills Card */}
-            <div className="rounded-2xl border border-neutral02 bg-white p-6 shadow-sm">
-              <Typography className="!text-sm !font-bold !text-neutral05 !mb-3">
-                Skills
-              </Typography>
-              <div className="flex flex-wrap gap-2">
-                {student.skills && student.skills.length > 0 ? (
-                  student.skills.map((skill) => (
+            {student.skills && student.skills.length > 0 && (
+              <div className="rounded-2xl border border-neutral02 bg-white p-6 shadow-sm">
+                <Typography className="!text-sm !font-bold !text-neutral05 !mb-3">
+                  Skills
+                </Typography>
+                <div className="flex flex-wrap gap-2">
+                  {student.skills.map((skill) => (
                     <Chip
                       key={skill}
                       label={skill}
@@ -183,38 +183,32 @@ export const StudentModal: React.FC<StudentModalProps> = ({
                         border: "1px solid var(--color-neutral03)",
                       }}
                     />
-                  ))
-                ) : (
-                  <Typography className="text-neutral04 text-xs">
-                    ไม่มีข้อมูลทักษะ
-                  </Typography>
-                )}
+                  ))}
+                </div>
               </div>
-            </div>
+            )}
           </div>
 
           {/* Right Panel: Project Tabs and Scrollable List */}
           <div className="flex-1 flex flex-col md:w-[65%] w-full">
-            
+
             {/* Tab Headers */}
             <div className="flex border-b border-neutral02 mb-6">
               <button
                 onClick={() => setActiveTab("course")}
-                className={`flex-1 pb-3 text-center font-bold text-sm transition-colors border-b-2 ${
-                  activeTab === "course"
-                    ? "border-primary01 text-primary01"
-                    : "border-transparent text-neutral04 hover:text-neutral05"
-                }`}
+                className={`flex-1 pb-3 text-center font-bold text-sm transition-colors border-b-2 ${activeTab === "course"
+                  ? "border-primary01 text-primary01"
+                  : "border-transparent text-neutral04 hover:text-neutral05"
+                  }`}
               >
                 โปรเจกต์ในหลักสูตร
               </button>
               <button
                 onClick={() => setActiveTab("other")}
-                className={`flex-1 pb-3 text-center font-bold text-sm transition-colors border-b-2 ${
-                  activeTab === "other"
-                    ? "border-primary01 text-primary01"
-                    : "border-transparent text-neutral04 hover:text-neutral05"
-                }`}
+                className={`flex-1 pb-3 text-center font-bold text-sm transition-colors border-b-2 ${activeTab === "other"
+                  ? "border-primary01 text-primary01"
+                  : "border-transparent text-neutral04 hover:text-neutral05"
+                  }`}
               >
                 โปรเจกต์อื่นๆ
               </button>
