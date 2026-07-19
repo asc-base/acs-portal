@@ -22,31 +22,44 @@ export const Carousel: FC<CarouselProps> = ({
 
   const goToSlide = (index: number) => setCurrentIndex(index);
 
-  if (!items.length) return null;
-
   return (
     <div className={`relative mx-auto w-full max-w-6xl`}>
       {/* Main Carousel Container */}
-      <div className="relative h-[496px] w-full overflow-hidden rounded-sm bg-gray-900 shadow-2xl max-xl:h-[199px] max-sm:h-[189px]">
+      <div className="relative h-[452px] w-full overflow-hidden rounded max-xl:h-[430px] max-lg:h-[210px] max-sm:h-[189px]">
         {/* Slides Container */}
         <div
           className="flex h-full transition-transform duration-700 ease-in-out"
           style={{ transform: `translateX(-${currentIndex * 100}%)` }}
         >
-          {items.map((item, index) => (
-            <div key={index} className="relative h-full w-full flex-shrink-0">
-              <Link href={`/news/${item?.news?.id}`}>
+          {items.length > 0 ? (
+            items.map((item, index) => (
+              <div key={index} className="relative h-full w-full flex-shrink-0">
+                <Link href={`/news/${item?.news?.id}`}>
+                  <Image
+                    className="object-cover"
+                    src={item?.thumbnailURL}
+                    alt={`Slide ${index + 1}`}
+                    fill
+                    sizes="(max-width: 640px) 100vw, (max-width: 1280px) 100vw, 1152px"
+                    priority={index === 0}
+                  />
+                </Link>
+              </div>
+            ))
+          ) : (
+            <div className="relative h-full w-full flex-shrink-0">
+              <Link href="/news/51">
                 <Image
                   className="object-cover"
-                  src={item?.thumbnailURL}
-                  alt={`Slide ${index + 1}`}
+                  src="/carousel.jpg"
+                  alt="Default Announcement"
                   fill
                   sizes="(max-width: 640px) 100vw, (max-width: 1280px) 100vw, 1152px"
-                  priority={index === 0}
+                  priority
                 />
               </Link>
             </div>
-          ))}
+          )}
         </div>
       </div>
 
@@ -59,8 +72,8 @@ export const Carousel: FC<CarouselProps> = ({
               onClick={() => goToSlide(index)}
               className={`transition-all duration-300 ${
                 index === currentIndex
-                  ? "bg-primary02 h-2 w-8 rounded-full"
-                  : "bg-neutral06 h-2 w-8 rounded-full hover:scale-125"
+                  ? "bg-primary02 h-2 w-8 rounded-[2px]"
+                  : "bg-neutral06 hover:bg-primary03 h-2 w-8 rounded-[2px] hover:scale-125"
               }`}
               aria-label={`Go to slide ${index + 1}`}
             />
