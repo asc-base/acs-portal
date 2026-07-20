@@ -173,7 +173,8 @@ const ProfileForm = ({ apiBase }: { apiBase: string }) => {
 
   const onSubmit = async (data: FormData) => {
     try {
-      const { skillInput: _skillInput, ...profileData } = data;
+      const profileData = { ...data };
+      Reflect.deleteProperty(profileData, "skillInput");
       setIsEditing(false);
       const id = student?.id;
       const classBookID = student?.classBookID;
