@@ -16,6 +16,7 @@ import SearchIcon from "@mui/icons-material/Search";
 import CloseIcon from "@mui/icons-material/Close";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import DoneIcon from "@mui/icons-material/Done";
+import FeedOutlinedIcon from "@mui/icons-material/FeedOutlined";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -30,6 +31,7 @@ import {
 import Alert from "@mui/material/Alert";
 import Snackbar from "@mui/material/Snackbar";
 import { Tag } from "@/core/domain/list-type";
+import EmptyState from "@/components/emptyState";
 
 interface NewsListComponentProps {
   news: INews[];
@@ -228,18 +230,28 @@ const NewsListComponent = (initValue: NewsListComponentProps) => {
       </div>
 
       <div className="flex w-full flex-1 flex-col items-center">
-        <div className="grid w-full grid-cols-3 justify-items-center gap-6">
-          {initValue.news.map((news) => (
-            <AdminCard
-              key={news.id}
-              type="news"
-              data={news}
-              onView={() => router.push(`/admin/news/${news.id}`)}
-              onDelete={() => confirmDeleteNews(news.id)}
+        {initValue.news.length === 0 ? (
+          <div className="flex w-full flex-1 items-center justify-center">
+            <EmptyState
+              title="ไม่พบข้อมูลข่าวสารในขณะนี้"
+              description="เมื่อมีข่าวสารใหม่ๆ ข้อมูลจะปรากฏที่นี่"
+              icon={FeedOutlinedIcon}
+              iconColor="var(--color-primary06)"
             />
-          ))}
-        </div>
-
+          </div>
+        ) : (
+          <div className="grid w-full grid-cols-3 justify-items-center gap-6">
+            {initValue.news.map((news) => (
+              <AdminCard
+                key={news.id}
+                type="news"
+                data={news}
+                onView={() => router.push(`/admin/news/${news.id}`)}
+                onDelete={() => confirmDeleteNews(news.id)}
+              />
+            ))}
+          </div>
+        )}
         {initValue.totalRecords > 0 && (
           <div className="mt-auto pt-10">
             <Pagination
