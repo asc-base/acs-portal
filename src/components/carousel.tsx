@@ -25,7 +25,7 @@ export const Carousel: FC<CarouselProps> = ({
   return (
     <div className={`relative mx-auto w-full max-w-6xl`}>
       {/* Main Carousel Container */}
-      <div className="relative h-[452px] w-full overflow-hidden rounded max-xl:h-[430px] max-lg:h-[210px] max-sm:h-[189px]">
+      <div className="relative h-113.5 w-full overflow-hidden rounded max-xl:h-107.5 max-lg:h-52.5 max-sm:h-47.5">
         {/* Slides Container */}
         <div
           className="flex h-full transition-transform duration-700 ease-in-out"
