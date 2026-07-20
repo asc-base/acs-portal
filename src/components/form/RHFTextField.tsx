@@ -41,7 +41,8 @@ export function RHFTextField<T extends FieldValues>({
               focused={focused}
               error={!!fieldState.error}
             >
-              {requiredMark ? `${label} *` : label}
+              {label}
+              {requiredMark && <span style={{ color: "#f44336", marginLeft: "4px" }}>*</span>}
             </FormLabel>
           )}
 
