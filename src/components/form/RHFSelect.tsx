@@ -36,7 +36,10 @@ export function RHFSelect<T extends FieldValues>({
             <FormLabel
               focused={focused}
               error={!!fieldState.error}
-            >{requiredMark ? `${label} *` : label}</FormLabel>
+            >
+              {label}
+              {requiredMark && <span style={{ color: "#f44336", marginLeft: "4px" }}>*</span>}
+            </FormLabel>
           )}
 
           <FormControl fullWidth error={!!fieldState.error}>
