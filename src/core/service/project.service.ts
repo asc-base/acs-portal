@@ -22,10 +22,11 @@ export class ProjectService {
     const formData = new FormData();
 
     Object.entries(payload).forEach(([key, value]) => {
-      if (Array.isArray(value) || typeof value === "object") {
+      if (value === null || value === undefined) return;
+      if (Array.isArray(value) || typeof value === 'object') {
         formData.append(key, JSON.stringify(value));
       } else {
-        formData.append(key, value?.toString() ?? "");
+        formData.append(key, value.toString());
       }
     });
 
@@ -45,10 +46,11 @@ export class ProjectService {
     const formData = new FormData();
 
     Object.entries(payload).forEach(([key, value]) => {
+      if (value === null || value === undefined) return;
       if (Array.isArray(value) || typeof value === 'object') {
         formData.append(key, JSON.stringify(value));
       } else {
-        formData.append(key, value?.toString() ?? "");
+        formData.append(key, value.toString());
       }
     });
 
@@ -59,6 +61,13 @@ export class ProjectService {
     if (files?.assets) {
       files.assets.forEach((file) => formData.append("assets", file));
     }
+
+    // --- LOGGING FOR EVIDENCE ---
+    console.log("=== [EVIDENCE] FormData Payload being sent to Backend ===");
+    for (const [key, value] of formData.entries()) {
+      console.log(`Key: ${key} | Value:`, value);
+    }
+    console.log("=========================================================");
 
     const response = await this.projectRepository.updateProject(id, formData);
     return response.data;

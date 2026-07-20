@@ -52,10 +52,13 @@ export interface IUpdateProject {
   documentURL: string;
   presentationURL: string;
   figmaURL: string | null;
-  coursesID: number[];
-  tagsID: number[];
   techStacks: string[];
-  members: { userID: number; roleID: number }[];
+  newtagsID: number[];
+  deletedtagsID: number[];
+  newMembers: { userID: number; roleID: number }[];
+  deletedmembersID: number[];
+  newCoursesID: number[];
+  deletedCoursesID: number[];
 }
 
 export interface QueryProject {

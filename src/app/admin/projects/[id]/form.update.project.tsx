@@ -28,7 +28,7 @@ import { MasterData } from "@/core/domain/master-data";
 import { IStudent } from "@/core/domain/student";
 import { IProfessor } from "@/core/domain/professor";
 import { IProject } from "@/core/domain/project";
-
+import { updateProjectSchema, ProjectFormValues } from "@/core/schema/project";
 interface FormUpdateProjectProps {
   apiBase: string;
   projectId: string;
@@ -38,31 +38,6 @@ interface FormUpdateProjectProps {
   initialStudents: IStudent[];
   initialProfessors: IProfessor[];
 }
-
-const Schema = z.object({
-  title: z.string().trim().min(1, "กรุณากรอกหัวข้อ"),
-  details: z.string().trim().min(1, "กรุณากรอกรายละเอียด"),
-  youtubeURL: z.string().trim().url("กรุณากรอกลิงก์ YouTube ให้ถูกต้อง (ต้องเป็น URL)"),
-  githubURL: z.string().trim().url("กรุณากรอกลิงก์ Github ให้ถูกต้อง (ต้องเป็น URL)"),
-  documentURL: z.string().trim().url("กรุณากรอกลิงก์ Document ให้ถูกต้อง (ต้องเป็น URL)"),
-  presentationURL: z.string().trim().url("กรุณากรอกลิงก์ Presentation ให้ถูกต้อง (ต้องเป็น URL)"),
-  projectCourses: z.array(z.object({ value: z.number().min(1, "กรุณาเลือกวิชา") })).min(1, "กรุณาเลือกวิชาอย่างน้อย 1 วิชา"),
-  projectTypes: z.array(z.object({ value: z.number().min(1, "กรุณาเลือกประเภท") })).min(1, "กรุณาเลือกประเภทอย่างน้อย 1 ประเภท"),
-  projectCategories: z.array(z.object({ value: z.number().min(1, "กรุณาเลือกหมวดหมู่") })).min(1, "กรุณาเลือกหมวดหมู่อย่างน้อย 1 หมวดหมู่"),
-  techStacks: z.array(z.object({ value: z.string().trim().min(1, "ระบุ Tech Stack") })).min(1, "ระบุอย่างน้อย 1 Tech Stack"),
-  students: z.array(
-    z.object({
-      userID: z.number().min(1, "กรุณาเลือกนักศึกษา"),
-    })
-  ).min(1, "กรุณาเพิ่มผู้จัดทำอย่างน้อย 1 คน"),
-  advisors: z.array(
-    z.object({
-      userID: z.number().min(1, "กรุณาเลือกอาจารย์"),
-    })
-  ).min(1, "กรุณาเพิ่มอาจารย์ที่ปรึกษาอย่างน้อย 1 คน"),
-});
-
-type ProjectFormValues = z.infer<typeof Schema>;
 
 const VisuallyHiddenInput = styled("input")({
   clip: "rect(0 0 0 0)",
@@ -113,8 +88,9 @@ export const FormUpdateProject: FC<FormUpdateProjectProps> = ({ apiBase, project
   const initStudents = (initialProject.member as unknown as { id: number; roleID: number; roleId: number }[])?.filter((m) => m.roleID === 2 || m.roleId === 2).map((m) => ({ userID: m.id })) || [];
   const initAdvisors = (initialProject.member as unknown as { id: number; roleID: number; roleId: number }[])?.filter((m) => m.roleID === 3 || m.roleId === 3).map((m) => ({ userID: m.id })) || [];
 
+
   const { control, handleSubmit, reset, formState: { isDirty } } = useForm<ProjectFormValues>({
-    resolver: zodResolver(Schema),
+    resolver: zodResolver(updateProjectSchema),
     defaultValues: {
       title: initialProject.title || "", 
       details: initialProject.details || "", 
@@ -122,12 +98,12 @@ export const FormUpdateProject: FC<FormUpdateProjectProps> = ({ apiBase, project
       githubURL: initialProject.githubURL || "", 
       documentURL: initialProject.documentURL || "", 
       presentationURL: initialProject.presentationURL || "",
-      projectCourses: initialProject.course?.map((c: ICourse) => ({ value: c.id })) || [{ value: 0 }], 
-      projectTypes: (initialProject.tag as unknown as Tag[])?.filter((t) => t.tagsGroupsId === 1).map((t) => ({ value: t.id })) || [{ value: 0 }], 
-      projectCategories: (initialProject.tag as unknown as Tag[])?.filter((t) => t.tagsGroupsId === 3).map((t) => ({ value: t.id })) || [{ value: 0 }],
-      techStacks: initialProject.techStacks?.map((ts: string) => ({ value: ts })) || [{ value: "" }], 
-      students: (initialProject.member as unknown as { id: number; roleId: number }[])?.filter((m) => m.roleId === 2).map((m) => ({ userID: m.id })) || [{ userID: 0 }], 
-      advisors: (initialProject.member as unknown as { id: number; roleId: number }[])?.filter((m) => m.roleId === 3).map((m) => ({ userID: m.id })) || [{ userID: 0 }],
+      projectCourses: initCourses.length > 0 ? initCourses : [{ value: 0 }], 
+      projectTypes: initTypes.length > 0 ? initTypes : [{ value: 0 }], 
+      projectCategories: initCategories.length > 0 ? initCategories : [{ value: 0 }],
+      techStacks: initTechStacks.length > 0 ? initTechStacks : [{ value: "" }], 
+      students: initStudents.length > 0 ? initStudents : [{ userID: 0 }], 
+      advisors: initAdvisors.length > 0 ? initAdvisors : [{ userID: 0 }],
     },
     mode: "onChange",
 });
@@ -217,6 +193,35 @@ export const FormUpdateProject: FC<FormUpdateProjectProps> = ({ apiBase, project
   const onSubmit: SubmitHandler<ProjectFormValues> = async (data) => {
     try {
       console.log("Form data:", data);
+      const oldCourses = initialProject.course?.map((c) => c.id) || [];
+      const oldTypes = (initialProject.tag as unknown as Tag[])?.filter((t) => t.tagsGroupsId === 1).map((t) => t.id) || [];
+      const oldCategories = (initialProject.tag as unknown as Tag[])?.filter((t) => t.tagsGroupsId === 3).map((t) => t.id) || [];
+      const oldTags = [...oldTypes, ...oldCategories];
+      const oldStudents = (initialProject.member as unknown as { id: number; roleID: number; roleId: number }[])?.filter((m) => m.roleID === 2 || m.roleId === 2).map((m) => m.id) || [];
+      const oldAdvisors = (initialProject.member as unknown as { id: number; roleID: number; roleId: number }[])?.filter((m) => m.roleID === 3 || m.roleId === 3).map((m) => m.id) || [];
+
+      const newCoursesFromForm = data.projectCourses.map((c) => Number(c.value)).filter((v) => v > 0);
+      const newTagsFromForm = [...data.projectTypes, ...data.projectCategories].map((t) => Number(t.value)).filter((v) => v > 0);
+      const newStudentsFromForm = data.students.map((s) => Number(s.userID)).filter((v) => v > 0);
+      const newAdvisorsFromForm = data.advisors.map((a) => Number(a.userID)).filter((v) => v > 0);
+
+      const newCoursesID = newCoursesFromForm.filter((id) => !oldCourses.includes(id));
+      const deletedCoursesID = oldCourses.filter((id) => !newCoursesFromForm.includes(id));
+
+      const newtagsID = newTagsFromForm.filter((id) => !oldTags.includes(id));
+      const deletedtagsID = oldTags.filter((id) => !newTagsFromForm.includes(id));
+
+      const newStudentsID = newStudentsFromForm.filter((id) => !oldStudents.includes(id));
+      const newAdvisorsID = newAdvisorsFromForm.filter((id) => !oldAdvisors.includes(id));
+      const deletedStudentsID = oldStudents.filter((id) => !newStudentsFromForm.includes(id));
+      const deletedAdvisorsID = oldAdvisors.filter((id) => !newAdvisorsFromForm.includes(id));
+
+      const newMembers = [
+        ...newStudentsID.map((id) => ({ userID: id, roleID: 2 })),
+        ...newAdvisorsID.map((id) => ({ userID: id, roleID: 3 })),
+      ];
+      const deletedmembersID = [...deletedStudentsID, ...deletedAdvisorsID];
+
       const payload: IUpdateProject = {
         title: data.title,
         details: data.details,
@@ -225,13 +230,13 @@ export const FormUpdateProject: FC<FormUpdateProjectProps> = ({ apiBase, project
         documentURL: data.documentURL,
         presentationURL: data.presentationURL,
         figmaURL: null,
-        coursesID: data.projectCourses.map((c) => Number(c.value)),
-        tagsID: [...data.projectTypes, ...data.projectCategories].map((t) => Number(t.value)),
-        techStacks: data.techStacks.map((t) => t.value),
-        members: [
-          ...data.students.map((c) => ({ userID: Number(c.userID), roleID: 2 })),
-          ...data.advisors.map((a) => ({ userID: Number(a.userID), roleID: 3 })),
-        ],
+        techStacks: data.techStacks.map((t) => t.value).filter((v) => v !== ""),
+        newtagsID,
+        deletedtagsID,
+        newMembers,
+        deletedmembersID,
+        newCoursesID,
+        deletedCoursesID,
       };
       
       const files = {
