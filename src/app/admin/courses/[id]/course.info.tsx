@@ -27,6 +27,7 @@ import {
   ConfirmModalProps,
 } from "@/components/modal/confirmModal";
 import { TypeCourse } from "@/core/domain/master-data";
+import { CourseInfoSchema } from "@/core/schema/course";
 
 interface CoursesFormProps {
   apiBase: string;
@@ -34,23 +35,7 @@ interface CoursesFormProps {
   course: ICourse;
 }
 
-const Schema = z.object({
-  typeCourseID: z.number().min(1, "กรุณาเลือกกลุ่มวิชา"),
-  courseCode: z.string().min(1, "กรุณากรอกรหัสวิชา"),
-  credits: z.string().min(1, "กรุณากรอกหน่วยกิต"),
-  courseNameEn: z.string().min(1, "กรุณากรอกชื่อวิชาภาษาอังกฤษ"),
-  courseNameTh: z.string().min(1, "กรุณากรอกชื่อวิชาภาษาไทย"),
-  detail: z.string().min(1, "กรุณากรอกลักษณะการเรียน"),
-  preCoursesID: z
-    .array(
-      z.object({
-        id: z.number().optional(),
-      }),
-    )
-    .optional(),
-});
-
-type FormData = z.infer<typeof Schema>;
+type FormData = z.infer<typeof CourseInfoSchema>;
 
 export const CourseInfo: FC<CoursesFormProps> = ({
   apiBase,
@@ -82,7 +67,8 @@ export const CourseInfo: FC<CoursesFormProps> = ({
     watch,
     formState: { isDirty },
   } = useForm<FormData>({
-    resolver: zodResolver(Schema),
+    resolver: zodResolver(CourseInfoSchema),
+    mode: "onChange",
     defaultValues: {
       typeCourseID: course.typeCourse.id,
       courseCode: course.courseCode,
