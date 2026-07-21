@@ -1,14 +1,13 @@
 "use client";
 import React, { FC, useState, useMemo } from "react";
 import { useForm, useFieldArray, SubmitHandler } from "react-hook-form";
-import { Button, IconButton, Modal, Box, Snackbar } from "@mui/material";
+import { Button, IconButton, Modal, Box, Snackbar, Dialog } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import MenuItem from "@mui/material/MenuItem";
 import Alert from "@mui/material/Alert";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { Tag } from "@/core/domain/list-type";
-import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { RHFTextField } from "@/components/form/RHFTextField";
 import { RHFSelect } from "@/components/form/RHFSelect";
@@ -80,13 +79,14 @@ export const FormUpdateProject: FC<FormUpdateProjectProps> = ({ apiBase, project
   const router = useRouter();
   const [confirmModal, setConfirmModal] = useState<ConfirmModalProps | null>(null);
   const [isEditMode, setIsEditMode] = useState(false);
+  const [previewImageUrl, setPreviewImageUrl] = useState<string | null>(null);
 
   const initCourses = initialProject.course?.map((c: ICourse) => ({ value: c.id })) || [];
   const initTypes = (initialProject.tag as unknown as Tag[])?.filter((t) => t.tagsGroupsId === 1).map((t) => ({ value: t.id })) || [];
   const initCategories = (initialProject.tag as unknown as Tag[])?.filter((t) => t.tagsGroupsId === 3).map((t) => ({ value: t.id })) || [];
   const initTechStacks = initialProject.techStacks?.map((ts: string) => ({ value: ts })) || [];
-  const initStudents = (initialProject.member as unknown as { id: number; roleID: number; roleId: number }[])?.filter((m) => m.roleID === 2 || m.roleId === 2).map((m) => ({ userID: m.id })) || [];
-  const initAdvisors = (initialProject.member as unknown as { id: number; roleID: number; roleId: number }[])?.filter((m) => m.roleID === 3 || m.roleId === 3).map((m) => ({ userID: m.id })) || [];
+  const initStudents = (initialProject.member as unknown as { id: number; role?: { id: number }; roleID?: number; roleId?: number }[])?.filter((m) => m.role?.id === 2 || m.roleID === 2 || m.roleId === 2).map((m) => ({ userID: m.id })) || [];
+  const initAdvisors = (initialProject.member as unknown as { id: number; role?: { id: number }; roleID?: number; roleId?: number }[])?.filter((m) => m.role?.id === 3 || m.roleID === 3 || m.roleId === 3).map((m) => ({ userID: m.id })) || [];
 
 
   const { control, handleSubmit, reset, formState: { isDirty } } = useForm<ProjectFormValues>({
@@ -197,8 +197,8 @@ export const FormUpdateProject: FC<FormUpdateProjectProps> = ({ apiBase, project
       const oldTypes = (initialProject.tag as unknown as Tag[])?.filter((t) => t.tagsGroupsId === 1).map((t) => t.id) || [];
       const oldCategories = (initialProject.tag as unknown as Tag[])?.filter((t) => t.tagsGroupsId === 3).map((t) => t.id) || [];
       const oldTags = [...oldTypes, ...oldCategories];
-      const oldStudents = (initialProject.member as unknown as { id: number; roleID: number; roleId: number }[])?.filter((m) => m.roleID === 2 || m.roleId === 2).map((m) => m.id) || [];
-      const oldAdvisors = (initialProject.member as unknown as { id: number; roleID: number; roleId: number }[])?.filter((m) => m.roleID === 3 || m.roleId === 3).map((m) => m.id) || [];
+      const oldStudents = (initialProject.member as unknown as { id: number; role?: { id: number }; roleID?: number; roleId?: number }[])?.filter((m) => m.role?.id === 2 || m.roleID === 2 || m.roleId === 2).map((m) => m.id) || [];
+      const oldAdvisors = (initialProject.member as unknown as { id: number; role?: { id: number }; roleID?: number; roleId?: number }[])?.filter((m) => m.role?.id === 3 || m.roleID === 3 || m.roleId === 3).map((m) => m.id) || [];
 
       const newCoursesFromForm = data.projectCourses.map((c) => Number(c.value)).filter((v) => v > 0);
       const newTagsFromForm = [...data.projectTypes, ...data.projectCategories].map((t) => Number(t.value)).filter((v) => v > 0);
@@ -261,6 +261,20 @@ export const FormUpdateProject: FC<FormUpdateProjectProps> = ({ apiBase, project
           <Alert severity="error" onClose={() => setIsError(false)} sx={{ width: "100%" }}>{errorMsg}</Alert>
         </Snackbar>
 
+        <Dialog open={!!previewImageUrl} onClose={() => setPreviewImageUrl(null)} maxWidth="lg" fullWidth PaperProps={{ sx: { backgroundColor: 'transparent', boxShadow: 'none' } }}>
+          <div className="relative w-full h-[80vh] flex items-center justify-center">
+            <IconButton 
+              onClick={() => setPreviewImageUrl(null)} 
+              sx={{ position: 'absolute', top: 0, right: 0, color: 'white', backgroundColor: 'rgba(0,0,0,0.6)', '&:hover': { backgroundColor: 'rgba(0,0,0,0.9)' }, zIndex: 10 }}
+            >
+              <CloseIcon />
+            </IconButton>
+            {previewImageUrl && (
+              <Image src={previewImageUrl} alt="Preview" fill className="object-contain" unoptimized />
+            )}
+          </div>
+        </Dialog>
+
         <div>
           <h3 className="font-bold">ข้อมูลผลงาน</h3>
         <div className="mt-6 mb-8 flex flex-row items-stretch gap-x-8 h-auto">
@@ -268,7 +282,7 @@ export const FormUpdateProject: FC<FormUpdateProjectProps> = ({ apiBase, project
             <div className="bg-gray-50 rounded-xl overflow-hidden border border-gray-300 relative flex flex-col justify-center items-center group h-full">
               {selectedFile ? (
                 <>
-                  <Image src={URL.createObjectURL(selectedFile)} alt="Preview" fill className="absolute inset-0 z-0 object-cover" />
+                  <Image src={URL.createObjectURL(selectedFile)} alt="Preview" fill unoptimized className="absolute inset-0 z-0 object-cover" />
                   {isEditMode && <div className="absolute inset-0 z-10 flex items-center justify-center bg-black/40 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
                     <Button variant="contained" component="label">
                       <VisuallyHiddenInput type="file" accept="image/*" onChange={handleFileChange} />
@@ -501,7 +515,7 @@ export const FormUpdateProject: FC<FormUpdateProjectProps> = ({ apiBase, project
         <div className="my-10 pt-4">
           <div className="flex items-center justify-between mb-4">
             <h3 className="font-bold">
-              รูปภาพเพิ่มเติม (ลากเพื่อเปลี่ยนลำดับรูป) <span className=" text-h4 text-neutral04 font-normal ml-2">{selectedAssets.length} รูป - สูงสุด 10</span>
+              รูปภาพเพิ่มเติม (ลากเพื่อเปลี่ยนลำดับรูป) <span className=" text-h4 text-neutral04 font-normal ml-2">{(initialProject.assetsURL?.length || 0) + selectedAssets.length} รูป - สูงสุด 10</span>
             </h3>
             {selectedAssets.length > 0 && (
               <button type="button" onClick={removeAllAssets} className="font-bold text-h5 underline cursor-pointer text-accent04">
@@ -510,7 +524,7 @@ export const FormUpdateProject: FC<FormUpdateProjectProps> = ({ apiBase, project
             )}
           </div>
           
-          {selectedAssets.length === 0 ? (
+          {(selectedAssets.length === 0 && (!initialProject.assetsURL || initialProject.assetsURL.length === 0)) ? (
             <div className="w-full flex flex-col items-center justify-center gap-2 p-10 bg-white border-2 border-dashed border-gray-300 rounded-lg min-h-[200px]">
               {isEditMode && <Button variant="contained" component="label">
                   <VisuallyHiddenInput type="file" accept="image/*" multiple onChange={handleAssetsChange} />
@@ -522,6 +536,20 @@ export const FormUpdateProject: FC<FormUpdateProjectProps> = ({ apiBase, project
             </div>
           ) : (
             <div className="grid grid-cols-5 gap-4 items-start rounded-lg min-h-[160px]">
+              {initialProject.assetsURL?.map((url, index) => (
+                <div 
+                  key={`existing-asset-${index}`} 
+                  className="relative aspect-video w-full rounded-md overflow-hidden border-2 border-gray-200 border-solid group cursor-pointer"
+                  onClick={() => setPreviewImageUrl(url)}
+                >
+                  <Image src={url} alt={`existing-asset-${index}`} fill unoptimized className="object-cover pointer-events-none" draggable={false} />
+                  {isEditMode && (
+                     <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                        <span className="text-white text-xs text-center px-2">รูปเดิม (ไม่สามารถลบได้)</span>
+                     </div>
+                  )}
+                </div>
+              ))}
               {selectedAssets.map((file, index) => (
                 <div 
                   key={`${file.name}-${index}`} 
@@ -531,23 +559,27 @@ export const FormUpdateProject: FC<FormUpdateProjectProps> = ({ apiBase, project
                   onDragOver={(e) => e.preventDefault()}
                   onDragEnd={handleDragEnd}
                   onDrop={() => handleDrop(index)}
-                  className={`relative aspect-video w-full rounded-md overflow-hidden cursor-grab active:cursor-grabbing transition-all border-2 
+                  onClick={() => setPreviewImageUrl(URL.createObjectURL(file))}
+                  className={`relative aspect-video w-full rounded-md overflow-hidden cursor-pointer active:cursor-grabbing transition-all border-2 
                     ${dragOverItemIndex === index ? 'border-[var(--color-primary02)] border-dashed scale-105' : 'border-gray-200 border-solid'} 
                     ${draggedItemIndex === index ? 'opacity-40' : 'opacity-100'} group`}
                 >
-                  <Image src={URL.createObjectURL(file)} alt="asset" fill className="object-cover pointer-events-none"  draggable={false} />
+                  <Image src={URL.createObjectURL(file)} alt="asset" fill unoptimized className="object-cover pointer-events-none"  draggable={false} />
                   
                   {isEditMode && <IconButton
                     size="small" 
                     sx={{ position: 'absolute', top: 8, right: 8, zIndex: 10, width: 24, height: 24, backgroundColor: 'rgba(0,0,0,0.6)', color: 'white', padding: 0, '&:hover': { backgroundColor: 'rgba(0,0,0,0.8)' } }} 
-                    onClick={() => removeAsset(index)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      removeAsset(index);
+                    }}
                   >
                     <CloseIcon sx={{ fontSize: 16 }} />
                   </IconButton>}
                 </div>
               ))}
 
-              {(selectedAssets.length < 10 && isEditMode) && (
+              {(((initialProject.assetsURL?.length || 0) + selectedAssets.length) < 10 && isEditMode) && (
                 <div className="aspect-video w-full rounded-md bg-gray-50 flex items-center justify-center border border-gray-200">
                   <Button variant="contained" component="label" sx={{ height: "40px" }}>
                     <VisuallyHiddenInput type="file" accept="image/*" multiple onChange={handleAssetsChange} />
