@@ -27,14 +27,12 @@ import {
   ConfirmModal,
   ConfirmModalProps,
 } from "@/components/modal/confirmModal";
-import { CourseSchema } from "@/core/schema/course";
+import { CourseSchemaType, CourseSchema } from "@/core/schema/course";
 
 interface CoursesFormProps {
   apiBase: string;
   curriculumID: number;
 }
-
-type FormData = z.infer<typeof CourseSchema>;
 
 export const CourseForm: FC<CoursesFormProps> = ({ apiBase, curriculumID }) => {
   const router = useRouter();
@@ -60,7 +58,7 @@ export const CourseForm: FC<CoursesFormProps> = ({ apiBase, curriculumID }) => {
     handleSubmit,
     watch,
     formState: { isDirty },
-  } = useForm<FormData>({
+  } = useForm<CourseSchemaType>({
     resolver: zodResolver(CourseSchema),
     mode: "onChange",
     defaultValues: {
@@ -94,7 +92,7 @@ export const CourseForm: FC<CoursesFormProps> = ({ apiBase, curriculumID }) => {
     }
   };
 
-  const onSubmit = async (data: FormData) => {
+  const onSubmit = async (data: CourseSchemaType) => {
     setIsError(false);
 
     try {

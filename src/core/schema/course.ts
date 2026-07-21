@@ -45,3 +45,6 @@ export const CourseInfoSchema = z.object({
     )
     .optional(),
 });
+
+export type CourseSchemaType = z.infer<typeof CourseSchema>;
+export type CourseInfoSchemaType = z.infer<typeof CourseInfoSchema>;
