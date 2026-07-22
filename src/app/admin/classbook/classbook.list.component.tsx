@@ -245,7 +245,7 @@ const ClassBookListComponents = ({
           <div className="flex w-full flex-1 items-center justify-center">
             <EmptyState
               title="ไม่พบข้อมูลรุ่นการศึกษาในขณะนี้"
-              description="เมื่อมีข้อมูลรุ่นการศึกษา ข้อมูลจะปรากฏที่นี่"
+              description="ไม่พบข้อมูลรุ่นการศึกษา หรือรุ่นการศึกษาที่ค้นหา"
             />
           </div>
         )}
