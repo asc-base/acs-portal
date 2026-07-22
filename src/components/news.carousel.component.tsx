@@ -5,7 +5,7 @@ import { INews } from "@/core/domain/news";
 import EmptyState from "./emptyState";
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
-import DescriptionOutlinedIcon from "@mui/icons-material/DescriptionOutlined";
+
 
 
 interface NewsCarouselComponentProps {
