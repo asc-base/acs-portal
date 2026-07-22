@@ -38,7 +38,7 @@ export function RHFSelect<T extends FieldValues>({
               error={!!fieldState.error}
             >
               {label}
-              {requiredMark && <span style={{ color: "#FF383C", marginLeft: "4px" }}>*</span>}
+              {requiredMark && <span className="text-[#E8360E] ml-1">*</span>}
             </FormLabel>
           )}
 
