@@ -191,10 +191,10 @@ const CurriculumListComponents = ({
             ))}
           </div>
         ) : (
-          <div className="flex min-h-[600px] items-center justify-center">
+          <div className="flex w-full flex-1 items-center justify-center py-12">
             <EmptyState
               title="ไม่พบข้อมูลหลักสูตรในขณะนี้"
-              description="ยังไม่มีหลักสูตรในระบบ หรือไม่พบผลลัพธ์จากการค้นหา"
+              description="ไม่พบข้อมูลหลักสูตร หรือหลักสูตรที่ค้นหา"
             />
           </div>
         )}
