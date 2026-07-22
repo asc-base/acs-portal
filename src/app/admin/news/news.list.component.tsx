@@ -234,9 +234,7 @@ const NewsListComponent = (initValue: NewsListComponentProps) => {
           <div className="flex w-full flex-1 items-center justify-center">
             <EmptyState
               title="ไม่พบข้อมูลข่าวสารในขณะนี้"
-              description="เมื่อมีข่าวสารใหม่ๆ ข้อมูลจะปรากฏที่นี่"
-              icon={FeedOutlinedIcon}
-              iconColor="var(--color-primary06)"
+              description="ไม่พบข้อมูลข่าวสาร หรือข่าวสารที่ค้นหา"
             />
           </div>
         ) : (
