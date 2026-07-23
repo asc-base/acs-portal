@@ -1,12 +1,11 @@
 "use client";
 import { useState, useMemo } from "react";
 import { INews, IUpdateNews } from "@/core/domain/news";
-import dayjs, { Dayjs } from "dayjs";
+import dayjs from "dayjs";
 import "dayjs/locale/th";
 import buddhistEra from "dayjs/plugin/buddhistEra";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { RHFTextField } from "@/components/form/RHFTextField";
-import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Image from "next/image";
 import { RHFSelect } from "@/components/form/RHFSelect";
@@ -22,6 +21,7 @@ import {
 } from "@/components/modal/confirmModal";
 import { Tag } from "@/core/domain/list-type";
 import { CropImageCard } from "@/components/cropimagecard";
+import { UpdateNewsSchema, UpdateNewsInputs } from "@/core/schema/news";
 
 dayjs.extend(buddhistEra);
 dayjs.locale("th");
@@ -31,16 +31,6 @@ interface NewsInfoProps {
   apiBase: string;
   categories: Tag[];
 }
-
-const formSchema = z.object({
-  title: z.string(),
-  startDate: z.custom<Dayjs>(),
-  dueDate: z.custom<Dayjs>().nullable(),
-  tag: z.number(),
-  detail: z.string().optional(),
-});
-
-type Inputs = z.infer<typeof formSchema>;
 
 const VisuallyHiddenInput = styled("input")({
   clip: "rect(0 0 0 0)",
@@ -60,13 +50,17 @@ const NewsInfo = ({ news, apiBase, categories }: NewsInfoProps) => {
     null,
   );
   const [isError, setIsError] = useState(false);
-  const [thumbnailFile, setThumbnailFile] = useState<File | null>(null);
-  const [highlightFile, setHighlightFile] = useState<File | null>(null);
 
   const [croppingFile, setCroppingFile] = useState<File | null>(null);
   const [cropTarget, setCropTarget] = useState<
     "thumbnail" | "highlight" | null
   >(null);
+  const [thumbnailPreview, setThumbnailPreview] = useState<string>(
+    news.thumbnailURL,
+  );
+  const [highlightPreview, setHighlightPreview] = useState<string>(
+    news.highlightURL,
+  );
 
   const router = useRouter();
 
@@ -79,15 +73,18 @@ const NewsInfo = ({ news, apiBase, categories }: NewsInfoProps) => {
     control,
     handleSubmit,
     reset,
+    setValue,
     formState: { isDirty },
-  } = useForm<Inputs>({
-    resolver: zodResolver(formSchema),
+  } = useForm<UpdateNewsInputs>({
+    resolver: zodResolver(UpdateNewsSchema),
     defaultValues: {
       title: news.title,
-      startDate: dayjs(news.startDate),
-      dueDate: news.dueDate ? dayjs(news.dueDate) : undefined,
+      startDate: dayjs(news.startDate).toISOString(),
+      dueDate: news.dueDate ? dayjs(news.dueDate).toISOString() : undefined,
       tag: news.tag.id,
       detail: news.detail,
+      thumbnail: news.thumbnailURL,
+      highlight: news.highlightURL,
     },
   });
 
@@ -103,56 +100,56 @@ const NewsInfo = ({ news, apiBase, categories }: NewsInfoProps) => {
   };
 
   const handleUploadComplete = (file: File) => {
+    const previewUrl = URL.createObjectURL(file);
+
     if (cropTarget === "thumbnail") {
-      setThumbnailFile(file);
+      setValue("thumbnail", file, { shouldDirty: true });
+      setThumbnailPreview(previewUrl);
     } else if (cropTarget === "highlight") {
-      setHighlightFile(file);
+      setValue("highlight", file, { shouldDirty: true });
+      setHighlightPreview(previewUrl);
     }
+
     setCroppingFile(null);
     setCropTarget(null);
   };
 
   const handleCancel = () => {
-    if (isDirty || thumbnailFile || highlightFile) {
+    if (isDirty) {
       setConfirmModal({
         isOpen: true,
         type: "warning",
         onClose: () => setConfirmModal(null),
         onConfirm: () => {
           reset();
-          setThumbnailFile(null);
-          setHighlightFile(null);
+          setThumbnailPreview(news.thumbnailURL);
+          setHighlightPreview(news.highlightURL);
           setIsEdit(false);
           setConfirmModal(null);
         },
       });
     } else {
       reset();
+      setThumbnailPreview(news.thumbnailURL);
+      setHighlightPreview(news.highlightURL);
       setIsEdit(false);
     }
   };
 
-  const onSubmit: SubmitHandler<Inputs> = async (data) => {
-    if (
-      isDirty ||
-      thumbnailFile instanceof File ||
-      highlightFile instanceof File
-    ) {
+  const onSubmit: SubmitHandler<UpdateNewsInputs> = async (data) => {
+    if (isDirty) {
       try {
         const payload: IUpdateNews = {
           title: data.title,
           tagID: data.tag,
           detail: data.detail,
+          thumbnail: data.thumbnail,
+          highlight: data.highlight,
           startDate: dayjs(data.startDate).toISOString(),
           dueDate: data.dueDate ? dayjs(data.dueDate).toISOString() : undefined,
         };
 
-        const response = await newsService.updateNews(
-          news.id,
-          payload,
-          thumbnailFile || null,
-          highlightFile || null,
-        );
+        const response = await newsService.updateNews(news.id, payload);
 
         if (!response) {
           setIsError(true);
@@ -209,11 +206,7 @@ const NewsInfo = ({ news, apiBase, categories }: NewsInfoProps) => {
               </label>
               <div className="group border-neutral03 bg-neutral02 relative aspect-[4/3] w-full overflow-hidden rounded-xl border">
                 <Image
-                  src={
-                    thumbnailFile
-                      ? URL.createObjectURL(thumbnailFile)
-                      : news.thumbnailURL
-                  }
+                  src={thumbnailPreview}
                   alt="Thumbnail Preview"
                   fill
                   className="object-cover"
@@ -241,11 +234,7 @@ const NewsInfo = ({ news, apiBase, categories }: NewsInfoProps) => {
               </label>
               <div className="group border-neutral03 bg-neutral02 relative aspect-[2/1] w-full overflow-hidden rounded-xl border md:aspect-auto md:flex-1">
                 <Image
-                  src={
-                    highlightFile
-                      ? URL.createObjectURL(highlightFile)
-                      : news.highlightURL
-                  }
+                  src={highlightPreview}
                   alt="Highlight Preview"
                   fill
                   className="object-cover"

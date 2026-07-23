@@ -1,12 +1,11 @@
 "use client";
-import { Button, MenuItem, Alert, Snackbar } from "@mui/material";
+import { Button, MenuItem, Alert, Snackbar, Modal } from "@mui/material";
 import React, { useState, useMemo } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
 import Image from "next/image";
 import { NewsRepository } from "@/infra/repositories/news.repository";
 import { NewsService } from "@/core/service/news.service";
 import { ICreateNews } from "@/core/domain/news";
-import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import dayjs from "dayjs";
 import "dayjs/locale/th";
@@ -21,8 +20,8 @@ import {
 import { useRouter } from "next/navigation";
 import { styled } from "@mui/material/styles";
 import { Tag } from "@/core/domain/list-type";
-import { Modal } from "@mui/material";
 import { CropImageCard } from "@/components/cropimagecard";
+import { CreateNewsInputs, CreateNewsSchema } from "@/core/schema/news";
 
 dayjs.extend(buddhistEra);
 dayjs.locale("th");
@@ -31,21 +30,6 @@ interface CraeteNewsProps {
   apiBase: string;
   categories: Tag[];
 }
-
-const Schema = z.object({
-  title: z.string().min(1, "กรุณากรอกหัวข้อ"),
-  detail: z.string().min(1, "กรุณากรอกรายละเอียด"),
-  tagID: z.number().min(1, "กรุณาเลือกหมวดหมู่"),
-  startDate: z
-    .string()
-    .min(1, "กรุณาเลือกวันที่เริ่มต้น")
-    .refine((val) => dayjs(val).isValid(), {
-      message: "รูปแบบวันที่ไม่ถูกต้อง",
-    }),
-  dueDate: z.string().optional(),
-});
-
-type FormData = z.infer<typeof Schema>;
 
 const VisuallyHiddenInput = styled("input")({
   clip: "rect(0 0 0 0)",
@@ -60,8 +44,6 @@ const VisuallyHiddenInput = styled("input")({
 });
 
 const CreateNewsForm = ({ apiBase, categories }: CraeteNewsProps) => {
-  const [thumbnailFile, setThumbnailFile] = useState<File | null>(null);
-  const [highlightFile, setHighlightFile] = useState<File | null>(null);
   const [confirmModal, setConfirmModal] = useState<ConfirmModalProps | null>(
     null,
   );
@@ -77,17 +59,24 @@ const CreateNewsForm = ({ apiBase, categories }: CraeteNewsProps) => {
     control,
     handleSubmit,
     reset,
-    formState: { isDirty },
-  } = useForm<FormData>({
-    resolver: zodResolver(Schema),
+    setValue,
+    watch,
+    formState: { isDirty, errors },
+  } = useForm<CreateNewsInputs>({
+    resolver: zodResolver(CreateNewsSchema),
     defaultValues: {
       title: "",
-      startDate: undefined,
-      dueDate: undefined,
+      startDate: "",
+      dueDate: "",
       tagID: 0,
       detail: "",
+      thumbnail: undefined,
+      highlight: undefined,
     },
   });
+
+  const thumbnailFile = watch("thumbnail");
+  const highlightFile = watch("highlight");
 
   const newsService = useMemo(() => {
     const newsRepository = new NewsRepository(apiBase);
@@ -107,56 +96,51 @@ const CreateNewsForm = ({ apiBase, categories }: CraeteNewsProps) => {
 
   const handleUploadComplete = (file: File) => {
     if (cropTarget === "thumbnail") {
-      setThumbnailFile(file);
+      setValue("thumbnail", file, { shouldDirty: true, shouldValidate: true });
     } else if (cropTarget === "highlight") {
-      setHighlightFile(file);
+      setValue("highlight", file, { shouldDirty: true, shouldValidate: true });
     }
     setCroppingFile(null);
     setCropTarget(null);
   };
 
   const handleCancel = () => {
-    if (isDirty || thumbnailFile || highlightFile) {
+    if (isDirty) {
       setConfirmModal({
         isOpen: true,
         type: "warning",
         onClose: () => setConfirmModal(null),
         onConfirm: () => {
           reset();
-          setThumbnailFile(null);
-          setHighlightFile(null);
           setConfirmModal(null);
           router.push(`/admin/news?page=1&pageSize=9&category=&title=`);
         },
       });
     } else {
       reset();
-      setThumbnailFile(null);
-      setHighlightFile(null);
       router.push(`/admin/news?page=1&pageSize=9&category=&title=`);
     }
   };
 
-  const onSubmit: SubmitHandler<FormData> = async (data) => {
-    if (isDirty || thumbnailFile || highlightFile) {
+  const onSubmit: SubmitHandler<CreateNewsInputs> = async (data) => {
+    if (isDirty) {
       try {
-        if (!thumbnailFile || !highlightFile) {
+        if (!data.thumbnail || !data.highlight) {
           setIsError(true);
           return;
         }
+
         const payload: ICreateNews = {
           title: data.title,
           tagID: data.tagID,
           detail: data.detail,
+          thumbnail: data.thumbnail,
+          highlight: data.highlight,
           startDate: dayjs(data.startDate).toISOString(),
           dueDate: data.dueDate ? dayjs(data.dueDate).toISOString() : undefined,
         };
 
-        const response = await newsService.createNewsWithImages(
-          payload,
-          thumbnailFile,
-          highlightFile,
-        );
+        const response = await newsService.createNews(payload);
 
         if (response) {
           setConfirmModal({
@@ -199,9 +183,9 @@ const CreateNewsForm = ({ apiBase, categories }: CraeteNewsProps) => {
         <div className="flex flex-col gap-4">
           <div className="grid grid-cols-1 gap-6 md:grid-cols-5">
             <div className="col-span-2 flex flex-col gap-2">
-              <label className="text-neutral05 text-sm font-medium">
+              <div className="text-neutral05 text-sm font-medium">
                 ภาพหน้าปก
-              </label>
+              </div>
               <div className="group border-neutral03 bg-neutral02 relative flex aspect-[4/3] w-full items-center justify-center overflow-hidden rounded-xl border">
                 {thumbnailFile ? (
                   <>
@@ -236,9 +220,9 @@ const CreateNewsForm = ({ apiBase, categories }: CraeteNewsProps) => {
             </div>
 
             <div className="col-span-3 flex flex-col gap-2">
-              <label className="text-neutral05 text-sm font-medium">
+              <div className="text-neutral05 text-sm font-medium">
                 ภาพหัวเรื่อง
-              </label>
+              </div>
               <div className="group border-neutral03 bg-neutral02 relative flex aspect-[2/1] w-full items-center justify-center overflow-hidden rounded-xl border md:aspect-auto md:flex-1">
                 {highlightFile ? (
                   <>
@@ -318,11 +302,11 @@ const CreateNewsForm = ({ apiBase, categories }: CraeteNewsProps) => {
               placeholder="เลือกวันที่สิ้นสุด"
             />
           </div>
-          {!thumbnailFile && (
-            <p className="text-accent04 text-sm">กรุณาอัปโหลดภาพหน้าปก</p>
+          {!thumbnailFile && errors.thumbnail && (
+            <p className="text-accent04 text-sm">{errors.thumbnail.message}</p>
           )}
-          {!highlightFile && (
-            <p className="text-accent04 text-sm">กรุณาอัปโหลดภาพหัวเรื่อง</p>
+          {!highlightFile && errors.highlight && (
+            <p className="text-accent04 text-sm">{errors.highlight.message}</p>
           )}
         </div>
         <div className="mt-4 flex justify-end">
