@@ -49,7 +49,7 @@ export const CurriculumForm = ({ apiBase }: CurriculumFormProps) => {
   const {
     handleSubmit,
     control,
-    formState: { isDirty, isValid },
+    formState: { isDirty },
   } = useForm<CurriculumSchemaType>({
     resolver: zodResolver(CurriculumSchema),
     mode: "onChange",
