@@ -3,7 +3,6 @@ import { useState, useMemo } from "react";
 import { useForm } from "react-hook-form";
 import { Button, Card } from "@mui/material";
 import Image from "next/image";
-import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import dayjs from "dayjs";
 import { styled } from "@mui/material/styles";
@@ -16,20 +15,12 @@ import { ICurriculum } from "@/core/domain/curriculum";
 import { ConfirmModal, ConfirmModalProps } from "@/components/modal/confirmModal";
 import Alert from "@mui/material/Alert";
 import Snackbar from "@mui/material/Snackbar";
+import { CurriculumInfoSchema, CurriculumInfoSchemaType } from "@/core/schema/curriculum";
 
 interface CurriculumInfoProps {
   apiBase: string;
   curriculum: ICurriculum;
 }
-
-const curriculumSchema = z.object({
-  title: z.string().min(1, "กรุณาระบุชื่อหลักสูตร"),
-  year: z.string().min(1, "กรุณาระบุปีการศึกษา"),
-  documentURL: z.url({ message: "กรุณาระบุลิงก์ที่ถูกต้อง" }),
-  description: z.string().min(1, "กรุณาระบุรายละเอียด"),
-});
-
-type FormValues = z.infer<typeof curriculumSchema>;
 
 const VisuallyHiddenInput = styled("input")({
   clip: "rect(0 0 0 0)",
@@ -68,8 +59,8 @@ export const CurriculumInfoComponent = ({ apiBase, curriculum }: CurriculumInfoP
     handleSubmit,
     reset,
     formState: { isDirty, isValid },
-  } = useForm<FormValues>({
-    resolver: zodResolver(curriculumSchema),
+  } = useForm<CurriculumInfoSchemaType>({
+    resolver: zodResolver(CurriculumInfoSchema),
     defaultValues: {
       title: curriculum.title ?? "",
       year: curriculum.year ?? "",
@@ -87,7 +78,7 @@ export const CurriculumInfoComponent = ({ apiBase, curriculum }: CurriculumInfoP
     }
   };
 
-  const onSubmit = async (data: FormValues) => {
+  const onSubmit = async (data: CurriculumInfoSchemaType) => {
     try {
       const year = dayjs(data.year).year().toString();
 
