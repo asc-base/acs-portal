@@ -14,6 +14,7 @@ import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import AddIcon from "@mui/icons-material/Add";
 import SearchIcon from "@mui/icons-material/Search";
 import CloseIcon from "@mui/icons-material/Close";
+import EmptyState from "@/components/emptyState";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -179,7 +180,10 @@ const ClassBookListComponents = ({
             startIcon={<SearchIcon />}
             endIcon={
               watchedSearch ? (
-                <CloseIcon onClick={handleResetSearch} />
+                <CloseIcon 
+                  onClick={handleResetSearch} 
+                  sx={{ cursor: "pointer" }}
+                />
               ) : (
                 <span style={{ width: "24px" }} />
               )
@@ -221,21 +225,30 @@ const ClassBookListComponents = ({
       </div>
 
       <div className="flex w-full flex-1 flex-col items-center">
-        <div className="grid w-full grid-cols-3 justify-items-center gap-6">
-          {classbooks.map((classbook) => (
-            <AdminCard
-              key={classbook.id}
-              type="classBook"
-              data={classbook}
-              onView={() =>
-                router.push(
-                  `/admin/students?page=1&pageSize=10&classBookID=${classbook.id}`,
-                )
-              }
-              onDelete={() => confirmDeleteClassbook(classbook.id)}
+        {classbooks.length > 0 ? (
+          <div className="grid w-full grid-cols-3 justify-items-center gap-6">
+            {classbooks.map((classbook) => (
+              <AdminCard
+                key={classbook.id}
+                type="classBook"
+                data={classbook}
+                onView={() =>
+                  router.push(
+                    `/admin/students?page=1&pageSize=10&classBookID=${classbook.id}`,
+                  )
+                }
+                onDelete={() => confirmDeleteClassbook(classbook.id)}
+              />
+            ))}
+          </div>
+        ) : (
+          <div className="flex w-full flex-1 items-center justify-center">
+            <EmptyState
+              title="ไม่พบข้อมูลรุ่นการศึกษาในขณะนี้"
+              description="ไม่พบข้อมูลรุ่นการศึกษา หรือรุ่นการศึกษาที่ค้นหา"
             />
-          ))}
-        </div>
+          </div>
+        )}
 
         {totalRecords > 0 && (
           <div className="mt-auto pt-10">

@@ -286,7 +286,6 @@ const CourseTableComponents = ({
                     <EmptyState
                       title="ไม่พบข้อมูลรายวิชาในขณะนี้"
                       description="ไม่พบรายวิชาในหลักสูตรนี้ กรุณาเพิ่มข้อมูลรายวิชา"
-                      iconColor="var(--color-primary06)"
                     />
                   </div>
                 </TableCell>
