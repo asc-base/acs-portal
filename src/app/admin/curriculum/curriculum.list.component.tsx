@@ -10,6 +10,7 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { AdminCard } from "@/components/adminCard";
+import EmptyState from "@/components/emptyState";
 import { RHFTextField } from "@/components/form/RHFTextField";
 import { ICurriculum } from "@/core/domain/curriculum";
 import { CurriculumRepository } from "@/infra/repositories/curriculum.repository";
@@ -173,21 +174,30 @@ const CurriculumListComponents = ({
       </div>
 
       <div className="flex w-full flex-1 flex-col items-center">
-        <div className="grid w-full grid-cols-3 justify-items-center gap-6">
-          {curriculums.map((curriculum) => (
-            <AdminCard
-              key={curriculum.id}
-              type="curriculum"
-              data={curriculum}
-              onView={() =>
-                router.push(
-                  `/admin/courses?prerequisite=false&page=1&pageSize=10&curriculumID=${curriculum.id}`,
-                )
-              }
-              onDelete={() => confirmDeleteCurriculum(curriculum.id)}
+        {curriculums.length > 0 ? (
+          <div className="grid w-full grid-cols-3 justify-items-center gap-6">
+            {curriculums.map((curriculum) => (
+              <AdminCard
+                key={curriculum.id}
+                type="curriculum"
+                data={curriculum}
+                onView={() =>
+                  router.push(
+                    `/admin/courses?prerequisite=false&page=1&pageSize=10&curriculumID=${curriculum.id}`,
+                  )
+                }
+                onDelete={() => confirmDeleteCurriculum(curriculum.id)}
+              />
+            ))}
+          </div>
+        ) : (
+          <div className="flex w-full flex-1 items-center justify-center py-12">
+            <EmptyState
+              title="ไม่พบข้อมูลหลักสูตรในขณะนี้"
+              description="ไม่พบข้อมูลหลักสูตร หรือหลักสูตรที่ค้นหา"
             />
-          ))}
-        </div>
+          </div>
+        )}
 
         {totalRecords > 0 && (
           <div className="mt-auto pt-10">
