@@ -1,5 +1,5 @@
 "use client";
-import { FC } from "react";
+import { FC, useEffect, useState } from "react";
 import {
   Card,
   CardContent,
@@ -67,16 +67,27 @@ const ProjectContent: FC<{ project: IProject }> = ({ project }) => {
 };
 
 const NewsContent: FC<{ news: INews }> = ({ news }) => {
+  const [date, setDate] = useState<string>("");
+
+  useEffect(() => {
+    if (news?.startDate) {
+      const formattedDate = new Date(news.startDate).toLocaleDateString("th-TH", {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      });
+      setDate(formattedDate);
+    }
+  }, [news.startDate]);
   return (
     <div className="flex flex-col items-start gap-1">
       <h3 className="line-clamp-2 font-bold">{news.title}</h3>
       <h6>
-        {" "}
-        {new Date(news.startDate).toLocaleDateString("th-TH", {
-          year: "numeric",
-          month: "long",
-          day: "numeric",
-        })}
+        {date ? (
+          date
+        ) : (
+          <span className="text-transparent">กำลังโหลดวันที่...</span>
+        )}
       </h6>
     </div>
   );
@@ -88,17 +99,17 @@ export const AdminCard: FC<AdminCardProps> = (props) => {
   let alt = "";
 
   if (type === "curriculum") {
-    image = data.thumbnailURL;
-    alt = data.year;
+    image = data.thumbnailURL || "";
+    alt = String(data.year || "");
   } else if (type === "classBook") {
-    image = data.thumbnailURL;
-    alt = String(data.classof);
+    image = data.thumbnailURL || "";
+    alt = String(data.classof || "");
   } else if (type === "project") {
     image = data.thumbnailURL || "";
-    alt = data.title;
+    alt = String(data.title || "");
   } else if (type === "news") {
-    image = data.thumbnailURL;
-    alt = data.title;
+    image = data.thumbnailURL || "";
+    alt = String(data.title || "");
   }
 
   return (

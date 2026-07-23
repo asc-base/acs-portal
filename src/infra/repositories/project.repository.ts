@@ -17,8 +17,8 @@ export class ProjectRepository implements IProjectRepository {
   ): Promise<ApiResponse<Pageable<IProject>>> {
     const params = new URLSearchParams();
 
-    if (query.sortBy) params.set("sortBy", query.sortBy);
-    if (query.sortOrder) params.set("sortOrder", query.sortOrder);
+    if (query.sortBy) params.set("orderBy", query.sortBy);
+    if (query.sortOrder) params.set("sortBy", query.sortOrder);
     if (query.page) params.set("page", query.page.toString());
     if (query.pageSize) params.set("pageSize", query.pageSize.toString());
     if (query.fields && query.fields.length > 0)
@@ -48,7 +48,13 @@ export class ProjectRepository implements IProjectRepository {
   async createProject(formData: FormData): Promise<ApiResponse<IProject>> {
     const url = `/v1/project`;
     const response = await this.http.post<ApiResponse<IProject>>(url, formData);
-    
+
+    return response;
+  }
+
+  async deleteProject(id: number): Promise<ApiResponse<IProject>> {
+    const url = `/v1/project/${id}`;
+    const response = await this.http.delete<ApiResponse<IProject>>(url);
     return response;
   }
 }
