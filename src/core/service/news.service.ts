@@ -9,45 +9,20 @@ import { INewsRepository } from "../ports/news.repository";
 export class NewsService {
   constructor(private readonly newsRepository: INewsRepository) {}
 
-  async createNews(data: ICreateNews, image: File): Promise<INews> {
-    const formData = new FormData();
+async createNews(data: ICreateNews): Promise<INews> {
+  const formData = new FormData();
 
-    formData.append("title", data.title);
-    formData.append("detail", data.detail);
-    formData.append("tagID", String(data.tagID));
-    formData.append("startDate", new Date(data.startDate).toISOString());
-
-    if (data.dueDate) {
-      formData.append("dueDate", new Date(data.dueDate).toISOString());
+  Object.entries(data).forEach(([key, value]) => {
+    if (value instanceof File) {
+      formData.append(key, value);
+    } else if (value !== undefined && value !== null) {
+      formData.append(key, String(value));
     }
+  });
 
-    if (image) {
-      formData.append("image", image);
-    }
-    const response = await this.newsRepository.createNews(formData);
-    return response.data;
-  }
-
-  async createNewsWithImages(
-    data: ICreateNews,
-    thumbnail: File,
-    highlight: File,
-  ): Promise<INews> {
-     const formData = new FormData();
-      Object.entries(data).forEach(([key, value]) => {
-        formData.append(key, value?.toString() ?? "");
-      });
-
-    if (thumbnail) {
-      formData.append("thumbnail", thumbnail);
-    }
-    if (highlight) {
-      formData.append("highlight", highlight);
-    }
-
-    const response = await this.newsRepository.createNews(formData);
-    return response.data;
-  }
+  const response = await this.newsRepository.createNews(formData);
+  return response.data;
+}
 
   async getNews(
     page: number,
@@ -78,22 +53,16 @@ export class NewsService {
   async updateNews(
     id: number,
     data: IUpdateNews,
-    thumbnail: File | null,
-    highlight: File | null,
   ) {
     try {
       const formData = new FormData();
-      Object.entries(data).forEach(([key, value]) => {
-        formData.append(key, value?.toString() ?? "");
-      });
-
-      if (thumbnail) {
-        formData.append("thumbnail", thumbnail);
-      }
-      if (highlight) {
-        formData.append("highlight", highlight);
-      }
-
+     Object.entries(data).forEach(([key, value]) => {
+    if (value instanceof File) {
+      formData.append(key, value);
+    } else if (value !== undefined && value !== null) {
+      formData.append(key, String(value));
+    }
+  });
       const response = await this.newsRepository.updateNews(id, formData);
       return response.data;
     } catch (error) {

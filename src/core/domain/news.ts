@@ -18,6 +18,8 @@ export interface INews {
 export interface ICreateNews {
   title: string;
   tagID: number;
+  thumbnail: File;
+  highlight:File 
   startDate: string;
   dueDate?: string;
   detail: string;
@@ -26,6 +28,8 @@ export interface ICreateNews {
 export interface IUpdateNews {
   title?: string;
   tagID?: number;
+  thumbnail?: File | string;
+  highlight?:File | string 
   startDate: string;
   dueDate?: string;
   detail?: string;
@@ -37,7 +41,7 @@ export interface INewsInformation {
   news: INews;
 }
 
-export interface newsInformationPageProps {
+export interface NewsInformationPageProps {
   newsInformation: INewsInformation[];
   tagID: number;
   pageSize: number;
