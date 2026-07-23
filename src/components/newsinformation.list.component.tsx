@@ -1,6 +1,6 @@
 "use client";
 import { AnnouncementCard } from "@/components/announcementcard";
-import { newsInformationPageProps } from "@/core/domain/news";
+import { NewsInformationPageProps } from "@/core/domain/news";
 import { useRouter } from "next/navigation";
 import { Button } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
@@ -10,7 +10,7 @@ const NewsInformationListComponent = ({
   newsInformation,
   tagID,
   pageSize,
-}: newsInformationPageProps) => {
+}: NewsInformationPageProps) => {
   const router = useRouter();
 
   return (

@@ -1,12 +1,11 @@
 "use client";
-import { Button, MenuItem, Alert, Snackbar } from "@mui/material";
+import { Button, MenuItem, Alert, Snackbar, Modal } from "@mui/material";
 import React, { useState, useMemo } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
 import Image from "next/image";
 import { NewsRepository } from "@/infra/repositories/news.repository";
 import { NewsService } from "@/core/service/news.service";
 import { ICreateNews } from "@/core/domain/news";
-import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import dayjs from "dayjs";
 import "dayjs/locale/th";
@@ -21,6 +20,8 @@ import {
 import { useRouter } from "next/navigation";
 import { styled } from "@mui/material/styles";
 import { Tag } from "@/core/domain/list-type";
+import { CropImageCard } from "@/components/cropimagecard";
+import { CreateNewsInputs, CreateNewsSchema } from "@/core/schema/news";
 
 dayjs.extend(buddhistEra);
 dayjs.locale("th");
@@ -29,21 +30,6 @@ interface CraeteNewsProps {
   apiBase: string;
   categories: Tag[];
 }
-
-const Schema = z.object({
-  title: z.string().min(1, "กรุณากรอกหัวข้อ"),
-  detail: z.string().min(1, "กรุณากรอกรายละเอียด"),
-  tagID: z.number().min(1, "กรุณาเลือกหมวดหมู่"),
-  startDate: z
-    .string()
-    .min(1, "กรุณาเลือกวันที่เริ่มต้น")
-    .refine((val) => dayjs(val).isValid(), {
-      message: "รูปแบบวันที่ไม่ถูกต้อง",
-    }),
-  dueDate: z.string().optional(),
-});
-
-type FormData = z.infer<typeof Schema>;
 
 const VisuallyHiddenInput = styled("input")({
   clip: "rect(0 0 0 0)",
@@ -58,12 +44,14 @@ const VisuallyHiddenInput = styled("input")({
 });
 
 const CreateNewsForm = ({ apiBase, categories }: CraeteNewsProps) => {
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [confirmModal, setConfirmModal] = useState<ConfirmModalProps | null>(
     null,
   );
   const [isError, setIsError] = useState(false);
-  const [imageError, setImageError] = useState(false);
+  const [croppingFile, setCroppingFile] = useState<File | null>(null);
+  const [cropTarget, setCropTarget] = useState<
+    "thumbnail" | "highlight" | null
+  >(null);
 
   const router = useRouter();
 
@@ -71,67 +59,88 @@ const CreateNewsForm = ({ apiBase, categories }: CraeteNewsProps) => {
     control,
     handleSubmit,
     reset,
-    formState: { isDirty },
-  } = useForm<FormData>({
-    resolver: zodResolver(Schema),
+    setValue,
+    watch,
+    formState: { isDirty, errors },
+  } = useForm<CreateNewsInputs>({
+    resolver: zodResolver(CreateNewsSchema),
     defaultValues: {
       title: "",
-      startDate: undefined,
-      dueDate: undefined,
+      startDate: "",
+      dueDate: "",
       tagID: 0,
       detail: "",
+      thumbnail: undefined,
+      highlight: undefined,
     },
   });
+
+  const thumbnailFile = watch("thumbnail");
+  const highlightFile = watch("highlight");
 
   const newsService = useMemo(() => {
     const newsRepository = new NewsRepository(apiBase);
     return new NewsService(newsRepository);
   }, [apiBase]);
 
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = (
+    event: React.ChangeEvent<HTMLInputElement>,
+    target: "thumbnail" | "highlight",
+  ) => {
     const file = event.target.files?.[0];
-    if (file) {
-      setSelectedFile(file);
-      setImageError(false);
+    if (!file) return;
+    setCroppingFile(file);
+    setCropTarget(target);
+    event.target.value = "";
+  };
+
+  const handleUploadComplete = (file: File) => {
+    if (cropTarget === "thumbnail") {
+      setValue("thumbnail", file, { shouldDirty: true, shouldValidate: true });
+    } else if (cropTarget === "highlight") {
+      setValue("highlight", file, { shouldDirty: true, shouldValidate: true });
     }
+    setCroppingFile(null);
+    setCropTarget(null);
   };
 
   const handleCancel = () => {
-    if (isDirty || selectedFile) {
+    if (isDirty) {
       setConfirmModal({
         isOpen: true,
         type: "warning",
         onClose: () => setConfirmModal(null),
         onConfirm: () => {
           reset();
-          setSelectedFile(null);
           setConfirmModal(null);
           router.push(`/admin/news?page=1&pageSize=9&category=&title=`);
         },
       });
     } else {
       reset();
-      setSelectedFile(null);
       router.push(`/admin/news?page=1&pageSize=9&category=&title=`);
     }
   };
 
-  const onSubmit: SubmitHandler<FormData> = async (data) => {
-    if (isDirty || selectedFile) {
+  const onSubmit: SubmitHandler<CreateNewsInputs> = async (data) => {
+    if (isDirty) {
       try {
-        if (!selectedFile) {
-          setImageError(true);
+        if (!data.thumbnail || !data.highlight) {
+          setIsError(true);
           return;
         }
+
         const payload: ICreateNews = {
           title: data.title,
           tagID: data.tagID,
           detail: data.detail,
+          thumbnail: data.thumbnail,
+          highlight: data.highlight,
           startDate: dayjs(data.startDate).toISOString(),
           dueDate: data.dueDate ? dayjs(data.dueDate).toISOString() : undefined,
         };
 
-        const response = await newsService.createNews(payload, selectedFile);
+        const response = await newsService.createNews(payload);
 
         if (response) {
           setConfirmModal({
@@ -172,41 +181,81 @@ const CreateNewsForm = ({ apiBase, categories }: CraeteNewsProps) => {
       <h3 className="mb-6 font-bold">ข้อมูลข่าวสาร</h3>
       <form className="gap-4 p-4" onSubmit={handleSubmit(onSubmit)}>
         <div className="flex flex-col gap-4">
-          <div className="bg-neutral02 flex h-[560px] items-center justify-center rounded-lg">
-            {selectedFile ? (
-              <div className="group relative aspect-video w-full h-[560px] overflow-hidden rounded-xl">
-                <Image
-                  src={URL.createObjectURL(selectedFile)}
-                  alt="Preview"
-                  fill
-                  className="rounded-md object-cover"
-                />
-
-                <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-5">
+            <div className="col-span-2 flex flex-col gap-2">
+              <div className="text-neutral05 text-sm font-medium">
+                ภาพหน้าปก
+              </div>
+              <div className="group border-neutral03 bg-neutral02 relative flex aspect-[4/3] w-full items-center justify-center overflow-hidden rounded-xl border">
+                {thumbnailFile ? (
+                  <>
+                    <Image
+                      src={URL.createObjectURL(thumbnailFile)}
+                      alt="Thumbnail Preview"
+                      fill
+                      className="object-cover"
+                    />
+                    <div className="bg-neutral05/40 absolute inset-0 flex items-center justify-center opacity-0 transition-opacity duration-200 group-hover:opacity-100">
+                      <Button variant="contained" component="label">
+                        อัปโหลดรูปภาพ
+                        <VisuallyHiddenInput
+                          type="file"
+                          accept="image/*"
+                          onChange={(e) => handleFileChange(e, "thumbnail")}
+                        />
+                      </Button>
+                    </div>
+                  </>
+                ) : (
                   <Button variant="contained" component="label">
+                    อัปโหลดรูปภาพ
                     <VisuallyHiddenInput
                       type="file"
                       accept="image/*"
-                      onChange={handleFileChange}
+                      onChange={(e) => handleFileChange(e, "thumbnail")}
                     />
-                    อัปโหลดรูปภาพ
                   </Button>
-                </div>
+                )}
               </div>
-            ) : (
-              <Button variant="contained" component="label" size="large">
-                อัปโหลดรูปภาพ
-                <VisuallyHiddenInput
-                  type="file"
-                  accept="image/*"
-                  onChange={handleFileChange}
-                />
-              </Button>
-            )}
+            </div>
+
+            <div className="col-span-3 flex flex-col gap-2">
+              <div className="text-neutral05 text-sm font-medium">
+                ภาพหัวเรื่อง
+              </div>
+              <div className="group border-neutral03 bg-neutral02 relative flex aspect-[2/1] w-full items-center justify-center overflow-hidden rounded-xl border md:aspect-auto md:flex-1">
+                {highlightFile ? (
+                  <>
+                    <Image
+                      src={URL.createObjectURL(highlightFile)}
+                      alt="Highlight Preview"
+                      fill
+                      className="object-cover"
+                    />
+                    <div className="bg-neutral05/40 absolute inset-0 flex items-center justify-center opacity-0 transition-opacity duration-200 group-hover:opacity-100">
+                      <Button variant="contained" component="label">
+                        อัปโหลดรูปภาพ
+                        <VisuallyHiddenInput
+                          type="file"
+                          accept="image/*"
+                          onChange={(e) => handleFileChange(e, "highlight")}
+                        />
+                      </Button>
+                    </div>
+                  </>
+                ) : (
+                  <Button variant="contained" component="label">
+                    อัปโหลดรูปภาพ
+                    <VisuallyHiddenInput
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => handleFileChange(e, "highlight")}
+                    />
+                  </Button>
+                )}
+              </div>
+            </div>
           </div>
-          {imageError && (
-            <p className="mt-1 text-sm text-red-600">กรุณาอัปโหลดรูปภาพ</p>
-          )}
           <RHFTextField
             name="title"
             control={control}
@@ -253,6 +302,12 @@ const CreateNewsForm = ({ apiBase, categories }: CraeteNewsProps) => {
               placeholder="เลือกวันที่สิ้นสุด"
             />
           </div>
+          {!thumbnailFile && errors.thumbnail && (
+            <p className="text-accent04 text-sm">{errors.thumbnail.message}</p>
+          )}
+          {!highlightFile && errors.highlight && (
+            <p className="text-accent04 text-sm">{errors.highlight.message}</p>
+          )}
         </div>
         <div className="mt-4 flex justify-end">
           <div className="flex gap-x-4">
@@ -265,6 +320,24 @@ const CreateNewsForm = ({ apiBase, categories }: CraeteNewsProps) => {
           </div>
         </div>
       </form>
+
+      <Modal open={!!croppingFile} onClose={() => setCroppingFile(null)}>
+        <div>
+          {croppingFile && cropTarget && (
+            <CropImageCard
+              file={croppingFile}
+              width={cropTarget === "thumbnail" ? 400 : 800}
+              height={cropTarget === "thumbnail" ? 300 : 400}
+              onUploadComplete={handleUploadComplete}
+              onCancel={() => {
+                setCroppingFile(null);
+                setCropTarget(null);
+              }}
+            />
+          )}
+        </div>
+      </Modal>
+
       {confirmModal && <ConfirmModal {...confirmModal} />}
     </div>
   );

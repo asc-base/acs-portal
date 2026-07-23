@@ -97,9 +97,8 @@ const ProfessorTableComponent = ({
                 </TableCell>
 
                 <TableCell align="center">
-                  {`${prof.user?.firstNameTh || ""} ${
-                    prof.user?.lastNameTh || ""
-                  }`}
+                  {`${prof.user?.firstNameTh || ""} ${prof.user?.lastNameTh || ""
+                    }`}
                 </TableCell>
 
                 <TableCell align="center">{prof.profRoom}</TableCell>
@@ -140,7 +139,6 @@ const ProfessorTableComponent = ({
                   <EmptyState
                     title="ไม่พบข้อมูลอาจารย์ในขณะนี้"
                     description="ไม่พบข้อมูลอาจารย์ กรุณาเพิ่มข้อมูลอาจารย์"
-                    iconColor="var(--color-primary06)"
                   />
                 </div>
               </TableCell>

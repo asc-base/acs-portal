@@ -289,7 +289,6 @@ const ProjectListComponents = ({
             <EmptyState
               title="ไม่พบข้อมูลผลงานในขณะนี้"
               description="ยังไม่มีโปรเจกต์ในระบบ หรือไม่พบผลลัพธ์จากการค้นหา"
-              iconColor="var(--color-primary06)"
             />
           </div>
         )}
