@@ -5,7 +5,7 @@ import { Button, MenuItem, Alert, Snackbar } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { RHFTextField } from "@/components/form/RHFTextField";
 import { useForm } from "react-hook-form";
-import { z } from "zod";
+import { CreateClassbookInputs, createClassbookSchema } from "@/core/schema/classbook";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { RHFSelect } from "@/components/form/RHFSelect";
 import { CurriculumService } from "@/core/service/curriculum.service";
@@ -22,16 +22,6 @@ import {
 interface FormClassbookProps {
   apiBase: string;
 }
-
-const Schema = z.object({
-  classof: z.string().min(1, "กรุณากรอกรุ่นการศึกษา"),
-  firstYearAcademic: z.string()
-    .min(1, "กรุณากรอกปีการศึกษา")
-    .regex(/^\d{4}$/, "กรุณากรอกปีการศึกษาให้ถูกต้อง"),
-  curriculumID: z.number().min(1, "กรุณาเลือกหลักสูตร"),
-});
-
-type FormData = z.infer<typeof Schema>;
 
 const VisuallyHiddenInput = styled("input")({
   clip: "rect(0 0 0 0)",
@@ -68,14 +58,14 @@ export const FormClassbook: FC<FormClassbookProps> = ({ apiBase }) => {
     control,
     handleSubmit,
     formState: { isDirty },
-  } = useForm<FormData>({
-    resolver: zodResolver(Schema),
+  } = useForm<CreateClassbookInputs>({
+    resolver: zodResolver(createClassbookSchema),
     defaultValues: {
       classof: "",
       firstYearAcademic: "",
       curriculumID: 0,
     },
-    mode: "onBlur",
+    mode: "onChange", 
     reValidateMode: "onChange",
   });
 
@@ -98,7 +88,7 @@ export const FormClassbook: FC<FormClassbookProps> = ({ apiBase }) => {
     } else router.push(`/admin/classbook`);
   };
 
-  const onSubmit = async (data: FormData) => {
+  const onSubmit = async (data: CreateClassbookInputs) => {
     setIsError(false);
     try {
       const reps = await classBookService.createClassBook(data, selectedFile!);
