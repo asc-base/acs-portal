@@ -372,9 +372,9 @@ export const NavbarMain = ({ baseUrl }: { baseUrl: string }) => {
       );
     } else {
       return (
-        // <Link href="/auth/student">
-        <h4 className="!text-gray-300">เข้าสู่ระบบ</h4>
-        // </Link>
+        <Link href="/auth/student">
+          <h4 className="!text-gray-300">เข้าสู่ระบบ</h4>
+        </Link>
       );
     }
   };

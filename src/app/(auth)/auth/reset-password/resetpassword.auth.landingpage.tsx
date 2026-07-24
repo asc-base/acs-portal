@@ -1,28 +1,44 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import Image from "next/image";
-import { Button, Typography, IconButton, InputAdornment } from "@mui/material";
+import {
+  Button,
+  Typography,
+  IconButton,
+  InputAdornment,
+  Snackbar,
+  Alert,
+} from "@mui/material";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { RHFTextField } from "@/components/form/RHFTextField";
 import { ResetPasswordSchema } from "@/core/schema/auth";
-import { authService } from "@/infra/container";
+import { AuthService } from "@/core/service/auth.service";
+import { AuthRepository } from "@/infra/repositories/auth.repository";
 import { useRouter } from "next/navigation";
 
 interface ResetPasswordAuthLandingPageProps {
   referenceCode: string;
+  apiBase: string;
 }
 
 type FormValues = z.infer<typeof ResetPasswordSchema>;
 
 export default function ResetPasswordAuthLandingPage({
   referenceCode,
+  apiBase,
 }: ResetPasswordAuthLandingPageProps) {
+  const authService = useMemo(() => {
+    const authRepository = new AuthRepository(apiBase);
+    return new AuthService(authRepository);
+  }, [apiBase]);
+
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [isSuccess, setIsSuccess] = useState(false);
   const router = useRouter();
 
   const {
@@ -40,12 +56,14 @@ export default function ResetPasswordAuthLandingPage({
   const onSubmit = async (formData: FormValues) => {
     try {
       await authService.resetPassword({
-        refferenceCode: referenceCode,
-        password: formData.password,
+        referenceCode: referenceCode,
+        newPassword: formData.password,
       });
-      alert("เปลี่ยนรหัสผ่านสำเร็จ");
       reset();
-      router.push("/auth/login");
+      setIsSuccess(true);
+      setTimeout(() => {
+        router.replace("/auth/student");
+      }, 4000);
     } catch {
       setError("password", {
         type: "manual",
@@ -58,6 +76,20 @@ export default function ResetPasswordAuthLandingPage({
     <main className="min-h-screen w-full bg-[var(--background)]">
       <div className="mx-auto flex min-h-screen w-full items-center justify-center px-4 py-10">
         <div className="w-full max-w-[680px] bg-[var(--background)] p-8">
+          <Snackbar
+            anchorOrigin={{ vertical: "top", horizontal: "right" }}
+            open={isSuccess}
+            autoHideDuration={4000}
+            onClose={() => setIsSuccess(false)}
+          >
+            <Alert
+              severity="success"
+              onClose={() => setIsSuccess(false)}
+              sx={{ width: "100%" }}
+            >
+              เปลี่ยนรหัสผ่านสำเร็จ
+            </Alert>
+          </Snackbar>
           <div className="flex justify-center">
             <Image
               src="/logoacs-nonbg.png"

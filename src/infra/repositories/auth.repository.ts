@@ -1,8 +1,9 @@
 import { IAuthRepository } from "@/core/ports/auth.repository";
 import {
   AuthResponse,
-  ForgetPasswordResponse,
   LoginRequest,
+  ResetPasswordCredential,
+  ResetPasswordPayload,
 } from "@/core/domain/auth";
 import { HttpHelper } from "@/lib/http";
 import { ApiResponse } from "@/interface/response";
@@ -46,23 +47,27 @@ export class AuthRepository implements IAuthRepository {
     return response;
   }
 
-  async createCredentailForgetPassowrd(payload: {
-    email: string;
-  }): Promise<ApiResponse<{ message?: string }>> {
-    const response = await this.http.post<ApiResponse<{ message?: string }>>(
-      `/v1/auth/forget-password`,
-      payload,
+  async createCredentialForgetPassword(email: string): Promise<ApiResponse<ResetPasswordCredential>> {
+    const response = await this.http.post<ApiResponse<ResetPasswordCredential>>(
+      `/v1/auth/credentials`,
+      { email },
     );
     return response;
   }
 
-  async resetPassword(payload: {
-    refferenceCode: string;
-    password: string;
-  }): Promise<ApiResponse<ForgetPasswordResponse>> {
-    const response = await this.http.post<ApiResponse<ForgetPasswordResponse>>(
-      `/v1/auth/reset-password`,
-      payload,
+  async getCredentials(referenceCode: string): Promise<ApiResponse<ResetPasswordCredential>> {
+    const response = await this.http.get<ApiResponse<ResetPasswordCredential>>(
+      `/v1/auth/credentials/${referenceCode}`,
+    );
+    return response;
+  }
+
+  async resetPassword(
+    payload : ResetPasswordPayload,
+  ): Promise<ApiResponse<{ msg?: string }>> {
+    const response = await this.http.post<ApiResponse<{ msg?: string }>>(
+      `/v1/auth/reset-password/${payload.referenceCode}`,
+      { newPassword: payload.newPassword },
     );
     return response;
   }

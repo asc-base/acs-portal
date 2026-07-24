@@ -1,10 +1,9 @@
 import { ApiResponse } from "@/interface/response";
 import {
   LoginRequest,
-  AuthResponse,
+  ResetPasswordCredential,
   ResetPasswordPayload,
-  ForgetPasswordPayload,
-  ForgetPasswordResponse,
+  AuthResponse,
 } from "../domain/auth";
 import { IUser } from "../domain/user";
 
@@ -12,12 +11,13 @@ export interface IAuthRepository {
   LoginAdmin(data: LoginRequest): Promise<ApiResponse<AuthResponse>>;
   getUserData(token: string): Promise<ApiResponse<IUser>>;
   Login(data: LoginRequest): Promise<ApiResponse<IUser>>;
-  createCredentailForgetPassowrd(
-    payload: ForgetPasswordPayload,
-  ): Promise<ApiResponse<ForgetPasswordResponse>>;
+  createCredentialForgetPassword(
+    email : string,
+  ): Promise<ApiResponse<ResetPasswordCredential>>;
+  getCredentials(referenceCode: string): Promise<ApiResponse<ResetPasswordCredential>>;
   resetPassword(
     data: ResetPasswordPayload,
-  ): Promise<ApiResponse<ForgetPasswordResponse>>;
+  ): Promise<ApiResponse<{ msg?: string }>>;
   getUser(): Promise<IUser | null>;
   Logout(): Promise<void>;
 }

@@ -2,8 +2,7 @@ import { IAuthRepository } from "../ports/auth.repository";
 import { ApiResponse } from "@/interface/response";
 import { IUser } from "../domain/user";
 import {
-  ForgetPasswordPayload,
-  ForgetPasswordResponse,
+  ResetPasswordCredential,
   ResetPasswordPayload,
 } from "../domain/auth";
 
@@ -23,15 +22,17 @@ export class AuthService {
     return this.authRepository.Login(data);
   }
 
-  async createCredentailForgetPassowrd(
-    payload: ForgetPasswordPayload,
-  ): Promise<ApiResponse<ForgetPasswordResponse>> {
-    return this.authRepository.createCredentailForgetPassowrd(payload);
+  async createCredentialForgetPassword(email: string): Promise<ApiResponse<ResetPasswordCredential>> {
+    return this.authRepository.createCredentialForgetPassword(email);
+  }
+
+  async getCredentials(referenceCode: string): Promise<ApiResponse<ResetPasswordCredential>> {
+    return this.authRepository.getCredentials(referenceCode);
   }
 
   async resetPassword(
     payload: ResetPasswordPayload,
-  ): Promise<ApiResponse<ForgetPasswordResponse>> {
+  ): Promise<ApiResponse<{ msg?: string }>> {
     return this.authRepository.resetPassword(payload);
   }
 
