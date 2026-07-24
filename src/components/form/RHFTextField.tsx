@@ -42,7 +42,7 @@ export function RHFTextField<T extends FieldValues>({
               error={!!fieldState.error}
             >
               {label}
-              {requiredMark && <span className="text-[#E8360E] ml-1">*</span>}
+              {requiredMark && <span className="text-accent04 ml-1">*</span>}
             </FormLabel>
           )}
 
