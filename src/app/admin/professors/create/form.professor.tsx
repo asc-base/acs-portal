@@ -14,7 +14,6 @@ import { MasterDataRepository } from "@/infra/repositories/master-data.repositor
 import { ProfessorService } from "@/core/service/professor.service";
 import { ProfessorRepository } from "@/infra/repositories/professor.repository";
 import { Position } from "@/core/domain/master-data";
-import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { RHFTextField } from "@/components/form/RHFTextField";
 import { RHFSelect } from "@/components/form/RHFSelect";
