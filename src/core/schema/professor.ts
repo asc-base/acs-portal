@@ -1,6 +1,6 @@
 import z from "zod";
 
-export const ProfessorSchema = z.object({
+export const ProfessorCreateSchema = z.object({
   academicPositionID: z.number().nullable().refine((v) => v !== null, {message: "กรุณากรอกตำแหน่ง",}),
   educations: z.array(z.object({value: z.string().trim().min(1, "กรุณากรอกข้อมูล"),}),),
   expertFields: z.array(z.object({value: z.string().trim().min(1, "กรุณากรอกข้อมูล"),}),),
@@ -27,5 +27,5 @@ export const ProfessorInfoSchema = z.object({
   expertFields: z.array(z.object({value: z.string().trim().min(1, "กรุณากรอกข้อมูล"),}),),
 });
 
-export type ProfessorSchemaType = z.infer<typeof ProfessorSchema>;
+export type ProfessorCreateSchemaType = z.infer<typeof ProfessorCreateSchema>;
 export type ProfessorInfoSchemaType = z.infer<typeof ProfessorInfoSchema>;
