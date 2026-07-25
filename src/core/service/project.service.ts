@@ -62,13 +62,6 @@ export class ProjectService {
       files.assets.forEach((file) => formData.append("assets", file));
     }
 
-    // --- LOGGING FOR EVIDENCE ---
-    console.log("=== [EVIDENCE] FormData Payload being sent to Backend ===");
-    for (const [key, value] of formData.entries()) {
-      console.log(`Key: ${key} | Value:`, value);
-    }
-    console.log("=========================================================");
-
     const response = await this.projectRepository.updateProject(id, formData);
     return response.data;
   }
