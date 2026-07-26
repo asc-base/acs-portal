@@ -7,7 +7,6 @@ import Alert from "@mui/material/Alert";
 import Snackbar from "@mui/material/Snackbar";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
-import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { RHFTextField } from "@/components/form/RHFTextField";
 import { StudentService } from "@/core/service/student.service";
@@ -19,38 +18,13 @@ import {
 } from "@/components/modal/confirmModal";
 import { styled } from "@mui/material/styles";
 import { CropImageCard } from "@/components/cropimagecard";
+import { UpdateStudentSchema, UpdateStudentInputs } from "@/core/schema/student";
 
 interface StudentUpdateFormProps {
   apiBase: string;
   classBookID: number;
   student: IStudent;
 }
-
-const Schema = z.object({
-  firstNameTh: z.string().min(1, "กรุณากรอกชื่อภาษาไทย"),
-  lastNameTh: z.string().min(1, "กรุณากรอกนามสกุลภาษาไทย"),
-  firstNameEn: z.string().min(1, "กรุณากรอกชื่อภาษาอังกฤษ"),
-  lastNameEn: z.string().min(1, "กรุณากรอกนามสกุลภาษาอังกฤษ"),
-  studentCode: z
-    .string()
-    .min(11, "กรุณากรอกรหัสนักศึกษา")
-    .regex(/^[0-9]+$/, "รหัสนักศึกษาต้องเป็นตัวเลขเท่านั้น"),
-  nickName: z.string().min(1, "กรุณากรอกชื่อเล่น"),
-  email: z.string().email("อีเมลไม่ถูกต้อง"),
-  facebook: z.string().optional(),
-  linkedin: z.string().optional(),
-  instagram: z.string().optional(),
-  github: z.string().optional(),
-  // otherProjects: z
-  //   .array(
-  //     z.object({
-  //       value: z.string().trim(),
-  //     }),
-  //   )
-  //   .optional(),
-});
-
-type FormData = z.infer<typeof Schema>;
 
 const VisuallyHiddenInput = styled("input")({
   clip: "rect(0 0 0 0)",
@@ -91,8 +65,8 @@ export const StudentUpdateForm = ({
     control,
     handleSubmit,
     formState: { isValid },
-  } = useForm<FormData>({
-    resolver: zodResolver(Schema),
+  } = useForm<UpdateStudentInputs>({
+    resolver: zodResolver(UpdateStudentSchema),
     defaultValues: {
       firstNameTh: student.user.firstNameTh,
       lastNameTh: student.user.lastNameTh,

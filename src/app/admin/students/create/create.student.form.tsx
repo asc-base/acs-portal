@@ -7,7 +7,6 @@ import Alert from "@mui/material/Alert";
 import Snackbar from "@mui/material/Snackbar";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
-import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { RHFTextField } from "@/components/form/RHFTextField";
 import { StudentService } from "@/core/service/student.service";
@@ -19,37 +18,12 @@ import {
 } from "@/components/modal/confirmModal";
 import { styled } from "@mui/material/styles";
 import { CropImageCard } from "@/components/cropimagecard";
+import { CreateStudentSchema, CreateStudentInputs } from "@/core/schema/student";
 
 interface FormProfessorsProps {
   apiBase: string;
   classBookID: number;
 }
-
-const Schema = z.object({
-  firstNameTh: z.string().min(1, "กรุณากรอกชื่อภาษาไทย"),
-  lastNameTh: z.string().min(1, "กรุณากรอกนามสกุลภาษาไทย"),
-  firstNameEn: z.string().min(1, "กรุณากรอกชื่อภาษาอังกฤษ"),
-  lastNameEn: z.string().min(1, "กรุณากรอกนามสกุลภาษาอังกฤษ"),
-  studentCode: z
-    .string()
-    .min(11, "กรุณากรอกรหัสนักศึกษา")
-    .regex(/^[0-9]+$/, "รหัสนักศึกษาต้องเป็นตัวเลขเท่านั้น"),
-  nickname: z.string().optional(),
-  email: z.string().email("อีเมลไม่ถูกต้อง"),
-  facebook: z.string().optional(),
-  linkedin: z.string().optional(),
-  instagram: z.string().optional(),
-  github: z.string().optional(),
-  // otherProjects: z
-  //   .array(
-  //     z.object({
-  //       value: z.string().trim(),
-  //     }),
-  //   )
-  //   .optional(),
-});
-
-type FormData = z.infer<typeof Schema>;
 
 const VisuallyHiddenInput = styled("input")({
   clip: "rect(0 0 0 0)",
@@ -85,15 +59,15 @@ export const CreateStudentForm: FC<FormProfessorsProps> = ({
     control,
     handleSubmit,
     formState: { isValid },
-  } = useForm<FormData>({
-    resolver: zodResolver(Schema),
+  } = useForm<CreateStudentInputs>({
+    resolver: zodResolver(CreateStudentSchema),
     defaultValues: {
       firstNameTh: "",
       lastNameTh: "",
       firstNameEn: "",
       lastNameEn: "",
       studentCode: "",
-      nickname: "",
+      nickName: "",
       email: "",
       facebook: undefined,
       linkedin: undefined,
@@ -129,7 +103,7 @@ export const CreateStudentForm: FC<FormProfessorsProps> = ({
     setSelectedFile(null);
   };
 
-  const onSubmit = async (data: FormData) => {
+  const onSubmit = async (data: CreateStudentInputs) => {
     try {
       const payload: ICreateStudent = {
         firstNameTh: data.firstNameTh,
@@ -137,7 +111,7 @@ export const CreateStudentForm: FC<FormProfessorsProps> = ({
         firstNameEn: data.firstNameEn,
         lastNameEn: data.lastNameEn,
         studentCode: data.studentCode,
-        nickName: data.nickname,
+        nickName: data.nickName,
         email: data.email,
         facebook: data.facebook,
         linkedin: data.linkedin,
@@ -276,7 +250,7 @@ export const CreateStudentForm: FC<FormProfessorsProps> = ({
             />
             <RHFTextField
               control={control}
-              name="nickname"
+              name="nickName"
               label="ชื่อเล่น"
               fullWidth
               placeholder="ระบุชื่อเล่น"
