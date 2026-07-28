@@ -6,18 +6,19 @@ const documentURLField = z
   .min(1, "กรุณาระบุลิงก์ไฟล์หลักสูตร")
   .pipe(z.url("กรุณาระบุลิงก์ที่ถูกต้อง"));
 
-export const CreateCurriculumSchema = z.object({
+export const CommonCurriculumField = {
   title: z.string().trim().min(1, "กรุณาระบุชื่อหลักสูตร"),
   year: z.string().min(1, "กรุณาระบุปีการศึกษา"),
   documentURL: documentURLField,
   description: z.string().trim().min(1, "กรุณาระบุรายละเอียด"),
+};
+
+export const CreateCurriculumSchema = z.object({
+  ...CommonCurriculumField
 });
 
 export const UpdateCurriculumSchema = z.object({
-  title: z.string().trim().min(1, "กรุณาระบุชื่อหลักสูตร"),
-  year: z.string().min(1, "กรุณาระบุปีการศึกษา"),
-  documentURL: documentURLField,
-  description: z.string().trim().min(1, "กรุณาระบุรายละเอียด"),
+  ...CommonCurriculumField
 });
 
 export type CreateCurriculumInputs = z.infer<typeof CreateCurriculumSchema>;
