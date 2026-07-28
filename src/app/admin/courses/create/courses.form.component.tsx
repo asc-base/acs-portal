@@ -27,8 +27,8 @@ import {
   ConfirmModalProps,
 } from "@/components/modal/confirmModal";
 import {
-  CreateCourseSchemaType,
-  CreateCourseSchema,
+  CreateCourseSchemaInput,
+  createCourseSchema,
 } from "@/core/schema/course";
 
 interface CoursesFormProps {
@@ -60,8 +60,8 @@ export const CourseForm: FC<CoursesFormProps> = ({ apiBase, curriculumID }) => {
     handleSubmit,
     watch,
     formState: { isDirty },
-  } = useForm<CreateCourseSchemaType>({
-    resolver: zodResolver(CreateCourseSchema),
+  } = useForm<CreateCourseSchemaInput>({
+    resolver: zodResolver(createCourseSchema),
     mode: "onChange",
     defaultValues: {
       typeCourseID: 0,
@@ -94,7 +94,7 @@ export const CourseForm: FC<CoursesFormProps> = ({ apiBase, curriculumID }) => {
     }
   };
 
-  const onSubmit = async (data: CreateCourseSchemaType) => {
+  const onSubmit = async (data: CreateCourseSchemaInput) => {
     setIsError(false);
 
     try {

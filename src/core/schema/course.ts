@@ -1,6 +1,6 @@
 import z from "zod";
 
-export const CreateCourseSchema = z.object({
+export const createCourseSchema = z.object({
   typeCourseID: z.number().min(1, "กรุณาเลือกกลุ่มวิชา"),
   courseCode: z.string().trim().min(1, "กรุณากรอกรหัสวิชา"),
   credits: z.string().trim().min(1, "กรุณากรอกหน่วยกิต"),
@@ -22,7 +22,7 @@ export const CreateCourseSchema = z.object({
   ),
 });
 
-export const UpdateCourseSchema = z.object({
+export const updateCourseSchema = z.object({
   typeCourseID: z.number().min(1, "กรุณาเลือกกลุ่มวิชา"),
   courseCode: z.string().trim().min(1, "กรุณากรอกรหัสวิชา"),
   credits: z.string().trim().min(1, "กรุณากรอกหน่วยกิต"),
@@ -46,5 +46,5 @@ export const UpdateCourseSchema = z.object({
     .optional(),
 });
 
-export type CreateCourseSchemaType = z.infer<typeof CreateCourseSchema>;
-export type UpdateCourseSchemaType = z.infer<typeof UpdateCourseSchema>;
+export type CreateCourseSchemaInput = z.infer<typeof createCourseSchema>;
+export type UpdateCourseSchemaInput = z.infer<typeof updateCourseSchema>;
