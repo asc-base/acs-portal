@@ -14,7 +14,7 @@ export const CreateStudentSchema = z.object({
     firstNameEn: z.string().trim().min(1, "กรุณากรอกชื่อภาษาอังกฤษ").regex(/^[A-Za-z\s]+$/, "กรุณากรอกเป็นภาษาอังกฤษเท่านั้น"),
     lastNameEn: z.string().trim().min(1, "กรุณากรอกนามสกุลภาษาอังกฤษ").regex(/^[A-Za-z\s]+$/, "กรุณากรอกเป็นภาษาอังกฤษเท่านั้น"),
     nickName: z.string().trim().optional(),
-    email: z.string().trim().lowercase().email("อีเมลไม่ถูกต้อง"),
+    email: z.string().trim().toLowerCase().email("อีเมลไม่ถูกต้อง"),
     ...CommonStudentSchema.shape,
     // otherProjects: z
     //   .array(
@@ -31,7 +31,7 @@ export const UpdateStudentSchema = z.object({
     firstNameEn: z.string().trim().min(1, "กรุณากรอกชื่อภาษาอังกฤษ").regex(/^[A-Za-z\s]+$/, "กรุณากรอกเป็นภาษาอังกฤษเท่านั้น"),
     lastNameEn: z.string().trim().min(1, "กรุณากรอกนามสกุลภาษาอังกฤษ").regex(/^[A-Za-z\s]+$/, "กรุณากรอกเป็นภาษาอังกฤษเท่านั้น"),
     nickName: z.string().trim().optional(),
-    email: z.string().trim().lowercase().email("อีเมลไม่ถูกต้อง"),
+    email: z.string().trim().toLowerCase().email("อีเมลไม่ถูกต้อง"),
     ...CommonStudentSchema.shape,
     // otherProjects: z
     //   .array(
