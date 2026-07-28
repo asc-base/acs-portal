@@ -6,7 +6,7 @@ import { styled } from "@mui/material/styles";
 import { RHFTextField } from "@/components/form/RHFTextField";
 import { RHFSelect } from "@/components/form/RHFSelect";
 import { useForm } from "react-hook-form";
-import { z } from "zod";
+import { UpdateClassbookInputs, updateClassBookSchema } from "@/core/schema/classbook";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { IClassBook, IUpdateClassBook } from "@/core/domain/classbook";
 import { ICurriculum } from "@/core/domain/curriculum";
@@ -20,14 +20,6 @@ interface CurriculumFormProps {
   classBook: IClassBook;
   apiBase: string;
 }
-
-const classBookSchema = z.object({
-  classof: z.string().min(1, "กรุณาระบุรุุ่นการศึกษา"),
-  firstYearAcademic: z.string().min(1, "กรุณาระบุปีการศึกษา"),
-  curriculumID: z.number().min(1, "กรุณาระบุหลักสูตร"),
-});
-
-type ClassBookFormValues = z.infer<typeof classBookSchema>;
 
 const VisuallyHiddenInput = styled("input")({
   clip: "rect(0 0 0 0)",
@@ -72,8 +64,8 @@ export const ClassBookInfoComponent = ({
     handleSubmit,
     reset,
     formState: { isValid, isDirty },
-  } = useForm<ClassBookFormValues>({
-    resolver: zodResolver(classBookSchema),
+  } = useForm<UpdateClassbookInputs>({
+    resolver: zodResolver(updateClassBookSchema),
     defaultValues: {
       classof: classBook.classof.toString() ?? "",
       firstYearAcademic: classBook.firstYearAcademic ?? "",
@@ -221,7 +213,7 @@ export const ClassBookInfoComponent = ({
                 <RHFTextField
                   control={control}
                   name="classof"
-                  label="รุุ่นการศึกษา"
+                  label="รุ่นการศึกษา"
                   variant="outlined"
                   disabled={!isEdit}
                   requiredMark
