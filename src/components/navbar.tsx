@@ -470,7 +470,7 @@ export const NavbarMain = ({ baseUrl }: { baseUrl: string }) => {
         )}
       </div>
 
-      <div className={`${isOpen ? "block" : "hidden"} xl:block`}>
+      <div className={`${isOpen ? "absolute z-50" : "hidden"} top-full left-0 w-full xl:static xl:block`}>
         <MenuBar />
       </div>
     </nav>
