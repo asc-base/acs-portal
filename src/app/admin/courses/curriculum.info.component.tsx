@@ -15,7 +15,7 @@ import { ICurriculum } from "@/core/domain/curriculum";
 import { ConfirmModal, ConfirmModalProps } from "@/components/modal/confirmModal";
 import Alert from "@mui/material/Alert";
 import Snackbar from "@mui/material/Snackbar";
-import { CurriculumInfoSchema, CurriculumInfoSchemaType } from "@/core/schema/curriculum";
+import { UpdateCurriculumSchema, UpdateCurriculumInputs } from "@/core/schema/curriculum";
 
 interface CurriculumInfoProps {
   apiBase: string;
@@ -59,8 +59,8 @@ export const CurriculumInfoComponent = ({ apiBase, curriculum }: CurriculumInfoP
     handleSubmit,
     reset,
     formState: { isDirty, isValid },
-  } = useForm<CurriculumInfoSchemaType>({
-    resolver: zodResolver(CurriculumInfoSchema),
+  } = useForm<UpdateCurriculumInputs>({
+    resolver: zodResolver(UpdateCurriculumSchema),
     defaultValues: {
       title: curriculum.title ?? "",
       year: curriculum.year ?? "",
@@ -78,7 +78,7 @@ export const CurriculumInfoComponent = ({ apiBase, curriculum }: CurriculumInfoP
     }
   };
 
-  const onSubmit = async (data: CurriculumInfoSchemaType) => {
+  const onSubmit = async (data: UpdateCurriculumInputs) => {
     try {
       const year = dayjs(data.year).year().toString();
 

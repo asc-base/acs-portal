@@ -15,7 +15,7 @@ import {
   ConfirmModal,
   ConfirmModalProps,
 } from "@/components/modal/confirmModal";
-import { CurriculumSchema, CurriculumSchemaType } from "@/core/schema/curriculum";
+import { CreateCurriculumSchema, CreateCurriculumInputs } from "@/core/schema/curriculum";
 interface CurriculumFormProps {
   apiBase: string;
 }
@@ -50,8 +50,8 @@ export const CurriculumForm = ({ apiBase }: CurriculumFormProps) => {
     handleSubmit,
     control,
     formState: { isDirty },
-  } = useForm<CurriculumSchemaType>({
-    resolver: zodResolver(CurriculumSchema),
+  } = useForm<CreateCurriculumInputs>({
+    resolver: zodResolver(CreateCurriculumSchema),
     mode: "onChange",
     defaultValues: {
       title: "",
@@ -81,7 +81,7 @@ export const CurriculumForm = ({ apiBase }: CurriculumFormProps) => {
     }
   };
 
-  const onSubmit = async (data: CurriculumSchemaType) => {
+  const onSubmit = async (data: CreateCurriculumInputs) => {
     if (!selectedFile) {
       setFileError("กรุณาอัปโหลดรูปภาพ");
       return;
