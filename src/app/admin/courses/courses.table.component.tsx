@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useRef } from "react";
 import {
   Table,
   TableBody,
@@ -19,7 +19,7 @@ import {
   Snackbar,
 } from "@mui/material";
 import { useRouter } from "next/navigation";
-import { ICourse } from "@/core/domain/course";
+import { ICourse, ICreateCourseCsv } from "@/core/domain/course";
 import { ArrowDownward, ArrowUpward, Edit, Delete } from "@mui/icons-material";
 import Link from "next/link";
 import { Control } from "react-hook-form";
@@ -37,6 +37,8 @@ import {
   ConfirmModalProps,
 } from "@/components/modal/confirmModal";
 import EmptyState from "@/components/emptyState";
+import Papa from "papaparse";
+import { useImportCourseStore } from "@/store/preview-course-data";
 
 interface CourseTableComponentsProps {
   courses: ICourse[];
@@ -76,6 +78,8 @@ const CourseTableComponents = ({
   handleNextPage,
 }: CourseTableComponentsProps) => {
   const router = useRouter();
+  const inputRef = useRef<HTMLInputElement | null>(null);
+  const { setImportData } = useImportCourseStore();
   const [isError, setIsError] = useState(false);
   const [confirmModal, setConfirmModal] = useState<ConfirmModalProps | null>(
     null,
@@ -84,6 +88,25 @@ const CourseTableComponents = ({
     const courseRepository = new CourseRepository(apiBase);
     return new CourseService(courseRepository);
   }, [apiBase]);
+
+  const handleClick = () => {
+    inputRef.current?.click();
+  };
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files?.[0]) return;
+    const file = e.target.files[0];
+
+    Papa.parse(file, {
+      header: true,
+      skipEmptyLines: true,
+      complete: (result) => {
+        const data = result.data as ICreateCourseCsv[];
+        setImportData(data);
+        router.push(`/admin/courses/preview?curriculumID=${curriculumID}`);
+      },
+    });
+  };
 
   const handleEdit = (courseId: number) => {
     router.push(`/admin/courses/${courseId}?curriculumID=${curriculumID}`);
@@ -185,6 +208,22 @@ const CourseTableComponents = ({
               เพิ่มรายวิชาใหม่
             </Button>
           </Link>
+
+          <input
+            type="file"
+            ref={inputRef}
+            hidden
+            accept=".csv"
+            onChange={handleFileChange}
+          />
+          <Button
+            variant="contained"
+            size="large"
+            startIcon={<AddIcon />}
+            onClick={handleClick}
+          >
+            เพิ่มรายวิชา (ไฟล์)
+          </Button>
         </div>
       </div>
 
