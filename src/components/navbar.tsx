@@ -1,6 +1,7 @@
 "use client";
 import Image from "next/image";
-import FacebookRoundedIcon from "@mui/icons-material/FacebookRounded";
+import FacebookIcon from "@mui/icons-material/Facebook";
+import InstagramIcon from "@mui/icons-material/Instagram";
 import YouTubeIcon from "@mui/icons-material/YouTube";
 import Link from "next/link";
 import { Button } from "@mui/material";
@@ -271,8 +272,12 @@ export const NavbarMain = ({ baseUrl }: { baseUrl: string }) => {
   const socialLinks = useMemo(
     () => [
       {
-        icon: <FacebookRoundedIcon />,
+        icon: <FacebookIcon />,
         href: "https://www.facebook.com/profile.php?id=100086247692906",
+      },
+      {
+        icon: <InstagramIcon />,
+        href: "https://www.instagram.com/dek_warmkid/",
       },
       {
         icon: <YouTubeIcon />,
