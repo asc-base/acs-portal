@@ -7,4 +7,5 @@ export interface IUser {
     lastNameEn: string;
     nickName?: string;
     imageUrl: string;
+    cropPosition?: string | null;
 }

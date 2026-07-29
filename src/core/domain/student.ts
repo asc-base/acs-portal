@@ -52,6 +52,7 @@ export interface IUpdateStudent {
   facebook?: string | null;
   instagram?: string | null;
   github?: string | null;
+  cropPosition?: string | null;
 }
 
 export interface ICreateStudentCsv {

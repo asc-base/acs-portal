@@ -8,7 +8,11 @@ interface CropImageCardProps {
   file: File;
   width: number;
   height: number;
-  onUploadComplete: (file: File) => void;
+  initialCropData?: { x: number; y: number; zoom: number } | null;
+  onUploadComplete: (
+    file: File,
+    cropData?: { x: number; y: number; zoom: number },
+  ) => void;
   onCancel: () => void;
 }
 
@@ -16,18 +20,22 @@ export const CropImageCard = ({
   file,
   width,
   height,
+  initialCropData,
   onUploadComplete,
   onCancel,
 }: CropImageCardProps) => {
-  const [zoom, setZoom] = useState(1);
-  const [position, setPosition] = useState({ x: 0, y: 0 });
+  const [zoom, setZoom] = useState(initialCropData?.zoom ?? 1);
+  const [position, setPosition] = useState({
+    x: initialCropData?.x ?? 0,
+    y: initialCropData?.y ?? 0,
+  });
   const [processing, setProcessing] = useState(false);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
   const imgRef = useRef<HTMLImageElement | null>(null);
 
   const baseScaleRef = useRef(1);
-  const zoomRef = useRef(1);
+  const zoomRef = useRef(initialCropData?.zoom ?? 1);
 
   const isDragging = useRef(false);
   const lastPos = useRef({ x: 0, y: 0 });
@@ -59,16 +67,22 @@ export const CropImageCard = ({
       // cover container
       baseScaleRef.current = Math.max(scaleX, scaleY);
 
-      zoomRef.current = 1;
-      setZoom(1);
+      const initZoom = initialCropData?.zoom ?? 1;
+      const initPos = {
+        x: initialCropData?.x ?? 0,
+        y: initialCropData?.y ?? 0,
+      };
 
-      setPosition({ x: 0, y: 0 });
+      zoomRef.current = initZoom;
+      setZoom(initZoom);
+
+      setPosition(initPos);
     };
 
     return () => {
       URL.revokeObjectURL(url);
     };
-  }, [file, width, height]);
+  }, [file, width, height, initialCropData]);
 
   const getFinalScale = () => {
     return baseScaleRef.current * zoomRef.current;
@@ -255,7 +269,11 @@ export const CropImageCard = ({
           type: "image/jpeg",
         });
 
-        onUploadComplete(croppedFile);
+        onUploadComplete(croppedFile, {
+          x: position.x,
+          y: position.y,
+          zoom: zoomRef.current,
+        });
       },
       "image/jpeg",
       1,

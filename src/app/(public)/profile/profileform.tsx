@@ -93,6 +93,11 @@ const ProfileForm = ({ apiBase }: { apiBase: string }) => {
     },
   });
   const [isCroping, setIsCroping] = useState(false);
+  const [cropData, setCropData] = useState<{
+    x: number;
+    y: number;
+    zoom: number;
+  } | null>(null);
 
   useEffect(() => {
     reset({
@@ -103,6 +108,7 @@ const ProfileForm = ({ apiBase }: { apiBase: string }) => {
       file: student?.user?.imageUrl || null,
     });
     setSelectedFile(null);
+    setCropData(null);
   }, [student, reset]);
 
   const { nickName, firstNameTh, firstNameEn, lastNameTh, lastNameEn } =
@@ -117,14 +123,21 @@ const ProfileForm = ({ apiBase }: { apiBase: string }) => {
     }
   };
 
-  const handleCropComplete = (croppedFile: File) => {
+  const handleCropComplete = (
+    croppedFile: File,
+    cropPosition?: { x: number; y: number; zoom: number },
+  ) => {
     setSelectedFile(croppedFile);
+    if (cropPosition) {
+      setCropData(cropPosition);
+    }
     setIsCroping(false);
   };
 
   const handleCropCancel = () => {
     setIsCroping(false);
     setSelectedFile(null);
+    setCropData(null);
   };
 
   const handleEdit = () => {
@@ -140,6 +153,7 @@ const ProfileForm = ({ apiBase }: { apiBase: string }) => {
       file: student?.user?.imageUrl || null,
     });
     setSelectedFile(null);
+    setCropData(null);
     setIsEditing(false);
   };
 
@@ -153,8 +167,13 @@ const ProfileForm = ({ apiBase }: { apiBase: string }) => {
         return;
       }
 
+      const updateData = {
+        ...data,
+        ...(cropData && { cropPosition: JSON.stringify(cropData) }),
+      };
+
       const response = await studentService.updateStudent(
-        data,
+        updateData,
         selectedFile,
         classBookID,
         id,
@@ -504,6 +523,18 @@ const ProfileForm = ({ apiBase }: { apiBase: string }) => {
               width={200}
               height={200}
               file={selectedFile}
+              initialCropData={
+                cropData ||
+                (student?.user?.cropPosition
+                  ? (() => {
+                      try {
+                        return JSON.parse(student.user.cropPosition);
+                      } catch {
+                        return null;
+                      }
+                    })()
+                  : null)
+              }
               onUploadComplete={handleCropComplete}
               onCancel={handleCropCancel}
             />
