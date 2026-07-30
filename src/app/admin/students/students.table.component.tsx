@@ -30,7 +30,7 @@ import { SearchForm } from "./students.landingpage";
 import { Control } from "react-hook-form";
 import Link from "next/link";
 import AddIcon from "@mui/icons-material/Add";
-import { useImportStudentStore } from "@/store/preview-student-data";
+import { useImportStudentStore } from "@/store/preview-data";
 import Papa from "papaparse";
 import { StudentService } from "@/core/service/student.service";
 import { StudentRepository } from "@/infra/repositories/student.repository";
