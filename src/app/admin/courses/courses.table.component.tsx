@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useMemo, useRef } from "react";
+import React, { useState, useMemo } from "react";
 import {
   Table,
   TableBody,
@@ -37,8 +37,7 @@ import {
   ConfirmModalProps,
 } from "@/components/modal/confirmModal";
 import EmptyState from "@/components/emptyState";
-import Papa from "papaparse";
-import { useImportCourseStore } from "@/store/preview-course-data";
+import { CoursesUploadModal } from "@/app/admin/courses/courses.uploadFile";
 
 interface CourseTableComponentsProps {
   courses: ICourse[];
@@ -78,8 +77,7 @@ const CourseTableComponents = ({
   handleNextPage,
 }: CourseTableComponentsProps) => {
   const router = useRouter();
-  const inputRef = useRef<HTMLInputElement | null>(null);
-  const { setImportData } = useImportCourseStore();
+  const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
   const [isError, setIsError] = useState(false);
   const [confirmModal, setConfirmModal] = useState<ConfirmModalProps | null>(
     null,
@@ -89,23 +87,40 @@ const CourseTableComponents = ({
     return new CourseService(courseRepository);
   }, [apiBase]);
 
-  const handleClick = () => {
-    inputRef.current?.click();
-  };
+  const handleUploadCourses = async (data: ICreateCourseCsv[]) => {
+    try {
+      await Promise.all(
+        data.map((courseItem) => {
+          const formattedCourse = {
+            courseCode: courseItem.courseCode,
+            typeCourseID: Number(courseItem.typeCourseID),
+            courseNameTh: courseItem.courseNameTh,
+            courseNameEn: courseItem.courseNameEn,
+            credits: courseItem.credits,
+            detail: courseItem.detail,
+            curriculumID: courseItem.curriculumID,
+          };
+          return courseService.createCourse(formattedCourse);
+        }),
+      );
 
-  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (!e.target.files?.[0]) return;
-    const file = e.target.files[0];
-
-    Papa.parse(file, {
-      header: true,
-      skipEmptyLines: true,
-      complete: (result) => {
-        const data = result.data as ICreateCourseCsv[];
-        setImportData(data);
-        router.push(`/admin/courses/preview?curriculumID=${curriculumID}`);
-      },
-    });
+      setConfirmModal({
+        isOpen: true,
+        type: "success",
+        onClose: () => setConfirmModal(null),
+        onConfirm: () => {
+          setConfirmModal(null);
+          router.refresh();
+        },
+        title: "นำเข้าข้อมูลสำเร็จ",
+        description: "ข้อมูลรายวิชาจากไฟล์ถูกเพิ่มเข้าสู่ระบบเรียบร้อยแล้ว",
+        confirmText: "เสร็จสิ้น",
+      });
+      router.refresh();
+    } catch (error) {
+      console.error(error);
+      setIsError(true);
+    }
   };
 
   const handleEdit = (courseId: number) => {
@@ -209,23 +224,23 @@ const CourseTableComponents = ({
             </Button>
           </Link>
 
-          <input
-            type="file"
-            ref={inputRef}
-            hidden
-            accept=".csv"
-            onChange={handleFileChange}
-          />
           <Button
             variant="contained"
             size="large"
             startIcon={<AddIcon />}
-            onClick={handleClick}
+            onClick={() => setIsUploadModalOpen(true)}
           >
             เพิ่มรายวิชา (ไฟล์)
           </Button>
         </div>
       </div>
+
+      <CoursesUploadModal
+        isOpen={isUploadModalOpen}
+        onClose={() => setIsUploadModalOpen(false)}
+        onUpload={handleUploadCourses}
+      />
+      {confirmModal && <ConfirmModal {...confirmModal} />}
 
       <TableContainer component={Paper} sx={{ boxShadow: "none", flex: 1 }}>
         <Table stickyHeader sx={{ tableLayout: "fixed" }}>

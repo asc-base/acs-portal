@@ -16,7 +16,7 @@ import {
   Snackbar,
 } from "@mui/material";
 import { Delete } from "@mui/icons-material";
-import { useImportStudentStore } from "@/store/preview-student-data";
+import { useImportStudentStore } from "@/store/preview-data";
 import { useState, useMemo, useEffect } from "react";
 import { ICreateStudentCsv } from "@/core/domain/student";
 import { useRouter } from "next/navigation";

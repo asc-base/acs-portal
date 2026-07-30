@@ -59,9 +59,11 @@ export interface IUpdateCourse {
 
 export interface ICreateCourseCsv {
   courseCode: string;
+  typeCourseID: number;
   courseNameTh: string;
   courseNameEn: string;
   credits: string;
-  detail?: string;
-  typeCourseID?: number;
+  detail: string;
+  preCoursesID?: number[];
+  curriculumID: number;
 }
