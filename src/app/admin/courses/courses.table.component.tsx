@@ -19,7 +19,7 @@ import {
   Snackbar,
 } from "@mui/material";
 import { useRouter } from "next/navigation";
-import { ICourse, ICreateCourseCsv } from "@/core/domain/course";
+import { ICourse, ICreateCourse } from "@/core/domain/course";
 import { ArrowDownward, ArrowUpward, Edit, Delete } from "@mui/icons-material";
 import Link from "next/link";
 import { Control } from "react-hook-form";
@@ -87,7 +87,7 @@ const CourseTableComponents = ({
     return new CourseService(courseRepository);
   }, [apiBase]);
 
-  const handleUploadCourses = async (data: ICreateCourseCsv[]) => {
+  const handleUploadCourses = async (data: ICreateCourse[]) => {
     try {
       await Promise.all(
         data.map((courseItem) => {
