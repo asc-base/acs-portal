@@ -14,12 +14,12 @@ import {
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import Papa from "papaparse";
-import { ICreateCourseCsv } from "@/core/domain/course";
+import { ICreateCourse } from "@/core/domain/course";
 
 interface CoursesUploadModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onUpload: (data: ICreateCourseCsv[]) => void;
+  onUpload: (data: ICreateCourse[]) => void;
 }
 
 export const CoursesUploadModal = ({
@@ -78,7 +78,7 @@ export const CoursesUploadModal = ({
       header: true,
       skipEmptyLines: true,
       complete: (result) => {
-        const data = result.data as ICreateCourseCsv[];
+        const data = result.data as ICreateCourse[];
         onUpload(data);
         handleClose();
       },

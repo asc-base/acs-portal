@@ -56,14 +56,3 @@ export interface IUpdateCourse {
   newPrecourseId?: number[];
   deletePrecourseId?: number[];
 }
-
-export interface ICreateCourseCsv {
-  courseCode: string;
-  typeCourseID: number;
-  courseNameTh: string;
-  courseNameEn: string;
-  credits: string;
-  detail: string;
-  preCoursesID?: number[];
-  curriculumID: number;
-}
