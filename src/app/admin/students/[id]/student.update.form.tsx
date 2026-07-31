@@ -109,7 +109,7 @@ export const StudentUpdateForm = ({
     setSelectedFile(null);
   };
 
-  const onSubmit = async (data: IUpdateStudent) => {
+  const onSubmit = async (data: UpdateStudentInputs) => {
     try {
       const payload: IUpdateStudent = {
         firstNameTh: data.firstNameTh,
