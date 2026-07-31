@@ -22,7 +22,7 @@ import {
   ConfirmModalProps,
 } from "@/components/modal/confirmModal";
 import { useRouter } from "next/navigation";
-import { ProfessorInfoSchemaType, ProfessorInfoSchema } from "@/core/schema/professor";
+import { UpdateProfessorInputs, UpdateProfessorSchema } from "@/core/schema/professor";
 
 const VisuallyHiddenInput = styled("input")({
   clip: "rect(0 0 0 0)",
@@ -65,8 +65,8 @@ const ProfessorFormComponent = ({
     return new ProfessorService(professorRepository);
   }, [apiBase]);
 
-  const { control, handleSubmit, reset, formState: { isDirty } } = useForm<ProfessorInfoSchemaType>({
-    resolver: zodResolver(ProfessorInfoSchema),
+  const { control, handleSubmit, reset, formState: { isDirty } } = useForm<UpdateProfessorInputs>({
+    resolver: zodResolver(UpdateProfessorSchema),
     defaultValues: {
       firstNameTh: professor.user.firstNameTh || "",
       lastNameTh: professor.user.lastNameTh || "",
@@ -76,7 +76,7 @@ const ProfessorFormComponent = ({
       email: professor.user.email || "",
       academicPositionID: professor.academicPosition?.id || 1,
       profRoom: professor.profRoom || "",
-      education: [],
+      educations: [],
       expertFields: [],
     },
   });
@@ -91,7 +91,7 @@ const ProfessorFormComponent = ({
       email: professor.user.email || "",
       academicPositionID: professor.academicPosition?.id || 1,
       profRoom: professor.profRoom || "",
-      education: professor.educations?.map((e) => ({ value: e })) || [],
+      educations: professor.educations?.map((e) => ({ value: e })) || [],
       expertFields: professor.expertFields?.map((e) => ({ value: e })) || [],
     });
   }, [professor, reset]);
@@ -102,7 +102,7 @@ const ProfessorFormComponent = ({
     remove: removeEducation,
   } = useFieldArray({
     control,
-    name: "education",
+    name: "educations",
   });
 
   const {
@@ -155,7 +155,7 @@ const ProfessorFormComponent = ({
     setIsEdit(false);
   };
 
-  const onSubmit = async (data: ProfessorInfoSchemaType) => {
+  const onSubmit = async (data: UpdateProfessorInputs) => {
     setIsError(false);
     try {
       const updateData: IUpdateProfessor = {
@@ -165,11 +165,11 @@ const ProfessorFormComponent = ({
         phone: data.phone,
         firstNameTh: data.firstNameTh,
         lastNameTh: data.lastNameTh,
-        firstNameEn: data.firstNameEn,
-        lastNameEn: data.lastNameEn,
+        firstNameEn: data.firstNameEn ?? "",
+        lastNameEn: data.lastNameEn ?? "",
         email: data.email,
         expertFields: data.expertFields.map((e) => e.value).join("/"),
-        educations: data.education.map((e) => e.value).join("/"),
+        educations: data.educations.map((e) => e.value).join("/"),
       };
 
       const res = await professorService.updateProfessor(
@@ -449,7 +449,7 @@ const ProfessorFormComponent = ({
               <div className="flex-1">
                 <RHFTextField
                   control={control}
-                  name={`education.${index}.value`}
+                  name={`educations.${index}.value`}
                   label="ระดับการศึกษา"
                   fullWidth
                   placeholder="ระบุลำดับการศึกษา เช่น B.Sc. Mathematics King Mongkut's University of Technology Thonburi"

@@ -1,31 +1,28 @@
 import z from "zod";
+import { CommonUserFields } from "./user";
 
-export const ProfessorCreateSchema = z.object({
-  firstNameEn: z.string().trim().regex(/^[a-zA-Z\s]*$/, "กรุณากรอกเป็นภาษาอังกฤษเท่านั้น").optional().or(z.literal("")),
-  firstNameTh: z.string().trim().min(1, "กรุณากรอกชื่อภาษาไทย").regex(/^[ก-๙\s]+$/, "กรุณากรอกเป็นภาษาไทยเท่านั้น"),
-  lastNameEn: z.string().trim().regex(/^[a-zA-Z\s]*$/, "กรุณากรอกเป็นภาษาอังกฤษเท่านั้น").optional().or(z.literal("")),
-  lastNameTh: z.string().trim().min(1, "กรุณากรอกนามสกุลภาษาไทย").regex(/^[ก-๙\s]+$/, "กรุณากรอกเป็นภาษาไทยเท่านั้น"),
+export const CommonProfessorFields = z.object({
   phone: z.string().trim().regex(/^0[0-9]{8,9}$/, "เบอร์โทรต้องเป็นตัวเลข 9-10 หลัก และขึ้นต้นด้วย 0"),
-  email: z.string().trim().lowercase().email("อีเมลไม่ถูกต้อง"),
+  profRoom: z.string().trim().min(1, "กรุณากรอกชื่อห้อง"),
+});
+
+export const CreateProfessorSchema = z.object({
   academicPositionID: z.number().nullable().refine((v) => v !== null, {message: "กรุณากรอกตำแหน่ง",}),
   educations: z.array(z.object({value: z.string().trim().min(1, "กรุณากรอกข้อมูล"),}),),
   expertFields: z.array(z.object({value: z.string().trim().min(1, "กรุณากรอกข้อมูล"),}),),
-  profRoom: z.string().min(1, "กรุณากรอกชื่อห้อง"),
+  ...CommonUserFields.shape,
+  ...CommonProfessorFields.shape,
 });
 
 
-export const ProfessorInfoSchema = z.object({
-  firstNameTh: z.string().trim().min(1, "กรุณากรอกชื่อ (ภาษาไทย)").regex(/^[ก-๙\s]+$/, "กรุณากรอกเป็นภาษาไทยเท่านั้น"),
-  lastNameTh: z.string().trim().min(1, "กรุณากรอกนามสกุล (ภาษาไทย)").regex(/^[ก-๙\s]+$/, "กรุณากรอกเป็นภาษาไทยเท่านั้น"),
-  firstNameEn: z.string().trim().min(1, "กรุณากรอกชื่อ (ภาษาอังกฤษ)").regex(/^[a-zA-Z\s]+$/, "กรุณากรอกเป็นภาษาอังกฤษเท่านั้น"),
-  lastNameEn: z.string().trim().min(1, "กรุณากรอกนามสกุล (ภาษาอังกฤษ)").regex(/^[a-zA-Z\s]+$/, "กรุณากรอกเป็นภาษาอังกฤษเท่านั้น"),
-  phone: z.string().trim().regex(/^0[0-9]{8,9}$/, "เบอร์โทรต้องเป็นตัวเลข 9-10 หลัก และขึ้นต้นด้วย 0"),
-  email: z.string().trim().lowercase().email("รูปแบบอีเมลไม่ถูกต้อง"),
+export const UpdateProfessorSchema = z.object({
   academicPositionID: z.number().min(1, "กรุณากรอกตำแหน่ง"),
-  profRoom: z.string().min(1, "กรุณากรอกห้องพักอาจารย์"),
-  education: z.array(z.object({value: z.string().trim().min(1, "กรุณากรอกข้อมูล"),}),),
+  educations: z.array(z.object({value: z.string().trim().min(1, "กรุณากรอกข้อมูล"),}),),
   expertFields: z.array(z.object({value: z.string().trim().min(1, "กรุณากรอกข้อมูล"),}),),
+  ...CommonUserFields.shape,
+  ...CommonProfessorFields.shape,
 });
 
-export type ProfessorCreateSchemaType = z.infer<typeof ProfessorCreateSchema>;
-export type ProfessorInfoSchemaType = z.infer<typeof ProfessorInfoSchema>;
+export type CommonProfessorInputs = z.infer<typeof CommonProfessorFields>;
+export type CreateProfessorInputs = z.infer<typeof CreateProfessorSchema>;
+export type UpdateProfessorInputs = z.infer<typeof UpdateProfessorSchema>;

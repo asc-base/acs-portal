@@ -24,7 +24,7 @@ import {
 } from "@/components/modal/confirmModal";
 import AddCircleOutlineRoundedIcon from "@mui/icons-material/AddCircleOutlineRounded";
 import { CropImageCard } from "@/components/cropimagecard";
-import { ProfessorCreateSchemaType, ProfessorCreateSchema } from "@/core/schema/professor";
+import { CreateProfessorInputs, CreateProfessorSchema } from "@/core/schema/professor";
 
 interface FormProfessorsProps {
   apiBase: string;
@@ -66,8 +66,8 @@ export const FormProfesssors: FC<FormProfessorsProps> = ({ apiBase }) => {
     control,
     handleSubmit,
     formState: { isValid, isDirty },
-  } = useForm<ProfessorCreateSchemaType>({
-    resolver: zodResolver(ProfessorCreateSchema),
+  } = useForm<CreateProfessorInputs>({
+    resolver: zodResolver(CreateProfessorSchema),
     defaultValues: {
       academicPositionID: null,
       educations: [],
@@ -125,7 +125,7 @@ export const FormProfesssors: FC<FormProfessorsProps> = ({ apiBase }) => {
     } else router.push(`/admin/professors`);
   };
 
-  const onSubmit = async (data: ProfessorCreateSchemaType) => {
+  const onSubmit = async (data: CreateProfessorInputs) => {
     setIsError(false);
     try {
       const payload: ICreateProfessor = {
