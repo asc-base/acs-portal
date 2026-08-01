@@ -11,14 +11,21 @@ import {
 } from "@mui/material";
 import Image from "next/image";
 import { Controller, useForm } from "react-hook-form";
-import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { CropImageCard } from "./cropimagecard";
 import { NewsRepository } from "@/infra/repositories/news.repository";
 import { NewsService } from "@/core/service/news.service";
 import { useRouter } from "next/navigation";
-import { ConfirmModal, ConfirmModalProps } from "@/components/modal/confirmModal";
+import {
+  ConfirmModal,
+  ConfirmModalProps,
+} from "@/components/modal/confirmModal";
 import { styled } from "@mui/material/styles";
+import {
+  UpsertNewsInformationInputs,
+  UpsertNewsInformationSchema,
+} from "@/core/schema/news";
+import { IUpsertNewsFeature } from "@/core/domain/news";
 
 interface NewsInformationFormProps {
   type: string;
@@ -30,13 +37,6 @@ type NewsItem = {
   id: number;
   title: string;
 };
-
-const Schema = z.object({
-  thumbnail: z.instanceof(File, { message: "กรุณาอัปโหลดรูปภาพ" }),
-  newsID: z.number().min(1, "กรุณาเลือกข่าว"),
-});
-
-type FormValues = z.infer<typeof Schema>;
 
 const VisuallyHiddenInput = styled("input")({
   clip: "rect(0 0 0 0)",
@@ -78,12 +78,13 @@ export const NewsInformationForm = ({
     handleSubmit,
     setValue,
     formState: { errors, isDirty },
-  } = useForm<FormValues>({
-    resolver: zodResolver(Schema),
+  } = useForm<UpsertNewsInformationInputs>({
+    resolver: zodResolver(UpsertNewsInformationSchema),
     mode: "onChange",
     defaultValues: {
       thumbnail: undefined,
       newsID: 0,
+      tagID,
     },
   });
 
@@ -98,14 +99,15 @@ export const NewsInformationForm = ({
     } else router.push(`/admin/newsinformation/${tagID}`);
   };
 
-  const onSubmit = async (data: FormValues) => {
+  const onSubmit = async (data: UpsertNewsInformationInputs) => {
     try {
-      const formData = new FormData();
-      formData.append("thumbnail", data.thumbnail);
-      formData.append("newsID", data.newsID.toString());
-      formData.append("tagID", tagID.toString());
+      const payload: IUpsertNewsFeature = {
+        thumbnail: data.thumbnail,
+        newsID: data.newsID,
+        tagID,
+      };
 
-      const response = await newsService.upsertNewsInformation(formData);
+      const response = await newsService.upsertNewsInformation(payload);
 
       if (response) {
         setConfirmModal({
@@ -126,12 +128,15 @@ export const NewsInformationForm = ({
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+
     setSelectedFile(file);
+    e.target.value = "";
     setOpen(true);
   };
 
   const handleUploadComplete = (file: File) => {
     setCroppedFile(file);
+    setSelectedFile(null);
 
     setValue("thumbnail", file, {
       shouldValidate: true,
@@ -141,11 +146,19 @@ export const NewsInformationForm = ({
     setOpen(false);
   };
 
-  const handleSearch = async ( search: string) => {
+  const handleSearch = async (search: string) => {
     setLoading(true);
     try {
-      const { rows } = await newsService.getNews(1, 10, undefined, undefined, undefined, search);
-      setOptions(rows);
+      const response = await newsService.getNews(
+        1,
+        10,
+        undefined,
+        undefined,
+        undefined,
+        search || undefined,
+        "title",
+      );
+      setOptions(response.rows);
     } finally {
       setLoading(false);
     }
@@ -252,7 +265,7 @@ export const NewsInformationForm = ({
             บันทึกข้อมูล
           </Button>
         </div>
-        
+
         {confirmModal && <ConfirmModal {...confirmModal} />}
       </form>
     </div>
