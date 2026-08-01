@@ -9,6 +9,7 @@ interface PageProps {
   searchParams: Promise<{
     page?: number;
     pageSize?: number;
+    academicPosition?: string;
   }>;
 }
 
@@ -18,6 +19,7 @@ const page = async ({ searchParams }: PageProps) => {
   const { rows, pageSize, page } = await professorService.getProfessors({
     page: resolvedSearchParams.page || 1,
     pageSize: resolvedSearchParams.pageSize || 12,
+    academicPosition: "true"
   });
 
   return (
