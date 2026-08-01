@@ -19,7 +19,7 @@ import {
   Snackbar,
 } from "@mui/material";
 import { useRouter } from "next/navigation";
-import { ICourse, ICreateCourse } from "@/core/domain/course";
+import { ICourse } from "@/core/domain/course";
 import { ArrowDownward, ArrowUpward, Edit, Delete } from "@mui/icons-material";
 import Link from "next/link";
 import { Control } from "react-hook-form";
