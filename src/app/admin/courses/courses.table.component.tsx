@@ -78,7 +78,7 @@ const CourseTableComponents = ({
 }: CourseTableComponentsProps) => {
   const router = useRouter();
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
-  const [isError, setIsError] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
   const [confirmModal, setConfirmModal] = useState<ConfirmModalProps | null>(
     null,
   );
@@ -86,42 +86,6 @@ const CourseTableComponents = ({
     const courseRepository = new CourseRepository(apiBase);
     return new CourseService(courseRepository);
   }, [apiBase]);
-
-  const handleUploadCourses = async (data: ICreateCourse[]) => {
-    try {
-      await Promise.all(
-        data.map((courseItem) => {
-          const formattedCourse = {
-            courseCode: courseItem.courseCode,
-            typeCourseID: Number(courseItem.typeCourseID),
-            courseNameTh: courseItem.courseNameTh,
-            courseNameEn: courseItem.courseNameEn,
-            credits: courseItem.credits,
-            detail: courseItem.detail,
-            curriculumID: courseItem.curriculumID,
-          };
-          return courseService.createCourse(formattedCourse);
-        }),
-      );
-
-      setConfirmModal({
-        isOpen: true,
-        type: "success",
-        onClose: () => setConfirmModal(null),
-        onConfirm: () => {
-          setConfirmModal(null);
-          router.refresh();
-        },
-        title: "นำเข้าข้อมูลสำเร็จ",
-        description: "ข้อมูลรายวิชาจากไฟล์ถูกเพิ่มเข้าสู่ระบบเรียบร้อยแล้ว",
-        confirmText: "เสร็จสิ้น",
-      });
-      router.refresh();
-    } catch (error) {
-      console.error(error);
-      setIsError(true);
-    }
-  };
 
   const handleEdit = (courseId: number) => {
     router.push(`/admin/courses/${courseId}?curriculumID=${curriculumID}`);
@@ -143,7 +107,7 @@ const CourseTableComponents = ({
     try {
       const reps = await courseService.deleteCourse(courseId);
       if (!reps) {
-        setIsError(true);
+        setErrorMessage("ไม่สามารถลบรายวิชาได้");
         return;
       }
       setConfirmModal({
@@ -160,19 +124,19 @@ const CourseTableComponents = ({
       });
     } catch (error) {
       console.error(error);
-      setIsError(true);
+      setErrorMessage("ไม่สามารถลบรายวิชาได้");
     }
   };
 
   const handleCloseAlert = () => {
-    setIsError(false);
+    setErrorMessage("");
   };
 
   return (
     <Card sx={{ height: 700, display: "flex", flexDirection: "column" }}>
       <Snackbar
         anchorOrigin={{ vertical: "top", horizontal: "right" }}
-        open={isError}
+        open={!!errorMessage}
         autoHideDuration={4000}
         onClose={handleCloseAlert}
       >
@@ -181,7 +145,7 @@ const CourseTableComponents = ({
           onClose={handleCloseAlert}
           sx={{ width: "100%" }}
         >
-          ไม่สามารถลบรายวิชาได้
+          {errorMessage}
         </Alert>
       </Snackbar>
       <div className="flex items-center justify-between p-6">
@@ -218,15 +182,17 @@ const CourseTableComponents = ({
             ))}
           </Select>
 
-          <Link href={`/admin/courses/create?curriculumID=${curriculumID}`}>
-            <Button variant="contained" startIcon={<AddIcon />}>
-              เพิ่มรายวิชาใหม่
-            </Button>
-          </Link>
+          <Button
+            component={Link}
+            href={`/admin/courses/create?curriculumID=${curriculumID}`}
+            variant="contained"
+            startIcon={<AddIcon />}
+          >
+            เพิ่มรายวิชาใหม่
+          </Button>
 
           <Button
             variant="contained"
-            size="large"
             startIcon={<AddIcon />}
             onClick={() => setIsUploadModalOpen(true)}
           >
@@ -238,7 +204,6 @@ const CourseTableComponents = ({
       <CoursesUploadModal
         isOpen={isUploadModalOpen}
         onClose={() => setIsUploadModalOpen(false)}
-        onUpload={handleUploadCourses}
       />
       {confirmModal && <ConfirmModal {...confirmModal} />}
 
@@ -361,7 +326,6 @@ const CourseTableComponents = ({
           />
         </div>
       )}
-      {confirmModal && <ConfirmModal {...confirmModal} />}
     </Card>
   );
 };
