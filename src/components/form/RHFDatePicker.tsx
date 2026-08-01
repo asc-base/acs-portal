@@ -38,7 +38,8 @@ export function RHFDatePickerDayjs<T extends FieldValues>({
         <Stack spacing={0.5}>
           {label && (
             <FormLabel>
-              {requiredMark || required ? `${label} *` : label}
+              {label}
+              {(requiredMark || required) && <span className="text-accent04 ml-1">*</span>}
             </FormLabel>
           )}
 

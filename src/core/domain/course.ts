@@ -27,7 +27,7 @@ export interface QueryCourse {
   page?: number;
   pageSize?: number;
   prerequisite?: boolean;
-  curriculumID: number;
+  curriculumID?: number;
   typeCourseID?: number;
   search?: string;
   orderBy?: string;

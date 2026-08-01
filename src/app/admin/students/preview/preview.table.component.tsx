@@ -15,7 +15,7 @@ import {
   AlertTitle,
   Snackbar,
 } from "@mui/material";
-import { Edit, Delete } from "@mui/icons-material";
+import { Delete } from "@mui/icons-material";
 import { useImportStudentStore } from "@/store/preview-data";
 import { useState, useMemo, useEffect } from "react";
 import { ICreateStudentCsv } from "@/core/domain/student";
@@ -99,9 +99,6 @@ export default function Preview_table_component({
     });
   };
 
-  const editStudentRowById = (studentId: string) => {
-    console.log(`edit student id ${studentId}`);
-  };
 
   const onSubmit = async () => {
     const cleanedStudents = students.map((s) => ({
@@ -111,7 +108,7 @@ export default function Preview_table_component({
       firstNameEn: s.firstNameEn.trim(),
       lastNameEn: s.lastNameEn.trim(),
       email: s.email.trim(),
-      studentCode:  s.studentCode.trim(),
+      studentCode: s.studentCode.trim(),
     }));
 
     const result = z.array(studentSchema).safeParse(cleanedStudents);
@@ -213,7 +210,7 @@ export default function Preview_table_component({
                 <TableCell align="center">
                   <h3 className="font-bold">อีเมล</h3>
                 </TableCell>
-                <TableCell/>
+                <TableCell />
               </TableRow>
             </TableHead>
 
@@ -299,7 +296,9 @@ export default function Preview_table_component({
         <Button
           variant="contained"
           size="large"
-          onClick={() => router.push("/admin/students?classBookID=2")}
+          onClick={() =>
+            router.push(`/admin/students?classBookID=${classBookID}`)
+          }
         >
           ย้อนกลับ
         </Button>

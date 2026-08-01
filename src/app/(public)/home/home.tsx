@@ -90,7 +90,7 @@ const HomePage = ({
   };
 
   const showActivitySection = initNewsActivity && initNewsActivity.length > 0;
-  const showAnnouncementSection = initAnnoucement && initAnnoucement.length > 0;
+  const showAnnouncementSection = initAnnoucement;
 
   return (
     <div>
@@ -105,7 +105,7 @@ const HomePage = ({
             <div className="flex flex-col-reverse gap-x-6 gap-y-6 md:grid md:grid-cols-2">
               {showActivitySection ? (
                 <div>
-                  <h3 className="text-accent04 lg:text-h1 mb-3 items-baseline font-bold">
+                  <h3 className="text-accent04 lg:text-h1-1 mb-3 items-baseline font-bold"> 
                     งานกิจกรรมเร็ว ๆ นี้
                   </h3>
                   <div className="flex flex-col gap-y-3 md:[&>*:nth-child(n+3)]:hidden lg:[&>*:nth-child(n+3)]:block [&>*:nth-child(n+5)]:hidden">
@@ -124,7 +124,7 @@ const HomePage = ({
 
               {showAnnouncementSection && (
                 <div>
-                  <h3 className="text-accent04 mb-3 items-baseline font-bold lg:text-[32px]">
+                  <h3 className="text-accent04 mb-3 items-baseline font-bold lg:text-h1-1">
                     ประชาสัมพันธ์สำคัญ
                   </h3>
                   <div className="h-full">

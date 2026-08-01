@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import { Button, Slider } from "@mui/material";
 import ImageIcon from "@mui/icons-material/Image";
 
@@ -53,8 +53,8 @@ export const CropImageCard = ({
     img.onload = () => {
       imgRef.current = img;
 
-      const scaleX = CONTAINER.w / img.naturalWidth;
-      const scaleY = CONTAINER.h / img.naturalHeight;
+      const scaleX = width / img.naturalWidth;
+      const scaleY = height / img.naturalHeight;
 
       // cover container
       baseScaleRef.current = Math.max(scaleX, scaleY);
@@ -77,7 +77,7 @@ export const CropImageCard = ({
   // =========================
   // CLAMP POSITION
   // =========================
-  const clampPosition = (
+  const clampPosition = useCallback((
     x: number,
     y: number,
     currentZoom = zoomRef.current,
@@ -93,15 +93,15 @@ export const CropImageCard = ({
     const scaledW = img.naturalWidth * scale;
     const scaledH = img.naturalHeight * scale;
 
-    const maxX = Math.max(0, (scaledW - CONTAINER.w) / 2);
+    const maxX = Math.max(0, (scaledW - width) / 2);
 
-    const maxY = Math.max(0, (scaledH - CONTAINER.h) / 2);
+    const maxY = Math.max(0, (scaledH - height) / 2);
 
     return {
       x: Math.max(-maxX, Math.min(maxX, x)),
       y: Math.max(-maxY, Math.min(maxY, y)),
     };
-  };
+  }, [width, height]);
 
   // =========================
   // UPDATE ZOOM
@@ -140,7 +140,7 @@ export const CropImageCard = ({
       document.removeEventListener("mousemove", move);
       document.removeEventListener("mouseup", up);
     };
-  }, []);
+  }, [clampPosition]);
 
   const handleMouseDown = (e: React.MouseEvent) => {
     isDragging.current = true;
@@ -292,6 +292,7 @@ export const CropImageCard = ({
           onTouchEnd={handleTouchEnd}
         >
           {previewUrl && (
+            /* eslint-disable-next-line @next/next/no-img-element */
             <img
               src={previewUrl}
               alt="preview"

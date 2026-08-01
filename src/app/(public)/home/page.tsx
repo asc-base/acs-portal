@@ -20,7 +20,7 @@ const MainPage = async () => {
     newsService.getNews(1, 6, 16).catch(() => ({ rows: [] })),
     newsService.getNews(1, 6, 17).catch(() => ({ rows: [] })),
     newsService.getNews(1, 6, 18).catch(() => ({ rows: [] })),
-    newsService.getNewsInformations(1, 6, 19).catch(() => ({ rows: [] })),
+    newsService.getNewsInformations(1, 6, 25).catch(() => ({ rows: [] })),
     // newsService.getNewsInformations("newshighlight", 1, 5).catch(() => []),
   ]);
 

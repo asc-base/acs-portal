@@ -2,6 +2,7 @@ import React from "react";
 import { projectService } from "@/infra/container";
 import ProjectListComponents from "./project.list.component";
 import { QueryProject } from "@/core/domain/project";
+import { baseUrl } from "@/infra/container";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -20,7 +21,8 @@ const page = async ({ searchParams }: PageProps) => {
     sortOrder: resolvedSearchParams.sortOrder ?? "desc",
     search: resolvedSearchParams.search ?? "",
   };
-  const { rows, totalRecords, pageSize, page } = await projectService.getProjects(query);
+  const { rows, totalRecords, pageSize, page } =
+    await projectService.getProjects(query);
   return (
     <ProjectListComponents
       projects={rows}
@@ -28,9 +30,10 @@ const page = async ({ searchParams }: PageProps) => {
       pageSize={pageSize}
       page={page}
       sortOrder={query.sortOrder}
+      search={query.search}
+      apiBase={baseUrl}
     />
   );
 };
 
 export default page;
-

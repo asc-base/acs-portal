@@ -30,6 +30,7 @@ import {
 import Alert from "@mui/material/Alert";
 import Snackbar from "@mui/material/Snackbar";
 import { Tag } from "@/core/domain/list-type";
+import EmptyState from "@/components/emptyState";
 
 interface NewsListComponentProps {
   news: INews[];
@@ -228,18 +229,26 @@ const NewsListComponent = (initValue: NewsListComponentProps) => {
       </div>
 
       <div className="flex w-full flex-1 flex-col items-center">
-        <div className="grid w-full grid-cols-3 justify-items-center gap-6">
-          {initValue.news.map((news) => (
-            <AdminCard
-              key={news.id}
-              type="news"
-              data={news}
-              onView={() => router.push(`/admin/news/${news.id}`)}
-              onDelete={() => confirmDeleteNews(news.id)}
+        {initValue.news.length === 0 ? (
+          <div className="flex w-full flex-1 items-center justify-center">
+            <EmptyState
+              title="ไม่พบข้อมูลข่าวสารในขณะนี้"
+              description="ไม่พบข้อมูลข่าวสาร หรือข่าวสารที่ค้นหา"
             />
-          ))}
-        </div>
-
+          </div>
+        ) : (
+          <div className="grid w-full grid-cols-3 justify-items-center gap-6">
+            {initValue.news.map((news) => (
+              <AdminCard
+                key={news.id}
+                type="news"
+                data={news}
+                onView={() => router.push(`/admin/news/${news.id}`)}
+                onDelete={() => confirmDeleteNews(news.id)}
+              />
+            ))}
+          </div>
+        )}
         {initValue.totalRecords > 0 && (
           <div className="mt-auto pt-10">
             <Pagination

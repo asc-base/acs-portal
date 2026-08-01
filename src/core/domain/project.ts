@@ -1,18 +1,23 @@
 import { IStudent } from "./student";
 import { ListType } from "@/interface/type";
 import { ICourse } from "./course";
+import { IUser } from "./user";
 
 export interface IProject {
   id: number;
   title: string;
-  thumbnail: string;
-  detail: string;
-  github: string;
-  presentation: string;
-  document: string;
-  figma: string;
-  youtube: string;
-  projectAssets: IProjectAssets[];
+  thumbnailURL: string;
+  details: string;
+  githubURL: string;
+  presentationURL: string;
+  documentURL: string;
+  figmaURL: string;
+  youtubeURL: string;
+  assetsURL: string[];
+  techStacks: string[];
+  member: IUser[];
+  tag: ListType[];
+  course: ICourse[];
   projectMembers: IStudent[];
   projectCategories: ListType[];
   projectFields: ListType[];
@@ -27,15 +32,16 @@ export interface IProject {
 
 export interface ICreateProject {
   title: string;
-  thumbnail: string;
-  detail: string;
-  youtube: string;
-  projectCourses: string[];
-  projectTypes: string[];
-  projectCategories: string[];
-  github: string;
-  document: string;
-  presentation: string;
+  details: string;
+  youtubeURL: string;
+  githubURL: string;
+  documentURL: string;
+  presentationURL: string;
+  figmaURL: string | null;
+  coursesID: number[];
+  tagsID: number[];
+  techStacks: string[];
+  members: { userID: number; roleID: number }[];
 }
 
 export interface QueryProject {

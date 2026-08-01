@@ -9,6 +9,26 @@ export const Theme = createTheme({
       main: "#dc004e",
     },
   },
+  typography: {
+    h1: {
+      fontSize: "var(--text-h1)",
+    },
+    h2: {
+      fontSize: "var(--text-h2)",
+    },
+    h3: {
+      fontSize: "var(--text-h3)",
+    },
+    h4: {
+      fontSize: "var(--text-h4)",
+    },
+    h5: {
+      fontSize: "var(--text-h5)",
+    },
+    h6: {
+      fontSize: "var(--text-h6)",
+    },
+  },
   components: {
     MuiButton: {
       styleOverrides: {
@@ -33,10 +53,11 @@ export const Theme = createTheme({
               borderColor: "var(--color-primary03)",
               borderWidth: 3,
             },
-            "&:hover:not(.Mui-focused):not(.Mui-disabled) .MuiOutlinedInput-notchedOutline": {
-              borderColor: "var(--color-primary04)",
-              borderWidth: 1,
-            },
+            "&:hover:not(.Mui-focused):not(.Mui-disabled) .MuiOutlinedInput-notchedOutline":
+              {
+                borderColor: "var(--color-primary04)",
+                borderWidth: 1,
+              },
             "& .MuiOutlinedInput-notchedOutline": {
               borderColor: "var(--color-neutral03)",
               borderWidth: 1,

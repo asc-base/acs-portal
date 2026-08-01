@@ -5,9 +5,8 @@ import { INews } from "@/core/domain/news";
 import EmptyState from "./emptyState";
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
-import DescriptionOutlinedIcon from "@mui/icons-material/DescriptionOutlined";
-import EmojiEventsOutlinedIcon from "@mui/icons-material/EmojiEventsOutlined";
-import SportsKabaddiOutlinedIcon from "@mui/icons-material/SportsKabaddiOutlined";
+
+
 
 interface NewsCarouselComponentProps {
   news: INews[];
@@ -33,23 +32,20 @@ const EmptyStateMap: Record<
   {
     title: string;
     description?: string;
-    icon: React.ElementType;
+    icon?: React.ElementType;
   }
 > = {
   news: {
     title: "ไม่พบข้อมูลข่าวสารในขณะนี้",
     description: "เมื่อมีข่าวสารใหม่ๆ ข้อมูลจะปรากฏที่นี่",
-    icon: DescriptionOutlinedIcon,
   },
   achievement: {
     title: "ไม่พบข้อมูลความสำเร็จในขณะนี้",
     description: "เมื่อมีข่าวสารใหม่ๆ ข้อมูลจะปรากฏที่นี่",
-    icon: EmojiEventsOutlinedIcon,
   },
   activity: {
     title: "ไม่พบข้อมูลกิจกรรมในขณะนี้",
     description: "เมื่อมีข่าวสารใหม่ๆ ข้อมูลจะปรากฏที่นี่",
-    icon: SportsKabaddiOutlinedIcon,
   },
 };
 
@@ -72,18 +68,18 @@ export const NewsCarouselComponent = ({
       <div>
         <div className="flex items-center justify-between">
           <h3 className="text-accent04 font-bold lg:text-[24px]">{title}</h3>
-           <Link
-          href={`/news?category=${title}&page=1&pageSize=12&tagId=${tagId}`}
-          className="flex items-center gap-x-1"
-        >
-          อ่านทั้งหมด
-          <span>
-            <ChevronRightIcon fontSize="small" />
-          </span>
-        </Link>
+          <Link
+            href={`/news?category=${title}&page=1&pageSize=12&tagId=${tagId}`}
+            className="flex items-center gap-x-1"
+          >
+            อ่านทั้งหมด
+            <span>
+              <ChevronRightIcon fontSize="small" />
+            </span>
+          </Link>
         </div>
 
-         <EmptyState
+        <EmptyState
           title={emptyStateConfig.title}
           description={emptyStateConfig.description}
           icon={emptyStateConfig.icon}

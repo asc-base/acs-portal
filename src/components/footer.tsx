@@ -2,7 +2,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import LOGOACS from "../../public/logoacs.png";
-import FacebookRoundedIcon from "@mui/icons-material/FacebookRounded";
+import FacebookIcon from "@mui/icons-material/Facebook";
 import InstagramIcon from "@mui/icons-material/Instagram";
 import YouTubeIcon from "@mui/icons-material/YouTube";
 import { ICurriculum } from "@/core/domain/curriculum";
@@ -13,7 +13,7 @@ interface FooterProps {
 export const Footer = ({ curriculums = [] }: FooterProps) => {
   const linkIcons = [
     {
-      icon: <FacebookRoundedIcon />,
+      icon: <FacebookIcon />,
       href: "https://www.facebook.com/profile.php?id=100086247692906",
     },
     {
@@ -157,7 +157,7 @@ export const Footer = ({ curriculums = [] }: FooterProps) => {
               <h5 className="text-neutral01">Sola.Kmutt</h5>
             </Link>
             <Link
-              href="https://science.kmutt.ac.th/สำนักงานคณะบดีฯ/"
+              href="https://science.kmutt.ac.th/%e0%b8%aa%e0%b8%b3%e0%b8%99%e0%b8%b1%e0%b8%81%e0%b8%87%e0%b8%b2%e0%b8%99%e0%b8%84%e0%b8%93%e0%b8%9a%e0%b8%94%e0%b8%b5%e0%b8%af/"
               target="_blank"
               rel="noopener noreferrer"
             >

@@ -89,7 +89,7 @@ const ProfessorFormComponent = ({
     return new ProfessorService(professorRepository);
   }, [apiBase]);
 
-  const { control, handleSubmit, reset, formState: { isValid, isDirty } } = useForm<FormValues>({
+  const { control, handleSubmit, reset, formState: { isDirty } } = useForm<FormValues>({
     resolver: zodResolver(Schema),
     defaultValues: {
       firstNameTh: professor.user.firstNameTh || "",
