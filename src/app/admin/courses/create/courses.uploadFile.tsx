@@ -15,21 +15,19 @@ import {
 import CloseIcon from "@mui/icons-material/Close";
 import Papa from "papaparse";
 import { ICreateCourse } from "@/core/domain/course";
+import FileDownloadOutlinedIcon from "@mui/icons-material/FileDownloadOutlined";
 
 interface CoursesUploadModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onUpload: (data: ICreateCourse[]) => void;
 }
 
 export const CoursesUploadModal = ({
   isOpen,
   onClose,
-  onUpload,
 }: CoursesUploadModalProps) => {
   const [dragActive, setDragActive] = useState(false);
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [isError, setIsError] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
 
   const handleDrag = (e: React.DragEvent) => {
@@ -56,42 +54,39 @@ export const CoursesUploadModal = ({
     if (e.target.files && e.target.files[0]) {
       handleFile(e.target.files[0]);
     }
+
+    if (inputRef.current) {
+      inputRef.current.value = "";
+    }
   };
 
   const handleFile = (file: File) => {
     if (file.name.endsWith(".csv") || file.type === "text/csv") {
       if (file.size > 25 * 1024 * 1024) {
-        setIsError("ไฟล์มีขนาดใหญ่เกิน 25 MB");
+        setErrorMessage("ไฟล์มีขนาดใหญ่เกิน 25 MB");
         return;
       }
-      setSelectedFile(file);
-      setIsError("");
+      setErrorMessage("");
+      Papa.parse(file, {
+        header: true,
+        skipEmptyLines: true,
+        complete: (result) => {
+          const data = result.data as ICreateCourse[];
+          console.log("ข้อมูลจาก CSV:", data);
+          handleClose();
+        },
+      });
     } else {
-      setIsError("กรุณาอัปโหลดไฟล์ CSV เท่านั้น");
+      setErrorMessage("กรุณาอัปโหลดไฟล์ CSV เท่านั้น");
     }
   };
 
-  const handleImport = () => {
-    if (!selectedFile) return;
-
-    Papa.parse(selectedFile, {
-      header: true,
-      skipEmptyLines: true,
-      complete: (result) => {
-        const data = result.data as ICreateCourse[];
-        onUpload(data);
-        handleClose();
-      },
-    });
-  };
-
   const handleCloseAlert = () => {
-    setIsError("");
+    setErrorMessage("");
   };
 
   const handleClose = () => {
-    setSelectedFile(null);
-    setIsError("");
+    setErrorMessage("");
     onClose();
   };
 
@@ -103,7 +98,7 @@ export const CoursesUploadModal = ({
     <Dialog open={isOpen} onClose={handleClose} maxWidth="sm" fullWidth>
       <Snackbar
         anchorOrigin={{ vertical: "top", horizontal: "right" }}
-        open={!!isError}
+        open={!!errorMessage}
         autoHideDuration={4000}
         onClose={handleCloseAlert}
       >
@@ -112,7 +107,7 @@ export const CoursesUploadModal = ({
           onClose={handleCloseAlert}
           sx={{ width: "100%" }}
         >
-          {isError}
+          {errorMessage}
         </Alert>
       </Snackbar>
       <DialogTitle
@@ -161,73 +156,32 @@ export const CoursesUploadModal = ({
             style={{ display: "none" }}
           />
 
-          {!selectedFile ? (
-            <>
-              <Typography variant="body1" fontWeight="bold" gutterBottom>
-                ลากแล้ววาง
-              </Typography>
-              <Typography
-                variant="body2"
-                sx={{ color: "var(--color-neutral05)" }}
-                gutterBottom
-              >
-                สามารถอัปโหลดได้เฉพาะไฟล์ CSV (ขนาดสูงสุดไม่เกิน 25 MB)
-              </Typography>
-              <Button variant="outlined" onClick={onButtonClick} sx={{ mt: 2 }}>
-                หรือเลือกจากไฟล์
-              </Button>
-            </>
-          ) : (
-            <>
-              <Typography variant="body1" fontWeight="bold" gutterBottom>
-                ไฟล์ที่เลือก:
-              </Typography>
-              <Typography
-                variant="body2"
-                sx={{ color: "var(--color-primary05)" }}
-                gutterBottom
-              >
-                {selectedFile.name}
-              </Typography>
-              <Button
-                variant="outlined"
-                sx={{
-                  color: "var(--color-accent03)",
-                  borderColor: "var(--color-accent03)",
-                  mt: 2,
-                }}
-                onClick={() => setSelectedFile(null)}
-              >
-                ลบไฟล์
-              </Button>
-            </>
-          )}
+          <Typography variant="body1" fontWeight="bold" gutterBottom>
+            ลากแล้ววาง
+          </Typography>
+          <Typography
+            variant="body2"
+            sx={{ color: "var(--color-neutral05)" }}
+            gutterBottom
+          >
+            สามารถอัปโหลดได้เฉพาะไฟล์ CSV (ขนาดสูงสุดไม่เกิน 25 MB)
+          </Typography>
+          <Button variant="outlined" onClick={onButtonClick} sx={{ mt: 2 }}>
+            หรือเลือกจากไฟล์
+          </Button>
         </Box>
       </DialogContent>
 
       <DialogActions sx={{ justifyContent: "space-between", p: 2 }}>
-        {/* <Button
+        <Button
           startIcon={<FileDownloadOutlinedIcon />}
           sx={{ color: "text.secondary" }}
           onClick={() => {
-            ไว้ใส่ตัวอย่าง
+            // ไว้ใส่ตัวอย่าง
           }}
         >
           ดาวน์โหลดตัวอย่างไฟล์
-        </Button> */}
-        <Box>
-          <Button onClick={handleClose} sx={{ mr: 2 }} color="inherit">
-            ยกเลิก
-          </Button>
-          <Button
-            variant="contained"
-            color="primary"
-            onClick={handleImport}
-            disabled={!selectedFile}
-          >
-            นำเข้า
-          </Button>
-        </Box>
+        </Button>
       </DialogActions>
     </Dialog>
   );
