@@ -37,7 +37,7 @@ import {
   ConfirmModalProps,
 } from "@/components/modal/confirmModal";
 import EmptyState from "@/components/emptyState";
-import { CoursesUploadModal } from "@/app/admin/courses/courses.uploadFile";
+import { CoursesUploadModal } from "@/app/admin/courses/create/courses.uploadFile";
 
 interface CourseTableComponentsProps {
   courses: ICourse[];
