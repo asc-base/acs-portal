@@ -4,6 +4,7 @@ import {
   ICreateNews,
   IUpdateNews,
   INewsInformation,
+  IUpsertNewsFeature,
 } from "../domain/news";
 import { INewsRepository } from "../ports/news.repository";
 export class NewsService {
@@ -88,8 +89,18 @@ async createNews(data: ICreateNews): Promise<INews> {
     return response.data;
   }
 
-  async upsertNewsInformation(data: FormData): Promise<INewsInformation> {
-    const response = await this.newsRepository.upsertNewsInformation(data);
+  async upsertNewsInformation(data: IUpsertNewsFeature): Promise<INewsInformation> {
+
+    const formData = new FormData();
+    Object.entries(data).forEach(([key, value]) => {
+      if (value instanceof File) {
+        formData.append(key, value);
+      } else if (value !== undefined && value !== null) {
+        formData.append(key, String(value));
+      }
+    });
+
+    const response = await this.newsRepository.upsertNewsInformation(formData);
     return response.data;
   }
 

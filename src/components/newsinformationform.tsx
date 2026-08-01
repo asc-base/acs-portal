@@ -16,7 +16,10 @@ import { CropImageCard } from "./cropimagecard";
 import { NewsRepository } from "@/infra/repositories/news.repository";
 import { NewsService } from "@/core/service/news.service";
 import { useRouter } from "next/navigation";
-import { ConfirmModal, ConfirmModalProps } from "@/components/modal/confirmModal";
+import {
+  ConfirmModal,
+  ConfirmModalProps,
+} from "@/components/modal/confirmModal";
 import { styled } from "@mui/material/styles";
 import {
   CreateNewsInformationSchema,
@@ -84,6 +87,7 @@ export const NewsInformationForm = ({
       thumbnail: undefined,
       highlight: undefined,
       newsID: 0,
+      tagID,
     },
   });
 
@@ -111,7 +115,7 @@ export const NewsInformationForm = ({
       formData.append("newsID", data.newsID.toString());
       formData.append("tagID", tagID.toString());
 
-      const response = await newsService.upsertNewsInformation(formData);
+      const response = await newsService.upsertNewsInformation(payload);
 
       if (response) {
         setConfirmModal({
@@ -129,7 +133,10 @@ export const NewsInformationForm = ({
     }
   };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, target: "thumbnail" | "highlight") => {
+  const handleFileChange = (
+    e: React.ChangeEvent<HTMLInputElement>,
+    target: "thumbnail" | "highlight",
+  ) => {
     const file = e.target.files?.[0];
     if (!file) return;
     setCroppingFile(file);
@@ -150,8 +157,16 @@ export const NewsInformationForm = ({
   const handleSearch = async (search: string) => {
     setLoading(true);
     try {
-      const { rows } = await newsService.getNews(1, 10, undefined, undefined, undefined, search);
-      setOptions(rows);
+      const response = await newsService.getNews(
+        1,
+        10,
+        undefined,
+        undefined,
+        undefined,
+        search || undefined,
+        "title",
+      );
+      setOptions(response.rows);
     } finally {
       setLoading(false);
     }
@@ -358,13 +373,23 @@ export const NewsInformationForm = ({
           </div>
         )}
 
-        <Modal open={!!croppingFile} onClose={() => { setCroppingFile(null); setCropTarget(null); }}>
+        <Modal
+          open={!!croppingFile}
+          onClose={() => {
+            setCroppingFile(null);
+            setCropTarget(null);
+          }}
+        >
           <div>
             {croppingFile && cropTarget && (
               <CropImageCard
                 file={croppingFile}
-                width={cropTarget === "highlight" ? 207 : isHighlight ? 706 : 590}
-                height={cropTarget === "highlight" ? 180 : isHighlight ? 376 : 440}
+                width={
+                  cropTarget === "highlight" ? 207 : isHighlight ? 706 : 590
+                }
+                height={
+                  cropTarget === "highlight" ? 180 : isHighlight ? 376 : 440
+                }
                 onUploadComplete={handleUploadComplete}
                 onCancel={() => {
                   setCroppingFile(null);
