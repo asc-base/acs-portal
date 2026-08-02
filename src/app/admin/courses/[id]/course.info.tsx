@@ -12,7 +12,6 @@ import {
 import AddCircleOutlineRoundedIcon from "@mui/icons-material/AddCircleOutlineRounded";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { useForm, useFieldArray, Controller } from "react-hook-form";
-import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { RHFTextField } from "@/components/form/RHFTextField";
 import { RHFSelect } from "@/components/form/RHFSelect";
@@ -27,30 +26,16 @@ import {
   ConfirmModalProps,
 } from "@/components/modal/confirmModal";
 import { TypeCourse } from "@/core/domain/master-data";
+import {
+  updateCourseSchema,
+  UpdateCourseSchemaInput,
+} from "@/core/schema/course";
 
 interface CoursesFormProps {
   apiBase: string;
   curriculumID: number;
   course: ICourse;
 }
-
-const Schema = z.object({
-  typeCourseID: z.number().min(1, "กรุณาเลือกกลุ่มวิชา"),
-  courseCode: z.string().min(1, "กรุณากรอกรหัสวิชา"),
-  credits: z.string().min(1, "กรุณากรอกหน่วยกิต"),
-  courseNameEn: z.string().min(1, "กรุณากรอกชื่อวิชาภาษาอังกฤษ"),
-  courseNameTh: z.string().min(1, "กรุณากรอกชื่อวิชาภาษาไทย"),
-  detail: z.string().min(1, "กรุณากรอกลักษณะการเรียน"),
-  preCoursesID: z
-    .array(
-      z.object({
-        id: z.number().optional(),
-      }),
-    )
-    .optional(),
-});
-
-type FormData = z.infer<typeof Schema>;
 
 export const CourseInfo: FC<CoursesFormProps> = ({
   apiBase,
@@ -81,8 +66,9 @@ export const CourseInfo: FC<CoursesFormProps> = ({
     handleSubmit,
     watch,
     formState: { isDirty },
-  } = useForm<FormData>({
-    resolver: zodResolver(Schema),
+  } = useForm<UpdateCourseSchemaInput>({
+    resolver: zodResolver(updateCourseSchema),
+    mode: "onChange",
     defaultValues: {
       typeCourseID: course.typeCourse.id,
       courseCode: course.courseCode,
@@ -117,7 +103,7 @@ export const CourseInfo: FC<CoursesFormProps> = ({
     }
   };
 
-  const onSubmit = async (data: FormData) => {
+  const onSubmit = async (data: UpdateCourseSchemaInput) => {
     setIsError(false);
 
     try {
