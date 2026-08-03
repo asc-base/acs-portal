@@ -1,6 +1,6 @@
 import z from "zod";
 
-export const CommonUserFields = z.object({
+export const CommonUserSchema = z.object({
     firstNameEn: z.string().trim().regex(/^[a-zA-Z\s]*$/, "กรุณากรอกเป็นภาษาอังกฤษเท่านั้น").optional().or(z.literal("")),
     firstNameTh: z.string().trim().min(1, "กรุณากรอกชื่อภาษาไทย").regex(/^[ก-๙\s]+$/, "กรุณากรอกเป็นภาษาไทยเท่านั้น"),
     lastNameEn: z.string().trim().regex(/^[a-zA-Z\s]*$/, "กรุณากรอกเป็นภาษาอังกฤษเท่านั้น").optional().or(z.literal("")),
@@ -9,4 +9,4 @@ export const CommonUserFields = z.object({
     nickName: z.string().trim().optional(),
 });
 
-export type CommonUserInputs = z.infer<typeof CommonUserFields>;
+export type CommonUserInputs = z.infer<typeof CommonUserSchema>;
