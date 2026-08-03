@@ -9,13 +9,14 @@ import { NewsCarouselComponent } from "@/components/news.carousel.component";
 import { ActivityCard } from "@/components/activitycard";
 import { Carousel } from "@/components/carousel";
 // import { useAuthStore } from "@/store/auth";
+import NewsHighlightCarousel from "@/components/newshighlightcarousel";
 
 interface HomePageProps {
   initNewsActivity: INews[];
   initNewsComplete: INews[];
   initNewsActivityStudent: INews[];
   initAnnoucement?: INewsInformation[];
-  // initNewsHighlight?: INewsInformation[];
+  initNewsHighlight?: INewsInformation[];
   // apibase: string;
 }
 
@@ -24,8 +25,7 @@ const HomePage = ({
   initNewsComplete,
   initNewsActivityStudent,
   initAnnoucement,
-  // initNewsHighlight,
-  // apibase,
+  initNewsHighlight,
 }: HomePageProps) => {
   const [newsActivityActive, setNewsActivityActive] = useState(0);
   const [newsCompleteActive, setNewsCompleteActive] = useState(0);
@@ -105,7 +105,7 @@ const HomePage = ({
             <div className="flex flex-col-reverse gap-x-6 gap-y-6 md:grid md:grid-cols-2">
               {showActivitySection ? (
                 <div>
-                  <h3 className="text-accent04 lg:text-h1-1 mb-3 items-baseline font-bold"> 
+                  <h3 className="text-accent04 lg:text-h1-1 mb-3 items-baseline font-bold">
                     งานกิจกรรมเร็ว ๆ นี้
                   </h3>
                   <div className="flex flex-col gap-y-3 md:[&>*:nth-child(n+3)]:hidden lg:[&>*:nth-child(n+3)]:block [&>*:nth-child(n+5)]:hidden">
@@ -137,6 +137,12 @@ const HomePage = ({
                   </div>
                 </div>
               )}
+            </div>
+          )}
+
+          {initNewsHighlight && initNewsHighlight.length > 0 && (
+            <div className="my-2">
+              <NewsHighlightCarousel newsHighlight={initNewsHighlight} />
             </div>
           )}
 
