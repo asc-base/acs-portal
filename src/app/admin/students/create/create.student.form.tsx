@@ -108,8 +108,8 @@ export const CreateStudentForm: FC<FormProfessorsProps> = ({
       const payload: ICreateStudent = {
         firstNameTh: data.firstNameTh,
         lastNameTh: data.lastNameTh,
-        firstNameEn: data.firstNameEn ?? "",
-        lastNameEn: data.lastNameEn ?? "",
+        firstNameEn: data.firstNameEn || null,
+        lastNameEn: data.lastNameEn || null,
         studentCode: data.studentCode,
         nickName: data.nickName,
         email: data.email,
