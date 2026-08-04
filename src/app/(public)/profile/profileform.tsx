@@ -10,7 +10,7 @@ import InstagramIcon from "@mui/icons-material/Instagram";
 import Image from "next/image";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
+import { profileFormSchema, ProfileFormData } from "@/core/schema/profile";
 import { CropImageCard } from "@/components/cropimagecard";
 import { useRouter } from "next/navigation";
 import { IStudent } from "@/core/domain/student";
@@ -31,18 +31,7 @@ const VisuallyHiddenInput = styled("input")({
   width: 1,
 });
 
-const formSchema = z.object({
-  github: z.string(),
-  linkedin: z.string(),
-  facebook: z.string(),
-  instagram: z.string(),
-  projects: z.array(z.object({ title: z.string() })),
-  file: z.union([z.string(), z.instanceof(File), z.null()]),
-  skills: z.array(z.string()),
-  skillInput: z.string(),
-});
 
-type FormData = z.infer<typeof formSchema>;
 
 // interface ProfileFormProps {
 //   studentData: IStudent;
@@ -86,8 +75,8 @@ const ProfileForm = ({ apiBase }: { apiBase: string }) => {
     fetchStudent();
   }, [router, authService, studentService]);
 
-  const { handleSubmit, control, reset, watch, setValue } = useForm<FormData>({
-    resolver: zodResolver(formSchema),
+  const { handleSubmit, control, reset, watch, setValue } = useForm<ProfileFormData>({
+    resolver: zodResolver(profileFormSchema),
     defaultValues: {
       github: student?.github || "",
       linkedin: student?.linkedin || "",
@@ -176,7 +165,7 @@ const ProfileForm = ({ apiBase }: { apiBase: string }) => {
     setIsEditing(false);
   };
 
-  const onSubmit = async (data: FormData) => {
+  const onSubmit = async (data: ProfileFormData) => {
     try {
       const profileData = { ...data };
       Reflect.deleteProperty(profileData, "skillInput");
