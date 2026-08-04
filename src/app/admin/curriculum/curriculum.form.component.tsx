@@ -4,7 +4,6 @@ import { useForm } from "react-hook-form";
 import { Button } from "@mui/material";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import dayjs from "dayjs";
 import { CurriculumRepository } from "@/infra/repositories/curriculum.repository";
@@ -16,34 +15,10 @@ import {
   ConfirmModal,
   ConfirmModalProps,
 } from "@/components/modal/confirmModal";
-
+import { CreateCurriculumSchema, CreateCurriculumInputs } from "@/core/schema/curriculum";
 interface CurriculumFormProps {
   apiBase: string;
 }
-
-const fileUrlSchema = z
-  .string()
-  .url()
-  .refine((url) => {
-    const hostname = new URL(url).hostname;
-
-    return (
-      hostname === "drive.google.com" ||
-      hostname === "docs.google.com" ||
-      hostname === "1drv.ms" ||
-      hostname === "onedrive.live.com" ||
-      hostname.endsWith(".sharepoint.com")
-    );
-  }, "อนุญาตเฉพาะลิงก์จาก Google Drive, OneDrive หรือ SharePoint เท่านั้น");
-
-const Schema = z.object({
-  title: z.string().min(1, "กรุณาระบุชื่อหลักสูตร"),
-  year: z.string().min(1, "กรุณาระบุปีการศึกษา"),
-  documentURL: fileUrlSchema,
-  description: z.string().min(1, "กรุณาระบุรายละเอียด"),
-});
-
-type FormValues = z.infer<typeof Schema>;
 
 const VisuallyHiddenInput = styled("input")({
   clip: "rect(0 0 0 0)",
@@ -60,6 +35,7 @@ const VisuallyHiddenInput = styled("input")({
 export const CurriculumForm = ({ apiBase }: CurriculumFormProps) => {
   const router = useRouter();
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [fileError, setFileError] = useState<string | null>(null);
 
   const [confirmModal, setConfirmModal] = useState<ConfirmModalProps | null>(
     null,
@@ -74,8 +50,8 @@ export const CurriculumForm = ({ apiBase }: CurriculumFormProps) => {
     handleSubmit,
     control,
     formState: { isDirty },
-  } = useForm<FormValues>({
-    resolver: zodResolver(Schema),
+  } = useForm<CreateCurriculumInputs>({
+    resolver: zodResolver(CreateCurriculumSchema),
     mode: "onChange",
     defaultValues: {
       title: "",
@@ -105,7 +81,13 @@ export const CurriculumForm = ({ apiBase }: CurriculumFormProps) => {
     }
   };
 
-  const onSubmit = async (data: FormValues) => {
+  const onSubmit = async (data: CreateCurriculumInputs) => {
+    if (!selectedFile) {
+      setFileError("กรุณาอัปโหลดรูปภาพ");
+      return;
+    }
+    setFileError(null);
+    
     try {
       const year = dayjs(data.year).year().toString();
       const response = await curriculumService.createCurriculum(
@@ -134,38 +116,42 @@ export const CurriculumForm = ({ apiBase }: CurriculumFormProps) => {
       <h3 className="mb-6 font-bold">เพิ่มหลักสูตร</h3>
       <form className="space-y-4" onSubmit={handleSubmit(onSubmit)}>
         <div className="flex gap-x-10 gap-y-2">
-          <div className="bg-neutral02 border-neutral04 relative flex h-[248px] w-[248px] flex-col items-center justify-center overflow-hidden rounded-md">
-            {selectedFile ? (
-              <div className="group relative h-full w-full">
-                <Image
-                  src={URL.createObjectURL(selectedFile)}
-                  alt="Preview"
-                  fill
-                  priority
-                />
-                <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
-                  <Button variant="contained" component="label">
-                    <VisuallyHiddenInput
-                      type="file"
-                      accept="image/*"
-                      onChange={handleFileChange}
-                    />
-                    อัปโหลดรูปภาพ
-                  </Button>
+          <div className="flex flex-col">
+            <div className="bg-neutral02 border-neutral04 relative flex h-[248px] w-[248px] flex-col items-center justify-center overflow-hidden rounded-md">
+              {selectedFile ? (
+                <div className="group relative h-full w-full">
+                  <Image
+                    src={URL.createObjectURL(selectedFile)}
+                    alt="Preview"
+                    fill
+                    priority
+                  />
+                  <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
+                    <Button variant="contained" component="label">
+                      <VisuallyHiddenInput
+                        type="file"
+                        accept="image/*"
+                        onChange={handleFileChange}
+                      />
+                      อัปโหลดรูปภาพ
+                    </Button>
+                  </div>
                 </div>
-              </div>
-            ) : (
-              <Button variant="contained" component="label" size="large">
-                อัปโหลดรูปภาพ
-                <VisuallyHiddenInput
-                  type="file"
-                  accept="image/*"
-                  onChange={handleFileChange}
-                />
-              </Button>
+              ) : (
+                <Button variant="contained" component="label" size="large">
+                  อัปโหลดรูปภาพ
+                  <VisuallyHiddenInput
+                    type="file"
+                    accept="image/*"
+                    onChange={handleFileChange}
+                  />
+                </Button>  
+              )}
+            </div>
+            {fileError && (
+              <p className="mt-2 text-sm text-accent04">{fileError}</p>
             )}
           </div>
-
           <div className="flex w-full flex-col space-y-4">
             <RHFTextField
               control={control}
