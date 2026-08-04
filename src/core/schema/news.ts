@@ -31,5 +31,23 @@ export const UpdateNewsSchema = z.object({
   highlight: z.union([z.string().trim().min(1), z.file()]),
 });
 
+export const createNewsInformationSchema = (type: string) =>
+  z
+    .object({
+      thumbnail: z.instanceof(File, { message: "กรุณาอัปโหลดรูปภาพ" }),
+      highlight: z.instanceof(File).optional(),
+      newsID: z.number().min(1, "กรุณาเลือกข่าว"),
+    })
+    .superRefine((data, ctx) => {
+      if (type === "highlight" && !data.highlight) {
+        ctx.addIssue({
+          code: "custom",
+          message: "กรุณาอัปโหลดรูปภาพไฮไลต์",
+          path: ["highlight"],
+        });
+      }
+    });
+
 export type CreateNewsInputs = z.infer<typeof CreateNewsSchema>;
 export type UpdateNewsInputs = z.infer<typeof UpdateNewsSchema>;
+export type NewsInformationInputs = z.infer<ReturnType<typeof createNewsInformationSchema>>
