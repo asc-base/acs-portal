@@ -19,8 +19,8 @@ export interface IUpdateProfessor {
   phone: string;
   firstNameTh: string;
   lastNameTh: string;
-  firstNameEn: string;
-  lastNameEn: string;
+  firstNameEn: string | null;
+  lastNameEn: string | null;
   email: string;
   expertFields?: string;
   educations?: string;
@@ -42,10 +42,10 @@ export interface ICreateProfessor {
   educations?: string;
   email: string;
   expertFields?: string;
-  firstNameEn?: string;
+  firstNameEn?: string | null;
   firstNameTh: string;
   image?: string;
-  lastNameEn?: string;
+  lastNameEn?: string | null;
   lastNameTh: string;
   phone: string;
   profRoom: string;
