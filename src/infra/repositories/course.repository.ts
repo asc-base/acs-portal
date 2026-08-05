@@ -75,7 +75,7 @@ export class CourseRepository implements ICourseRepository {
     return response;
   }
 
-  async importCourses(data: FormData): Promise<ApiResponse<ICourse>> {
+  async createCourseBatch(data: FormData): Promise<ApiResponse<ICourse>> {
     const response = await this.http.post<ApiResponse<ICourse>>(
       `/v1/courses/import`,
       data,
