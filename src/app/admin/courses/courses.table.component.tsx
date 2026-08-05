@@ -196,7 +196,7 @@ const CourseTableComponents = ({
             startIcon={<AddIcon />}
             onClick={() => setIsUploadModalOpen(true)}
           >
-            เพิ่มรายวิชา (ไฟล์)
+            เพิ่มรายวิชาใหม่(ไฟล์)
           </Button>
         </div>
       </div>
