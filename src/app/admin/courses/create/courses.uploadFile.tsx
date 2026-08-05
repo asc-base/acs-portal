@@ -15,7 +15,9 @@ import {
 import CloseIcon from "@mui/icons-material/Close";
 import Papa from "papaparse";
 import { ICreateCourse } from "@/core/domain/course";
-import FileDownloadOutlinedIcon from "@mui/icons-material/FileDownloadOutlined";
+import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
+import InsertDriveFileOutlinedIcon from "@mui/icons-material/InsertDriveFileOutlined";
+import FileUploadOutlinedIcon from "@mui/icons-material/FileUploadOutlined";
 
 interface CoursesUploadModalProps {
   isOpen: boolean;
@@ -28,6 +30,7 @@ export const CoursesUploadModal = ({
 }: CoursesUploadModalProps) => {
   const [dragActive, setDragActive] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
   const handleDrag = (e: React.DragEvent) => {
@@ -67,18 +70,28 @@ export const CoursesUploadModal = ({
         return;
       }
       setErrorMessage("");
-      Papa.parse(file, {
-        header: true,
-        skipEmptyLines: true,
-        complete: (result) => {
-          const data = result.data as ICreateCourse[];
-          console.log("ข้อมูลจาก CSV:", data);
-          handleClose();
-        },
-      });
+      setSelectedFile(file);
     } else {
       setErrorMessage("กรุณาอัปโหลดไฟล์ CSV เท่านั้น");
     }
+  };
+
+  const handleUploadFile = () => {
+    if (!selectedFile) return;
+
+    Papa.parse(selectedFile, {
+      header: true,
+      skipEmptyLines: true,
+      complete: (result) => {
+        const data = result.data as ICreateCourse[];
+
+        handleClose();
+      },
+    });
+  };
+
+  const handleRemoveFile = () => {
+    setSelectedFile(null);
   };
 
   const handleCloseAlert = () => {
@@ -87,6 +100,7 @@ export const CoursesUploadModal = ({
 
   const handleClose = () => {
     setErrorMessage("");
+    setSelectedFile(null);
     onClose();
   };
 
@@ -117,72 +131,156 @@ export const CoursesUploadModal = ({
           alignItems: "center",
         }}
       >
-        <Typography fontWeight="bold">นำเข้ารายวิชา</Typography>
+        <Typography fontWeight="bold">อัปโหลดไฟล์รายวิชา</Typography>
         <IconButton onClick={handleClose}>
           <CloseIcon />
         </IconButton>
       </DialogTitle>
 
-      <DialogContent dividers>
-        <Box
-          onDragEnter={handleDrag}
-          onDragLeave={handleDrag}
-          onDragOver={handleDrag}
-          onDrop={handleDrop}
-          sx={{
-            border: "2px dashed",
-            borderColor: dragActive
-              ? "var(--color-primary02)"
-              : "var(--color-neutral03)",
-            borderRadius: 2,
-            p: 4,
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            justifyContent: "center",
-            bgcolor: dragActive
-              ? "var(--color-primary06)"
-              : "var(--color-neutral01)",
-            minHeight: 250,
-            textAlign: "center",
-            transition: "all 0.2s ease",
-          }}
-        >
-          <input
-            ref={inputRef}
-            type="file"
-            accept=".csv"
-            onChange={handleChange}
-            style={{ display: "none" }}
-          />
-
-          <Typography variant="body1" fontWeight="bold" gutterBottom>
-            ลากแล้ววาง
-          </Typography>
-          <Typography
-            variant="body2"
-            sx={{ color: "var(--color-neutral05)" }}
-            gutterBottom
+      <DialogContent sx={{ p: 4 }}>
+        {!selectedFile ? (
+          <Box
+            onDragEnter={handleDrag}
+            onDragLeave={handleDrag}
+            onDragOver={handleDrag}
+            onDrop={handleDrop}
+            sx={{
+              border: "2px dashed",
+              borderColor: "var(--color-neutral03)",
+              borderRadius: 4,
+              py: 8,
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              justifyContent: "center",
+              bgcolor: "var(--color-neutral01)",
+              textAlign: "center",
+            }}
           >
-            สามารถอัปโหลดได้เฉพาะไฟล์ CSV (ขนาดสูงสุดไม่เกิน 25 MB)
-          </Typography>
-          <Button variant="outlined" onClick={onButtonClick} sx={{ mt: 2 }}>
-            หรือเลือกจากไฟล์
-          </Button>
-        </Box>
+            <input
+              ref={inputRef}
+              type="file"
+              accept=".csv"
+              onChange={handleChange}
+              style={{ display: "none" }}
+            />
+
+            <Box
+              sx={{
+                mb: 2,
+                p: 2,
+                borderRadius: "50%",
+                bgcolor: "var(--color-primary06)",
+              }}
+            >
+              <FileUploadOutlinedIcon
+                sx={{ fontSize: 40, color: "var(--color-primary03)" }}
+              />
+            </Box>
+
+            <Typography variant="body1" fontWeight="bold" gutterBottom>
+              ลากไฟล์มาวางตรงนี้
+            </Typography>
+            <Typography
+              variant="body2"
+              sx={{ color: "var(--color-neutral04)", mb: 3 }}
+            >
+              หรือเลือกไฟล์จากคอมพิวเตอร์ของคุณ (.csv)
+            </Typography>
+            <Button
+              variant="outlined"
+              onClick={onButtonClick}
+              sx={{
+                color: "var(--color-primary03)",
+                borderColor: "var(--color-primary03)",
+                fontWeight: "bold",
+                borderRadius: 1,
+                px: 5,
+                py: 1,
+                "&:hover": {
+                  borderColor: "var(--color-neutral02)",
+                  bgcolor: "var(--color-primary06)",
+                },
+              }}
+            >
+              เลือกไฟล์
+            </Button>
+          </Box>
+        ) : (
+          <Box
+            sx={{
+              border: "2px dashed",
+              borderColor: "var(--color-neutral03)",
+              borderRadius: 4,
+              p: 3,
+              display: "flex",
+              flexDirection: "row",
+              alignItems: "center",
+              justifyContent: "space-between",
+              bgcolor: "var(--color-neutral01)",
+            }}
+          >
+            <div className="flex items-center gap-4">
+              <InsertDriveFileOutlinedIcon
+                sx={{ fontSize: 40, color: "var(--color-neutral05)" }}
+              />
+              <div>
+                <Typography fontWeight="bold">{selectedFile.name}</Typography>
+                <Typography
+                  variant="body2"
+                  sx={{ color: "var(--color-neutral04)" }}
+                >
+                  {(selectedFile.size / (1024 * 1024)).toFixed(2)} MB
+                </Typography>
+              </div>
+            </div>
+
+            <IconButton color="error" onClick={handleRemoveFile}>
+              <DeleteOutlineIcon />
+            </IconButton>
+          </Box>
+        )}
       </DialogContent>
 
-      <DialogActions sx={{ justifyContent: "space-between", p: 2 }}>
-        <Button
-          startIcon={<FileDownloadOutlinedIcon />}
-          sx={{ color: "text.secondary" }}
-          onClick={() => {
-            // ไว้ใส่ตัวอย่าง
-          }}
-        >
-          ดาวน์โหลดตัวอย่างไฟล์
-        </Button>
-      </DialogActions>
+      {selectedFile && (
+        <DialogActions sx={{ p: 3, pt: 2, justifyContent: "flex-end", gap: 1 }}>
+          <Button
+            variant="outlined"
+            onClick={handleRemoveFile}
+            sx={{
+              color: "var(--color-primary03)",
+              borderColor: "var(--color-primary03)",
+              fontWeight: "bold",
+              px: 4,
+              py: 1,
+              borderRadius: 1,
+              "&:hover": {
+                borderColor: "var(--color-neutral02)",
+                bgcolor: "var(--color-primary06)",
+              },
+            }}
+          >
+            ยกเลิก
+          </Button>
+          <Button
+            variant="contained"
+            onClick={handleUploadFile}
+            sx={{
+              bgcolor: "var(--color-primary02)",
+              color: "var(--color-neutral01)",
+              fontWeight: "bold",
+              px: 4,
+              py: 1,
+              borderRadius: 1,
+              "&:hover": {
+                bgcolor: "var(--color-primary03)",
+              },
+            }}
+          >
+            อัปโหลด
+          </Button>
+        </DialogActions>
+      )}
     </Dialog>
   );
 };
