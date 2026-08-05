@@ -19,8 +19,8 @@ import { useRouter } from "next/navigation";
 import { ConfirmModal, ConfirmModalProps } from "@/components/modal/confirmModal";
 import { styled } from "@mui/material/styles";
 import {
-  createNewsInformationSchema,
-  NewsInformationInputs,
+  CreateNewsInformationSchema,
+  CreateNewsInformationInputs,
 } from "@/core/schema/news";
 
 interface NewsInformationFormProps {
@@ -77,8 +77,8 @@ export const NewsInformationForm = ({
     setValue,
     watch,
     formState: { errors, isDirty },
-  } = useForm<NewsInformationInputs>({
-    resolver: zodResolver(createNewsInformationSchema(type)),
+  } = useForm<CreateNewsInformationInputs>({
+    resolver: zodResolver(CreateNewsInformationSchema(type)),
     mode: "onChange",
     defaultValues: {
       thumbnail: undefined,
@@ -87,7 +87,7 @@ export const NewsInformationForm = ({
     },
   });
 
-  const thumbnailFile = watch("thumbnail"); 
+  const thumbnailFile = watch("thumbnail");
   const highlightFile = watch("highlight");
 
   const cancelForm = () => {
@@ -101,7 +101,7 @@ export const NewsInformationForm = ({
     } else router.push(`/admin/newsinformation/${tagID}`);
   };
 
-  const onSubmit = async (data: NewsInformationInputs) => {
+  const onSubmit = async (data: CreateNewsInformationInputs) => {
     try {
       const formData = new FormData();
       formData.append("thumbnail", data.thumbnail);
@@ -129,7 +129,7 @@ export const NewsInformationForm = ({
     }
   };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, target: "thumbnail" | "highlight" ) => {
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, target: "thumbnail" | "highlight") => {
     const file = e.target.files?.[0];
     if (!file) return;
     setCroppingFile(file);
@@ -147,7 +147,7 @@ export const NewsInformationForm = ({
     setCropTarget(null);
   };
 
-  const handleSearch = async ( search: string) => {
+  const handleSearch = async (search: string) => {
     setLoading(true);
     try {
       const { rows } = await newsService.getNews(1, 10, undefined, undefined, undefined, search);
@@ -180,7 +180,7 @@ export const NewsInformationForm = ({
             <div className="grid grid-cols-5 gap-6">
               <div className="col-span-3 flex flex-col gap-2">
                 <div className="text-neutral05 text-sm font-medium">
-                  ภาพหน้าปก
+                  ภาพไฮไลต์หลัก
                 </div>
                 <div className="group border-neutral03 bg-neutral02 relative flex h-[376px] w-full items-center justify-center overflow-hidden rounded-xl border">
                   {thumbnailFile ? (
@@ -194,105 +194,105 @@ export const NewsInformationForm = ({
                       <div className="bg-neutral05/40 absolute inset-0 flex items-center justify-center opacity-0 transition-opacity duration-200 group-hover:opacity-100">
                         <Button variant="contained" component="label">
                           เปลี่ยนรูปภาพ
-                          <VisuallyHiddenInput 
-                            type="file" 
-                            accept="image/*" 
-                            onChange={(e) => handleFileChange(e, "thumbnail")} 
-                         />
-                       </Button>
+                          <VisuallyHiddenInput
+                            type="file"
+                            accept="image/*"
+                            onChange={(e) => handleFileChange(e, "thumbnail")}
+                          />
+                        </Button>
                       </div>
                     </>
                   ) : (
                     <Button variant="contained" component="label">
                       อัปโหลดรูปภาพ
-                      <VisuallyHiddenInput 
-                        type="file" 
-                        accept="image/*" 
-                        onChange={(e) => handleFileChange(e, "thumbnail")} 
+                      <VisuallyHiddenInput
+                        type="file"
+                        accept="image/*"
+                        onChange={(e) => handleFileChange(e, "thumbnail")}
                       />
-                  </Button>
-                )}
-              </div>
-              {errors.thumbnail && (
-                <p className="text-accent04 text-sm">
-                  {errors.thumbnail.message}
-                </p>
-              )}
-            </div>
-
-            <div className="col-span-2 flex flex-col gap-2">
-              <div className="text-neutral05 text-sm font-medium">
-                ภาพหัวเรื่อง
-              </div>
-              <div className="group border-neutral03 bg-neutral02 relative flex h-[376px] w-full items-center justify-center overflow-hidden rounded-xl border">
-                {highlightFile ? (
-                  <>
-                    <Image
-                      src={URL.createObjectURL(highlightFile)}
-                      alt="Highlight Preview"
-                      fill
-                      className="object-cover"
-                    />
-                    <div className="bg-neutral05/40 absolute inset-0 flex items-center justify-center opacity-0 transition-opacity duration-200 group-hover:opacity-100">
-                      <Button variant="contained" component="label">
-                        เปลี่ยนรูปภาพ
-                        <VisuallyHiddenInput 
-                          type="file" 
-                          accept="image/*" 
-                          onChange={(e) => handleFileChange(e, "highlight")} 
-                        />
-                      </Button>
-                    </div>
-                  </>
-                ) : (
-                  <Button variant="contained" component="label">
-                    อัปโหลดรูปภาพ
-                    <VisuallyHiddenInput 
-                      type="file" 
-                      accept="image/*" 
-                      onChange={(e) => handleFileChange(e, "highlight")} 
-                    />
-                  </Button>
-                )}
-              </div>
-              {errors.highlight && (
-                <p className="text-accent04 text-sm">
-                  {errors.highlight.message}
-                </p>
-              )}
-            </div>
-          </div>
-          <div className="mt-6 w-full">
-            <Controller
-              name="newsID"
-              control={control}
-              render={({ field }) => (
-                <Autocomplete
-                  popupIcon={null}
-                  options={options}
-                  loading={loading}
-                  getOptionLabel={(opt) => opt.title}
-                  isOptionEqualToValue={(a, b) => a.id === b.id}
-                  onInputChange={(_, value) => handleSearch(value)}
-                  onChange={(_, value) => field.onChange(value?.id)}
-                  renderInput={(params) => (
-                    <TextField
-                      {...params}
-                      placeholder="ค้นหาข่าว"
-                      error={!!errors.newsID}
-                      required
-                      label="ข่าวสาร"
-                    />
+                    </Button>
                   )}
-                />
-              )}
-            />
+                </div>
+                {errors.thumbnail && (
+                  <p className="text-accent04 text-sm">
+                    {errors.thumbnail.message}
+                  </p>
+                )}
+              </div>
+
+              <div className="col-span-2 flex flex-col gap-2">
+                <div className="text-neutral05 text-sm font-medium">
+                  ภาพไฮไลต์รอง
+                </div>
+                <div className="group border-neutral03 bg-neutral02 relative flex h-[376px] w-full items-center justify-center overflow-hidden rounded-xl border">
+                  {highlightFile ? (
+                    <>
+                      <Image
+                        src={URL.createObjectURL(highlightFile)}
+                        alt="Highlight Preview"
+                        fill
+                        className="object-cover"
+                      />
+                      <div className="bg-neutral05/40 absolute inset-0 flex items-center justify-center opacity-0 transition-opacity duration-200 group-hover:opacity-100">
+                        <Button variant="contained" component="label">
+                          เปลี่ยนรูปภาพ
+                          <VisuallyHiddenInput
+                            type="file"
+                            accept="image/*"
+                            onChange={(e) => handleFileChange(e, "highlight")}
+                          />
+                        </Button>
+                      </div>
+                    </>
+                  ) : (
+                    <Button variant="contained" component="label">
+                      อัปโหลดรูปภาพ
+                      <VisuallyHiddenInput
+                        type="file"
+                        accept="image/*"
+                        onChange={(e) => handleFileChange(e, "highlight")}
+                      />
+                    </Button>
+                  )}
+                </div>
+                {errors.highlight && (
+                  <p className="text-accent04 text-sm">
+                    {errors.highlight.message}
+                  </p>
+                )}
+              </div>
+            </div>
+            <div className="w-full">
+              <Controller
+                name="newsID"
+                control={control}
+                render={({ field }) => (
+                  <Autocomplete
+                    popupIcon={null}
+                    options={options}
+                    loading={loading}
+                    getOptionLabel={(opt) => opt.title}
+                    isOptionEqualToValue={(a, b) => a.id === b.id}
+                    onInputChange={(_, value) => handleSearch(value)}
+                    onChange={(_, value) => field.onChange(value?.id)}
+                    renderInput={(params) => (
+                      <TextField
+                        {...params}
+                        placeholder="ค้นหาข่าว"
+                        error={!!errors.newsID}
+                        required
+                        label="ข่าวสาร"
+                      />
+                    )}
+                  />
+                )}
+              />
+            </div>
           </div>
-        </div>
-      ) : (
+        ) : (
           <div className="flex gap-x-5">
-            <div className="flex flex-col gap-2">
-              <div className="bg-neutral02 flex h-[440px] w-[590px] items-center justify-center overflow-hidden rounded-md border border-gray-200">
+            <div className="flex w-[590px] flex-col gap-2">
+              <div className="bg-neutral02 flex h-[440px] w-full items-center justify-center overflow-hidden rounded-md border border-gray-200">
                 {thumbnailFile ? (
                   <div className="group relative h-full w-full">
                     <Image
@@ -323,39 +323,39 @@ export const NewsInformationForm = ({
                   </Button>
                 )}
               </div>
-            {errors.thumbnail && (
-              <p className="text-accent04 text-sm">
-                {errors.thumbnail.message}
-              </p>
-            )}
-          </div>
-          <div className="w-full">
-            <Controller
-              name="newsID"
-              control={control}
-              render={({ field }) => (
-                <Autocomplete
-                  popupIcon={null}
-                  options={options}
-                  loading={loading}
-                  getOptionLabel={(opt) => opt.title}
-                  isOptionEqualToValue={(a, b) => a.id === b.id}
-                  onInputChange={(_, value) => handleSearch(value)}
-                  onChange={(_, value) => field.onChange(value?.id)}
-                  renderInput={(params) => (
-                    <TextField
-                      {...params}
-                      placeholder="ค้นหาข่าว"
-                      error={!!errors.newsID}
-                      required
-                      label="ข่าวสาร"
-                    />
-                  )}
-                />
+              {errors.thumbnail && (
+                <p className="text-accent04 text-sm">
+                  {errors.thumbnail.message}
+                </p>
               )}
-            />
+            </div>
+            <div className="w-full">
+              <Controller
+                name="newsID"
+                control={control}
+                render={({ field }) => (
+                  <Autocomplete
+                    popupIcon={null}
+                    options={options}
+                    loading={loading}
+                    getOptionLabel={(opt) => opt.title}
+                    isOptionEqualToValue={(a, b) => a.id === b.id}
+                    onInputChange={(_, value) => handleSearch(value)}
+                    onChange={(_, value) => field.onChange(value?.id)}
+                    renderInput={(params) => (
+                      <TextField
+                        {...params}
+                        placeholder="ค้นหาข่าว"
+                        error={!!errors.newsID}
+                        required
+                        label="ข่าวสาร"
+                      />
+                    )}
+                  />
+                )}
+              />
+            </div>
           </div>
-        </div>
         )}
 
         <Modal open={!!croppingFile} onClose={() => { setCroppingFile(null); setCropTarget(null); }}>
@@ -383,7 +383,7 @@ export const NewsInformationForm = ({
             บันทึกข้อมูล
           </Button>
         </div>
-        
+
         {confirmModal && <ConfirmModal {...confirmModal} />}
       </form>
     </div>
