@@ -30,8 +30,8 @@ export interface ICreateStudent {
   email: string;
   firstNameTh: string;
   lastNameTh: string;
-  firstNameEn: string;
-  lastNameEn: string;
+  firstNameEn: string | null;
+  lastNameEn: string | null;
   nickName?: string;
   linkedin?: string;
   github?: string;
@@ -45,8 +45,8 @@ export interface IUpdateStudent {
   email?: string;
   firstNameTh?: string;
   lastNameTh?: string;
-  firstNameEn?: string;
-  lastNameEn?: string;
+  firstNameEn?: string | null;
+  lastNameEn?: string | null;
   nickName?: string;
   linkedin?: string | null;
   facebook?: string | null;
