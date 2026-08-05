@@ -28,7 +28,6 @@ export const CoursesUploadModal = ({
   isOpen,
   onClose,
 }: CoursesUploadModalProps) => {
-  const [dragActive, setDragActive] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -36,17 +35,11 @@ export const CoursesUploadModal = ({
   const handleDrag = (e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    if (e.type === "dragenter" || e.type === "dragover") {
-      setDragActive(true);
-    } else if (e.type === "dragleave") {
-      setDragActive(false);
-    }
   };
 
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    setDragActive(false);
     if (e.dataTransfer.files && e.dataTransfer.files[0]) {
       handleFile(e.dataTransfer.files[0]);
     }
@@ -84,7 +77,7 @@ export const CoursesUploadModal = ({
       skipEmptyLines: true,
       complete: (result) => {
         const data = result.data as ICreateCourse[];
-
+        console.log("data: ", data);
         handleClose();
       },
     });
