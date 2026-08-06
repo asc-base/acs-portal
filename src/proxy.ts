@@ -13,9 +13,7 @@ export async function proxy(request: NextRequest) {
   const cookie = request.headers.get("cookie");
 
   if (!cookie) {
-    return NextResponse.redirect(
-      new URL("/home?error=unauthorized", request.url),
-    );
+    return NextResponse.redirect(new URL("/home", request.url));
   }
 
   try {
@@ -25,21 +23,15 @@ export async function proxy(request: NextRequest) {
     });
 
     if (!response.ok) {
-      return NextResponse.redirect(
-        new URL("/home?error=unauthorized", request.url),
-      );
+      return NextResponse.redirect(new URL("/home", request.url));
     }
 
     const result = (await response.json()) as ApiResponse<IUser>;
     if (!isAdminUser(result.data)) {
-      return NextResponse.redirect(
-        new URL("/home?error=unauthorized", request.url),
-      );
+      return NextResponse.redirect(new URL("/home", request.url));
     }
   } catch {
-    return NextResponse.redirect(
-      new URL("/home?error=unauthorized", request.url),
-    );
+    return NextResponse.redirect(new URL("/home", request.url));
   }
 
   return NextResponse.next();

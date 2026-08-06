@@ -61,7 +61,7 @@ export const AdminRouteGuard = ({
       }
 
       if (isActive) {
-        router.replace("/home?error=unauthorized");
+        router.replace("/home");
       }
     };
 
