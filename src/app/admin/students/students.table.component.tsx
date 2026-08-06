@@ -20,8 +20,9 @@ import {
   ArrowDownward,
   ArrowUpward,
 } from "@mui/icons-material";
-import { useState, useMemo, useRef } from "react";
+import { useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
+import { UploadModal } from "@/components/uploadFile";
 import { IStudent, ICreateStudentCsv } from "@/core/domain/student";
 import SearchIcon from "@mui/icons-material/Search";
 import CloseIcon from "@mui/icons-material/Close";
@@ -74,8 +75,8 @@ const StudentTableComponents = ({
   apiBase,
 }: StudentTableComponentsProps) => {
   const router = useRouter();
-  const inputRef = useRef<HTMLInputElement | null>(null);
   const { setImportData } = useImportStudentStore();
+  const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
   const [confirmModal, setConfirmModal] = useState<ConfirmModalProps | null>(
     null,
   );
@@ -129,19 +130,14 @@ const StudentTableComponents = ({
     }
   };
 
-  const handleClick = () => {
-    inputRef.current?.click();
-  };
-
-  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (!e.target.files?.[0]) return;
-    const file = e.target.files[0];
+  const handleUploadStudentFile = (file: File) => {
     Papa.parse(file, {
       header: true,
       skipEmptyLines: true,
       complete: (result) => {
         const data: ICreateStudentCsv[] = result.data as ICreateStudentCsv[];
         setImportData(data);
+        setIsUploadModalOpen(false);
         router.push(`/admin/students/preview?classBookID=${classBookID}`);
       },
     });
@@ -185,23 +181,24 @@ const StudentTableComponents = ({
               <Add /> เพิ่มนักศึกษา (บุคคล)
             </Link>
           </Button>
-          <input
-            type="file"
-            ref={inputRef}
-            hidden
-            accept=".csv"
-            onChange={handleFileChange}
-          />
+
           <Button
             variant="contained"
             size="large"
             startIcon={<AddIcon />}
-            onClick={handleClick}
+            onClick={() => setIsUploadModalOpen(true)}
           >
             เพิ่มนักศึกษา (ไฟล์)
           </Button>
         </div>
       </div>
+
+      <UploadModal
+        isOpen={isUploadModalOpen}
+        onClose={() => setIsUploadModalOpen(false)}
+        title="อัปโหลดไฟล์รายชื่อนักศึกษา"
+        onUpload={handleUploadStudentFile}
+      />
 
       <TableContainer component={Paper} sx={{ boxShadow: "none", flex: 1 }}>
         <Table stickyHeader sx={{ tableLayout: "fixed" }}>
