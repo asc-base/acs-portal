@@ -12,6 +12,8 @@ import { AuthRepository } from "@/infra/repositories/auth.repository";
 import { AuthService } from "@/core/service/auth.service";
 import { useMemo } from "react";
 import { useRouter } from "next/navigation";
+import { useAuthStore } from "@/store/auth";
+import { isAdminUser } from "@/lib/admin-access";
 
 const Schema = z.object({
   email: z.string().trim().email("กรุณากรอกอีเมลที่ถูกต้อง"),
@@ -27,6 +29,8 @@ export default function AdminLoginLandingPage({
   apiBase,
 }: Readonly<AdminLoginLandingPageProps>) {
   const router = useRouter();
+  const setUser = useAuthStore((state) => state.setUser);
+  const clearUser = useAuthStore((state) => state.clearUser);
   const [showPwd, setShowPwd] = React.useState(false);
 
   const authService = useMemo(() => {
@@ -56,13 +60,28 @@ export default function AdminLoginLandingPage({
         password: data.password,
       };
 
-      const response = await authService.Login(loginRequest);
+      const response = await authService.LoginAdmin(loginRequest);
 
-      console.log("form data", loginRequest);
-
-      if (response?.status) {
-        router.push(`/admin/classbook`);
+      if (!response?.status) {
+        setError("password", {
+          type: "manual",
+          message: "ข้อมูลการเข้าสู่ระบบไม่ถูกต้อง",
+        });
+        return;
       }
+
+      const user = await authService.getUser();
+      if (!isAdminUser(user)) {
+        clearUser();
+        setError("password", {
+          type: "manual",
+          message: "บัญชีนี้ไม่มีสิทธิ์เข้าถึงระบบผู้ดูแล",
+        });
+        return;
+      }
+
+      setUser(user);
+      router.replace("/admin/classbook");
     } catch {
       setError("password", {
         type: "manual",
