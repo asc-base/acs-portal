@@ -15,6 +15,7 @@ interface HomePageProps {
   initNewsComplete: INews[];
   initNewsActivityStudent: INews[];
   initAnnoucement?: INewsInformation[];
+  accessDenied?: boolean;
   // initNewsHighlight?: INewsInformation[];
   // apibase: string;
 }
@@ -24,6 +25,7 @@ const HomePage = ({
   initNewsComplete,
   initNewsActivityStudent,
   initAnnoucement,
+  accessDenied = false,
   // initNewsHighlight,
   // apibase,
 }: HomePageProps) => {
@@ -94,6 +96,14 @@ const HomePage = ({
 
   return (
     <div>
+      {accessDenied && (
+        <div
+          role="alert"
+          className="bg-accent04 mx-auto mt-4 max-w-7xl rounded-md px-6 py-3 text-white"
+        >
+          Access Denied: คุณไม่มีสิทธิ์เข้าถึงส่วนผู้ดูแลระบบ
+        </div>
+      )}
       <HeroCard
         image={heroImage}
         header="สาขาวิทยาการคอมพิวเตอร์ประยุกต์"
