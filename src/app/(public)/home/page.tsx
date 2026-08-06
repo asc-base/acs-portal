@@ -9,12 +9,7 @@ export const metadata = {
   description: "Applied Computer Science KMUTT official website",
 };
 
-interface MainPageProps {
-  searchParams: Promise<{ error?: string }>;
-}
-
-const MainPage = async ({ searchParams }: MainPageProps) => {
-  const { error } = await searchParams;
+const MainPage = async () => {
   const [
     initNewsActivity,
     initNewsComplete,
@@ -35,7 +30,6 @@ const MainPage = async ({ searchParams }: MainPageProps) => {
       initNewsComplete={initNewsComplete.rows || []}
       initNewsActivityStudent={initNewsActivityStudent.rows || []}
       initAnnoucement={initAnnoucement.rows || []}
-      accessDenied={error === "unauthorized"}
       // initNewsHighlight={initNewsHighlight || []}
     />
   );
