@@ -82,11 +82,11 @@ export const FormUpdateProject: FC<FormUpdateProjectProps> = ({ apiBase, project
   const [previewImageUrl, setPreviewImageUrl] = useState<string | null>(null);
 
   const initCourses = initialProject.course?.map((c: ICourse) => ({ value: c.id })) || [];
-  const initTypes = (initialProject.tag as unknown as Tag[])?.filter((t) => t.tagsGroupsId === 1).map((t) => ({ value: t.id })) || [];
-  const initCategories = (initialProject.tag as unknown as Tag[])?.filter((t) => t.tagsGroupsId === 3).map((t) => ({ value: t.id })) || [];
+  const initTypes = initialProject.tag?.filter((t) => t.tagsGroupsId === 1).map((t) => ({ value: t.id })) || [];
+  const initCategories = initialProject.tag?.filter((t) => t.tagsGroupsId === 3).map((t) => ({ value: t.id })) || [];
   const initTechStacks = initialProject.techStacks?.map((ts: string) => ({ value: ts })) || [];
-  const initStudents = (initialProject.member as unknown as { id: number; role?: { id: number }; roleID?: number; roleId?: number }[])?.filter((m) => m.role?.id === 2 || m.roleID === 2 || m.roleId === 2).map((m) => ({ userID: m.id })) || [];
-  const initAdvisors = (initialProject.member as unknown as { id: number; role?: { id: number }; roleID?: number; roleId?: number }[])?.filter((m) => m.role?.id === 3 || m.roleID === 3 || m.roleId === 3).map((m) => ({ userID: m.id })) || [];
+  const initStudents = initialProject.member?.filter((m) => m.role?.id === 2 || m.roleID === 2).map((m) => ({ userID: m.id })) || [];
+  const initAdvisors = initialProject.member?.filter((m) => m.role?.id === 3 || m.roleID === 3).map((m) => ({ userID: m.id })) || [];
 
 
   const { control, handleSubmit, reset, formState: { isDirty } } = useForm<ProjectFormValues>({
@@ -194,11 +194,11 @@ export const FormUpdateProject: FC<FormUpdateProjectProps> = ({ apiBase, project
     try {
       console.log("Form data:", data);
       const oldCourses = initialProject.course?.map((c) => c.id) || [];
-      const oldTypes = (initialProject.tag as unknown as Tag[])?.filter((t) => t.tagsGroupsId === 1).map((t) => t.id) || [];
-      const oldCategories = (initialProject.tag as unknown as Tag[])?.filter((t) => t.tagsGroupsId === 3).map((t) => t.id) || [];
+      const oldTypes = initialProject.tag?.filter((t) => t.tagsGroupsId === 1).map((t) => t.id) || [];
+      const oldCategories = initialProject.tag?.filter((t) => t.tagsGroupsId === 3).map((t) => t.id) || [];
       const oldTags = [...oldTypes, ...oldCategories];
-      const oldStudents = (initialProject.member as unknown as { id: number; role?: { id: number }; roleID?: number; roleId?: number }[])?.filter((m) => m.role?.id === 2 || m.roleID === 2 || m.roleId === 2).map((m) => m.id) || [];
-      const oldAdvisors = (initialProject.member as unknown as { id: number; role?: { id: number }; roleID?: number; roleId?: number }[])?.filter((m) => m.role?.id === 3 || m.roleID === 3 || m.roleId === 3).map((m) => m.id) || [];
+      const oldStudents = initialProject.member?.filter((m) => m.role?.id === 2 || m.roleID === 2).map((m) => m.id) || [];
+      const oldAdvisors = initialProject.member?.filter((m) => m.role?.id === 3 || m.roleID === 3).map((m) => m.id) || [];
 
       const newCoursesFromForm = data.projectCourses.map((c) => Number(c.value)).filter((v) => v > 0);
       const newTagsFromForm = [...data.projectTypes, ...data.projectCategories].map((t) => Number(t.value)).filter((v) => v > 0);
@@ -245,7 +245,18 @@ export const FormUpdateProject: FC<FormUpdateProjectProps> = ({ apiBase, project
       };
 
       await projectsService.updateProject(projectId, payload, files);
-      router.push("/admin/projects");
+      setConfirmModal({
+        isOpen: true,
+        title: "สำเร็จ",
+        description: "อัปเดตข้อมูลโครงงานสำเร็จแล้ว",
+        type: "success",
+        confirmText: "ตกลง",
+        onClose: () => setConfirmModal(null),
+        onConfirm: () => {
+          setConfirmModal(null);
+          router.push("/admin/projects");
+        }
+      });
       
     } catch (error) {
       console.error(error);
