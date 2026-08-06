@@ -19,15 +19,19 @@ import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import InsertDriveFileOutlinedIcon from "@mui/icons-material/InsertDriveFileOutlined";
 import FileUploadOutlinedIcon from "@mui/icons-material/FileUploadOutlined";
 
-interface CoursesUploadModalProps {
+interface UploadModalProps {
   isOpen: boolean;
   onClose: () => void;
+  onUpload: (file: File) => void;
+  title: string;
 }
 
-export const CoursesUploadModal = ({
+export const UploadModal = ({
   isOpen,
   onClose,
-}: CoursesUploadModalProps) => {
+  onUpload,
+  title,
+}: UploadModalProps) => {
   const [errorMessage, setErrorMessage] = useState("");
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -57,7 +61,13 @@ export const CoursesUploadModal = ({
   };
 
   const handleFile = (file: File) => {
-    if (file.name.endsWith(".csv") || file.type === "text/csv") {
+    if (
+      file.name.endsWith(".csv") ||
+      file.type === "text/csv" ||
+      file.name.endsWith(".xlsx") ||
+      file.type ===
+        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    ) {
       if (file.size > 25 * 1024 * 1024) {
         setErrorMessage("ไฟล์มีขนาดใหญ่เกิน 25 MB");
         return;
@@ -65,22 +75,14 @@ export const CoursesUploadModal = ({
       setErrorMessage("");
       setSelectedFile(file);
     } else {
-      setErrorMessage("กรุณาอัปโหลดไฟล์ CSV เท่านั้น");
+      setErrorMessage("กรุณาอัปโหลดไฟล์ CSV หรือไฟล์ XLSX เท่านั้น");
     }
   };
 
   const handleUploadFile = () => {
     if (!selectedFile) return;
-
-    Papa.parse(selectedFile, {
-      header: true,
-      skipEmptyLines: true,
-      complete: (result) => {
-        const data = result.data as ICreateCourse[];
-        console.log("data: ", data);
-        handleClose();
-      },
-    });
+    onUpload(selectedFile);
+    handleClose();
   };
 
   const handleRemoveFile = () => {
@@ -124,7 +126,7 @@ export const CoursesUploadModal = ({
           alignItems: "center",
         }}
       >
-        <Typography fontWeight="bold">อัปโหลดไฟล์รายวิชา</Typography>
+        <Typography fontWeight="bold">{title}</Typography>
         <IconButton onClick={handleClose}>
           <CloseIcon />
         </IconButton>
@@ -153,7 +155,7 @@ export const CoursesUploadModal = ({
             <input
               ref={inputRef}
               type="file"
-              accept=".csv"
+              accept=".csv, .xlsx, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
               onChange={handleChange}
               style={{ display: "none" }}
             />
@@ -178,7 +180,7 @@ export const CoursesUploadModal = ({
               variant="body2"
               sx={{ color: "var(--color-neutral04)", mb: 3 }}
             >
-              หรือเลือกไฟล์จากคอมพิวเตอร์ของคุณ (.csv)
+              หรือเลือกไฟล์จากคอมพิวเตอร์ของคุณ (.csv หรือ .xlsx)
             </Typography>
             <Button
               variant="outlined"

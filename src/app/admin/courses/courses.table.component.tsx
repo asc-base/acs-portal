@@ -37,7 +37,9 @@ import {
   ConfirmModalProps,
 } from "@/components/modal/confirmModal";
 import EmptyState from "@/components/emptyState";
-import { CoursesUploadModal } from "@/app/admin/courses/create/courses.uploadFile";
+import Papa from "papaparse";
+import { UploadModal } from "@/components/uploadFile";
+import { ICreateCourse } from "@/core/domain/course";
 
 interface CourseTableComponentsProps {
   courses: ICourse[];
@@ -132,6 +134,23 @@ const CourseTableComponents = ({
     setErrorMessage("");
   };
 
+  const handleUploadCourseFile = (file: File) => {
+    Papa.parse(file, {
+      header: true,
+      skipEmptyLines: true,
+      complete: (result) => {
+        const data = result.data as ICreateCourse[];
+        console.log("Data: ", data);
+        // จุดส่งเข้า API      
+        setIsUploadModalOpen(false);
+      },
+      error: (error) => {
+        console.error(error);
+        setErrorMessage("เกิดข้อผิดพลาดในการอ่านไฟล์");
+      }
+    });
+  };
+
   return (
     <Card sx={{ height: 700, display: "flex", flexDirection: "column" }}>
       <Snackbar
@@ -201,9 +220,11 @@ const CourseTableComponents = ({
         </div>
       </div>
 
-      <CoursesUploadModal
+      <UploadModal
         isOpen={isUploadModalOpen}
         onClose={() => setIsUploadModalOpen(false)}
+        title="อัปโหลดไฟล์รายวิชา"
+        onUpload={handleUploadCourseFile}
       />
       {confirmModal && <ConfirmModal {...confirmModal} />}
 
