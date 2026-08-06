@@ -13,8 +13,6 @@ import {
   Snackbar,
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
-import Papa from "papaparse";
-import { ICreateCourse } from "@/core/domain/course";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import InsertDriveFileOutlinedIcon from "@mui/icons-material/InsertDriveFileOutlined";
 import FileUploadOutlinedIcon from "@mui/icons-material/FileUploadOutlined";
