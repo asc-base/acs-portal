@@ -12,6 +12,7 @@ import { AuthRepository } from "@/infra/repositories/auth.repository";
 import { AuthService } from "@/core/service/auth.service";
 import { useMemo } from "react";
 import { useRouter } from "next/navigation";
+import { useAuthStore } from "@/store/auth";
 
 const Schema = z.object({
   email: z.string().trim().email("กรุณากรอกอีเมลที่ถูกต้อง"),
@@ -27,14 +28,13 @@ export default function AdminLoginLandingPage({
   apiBase,
 }: Readonly<AdminLoginLandingPageProps>) {
   const router = useRouter();
+  const { setUser } = useAuthStore();
   const [showPwd, setShowPwd] = React.useState(false);
 
   const authService = useMemo(() => {
     const authRepository = new AuthRepository(apiBase);
     return new AuthService(authRepository);
   }, [apiBase]);
-
-  console.log("API URL", apiBase);
 
   const {
     control,
@@ -50,7 +50,6 @@ export default function AdminLoginLandingPage({
 
   const onSubmit = async (data: FormValues) => {
     try {
-      await new Promise((r) => setTimeout(r, 400)); // mock
       const loginRequest = {
         email: data.email,
         password: data.password,
@@ -58,11 +57,18 @@ export default function AdminLoginLandingPage({
 
       const response = await authService.Login(loginRequest);
 
-      console.log("form data", loginRequest);
-
-      if (response?.status) {
-        router.push(`/admin/classbook`);
+      if (!response?.status) {
+        setError("password", {
+          type: "manual",
+          message: "ข้อมูลการเข้าสู่ระบบไม่ถูกต้อง",
+        });
+        return;
       }
+
+      const user = await authService.getUser();
+
+      setUser(user);
+      router.replace("/admin/classbook");
     } catch {
       setError("password", {
         type: "manual",

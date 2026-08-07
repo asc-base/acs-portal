@@ -35,7 +35,7 @@ export class AuthService {
     return this.authRepository.resetPassword(payload);
   }
 
-  async getUser(): Promise<void | IUser | null> {
+  async getUser(): Promise<IUser | null> {
     const user = await this.authRepository.getUser();
     return user;
   }
