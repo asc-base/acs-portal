@@ -14,6 +14,7 @@ import { AuthService } from "@/core/service/auth.service";
 import { AuthRepository } from "@/infra/repositories/auth.repository";
 import { useAuthStore } from "@/store/auth";
 import { useMemo } from "react";
+import Image from "next/image";
 
 const sidebarItems = [
   {
@@ -95,9 +96,11 @@ export const EdgeSidebarAdmin = ({
       <div>
         <div className="flex items-center gap-x-4 px-8 py-4">
           {imageUrl && (
-            <img
+            <Image
               src={imageUrl}
               alt="Profile"
+              width={40}
+              height={40}
               className="border-neutral02 h-10 w-10 rounded-full border object-cover shadow-sm"
             />
           )}
