@@ -1,6 +1,6 @@
 "use client";
 import React, { useState, useEffect, useMemo } from "react";
-import { Button, InputAdornment, Modal } from "@mui/material";
+import { Button, InputAdornment, Modal, Chip, TextField } from "@mui/material";
 import { RHFTextField } from "@/components/form/RHFTextField";
 import { styled } from "@mui/material/styles";
 import GitHubIcon from "@mui/icons-material/GitHub";
@@ -9,6 +9,8 @@ import LinkedInIcon from "@mui/icons-material/LinkedIn";
 import InstagramIcon from "@mui/icons-material/Instagram";
 import Image from "next/image";
 import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { profileFormSchema, ProfileFormData } from "@/core/schema/profile";
 import { CropImageCard } from "@/components/cropimagecard";
 import { useRouter } from "next/navigation";
 import { IStudent } from "@/core/domain/student";
@@ -29,14 +31,7 @@ const VisuallyHiddenInput = styled("input")({
   width: 1,
 });
 
-interface FormData {
-  github: string;
-  linkedin: string;
-  facebook: string;
-  instagram: string;
-  projects: { title: string }[];
-  file: string | File | null;
-}
+
 
 // interface ProfileFormProps {
 //   studentData: IStudent;
@@ -80,18 +75,37 @@ const ProfileForm = ({ apiBase }: { apiBase: string }) => {
     fetchStudent();
   }, [router, authService, studentService]);
 
-  const { handleSubmit, control, reset } = useForm<FormData>({
+  const [skillInput, setSkillInput] = useState("");
+
+  const { handleSubmit, control, reset, watch, setValue } = useForm<ProfileFormData>({
+    resolver: zodResolver(profileFormSchema),
     defaultValues: {
       github: student?.github || "",
       linkedin: student?.linkedin || "",
       facebook: student?.facebook || "",
       instagram: student?.instagram || "",
-      // projects:
-      //   studentData?.projects?.map((project) => ({ title: project.title })) ||
-      //   [],
       file: student?.user?.imageUrl || null,
+      skills: student?.skills || [],
     },
   });
+
+  const currentSkills = watch("skills") || [];
+
+  const handleAddSkill = () => {
+    const trimmed = skillInput.trim();
+    if (trimmed && !currentSkills.includes(trimmed)) {
+      setValue("skills", [...currentSkills, trimmed], { shouldDirty: true });
+      setSkillInput("");
+    }
+  };
+
+  const handleDeleteSkill = (skillToDelete: string) => {
+    setValue(
+      "skills",
+      currentSkills.filter((skill) => skill !== skillToDelete),
+      { shouldDirty: true }
+    );
+  };
   const [isCroping, setIsCroping] = useState(false);
 
   useEffect(() => {
@@ -101,7 +115,9 @@ const ProfileForm = ({ apiBase }: { apiBase: string }) => {
       facebook: student?.facebook || "",
       instagram: student?.instagram || "",
       file: student?.user?.imageUrl || null,
+      skills: student?.skills || [],
     });
+    setSkillInput("");
     setSelectedFile(null);
   }, [student, reset]);
 
@@ -138,12 +154,14 @@ const ProfileForm = ({ apiBase }: { apiBase: string }) => {
       facebook: student?.facebook || "",
       instagram: student?.instagram || "",
       file: student?.user?.imageUrl || null,
+      skills: student?.skills || [],
     });
+    setSkillInput("");
     setSelectedFile(null);
     setIsEditing(false);
   };
 
-  const onSubmit = async (data: FormData) => {
+  const onSubmit = async (data: ProfileFormData) => {
     try {
       setIsEditing(false);
       const id = student?.id;
@@ -425,6 +443,73 @@ const ProfileForm = ({ apiBase }: { apiBase: string }) => {
               />
             </div>
           </div>
+        </div>
+
+        
+       <div className="group text-neutral04 mt-6 flex flex-col">
+          <h4 className="group-focus-within:text-primary03">Skills</h4>
+          <div className="flex flex-col gap-2 md:flex-row md:items-start">
+            <div className="grow">
+              <TextField
+                value={skillInput}
+                onChange={(e) => setSkillInput(e.target.value)}
+                fullWidth
+                variant="outlined"
+                size="small"
+                placeholder="เพิ่ม skills ของคุณ ..."
+                disabled={!isEditing}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    handleAddSkill();
+                  }
+                }}
+                sx={{
+                  "& .MuiOutlinedInput-root": {
+                    "& fieldset": { borderColor: "var(--color-neutral03)" },
+                    "&.Mui-focused fieldset": { borderColor: "var(--color-primary03)" },
+                  },
+                }}
+              />
+            </div>
+            <Button
+              variant="contained"
+              disabled={!isEditing || !skillInput.trim()}
+              onClick={handleAddSkill}
+              sx={{
+                backgroundColor: "var(--color-primary02)", 
+                color: "var(--color-neutral01)",
+                height: "40px",
+                minWidth: "100px",
+                alignSelf: "flex-start",
+                "&:hover": { backgroundColor: "var(--color-primary01)" }, 
+              }}
+            >
+              เพิ่ม
+            </Button>
+          </div>
+
+          {currentSkills.length > 0 && (
+            <div className="mt-1 flex flex-wrap gap-2">
+              {currentSkills.map((skill, index) => (
+                <Chip
+                  key={index}
+                  label={skill}
+                  onDelete={isEditing ? () => handleDeleteSkill(skill) : undefined}
+                  sx={{
+                    backgroundColor: "var(--color-neutral02)", 
+                    borderRadius: "16px",
+                    fontSize: "var(--text-h5)", 
+                    color: "var(--color-neutral05)", 
+                    "& .MuiChip-deleteIcon": {
+                      color: "var(--color-neutral04)",
+                      "&:hover": { color: "var(--color-neutral05)" },
+                    },
+                  }}
+                />
+              ))}
+            </div>
+          )}
         </div>
 
         {/* Section 3: Projects */}
