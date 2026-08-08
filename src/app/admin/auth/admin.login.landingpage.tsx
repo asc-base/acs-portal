@@ -38,6 +38,8 @@ export default function AdminLoginLandingPage({
     return new AuthService(authRepository);
   }, [apiBase]);
 
+  console.log("API URL", apiBase);
+
   const {
     control,
     handleSubmit,
@@ -52,6 +54,7 @@ export default function AdminLoginLandingPage({
 
   const onSubmit = async (data: FormValues) => {
     try {
+      await new Promise((r) => setTimeout(r, 400)); // mock
       const loginRequest = {
         email: data.email,
         password: data.password,
