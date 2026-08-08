@@ -6,4 +6,5 @@ export interface IProjectRepository {
   getProjectById(id: string): Promise<ApiResponse<IProject>>;
   createProject(formData: FormData): Promise<ApiResponse<IProject>>;
   deleteProject(id: number): Promise<ApiResponse<IProject>>;
+  updateProject(id: string, formData: FormData): Promise<ApiResponse<IProject>>;
 }
