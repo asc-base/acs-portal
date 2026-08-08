@@ -31,5 +31,17 @@ export const UpdateNewsSchema = z.object({
   highlight: z.union([z.string().trim().min(1), z.file()]),
 });
 
+export const CreateNewsInformationSchema = (type: string) =>
+  z
+    .object({
+      thumbnail: z.instanceof(File, { message: "กรุณาอัปโหลดรูปภาพ" }),
+      highlight:
+      type === "newshighlight"
+        ? z.instanceof(File, { message: "กรุณาอัปโหลดรูปภาพ" })
+        : z.instanceof(File).optional(),
+    newsID: z.number().min(1, "กรุณาเลือกข่าว"),
+    });
+
 export type CreateNewsInputs = z.infer<typeof CreateNewsSchema>;
 export type UpdateNewsInputs = z.infer<typeof UpdateNewsSchema>;
+export type CreateNewsInformationInputs = z.infer<ReturnType<typeof CreateNewsInformationSchema>>
