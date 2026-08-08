@@ -7,4 +7,6 @@ export interface IUser {
     lastNameEn: string;
     nickName?: string;
     imageUrl: string;
+    group?: string | { name?: string };
+    groups?: Array<string | { name?: string }>;
 }

@@ -38,6 +38,7 @@ export interface IUpdateNews {
 export interface INewsInformation {
   id: number;
   thumbnailURL: string;
+  highlightURL?: string;
   news: INews;
 }
 

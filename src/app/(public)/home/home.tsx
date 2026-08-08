@@ -150,7 +150,7 @@ const HomePage = ({
             tagId={16}
           >
             {Array.from(
-              { length: Math.min(3, initNewsActivity.length) },
+              { length: Math.min(4, initNewsActivity.length) },
               (_, i) => {
                 const index =
                   (newsActivityActive + i) % initNewsActivity.length;
@@ -187,7 +187,7 @@ const HomePage = ({
             tagId={17}
           >
             {Array.from(
-              { length: Math.min(3, initNewsComplete.length) },
+              { length: Math.min(4, initNewsComplete.length) },
               (_, i) => {
                 const index =
                   (newsCompleteActive + i) % initNewsComplete.length;
@@ -224,7 +224,7 @@ const HomePage = ({
             tagId={18}
           >
             {Array.from(
-              { length: Math.min(3, initNewsActivityStudent.length) },
+              { length: Math.min(4, initNewsActivityStudent.length) },
               (_, i) => {
                 const index =
                   (newsActivityStudentActive + i) %

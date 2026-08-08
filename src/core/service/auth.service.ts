@@ -36,8 +36,7 @@ export class AuthService {
   }
 
   async getUser(): Promise<IUser | null> {
-    const user = await this.authRepository.getUser();
-    return user;
+    return this.authRepository.getUser();
   }
 
   async logout(): Promise<void> {
