@@ -15,13 +15,15 @@ export default function AdminClientLayout({
   apiBase,
 }: Readonly<AdminClientLayoutProps>) {
   const pathname = usePathname();
-  const hideSidebar = pathname === "/admin/auth";
-
   const { user } = useAuthStore();
 
+  if (pathname === "/admin/auth") {
+    return <main className="jun-content">{children}</main>;
+  }
+
   return (
-    <div className="jun-layout flex h-screen">
-      {!hideSidebar && (
+    <AdminRouteGuard apiBase={apiBase}>
+      <div className="jun-layout flex h-screen">
         <aside className="jun-sidebar w-64">
           <EdgeSidebarAdmin
             username={user ? `${user.firstNameTh} ${user.lastNameTh}` : "Admin"}
@@ -29,10 +31,8 @@ export default function AdminClientLayout({
             apiBase={apiBase}
           />
         </aside>
-      )}
-      <AdminRouteGuard apiBase={apiBase}>
         <main className="jun-content flex-1 overflow-y-auto">{children}</main>
-      </AdminRouteGuard>
-    </div>
+      </div>
+    </AdminRouteGuard>
   );
 }
