@@ -22,7 +22,7 @@ const ProfessorsInfoComponent = ({ professorsInfo }: ProfessorsInfoProps) => {
                 </span>
             </Breadcrumbs>
 
-            <div className="flex flex-col md:flex-row gap-4 lg:gap-6 py-6 items-center md:items-start">
+            <div className="flex flex-col md:flex-row gap-4 lg:gap-6 py-6 items-center md:items-start justify-center">
                 <div className="md:basis-auto pointer-events-none">
                     <ProfessorCardInfo {...professorsInfo} />
                 </div>
@@ -51,7 +51,7 @@ const ProfessorsInfoComponent = ({ professorsInfo }: ProfessorsInfoProps) => {
                         ) : (
                             <p>-</p>
                         )}
-                    </div>  
+                    </div>
 
                     <div className="flex flex-col gap-2">
                         <h3 className="font-semibold text-primary01 leading-none">
@@ -66,7 +66,7 @@ const ProfessorsInfoComponent = ({ professorsInfo }: ProfessorsInfoProps) => {
                         ) : (
                             <p>-</p>
                         )}
-                    </div>  
+                    </div>
                 </div>
             </div>
         </div>
