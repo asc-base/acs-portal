@@ -9,7 +9,12 @@ import BookmarkIcon from "@mui/icons-material/Bookmark";
 import CampaignIcon from "@mui/icons-material/Campaign";
 import BorderColorIcon from "@mui/icons-material/BorderColor";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
+import { AuthService } from "@/core/service/auth.service";
+import { AuthRepository } from "@/infra/repositories/auth.repository";
+import { useAuthStore } from "@/store/auth";
+import { useMemo } from "react";
+import Image from "next/image";
 
 const sidebarItems = [
   {
@@ -58,16 +63,51 @@ const sidebarItems = [
   // },
 ];
 
-export const EdgeSidebarAdmin = ({ username }: { username: string }) => {
+export const EdgeSidebarAdmin = ({
+  username,
+  imageUrl,
+  apiBase,
+}: {
+  username: string;
+  imageUrl?: string;
+  apiBase: string;
+}) => {
   const pathName = usePathname();
+  const router = useRouter();
+  const { clearUser } = useAuthStore();
+
+  const authService = useMemo(() => {
+    const authRepository = new AuthRepository(apiBase);
+    return new AuthService(authRepository);
+  }, [apiBase]);
+
+  const handleLogout = async () => {
+    try {
+      await authService.logout();
+      clearUser();
+      router.push("/admin/auth");
+    } catch (error) {
+      console.error("Logout failed:", error);
+    }
+  };
 
   return (
     <aside className="bg-neutral01 flex h-full w-full flex-col shadow-lg">
       <div>
         <div className="flex items-center gap-x-4 px-8 py-4">
+          {imageUrl && (
+            <Image
+              src={imageUrl}
+              alt="Profile"
+              width={40}
+              height={40}
+              className="border-neutral02 h-10 w-10 rounded-full border object-cover shadow-sm"
+            />
+          )}
           <AccountCircleRoundedIcon
             fontSize="large"
             className="text-neutral05"
+            style={{ display: imageUrl ? "none" : "block" }}
           />
           <h3>{username}</h3>
         </div>
@@ -110,9 +150,9 @@ export const EdgeSidebarAdmin = ({ username }: { username: string }) => {
         </nav>
       </div>
       <div className="mt-auto">
-        <Link
-          href="/logout"
-          className="hover:bg-neutral02 group flex h-[44px] items-center gap-x-4 px-8"
+        <div
+          onClick={handleLogout}
+          className="hover:bg-neutral02 group flex h-[44px] cursor-pointer items-center gap-x-4 px-8"
         >
           <h3>
             <LogoutIcon className="text-neutral04 group-hover:text-accent04" />
@@ -120,7 +160,7 @@ export const EdgeSidebarAdmin = ({ username }: { username: string }) => {
           <h4 className="text-neutral05 group-hover:text-accent04">
             ออกจากระบบ
           </h4>
-        </Link>
+        </div>
       </div>
     </aside>
   );
