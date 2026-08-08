@@ -37,9 +37,7 @@ import {
   ConfirmModalProps,
 } from "@/components/modal/confirmModal";
 import EmptyState from "@/components/emptyState";
-import Papa from "papaparse";
 import { UploadModal } from "@/components/uploadFile";
-import { ICreateCourse } from "@/core/domain/course";
 
 interface CourseTableComponentsProps {
   courses: ICourse[];
@@ -134,21 +132,19 @@ const CourseTableComponents = ({
     setErrorMessage("");
   };
 
-  const handleUploadCourseFile = (file: File) => {
-    Papa.parse(file, {
-      header: true,
-      skipEmptyLines: true,
-      complete: (result) => {
-        const data = result.data as ICreateCourse[];
-        console.log("Data: ", data);
-        // จุดส่งเข้า API      
-        setIsUploadModalOpen(false);
-      },
-      error: (error) => {
-        console.error(error);
-        setErrorMessage("เกิดข้อผิดพลาดในการอ่านไฟล์");
-      }
-    });
+  const handleUploadCourseFile = async (file: File) => {
+    try {
+      const formData = new FormData();
+      formData.append("file", file); // key "file" ใช้ตาม backend
+
+      await courseService.createCourseBatch(formData);
+
+      setIsUploadModalOpen(false);
+      router.refresh();
+    } catch (error) {
+      console.error(error);
+      setErrorMessage("ไม่สามารถอัปโหลดข้อมูลรายวิชาได้");
+    }
   };
 
   return (
