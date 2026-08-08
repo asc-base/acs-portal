@@ -33,4 +33,11 @@ export class CourseService {
     const response = await this.courseRepository.deleteCourse(id);
     return response.data;
   }
+
+  async createCourseBatch(file: File): Promise<ICourse> {
+    const formData = new FormData();
+    formData.append("file", file);  //ตั้งชื่อ key ตามที่ backend ตั้ง
+    const response = await this.courseRepository.createCourseBatch(formData);
+    return response.data;
+  }
 }
