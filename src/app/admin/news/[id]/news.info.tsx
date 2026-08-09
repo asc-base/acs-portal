@@ -85,6 +85,10 @@ const NewsInfo = ({ news, apiBase, categories }: NewsInfoProps) => {
       detail: news.detail,
       thumbnail: news.thumbnailURL,
       highlight: news.highlightURL,
+      cardFocalPointX: news.cardFocalPointX,
+      cardFocalPointY: news.cardFocalPointY,
+      thumbnailFocalPointX: news.thumbnailFocalPointX,
+      thumbnailFocalPointY: news.thumbnailFocalPointY,
     },
   });
 
@@ -99,14 +103,25 @@ const NewsInfo = ({ news, apiBase, categories }: NewsInfoProps) => {
     event.target.value = "";
   };
 
-  const handleUploadComplete = (file: File) => {
+  const handleUploadComplete = (
+    file: File,
+    focalPoint?: { x: number; y: number },
+  ) => {
     const previewUrl = URL.createObjectURL(file);
 
     if (cropTarget === "thumbnail") {
       setValue("thumbnail", file, { shouldDirty: true });
+      if (focalPoint) {
+        setValue("cardFocalPointX", focalPoint.x, { shouldDirty: true });
+        setValue("cardFocalPointY", focalPoint.y, { shouldDirty: true });
+      }
       setThumbnailPreview(previewUrl);
     } else if (cropTarget === "highlight") {
       setValue("highlight", file, { shouldDirty: true });
+      if (focalPoint) {
+        setValue("thumbnailFocalPointX", focalPoint.x, { shouldDirty: true });
+        setValue("thumbnailFocalPointY", focalPoint.y, { shouldDirty: true });
+      }
       setHighlightPreview(previewUrl);
     }
 
@@ -147,6 +162,10 @@ const NewsInfo = ({ news, apiBase, categories }: NewsInfoProps) => {
           highlight: data.highlight,
           startDate: dayjs(data.startDate).toISOString(),
           dueDate: data.dueDate ? dayjs(data.dueDate).toISOString() : undefined,
+          cardFocalPointX: data.cardFocalPointX,
+          cardFocalPointY: data.cardFocalPointY,
+          thumbnailFocalPointX: data.thumbnailFocalPointX,
+          thumbnailFocalPointY: data.thumbnailFocalPointY,
         };
 
         const response = await newsService.updateNews(news.id, payload);
