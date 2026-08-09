@@ -5,6 +5,10 @@ export interface INews {
   title: string;
   thumbnailURL: string;
   highlightURL: string;
+  cardFocalPointX?: number;
+  cardFocalPointY?: number;
+  thumbnailFocalPointX?: number;
+  thumbnailFocalPointY?: number;
   detail: string;
   startDate: Date;
   dueDate: Date | null;
@@ -19,20 +23,28 @@ export interface ICreateNews {
   title: string;
   tagID: number;
   thumbnail: File;
-  highlight:File 
+  highlight: File;
   startDate: string;
   dueDate?: string;
   detail: string;
+  cardFocalPointX?: number;
+  cardFocalPointY?: number;
+  thumbnailFocalPointX?: number;
+  thumbnailFocalPointY?: number;
 }
 
 export interface IUpdateNews {
   title?: string;
   tagID?: number;
   thumbnail?: File | string;
-  highlight?:File | string 
+  highlight?: File | string;
   startDate: string;
   dueDate?: string;
   detail?: string;
+  cardFocalPointX?: number;
+  cardFocalPointY?: number;
+  thumbnailFocalPointX?: number;
+  thumbnailFocalPointY?: number;
 }
 
 export interface INewsInformation {

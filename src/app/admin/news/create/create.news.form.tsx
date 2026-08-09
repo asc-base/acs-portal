@@ -94,11 +94,22 @@ const CreateNewsForm = ({ apiBase, categories }: CraeteNewsProps) => {
     event.target.value = "";
   };
 
-  const handleUploadComplete = (file: File) => {
+  const handleUploadComplete = (
+    file: File,
+    focalPoint?: { x: number; y: number },
+  ) => {
     if (cropTarget === "thumbnail") {
       setValue("thumbnail", file, { shouldDirty: true, shouldValidate: true });
+      if (focalPoint) {
+        setValue("cardFocalPointX", focalPoint.x, { shouldDirty: true });
+        setValue("cardFocalPointY", focalPoint.y, { shouldDirty: true });
+      }
     } else if (cropTarget === "highlight") {
       setValue("highlight", file, { shouldDirty: true, shouldValidate: true });
+      if (focalPoint) {
+        setValue("thumbnailFocalPointX", focalPoint.x, { shouldDirty: true });
+        setValue("thumbnailFocalPointY", focalPoint.y, { shouldDirty: true });
+      }
     }
     setCroppingFile(null);
     setCropTarget(null);
@@ -138,6 +149,10 @@ const CreateNewsForm = ({ apiBase, categories }: CraeteNewsProps) => {
           highlight: data.highlight,
           startDate: dayjs(data.startDate).toISOString(),
           dueDate: data.dueDate ? dayjs(data.dueDate).toISOString() : undefined,
+          cardFocalPointX: data.cardFocalPointX,
+          cardFocalPointY: data.cardFocalPointY,
+          thumbnailFocalPointX: data.thumbnailFocalPointX,
+          thumbnailFocalPointY: data.thumbnailFocalPointY,
         };
 
         const response = await newsService.createNews(payload);

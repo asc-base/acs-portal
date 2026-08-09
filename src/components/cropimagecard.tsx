@@ -1,14 +1,15 @@
 "use client";
 
-import { useEffect, useRef, useState, useCallback } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { Button, Slider } from "@mui/material";
 import ImageIcon from "@mui/icons-material/Image";
+import Cropper, { Area } from "react-easy-crop";
 
 interface CropImageCardProps {
   file: File;
   width: number;
   height: number;
-  onUploadComplete: (file: File) => void;
+  onUploadComplete: (file: File, focalPoint?: { x: number; y: number }) => void;
   onCancel: () => void;
 }
 
@@ -20,18 +21,12 @@ export const CropImageCard = ({
   onCancel,
 }: CropImageCardProps) => {
   const [zoom, setZoom] = useState(1);
-  const [position, setPosition] = useState({ x: 0, y: 0 });
+  const [crop, setCrop] = useState({ x: 0, y: 0 });
   const [processing, setProcessing] = useState(false);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
-
-  const imgRef = useRef<HTMLImageElement | null>(null);
-
-  const baseScaleRef = useRef(1);
-  const zoomRef = useRef(1);
-
-  const isDragging = useRef(false);
-  const lastPos = useRef({ x: 0, y: 0 });
-  const lastDistance = useRef<number | null>(null);
+  const [croppedAreaPixels, setCroppedAreaPixels] = useState<Area | null>(null);
+  const [croppedAreaPercentage, setCroppedAreaPercentage] =
+    useState<Area | null>(null);
 
   const CONTAINER = {
     w: width,
@@ -47,233 +42,88 @@ export const CropImageCard = ({
     const url = URL.createObjectURL(file);
     setPreviewUrl(url);
 
-    const img = new window.Image();
-    img.src = url;
-
-    img.onload = () => {
-      imgRef.current = img;
-
-      const scaleX = width / img.naturalWidth;
-      const scaleY = height / img.naturalHeight;
-
-      // cover container
-      baseScaleRef.current = Math.max(scaleX, scaleY);
-
-      zoomRef.current = 1;
-      setZoom(1);
-
-      setPosition({ x: 0, y: 0 });
-    };
-
     return () => {
       URL.revokeObjectURL(url);
     };
-  }, [file, width, height]);
+  }, [file]);
 
-  const getFinalScale = () => {
-    return baseScaleRef.current * zoomRef.current;
-  };
-
-  // =========================
-  // CLAMP POSITION
-  // =========================
-  const clampPosition = useCallback((
-    x: number,
-    y: number,
-    currentZoom = zoomRef.current,
-  ) => {
-    const img = imgRef.current;
-
-    if (!img) {
-      return { x, y };
-    }
-
-    const scale = baseScaleRef.current * currentZoom;
-
-    const scaledW = img.naturalWidth * scale;
-    const scaledH = img.naturalHeight * scale;
-
-    const maxX = Math.max(0, (scaledW - width) / 2);
-
-    const maxY = Math.max(0, (scaledH - height) / 2);
-
-    return {
-      x: Math.max(-maxX, Math.min(maxX, x)),
-      y: Math.max(-maxY, Math.min(maxY, y)),
-    };
-  }, [width, height]);
-
-  // =========================
-  // UPDATE ZOOM
-  // =========================
-  const updateZoom = (newZoom: number) => {
-    zoomRef.current = newZoom;
-    setZoom(newZoom);
-  };
-
-  // =========================
-  // MOUSE DRAG
-  // =========================
-  useEffect(() => {
-    const move = (e: MouseEvent) => {
-      if (!isDragging.current) return;
-
-      const dx = e.clientX - lastPos.current.x;
-      const dy = e.clientY - lastPos.current.y;
-
-      setPosition((prev) => clampPosition(prev.x + dx, prev.y + dy));
-
-      lastPos.current = {
-        x: e.clientX,
-        y: e.clientY,
-      };
-    };
-
-    const up = () => {
-      isDragging.current = false;
-    };
-
-    document.addEventListener("mousemove", move);
-    document.addEventListener("mouseup", up);
-
-    return () => {
-      document.removeEventListener("mousemove", move);
-      document.removeEventListener("mouseup", up);
-    };
-  }, [clampPosition]);
-
-  const handleMouseDown = (e: React.MouseEvent) => {
-    isDragging.current = true;
-
-    lastPos.current = {
-      x: e.clientX,
-      y: e.clientY,
-    };
-  };
-
-  // =========================
-  // TOUCH
-  // =========================
-  const getDistance = (touches: React.TouchList) => {
-    const dx = touches[0].clientX - touches[1].clientX;
-    const dy = touches[0].clientY - touches[1].clientY;
-
-    return Math.sqrt(dx * dx + dy * dy);
-  };
-
-  const handleTouchStart = (e: React.TouchEvent) => {
-    if (e.touches.length === 1) {
-      isDragging.current = true;
-
-      lastPos.current = {
-        x: e.touches[0].clientX,
-        y: e.touches[0].clientY,
-      };
-    }
-
-    if (e.touches.length === 2) {
-      lastDistance.current = getDistance(e.touches);
-    }
-  };
-
-  const handleTouchMove = (e: React.TouchEvent) => {
-    // drag
-    if (e.touches.length === 1 && isDragging.current) {
-      const dx = e.touches[0].clientX - lastPos.current.x;
-
-      const dy = e.touches[0].clientY - lastPos.current.y;
-
-      setPosition((prev) => clampPosition(prev.x + dx, prev.y + dy));
-
-      lastPos.current = {
-        x: e.touches[0].clientX,
-        y: e.touches[0].clientY,
-      };
-    }
-
-    // pinch zoom
-    if (e.touches.length === 2 && lastDistance.current) {
-      const newDist = getDistance(e.touches);
-
-      const delta = newDist / lastDistance.current;
-
-      const newZoom = Math.min(3, Math.max(1, zoomRef.current * delta));
-
-      updateZoom(newZoom);
-
-      setPosition((prev) => clampPosition(prev.x, prev.y, newZoom));
-
-      lastDistance.current = newDist;
-    }
-  };
-
-  const handleTouchEnd = () => {
-    isDragging.current = false;
-    lastDistance.current = null;
-  };
+  const onCropComplete = useCallback(
+    (croppedArea: Area, croppedAreaPixels: Area) => {
+      setCroppedAreaPercentage(croppedArea);
+      setCroppedAreaPixels(croppedAreaPixels);
+    },
+    [],
+  );
 
   // =========================
   // CROP
   // =========================
-  const handleConfirm = () => {
-    if (!imgRef.current) return;
+  const handleConfirm = async () => {
+    if (!previewUrl || !croppedAreaPixels) return;
 
     setProcessing(true);
 
-    const img = imgRef.current;
+    try {
+      const image = new window.Image();
+      image.src = previewUrl;
+      await new Promise((resolve, reject) => {
+        image.onload = resolve;
+        image.onerror = reject;
+      });
 
-    const scale = getFinalScale();
+      const canvas = document.createElement("canvas");
+      canvas.width = CONTAINER.w;
+      canvas.height = CONTAINER.h;
+      const ctx = canvas.getContext("2d");
 
-    const canvas = document.createElement("canvas");
-
-    canvas.width = CONTAINER.w;
-    canvas.height = CONTAINER.h;
-
-    const ctx = canvas.getContext("2d");
-
-    if (!ctx) return;
-
-    const drawW = img.naturalWidth * scale;
-    const drawH = img.naturalHeight * scale;
-
-    const x = (CONTAINER.w - drawW) / 2 + position.x;
-
-    const y = (CONTAINER.h - drawH) / 2 + position.y;
-
-    ctx.fillStyle = "#ffffff";
-    ctx.fillRect(0, 0, CONTAINER.w, CONTAINER.h);
-
-    ctx.drawImage(img, x, y, drawW, drawH);
-
-    canvas.toBlob(
-      (blob) => {
+      if (!ctx) {
         setProcessing(false);
+        return;
+      }
 
-        if (!blob) return;
+      ctx.fillStyle = "#ffffff";
+      ctx.fillRect(0, 0, CONTAINER.w, CONTAINER.h);
 
-        const croppedFile = new File([blob], file.name, {
-          type: "image/jpeg",
-        });
+      ctx.drawImage(
+        image,
+        croppedAreaPixels.x,
+        croppedAreaPixels.y,
+        croppedAreaPixels.width,
+        croppedAreaPixels.height,
+        0,
+        0,
+        CONTAINER.w,
+        CONTAINER.h,
+      );
 
-        onUploadComplete(croppedFile);
-      },
-      "image/jpeg",
-      1,
-    );
+      canvas.toBlob(
+        (blob) => {
+          setProcessing(false);
+
+          if (!blob) return;
+
+          const croppedFile = new File([blob], file.name, {
+            type: "image/jpeg",
+          });
+
+          let focalPoint;
+          if (croppedAreaPercentage) {
+            focalPoint = {
+              x: croppedAreaPercentage.x + croppedAreaPercentage.width / 2,
+              y: croppedAreaPercentage.y + croppedAreaPercentage.height / 2,
+            };
+          }
+
+          onUploadComplete(croppedFile, focalPoint);
+        },
+        "image/jpeg",
+        1,
+      );
+    } catch (e) {
+      console.error(e);
+      setProcessing(false);
+    }
   };
-
-  // =========================
-  // SCALE
-  // =========================
-  const scale = getFinalScale();
-
-  const renderedWidth = imgRef.current
-    ? imgRef.current.naturalWidth * scale
-    : 0;
-
-  const renderedHeight = imgRef.current
-    ? imgRef.current.naturalHeight * scale
-    : 0;
 
   return (
     <div className="flex min-h-screen items-center justify-center">
@@ -281,45 +131,22 @@ export const CropImageCard = ({
         <h2 className="mb-4 text-2xl font-bold">Crop Photo</h2>
 
         <div
-          className="relative cursor-grab touch-none overflow-hidden rounded-md bg-gray-100 active:cursor-grabbing"
+          className="relative overflow-hidden rounded-md bg-gray-100"
           style={{
             width: `${CONTAINER.w}px`,
             height: `${CONTAINER.h}px`,
           }}
-          onMouseDown={handleMouseDown}
-          onTouchStart={handleTouchStart}
-          onTouchMove={handleTouchMove}
-          onTouchEnd={handleTouchEnd}
         >
           {previewUrl && (
-            /* eslint-disable-next-line @next/next/no-img-element */
-            <img
-              src={previewUrl}
-              alt="preview"
-              draggable={false}
-              className="absolute select-none"
-              style={{
-                top: "50%",
-                left: "50%",
-
-                width: `${renderedWidth}px`,
-                height: `${renderedHeight}px`,
-
-                transform: `
-                  translate(
-                    calc(-50% + ${position.x}px),
-                    calc(-50% + ${position.y}px)
-                  )
-                `,
-
-                transformOrigin: "center",
-
-                maxWidth: "none",
-                maxHeight: "none",
-
-                userSelect: "none",
-                pointerEvents: "none",
-              }}
+            <Cropper
+              image={previewUrl}
+              crop={crop}
+              zoom={zoom}
+              aspect={CONTAINER.w / CONTAINER.h}
+              onCropChange={setCrop}
+              onZoomChange={setZoom}
+              onCropComplete={onCropComplete}
+              showGrid={false}
             />
           )}
         </div>
@@ -333,11 +160,7 @@ export const CropImageCard = ({
             step={0.1}
             value={zoom}
             onChange={(_, v) => {
-              const newZoom = v as number;
-
-              updateZoom(newZoom);
-
-              setPosition((prev) => clampPosition(prev.x, prev.y, newZoom));
+              setZoom(v as number);
             }}
           />
 
