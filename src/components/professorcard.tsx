@@ -7,7 +7,7 @@ export const ProfessorCard: FC<IProfessor> = (props) => {
     <div className="h-full w-[280px] cursor-pointer overflow-hidden rounded-2xl shadow-lg transition-all duration-300 hover:-translate-y-2">
       <CardMedia
         sx={{
-          height: "250px",
+          height: "272px",
           width: "100%",
           objectFit: "cover",
           objectPosition: "top center",
