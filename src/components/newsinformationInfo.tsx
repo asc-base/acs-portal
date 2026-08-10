@@ -20,8 +20,8 @@ import { ConfirmModal, ConfirmModalProps } from "@/components/modal/confirmModal
 import { styled } from "@mui/material/styles";
 import { INewsInformation } from "@/core/domain/news";
 import {
-    UpdateNewsInformationSchema,
-    UpdateNewsInformationInputs,
+    UpsertNewsInformationSchema,
+    UpsertNewsInformationInputs,
 } from "@/core/schema/newsinformation";
 
 interface NewsInformationInfoProps {
@@ -80,8 +80,8 @@ export const NewsInformationInfo = ({
         setValue,
         formState: { isDirty, isValid },
         reset,
-    } = useForm<UpdateNewsInformationInputs>({
-        resolver: zodResolver(UpdateNewsInformationSchema),
+    } = useForm<UpsertNewsInformationInputs>({
+        resolver: zodResolver(UpsertNewsInformationSchema),
         mode: "onChange",
         defaultValues: {
             thumbnail: newsInformation.thumbnailURL,
@@ -90,7 +90,7 @@ export const NewsInformationInfo = ({
         },
     });
 
-    const onSubmit = async (data: UpdateNewsInformationInputs) => {
+    const onSubmit = async (data: UpsertNewsInformationInputs) => {
         try {
             const formData = new FormData();
 
