@@ -21,17 +21,16 @@ const isValidUrl = (url?: string) => {
 
 const getImageUrl = (item: INewsInformation, isMain: boolean = false) => {
   const highlight = item.news?.highlightURL;
-  const infoThumb = item.thumbnailURL;
-  const newsThumb = item.news?.thumbnailURL;
+  const thumbnail = item.thumbnailURL;
 
-  if (isMain) {
-    if (isValidUrl(highlight)) return highlight!;
-    if (isValidUrl(infoThumb)) return infoThumb!;
-    if (isValidUrl(newsThumb)) return newsThumb!;
-  } else {
-    if (isValidUrl(infoThumb)) return infoThumb!;
-    if (isValidUrl(newsThumb)) return newsThumb!;
-    if (isValidUrl(highlight)) return highlight!;
+  if (isMain && isValidUrl(highlight)) {
+    return highlight!;
+  }
+  if (isValidUrl(thumbnail)) {
+    return thumbnail!;
+  }
+  if (isValidUrl(highlight)) {
+    return highlight!;
   }
   return "/hero.jpg";
 };
