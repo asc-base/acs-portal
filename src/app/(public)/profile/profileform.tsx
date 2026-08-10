@@ -10,7 +10,10 @@ import InstagramIcon from "@mui/icons-material/Instagram";
 import Image from "next/image";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { profileFormSchema, ProfileFormData } from "@/core/schema/profile";
+import {
+  UpdateStudentSchema,
+  UpdateStudentInputs,
+} from "@/core/schema/student";
 import { CropImageCard } from "@/components/cropimagecard";
 import { useRouter } from "next/navigation";
 import { IStudent } from "@/core/domain/student";
@@ -77,14 +80,20 @@ const ProfileForm = ({ apiBase }: { apiBase: string }) => {
 
   const [skillInput, setSkillInput] = useState("");
 
-  const { handleSubmit, control, reset, watch, setValue } = useForm<ProfileFormData>({
-    resolver: zodResolver(profileFormSchema),
+  const { handleSubmit, control, reset, watch, setValue } = useForm<UpdateStudentInputs>({
+    resolver: zodResolver(UpdateStudentSchema),
     defaultValues: {
+      studentCode: student?.studentCode || "",
+      firstNameTh: student?.user?.firstNameTh || "",
+      lastNameTh: student?.user?.lastNameTh || "",
+      firstNameEn: student?.user?.firstNameEn || "",
+      lastNameEn: student?.user?.lastNameEn || "",
+      email: student?.user?.email || "",
+      nickName: student?.user?.nickName || "",
       github: student?.github || "",
       linkedin: student?.linkedin || "",
       facebook: student?.facebook || "",
       instagram: student?.instagram || "",
-      file: student?.user?.imageUrl || null,
       skills: student?.skills || [],
     },
   });
@@ -110,11 +119,17 @@ const ProfileForm = ({ apiBase }: { apiBase: string }) => {
 
   useEffect(() => {
     reset({
+      studentCode: student?.studentCode || "",
+      firstNameTh: student?.user?.firstNameTh || "",
+      lastNameTh: student?.user?.lastNameTh || "",
+      firstNameEn: student?.user?.firstNameEn || "",
+      lastNameEn: student?.user?.lastNameEn || "",
+      email: student?.user?.email || "",
+      nickName: student?.user?.nickName || "",
       github: student?.github || "",
       linkedin: student?.linkedin || "",
       facebook: student?.facebook || "",
       instagram: student?.instagram || "",
-      file: student?.user?.imageUrl || null,
       skills: student?.skills || [],
     });
     setSkillInput("");
@@ -149,11 +164,17 @@ const ProfileForm = ({ apiBase }: { apiBase: string }) => {
 
   const handleCancel = () => {
     reset({
+      studentCode: student?.studentCode || "",
+      firstNameTh: student?.user?.firstNameTh || "",
+      lastNameTh: student?.user?.lastNameTh || "",
+      firstNameEn: student?.user?.firstNameEn || "",
+      lastNameEn: student?.user?.lastNameEn || "",
+      email: student?.user?.email || "",
+      nickName: student?.user?.nickName || "",
       github: student?.github || "",
       linkedin: student?.linkedin || "",
       facebook: student?.facebook || "",
       instagram: student?.instagram || "",
-      file: student?.user?.imageUrl || null,
       skills: student?.skills || [],
     });
     setSkillInput("");
@@ -161,7 +182,7 @@ const ProfileForm = ({ apiBase }: { apiBase: string }) => {
     setIsEditing(false);
   };
 
-  const onSubmit = async (data: ProfileFormData) => {
+  const onSubmit = async (data: UpdateStudentInputs) => {
     try {
       setIsEditing(false);
       const id = student?.id;
