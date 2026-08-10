@@ -74,4 +74,12 @@ export class CourseRepository implements ICourseRepository {
     );
     return response;
   }
+
+  async createCourseBatch(data: FormData): Promise<ApiResponse<ICourse>> {
+    const response = await this.http.post<ApiResponse<ICourse>>(
+      `/v1/courses/batch`,
+      data,
+    );
+    return response;
+  }
 }
