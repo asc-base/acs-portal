@@ -10,7 +10,7 @@ export const ProfessorCard: FC<IProfessor> = (props) => {
           height: "275px",
           width: "100%",
           objectFit: "cover",
-          objectPosition: "top center",
+          objectPosition: "center 20%",
         }}
         component="img"
         image={props.user.imageUrl}
@@ -22,8 +22,8 @@ export const ProfessorCard: FC<IProfessor> = (props) => {
           className="!text-primary01 text-left !font-bold"
         >
           <span className="lg:hidden">
-            {`${props.academicPosition?.shortNameTh}${props.user.firstNameTh} ${props.user.lastNameTh}`
-              .length >= 16 ? (
+            {`${props.academicPosition?.shortNameTh}${props.user.firstNameTh} ${props.user.lastNameTh}`.length >=
+              16 ? (
               <>
                 {props.academicPosition?.shortNameTh}
                 {props.user.firstNameTh}
@@ -41,8 +41,7 @@ export const ProfessorCard: FC<IProfessor> = (props) => {
         </Typography>
 
         <Typography component="h4" className="!text-neutral05 text-left">
-          {props.academicPosition?.shortNameEn} {props.user.firstNameEn}{" "}
-          {props.user.lastNameEn}
+          {props.academicPosition?.shortNameEn} {props.user.firstNameEn} {props.user.lastNameEn}
         </Typography>
       </CardContent>
     </div>
