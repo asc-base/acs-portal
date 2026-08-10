@@ -7,12 +7,10 @@ export const ProfessorCard: FC<IProfessor> = (props) => {
     <div className="h-full w-[280px] cursor-pointer overflow-hidden rounded-2xl shadow-lg transition-all duration-300 hover:-translate-y-2">
       <CardMedia
         sx={{
-          height: "200px",
+          height: "250px",
           width: "100%",
-          backgroundSize: "cover",
-          backgroundPosition: "center",
           objectFit: "cover",
-          objectPosition: "center",
+          objectPosition: "top center",
         }}
         component="img"
         image={props.user.imageUrl}
@@ -24,8 +22,8 @@ export const ProfessorCard: FC<IProfessor> = (props) => {
           className="!text-primary01 text-left !font-bold"
         >
           <span className="lg:hidden">
-            {`${props.academicPosition?.shortNameTh}${props.user.firstNameTh} ${props.user.lastNameTh}`.length >=
-            16 ? (
+            {`${props.academicPosition?.shortNameTh}${props.user.firstNameTh} ${props.user.lastNameTh}`
+              .length >= 16 ? (
               <>
                 {props.academicPosition?.shortNameTh}
                 {props.user.firstNameTh}
@@ -43,7 +41,8 @@ export const ProfessorCard: FC<IProfessor> = (props) => {
         </Typography>
 
         <Typography component="h4" className="!text-neutral05 text-left">
-          {props.academicPosition?.shortNameEn} {props.user.firstNameEn} {props.user.lastNameEn}
+          {props.academicPosition?.shortNameEn} {props.user.firstNameEn}{" "}
+          {props.user.lastNameEn}
         </Typography>
       </CardContent>
     </div>
