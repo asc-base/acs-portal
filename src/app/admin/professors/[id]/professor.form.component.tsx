@@ -8,7 +8,6 @@ import { useForm, useFieldArray } from "react-hook-form";
 import { IProfessor, IUpdateProfessor } from "@/core/domain/professor";
 import { EducationLevel, Position } from "@/core/domain/master-data";
 import { Delete } from "@mui/icons-material";
-import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import MenuItem from "@mui/material/MenuItem";
 import { RHFTextField } from "@/components/form/RHFTextField";
@@ -23,7 +22,7 @@ import {
   ConfirmModalProps,
 } from "@/components/modal/confirmModal";
 import { useRouter } from "next/navigation";
-
+import { UpdateProfessorInputs, UpdateProfessorSchema } from "@/core/schema/professor";
 
 const VisuallyHiddenInput = styled("input")({
   clip: "rect(0 0 0 0)",
@@ -42,30 +41,7 @@ interface ProfessorFormComponentProps {
   academicPositions: Position[];
   educationLevel: EducationLevel[];
   apiBase: string;
-}
-
-const Schema = z.object({
-  firstNameTh: z.string().min(1, "กรุณากรอกชื่อ (ภาษาไทย)"),
-  lastNameTh: z.string().min(1, "กรุณากรอกนามสกุล (ภาษาไทย)"),
-  firstNameEn: z.string().min(1, "กรุณากรอกชื่อ (ภาษาอังกฤษ)"),
-  lastNameEn: z.string().min(1, "กรุณากรอกนามสกุล (ภาษาอังกฤษ)"),
-  phone: z.string().regex(/^[0-9]{9,10}$/, "กรุณากรอกเบอร์โทรให้ถูกต้อง"),
-  email: z.string().email("รูปแบบอีเมลไม่ถูกต้อง"),
-  academicPositionID: z.number().min(1, "กรุณากรอกตำแหน่ง"),
-  profRoom: z.string().min(1, "กรุณากรอกห้องพักอาจารย์"),
-  education: z.array(
-    z.object({
-      value: z.string(),
-    }),
-  ),
-  expertFields: z.array(
-    z.object({
-      value: z.string(),
-    }),
-  ),
-});
-
-type FormValues = z.infer<typeof Schema>;
+};
 
 const ProfessorFormComponent = ({
   professor,
@@ -89,8 +65,8 @@ const ProfessorFormComponent = ({
     return new ProfessorService(professorRepository);
   }, [apiBase]);
 
-  const { control, handleSubmit, reset, formState: { isDirty } } = useForm<FormValues>({
-    resolver: zodResolver(Schema),
+  const { control, handleSubmit, reset, formState: { isDirty } } = useForm<UpdateProfessorInputs>({
+    resolver: zodResolver(UpdateProfessorSchema),
     defaultValues: {
       firstNameTh: professor.user.firstNameTh || "",
       lastNameTh: professor.user.lastNameTh || "",
@@ -100,7 +76,7 @@ const ProfessorFormComponent = ({
       email: professor.user.email || "",
       academicPositionID: professor.academicPosition?.id || 1,
       profRoom: professor.profRoom || "",
-      education: [],
+      educations: [],
       expertFields: [],
     },
   });
@@ -115,7 +91,7 @@ const ProfessorFormComponent = ({
       email: professor.user.email || "",
       academicPositionID: professor.academicPosition?.id || 1,
       profRoom: professor.profRoom || "",
-      education: professor.educations?.map((e) => ({ value: e })) || [],
+      educations: professor.educations?.map((e) => ({ value: e })) || [],
       expertFields: professor.expertFields?.map((e) => ({ value: e })) || [],
     });
   }, [professor, reset]);
@@ -126,7 +102,7 @@ const ProfessorFormComponent = ({
     remove: removeEducation,
   } = useFieldArray({
     control,
-    name: "education",
+    name: "educations",
   });
 
   const {
@@ -179,7 +155,7 @@ const ProfessorFormComponent = ({
     setIsEdit(false);
   };
 
-  const onSubmit = async (data: FormValues) => {
+  const onSubmit = async (data: UpdateProfessorInputs) => {
     setIsError(false);
     try {
       const updateData: IUpdateProfessor = {
@@ -189,11 +165,11 @@ const ProfessorFormComponent = ({
         phone: data.phone,
         firstNameTh: data.firstNameTh,
         lastNameTh: data.lastNameTh,
-        firstNameEn: data.firstNameEn,
-        lastNameEn: data.lastNameEn,
+        firstNameEn: data.firstNameEn || null,
+        lastNameEn: data.lastNameEn || null,
         email: data.email,
         expertFields: data.expertFields.map((e) => e.value).join("/"),
-        educations: data.education.map((e) => e.value).join("/"),
+        educations: data.educations.map((e) => e.value).join("/"),
       };
 
       const res = await professorService.updateProfessor(
@@ -473,7 +449,7 @@ const ProfessorFormComponent = ({
               <div className="flex-1">
                 <RHFTextField
                   control={control}
-                  name={`education.${index}.value`}
+                  name={`educations.${index}.value`}
                   label="ระดับการศึกษา"
                   fullWidth
                   placeholder="ระบุลำดับการศึกษา เช่น B.Sc. Mathematics King Mongkut's University of Technology Thonburi"

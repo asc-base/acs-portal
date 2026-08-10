@@ -14,7 +14,6 @@ import { MasterDataRepository } from "@/infra/repositories/master-data.repositor
 import { ProfessorService } from "@/core/service/professor.service";
 import { ProfessorRepository } from "@/infra/repositories/professor.repository";
 import { Position } from "@/core/domain/master-data";
-import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { RHFTextField } from "@/components/form/RHFTextField";
 import { RHFSelect } from "@/components/form/RHFSelect";
@@ -25,52 +24,11 @@ import {
 } from "@/components/modal/confirmModal";
 import AddCircleOutlineRoundedIcon from "@mui/icons-material/AddCircleOutlineRounded";
 import { CropImageCard } from "@/components/cropimagecard";
+import { CreateProfessorInputs, CreateProfessorSchema } from "@/core/schema/professor";
 
 interface FormProfessorsProps {
   apiBase: string;
-}
-
-const Schema = z.object({
-  academicPositionID: z
-    .number()
-    .nullable()
-    .refine((v) => v !== null, {
-      message: "กรุณากรอกตำแหน่ง",
-    }),
-  educations: z.array(
-    z.object({
-      value: z.string(),
-    }),
-  ),
-  expertFields: z.array(
-    z.object({
-      value: z.string(),
-    }),
-  ),
-  email: z.string().trim().email("อีเมลไม่ถูกต้อง"),
-  firstNameEn: z
-    .string()
-    .trim()
-    .min(1, "กรุณากรอกชื่อภาษาอังกฤษ")
-    .optional()
-    .or(z.literal("")),
-  firstNameTh: z.string().trim().min(1, "กรุณากรอกชื่อภาษาไทย"),
-  lastNameEn: z
-    .string()
-    .trim()
-    .min(1, "กรุณากรอกนามสกุลภาษาอังกฤษ")
-    .optional()
-    .or(z.literal("")),
-  lastNameTh: z.string().trim().min(1, "กรุณากรอกนามสกุลภาษาไทย"),
-  phone: z
-    .string()
-    .trim()
-    .min(9, "กรุณากรอกเบอร์โทร")
-    .regex(/^[0-9]+$/, "เบอร์โทรต้องเป็นตัวเลขเท่านั้น"),
-  profRoom: z.string().min(1, "กรุณากรอกชื่อห้อง"),
-});
-
-type FormData = z.infer<typeof Schema>;
+};
 
 const VisuallyHiddenInput = styled("input")({
   clip: "rect(0 0 0 0)",
@@ -108,8 +66,8 @@ export const FormProfesssors: FC<FormProfessorsProps> = ({ apiBase }) => {
     control,
     handleSubmit,
     formState: { isValid, isDirty },
-  } = useForm<FormData>({
-    resolver: zodResolver(Schema),
+  } = useForm<CreateProfessorInputs>({
+    resolver: zodResolver(CreateProfessorSchema),
     defaultValues: {
       academicPositionID: null,
       educations: [],
@@ -167,15 +125,15 @@ export const FormProfesssors: FC<FormProfessorsProps> = ({ apiBase }) => {
     } else router.push(`/admin/professors`);
   };
 
-  const onSubmit = async (data: FormData) => {
+  const onSubmit = async (data: CreateProfessorInputs) => {
     setIsError(false);
     try {
       const payload: ICreateProfessor = {
         academicPositionID: data.academicPositionID!,
         firstNameTh: data.firstNameTh,
         lastNameTh: data.lastNameTh,
-        firstNameEn: data.firstNameEn,
-        lastNameEn: data.lastNameEn,
+        firstNameEn: data.firstNameEn || null,
+        lastNameEn: data.lastNameEn || null,
         email: data.email,
         phone: data.phone,
         profRoom: data.profRoom,

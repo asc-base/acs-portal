@@ -12,4 +12,5 @@ export interface ICourseRepository {
   getCourseById(id: number): Promise<ApiResponse<ICourse> | null>;
   updateCourse(id: number, data: IUpdateCourse): Promise<ApiResponse<ICourse>>;
   deleteCourse(id: number): Promise<ApiResponse<ICourse>>;
+  createCourseBatch(data: FormData): Promise<ApiResponse<ICourse>>;
 }
