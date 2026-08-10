@@ -7,6 +7,7 @@ export const CommonStudentSchema = z.object({
     linkedin: z.string().trim().optional(),
     instagram: z.string().trim().optional(),
     github: z.string().trim().optional(),
+    skills: z.array(z.string()).optional(),
 });
 
 export const CreateStudentSchema = z.object({
