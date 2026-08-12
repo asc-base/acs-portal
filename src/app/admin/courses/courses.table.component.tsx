@@ -134,10 +134,7 @@ const CourseTableComponents = ({
 
   const handleUploadCourseFile = async (file: File) => {
     try {
-      const formData = new FormData();
-      formData.append("file", file); // key "file" ใช้ตาม backend
-
-      await courseService.createCourseBatch(formData);
+      await courseService.createCourseBatch(file);
 
       setIsUploadModalOpen(false);
       router.refresh();
