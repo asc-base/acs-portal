@@ -37,6 +37,7 @@ import {
   ConfirmModalProps,
 } from "@/components/modal/confirmModal";
 import EmptyState from "@/components/emptyState";
+import { UploadModal } from "@/components/uploadFile";
 
 interface CourseTableComponentsProps {
   courses: ICourse[];
@@ -76,7 +77,8 @@ const CourseTableComponents = ({
   handleNextPage,
 }: CourseTableComponentsProps) => {
   const router = useRouter();
-  const [isError, setIsError] = useState(false);
+  const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
   const [confirmModal, setConfirmModal] = useState<ConfirmModalProps | null>(
     null,
   );
@@ -105,7 +107,7 @@ const CourseTableComponents = ({
     try {
       const reps = await courseService.deleteCourse(courseId);
       if (!reps) {
-        setIsError(true);
+        setErrorMessage("ไม่สามารถลบรายวิชาได้");
         return;
       }
       setConfirmModal({
@@ -122,19 +124,34 @@ const CourseTableComponents = ({
       });
     } catch (error) {
       console.error(error);
-      setIsError(true);
+      setErrorMessage("ไม่สามารถลบรายวิชาได้");
     }
   };
 
   const handleCloseAlert = () => {
-    setIsError(false);
+    setErrorMessage("");
+  };
+
+  const handleUploadCourseFile = async (file: File) => {
+    try {
+      const formData = new FormData();
+      formData.append("file", file); // key "file" ใช้ตาม backend
+
+      await courseService.createCourseBatch(formData);
+
+      setIsUploadModalOpen(false);
+      router.refresh();
+    } catch (error) {
+      console.error(error);
+      setErrorMessage("ไม่สามารถอัปโหลดข้อมูลรายวิชาได้");
+    }
   };
 
   return (
     <Card sx={{ height: 700, display: "flex", flexDirection: "column" }}>
       <Snackbar
         anchorOrigin={{ vertical: "top", horizontal: "right" }}
-        open={isError}
+        open={!!errorMessage}
         autoHideDuration={4000}
         onClose={handleCloseAlert}
       >
@@ -143,7 +160,7 @@ const CourseTableComponents = ({
           onClose={handleCloseAlert}
           sx={{ width: "100%" }}
         >
-          ไม่สามารถลบรายวิชาได้
+          {errorMessage}
         </Alert>
       </Snackbar>
       <div className="flex items-center justify-between p-6">
@@ -180,13 +197,32 @@ const CourseTableComponents = ({
             ))}
           </Select>
 
-          <Link href={`/admin/courses/create?curriculumID=${curriculumID}`}>
-            <Button variant="contained" startIcon={<AddIcon />}>
-              เพิ่มรายวิชาใหม่
-            </Button>
-          </Link>
+          <Button
+            component={Link}
+            href={`/admin/courses/create?curriculumID=${curriculumID}`}
+            variant="contained"
+            startIcon={<AddIcon />}
+          >
+            เพิ่มรายวิชาใหม่
+          </Button>
+
+          <Button
+            variant="contained"
+            startIcon={<AddIcon />}
+            onClick={() => setIsUploadModalOpen(true)}
+          >
+            เพิ่มรายวิชาใหม่(ไฟล์)
+          </Button>
         </div>
       </div>
+
+      <UploadModal
+        isOpen={isUploadModalOpen}
+        onClose={() => setIsUploadModalOpen(false)}
+        title="อัปโหลดไฟล์รายวิชา"
+        onUpload={handleUploadCourseFile}
+      />
+      {confirmModal && <ConfirmModal {...confirmModal} />}
 
       <TableContainer component={Paper} sx={{ boxShadow: "none", flex: 1 }}>
         <Table stickyHeader sx={{ tableLayout: "fixed" }}>
@@ -307,7 +343,6 @@ const CourseTableComponents = ({
           />
         </div>
       )}
-      {confirmModal && <ConfirmModal {...confirmModal} />}
     </Card>
   );
 };

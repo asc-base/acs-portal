@@ -1,5 +1,5 @@
 import { Pageable } from "@/interface/response";
-import { IProject, QueryProject, ICreateProject } from "../domain/project";
+import { IProject, QueryProject, ICreateProject, IUpdateProject } from "../domain/project";
 import { IProjectRepository } from "../ports/project.repository";
 
 export class ProjectService {
@@ -22,10 +22,11 @@ export class ProjectService {
     const formData = new FormData();
 
     Object.entries(payload).forEach(([key, value]) => {
-      if (Array.isArray(value) || typeof value === "object") {
+      if (value === null || value === undefined) return;
+      if (Array.isArray(value) || typeof value === 'object') {
         formData.append(key, JSON.stringify(value));
       } else {
-        formData.append(key, value?.toString() ?? "");
+        formData.append(key, value.toString());
       }
     });
 
@@ -38,6 +39,30 @@ export class ProjectService {
 
   async deleteProject(id: number): Promise<IProject> {
     const response = await this.projectRepository.deleteProject(id);
+    return response.data;
+  }
+
+  async updateProject(id: string, payload: IUpdateProject, files?: { thumbnailFile?: File | null; assets?: File[] }): Promise<IProject> {
+    const formData = new FormData();
+
+    Object.entries(payload).forEach(([key, value]) => {
+      if (value === null || value === undefined) return;
+      if (Array.isArray(value) || typeof value === 'object') {
+        formData.append(key, JSON.stringify(value));
+      } else {
+        formData.append(key, value.toString());
+      }
+    });
+
+    if (files?.thumbnailFile) {
+      formData.append("thumbnailFile", files.thumbnailFile);
+    }
+    
+    if (files?.assets) {
+      files.assets.forEach((file) => formData.append("assets", file));
+    }
+
+    const response = await this.projectRepository.updateProject(id, formData);
     return response.data;
   }
 }

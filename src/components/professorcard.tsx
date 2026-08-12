@@ -7,12 +7,10 @@ export const ProfessorCard: FC<IProfessor> = (props) => {
     <div className="h-full w-[280px] cursor-pointer overflow-hidden rounded-2xl shadow-lg transition-all duration-300 hover:-translate-y-2">
       <CardMedia
         sx={{
-          height: "200px",
+          height: "275px",
           width: "100%",
-          backgroundSize: "cover",
-          backgroundPosition: "center",
           objectFit: "cover",
-          objectPosition: "center",
+          objectPosition: "center 20%",
         }}
         component="img"
         image={props.user.imageUrl}
@@ -25,7 +23,7 @@ export const ProfessorCard: FC<IProfessor> = (props) => {
         >
           <span className="lg:hidden">
             {`${props.academicPosition?.shortNameTh}${props.user.firstNameTh} ${props.user.lastNameTh}`.length >=
-            16 ? (
+              16 ? (
               <>
                 {props.academicPosition?.shortNameTh}
                 {props.user.firstNameTh}

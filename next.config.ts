@@ -50,6 +50,11 @@ const nextConfig: NextConfig = {
         pathname: "/storage/v1/object/public/**",
       },
       {
+        protocol: "https",
+        hostname: "mejklhtflfggnozoflrk.supabase.co",
+        pathname: "/storage/v1/object/public/**",
+      },
+      {
         protocol: "http",
         hostname: "infra-supabase-c1c918-31-97-48-3.sslip.io",
         pathname: "/storage/v1/object/public/**",
@@ -57,6 +62,11 @@ const nextConfig: NextConfig = {
       {
         protocol: "https",
         hostname: "infra-supabase-c1c918-31-97-48-3.sslip.io",
+        pathname: "/storage/v1/object/public/**",
+      },
+      {
+        protocol: "https",
+        hostname: "mejklhtflfggnozoflrk.supabase.co",
         pathname: "/storage/v1/object/public/**",
       },
     ],

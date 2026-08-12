@@ -9,13 +9,14 @@ import { NewsCarouselComponent } from "@/components/news.carousel.component";
 import { ActivityCard } from "@/components/activitycard";
 import { Carousel } from "@/components/carousel";
 // import { useAuthStore } from "@/store/auth";
+import NewsHighlightCarousel from "@/components/newshighlightcarousel";
 
 interface HomePageProps {
   initNewsActivity: INews[];
   initNewsComplete: INews[];
   initNewsActivityStudent: INews[];
   initAnnoucement?: INewsInformation[];
-  // initNewsHighlight?: INewsInformation[];
+  initNewsHighlight?: INewsInformation[];
   // apibase: string;
 }
 
@@ -24,8 +25,7 @@ const HomePage = ({
   initNewsComplete,
   initNewsActivityStudent,
   initAnnoucement,
-  // initNewsHighlight,
-  // apibase,
+  initNewsHighlight,
 }: HomePageProps) => {
   const [newsActivityActive, setNewsActivityActive] = useState(0);
   const [newsCompleteActive, setNewsCompleteActive] = useState(0);
@@ -105,7 +105,7 @@ const HomePage = ({
             <div className="flex flex-col-reverse gap-x-6 gap-y-6 md:grid md:grid-cols-2">
               {showActivitySection ? (
                 <div>
-                  <h3 className="text-accent04 lg:text-h1-1 mb-3 items-baseline font-bold"> 
+                  <h3 className="text-accent04 lg:text-h1-1 mb-3 items-baseline font-bold">
                     งานกิจกรรมเร็ว ๆ นี้
                   </h3>
                   <div className="flex flex-col gap-y-3 md:[&>*:nth-child(n+3)]:hidden lg:[&>*:nth-child(n+3)]:block [&>*:nth-child(n+5)]:hidden">
@@ -140,6 +140,12 @@ const HomePage = ({
             </div>
           )}
 
+          {initNewsHighlight && initNewsHighlight.length > 0 && (
+            <div className="my-2">
+              <NewsHighlightCarousel newsHighlight={initNewsHighlight} />
+            </div>
+          )}
+
           <NewsCarouselComponent
             title="ข่าวประชาสัมพันธ์"
             news={initNewsActivity}
@@ -150,7 +156,7 @@ const HomePage = ({
             tagId={16}
           >
             {Array.from(
-              { length: Math.min(3, initNewsActivity.length) },
+              { length: Math.min(4, initNewsActivity.length) },
               (_, i) => {
                 const index =
                   (newsActivityActive + i) % initNewsActivity.length;
@@ -187,7 +193,7 @@ const HomePage = ({
             tagId={17}
           >
             {Array.from(
-              { length: Math.min(3, initNewsComplete.length) },
+              { length: Math.min(4, initNewsComplete.length) },
               (_, i) => {
                 const index =
                   (newsCompleteActive + i) % initNewsComplete.length;
@@ -224,7 +230,7 @@ const HomePage = ({
             tagId={18}
           >
             {Array.from(
-              { length: Math.min(3, initNewsActivityStudent.length) },
+              { length: Math.min(4, initNewsActivityStudent.length) },
               (_, i) => {
                 const index =
                   (newsActivityStudentActive + i) %

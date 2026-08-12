@@ -49,6 +49,20 @@ const EmptyStateMap: Record<
   },
 };
 
+const getCardWrapperClass = (index: number) => {
+  switch (index) {
+    case 0:
+      return "relative shrink-0"; 
+    case 1:
+      return "relative hidden shrink-0 md:block"; 
+    case 2:
+      return "relative hidden shrink-0 md:block lg:w-auto";
+    case 3:
+      return "relative hidden shrink-0 lg:block lg:w-auto";
+    default:
+      return "hidden";
+  }
+};
 
 export const NewsCarouselComponent = ({
   news,
@@ -62,6 +76,7 @@ export const NewsCarouselComponent = ({
 }: NewsCarouselComponentProps) => {
   const emptyStateType = EmptyStateTypeMap[tagId] ?? "news";
   const emptyStateConfig = EmptyStateMap[emptyStateType];
+  const childrenArray = React.Children.toArray(children);
 
   if (!news || news.length === 0) {
     return (
@@ -108,9 +123,13 @@ export const NewsCarouselComponent = ({
             <ChevronLeftIcon fontSize="large" />
           </Button>
         </div>
-        <div className="w-full">
-          <div className="my-3 flex justify-center gap-4 transition-all duration-300 ease-in-out [&>*:nth-child(n+2)]:hidden lg:[&>*:nth-child(n+2)]:block md:[&>*:nth-child(n+3)]:block">
-            {children}
+        <div className="w-full min-w-0 [overflow-x:clip] px-3 lg:max-w-6xl">
+          <div className="my-3 flex justify-center gap-4 py-5 px-3 transition-all duration-300 ease-in-out md:justify-start">
+            {childrenArray.map((child, i) => (
+              <div key={i} className={getCardWrapperClass(i)}>
+                {child}
+              </div>
+            ))}
           </div>
           <div className="hidden justify-center gap-x-3 sm:flex">
             {news.map((_, index) => (
