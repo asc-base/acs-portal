@@ -23,7 +23,7 @@
     "@mui/material": "^7.3.1",
     "@mui/x-date-pickers": "^8.10.2",
     "dayjs": "^1.11.15",
-    "next": "^16.2.11",
+    "next": "^16.3.1",
     "papaparse": "^5.5.3",
     "react": "^19.2.1",
     "react-dom": "^19.2.1",
