@@ -10,9 +10,6 @@ export interface LoginRequest {
   password: string;
 }
 
-export interface AuthResponse {
-  msg: string;
-}
 export interface ForgetPasswordPayload {
   email: string;
 }
