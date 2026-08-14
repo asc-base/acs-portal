@@ -1,6 +1,5 @@
 import { IAuthRepository } from "@/core/ports/auth.repository";
 import {
-  AuthResponse,
   ForgetPasswordResponse,
   LoginRequest,
 } from "@/core/domain/auth";
@@ -16,14 +15,6 @@ export class AuthRepository implements IAuthRepository {
   constructor(baseUrl: string) {
     this.baseUrl = baseUrl;
     this.http = new HttpHelper(this.baseUrl);
-  }
-
-  async LoginAdmin(data: LoginRequest): Promise<ApiResponse<AuthResponse>> {
-    const response = await this.http.post<ApiResponse<AuthResponse>>(
-      `/v1/auth/login-admin`,
-      data,
-    );
-    return response;
   }
 
   async getUserData(token: string): Promise<ApiResponse<IUser>> {

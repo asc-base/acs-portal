@@ -10,10 +10,6 @@ import {
 export class AuthService {
   constructor(private readonly authRepository: IAuthRepository) {}
 
-  /** ===== ของเดิม: ห้ามแก้ ===== */
-  async LoginAdmin(data: { email: string; password: string }) {
-    return this.authRepository.LoginAdmin(data);
-  }
   async getUserData(token: string) {
     const response = await this.authRepository.getUserData(token);
     return response.data;
