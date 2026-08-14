@@ -60,7 +60,7 @@ export default function AdminLoginLandingPage({
         password: data.password,
       };
 
-      const response = await authService.LoginAdmin(loginRequest);
+      const response = await authService.Login(loginRequest);
 
       if (!response?.status) {
         setError("password", {
