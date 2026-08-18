@@ -87,6 +87,10 @@ export const NewsInformationInfo = ({
             thumbnail: newsInformation.thumbnailURL,
             highlight: newsInformation.highlightURL || undefined,
             newsID: newsInformation.news.id,
+            thumbnailFocalPointX: newsInformation.thumbnailFocalPointX,
+            thumbnailFocalPointY: newsInformation.thumbnailFocalPointY,
+            highlightFocalPointX: newsInformation.highlightFocalPointX,
+            highlightFocalPointY: newsInformation.highlightFocalPointY,
         },
     });
 
@@ -101,6 +105,19 @@ export const NewsInformationInfo = ({
             formData.append("newsID", data.newsID.toString());
             formData.append("tagID", tagID.toString());
             formData.append("id", newsInformation.id.toString());
+
+            if (data.thumbnailFocalPointX !== undefined) {
+                formData.append("thumbnailFocalPointX", data.thumbnailFocalPointX.toString());
+            }
+            if (data.thumbnailFocalPointY !== undefined) {
+                formData.append("thumbnailFocalPointY", data.thumbnailFocalPointY.toString());
+            }
+            if (data.highlightFocalPointX !== undefined) {
+                formData.append("highlightFocalPointX", data.highlightFocalPointX.toString());
+            }
+            if (data.highlightFocalPointY !== undefined) {
+                formData.append("highlightFocalPointY", data.highlightFocalPointY.toString());
+            }
 
             const response = await newsService.upsertNewsInformation(formData);
 
@@ -134,16 +151,25 @@ export const NewsInformationInfo = ({
         e.target.value = "";
     };
 
-    const handleUploadComplete = (file: File) => {
+    const handleUploadComplete = (file: File, focalPoint?: { x: number; y: number }) => {
         const previewUrl = URL.createObjectURL(file);
         if (cropTarget === "thumbnail") {
             setValue("thumbnail", file, { shouldValidate: true, shouldDirty: true });
+            if (focalPoint) {
+                setValue("thumbnailFocalPointX", focalPoint.x, { shouldDirty: true });
+                setValue("thumbnailFocalPointY", focalPoint.y, { shouldDirty: true });
+            }
             setThumbnailPreview(previewUrl);
         } else if (cropTarget === "highlight") {
             setValue("highlight", file, { shouldValidate: true, shouldDirty: true });
+            if (focalPoint) {
+                setValue("highlightFocalPointX", focalPoint.x, { shouldDirty: true });
+                setValue("highlightFocalPointY", focalPoint.y, { shouldDirty: true });
+            }
             setHighlightPreview(previewUrl);
         }
         setOpenCrop(false);
+        setSelectedFile(null);
         setCropTarget(null);
     };
 
@@ -330,15 +356,26 @@ export const NewsInformationInfo = ({
                     />
                 </div>
 
-                <Modal open={openCrop} onClose={() => setOpenCrop(false)}>
+                <Modal
+                    open={openCrop}
+                    onClose={() => {
+                        setOpenCrop(false);
+                        setSelectedFile(null);
+                        setCropTarget(null);
+                    }}
+                >
                     <div>
-                        {selectedFile && (
+                        {selectedFile && cropTarget && (
                             <CropImageCard
                                 file={selectedFile}
-                                width={590}
-                                height={440}
+                                width={cropTarget === "highlight" ? 207 : isHighlightType ? 706 : 590}
+                                height={cropTarget === "highlight" ? 180 : isHighlightType ? 376 : 440}
                                 onUploadComplete={handleUploadComplete}
-                                onCancel={() => setOpenCrop(false)}
+                                onCancel={() => {
+                                    setOpenCrop(false);
+                                    setSelectedFile(null);
+                                    setCropTarget(null);
+                                }}
                             />
                         )}
                     </div>
