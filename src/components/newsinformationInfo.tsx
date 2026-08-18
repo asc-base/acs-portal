@@ -330,15 +330,26 @@ export const NewsInformationInfo = ({
                     />
                 </div>
 
-                <Modal open={openCrop} onClose={() => setOpenCrop(false)}>
+                <Modal
+                    open={openCrop}
+                    onClose={() => {
+                        setOpenCrop(false);
+                        setSelectedFile(null);
+                        setCropTarget(null);
+                    }}
+                >
                     <div>
-                        {selectedFile && (
+                        {selectedFile && cropTarget && (
                             <CropImageCard
                                 file={selectedFile}
-                                width={590}
-                                height={440}
+                                width={cropTarget === "highlight" ? 207 : isHighlightType ? 706 : 590}
+                                height={cropTarget === "highlight" ? 180 : isHighlightType ? 376 : 440}
                                 onUploadComplete={handleUploadComplete}
-                                onCancel={() => setOpenCrop(false)}
+                                onCancel={() => {
+                                    setOpenCrop(false);
+                                    setSelectedFile(null);
+                                    setCropTarget(null);
+                                }}
                             />
                         )}
                     </div>
