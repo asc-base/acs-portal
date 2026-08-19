@@ -17,14 +17,17 @@ import { Position } from "@/core/domain/master-data";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { RHFTextField } from "@/components/form/RHFTextField";
 import { RHFSelect } from "@/components/form/RHFSelect";
-import { ICreateProfessor } from "@/core/domain/professor";
 import {
   ConfirmModal,
   ConfirmModalProps,
 } from "@/components/modal/confirmModal";
 import AddCircleOutlineRoundedIcon from "@mui/icons-material/AddCircleOutlineRounded";
 import { CropImageCard } from "@/components/cropimagecard";
-import { CreateProfessorInputs, CreateProfessorSchema } from "@/core/schema/professor";
+import {
+  CreateProfessorInputs,
+  CreateProfessorSchema,
+  CreateProfessorPayload,
+} from "@/core/schema/professor";
 
 interface FormProfessorsProps {
   apiBase: string;
@@ -65,6 +68,7 @@ export const FormProfesssors: FC<FormProfessorsProps> = ({ apiBase }) => {
   const {
     control,
     handleSubmit,
+    setValue,
     formState: { isValid, isDirty },
   } = useForm<CreateProfessorInputs>({
     resolver: zodResolver(CreateProfessorSchema),
@@ -103,8 +107,12 @@ export const FormProfesssors: FC<FormProfessorsProps> = ({ apiBase }) => {
     }
   };
 
-  const handleCropComplete = (croppedFile: File) => {
+  const handleCropComplete = (croppedFile: File, focalPoint?: { x: number; y: number }) => {
     setSelectedFile(croppedFile);
+    if (focalPoint) {
+      setValue("imageFocalPointX", focalPoint.x, { shouldDirty: true });
+      setValue("imageFocalPointY", focalPoint.y, { shouldDirty: true });
+    }
     setIsCroping(false);
   };
 
@@ -128,7 +136,7 @@ export const FormProfesssors: FC<FormProfessorsProps> = ({ apiBase }) => {
   const onSubmit = async (data: CreateProfessorInputs) => {
     setIsError(false);
     try {
-      const payload: ICreateProfessor = {
+      const payload: CreateProfessorPayload = {
         academicPositionID: data.academicPositionID!,
         firstNameTh: data.firstNameTh,
         lastNameTh: data.lastNameTh,
@@ -139,6 +147,8 @@ export const FormProfesssors: FC<FormProfessorsProps> = ({ apiBase }) => {
         profRoom: data.profRoom,
         educations: data.educations.map((e) => e.value).join("/"),
         expertFields: data.expertFields.map((e) => e.value).join("/"),
+        imageFocalPointX: data.imageFocalPointX,
+        imageFocalPointY: data.imageFocalPointY,
       };
       const reps = await professorService.createProfessor(
         payload,
