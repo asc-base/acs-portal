@@ -1,7 +1,7 @@
 "use client";
 import { useState, useMemo } from "react";
 import { useForm } from "react-hook-form";
-import { Button, Card } from "@mui/material";
+import { Button, Card, Modal } from "@mui/material";
 import Image from "next/image";
 import { zodResolver } from "@hookform/resolvers/zod";
 import dayjs from "dayjs";
@@ -16,6 +16,7 @@ import { ConfirmModal, ConfirmModalProps } from "@/components/modal/confirmModal
 import Alert from "@mui/material/Alert";
 import Snackbar from "@mui/material/Snackbar";
 import { UpdateCurriculumSchema, UpdateCurriculumInputs } from "@/core/schema/curriculum";
+import { CropImageCard } from "@/components/cropimagecard";
 
 interface CurriculumInfoProps {
   apiBase: string;
@@ -38,6 +39,7 @@ export const CurriculumInfoComponent = ({ apiBase, curriculum }: CurriculumInfoP
   const router = useRouter();
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isEdit, setIsEdit] = useState(false);
+  const [croppingFile, setCroppingFile] = useState<File | null>(null);
   const [confirmModal, setConfirmModal] = useState<ConfirmModalProps | null>(null);
   const [isError, setIsError] = useState(false);
 
@@ -58,6 +60,7 @@ export const CurriculumInfoComponent = ({ apiBase, curriculum }: CurriculumInfoP
     control,
     handleSubmit,
     reset,
+    setValue,
     formState: { isDirty, isValid },
   } = useForm<UpdateCurriculumInputs>({
     resolver: zodResolver(UpdateCurriculumSchema),
@@ -66,6 +69,8 @@ export const CurriculumInfoComponent = ({ apiBase, curriculum }: CurriculumInfoP
       year: curriculum.year ?? "",
       documentURL: curriculum.documentURL ?? "",
       description: curriculum.description ?? "",
+      thumbnailFocalPointX: curriculum.thumbnailFocalPointX,
+      thumbnailFocalPointY: curriculum.thumbnailFocalPointY,
     },
     mode: "onBlur",
     reValidateMode: "onChange",
@@ -73,9 +78,18 @@ export const CurriculumInfoComponent = ({ apiBase, curriculum }: CurriculumInfoP
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) {
-      setSelectedFile(file);
+    if (!file) return;
+    setCroppingFile(file);
+    e.target.value = "";
+  };
+
+  const handleUploadComplete = (file: File, focalPoint?: { x: number; y: number }) => {
+    setSelectedFile(file);
+    if (focalPoint) {
+      setValue("thumbnailFocalPointX", focalPoint.x);
+      setValue("thumbnailFocalPointY", focalPoint.y);
     }
+    setCroppingFile(null);
   };
 
   const onSubmit = async (data: UpdateCurriculumInputs) => {
@@ -270,6 +284,21 @@ export const CurriculumInfoComponent = ({ apiBase, curriculum }: CurriculumInfoP
           </form>
         </div>
       </Card>
+
+      <Modal open={!!croppingFile} onClose={() => setCroppingFile(null)}>
+        <div>
+          {croppingFile && (
+            <CropImageCard
+              file={croppingFile}
+              width={400}
+              height={300}
+              onUploadComplete={handleUploadComplete}
+              onCancel={() => setCroppingFile(null)}
+            />
+          )}
+        </div>
+      </Modal>
+
       {confirmModal && <ConfirmModal {...confirmModal} />}
     </div>
   );
