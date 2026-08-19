@@ -22,9 +22,9 @@ import {
 } from "@/components/modal/confirmModal";
 import { styled } from "@mui/material/styles";
 import {
-  CreateNewsInformationSchema,
-  CreateNewsInformationInputs,
-} from "@/core/schema/news";
+  UpsertNewsInformationSchema,
+  UpsertNewsInformationInputs,
+} from "@/core/schema/newsinformation";
 
 interface NewsInformationFormProps {
   type: string;
@@ -80,14 +80,14 @@ export const NewsInformationForm = ({
     setValue,
     watch,
     formState: { errors, isDirty },
-  } = useForm<CreateNewsInformationInputs>({
-    resolver: zodResolver(CreateNewsInformationSchema(type)),
+  } = useForm<UpsertNewsInformationInputs>({
+    resolver: zodResolver(UpsertNewsInformationSchema),
     mode: "onChange",
     defaultValues: {
       thumbnail: undefined,
       highlight: undefined,
       newsID: 0,
-      tagID,
+      tagID: tagID,
     },
   });
 
@@ -105,17 +105,9 @@ export const NewsInformationForm = ({
     } else router.push(`/admin/newsinformation/${tagID}`);
   };
 
-  const onSubmit = async (data: CreateNewsInformationInputs) => {
+  const onSubmit = async (data: UpsertNewsInformationInputs) => {
     try {
-      const formData = new FormData();
-      formData.append("thumbnail", data.thumbnail);
-      if (data.highlight) {
-        formData.append("highlight", data.highlight);
-      }
-      formData.append("newsID", data.newsID.toString());
-      formData.append("tagID", tagID.toString());
-
-      const response = await newsService.upsertNewsInformation(payload);
+      const response = await newsService.upsertNewsInformation(data);
 
       if (response) {
         setConfirmModal({
@@ -201,7 +193,11 @@ export const NewsInformationForm = ({
                   {thumbnailFile ? (
                     <>
                       <Image
-                        src={URL.createObjectURL(thumbnailFile)}
+                        src={
+                          thumbnailFile instanceof File
+                            ? URL.createObjectURL(thumbnailFile)
+                            : thumbnailFile
+                        }
                         alt="Thumbnail Preview"
                         fill
                         className="object-cover"
@@ -243,7 +239,11 @@ export const NewsInformationForm = ({
                   {highlightFile ? (
                     <>
                       <Image
-                        src={URL.createObjectURL(highlightFile)}
+                        src={
+                          highlightFile instanceof File
+                            ? URL.createObjectURL(highlightFile)
+                            : highlightFile
+                        }
                         alt="Highlight Preview"
                         fill
                         className="object-cover"
@@ -311,7 +311,11 @@ export const NewsInformationForm = ({
                 {thumbnailFile ? (
                   <div className="group relative h-full w-full">
                     <Image
-                      src={URL.createObjectURL(thumbnailFile)}
+                      src={
+                        thumbnailFile instanceof File
+                          ? URL.createObjectURL(thumbnailFile)
+                          : thumbnailFile
+                      }
                       alt="Preview"
                       fill
                       priority

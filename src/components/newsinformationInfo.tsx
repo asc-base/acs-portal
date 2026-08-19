@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo } from "react";
 import {
   Button,
   TextField,
@@ -85,11 +85,6 @@ export const NewsInformationInfo = ({
 
   const router = useRouter();
 
-  const newsService = useMemo(() => {
-    const repo = new NewsRepository(apiBase);
-    return new NewsService(repo);
-  }, [apiBase]);
-
   const {
     control,
     handleSubmit,
@@ -103,22 +98,13 @@ export const NewsInformationInfo = ({
       thumbnail: newsInformation.thumbnailURL,
       highlight: newsInformation.highlightURL || undefined,
       newsID: newsInformation.news.id,
+      tagID: tagID,
     },
   });
 
   const onSubmit = async (data: UpsertNewsInformationInputs) => {
     try {
-      const formData = new FormData();
-
-      formData.append("thumbnail", data.thumbnail);
-      if (data.highlight) {
-        formData.append("highlight", data.highlight);
-      }
-      formData.append("newsID", data.newsID.toString());
-      formData.append("tagID", tagID.toString());
-      formData.append("id", newsInformation.id.toString());
-
-      const response = await newsService.upsertNewsInformation(formData);
+      const response = await newsService.upsertNewsInformation(data);
 
       if (response) {
         setConfirmModal({
