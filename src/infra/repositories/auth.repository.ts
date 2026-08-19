@@ -6,6 +6,7 @@ import {
 import { HttpHelper } from "@/lib/http";
 import { ApiResponse } from "@/interface/response";
 import { IUser } from "@/interface/user";
+import { UserProfile } from "@/core/domain/user";
 import { authErrorHandler } from "@/lib/auth-error-handler";
 
 export class AuthRepository implements IAuthRepository {
@@ -17,8 +18,8 @@ export class AuthRepository implements IAuthRepository {
     this.http = new HttpHelper(this.baseUrl);
   }
 
-  async getUserData(token: string): Promise<ApiResponse<IUser>> {
-    const response = await this.http.get<ApiResponse<IUser>>(
+  async getUserData(token: string): Promise<ApiResponse<UserProfile>> {
+    const response = await this.http.get<ApiResponse<UserProfile>>(
       `/v1/users/profile`,
       {
         Authorization: `Bearer ${token}`,
@@ -58,10 +59,10 @@ export class AuthRepository implements IAuthRepository {
     return response;
   }
 
-  async getUser(): Promise<IUser | null> {
+  async getUser(): Promise<UserProfile | null> {
     return authErrorHandler.withAuthErrorHandling(async () => {
       const response =
-        await this.http.get<ApiResponse<IUser>>(`/v1/users/profile`);
+        await this.http.get<ApiResponse<UserProfile>>(`/v1/users/profile`);
       if (!response.data) {
         return null;
       }
