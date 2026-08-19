@@ -48,6 +48,10 @@ export const CreateNewsInformationSchema = (type: string) =>
         ? z.instanceof(File, { message: "กรุณาอัปโหลดรูปภาพ" })
         : z.instanceof(File).optional(),
     newsID: z.number().min(1, "กรุณาเลือกข่าว"),
+    thumbnailFocalPointX: z.number().optional(),
+    thumbnailFocalPointY: z.number().optional(),
+    highlightFocalPointX: z.number().optional(),
+    highlightFocalPointY: z.number().optional(),
   });
 
 export type CreateNewsInputs = z.infer<typeof CreateNewsSchema>;
