@@ -96,7 +96,7 @@ export const NewsInformationForm = ({
         isOpen: true,
         type: "warning",
         onClose: () => setConfirmModal(null),
-        onConfirm: () => router.push(`/admin/${type}`),
+        onConfirm: () => router.push(`/admin/newsinformation/${tagID}`),
       });
     } else router.push(`/admin/newsinformation/${tagID}`);
   };
