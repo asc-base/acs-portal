@@ -1,7 +1,7 @@
 "use client";
 import { useState, useMemo } from "react";
 import { useForm } from "react-hook-form";
-import { Button } from "@mui/material";
+import { Button, Modal } from "@mui/material";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -16,6 +16,7 @@ import {
   ConfirmModalProps,
 } from "@/components/modal/confirmModal";
 import { CreateCurriculumSchema, CreateCurriculumInputs } from "@/core/schema/curriculum";
+import { CropImageCard } from "@/components/cropimagecard";
 interface CurriculumFormProps {
   apiBase: string;
 }
@@ -36,7 +37,7 @@ export const CurriculumForm = ({ apiBase }: CurriculumFormProps) => {
   const router = useRouter();
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [fileError, setFileError] = useState<string | null>(null);
-
+  const [croppingFile, setCroppingFile] = useState<File | null>(null);
   const [confirmModal, setConfirmModal] = useState<ConfirmModalProps | null>(
     null,
   );
@@ -48,6 +49,7 @@ export const CurriculumForm = ({ apiBase }: CurriculumFormProps) => {
 
   const {
     handleSubmit,
+    setValue,
     control,
     formState: { isDirty },
   } = useForm<CreateCurriculumInputs>({
@@ -63,9 +65,18 @@ export const CurriculumForm = ({ apiBase }: CurriculumFormProps) => {
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) {
-      setSelectedFile(file);
+    if (!file) return;
+    setCroppingFile(file);
+    e.target.value = "";
+  };
+
+  const handleUploadComplete = (file: File, focalPoint?: { x: number; y: number }) => {
+    setSelectedFile(file);
+    if (focalPoint) {
+      setValue("thumbnailFocalPointX", focalPoint.x);
+      setValue("thumbnailFocalPointY", focalPoint.y);
     }
+    setCroppingFile(null);
   };
 
   const handleCancel = () => {
@@ -87,7 +98,7 @@ export const CurriculumForm = ({ apiBase }: CurriculumFormProps) => {
       return;
     }
     setFileError(null);
-    
+
     try {
       const year = dayjs(data.year).year().toString();
       const response = await curriculumService.createCurriculum(
@@ -145,7 +156,7 @@ export const CurriculumForm = ({ apiBase }: CurriculumFormProps) => {
                     accept="image/*"
                     onChange={handleFileChange}
                   />
-                </Button>  
+                </Button>
               )}
             </div>
             {fileError && (
@@ -209,6 +220,20 @@ export const CurriculumForm = ({ apiBase }: CurriculumFormProps) => {
             บันทึกข้อมูล
           </Button>
         </div>
+
+        <Modal open={!!croppingFile} onClose={() => setCroppingFile(null)}>
+          <div>
+            {croppingFile && (
+              <CropImageCard
+                file={croppingFile}
+                width={400}
+                height={300}
+                onUploadComplete={handleUploadComplete}
+                onCancel={() => setCroppingFile(null)}
+              />
+            )}
+          </div>
+        </Modal>
 
         {confirmModal && <ConfirmModal {...confirmModal} />}
       </form>
