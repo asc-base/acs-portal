@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { isAdminUser } from "@/lib/admin-access";
-import { IUser } from "@/core/domain/user";
+import { UserProfile } from "@/core/domain/user";
 import { ApiResponse } from "@/interface/response";
 
 const apiBase = `${process.env.API_URL || "https://acs-dev.service.narutchai.com"}/api`;
@@ -26,7 +26,7 @@ export async function proxy(request: NextRequest) {
       return NextResponse.redirect(new URL("/home", request.url));
     }
 
-    const result = (await response.json()) as ApiResponse<IUser>;
+    const result = (await response.json()) as ApiResponse<UserProfile>;
     if (!isAdminUser(result.data)) {
       return NextResponse.redirect(new URL("/home", request.url));
     }
