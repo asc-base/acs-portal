@@ -5,10 +5,10 @@ import {
   ForgetPasswordPayload,
   ForgetPasswordResponse,
 } from "../domain/auth";
-import { IUser } from "../domain/user";
+import { IUser, UserProfile } from "../domain/user";
 
 export interface IAuthRepository {
-  getUserData(token: string): Promise<ApiResponse<IUser>>;
+  getUserData(token: string): Promise<ApiResponse<UserProfile>>;
   Login(data: LoginRequest): Promise<ApiResponse<IUser>>;
   createCredentailForgetPassowrd(
     payload: ForgetPasswordPayload,
@@ -16,6 +16,6 @@ export interface IAuthRepository {
   resetPassword(
     data: ResetPasswordPayload,
   ): Promise<ApiResponse<ForgetPasswordResponse>>;
-  getUser(): Promise<IUser | null>;
+  getUser(): Promise<UserProfile | null>;
   Logout(): Promise<void>;
 }

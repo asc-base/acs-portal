@@ -73,3 +73,10 @@ export interface QueryNews {
   search?: string;
   searchBy?: string;
 }
+
+export interface IUpsertNewsFeature {
+  id?: number;
+  thumbnail?: File | string;
+  newsID: number;
+  tagID: number;
+}

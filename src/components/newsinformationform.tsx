@@ -16,12 +16,15 @@ import { CropImageCard } from "./cropimagecard";
 import { NewsRepository } from "@/infra/repositories/news.repository";
 import { NewsService } from "@/core/service/news.service";
 import { useRouter } from "next/navigation";
-import { ConfirmModal, ConfirmModalProps } from "@/components/modal/confirmModal";
+import {
+  ConfirmModal,
+  ConfirmModalProps,
+} from "@/components/modal/confirmModal";
 import { styled } from "@mui/material/styles";
 import {
-  CreateNewsInformationSchema,
-  CreateNewsInformationInputs,
-} from "@/core/schema/news";
+  UpsertNewsInformationSchema,
+  UpsertNewsInformationInputs,
+} from "@/core/schema/newsinformation";
 
 interface NewsInformationFormProps {
   type: string;
@@ -77,13 +80,14 @@ export const NewsInformationForm = ({
     setValue,
     watch,
     formState: { errors, isDirty },
-  } = useForm<CreateNewsInformationInputs>({
-    resolver: zodResolver(CreateNewsInformationSchema(type)),
+  } = useForm<UpsertNewsInformationInputs>({
+    resolver: zodResolver(UpsertNewsInformationSchema),
     mode: "onChange",
     defaultValues: {
       thumbnail: undefined,
       highlight: undefined,
       newsID: 0,
+      tagID: tagID,
     },
   });
 
@@ -101,17 +105,9 @@ export const NewsInformationForm = ({
     } else router.push(`/admin/newsinformation/${tagID}`);
   };
 
-  const onSubmit = async (data: CreateNewsInformationInputs) => {
+  const onSubmit = async (data: UpsertNewsInformationInputs) => {
     try {
-      const formData = new FormData();
-      formData.append("thumbnail", data.thumbnail);
-      if (data.highlight) {
-        formData.append("highlight", data.highlight);
-      }
-      formData.append("newsID", data.newsID.toString());
-      formData.append("tagID", tagID.toString());
-
-      const response = await newsService.upsertNewsInformation(formData);
+      const response = await newsService.upsertNewsInformation(data);
 
       if (response) {
         setConfirmModal({
@@ -129,7 +125,10 @@ export const NewsInformationForm = ({
     }
   };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, target: "thumbnail" | "highlight") => {
+  const handleFileChange = (
+    e: React.ChangeEvent<HTMLInputElement>,
+    target: "thumbnail" | "highlight",
+  ) => {
     const file = e.target.files?.[0];
     if (!file) return;
     setCroppingFile(file);
@@ -150,8 +149,16 @@ export const NewsInformationForm = ({
   const handleSearch = async (search: string) => {
     setLoading(true);
     try {
-      const { rows } = await newsService.getNews(1, 10, undefined, undefined, undefined, search);
-      setOptions(rows);
+      const response = await newsService.getNews(
+        1,
+        10,
+        undefined,
+        undefined,
+        undefined,
+        search || undefined,
+        "title",
+      );
+      setOptions(response.rows);
     } finally {
       setLoading(false);
     }
@@ -186,7 +193,11 @@ export const NewsInformationForm = ({
                   {thumbnailFile ? (
                     <>
                       <Image
-                        src={URL.createObjectURL(thumbnailFile)}
+                        src={
+                          thumbnailFile instanceof File
+                            ? URL.createObjectURL(thumbnailFile)
+                            : thumbnailFile
+                        }
                         alt="Thumbnail Preview"
                         fill
                         className="object-cover"
@@ -228,7 +239,11 @@ export const NewsInformationForm = ({
                   {highlightFile ? (
                     <>
                       <Image
-                        src={URL.createObjectURL(highlightFile)}
+                        src={
+                          highlightFile instanceof File
+                            ? URL.createObjectURL(highlightFile)
+                            : highlightFile
+                        }
                         alt="Highlight Preview"
                         fill
                         className="object-cover"
@@ -296,7 +311,11 @@ export const NewsInformationForm = ({
                 {thumbnailFile ? (
                   <div className="group relative h-full w-full">
                     <Image
-                      src={URL.createObjectURL(thumbnailFile)}
+                      src={
+                        thumbnailFile instanceof File
+                          ? URL.createObjectURL(thumbnailFile)
+                          : thumbnailFile
+                      }
                       alt="Preview"
                       fill
                       priority
@@ -358,13 +377,23 @@ export const NewsInformationForm = ({
           </div>
         )}
 
-        <Modal open={!!croppingFile} onClose={() => { setCroppingFile(null); setCropTarget(null); }}>
+        <Modal
+          open={!!croppingFile}
+          onClose={() => {
+            setCroppingFile(null);
+            setCropTarget(null);
+          }}
+        >
           <div>
             {croppingFile && cropTarget && (
               <CropImageCard
                 file={croppingFile}
-                width={cropTarget === "highlight" ? 207 : isHighlight ? 706 : 590}
-                height={cropTarget === "highlight" ? 180 : isHighlight ? 376 : 440}
+                width={
+                  cropTarget === "highlight" ? 207 : isHighlight ? 706 : 590
+                }
+                height={
+                  cropTarget === "highlight" ? 180 : isHighlight ? 376 : 440
+                }
                 onUploadComplete={handleUploadComplete}
                 onCancel={() => {
                   setCroppingFile(null);
