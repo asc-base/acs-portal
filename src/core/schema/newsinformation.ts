@@ -6,6 +6,10 @@ export const UpsertNewsInformationSchema = z.object({
     message: "กรุณาอัปโหลดรูปภาพ Thumbnail",
   }),
   highlight: z.union([z.string().trim().min(1), z.instanceof(File)]).optional(),
+  thumbnailFocalPointX: z.number().optional(),
+  thumbnailFocalPointY: z.number().optional(),
+  highlightFocalPointX: z.number().optional(),
+  highlightFocalPointY: z.number().optional(),
   tagID: z.number().min(1, "กรุณาเลือกหมวดหมู่ข่าว"),
 });
 
