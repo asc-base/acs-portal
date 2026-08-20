@@ -10,6 +10,7 @@ export const UpsertNewsInformationSchema = z.object({
   thumbnailFocalPointY: z.number().optional(),
   highlightFocalPointX: z.number().optional(),
   highlightFocalPointY: z.number().optional(),
+  tagID: z.number().min(1, "กรุณาเลือกหมวดหมู่ข่าว"),
 });
 
 export type UpsertNewsInformationInputs = z.infer<typeof UpsertNewsInformationSchema>;
