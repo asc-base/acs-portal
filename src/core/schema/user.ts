@@ -9,4 +9,11 @@ export const CommonUserSchema = z.object({
     nickName: z.string().trim().optional(),
 });
 
+export const UserResponseSchema = z.object({
+    id: z.number(),
+    ...CommonUserSchema.shape,
+    imageUrl: z.string(),
+});
+
 export type CommonUserInputs = z.infer<typeof CommonUserSchema>;
+export type UserResponse = z.infer<typeof UserResponseSchema>;
