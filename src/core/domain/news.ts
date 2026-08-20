@@ -51,6 +51,10 @@ export interface INewsInformation {
   id: number;
   thumbnailURL: string;
   highlightURL?: string;
+  thumbnailFocalPointX?: number;
+  thumbnailFocalPointY?: number;
+  highlightFocalPointX?: number;
+  highlightFocalPointY?: number;
   news: INews;
 }
 
@@ -68,4 +72,11 @@ export interface QueryNews {
   sortBy?: string;
   search?: string;
   searchBy?: string;
+}
+
+export interface IUpsertNewsFeature {
+  id?: number;
+  thumbnail?: File | string;
+  newsID: number;
+  tagID: number;
 }

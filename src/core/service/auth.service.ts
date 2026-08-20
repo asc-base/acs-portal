@@ -1,6 +1,6 @@
 import { IAuthRepository } from "../ports/auth.repository";
 import { ApiResponse } from "@/interface/response";
-import { IUser } from "../domain/user";
+import { UserProfile } from "../domain/user";
 import {
   ForgetPasswordPayload,
   ForgetPasswordResponse,
@@ -31,7 +31,7 @@ export class AuthService {
     return this.authRepository.resetPassword(payload);
   }
 
-  async getUser(): Promise<IUser | null> {
+  async getUser(): Promise<UserProfile | null> {
     return this.authRepository.getUser();
   }
 

@@ -6,6 +6,7 @@ import {
   INewsInformation,
 } from "../domain/news";
 import { INewsRepository } from "../ports/news.repository";
+import { UpsertNewsInformationInputs } from "../schema/newsinformation";
 export class NewsService {
   constructor(private readonly newsRepository: INewsRepository) {}
 
@@ -88,8 +89,18 @@ async createNews(data: ICreateNews): Promise<INews> {
     return response.data;
   }
 
-  async upsertNewsInformation(data: FormData): Promise<INewsInformation> {
-    const response = await this.newsRepository.upsertNewsInformation(data);
+  async upsertNewsInformation(data: UpsertNewsInformationInputs): Promise<INewsInformation> {
+
+    const formData = new FormData();
+    Object.entries(data).forEach(([key, value]) => {
+      if (value instanceof File) {
+        formData.append(key, value);
+      } else if (value !== undefined && value !== null) {
+        formData.append(key, String(value));
+      }
+    });
+
+    const response = await this.newsRepository.upsertNewsInformation(formData);
     return response.data;
   }
 
