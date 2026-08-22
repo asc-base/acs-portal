@@ -40,7 +40,7 @@ export const NewsCard: FC<NewsCardProps> = (props) => {
         >
           {news.title}
         </Typography>
-        <Typography variant="h4" className="text-primary01 mt-2">
+        <Typography variant="h4" className="text-primary01" sx={{ mt: 1 }}>
           {date}
         </Typography>
       </CardContent>
