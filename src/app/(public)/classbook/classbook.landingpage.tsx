@@ -3,6 +3,7 @@ import Link from "next/link";
 import { IClassBook } from "@/core/domain/classbook";
 import { FC } from "react";
 import { Breadcrumbs } from "@mui/material";
+import EmptyState from "@/components/emptyState";
 
 interface PageProps {
   classBooks: IClassBook[];
@@ -24,16 +25,25 @@ const ClassBookLandingPage: FC<PageProps> = ({ classBooks }) => {
       </h4>
 
       {/* Grid 2 คอลัมน์ (Desktop) / 1 คอลัมน์ (Mobile) */}
-      <div className="grid gap-6 px-1 md:gap-8 xl:grid-cols-2">
-        {classBooks.map((item, i) => (
-          <Link
-            key={item.id}
-            href={`/students?page=1&pageSize=12&classBookID=${item.id}`}
-          >
-            <ClassbookCard {...item} classof={item.classof} priority={i < 2} />
-          </Link>
-        ))}
-      </div>
+      {classBooks.length === 0 ? (
+        <div className="flex h-96 flex-col items-center justify-center">
+          <EmptyState 
+            title="ไม่มีข้อมูลทำเนียบรุ่น" 
+            description="ยังไม่มีการเพิ่มข้อมูลทำเนียบรุ่นในระบบ" 
+          />
+        </div>
+      ) : (
+        <div className="grid gap-6 px-1 md:gap-8 xl:grid-cols-2">
+          {classBooks.map((item, i) => (
+            <Link
+              key={item.id}
+              href={`/students?page=1&pageSize=12&classBookID=${item.id}`}
+            >
+              <ClassbookCard {...item} classof={item.classof} priority={i < 2} />
+            </Link>
+          ))}
+        </div>
+      )}
     </main>
   );
 };
