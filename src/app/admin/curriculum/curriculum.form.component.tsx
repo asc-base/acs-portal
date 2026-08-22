@@ -226,8 +226,8 @@ export const CurriculumForm = ({ apiBase }: CurriculumFormProps) => {
             {croppingFile && (
               <CropImageCard
                 file={croppingFile}
-                width={400}
-                height={300}
+                width={512}
+                height={512}
                 onUploadComplete={handleUploadComplete}
                 onCancel={() => setCroppingFile(null)}
               />
