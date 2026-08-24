@@ -42,11 +42,11 @@ export const CreateStudentForm: FC<FormProfessorsProps> = ({
   classBookID,
 }) => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [croppingFile, setCroppingFile] = useState<File | null>(null);
   const [isError, setIsError] = useState(false);
   const [confirmModal, setConfirmModal] = useState<ConfirmModalProps | null>(
     null,
   );
-  const [isCroping, setIsCroping] = useState(false);
 
   const router = useRouter();
 
@@ -88,19 +88,18 @@ export const CreateStudentForm: FC<FormProfessorsProps> = ({
     const file = event.target.files?.[0] || null;
 
     if (file) {
-      setSelectedFile(file);
-      setIsCroping(true);
+      setCroppingFile(file);
     }
+    event.target.value = "";
   };
 
   const handleCropComplete = (croppedFile: File) => {
     setSelectedFile(croppedFile);
-    setIsCroping(false);
+    setCroppingFile(null);
   };
 
   const handleCropCancel = () => {
-    setIsCroping(false);
-    setSelectedFile(null);
+    setCroppingFile(null);
   };
 
   const onSubmit = async (data: CreateStudentInputs) => {
@@ -383,17 +382,19 @@ export const CreateStudentForm: FC<FormProfessorsProps> = ({
         </Button>
       </div>
       {confirmModal && <ConfirmModal {...confirmModal} />}
-      {isCroping && selectedFile && (
-        <Modal open={isCroping} onClose={handleCropCancel} closeAfterTransition>
-          <CropImageCard
-            file={selectedFile}
-            width={512}
-            height={512}
-            onUploadComplete={handleCropComplete}
-            onCancel={handleCropCancel}
-          />
-        </Modal>
-      )}
+      <Modal open={!!croppingFile} onClose={handleCropCancel}>
+        <div>
+          {croppingFile && (
+            <CropImageCard
+              file={croppingFile}
+              width={536}
+              height={480}
+              onUploadComplete={handleCropComplete}
+              onCancel={handleCropCancel}
+            />
+          )}
+        </div>
+      </Modal>
     </form>
   );
 };
