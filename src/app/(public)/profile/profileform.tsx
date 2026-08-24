@@ -270,8 +270,8 @@ const ProfileForm = ({ apiBase }: { apiBase: string }) => {
                 {isEditing && (
                   <div
                     className={`flex items-center justify-center ${selectedFile || student?.user?.imageUrl
-                        ? "absolute inset-0 z-10 h-full w-full bg-black/40 opacity-0 transition-opacity duration-300 hover:opacity-100"
-                        : "relative h-full w-full opacity-100"
+                      ? "absolute inset-0 z-10 h-full w-full bg-black/40 opacity-0 transition-opacity duration-300 hover:opacity-100"
+                      : "relative h-full w-full opacity-100"
                       } `}
                   >
                     <div className="border-neutral03 bg-neutral01/70 flex items-center justify-center rounded-lg border px-6 py-3 shadow-sm backdrop-blur-sm">
