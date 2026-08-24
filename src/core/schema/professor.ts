@@ -1,11 +1,6 @@
 import z from "zod";
-import { CommonUserSchema, UserResponseSchema } from "./user";
+import { CommonUserSchema, UserResponseSchema, CommonFocalPointSchema } from "./user";
 import { PositionSchema } from "./master-data";
-
-export const CommonFocalPointSchema = z.object({
-  imageFocalPointX: z.number().nullable().optional(),
-  imageFocalPointY: z.number().nullable().optional(),
-});
 
 export const CommonProfessorSchema = z.object({
   phone: z.string().trim().regex(/^0[0-9]{8,9}$/, "เบอร์โทรต้องเป็นตัวเลข 9-10 หลัก และขึ้นต้นด้วย 0"),
@@ -18,7 +13,6 @@ export const CreateProfessorSchema = z.object({
   expertFields: z.array(z.object({value: z.string().trim().min(1, "กรุณากรอกข้อมูล"),}),),
   ...CommonUserSchema.shape,
   ...CommonProfessorSchema.shape,
-  ...CommonFocalPointSchema.shape,
 });
 
 
@@ -28,7 +22,6 @@ export const UpdateProfessorSchema = z.object({
   expertFields: z.array(z.object({value: z.string().trim().min(1, "กรุณากรอกข้อมูล"),}),),
   ...CommonUserSchema.shape,
   ...CommonProfessorSchema.shape,
-  ...CommonFocalPointSchema.shape,
 });
 
 export const CreateProfessorPayloadSchema = z.object({
