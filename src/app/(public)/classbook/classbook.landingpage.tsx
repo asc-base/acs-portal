@@ -28,8 +28,8 @@ const ClassBookLandingPage: FC<PageProps> = ({ classBooks }) => {
       {classBooks.length === 0 ? (
         <div className="flex h-96 flex-col items-center justify-center">
           <EmptyState 
-            title="ไม่มีข้อมูลทำเนียบรุ่น" 
-            description="ยังไม่มีการเพิ่มข้อมูลทำเนียบรุ่นในระบบ" 
+            title="ไม่พบข้อมูลทำเนียบรุ่นในขณะนี้" 
+            description="เมื่อมีข้อมูลทำเนียบรุ่น ข้อมูลจะปรากฏที่นี่"  
           />
         </div>
       ) : (
