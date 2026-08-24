@@ -45,8 +45,8 @@ const NewsListComponents = ({
       {news.length === 0 ? (
         <div className="flex h-96 flex-col items-center justify-center">
           <EmptyState 
-            title="ไม่มีข่าวในหมวดหมู่นี้" 
-            description="ยังไม่มีการประกาศข่าวสารในหมวดหมู่ที่คุณเลือก" 
+            title="ไม่พบข่าวสารในหมวดหมู่นี้" 
+            description="เมื่อมีข้อมูลข่าวสาร ข้อมูลจะปรากฏที่นี่" 
           />
         </div>
       ) : (
