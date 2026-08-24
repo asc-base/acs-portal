@@ -115,7 +115,7 @@ const ProfileForm = ({ apiBase }: { apiBase: string }) => {
       { shouldDirty: true }
     );
   };
-  const [isCroping, setIsCroping] = useState(false);
+  const [croppingFile, setCroppingFile] = useState<File | null>(null);
 
   useEffect(() => {
     reset({
@@ -143,19 +143,18 @@ const ProfileForm = ({ apiBase }: { apiBase: string }) => {
     const file = event.target.files?.[0] || null;
 
     if (file) {
-      setSelectedFile(file);
-      setIsCroping(true);
+      setCroppingFile(file);
     }
+    event.target.value = "";
   };
 
   const handleCropComplete = (croppedFile: File) => {
     setSelectedFile(croppedFile);
-    setIsCroping(false);
+    setCroppingFile(null);
   };
 
   const handleCropCancel = () => {
-    setIsCroping(false);
-    setSelectedFile(null);
+    setCroppingFile(null);
   };
 
   const handleEdit = () => {
@@ -600,21 +599,19 @@ const ProfileForm = ({ apiBase }: { apiBase: string }) => {
             </>
           )}
         </div>
-        {isCroping && selectedFile && (
-          <Modal
-            open={isCroping}
-            onClose={handleCropCancel}
-            closeAfterTransition
-          >
-            <CropImageCard
-              width={200}
-              height={200}
-              file={selectedFile}
-              onUploadComplete={handleCropComplete}
-              onCancel={handleCropCancel}
-            />
-          </Modal>
-        )}
+        <Modal open={!!croppingFile} onClose={handleCropCancel}>
+          <div>
+            {croppingFile && (
+              <CropImageCard
+                file={croppingFile}
+                width={536}
+                height={480}
+                onUploadComplete={handleCropComplete}
+                onCancel={handleCropCancel}
+              />
+            )}
+          </div>
+        </Modal>
       </form>
     </div>
   );
