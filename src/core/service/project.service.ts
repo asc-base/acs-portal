@@ -3,7 +3,7 @@ import { IProject, QueryProject, ICreateProject, IUpdateProject } from "../domai
 import { IProjectRepository } from "../ports/project.repository";
 
 export class ProjectService {
-  constructor(private projectRepository: IProjectRepository) {}
+  constructor(private projectRepository: IProjectRepository) { }
 
   async getProjects(query: QueryProject): Promise<Pageable<IProject>> {
     const response = await this.projectRepository.getProjects(query);
@@ -57,7 +57,7 @@ export class ProjectService {
     if (files?.thumbnailFile) {
       formData.append("thumbnailFile", files.thumbnailFile);
     }
-    
+
     if (files?.assets) {
       files.assets.forEach((file) => formData.append("assets", file));
     }
