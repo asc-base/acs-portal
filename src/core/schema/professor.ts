@@ -1,6 +1,5 @@
 import z from "zod";
-import { CommonUserSchema, UserResponseSchema, CommonFocalPointSchema } from "./user";
-import { PositionSchema } from "./master-data";
+import { CommonUserSchema, CommonFocalPointSchema } from "./user";
 
 export const CommonProfessorSchema = z.object({
   phone: z.string().trim().regex(/^0[0-9]{8,9}$/, "เบอร์โทรต้องเป็นตัวเลข 9-10 หลัก และขึ้นต้นด้วย 0"),
@@ -54,30 +53,7 @@ export const UpdateProfessorPayloadSchema = z.object({
   ...CommonFocalPointSchema.shape,
 });
 
-export const ProfessorResponseSchema = z.object({
-  id: z.number(),
-  user: UserResponseSchema,
-  majorPosition: PositionSchema,
-  academicPosition: PositionSchema,
-  expertFields: z.array(z.string()),
-  educations: z.array(z.string()),
-  ...CommonProfessorSchema.shape,
-});
-
-export const ProfessorQuerySchema = z.object({
-  page: z.number().optional(),
-  pageSize: z.number().optional(),
-  educations: z.string().optional(),
-  expertFields: z.string().optional(),
-  majorPosition: z.string().optional(),
-  academicPosition: z.string().optional(),
-  search: z.string().optional(),
-  searchBy: z.string().optional(),
-});
-
 export type CreateProfessorInputs = z.infer<typeof CreateProfessorSchema>;
 export type UpdateProfessorInputs = z.infer<typeof UpdateProfessorSchema>;
 export type CreateProfessorPayload = z.infer<typeof CreateProfessorPayloadSchema>;
 export type UpdateProfessorPayload = z.infer<typeof UpdateProfessorPayloadSchema>;
-export type ProfessorResponse = z.infer<typeof ProfessorResponseSchema>;
-export type ProfessorQuery = z.infer<typeof ProfessorQuerySchema>;
