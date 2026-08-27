@@ -32,7 +32,7 @@ export const NewsCard: FC<NewsCardProps> = (props) => {
         image={news.thumbnailURL}
         alt={news.title}
       />
-      <CardContent className="flex-grow p-4 lg:p-6">
+      <CardContent className="px-4 pt-3 lg:px-6 lg:pt-4" sx={{ pb: 1.5 }}>
         <Typography
           variant="h2"
           fontWeight="bold"
