@@ -14,6 +14,8 @@ export interface IUser {
     nickName?: string;
     imageUrl: string;
     prefix?: UserPrefix | null;
+    imageFocalPointX?: number | null;
+    imageFocalPointY?: number | null;
 }
 
 export interface UserRole {
