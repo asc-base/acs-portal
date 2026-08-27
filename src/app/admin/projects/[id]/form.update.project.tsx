@@ -22,7 +22,6 @@ import { ICourse } from "@/core/domain/course";
 import { CropImageCard } from "@/components/cropimagecard";
 import { ProjectRepository } from "@/infra/repositories/project.repository";
 import { ProjectService } from "@/core/service/project.service";
-import { IUpdateProject } from "@/core/domain/project";
 import { MasterData } from "@/core/domain/master-data";
 import { IStudent } from "@/core/domain/student";
 import { IProfessor } from "@/core/domain/professor";
