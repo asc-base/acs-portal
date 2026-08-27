@@ -11,9 +11,11 @@ export const CommonCurriculumSchema = z.object({
   year: z.string().min(1, "กรุณาระบุปีการศึกษา"),
   documentURL: documentURLField,
   description: z.string().trim().min(1, "กรุณาระบุรายละเอียด"),
+  thumbnailFocalPointX: z.number().optional(),
+  thumbnailFocalPointY: z.number().optional(),
 });
 
-export const CreateCurriculumSchema = CommonCurriculumSchema
+export const CreateCurriculumSchema = CommonCurriculumSchema;
 
 export const UpdateCurriculumSchema = CommonCurriculumSchema.partial();
 

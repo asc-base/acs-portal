@@ -1,5 +1,10 @@
 import { z } from "zod";
 
+export const CommonFocalPointSchema = z.object({
+  imageFocalPointX: z.number().nullable().optional(),
+  imageFocalPointY: z.number().nullable().optional(),
+});
+
 export const createClassbookSchema = z.object({
   classof: z
     .string()
@@ -11,6 +16,7 @@ export const createClassbookSchema = z.object({
     .regex(/^[0-9]+$/, "กรุณากรอกแค่ตัวเลข")
     .regex(/^\d{4}$/, "กรุณากรอกปีการศึกษาให้ถูกต้อง"),
   curriculumID: z.number().min(1, "กรุณาเลือกหลักสูตร"),
+  ...CommonFocalPointSchema.shape,
 });
 
 export const updateClassBookSchema = z.object({
@@ -24,6 +30,7 @@ export const updateClassBookSchema = z.object({
     .regex(/^[0-9]+$/, "กรุณากรอกแค่ตัวเลข")
     .regex(/^\d{4}$/, "กรุณากรอกปีการศึกษาให้ถูกต้อง"),
   curriculumID: z.number().min(1, "กรุณาเลือกหลักสูตร"),
+  ...CommonFocalPointSchema.shape,
 });
 
 export type CreateClassbookInputs = z.infer<typeof createClassbookSchema>;
