@@ -4,6 +4,7 @@ import { ProfessorCard } from "@/components/professorcard";
 import { Breadcrumbs } from "@mui/material";
 import Link from "next/link";
 import { IProfessor } from "@/core/domain/professor";
+import EmptyState from "@/components/emptyState";
 
 interface ProfessorsListComponentsProps {
   professors: IProfessor[];
@@ -26,9 +27,12 @@ const ProfessorsListComponent = ({
       <h4 className="font-bold text-accent04 mt-2 lg:mt-3 mb-4 lg:mb-6 lg:text-2xl">อาจารย์และเจ้าหน้าที่</h4>
 
       {professors.length === 0 ? (
-        <div className="flex w-full flex-col items-center justify-center">
-          <p className="text-gray-500">ไม่มีข้อมูลอาจารย์และเจ้าหน้าที่</p>
-        </div>
+          <div className="flex h-96 flex-col items-center justify-center">
+            <EmptyState 
+             title="ไม่พบข้อมูลอาจารย์และเจ้าหน้าที่ในขณะนี้"
+             description="เมื่อมีข้อมูลอาจารย์และเจ้าหน้าที่ ข้อมูลจะปรากฏที่นี่"
+             />
+          </div>
       ) : (
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 justify-items-center">
           {professors.map((item) => (
