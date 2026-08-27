@@ -98,10 +98,6 @@ export const NewsInformationInfo = ({
       thumbnail: newsInformation.thumbnailURL,
       highlight: newsInformation.highlightURL || undefined,
       newsID: newsInformation.news.id,
-      thumbnailFocalPointX: newsInformation.thumbnailFocalPointX,
-      thumbnailFocalPointY: newsInformation.thumbnailFocalPointY,
-      highlightFocalPointX: newsInformation.highlightFocalPointX,
-      highlightFocalPointY: newsInformation.highlightFocalPointY,
       tagID: tagID,
     },
   });
@@ -143,28 +139,16 @@ export const NewsInformationInfo = ({
     e.target.value = "";
   };
 
-  const handleUploadComplete = (
-    file: File,
-    focalPoint?: { x: number; y: number },
-  ) => {
+  const handleUploadComplete = (file: File) => {
     const previewUrl = URL.createObjectURL(file);
     if (cropTarget === "thumbnail") {
       setValue("thumbnail", file, { shouldValidate: true, shouldDirty: true });
-      if (focalPoint) {
-        setValue("thumbnailFocalPointX", focalPoint.x, { shouldDirty: true });
-        setValue("thumbnailFocalPointY", focalPoint.y, { shouldDirty: true });
-      }
       setThumbnailPreview(previewUrl);
     } else if (cropTarget === "highlight") {
       setValue("highlight", file, { shouldValidate: true, shouldDirty: true });
-      if (focalPoint) {
-        setValue("highlightFocalPointX", focalPoint.x, { shouldDirty: true });
-        setValue("highlightFocalPointY", focalPoint.y, { shouldDirty: true });
-      }
       setHighlightPreview(previewUrl);
     }
     setOpenCrop(false);
-    setSelectedFile(null);
     setCropTarget(null);
   };
 
@@ -364,26 +348,15 @@ export const NewsInformationInfo = ({
           />
         </div>
 
-        <Modal
-          open={openCrop}
-          onClose={() => {
-            setOpenCrop(false);
-            setSelectedFile(null);
-            setCropTarget(null);
-          }}
-        >
+        <Modal open={openCrop} onClose={() => setOpenCrop(false)}>
           <div>
-            {selectedFile && cropTarget && (
+            {selectedFile && (
               <CropImageCard
                 file={selectedFile}
-                width={cropTarget === "highlight" ? 287 : isHighlightType ? 706 : 590}
-                height={cropTarget === "highlight" ? 180 : isHighlightType ? 376 : 440}
+                width={590}
+                height={440}
                 onUploadComplete={handleUploadComplete}
-                onCancel={() => {
-                  setOpenCrop(false);
-                  setSelectedFile(null);
-                  setCropTarget(null);
-                }}
+                onCancel={() => setOpenCrop(false)}
               />
             )}
           </div>

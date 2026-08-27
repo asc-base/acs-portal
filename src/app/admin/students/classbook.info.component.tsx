@@ -1,6 +1,6 @@
 "use client";
 import { useState, useEffect, useMemo } from "react";
-import { Button, Card, MenuItem, Alert, Snackbar } from "@mui/material";
+import { Button, Card, MenuItem, Alert, Snackbar, Modal } from "@mui/material";
 import Image from "next/image";
 import { styled } from "@mui/material/styles";
 import { RHFTextField } from "@/components/form/RHFTextField";
@@ -8,13 +8,14 @@ import { RHFSelect } from "@/components/form/RHFSelect";
 import { useForm } from "react-hook-form";
 import { UpdateClassbookInputs, updateClassBookSchema } from "@/core/schema/classbook";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { IClassBook, IUpdateClassBook } from "@/core/domain/classbook";
+import { IClassBook } from "@/core/domain/classbook";
 import { ICurriculum } from "@/core/domain/curriculum";
 import { ConfirmModal, ConfirmModalProps } from "@/components/modal/confirmModal";
 import { ClassBookService } from "@/core/service/class-book.service";
 import { ClassBookRepository } from "@/infra/repositories/class-book.repository";
 import { CurriculumService } from "@/core/service/curriculum.service";
 import { CurriculumRepository } from "@/infra/repositories/curriculum.repository";
+import { CropImageCard } from "@/components/cropimagecard";
 
 interface CurriculumFormProps {
   classBook: IClassBook;
@@ -39,6 +40,7 @@ export const ClassBookInfoComponent = ({
 }: CurriculumFormProps) => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isEdit, setIsEdit] = useState(false);
+  const [isCroping, setIsCroping] = useState(false);
   const [confirmModal, setConfirmModal] = useState<ConfirmModalProps | null>(
     null,
   );
@@ -63,6 +65,7 @@ export const ClassBookInfoComponent = ({
     control,
     handleSubmit,
     reset,
+    setValue,
     formState: { isValid, isDirty },
   } = useForm<UpdateClassbookInputs>({
     resolver: zodResolver(updateClassBookSchema),
@@ -79,9 +82,24 @@ export const ClassBookInfoComponent = ({
     const file = e.target.files?.[0];
     if (file) {
       setSelectedFile(file);
+      setIsCroping(true);
     } else {
       setSelectedFile(null);
     }
+  };
+
+  const handleCropComplete = (croppedFile: File, focalPoint?: { x: number; y: number }) => {
+    setSelectedFile(croppedFile);
+    if (focalPoint) {
+      setValue("imageFocalPointX", focalPoint.x, { shouldDirty: true });
+      setValue("imageFocalPointY", focalPoint.y, { shouldDirty: true });
+    }
+    setIsCroping(false);
+  };
+
+  const handleCropCancel = () => {
+    setIsCroping(false);
+    setSelectedFile(null);
   };
 
   const handleCancle = () => {
@@ -104,7 +122,7 @@ export const ClassBookInfoComponent = ({
     }
   };
 
-  const onSubmit = async (data: IUpdateClassBook) => {
+  const onSubmit = async (data: UpdateClassbookInputs) => {
     if (isDirty || selectedFile) {
       try {
         const response = await classBookService.updateClassBook(
@@ -276,6 +294,17 @@ export const ClassBookInfoComponent = ({
         </div>
       </Card>
       {confirmModal && <ConfirmModal {...confirmModal} />}
+      {isCroping && selectedFile && (
+        <Modal open={isCroping} onClose={handleCropCancel} closeAfterTransition>
+          <CropImageCard
+            file={selectedFile}
+            width={512}
+            height={512}
+            onUploadComplete={handleCropComplete}
+            onCancel={handleCropCancel}
+          />
+        </Modal>
+      )}
     </div>
   );
 };
