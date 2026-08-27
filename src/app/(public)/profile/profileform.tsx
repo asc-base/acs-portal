@@ -150,6 +150,7 @@ const ProfileForm = ({ apiBase }: { apiBase: string }) => {
 
   const handleCropComplete = (
     croppedFile: File,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     focalPoint?: { x: number; y: number },
   ) => {
     setSelectedFile(croppedFile);
