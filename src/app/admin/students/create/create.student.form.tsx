@@ -43,6 +43,9 @@ export const CreateStudentForm: FC<FormProfessorsProps> = ({
 }) => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [croppingFile, setCroppingFile] = useState<File | null>(null);
+  const [focalPoint, setFocalPoint] = useState<{ x: number; y: number } | null>(
+    null,
+  );
   const [isError, setIsError] = useState(false);
   const [confirmModal, setConfirmModal] = useState<ConfirmModalProps | null>(
     null,
@@ -93,8 +96,14 @@ export const CreateStudentForm: FC<FormProfessorsProps> = ({
     event.target.value = "";
   };
 
-  const handleCropComplete = (croppedFile: File) => {
+  const handleCropComplete = (
+    croppedFile: File,
+    focal?: { x: number; y: number },
+  ) => {
     setSelectedFile(croppedFile);
+    if (focal) {
+      setFocalPoint(focal);
+    }
     setCroppingFile(null);
   };
 
@@ -117,6 +126,8 @@ export const CreateStudentForm: FC<FormProfessorsProps> = ({
         instagram: data.instagram,
         github: data.github,
         classBookID: classBookID,
+        imageFocalPointX: focalPoint?.x,
+        imageFocalPointY: focalPoint?.y,
       };
       const response = await studentService.createStudent(
         payload,

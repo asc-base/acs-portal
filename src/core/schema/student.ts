@@ -8,6 +8,8 @@ export const CommonStudentSchema = z.object({
     instagram: z.string().trim().optional(),
     github: z.string().trim().optional(),
     skills: z.array(z.string()).optional(),
+    imageFocalPointX: z.number().optional(),
+    imageFocalPointY: z.number().optional(),
 });
 
 export const CreateStudentSchema = z.object({

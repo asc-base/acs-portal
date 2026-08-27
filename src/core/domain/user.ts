@@ -7,6 +7,8 @@ export interface IUser {
     lastNameEn: string;
     nickName?: string;
     imageUrl: string;
+    imageFocalPointX?: number | null;
+    imageFocalPointY?: number | null;
 }
 
 export interface UserRole {

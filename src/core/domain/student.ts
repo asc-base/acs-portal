@@ -38,6 +38,9 @@ export interface ICreateStudent {
   facebook?: string;
   instagram?: string;
   classBookID: number;
+  imageFile?: File;
+  imageFocalPointX?: number;
+  imageFocalPointY?: number;
 }
 
 export interface IUpdateStudent {
@@ -53,6 +56,9 @@ export interface IUpdateStudent {
   instagram?: string | null;
   github?: string | null;
   skills?: string[];
+  imageFile?: File;
+  imageFocalPointX?: number;
+  imageFocalPointY?: number;
 }
 
 export interface ICreateStudentCsv {

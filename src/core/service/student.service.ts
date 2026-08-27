@@ -32,7 +32,9 @@ export class StudentService {
   ): Promise<IStudent> {
     const formData = new FormData();
     Object.entries(data).forEach(([key, value]) => {
-      formData.append(key, value?.toString() ?? "");
+      if (value !== undefined && value !== null) {
+        formData.append(key, value.toString());
+      }
     });
 
     if (imageFile) {
@@ -58,10 +60,12 @@ export class StudentService {
     try {
       const formData = new FormData();
       Object.entries(data).forEach(([key, value]) => {
-        if (key === "skills" && Array.isArray(value)) {
-          value.forEach((v) => formData.append("skills", v));
-        } else {
-          formData.append(key, value?.toString() ?? "");
+        if (value !== undefined && value !== null) {
+          if (key === "skills" && Array.isArray(value)) {
+            value.forEach((v) => formData.append("skills", v));
+          } else {
+            formData.append(key, value.toString());
+          }
         }
       });
       if (image) formData.append("imageFile", image);
