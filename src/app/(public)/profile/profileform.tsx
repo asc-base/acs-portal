@@ -148,7 +148,10 @@ const ProfileForm = ({ apiBase }: { apiBase: string }) => {
     event.target.value = "";
   };
 
-  const handleCropComplete = (croppedFile: File) => {
+  const handleCropComplete = (
+    croppedFile: File,
+    focalPoint?: { x: number; y: number },
+  ) => {
     setSelectedFile(croppedFile);
     setCroppingFile(null);
   };
