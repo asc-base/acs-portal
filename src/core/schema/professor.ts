@@ -55,57 +55,6 @@ export const UpdateProfessorPayloadSchema = z.object({
   ...CommonFocalPointSchema.shape,
 });
 
-export const ProfessorResponseSchema = z.object({
-  id: z.number(),
-  user: UserResponseSchema,
-  majorPosition: PositionSchema,
-  academicPosition: PositionSchema,
-  expertFields: z.array(z.string()),
-  educations: z.array(z.string()),
-  ...CommonProfessorSchema.shape,
-});
-
-export const ProfessorQuerySchema = z.object({
-  page: z.number().optional(),
-  pageSize: z.number().optional(),
-  educations: z.string().optional(),
-  expertFields: z.string().optional(),
-  majorPosition: z.string().optional(),
-  academicPosition: z.string().optional(),
-  search: z.string().optional(),
-  searchBy: z.string().optional(),
-});
-
-export const CreateProfessorPayloadSchema = z.object({
-  academicPositionID: z.number(),
-  educations: z.string().optional(),
-  email: z.string(),
-  expertFields: z.string().optional(),
-  firstNameEn: z.string().nullable().optional(),
-  firstNameTh: z.string(),
-  image: z.string().optional(),
-  lastNameEn: z.string().nullable().optional(),
-  lastNameTh: z.string(),
-  phone: z.string(),
-  profRoom: z.string(),
-  ...CommonFocalPointSchema.shape,
-});
-
-export const UpdateProfessorPayloadSchema = z.object({
-  id: z.number(),
-  academicPositionID: z.number(),
-  profRoom: z.string(),
-  phone: z.string(),
-  firstNameTh: z.string(),
-  lastNameTh: z.string(),
-  firstNameEn: z.string().nullable(),
-  lastNameEn: z.string().nullable(),
-  email: z.string(),
-  expertFields: z.string().optional(),
-  educations: z.string().optional(),
-  ...CommonFocalPointSchema.shape,
-});
-
 export type CreateProfessorInputs = z.infer<typeof CreateProfessorSchema>;
 export type UpdateProfessorInputs = z.infer<typeof UpdateProfessorSchema>;
 export type CreateProfessorPayload = z.infer<typeof CreateProfessorPayloadSchema>;
