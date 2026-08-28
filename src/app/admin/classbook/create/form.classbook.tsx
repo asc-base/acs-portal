@@ -1,7 +1,7 @@
 "use client";
 import React, { FC, useEffect, useMemo, useState } from "react";
 import Image from "next/image";
-import { Button, MenuItem, Alert, Snackbar } from "@mui/material";
+import { Button, MenuItem, Alert, Snackbar, Modal } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { RHFTextField } from "@/components/form/RHFTextField";
 import { useForm } from "react-hook-form";
@@ -18,6 +18,7 @@ import {
   ConfirmModal,
   ConfirmModalProps,
 } from "@/components/modal/confirmModal";
+import { CropImageCard } from "@/components/cropimagecard";
 
 interface FormClassbookProps {
   apiBase: string;
@@ -54,9 +55,12 @@ export const FormClassbook: FC<FormClassbookProps> = ({ apiBase }) => {
     return new ClassBookService(classBookRepository);
   }, [apiBase]);
 
+  const [isCroping, setIsCroping] = useState(false);
+
   const {
     control,
     handleSubmit,
+    setValue,
     formState: { isDirty },
   } = useForm<CreateClassbookInputs>({
     resolver: zodResolver(createClassbookSchema),
@@ -73,7 +77,22 @@ export const FormClassbook: FC<FormClassbookProps> = ({ apiBase }) => {
     const file = event.target.files?.[0];
     if (file) {
       setSelectedFile(file);
+      setIsCroping(true);
     }
+  };
+
+  const handleCropComplete = (croppedFile: File, focalPoint?: { x: number; y: number }) => {
+    setSelectedFile(croppedFile);
+    if (focalPoint) {
+      setValue("imageFocalPointX", focalPoint.x, { shouldDirty: true });
+      setValue("imageFocalPointY", focalPoint.y, { shouldDirty: true });
+    }
+    setIsCroping(false);
+  };
+
+  const handleCropCancel = () => {
+    setIsCroping(false);
+    setSelectedFile(null);
   };
 
   const cancelForm = () => {
@@ -240,6 +259,17 @@ export const FormClassbook: FC<FormClassbookProps> = ({ apiBase }) => {
         </Button>
       </div>
       {confirmModal && <ConfirmModal {...confirmModal} />}
+      {isCroping && selectedFile && (
+        <Modal open={isCroping} onClose={handleCropCancel} closeAfterTransition>
+          <CropImageCard
+            file={selectedFile}
+            width={512} 
+            height={512}
+            onUploadComplete={handleCropComplete}
+            onCancel={handleCropCancel}
+          />
+        </Modal>
+      )}
     </form>
   );
 };

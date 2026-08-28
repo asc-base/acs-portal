@@ -5,6 +5,8 @@ export interface ICurriculum {
   documentURL: string;
   description: string;
   thumbnailURL: string;
+  thumbnailFocalPointX?: number;
+  thumbnailFocalPointY?: number;
 }
 
 export interface QueryCurriculum {
@@ -20,6 +22,8 @@ export interface ICreateCurriculum {
   title: string;
   documentURL: string;
   description: string;
+  thumbnailFocalPointX?: number;
+  thumbnailFocalPointY?: number;
 }
 
 export interface IUpdateCurriculum {
@@ -27,4 +31,6 @@ export interface IUpdateCurriculum {
   title?: string;
   documentURL?: string;
   description?: string;
+  thumbnailFocalPointX?: number;
+  thumbnailFocalPointY?: number;
 }
