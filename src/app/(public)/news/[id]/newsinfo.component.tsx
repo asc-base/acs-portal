@@ -33,7 +33,7 @@ const NewsInfoComponent = ({ newsInfo, recommendNews }: NewsInfoProps) => {
         </Link>
         {newsInfo.title && <span>{newsInfo.title}</span>}
       </Breadcrumbs>
-      <div>
+      <section className="border-b border-neutral03 pb-8">
         <div className="relative aspect-video h-[560px] w-full overflow-hidden rounded-xl">
           <Skeleton
             data-skeleton
@@ -68,11 +68,15 @@ const NewsInfoComponent = ({ newsInfo, recommendNews }: NewsInfoProps) => {
           </div>
           <h3 className="break-words whitespace-pre-wrap">{newsInfo.detail}</h3>
         </div>
-      </div>
-      <div className="flex flex-col gap-4 pb-8">
-        <h3 className="text-accent04 font-bold lg:text-2xl">
-          ข่าวที่น่าสนใจอื่นๆ
-        </h3>
+      </section>
+      <section className="flex flex-col gap-4 py-8">
+        <div className="flex items-center gap-2">
+          <span className="h-6 w-1 shrink-0 bg-accent04" aria-hidden="true" />
+          <h3 className="text-accent04 shrink-0 font-bold lg:text-2xl">
+            ข่าวที่น่าสนใจอื่น ๆ
+          </h3>
+          <span className="h-px w-full bg-neutral03" aria-hidden="true" />
+        </div>
 
         <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
           {recommendNews?.map((news) => (
@@ -83,7 +87,7 @@ const NewsInfoComponent = ({ newsInfo, recommendNews }: NewsInfoProps) => {
             </div>
           ))}
         </div>
-      </div>
+      </section>
     </div>
   );
 };
