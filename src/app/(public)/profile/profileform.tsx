@@ -21,6 +21,7 @@ import { AuthRepository } from "@/infra/repositories/auth.repository";
 import { AuthService } from "@/core/service/auth.service";
 import { StudentRepository } from "@/infra/repositories/student.repository";
 import { StudentService } from "@/core/service/student.service";
+import { StudentDefaultAvatar } from "@/components/student-default-avatar";
 
 const VisuallyHiddenInput = styled("input")({
   clip: "rect(0 0 0 0)",
@@ -253,6 +254,13 @@ const ProfileForm = ({ apiBase }: { apiBase: string }) => {
                     className="h-full w-full object-cover transition-opacity"
                   />
                 )}
+                {!(selectedFile || student?.user?.imageUrl) && (
+                  <StudentDefaultAvatar
+                    prefix={student?.user?.prefix}
+                    alt="Profile"
+                    sx={{ width: "100%", height: "100%" }}
+                  />
+                )}
                 {isEditing && (
                   <div
                     className={`flex items-center justify-center ${
@@ -267,11 +275,6 @@ const ProfileForm = ({ apiBase }: { apiBase: string }) => {
                       </span>
                     </div>
                   </div>
-                )}
-                {!(selectedFile || student?.user?.imageUrl) && !isEditing && (
-                  <span className="text-neutral04 text-sm font-medium">
-                    ไม่มีรูปโปรไฟล์
-                  </span>
                 )}
                 {isEditing && (
                   <VisuallyHiddenInput

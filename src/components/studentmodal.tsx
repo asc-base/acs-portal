@@ -9,9 +9,9 @@ import GitHubIcon from "@mui/icons-material/GitHub";
 import CloseIcon from "@mui/icons-material/Close";
 import { Typography, Chip } from "@mui/material";
 import Image from "next/image";
-import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import { IStudent } from "@/core/domain/student";
 import { IClassBook } from "@/core/domain/classbook";
+import { StudentDefaultAvatar } from "@/components/student-default-avatar";
 
 interface StudentModalProps {
   student: IStudent;
@@ -97,10 +97,13 @@ export const StudentModal: React.FC<StudentModalProps> = ({
                     className="h-[230px] w-full max-w-[220px] object-cover rounded-2xl"
                   />
                 ) : (
-                  <AccountCircleIcon
+                  <StudentDefaultAvatar
+                    prefix={student.user.prefix}
+                    alt={`${student.user.firstNameTh} ${student.user.lastNameTh}`}
                     sx={{
-                      fontSize: 220,
-                      color: "var(--color-neutral03)",
+                      width: "100%",
+                      maxWidth: 220,
+                      height: 230,
                     }}
                   />
                 )}

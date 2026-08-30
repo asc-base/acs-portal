@@ -42,6 +42,7 @@ import {
 import Alert from "@mui/material/Alert";
 import Snackbar from "@mui/material/Snackbar";
 import EmptyState from "@/components/emptyState";
+import { StudentDefaultAvatar } from "@/components/student-default-avatar";
 
 interface StudentTableComponentsProps {
   students: IStudent[];
@@ -272,12 +273,13 @@ const StudentTableComponents = ({
                         sx={{ width: 64, height: 64, margin: "0 auto" }}
                       />
                     ) : (
-                      <Avatar
+                      <StudentDefaultAvatar
+                        prefix={student.user?.prefix}
+                        alt={student.user?.firstNameTh || "Student"}
                         sx={{
                           width: 64,
                           height: 64,
                           margin: "0 auto",
-                          bgcolor: "grey.300",
                         }}
                       />
                     )}

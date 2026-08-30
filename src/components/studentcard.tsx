@@ -1,7 +1,7 @@
 import { FC } from "react";
 import { Card, CardContent, CardMedia, Typography, Box } from "@mui/material";
-import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import { IStudent } from "@/core/domain/student";
+import { StudentDefaultAvatar } from "@/components/student-default-avatar";
 
 export const StudentCard: FC<IStudent> = (props) => {
   return (
@@ -18,22 +18,13 @@ export const StudentCard: FC<IStudent> = (props) => {
           alt={`${props.user.firstNameTh} ${props.user.lastNameTh}`}
         />
       ) : (
-        <Box
+        <StudentDefaultAvatar
+          prefix={props.user.prefix}
+          alt={`${props.user.firstNameTh} ${props.user.lastNameTh}`}
           sx={{
             height: { xs: 158, lg: 240 },
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            backgroundColor: "var(--color-neutral02)",
           }}
-        >
-          <AccountCircleIcon
-            sx={{
-              fontSize: { sm: 80, lg: 120 },
-              color: "var(--color-neutral05)",
-            }}
-          />
-        </Box>
+        />
       )}
       <CardContent className="flex flex-1 flex-col justify-center gap-1 p-3 !pb-3 text-left lg:p-4 lg:!pb-4">
         <Typography component="h2" className="!text-primary01 text-left !font-bold">
