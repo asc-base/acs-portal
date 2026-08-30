@@ -18,6 +18,24 @@ function ProjectCardBase({ data }: ProjectCardProps) {
     tag,
   } = data;
 
+  const category =
+    tag?.find((t) => t.tagsGroupsId === 3)?.name ??
+    data.projectCategories?.[0]?.name;
+  const projectType =
+    tag?.find((t) => t.tagsGroupsId === 1)?.name ??
+    data.projectTypes?.[0]?.name;
+  const field =
+    tag?.find((t) => t.tagsGroupsId === 2)?.name ??
+    data.projectFields?.[0]?.name;
+
+  const displaySubtitle =
+    [category, projectType].filter(Boolean).join(" / ") ||
+    [category, field].filter(Boolean).join(" / ") ||
+    projectType ||
+    category ||
+    field ||
+    "";
+
   return (
     <>
       {/* media */}
@@ -37,8 +55,8 @@ function ProjectCardBase({ data }: ProjectCardProps) {
 
       {/* content */}
       <div className="px-4 pb-4">
-        <p className="text-neutral04 text-[14px] font-medium">
-          {tag[2]?.name} / {tag[1]?.name}
+        <p className="text-neutral04 text-[14px] font-medium line-clamp-1 min-h-[21px]">
+          {displaySubtitle}
         </p>
 
         <h3 className="text-primary01 mt-1 line-clamp-2 text-[16px] leading-snug font-extrabold">

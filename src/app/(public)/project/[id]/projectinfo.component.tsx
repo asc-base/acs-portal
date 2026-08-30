@@ -63,6 +63,24 @@ const ProjectInfoComponent: FC<ProjectInfoProps> = ({ project }) => {
     return /\.(jpeg|jpg|gif|png|webp)$/i.test(url);
   };
 
+  const category =
+    project?.tag?.find((t) => t.tagsGroupsId === 3)?.name ??
+    project?.projectCategories?.[0]?.name;
+  const projectType =
+    project?.tag?.find((t) => t.tagsGroupsId === 1)?.name ??
+    project?.projectTypes?.[0]?.name;
+  const field =
+    project?.tag?.find((t) => t.tagsGroupsId === 2)?.name ??
+    project?.projectFields?.[0]?.name;
+
+  const displaySubtitle =
+    [category, projectType].filter(Boolean).join(" / ") ||
+    [category, field].filter(Boolean).join(" / ") ||
+    projectType ||
+    category ||
+    field ||
+    "Uncategorized";
+
   return (
     <div className="container mx-auto px-4 py-5 md:px-16">
       {/*Breadcrumbs*/}
@@ -87,14 +105,7 @@ const ProjectInfoComponent: FC<ProjectInfoProps> = ({ project }) => {
       </div>
       {/*Project detail*/}
       <div className="mb-4">
-        <h5>
-          {project?.projectCategories?.[0]?.name &&
-          project?.projectFields?.[0]?.name
-            ? `${project.projectCategories[0].name} / ${project.projectFields[0].name}`
-            : project?.projectCategories?.[0]?.name ||
-              project?.projectFields?.[0]?.name ||
-              "Uncategorized"}
-        </h5>
+        <h5>{displaySubtitle}</h5>
         <h2 className="font-bold">{project?.title}</h2>
         <h4>{project?.details}</h4>
       </div>
