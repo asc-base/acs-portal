@@ -32,29 +32,20 @@ export const StudentDefaultAvatar = ({
       }}
     >
       <Box
+        component="img"
+        src={
+          isFemale
+            ? "/avatars/student-default-female.jpg"
+            : "/avatars/student-default-male.jpg"
+        }
+        alt=""
         sx={{
-          position: "relative",
           width: "72%",
           aspectRatio: "1",
-          overflow: "hidden",
           borderRadius: "50%",
+          objectFit: "cover",
         }}
-      >
-        <Box
-          component="img"
-          src="/avatars/student-default-avatars.jpg"
-          alt=""
-          sx={{
-            position: "absolute",
-            width: "500%",
-            maxWidth: "none",
-            height: "auto",
-            left: isFemale ? "-400%" : "-100%",
-            top: isFemale ? "auto" : 0,
-            bottom: isFemale ? 0 : "auto",
-          }}
-        />
-      </Box>
+      />
     </Box>
   );
 };
