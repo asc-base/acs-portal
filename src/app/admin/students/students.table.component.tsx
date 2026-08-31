@@ -280,6 +280,7 @@ const StudentTableComponents = ({
                           width: 64,
                           height: 64,
                           margin: "0 auto",
+                          bgcolor: "transparent",
                         }}
                       />
                     )}
