@@ -33,7 +33,7 @@ const NewsInfoComponent = ({ newsInfo, recommendNews }: NewsInfoProps) => {
         </Link>
         {newsInfo.title && <span>{newsInfo.title}</span>}
       </Breadcrumbs>
-      <section className="border-b border-neutral03 pb-8">
+      <section className="pb-8">
         <div className="relative aspect-video h-[560px] w-full overflow-hidden rounded-xl">
           <Skeleton
             data-skeleton
@@ -75,7 +75,7 @@ const NewsInfoComponent = ({ newsInfo, recommendNews }: NewsInfoProps) => {
           <h3 className="text-accent04 shrink-0 font-bold lg:text-2xl">
             ข่าวที่น่าสนใจอื่น ๆ
           </h3>
-          <span className="h-px w-full bg-neutral03" aria-hidden="true" />
+          <span className="h-[1.5px] w-full bg-neutral03" aria-hidden="true" />
         </div>
 
         <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
