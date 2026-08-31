@@ -35,8 +35,8 @@ export const StudentDefaultAvatar = ({
         component="img"
         src={
           isFemale
-            ? "/avatars/student-default-female.jpg"
-            : "/avatars/student-default-male.jpg"
+            ? "/avatars/student-default-female.png"
+            : "/avatars/student-default-male.png"
         }
         alt=""
         sx={{
