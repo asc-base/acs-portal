@@ -276,6 +276,7 @@ const StudentTableComponents = ({
                       <StudentDefaultAvatar
                         prefix={student.user?.prefix}
                         alt={student.user?.firstNameTh || "Student"}
+                        fillContainer
                         sx={{
                           width: 64,
                           height: 64,
