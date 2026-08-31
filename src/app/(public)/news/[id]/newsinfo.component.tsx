@@ -70,13 +70,13 @@ const NewsInfoComponent = ({ newsInfo, recommendNews }: NewsInfoProps) => {
         </div>
       </section>
       <section className="flex flex-col gap-4 py-8">
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-2">
           <span className="h-6 w-1 shrink-0 bg-accent04" aria-hidden="true" />
           <h3 className="text-accent04 shrink-0 font-bold lg:text-2xl">
             ข่าวที่น่าสนใจอื่น ๆ
           </h3>
           <span
-            className="h-[1.5px] max-w-[30rem] flex-1 bg-neutral03"
+            className="ml-2 h-[1.5px] w-full bg-neutral03"
             aria-hidden="true"
           />
         </div>
