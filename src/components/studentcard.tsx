@@ -21,10 +21,8 @@ export const StudentCard: FC<IStudent> = (props) => {
         <StudentDefaultAvatar
           prefix={props.user.prefix}
           alt={`${props.user.firstNameTh} ${props.user.lastNameTh}`}
-          sx={{
-            height: { xs: 158, lg: 240 },
-            "& img": { width: "72%", height: "auto" },
-          }}
+          variant="square"
+          sx={{ height: { sm: 158, lg: 236 } }}
         />
       )}
       <CardContent className="flex flex-1 flex-col justify-center gap-1 p-3 !pb-3 text-left lg:p-4 lg:!pb-4">
