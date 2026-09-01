@@ -281,7 +281,12 @@ const StudentTableComponents = ({
                           height: 64,
                           margin: "0 auto",
                           bgcolor: "transparent",
-                          "& img": { width: "100%", height: "100%" },
+                          "& img": {
+                            width: "100%",
+                            height: "100%",
+                            transform: "scale(1.25)",
+                            transformOrigin: "center bottom",
+                          },
                         }}
                       />
                     )}
