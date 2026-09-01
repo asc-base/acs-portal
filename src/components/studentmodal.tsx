@@ -83,10 +83,10 @@ export const StudentModal: React.FC<StudentModalProps> = ({
         <div className="flex flex-col gap-8 md:flex-row pt-4">
 
           {/* Left Panel: Profile and Skills */}
-          <div className="flex flex-col gap-6 md:w-[35%] w-full">
+          <div className="flex w-full flex-col gap-6 md:w-[262px] md:shrink-0">
 
             {/* Profile Card */}
-            <div className="flex flex-col items-center rounded-2xl border border-neutral02 bg-white p-6 shadow-sm">
+            <div className="flex h-[450px] w-full flex-col items-center rounded-2xl border border-neutral02 bg-white p-6 shadow-sm">
               <div className="mb-4 overflow-hidden rounded-2xl w-full flex justify-center">
                 {student.user.imageUrl ? (
                   <Image
