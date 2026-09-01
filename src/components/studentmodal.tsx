@@ -87,14 +87,14 @@ export const StudentModal: React.FC<StudentModalProps> = ({
 
             {/* Profile Card */}
             <div className="flex flex-col items-center rounded-2xl border border-neutral02 bg-white p-6 shadow-sm">
-              <div className="mb-4 flex w-full justify-center overflow-hidden">
+              <div className="mb-4 overflow-hidden rounded-2xl w-full flex justify-center">
                 {student.user.imageUrl ? (
                   <Image
                     src={student.user.imageUrl}
                     alt={`${student.user.firstNameTh} ${student.user.lastNameTh}`}
                     width={220}
                     height={230}
-                    className="h-[230px] w-full max-w-[220px] object-cover"
+                    className="h-[230px] w-full max-w-[220px] object-cover rounded-2xl"
                   />
                 ) : (
                   <StudentDefaultAvatar
