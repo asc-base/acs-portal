@@ -83,10 +83,10 @@ export const StudentModal: React.FC<StudentModalProps> = ({
         <div className="flex flex-col gap-8 md:flex-row pt-4">
 
           {/* Left Panel: Profile and Skills */}
-          <div className="flex w-full flex-col gap-6 md:w-[262px] md:shrink-0">
+          <div className="flex w-full flex-col gap-6 md:w-65.5 md:shrink-0">
 
             {/* Profile Card */}
-            <div className="flex h-[450px] w-full flex-col items-center rounded-2xl border border-neutral02 bg-white p-6 shadow-sm">
+            <div className="flex h-112.5 w-full flex-col items-center rounded-2xl border border-neutral02 bg-white p-6 shadow-sm">
               <div className="mb-4 overflow-hidden rounded-2xl w-full flex justify-center">
                 {student.user.imageUrl ? (
                   <Image
@@ -94,20 +94,17 @@ export const StudentModal: React.FC<StudentModalProps> = ({
                     alt={`${student.user.firstNameTh} ${student.user.lastNameTh}`}
                     width={220}
                     height={230}
-                    className="h-[230px] w-full max-w-[220px] object-cover rounded-2xl"
+                    className="h-57.5 w-full max-w-55 object-cover rounded-2xl"
                   />
                 ) : (
-                  <StudentDefaultAvatar
-                    prefix={student.user.prefix}
-                    alt={`${student.user.firstNameTh} ${student.user.lastNameTh}`}
-                    variant="square"
-                    sx={{
-                      width: "100%",
-                      maxWidth: 220,
-                      height: 230,
-                      borderRadius: "1rem",
-                    }}
-                  />
+                  <div className="h-57.5 w-full max-w-55 overflow-hidden rounded-2xl">
+                    <StudentDefaultAvatar
+                      prefix={student.user.prefix}
+                      alt={`${student.user.firstNameTh} ${student.user.lastNameTh}`}
+                      variant="square"
+                      sx={{ width: "100%", height: "100%" }}
+                    />
+                  </div>
                 )}
               </div>
 
@@ -220,7 +217,7 @@ export const StudentModal: React.FC<StudentModalProps> = ({
             </div>
 
             {/* Scrollable Project List */}
-            <div className="flex-1 max-h-[420px] overflow-y-auto pr-3 custom-scrollbar">
+            <div className="flex-1 max-h-105 overflow-y-auto pr-3 custom-scrollbar">
               <ul className="list-disc pl-5 text-neutral05 space-y-4">
                 {activeTab === "course" ? (
                   courseProjectsMock.map((project, idx) => (

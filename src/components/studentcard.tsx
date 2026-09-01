@@ -5,11 +5,11 @@ import { StudentDefaultAvatar } from "@/components/student-default-avatar";
 
 export const StudentCard: FC<IStudent> = (props) => {
   return (
-    <Card className="flex max-h-[340px] !min-h-[300px] !w-[162px] cursor-pointer flex-col !rounded-2xl transition-all duration-300 hover:-translate-y-1 xl:!w-[268px]">
+    <Card className="flex max-h-85 !min-h-75 !w-40.5 cursor-pointer flex-col !rounded-2xl transition-all duration-300 hover:-translate-y-1 xl:!w-67">
       {props.user.imageUrl ? (
         <CardMedia
+          className="h-39.5 object-cover lg:h-59"
           sx={{
-            height: { sm: 158, lg: 236 },
             backgroundSize: "cover",
             backgroundPosition: "center",
           }}
@@ -18,15 +18,18 @@ export const StudentCard: FC<IStudent> = (props) => {
           alt={`${props.user.firstNameTh} ${props.user.lastNameTh}`}
         />
       ) : (
-        <StudentDefaultAvatar
-          prefix={props.user.prefix}
-          alt={`${props.user.firstNameTh} ${props.user.lastNameTh}`}
-          variant="square"
-          sx={{
-            height: { sm: 158, lg: 236 },
-            "& img": { objectPosition: "center bottom" },
-          }}
-        />
+        <div className="h-39.5 lg:h-59">
+          <StudentDefaultAvatar
+            prefix={props.user.prefix}
+            alt={`${props.user.firstNameTh} ${props.user.lastNameTh}`}
+            variant="square"
+            sx={{
+              width: "100%",
+              height: "100%",
+              "& img": { objectPosition: "center bottom" },
+            }}
+          />
+        </div>
       )}
       <CardContent className="flex flex-1 flex-col justify-center gap-1 p-3 !pb-3 text-left lg:p-4 lg:!pb-4">
         <Typography component="h2" className="!text-primary01 text-left !font-bold">
