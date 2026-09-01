@@ -6,7 +6,6 @@ interface StudentDefaultAvatarProps {
   prefix?: UserPrefix | null;
   alt: string;
   sx?: SxProps<Theme>;
-  fillContainer?: boolean;
   variant?: "circle" | "square";
 }
 
@@ -17,7 +16,6 @@ export const StudentDefaultAvatar = ({
   prefix,
   alt,
   sx,
-  fillContainer = false,
   variant = "circle",
 }: StudentDefaultAvatarProps) => {
   const isFemale = isFemalePrefix(prefix);
@@ -45,8 +43,8 @@ export const StudentDefaultAvatar = ({
         }
         alt=""
         sx={{
-          width: isSquare || fillContainer ? "100%" : "72%",
-          height: isSquare || fillContainer ? "100%" : "auto",
+          width: isSquare ? "100%" : "72%",
+          height: isSquare ? "100%" : "auto",
           aspectRatio: isSquare ? "auto" : "1",
           borderRadius: isSquare ? 0 : "50%",
           objectFit: "cover",
