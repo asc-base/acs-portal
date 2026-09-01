@@ -5,6 +5,11 @@ export interface INews {
   title: string;
   thumbnailURL: string;
   highlightURL: string;
+  newsAdditionalImages?: {
+    id: number;
+    newsID: number;
+    imageUrl: string;
+  }[];
   cardFocalPointX?: number;
   cardFocalPointY?: number;
   thumbnailFocalPointX?: number;
