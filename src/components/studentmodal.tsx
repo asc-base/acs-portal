@@ -105,6 +105,7 @@ export const StudentModal: React.FC<StudentModalProps> = ({
                       width: "100%",
                       maxWidth: 220,
                       height: 230,
+                      borderRadius: "1rem",
                     }}
                   />
                 )}
