@@ -22,7 +22,10 @@ export const StudentCard: FC<IStudent> = (props) => {
           prefix={props.user.prefix}
           alt={`${props.user.firstNameTh} ${props.user.lastNameTh}`}
           variant="square"
-          sx={{ height: { sm: 158, lg: 236 } }}
+          sx={{
+            height: { sm: 158, lg: 236 },
+            "& img": { objectPosition: "center bottom" },
+          }}
         />
       )}
       <CardContent className="flex flex-1 flex-col justify-center gap-1 p-3 !pb-3 text-left lg:p-4 lg:!pb-4">
