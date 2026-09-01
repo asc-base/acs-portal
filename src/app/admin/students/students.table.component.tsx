@@ -281,6 +281,7 @@ const StudentTableComponents = ({
                           height: 64,
                           margin: "0 auto",
                           bgcolor: "transparent",
+                          borderRadius: "50%",
                           "& img": {
                             width: "100%",
                             height: "100%",
