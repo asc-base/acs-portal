@@ -53,13 +53,17 @@ const NewsInfoComponent = ({ newsInfo, recommendNews }: NewsInfoProps) => {
   const updateArrowState = (swiper: SwiperType) => {
     setHasOverflow(!swiper.isLocked);
     const isAtEnd = swiper.isEnd || swiper.progress >= 0.99;
-    setCanScrollRight(!swiper.isEnd);
+    setCanScrollRight(!swiper.isLocked && !isAtEnd);
   };
 
   const scrollThumbs = (direction: "left" | "right") => {
-    if (!thumbsSwiper) return;
-    direction === "left" ? thumbsSwiper.slidePrev() : thumbsSwiper.slideNext();
-  };
+  if (!thumbsSwiper) return;
+  if (direction === "left") {
+    thumbsSwiper.slidePrev();
+  } else {
+    thumbsSwiper.slideNext();
+  }
+};
 
   return (
     <div className="container mx-auto px-5 pt-6 pb-5 md:p-8 xl:px-16">
