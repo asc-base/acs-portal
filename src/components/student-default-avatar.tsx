@@ -43,9 +43,8 @@ export const StudentDefaultAvatar = ({
         }
         alt=""
         sx={{
-          width: isSquare ? "100%" : "72%",
-          height: isSquare ? "100%" : "auto",
-          aspectRatio: isSquare ? "auto" : "1",
+          width: "100%",
+          height: "100%",
           borderRadius: isSquare ? 0 : "50%",
           objectFit: "cover",
         }}

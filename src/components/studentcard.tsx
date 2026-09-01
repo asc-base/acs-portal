@@ -23,6 +23,7 @@ export const StudentCard: FC<IStudent> = (props) => {
           alt={`${props.user.firstNameTh} ${props.user.lastNameTh}`}
           sx={{
             height: { xs: 158, lg: 240 },
+            "& img": { width: "72%", height: "auto" },
           }}
         />
       )}
