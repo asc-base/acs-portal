@@ -22,7 +22,6 @@ import { ICourse } from "@/core/domain/course";
 import { CropImageCard } from "@/components/cropimagecard";
 import { ProjectRepository } from "@/infra/repositories/project.repository";
 import { ProjectService } from "@/core/service/project.service";
-import { IUpdateProject } from "@/core/domain/project";
 import { MasterData } from "@/core/domain/master-data";
 import { IStudent } from "@/core/domain/student";
 import { IProfessor } from "@/core/domain/professor";
@@ -89,7 +88,7 @@ export const FormUpdateProject: FC<FormUpdateProjectProps> = ({ apiBase, project
   const initAdvisors = initialProject.member?.filter((m) => m.role?.id === 3 || m.roleID === 3).map((m) => ({ userID: m.id })) || [];
 
 
-  const { control, handleSubmit, reset, formState: { isDirty } } = useForm<ProjectFormValues>({
+  const { control, handleSubmit, reset, setValue, formState: { isDirty } } = useForm<ProjectFormValues>({
     resolver: zodResolver(updateProjectSchema),
     defaultValues: {
       title: initialProject.title || "",
@@ -124,8 +123,12 @@ export const FormUpdateProject: FC<FormUpdateProjectProps> = ({ apiBase, project
     event.target.value = "";
   };
 
-  const handleCropComplete = (croppedFile: File) => {
+  const handleCropComplete = (croppedFile: File, focalPoint?: { x: number; y: number }) => {
     setSelectedFile(croppedFile);
+    if (focalPoint) {
+      setValue("thumbnailFocalPointX", focalPoint.x, { shouldDirty: true });
+      setValue("thumbnailFocalPointY", focalPoint.y, { shouldDirty: true });
+    }
     setImageError(false);
     setIsCroping(false);
     setTempThumbFile(null);
@@ -222,7 +225,7 @@ export const FormUpdateProject: FC<FormUpdateProjectProps> = ({ apiBase, project
       ];
       const deletedmembersID = [...deletedStudentsID, ...deletedAdvisorsID];
 
-      const payload: IUpdateProject = {
+      const payload = {
         title: data.title,
         details: data.details,
         youtubeURL: data.youtubeURL,
@@ -237,6 +240,8 @@ export const FormUpdateProject: FC<FormUpdateProjectProps> = ({ apiBase, project
         deletedmembersID,
         newCoursesID,
         deletedCoursesID,
+        thumbnailFocalPointX: data.thumbnailFocalPointX,
+        thumbnailFocalPointY: data.thumbnailFocalPointY,
       };
 
       const files = {
