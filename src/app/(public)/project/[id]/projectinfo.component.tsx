@@ -27,6 +27,9 @@ interface ProjectInfoProps {
 const ProjectInfoComponent: FC<ProjectInfoProps> = ({ project }) => {
   const [index, setIndex] = useState(0);
 
+  const projectCategories = project?.tag?.filter((t) => t.tagsGroupsId === 3) || [];
+  const projectFields = project?.tag?.filter((t) => t.tagsGroupsId === 2) || [];
+
   const handlePrev = () => {
     setIndex((prev) =>
       prev === 0 ? (project?.assetsURL?.length || 1)- 1 : prev - 1,
@@ -88,11 +91,10 @@ const ProjectInfoComponent: FC<ProjectInfoProps> = ({ project }) => {
       {/*Project detail*/}
       <div className="mb-4">
         <h5>
-          {project?.projectCategories?.[0]?.name &&
-          project?.projectFields?.[0]?.name
-            ? `${project.projectCategories[0].name} / ${project.projectFields[0].name}`
-            : project?.projectCategories?.[0]?.name ||
-              project?.projectFields?.[0]?.name ||
+          {projectCategories?.[0]?.name && projectFields?.[0]?.name
+            ? `${projectCategories[0].name} / ${projectFields[0].name}`
+            : projectCategories?.[0]?.name ||
+              projectFields?.[0]?.name ||
               "Uncategorized"}
         </h5>
         <h2 className="font-bold">{project?.title}</h2>
