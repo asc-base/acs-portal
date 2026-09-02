@@ -25,14 +25,14 @@ export const NewsCard: FC<NewsCardProps> = (props) => {
   }, [news.startDate]);
 
   return (
-    <Card className="flex h-85 max-w-84 min-w-75 cursor-pointer flex-col !rounded-xl shadow-md transition-all duration-300 hover:drop-shadow-lg lg:!rounded-2xl">
+    <Card className="flex max-h-85 max-w-84 min-w-75 cursor-pointer flex-col !rounded-xl shadow-md transition-all duration-300 hover:drop-shadow-lg lg:!rounded-2xl">
       <CardMedia
         className="h-[180px] w-full object-cover lg:h-[240px]"
         component="img"
         image={news.thumbnailURL}
         alt={news.title}
       />
-      <CardContent className="px-4 pt-3 lg:px-6 lg:pt-4" sx={{ pb: 1.5 }}>
+      <CardContent className="px-4 pt-3 lg:px-6 lg:pt-4" sx={{ pb: 0.5 }}>
         <Typography
           variant="h2"
           fontWeight="bold"
