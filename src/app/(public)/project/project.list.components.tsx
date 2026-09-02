@@ -57,7 +57,7 @@ const ProjectPage: FC<ProjectPageProps> = ({
       <div className="mb-4 flex items-center justify-between">
         <Typography
           component="p"
-          className="!text-primary01 !font-medium"
+          className="!text-accent04 !font-medium"
           sx={{ fontSize: { xs: 13, sm: 14, md: 16, lg: 18 }, lineHeight: 1.2 }}
         >
           จำนวน {totalRecords} ชิ้นงาน
