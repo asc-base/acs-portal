@@ -21,10 +21,9 @@ import LinkIcon from "@mui/icons-material/Link";
 import DescriptionIcon from "@mui/icons-material/Description";
 import SlideshowIcon from "@mui/icons-material/Slideshow";
 import { ICourse } from "@/core/domain/course";
-import { CropImageCard } from "@/components/cropimagecard"; 
+import { CropImageCard } from "@/components/cropimagecard";
 import { ProjectRepository } from "@/infra/repositories/project.repository";
 import { ProjectService } from "@/core/service/project.service";
-import { ICreateProject } from "@/core/domain/project";
 import { MasterData } from "@/core/domain/master-data";
 import { IStudent } from "@/core/domain/student";
 import { IProfessor } from "@/core/domain/professor";
@@ -58,6 +57,8 @@ const Schema = z.object({
       userID: z.number().min(1, "กรุณาเลือกอาจารย์"),
     })
   ).min(1, "กรุณาเพิ่มอาจารย์ที่ปรึกษาอย่างน้อย 1 คน"),
+  thumbnailFocalPointX: z.number().optional(),
+  thumbnailFocalPointY: z.number().optional(),
 });
 
 type ProjectFormValues = z.infer<typeof Schema>;
@@ -103,24 +104,24 @@ export const FormProjects: FC<FormProjectsProps> = ({ apiBase, initialCourses, i
   const router = useRouter();
   const [confirmModal, setConfirmModal] = useState<ConfirmModalProps | null>(null);
 
-  const { control, handleSubmit, formState: { isDirty } } = useForm<ProjectFormValues>({
+  const { control, handleSubmit, setValue, formState: { isDirty } } = useForm<ProjectFormValues>({
     resolver: zodResolver(Schema),
     defaultValues: {
-      title: "", 
-      details: "", 
-      youtubeURL: "", 
-      githubURL: "", 
-      documentURL: "", 
+      title: "",
+      details: "",
+      youtubeURL: "",
+      githubURL: "",
+      documentURL: "",
       presentationURL: "",
-      projectCourses: [{ value: 0 }], 
-      projectTypes: [{ value: 0 }], 
+      projectCourses: [{ value: 0 }],
+      projectTypes: [{ value: 0 }],
       projectCategories: [{ value: 0 }],
-      techStacks: [{ value: "" }], 
-      students: [{ userID: 0 }], 
+      techStacks: [{ value: "" }],
+      students: [{ userID: 0 }],
       advisors: [{ userID: 0 }],
     },
     mode: "onChange",
-});
+  });
 
   const { fields: projectCoursesFields, append: appendProjectCourses, remove: removeProjectCourses } = useFieldArray({ control, name: "projectCourses" });
   const { fields: projectTypesFields, append: appendProjectTypes, remove: removeProjectTypes } = useFieldArray({ control, name: "projectTypes" });
@@ -135,19 +136,23 @@ export const FormProjects: FC<FormProjectsProps> = ({ apiBase, initialCourses, i
       setTempThumbFile(file);
       setIsCroping(true);
     }
-    event.target.value = ""; 
+    event.target.value = "";
   };
 
-  const handleCropComplete = (croppedFile: File) => {
-  setSelectedFile(croppedFile);
-  setImageError(false);
-  setIsCroping(false);
-  setTempThumbFile(null);
+  const handleCropComplete = (croppedFile: File, focalPoint?: { x: number; y: number }) => {
+    setSelectedFile(croppedFile);
+    if (focalPoint) {
+      setValue("thumbnailFocalPointX", focalPoint.x, { shouldDirty: true });
+      setValue("thumbnailFocalPointY", focalPoint.y, { shouldDirty: true });
+    }
+    setImageError(false);
+    setIsCroping(false);
+    setTempThumbFile(null);
   };
 
   const handleCropCancel = () => {
-  setIsCroping(false);
-  setTempThumbFile(null);
+    setIsCroping(false);
+    setTempThumbFile(null);
   };
 
   const handleAssetsChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -193,8 +198,8 @@ export const FormProjects: FC<FormProjectsProps> = ({ apiBase, initialCourses, i
 
   const onSubmit: SubmitHandler<ProjectFormValues> = async (data) => {
     if (!selectedFile) {
-    setImageError(true);
-    return;
+      setImageError(true);
+      return;
     }
 
     if (selectedAssets.length === 0) {
@@ -203,8 +208,7 @@ export const FormProjects: FC<FormProjectsProps> = ({ apiBase, initialCourses, i
     }
 
     try {
-
-      const payload: ICreateProject = {
+      const payload = {
         title: data.title,
         details: data.details,
         youtubeURL: data.youtubeURL,
@@ -218,7 +222,9 @@ export const FormProjects: FC<FormProjectsProps> = ({ apiBase, initialCourses, i
         members: [
           ...data.students.map(s => ({ userID: Number(s.userID), roleID: 2 })),
           ...data.advisors.map(a => ({ userID: Number(a.userID), roleID: 3 }))
-        ]
+        ],
+        thumbnailFocalPointX: data.thumbnailFocalPointX,
+        thumbnailFocalPointY: data.thumbnailFocalPointY,
       };
 
       const files = {
@@ -227,11 +233,11 @@ export const FormProjects: FC<FormProjectsProps> = ({ apiBase, initialCourses, i
       };
 
       const response = await projectsService.createProject(payload, files);
-      
+
       if (!response) {
-      setErrorMsg("ไม่สามารถบันทึกข้อมูลได้ กรุณาลองใหม่อีกครั้ง");
-      setIsError(true);
-      return;
+        setErrorMsg("ไม่สามารถบันทึกข้อมูลได้ กรุณาลองใหม่อีกครั้ง");
+        setIsError(true);
+        return;
       }
 
       setConfirmModal({
@@ -280,9 +286,9 @@ export const FormProjects: FC<FormProjectsProps> = ({ apiBase, initialCourses, i
             {imageError && (
               <p className="text-h5 text-accent04">กรุณาอัปโหลดรูปภาพหลัก</p>
             )}
-            
+
           </div>
-          
+
           <div className="flex flex-1 flex-col gap-4">
             <RHFTextField
               control={control}
@@ -293,20 +299,20 @@ export const FormProjects: FC<FormProjectsProps> = ({ apiBase, initialCourses, i
               requiredMark
             />
             <div className="flex-1 flex flex-col">
-               <RHFTextField 
-                  control={control} 
-                  name="details" 
-                  label="รายละเอียด" 
-                  variant="outlined" 
-                  fullWidth 
-                  multiline 
-                  rows={8} 
-                  requiredMark 
-                  sx={{ 
-                    flex: 1, 
-                    '& .MuiInputBase-root': { height: '100%', alignItems: 'flex-start' } 
-                  }} 
-               />
+              <RHFTextField
+                control={control}
+                name="details"
+                label="รายละเอียด"
+                variant="outlined"
+                fullWidth
+                multiline
+                rows={8}
+                requiredMark
+                sx={{
+                  flex: 1,
+                  '& .MuiInputBase-root': { height: '100%', alignItems: 'flex-start' }
+                }}
+              />
             </div>
           </div>
         </div>
@@ -316,16 +322,16 @@ export const FormProjects: FC<FormProjectsProps> = ({ apiBase, initialCourses, i
             <h3 className="font-bold">ข้อมูลการจัดหมวดหมู่</h3>
             <p className="text-h3 font-normal">(สามารถเลือกได้มากกว่า 1 ในแต่ละคอลัมม์)</p>
           </div>
-          
+
           <div className="flex items-stretch justify-between gap-6">
             <div className="flex-1 space-y-4">
               <div className="flex items-center justify-between">
                 <h3 className="font-bold">วิชา</h3>
-                <IconButton 
-                  onClick={() => appendProjectCourses({ value: 0 })} 
+                <IconButton
+                  onClick={() => appendProjectCourses({ value: 0 })}
                   sx={{ color: "var(--color-primary03)" }}
-                  >
-                    <AddCircleOutlineOutlined sx={{ fontSize: 36 }} />
+                >
+                  <AddCircleOutlineOutlined sx={{ fontSize: 36 }} />
                 </IconButton>
               </div>
               <div className="space-y-2">
@@ -347,25 +353,25 @@ export const FormProjects: FC<FormProjectsProps> = ({ apiBase, initialCourses, i
                         ))}
                       </RHFSelect>
                     </div>
-                    <IconButton 
+                    <IconButton
                       onClick={() => removeProjectCourses(index)} disabled={projectCoursesFields.length === 1} color="error" sx={{ mt: 2.8 }}>
-                      <DeleteIcon sx={{ fontSize: 34 }}/>
+                      <DeleteIcon sx={{ fontSize: 34 }} />
                     </IconButton>
                   </div>
                 ))}
               </div>
             </div>
-            
+
             <div className="w-[1px] bg-neutral03 mt-10"></div>
-            
+
             <div className="flex-1 space-y-4">
               <div className="flex items-center justify-between">
                 <h3 className="font-bold">ประเภท</h3>
-                <IconButton 
-                  onClick={() => appendProjectTypes({ value: 0 })} 
+                <IconButton
+                  onClick={() => appendProjectTypes({ value: 0 })}
                   sx={{ color: "var(--color-primary03)" }}
-                  >
-                    <AddCircleOutlineOutlined sx={{ fontSize: 36 }} />
+                >
+                  <AddCircleOutlineOutlined sx={{ fontSize: 36 }} />
                 </IconButton>
               </div>
               <div className="space-y-2">
@@ -388,7 +394,7 @@ export const FormProjects: FC<FormProjectsProps> = ({ apiBase, initialCourses, i
                       </RHFSelect>
                     </div>
                     <IconButton onClick={() => removeProjectTypes(index)} disabled={projectTypesFields.length === 1} color="error" sx={{ mt: 2.8 }}>
-                      <DeleteIcon sx={{ fontSize: 34 }}/>
+                      <DeleteIcon sx={{ fontSize: 34 }} />
                     </IconButton>
                   </div>
                 ))}
@@ -396,15 +402,15 @@ export const FormProjects: FC<FormProjectsProps> = ({ apiBase, initialCourses, i
             </div>
 
             <div className="w-[1px] bg-neutral03 mt-10"></div>
-            
+
             <div className="flex-1 space-y-4">
               <div className="flex items-center justify-between">
                 <h3 className="font-bold">หมวดหมู่</h3>
-                <IconButton 
-                  onClick={() => appendProjectCategories({ value: 0 })} 
+                <IconButton
+                  onClick={() => appendProjectCategories({ value: 0 })}
                   sx={{ color: "var(--color-primary03)" }}
-                  >
-                    <AddCircleOutlineOutlined sx={{ fontSize: 36 }} />
+                >
+                  <AddCircleOutlineOutlined sx={{ fontSize: 36 }} />
                 </IconButton>
               </div>
               <div className="space-y-2">
@@ -427,7 +433,7 @@ export const FormProjects: FC<FormProjectsProps> = ({ apiBase, initialCourses, i
                       </RHFSelect>
                     </div>
                     <IconButton onClick={() => removeProjectCategories(index)} disabled={projectCategoriesFields.length === 1} color="error" sx={{ mt: 2.8 }}>
-                      <DeleteIcon sx={{ fontSize: 34 }}/>
+                      <DeleteIcon sx={{ fontSize: 34 }} />
                     </IconButton>
                   </div>
                 ))}
@@ -490,12 +496,12 @@ export const FormProjects: FC<FormProjectsProps> = ({ apiBase, initialCourses, i
               </button>
             )}
           </div>
-          
+
           {selectedAssets.length === 0 ? (
             <div className="w-full flex flex-col items-center justify-center gap-2 p-10 bg-white border-2 border-dashed border-gray-300 rounded-lg min-h-[200px]">
               <Button variant="contained" component="label">
-                  <VisuallyHiddenInput type="file" accept="image/*" multiple onChange={handleAssetsChange} />
-                  อัปโหลดรูปภาพ
+                <VisuallyHiddenInput type="file" accept="image/*" multiple onChange={handleAssetsChange} />
+                อัปโหลดรูปภาพ
               </Button>
               {assetsError && (
                 <p className="text-h5 text-accent04">กรุณาอัปโหลดรูปภาพเพิ่มเติมอย่างน้อย 1 รูป</p>
@@ -504,8 +510,8 @@ export const FormProjects: FC<FormProjectsProps> = ({ apiBase, initialCourses, i
           ) : (
             <div className="grid grid-cols-5 gap-4 items-start rounded-lg min-h-[160px]">
               {selectedAssets.map((file, index) => (
-                <div 
-                  key={`${file.name}-${index}`} 
+                <div
+                  key={`${file.name}-${index}`}
                   draggable
                   onDragStart={() => handleDragStart(index)}
                   onDragEnter={() => handleDragEnter(index)}
@@ -516,11 +522,11 @@ export const FormProjects: FC<FormProjectsProps> = ({ apiBase, initialCourses, i
                     ${dragOverItemIndex === index ? 'border-[var(--color-primary02)] border-dashed scale-105' : 'border-gray-200 border-solid'} 
                     ${draggedItemIndex === index ? 'opacity-40' : 'opacity-100'} group`}
                 >
-                  <Image src={URL.createObjectURL(file)} alt="asset" fill className="object-cover pointer-events-none"  draggable={false} />
-                  
+                  <Image src={URL.createObjectURL(file)} alt="asset" fill className="object-cover pointer-events-none" draggable={false} />
+
                   <IconButton
-                    size="small" 
-                    sx={{ position: 'absolute', top: 8, right: 8, zIndex: 10, width: 24, height: 24, backgroundColor: 'rgba(0,0,0,0.6)', color: 'white', padding: 0, '&:hover': { backgroundColor: 'rgba(0,0,0,0.8)' } }} 
+                    size="small"
+                    sx={{ position: 'absolute', top: 8, right: 8, zIndex: 10, width: 24, height: 24, backgroundColor: 'rgba(0,0,0,0.6)', color: 'white', padding: 0, '&:hover': { backgroundColor: 'rgba(0,0,0,0.8)' } }}
                     onClick={() => removeAsset(index)}
                   >
                     <CloseIcon sx={{ fontSize: 16 }} />
@@ -542,12 +548,12 @@ export const FormProjects: FC<FormProjectsProps> = ({ apiBase, initialCourses, i
 
         <div className="my-10 pt-4">
           <div className="flex items-center justify-between mb-4">
-             <h3 className="font-bold">Tech Stack</h3>
-            <IconButton 
-              onClick={() => appendTechStacks({ value: "" })} 
-              sx={{ color: "var(--color-primary03)"}}
-              >
-                <AddCircleOutlineOutlined sx={{ fontSize: 36 }} />
+            <h3 className="font-bold">Tech Stack</h3>
+            <IconButton
+              onClick={() => appendTechStacks({ value: "" })}
+              sx={{ color: "var(--color-primary03)" }}
+            >
+              <AddCircleOutlineOutlined sx={{ fontSize: 36 }} />
             </IconButton>
           </div>
           <div className="space-y-4">
@@ -573,15 +579,15 @@ export const FormProjects: FC<FormProjectsProps> = ({ apiBase, initialCourses, i
 
         <div className="my-10 pt-4">
           <h3 className="font-bold">คณะผู้จัดทำและอาจารย์ที่ปรึกษา</h3>
-          
+
           <div className="mb-8">
             <div className="flex items-center justify-between mb-4">
               <h3 className="font-bold">คณะผู้จัดทำ</h3>
-              <IconButton 
-                onClick={() => appendStudents({ userID: 0 })} 
+              <IconButton
+                onClick={() => appendStudents({ userID: 0 })}
                 sx={{ color: "var(--color-primary03)" }}
-                >
-                  <AddCircleOutlineOutlined sx={{ fontSize: 36 }} />
+              >
+                <AddCircleOutlineOutlined sx={{ fontSize: 36 }} />
               </IconButton>
             </div>
             <div className="space-y-4">
@@ -630,11 +636,11 @@ export const FormProjects: FC<FormProjectsProps> = ({ apiBase, initialCourses, i
           <div>
             <div className="flex items-center justify-between mb-4">
               <h3 className="font-bold">อาจารย์ที่ปรึกษา</h3>
-              <IconButton 
-                onClick={() => appendAdvisors({ userID: 0 })} 
-                sx={{ color: "var(--color-primary03)"}}
-                >
-                  <AddCircleOutlineOutlined sx={{ fontSize: 36 }}/>
+              <IconButton
+                onClick={() => appendAdvisors({ userID: 0 })}
+                sx={{ color: "var(--color-primary03)" }}
+              >
+                <AddCircleOutlineOutlined sx={{ fontSize: 36 }} />
               </IconButton>
             </div>
             <div className="space-y-4">
