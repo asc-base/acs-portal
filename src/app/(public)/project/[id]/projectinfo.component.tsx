@@ -40,12 +40,12 @@ const ProjectInfoComponent: FC<ProjectInfoProps> = ({ project }) => {
   };
 
   const getVisibleImages = () => {
+    const total = project?.assetsURL?.length || 0;
+    if (total === 0) return ["https://picsum.photos/seed/acs/140/90"];
+    const count = Math.min(3, total);
     const result = [];
-    for (let i = 0; i < 3; i++) {
-      result.push(
-        project?.assetsURL?.[(index + i) % (project?.assetsURL?.length || 1)] ?? 
-        "https://picsum.photos/seed/acs/140/90",
-      );
+    for (let i = 0; i < count; i++) {
+      result.push(project.assetsURL[(index + i) % total]);
     }
     return result;
   };
