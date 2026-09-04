@@ -1,3 +1,9 @@
+export interface UserPrefix {
+    id: number;
+    nameTh: string;
+    nameEn?: string;
+}
+
 export interface IUser {
     id: number;
     email: string;
@@ -7,6 +13,7 @@ export interface IUser {
     lastNameEn: string;
     nickName?: string;
     imageUrl: string;
+    prefix?: UserPrefix | null;
 }
 
 export interface UserRole {
