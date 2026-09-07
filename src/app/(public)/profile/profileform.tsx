@@ -16,7 +16,7 @@ import {
 } from "@/core/schema/student";
 import { CropImageCard } from "@/components/cropimagecard";
 import { useRouter } from "next/navigation";
-import { IStudent } from "@/core/domain/student";
+import { IStudent, IUpdateStudent } from "@/core/domain/student";
 import { AuthRepository } from "@/infra/repositories/auth.repository";
 import { AuthService } from "@/core/service/auth.service";
 import { StudentRepository } from "@/infra/repositories/student.repository";
@@ -116,6 +116,7 @@ const ProfileForm = ({ apiBase }: { apiBase: string }) => {
     );
   };
   const [croppingFile, setCroppingFile] = useState<File | null>(null);
+  const [focalPoint, setFocalPoint] = useState<{ x: number; y: number } | null>(null);
 
   useEffect(() => {
     reset({
@@ -134,6 +135,7 @@ const ProfileForm = ({ apiBase }: { apiBase: string }) => {
     });
     setSkillInput("");
     setSelectedFile(null);
+    setFocalPoint(null);
   }, [student, reset]);
 
   const { nickName, firstNameTh, firstNameEn, lastNameTh, lastNameEn } =
@@ -150,10 +152,12 @@ const ProfileForm = ({ apiBase }: { apiBase: string }) => {
 
   const handleCropComplete = (
     croppedFile: File,
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    focalPoint?: { x: number; y: number },
+    focal?: { x: number; y: number },
   ) => {
     setSelectedFile(croppedFile);
+    if (focal) {
+      setFocalPoint(focal);
+    }
     setCroppingFile(null);
   };
 
@@ -182,6 +186,7 @@ const ProfileForm = ({ apiBase }: { apiBase: string }) => {
     });
     setSkillInput("");
     setSelectedFile(null);
+    setFocalPoint(null);
     setIsEditing(false);
   };
 
@@ -195,8 +200,14 @@ const ProfileForm = ({ apiBase }: { apiBase: string }) => {
         return;
       }
 
+      const payload: IUpdateStudent = {
+        ...data,
+        imageFocalPointX: focalPoint?.x,
+        imageFocalPointY: focalPoint?.y,
+      };
+
       const response = await studentService.updateStudent(
-        data,
+        payload,
         selectedFile,
         classBookID,
         id,
@@ -258,11 +269,10 @@ const ProfileForm = ({ apiBase }: { apiBase: string }) => {
                 )}
                 {isEditing && (
                   <div
-                    className={`flex items-center justify-center ${
-                      selectedFile || student?.user?.imageUrl
+                    className={`flex items-center justify-center ${selectedFile || student?.user?.imageUrl
                         ? "absolute inset-0 z-10 h-full w-full bg-black/40 opacity-0 transition-opacity duration-300 hover:opacity-100"
                         : "relative h-full w-full opacity-100"
-                    } `}
+                      } `}
                   >
                     <div className="border-neutral03 bg-neutral01/70 flex items-center justify-center rounded-lg border px-6 py-3 shadow-sm backdrop-blur-sm">
                       <span className="text-neutral05 text-base font-medium">
@@ -346,9 +356,9 @@ const ProfileForm = ({ apiBase }: { apiBase: string }) => {
                     },
                   },
                   "& .MuiOutlinedInput-root.Mui-focused .MuiInputAdornment-root .MuiSvgIcon-root":
-                    {
-                      color: "primary.main",
-                    },
+                  {
+                    color: "primary.main",
+                  },
                 }}
                 slotProps={{
                   input: {
@@ -380,9 +390,9 @@ const ProfileForm = ({ apiBase }: { apiBase: string }) => {
                     },
                   },
                   "& .MuiOutlinedInput-root.Mui-focused .MuiInputAdornment-root .MuiSvgIcon-root":
-                    {
-                      color: "primary.main",
-                    },
+                  {
+                    color: "primary.main",
+                  },
                 }}
                 slotProps={{
                   input: {
@@ -417,9 +427,9 @@ const ProfileForm = ({ apiBase }: { apiBase: string }) => {
                     },
                   },
                   "& .MuiOutlinedInput-root.Mui-focused .MuiInputAdornment-root .MuiSvgIcon-root":
-                    {
-                      color: "primary.main",
-                    },
+                  {
+                    color: "primary.main",
+                  },
                 }}
                 slotProps={{
                   input: {
@@ -451,9 +461,9 @@ const ProfileForm = ({ apiBase }: { apiBase: string }) => {
                     },
                   },
                   "& .MuiOutlinedInput-root.Mui-focused .MuiInputAdornment-root .MuiSvgIcon-root":
-                    {
-                      color: "primary.main",
-                    },
+                  {
+                    color: "primary.main",
+                  },
                 }}
                 slotProps={{
                   input: {
@@ -469,8 +479,8 @@ const ProfileForm = ({ apiBase }: { apiBase: string }) => {
           </div>
         </div>
 
-        
-       <div className="group text-neutral04 mt-6 flex flex-col">
+
+        <div className="group text-neutral04 mt-6 flex flex-col">
           <h4 className="group-focus-within:text-primary03">Skills</h4>
           <div className="flex flex-col gap-2 md:flex-row md:items-start">
             <div className="grow">
@@ -501,12 +511,12 @@ const ProfileForm = ({ apiBase }: { apiBase: string }) => {
               disabled={!isEditing || !skillInput.trim()}
               onClick={handleAddSkill}
               sx={{
-                backgroundColor: "var(--color-primary02)", 
+                backgroundColor: "var(--color-primary02)",
                 color: "var(--color-neutral01)",
                 height: "40px",
                 minWidth: "100px",
                 alignSelf: "flex-start",
-                "&:hover": { backgroundColor: "var(--color-primary01)" }, 
+                "&:hover": { backgroundColor: "var(--color-primary01)" },
               }}
             >
               เพิ่ม
@@ -521,10 +531,10 @@ const ProfileForm = ({ apiBase }: { apiBase: string }) => {
                   label={skill}
                   onDelete={isEditing ? () => handleDeleteSkill(skill) : undefined}
                   sx={{
-                    backgroundColor: "var(--color-neutral02)", 
+                    backgroundColor: "var(--color-neutral02)",
                     borderRadius: "16px",
-                    fontSize: "var(--text-h5)", 
-                    color: "var(--color-neutral05)", 
+                    fontSize: "var(--text-h5)",
+                    color: "var(--color-neutral05)",
                     "& .MuiChip-deleteIcon": {
                       color: "var(--color-neutral04)",
                       "&:hover": { color: "var(--color-neutral05)" },
