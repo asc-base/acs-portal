@@ -10,6 +10,7 @@ export interface MasterData {
   academicPositions: Position[];
   tags: Tag[];
   tagsGroups: TagsGroups[];
+  prefixes: Position[];
 }
 
 export interface Position {
