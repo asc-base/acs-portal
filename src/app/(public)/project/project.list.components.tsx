@@ -7,6 +7,7 @@ import ImportExportIcon from "@mui/icons-material/ImportExport";
 import FilterListRoundedIcon from "@mui/icons-material/FilterListRounded";
 import type { IProject } from "@/core/domain/project";
 import { ProjectCard } from "@/components/ProjectCard";
+import EmptyState from "@/components/emptyState";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import TuneIcon from "@mui/icons-material/Tune";
@@ -57,7 +58,7 @@ const ProjectPage: FC<ProjectPageProps> = ({
       <div className="mb-4 flex items-center justify-between">
         <Typography
           component="p"
-          className="!text-primary01 !font-medium"
+          className="!text-accent04 !font-medium"
           sx={{ fontSize: { xs: 13, sm: 14, md: 16, lg: 18 }, lineHeight: 1.2 }}
         >
           จำนวน {totalRecords} ชิ้นงาน
@@ -114,18 +115,27 @@ const ProjectPage: FC<ProjectPageProps> = ({
       </div>
 
       {/* grid */}
-      <div className="grid gap-6 md:grid-cols-2 md:gap-8 xl:grid-cols-3">
-        {projects.map((project) => (
-          <Link
-            key={project.id}
-            href={`/project/${project.id}`}
-            aria-label={project.title}
-            className="group border-neutral03 focus:ring-primary01/40 block w-full rounded-2xl border bg-white shadow-[0_0_0_1px_rgba(0,0,0,0.03),0_4px_14px_rgba(0,0,0,0.06)] transition hover:shadow-[0_0_0_1px_rgba(0,0,0,0.05),0_6px_18px_rgba(0,0,0,0.10)] focus:ring-2 focus:outline-none"
-          >
-            <ProjectCard key={project.id} data={project} />
-          </Link>
-        ))}
-      </div>
+      {projects.length === 0 ? (
+        <div className="flex w-full flex-col items-center justify-center py-16">
+          <EmptyState
+            title="ไม่พบข้อมูลผลงานในขณะนี้"
+            description="เมื่อมีข้อมูลผลงาน ข้อมูลจะปรากฏที่นี่"
+          />
+        </div>
+      ) : (
+        <div className="grid gap-6 md:grid-cols-2 md:gap-8 xl:grid-cols-3">
+          {projects.map((project) => (
+            <Link
+              key={project.id}
+              href={`/project/${project.id}`}
+              aria-label={project.title}
+              className="group border-neutral03 focus:ring-primary01/40 block w-full rounded-2xl border bg-white shadow-sm transition hover:shadow-md focus:ring-2 focus:outline-none"
+            >
+              <ProjectCard key={project.id} data={project} />
+            </Link>
+          ))}
+        </div>
+      )}
     </main>
   );
 };

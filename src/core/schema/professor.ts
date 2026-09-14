@@ -12,6 +12,7 @@ export const CreateProfessorSchema = z.object({
   expertFields: z.array(z.object({value: z.string().trim().min(1, "กรุณากรอกข้อมูล"),}),),
   ...CommonUserSchema.shape,
   ...CommonProfessorSchema.shape,
+  ...CommonFocalPointSchema.shape,
 });
 
 
@@ -21,6 +22,7 @@ export const UpdateProfessorSchema = z.object({
   expertFields: z.array(z.object({value: z.string().trim().min(1, "กรุณากรอกข้อมูล"),}),),
   ...CommonUserSchema.shape,
   ...CommonProfessorSchema.shape,
+  ...CommonFocalPointSchema.shape,
 });
 
 export const CreateProfessorPayloadSchema = z.object({

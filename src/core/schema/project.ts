@@ -20,6 +20,8 @@ export const updateProjectSchema = z.object({
       userID: z.number().min(1, "กรุณาเลือกอาจารย์"),
     })
   ).min(1, "กรุณาเพิ่มอาจารย์ที่ปรึกษาอย่างน้อย 1 คน"),
+  thumbnailFocalPointX: z.number().optional(),
+  thumbnailFocalPointY: z.number().optional(),
 });
 
 export type ProjectFormValues = z.infer<typeof updateProjectSchema>;

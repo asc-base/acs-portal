@@ -5,7 +5,7 @@ import { styled } from "@mui/material/styles";
 import AddIcon from "@mui/icons-material/Add";
 import Image from "next/image";
 import { useForm, useFieldArray } from "react-hook-form";
-import { IProfessor, IUpdateProfessor } from "@/core/domain/professor";
+import { IProfessor } from "@/core/domain/professor";
 import { EducationLevel, Position } from "@/core/domain/master-data";
 import { Delete } from "@mui/icons-material";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -22,7 +22,11 @@ import {
   ConfirmModalProps,
 } from "@/components/modal/confirmModal";
 import { useRouter } from "next/navigation";
-import { UpdateProfessorInputs, UpdateProfessorSchema } from "@/core/schema/professor";
+import {
+  UpdateProfessorInputs,
+  UpdateProfessorSchema,
+  UpdateProfessorPayload,
+} from "@/core/schema/professor";
 
 const VisuallyHiddenInput = styled("input")({
   clip: "rect(0 0 0 0)",
@@ -65,7 +69,7 @@ const ProfessorFormComponent = ({
     return new ProfessorService(professorRepository);
   }, [apiBase]);
 
-  const { control, handleSubmit, reset, formState: { isDirty } } = useForm<UpdateProfessorInputs>({
+  const { control, handleSubmit, reset, setValue, formState: { isDirty } } = useForm<UpdateProfessorInputs>({
     resolver: zodResolver(UpdateProfessorSchema),
     defaultValues: {
       firstNameTh: professor.user.firstNameTh || "",
@@ -122,9 +126,13 @@ const ProfessorFormComponent = ({
     }
   };
 
-  const handleCropComplete = (croppedFile: File) => {
+  const handleCropComplete = (croppedFile: File, focalPoint?: { x: number; y: number },) => {
     setSelectedFile(croppedFile);
     setPreviewUrl(URL.createObjectURL(croppedFile));
+    if (focalPoint) {
+      setValue("imageFocalPointX", focalPoint.x, { shouldDirty: true });
+      setValue("imageFocalPointY", focalPoint.y, { shouldDirty: true });
+    }
     setIsCroping(false);
   };
 
@@ -158,7 +166,7 @@ const ProfessorFormComponent = ({
   const onSubmit = async (data: UpdateProfessorInputs) => {
     setIsError(false);
     try {
-      const updateData: IUpdateProfessor = {
+      const updateData: UpdateProfessorPayload = {
         id: professor.id,
         academicPositionID: data.academicPositionID,
         profRoom: data.profRoom,
@@ -170,6 +178,8 @@ const ProfessorFormComponent = ({
         email: data.email,
         expertFields: data.expertFields.map((e) => e.value).join("/"),
         educations: data.educations.map((e) => e.value).join("/"),
+        imageFocalPointX: data.imageFocalPointX,
+        imageFocalPointY: data.imageFocalPointY,
       };
 
       const res = await professorService.updateProfessor(
