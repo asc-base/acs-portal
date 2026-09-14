@@ -40,39 +40,46 @@ export const NewsCard: FC<NewsCardProps> = (props) => {
     >
       <CardMedia
         className={`w-full shrink-0 object-cover ${
-          hasActions ? "h-[180px] lg:h-[240px]" : "h-[221px]"
+          hasActions ? "h-[180px] lg:h-[240px]" : "h-[221px] md:h-[196px] lg:h-[221px]"
         }`}
         component="img"
         image={news.thumbnailURL}
         alt={news.title}
       />
-      <CardContent className="px-4 pt-3 lg:px-6 lg:pt-4" sx={{ pb: 0.5 }}>
+      <CardContent className="min-h-0 flex-1 overflow-hidden px-4 pt-1 lg:px-[14px] lg:pt-2" sx={{ pb: 2 }}>
         <Typography
+          component="p"
           variant="h2"
           fontWeight="bold"
-          className="text-primary01 line-clamp-1"
+          className="text-primary01 truncate !text-h2"
+          sx={{
+            lineHeight: 1.5,
+            mt: "-4px",
+          }}
         >
           {news.title}
         </Typography>
-        <Typography variant="h4" className="text-primary01" sx={{ mt: "1" }}>
+        <Typography variant="h4" className="text-primary01 !text-h4" sx={{ mt: "-2px" }}>
           {date}
         </Typography>
       </CardContent>
       
-      <CardActions className="p-4 pt-0">
-        {onEdit && (
-          <Button size="small" fullWidth onClick={onEdit}>
-            <DeleteOutlineOutlinedIcon fontSize="small" />
-            ดูข้อมูล
-          </Button>
-        )}
-        {onDelete && (
-          <Button size="small" fullWidth onClick={onDelete}>
-            <DeleteOutlineOutlinedIcon fontSize="small" />
-            ลบ
-          </Button>
-        )}
-      </CardActions>
+      {hasActions && (
+        <CardActions className="p-4 pt-0">
+          {onEdit && (
+            <Button size="small" fullWidth onClick={onEdit}>
+              <DeleteOutlineOutlinedIcon fontSize="small" />
+              ดูข้อมูล
+            </Button>
+          )}
+          {onDelete && (
+            <Button size="small" fullWidth onClick={onDelete}>
+              <DeleteOutlineOutlinedIcon fontSize="small" />
+              ลบ
+            </Button>
+          )}
+        </CardActions>
+      )}
     </Card>
   );
 };
