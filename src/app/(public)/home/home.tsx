@@ -20,6 +20,19 @@ interface HomePageProps {
   // apibase: string;
 }
 
+const getCarouselStep = (length: number) => {
+  return length >= 4 ? 3 : 1;
+};
+
+const moveCarouselIndex = (
+  currentIndex: number,
+  length: number,
+  direction: 1 | -1,
+) => {
+  const step = getCarouselStep(length);
+  return (currentIndex + direction * step + length) % length;
+};
+
 const HomePage = ({
   initNewsActivity,
   initNewsComplete,
@@ -35,16 +48,14 @@ const HomePage = ({
 
   const handleNextNewsActivity = () => {
     if (initNewsActivity.length === 0) return;
-    setNewsActivityActive(
-      (prevItem) => (prevItem + 1) % initNewsActivity.length,
+    setNewsActivityActive((prevItem) =>
+      moveCarouselIndex(prevItem, initNewsActivity.length, 1),
     );
   };
-
   const handlePrevNewsActivity = () => {
     if (initNewsActivity.length === 0) return;
-    setNewsActivityActive(
-      (prevItem) =>
-        (prevItem - 1 + initNewsActivity.length) % initNewsActivity.length,
+    setNewsActivityActive((prevItem) =>
+      moveCarouselIndex(prevItem, initNewsActivity.length, -1),
     );
   };
 
@@ -54,16 +65,14 @@ const HomePage = ({
 
   const handleNextNewsComplete = () => {
     if (initNewsComplete.length === 0) return;
-    setNewsCompleteActive(
-      (prevItem) => (prevItem + 1) % initNewsComplete.length,
+    setNewsCompleteActive((prevItem) =>
+      moveCarouselIndex(prevItem, initNewsComplete.length, 1),
     );
   };
-
   const handlePrevNewsComplete = () => {
     if (initNewsComplete.length === 0) return;
-    setNewsCompleteActive(
-      (prevItem) =>
-        (prevItem - 1 + initNewsComplete.length) % initNewsComplete.length,
+    setNewsCompleteActive((prevItem) =>
+      moveCarouselIndex(prevItem, initNewsComplete.length, -1),
     );
   };
 
@@ -74,14 +83,13 @@ const HomePage = ({
   const handleNextNewsActivityStudent = () => {
     if (initNewsActivityStudent.length === 0) return;
     setNewsActivityStudentActive((prevItem) =>
-      prevItem >= initNewsActivityStudent.length - 1 ? 0 : prevItem + 1,
+      moveCarouselIndex(prevItem, initNewsActivityStudent.length, 1),
     );
   };
-
   const handlePrevNewsActivityStudent = () => {
     if (initNewsActivityStudent.length === 0) return;
     setNewsActivityStudentActive((prevItem) =>
-      prevItem === 0 ? initNewsActivityStudent.length - 1 : prevItem - 1,
+      moveCarouselIndex(prevItem, initNewsActivityStudent.length, -1),
     );
   };
 
