@@ -318,7 +318,7 @@ const ProfileForm = ({ apiBase }: { apiBase: string }) => {
               <div className="text-center">:</div>
               <div className="text-primary01 font-bold">
                 {student?.user
-                  ? `${firstNameTh} ${lastNameTh}`.trim()
+                  ? `${student.user.prefix?.nameTh || ""} ${firstNameTh} ${lastNameTh}`.trim()
                   : "สมชาย ใจดี"}
               </div>
 
@@ -327,7 +327,7 @@ const ProfileForm = ({ apiBase }: { apiBase: string }) => {
               <div className="text-center">:</div>
               <div className="text-primary01 font-bold">
                 {student?.user
-                  ? `${firstNameEn} ${lastNameEn}`.trim()
+                  ? `${student.user.prefix?.shortNameEn || ""} ${firstNameEn} ${lastNameEn}`.trim()
                   : "Somchai Jaidee"}
               </div>
             </div>
