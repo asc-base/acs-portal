@@ -22,26 +22,26 @@ export const ProfessorCard: FC<IProfessor> = (props) => {
           className="!text-primary01 text-left !font-bold"
         >
           <span className="lg:hidden">
-            {`${props.academicPosition?.shortNameTh}${props.user.firstNameTh} ${props.user.lastNameTh}`.length >=
+            {`${props.prefix?.shortNameTh}${props.user.firstNameTh} ${props.user.lastNameTh}`.length >=
               16 ? (
               <>
-                {props.academicPosition?.shortNameTh}
+                {props.prefix?.shortNameTh}
                 {props.user.firstNameTh}
                 <br />
                 {props.user.lastNameTh}
               </>
             ) : (
-              `${props.academicPosition?.shortNameTh}${props.user.firstNameTh} ${props.user.lastNameTh}`
+              `${props.prefix?.shortNameTh}${props.user.firstNameTh} ${props.user.lastNameTh}`
             )}
           </span>
           <span className="hidden lg:inline">
-            {props.academicPosition?.shortNameTh}
+            {props.prefix?.shortNameTh}
             {props.user.firstNameTh} {props.user.lastNameTh}
           </span>
         </Typography>
 
         <Typography component="h4" className="!text-neutral05 text-left">
-          {props.academicPosition?.shortNameEn} {props.user.firstNameEn} {props.user.lastNameEn}
+          {props.prefix?.shortNameEn} {props.user.firstNameEn} {props.user.lastNameEn}
         </Typography>
       </CardContent>
     </div>
