@@ -125,7 +125,7 @@ export const NewsCarouselComponent = ({
           </Button>
         </div>
         <div className="w-full min-w-0 [overflow-x:clip] px-3 lg:max-w-6xl">
-          <div className="my-3 flex justify-center gap-4 py-5 px-3 transition-all duration-300 ease-in-out md:justify-start">
+          <div className="my-3 flex justify-center gap-x-[15px] px-3 py-5 transition-all duration-300 ease-in-out md:justify-start">
             {childrenArray.map((child, i) => (
               <div key={i} className={getCardWrapperClass(i)}>
                 {child}
