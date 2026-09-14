@@ -2,6 +2,8 @@ export interface UserPrefix {
     id: number;
     nameTh: string;
     nameEn?: string;
+    shortNameTh?: string;
+    shortNameEn?: string;
 }
 
 export interface IUser {
