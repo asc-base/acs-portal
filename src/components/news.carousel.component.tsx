@@ -3,6 +3,7 @@ import Link from "next/link";
 import { Button } from "@mui/material";
 import { INews } from "@/core/domain/news";
 import EmptyState from "./emptyState";
+import { newsCardSizeClass } from "@/components/newscard";
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 
@@ -49,16 +50,16 @@ const EmptyStateMap: Record<
   },
 };
 
+const cardWidthClass = newsCardSizeClass;
 const getCardWrapperClass = (index: number) => {
   switch (index) {
     case 0:
-      return "relative shrink-0"; 
+      return `relative ${cardWidthClass} shrink-0`;
     case 1:
-      return "relative hidden shrink-0 md:block"; 
     case 2:
-      return "relative hidden shrink-0 md:block lg:w-auto";
+      return `relative hidden ${cardWidthClass} shrink-0 md:block`;
     case 3:
-      return "relative hidden shrink-0 lg:block lg:w-auto";
+      return `relative hidden ${cardWidthClass} shrink-0 lg:block`;
     default:
       return "hidden";
   }
