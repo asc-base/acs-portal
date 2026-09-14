@@ -7,9 +7,8 @@ export const CommonProfessorSchema = z.object({
 });
 
 export const CreateProfessorSchema = z.object({
-  academicPositionID: z.number().nullable().refine((v) => v !== null, {message: "กรุณากรอกตำแหน่ง",}),
-  educations: z.array(z.object({value: z.string().trim().min(1, "กรุณากรอกข้อมูล"),}),),
-  expertFields: z.array(z.object({value: z.string().trim().min(1, "กรุณากรอกข้อมูล"),}),),
+  educations: z.array(z.object({ value: z.string().trim().min(1, "กรุณากรอกข้อมูล"), }),),
+  expertFields: z.array(z.object({ value: z.string().trim().min(1, "กรุณากรอกข้อมูล"), }),),
   ...CommonUserSchema.shape,
   ...CommonProfessorSchema.shape,
   ...CommonFocalPointSchema.shape,
@@ -17,16 +16,15 @@ export const CreateProfessorSchema = z.object({
 
 
 export const UpdateProfessorSchema = z.object({
-  academicPositionID: z.number().min(1, "กรุณากรอกตำแหน่ง"),
-  educations: z.array(z.object({value: z.string().trim().min(1, "กรุณากรอกข้อมูล"),}),),
-  expertFields: z.array(z.object({value: z.string().trim().min(1, "กรุณากรอกข้อมูล"),}),),
+  educations: z.array(z.object({ value: z.string().trim().min(1, "กรุณากรอกข้อมูล"), }),),
+  expertFields: z.array(z.object({ value: z.string().trim().min(1, "กรุณากรอกข้อมูล"), }),),
   ...CommonUserSchema.shape,
   ...CommonProfessorSchema.shape,
   ...CommonFocalPointSchema.shape,
 });
 
 export const CreateProfessorPayloadSchema = z.object({
-  academicPositionID: z.number(),
+  prefixID: z.number(),
   educations: z.string().optional(),
   email: z.string(),
   expertFields: z.string().optional(),
@@ -42,7 +40,7 @@ export const CreateProfessorPayloadSchema = z.object({
 
 export const UpdateProfessorPayloadSchema = z.object({
   id: z.number(),
-  academicPositionID: z.number(),
+  prefixID: z.number(),
   profRoom: z.string(),
   phone: z.string(),
   firstNameTh: z.string(),

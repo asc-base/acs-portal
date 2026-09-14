@@ -42,14 +42,14 @@ const VisuallyHiddenInput = styled("input")({
 
 interface ProfessorFormComponentProps {
   professor: IProfessor;
-  academicPositions: Position[];
+  prefixes: Position[];
   educationLevel: EducationLevel[];
   apiBase: string;
 };
 
 const ProfessorFormComponent = ({
   professor,
-  academicPositions,
+  prefixes,
   apiBase,
 }: ProfessorFormComponentProps) => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -78,7 +78,7 @@ const ProfessorFormComponent = ({
       lastNameEn: professor.user.lastNameEn || "",
       phone: professor.phone || "",
       email: professor.user.email || "",
-      academicPositionID: professor.academicPosition?.id || 1,
+      prefixID: professor.prefix?.id || 1,
       profRoom: professor.profRoom || "",
       educations: [],
       expertFields: [],
@@ -93,7 +93,7 @@ const ProfessorFormComponent = ({
       lastNameEn: professor.user.lastNameEn || "",
       phone: professor.phone || "",
       email: professor.user.email || "",
-      academicPositionID: professor.academicPosition?.id || 1,
+      prefixID: professor.prefix?.id || 1,
       profRoom: professor.profRoom || "",
       educations: professor.educations?.map((e) => ({ value: e })) || [],
       expertFields: professor.expertFields?.map((e) => ({ value: e })) || [],
@@ -168,7 +168,7 @@ const ProfessorFormComponent = ({
     try {
       const updateData: UpdateProfessorPayload = {
         id: professor.id,
-        academicPositionID: data.academicPositionID,
+        prefixID: data.prefixID!,
         profRoom: data.profRoom,
         phone: data.phone,
         firstNameTh: data.firstNameTh,
@@ -271,7 +271,7 @@ const ProfessorFormComponent = ({
               <div className="flex-2">
                 <RHFSelect
                   control={control}
-                  name="academicPositionID"
+                  name="prefixID"
                   label="ตำแหน่ง (ภาษาไทย)"
                   variant="outlined"
                   fullWidth
@@ -287,13 +287,13 @@ const ProfessorFormComponent = ({
                         </span>
                       );
                     }
-                    const selected = academicPositions.find(
+                    const selected = prefixes.find(
                       (item) => item.id === value,
                     );
                     return selected?.nameTh;
                   }}
                 >
-                  {academicPositions.map((position) => (
+                  {prefixes.map((position) => (
                     <MenuItem key={position.id} value={position.id}>
                       {position.nameTh}
                     </MenuItem>
@@ -332,7 +332,7 @@ const ProfessorFormComponent = ({
               <div className="flex-2">
                 <RHFSelect
                   control={control}
-                  name="academicPositionID"
+                  name="prefixID"
                   label="ตำแหน่ง (ภาษาอังกฤษ)"
                   variant="outlined"
                   fullWidth
@@ -348,13 +348,13 @@ const ProfessorFormComponent = ({
                         </span>
                       );
                     }
-                    const selected = academicPositions.find(
+                    const selected = prefixes.find(
                       (item) => item.id === value,
                     );
                     return selected?.nameEn;
                   }}
                 >
-                  {academicPositions.map((position) => (
+                  {prefixes.map((position) => (
                     <MenuItem key={position.id} value={position.id}>
                       {position.nameEn}
                     </MenuItem>
