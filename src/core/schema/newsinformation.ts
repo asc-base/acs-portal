@@ -7,6 +7,8 @@ export const UpsertNewsInformationSchema = z.object({
   }),
   highlight: z.union([z.string().trim().min(1), z.instanceof(File)]).optional(),
   tagID: z.number().min(1, "กรุณาเลือกหมวดหมู่ข่าว"),
+  thumbnailFocalPointX: z.number().optional(),
+  thumbnailFocalPointY: z.number().optional(),
 });
 
 export type UpsertNewsInformationInputs = z.infer<typeof UpsertNewsInformationSchema>;
