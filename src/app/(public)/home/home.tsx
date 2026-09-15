@@ -4,12 +4,33 @@ import { INews, INewsInformation } from "@/core/domain/news";
 import heroImage from "../../../../public/hero.jpg";
 import { NewsCard } from "@/components/newscard";
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { NewsCarouselComponent } from "@/components/news.carousel.component";
 import { ActivityCard } from "@/components/activitycard";
 import { Carousel } from "@/components/carousel";
 // import { useAuthStore } from "@/store/auth";
 import NewsHighlightCarousel from "@/components/newshighlightcarousel";
+
+const useCarouselStep = () => {
+  const [step, setStep] = useState(1);
+
+  useEffect(() => {
+    const calculateStep = () => {
+      const width = window.innerWidth;
+      if (width >= 1280) return 3;
+      if (width >= 768) return 2;
+      return 1;
+    };
+
+    setStep(calculateStep());
+
+    const handleResize = () => setStep(calculateStep());
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  return step;
+};
 
 interface HomePageProps {
   initNewsActivity: INews[];
@@ -20,17 +41,14 @@ interface HomePageProps {
   // apibase: string;
 }
 
-const getCarouselStep = (length: number) => {
-  return length >= 4 ? 3 : 1;
-};
-
 const moveCarouselIndex = (
   currentIndex: number,
   length: number,
   direction: 1 | -1,
+  step: number,
 ) => {
-  const step = getCarouselStep(length);
-  return (currentIndex + direction * step + length) % length;
+  const safeStep = Math.min(step, length);
+  return (currentIndex + direction * safeStep + length) % length;
 };
 
 const HomePage = ({
@@ -40,6 +58,7 @@ const HomePage = ({
   initAnnoucement,
   initNewsHighlight,
 }: HomePageProps) => {
+  const carouselStep = useCarouselStep();
   const [newsActivityActive, setNewsActivityActive] = useState(0);
   const [newsCompleteActive, setNewsCompleteActive] = useState(0);
   const [newsActivityStudentActive, setNewsActivityStudentActive] = useState(0);
@@ -47,15 +66,15 @@ const HomePage = ({
   // const user = useAuthStore((state) => state.user);
 
   const handleNextNewsActivity = () => {
-    if (initNewsActivity.length === 0) return;
-    setNewsActivityActive((prevItem) =>
-      moveCarouselIndex(prevItem, initNewsActivity.length, 1),
-    );
-  };
+  if (initNewsActivity.length === 0) return;
+  setNewsActivityActive((prevItem) =>
+    moveCarouselIndex(prevItem, initNewsActivity.length, 1, carouselStep),
+  );
+};
   const handlePrevNewsActivity = () => {
     if (initNewsActivity.length === 0) return;
     setNewsActivityActive((prevItem) =>
-      moveCarouselIndex(prevItem, initNewsActivity.length, -1),
+      moveCarouselIndex(prevItem, initNewsActivity.length, -1, carouselStep),
     );
   };
 
@@ -66,13 +85,13 @@ const HomePage = ({
   const handleNextNewsComplete = () => {
     if (initNewsComplete.length === 0) return;
     setNewsCompleteActive((prevItem) =>
-      moveCarouselIndex(prevItem, initNewsComplete.length, 1),
+      moveCarouselIndex(prevItem, initNewsComplete.length, 1, carouselStep),
     );
   };
   const handlePrevNewsComplete = () => {
     if (initNewsComplete.length === 0) return;
     setNewsCompleteActive((prevItem) =>
-      moveCarouselIndex(prevItem, initNewsComplete.length, -1),
+      moveCarouselIndex(prevItem, initNewsComplete.length, -1, carouselStep),
     );
   };
 
@@ -83,13 +102,13 @@ const HomePage = ({
   const handleNextNewsActivityStudent = () => {
     if (initNewsActivityStudent.length === 0) return;
     setNewsActivityStudentActive((prevItem) =>
-      moveCarouselIndex(prevItem, initNewsActivityStudent.length, 1),
+      moveCarouselIndex(prevItem, initNewsActivityStudent.length, 1, carouselStep),
     );
   };
   const handlePrevNewsActivityStudent = () => {
     if (initNewsActivityStudent.length === 0) return;
     setNewsActivityStudentActive((prevItem) =>
-      moveCarouselIndex(prevItem, initNewsActivityStudent.length, -1),
+      moveCarouselIndex(prevItem, initNewsActivityStudent.length, -1, carouselStep),
     );
   };
 
