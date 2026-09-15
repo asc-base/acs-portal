@@ -104,6 +104,12 @@ export const NewsCarouselComponent = ({
       </div>
     );
   }
+
+  const showNavigation = news.length >= 3;
+  const cardAlignmentClass = showNavigation
+  ? "justify-center md:justify-start"
+  : "justify-center md:justify-start";
+
   return (
     <div>
       <div className="flex items-center justify-between">
@@ -119,13 +125,15 @@ export const NewsCarouselComponent = ({
         </Link>
       </div>
       <div className="flex items-center justify-between">
-        <div className="hidden items-center justify-between sm:flex">
-          <Button onClick={handlePrevNews}>
-            <ChevronLeftIcon fontSize="large" />
-          </Button>
-        </div>
+        {showNavigation && (
+          <div className="hidden items-center justify-between sm:flex">
+            <Button onClick={handlePrevNews}>
+              <ChevronLeftIcon fontSize="large" />
+            </Button>
+          </div>
+        )}
         <div className="w-full min-w-0 [overflow-x:clip] px-3 lg:max-w-6xl">
-          <div className="my-3 flex justify-center gap-x-[15px] px-3 py-5 transition-all duration-300 ease-in-out md:justify-start">
+          <div className={`my-3 flex ${cardAlignmentClass} gap-x-[15px] px-3 py-5 transition-all duration-300 ease-in-out`}>
             {childrenArray.map((child, i) => (
               <div key={i} className={getCardWrapperClass(i)}>
                 {child}
@@ -142,11 +150,13 @@ export const NewsCarouselComponent = ({
             ))}
           </div>
         </div>
-        <div className="hidden items-center justify-between sm:flex">
-          <Button onClick={handleNextNews}>
-            <ChevronRightIcon fontSize="large" />
-          </Button>
-        </div>
+        {showNavigation && (
+          <div className="hidden items-center justify-between sm:flex">
+            <Button onClick={handleNextNews}>
+              <ChevronRightIcon fontSize="large" />
+            </Button>
+          </div>
+        )}
       </div>
     </div>
   );
