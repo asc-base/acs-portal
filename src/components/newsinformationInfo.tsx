@@ -104,7 +104,10 @@ export const NewsInformationInfo = ({
 
   const onSubmit = async (data: UpsertNewsInformationInputs) => {
     try {
-      const response = await newsService.upsertNewsInformation(data);
+      const payload = type === "newshighlight"
+        ? { ...data, thumbnailFocalPointX: 0, thumbnailFocalPointY: 0 }
+        : data;
+      const response = await newsService.upsertNewsInformation(payload);
 
       if (response) {
         setConfirmModal({

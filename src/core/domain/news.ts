@@ -54,6 +54,8 @@ export interface INewsInformation {
   thumbnailURL: string;
   highlightURL?: string;
   news: INews;
+  thumbnailFocalPointX?: number;
+  thumbnailFocalPointY?: number;
 }
 
 export interface NewsInformationPageProps {
