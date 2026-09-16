@@ -38,20 +38,18 @@ const ProfessorsInfoComponent = ({ professorsInfo }: ProfessorsInfoProps) => {
                             {professorsInfo.user.firstNameEn} {professorsInfo.user.lastNameEn}
                         </h2>
                     </div>
-                    <div className="flex flex-col gap-2">
-                        <h3 className="font-semibold text-primary01 leading-none">
-                            สาขาวิชาที่เชี่ยวชาญ
-                        </h3>
-                        {professorsInfo.expertFields?.length ? (
+                    {professorsInfo.expertFields?.length ? (
+                        <div className="flex flex-col gap-2">
+                            <h3 className="font-semibold text-primary01 leading-none">
+                                สาขาวิชาที่เชี่ยวชาญ
+                            </h3>
                             <ul className="list-disc pl-12 text-h4">
                                 {professorsInfo.expertFields.map((exp) => (
                                     <li key={exp}>{exp}</li>
                                 ))}
                             </ul>
-                        ) : (
-                            <p>-</p>
-                        )}
-                    </div>
+                        </div>
+                    ) : null}
 
                     <div className="flex flex-col gap-2">
                         <h3 className="font-semibold text-primary01 leading-none">
