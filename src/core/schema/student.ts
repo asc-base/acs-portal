@@ -11,6 +11,7 @@ export const CommonStudentSchema = z.object({
 });
 
 export const CreateStudentSchema = z.object({
+    prefixID: z.number().nullable().refine((v) => v !== null, { message: "กรุณาเลือกคำนำหน้าชื่อ" }),
     ...CommonUserSchema.shape,
     ...CommonStudentSchema.shape,
     // otherProjects: z
@@ -23,6 +24,7 @@ export const CreateStudentSchema = z.object({
 });
 
 export const UpdateStudentSchema = z.object({
+    prefixID: z.number().nullable().refine((v) => v !== null, { message: "กรุณาเลือกคำนำหน้าชื่อ" }),
     ...CommonUserSchema.shape,
     ...CommonStudentSchema.shape,
     // otherProjects: z
