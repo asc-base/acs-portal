@@ -60,7 +60,9 @@ const ProfessorsInfoComponent = ({ professorsInfo }: ProfessorsInfoProps) => {
                             </h3>
                             <ul className="list-disc pl-12 text-h4">
                                 {professorsInfo.educations.map((edu) => (
-                                    <li key={edu}>{edu}</li>
+                                    <li key={edu} className="break-words whitespace-normal">
+                                        {edu}
+                                    </li>
                                 ))}
                             </ul>
                         </div>
