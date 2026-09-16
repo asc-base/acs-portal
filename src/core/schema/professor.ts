@@ -7,6 +7,7 @@ export const CommonProfessorSchema = z.object({
 });
 
 export const CreateProfessorSchema = z.object({
+  prefixID: z.number().nullable().refine((v) => v !== null, { message: "กรุณาเลือกคำนำหน้าชื่อ" }),
   educations: z.array(z.object({ value: z.string().trim().min(1, "กรุณากรอกข้อมูล"), }),),
   expertFields: z.array(z.object({ value: z.string().trim().min(1, "กรุณากรอกข้อมูล"), }),),
   ...CommonUserSchema.shape,
@@ -16,6 +17,7 @@ export const CreateProfessorSchema = z.object({
 
 
 export const UpdateProfessorSchema = z.object({
+  prefixID: z.number().nullable().refine((v) => v !== null, { message: "กรุณาเลือกคำนำหน้าชื่อ" }),
   educations: z.array(z.object({ value: z.string().trim().min(1, "กรุณากรอกข้อมูล"), }),),
   expertFields: z.array(z.object({ value: z.string().trim().min(1, "กรุณากรอกข้อมูล"), }),),
   ...CommonUserSchema.shape,
