@@ -51,20 +51,18 @@ const ProfessorsInfoComponent = ({ professorsInfo }: ProfessorsInfoProps) => {
                         </div>
                     ) : null}
 
-                    <div className="flex flex-col gap-2">
-                        <h3 className="font-semibold text-primary01 leading-none">
-                            ประวัติการศึกษา
-                        </h3>
-                        {professorsInfo.educations?.length ? (
+                    {professorsInfo.educations?.length ? (
+                        <div className="flex flex-col gap-2">
+                            <h3 className="font-semibold text-primary01 leading-none">
+                                ประวัติการศึกษา
+                            </h3>
                             <ul className="list-disc pl-12 text-h4">
                                 {professorsInfo.educations.map((edu) => (
                                     <li key={edu}>{edu}</li>
                                 ))}
                             </ul>
-                        ) : (
-                            <p>-</p>
-                        )}
-                    </div>
+                        </div>
+                    ) : null}
                 </div>
             </div>
         </div>
