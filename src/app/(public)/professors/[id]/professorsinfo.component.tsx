@@ -45,7 +45,9 @@ const ProfessorsInfoComponent = ({ professorsInfo }: ProfessorsInfoProps) => {
                             </h3>
                             <ul className="list-disc pl-12 text-h4">
                                 {professorsInfo.expertFields.map((exp) => (
-                                    <li key={exp}>{exp}</li>
+                                    <li key={exp} className="break-words whitespace-normal">
+                                        {exp}
+                                    </li>
                                 ))}
                             </ul>
                         </div>
