@@ -2,12 +2,11 @@
 
 import React, { FC } from "react";
 import Link from "next/link";
-import { Typography, IconButton, Tooltip, Breadcrumbs } from "@mui/material";
+import { Typography, IconButton, Tooltip, Breadcrumbs, Pagination } from "@mui/material";
 import ImportExportIcon from "@mui/icons-material/ImportExport";
 import FilterListRoundedIcon from "@mui/icons-material/FilterListRounded";
 import type { IProject } from "@/core/domain/project";
 import { ProjectCard } from "@/components/ProjectCard";
-import EmptyState from "@/components/emptyState";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import TuneIcon from "@mui/icons-material/Tune";
@@ -20,16 +19,24 @@ interface ProjectPageProps {
   totalRecords?: number;
   sortBy?: string;
   sortOrder?: Order;
+  page: number;
+  pageSize: number;
 }
 
 const ProjectPage: FC<ProjectPageProps> = ({
   projects,
   totalRecords,
   sortBy,
+  page,
+  pageSize,
 }) => {
   const router = useRouter();
   const [order, setOrder] = useState<Order>("desc");
   const [firstClick, setFirstClick] = useState(true);
+
+  const handleNextPage = (currentPage: number) => {
+    router.push(`/project?page=${currentPage}&pageSize=${pageSize}&sortBy=${sortBy || "createdAt"}&sortOrder=${order}`);
+  };
 
   const toggleOrder = () => {
     const newOrder = order === "asc" ? "desc" : "asc";
@@ -115,15 +122,8 @@ const ProjectPage: FC<ProjectPageProps> = ({
       </div>
 
       {/* grid */}
-      {projects.length === 0 ? (
-        <div className="flex w-full flex-col items-center justify-center py-16">
-          <EmptyState
-            title="ไม่พบข้อมูลผลงานในขณะนี้"
-            description="เมื่อมีข้อมูลผลงาน ข้อมูลจะปรากฏที่นี่"
-          />
-        </div>
-      ) : (
-        <div className="grid gap-6 md:grid-cols-2 md:gap-8 xl:grid-cols-3">
+      <div className="flex w-full flex-col items-center justify-center gap-5">
+        <div className="grid w-full gap-6 md:grid-cols-2 md:gap-8 xl:grid-cols-3">
           {projects.map((project) => (
             <Link
               key={project.id}
@@ -135,7 +135,15 @@ const ProjectPage: FC<ProjectPageProps> = ({
             </Link>
           ))}
         </div>
-      )}
+        <Pagination
+          shape="rounded"
+          count={Math.ceil((totalRecords || 0) / pageSize)}
+          page={page}
+          onChange={(_, currentPage) => handleNextPage(currentPage)}
+          color="primary"
+          size="large"
+        />
+      </div>
     </main>
   );
 };

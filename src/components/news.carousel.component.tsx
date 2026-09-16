@@ -3,6 +3,7 @@ import Link from "next/link";
 import { Button } from "@mui/material";
 import { INews } from "@/core/domain/news";
 import EmptyState from "./emptyState";
+import { newsCardSizeClass } from "@/components/newscard";
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 
@@ -49,16 +50,16 @@ const EmptyStateMap: Record<
   },
 };
 
+const cardWidthClass = newsCardSizeClass;
 const getCardWrapperClass = (index: number) => {
   switch (index) {
     case 0:
-      return "relative shrink-0"; 
+      return `relative ${cardWidthClass} shrink-0`;
     case 1:
-      return "relative hidden shrink-0 md:block"; 
     case 2:
-      return "relative hidden shrink-0 md:block lg:w-auto";
+      return `relative hidden ${cardWidthClass} shrink-0 md:block`;
     case 3:
-      return "relative hidden shrink-0 lg:block lg:w-auto";
+      return `relative hidden ${cardWidthClass} shrink-0 lg:block`;
     default:
       return "hidden";
   }
@@ -103,6 +104,12 @@ export const NewsCarouselComponent = ({
       </div>
     );
   }
+
+  const showNavigation = news.length >= 3;
+  const cardAlignmentClass = showNavigation
+  ? "justify-center md:justify-start"
+  : "justify-center md:justify-start";
+
   return (
     <div>
       <div className="flex items-center justify-between">
@@ -118,13 +125,15 @@ export const NewsCarouselComponent = ({
         </Link>
       </div>
       <div className="flex items-center justify-between">
-        <div className="hidden items-center justify-between sm:flex">
-          <Button onClick={handlePrevNews}>
-            <ChevronLeftIcon fontSize="large" />
-          </Button>
-        </div>
+        {showNavigation && (
+          <div className="hidden items-center justify-between sm:flex">
+            <Button onClick={handlePrevNews}>
+              <ChevronLeftIcon fontSize="large" />
+            </Button>
+          </div>
+        )}
         <div className="w-full min-w-0 [overflow-x:clip] px-3 lg:max-w-6xl">
-          <div className="my-3 flex justify-center gap-4 py-5 px-3 transition-all duration-300 ease-in-out md:justify-start">
+          <div className={`my-3 flex ${cardAlignmentClass} gap-x-[15px] px-3 py-5 transition-all duration-300 ease-in-out`}>
             {childrenArray.map((child, i) => (
               <div key={i} className={getCardWrapperClass(i)}>
                 {child}
@@ -141,11 +150,13 @@ export const NewsCarouselComponent = ({
             ))}
           </div>
         </div>
-        <div className="hidden items-center justify-between sm:flex">
-          <Button onClick={handleNextNews}>
-            <ChevronRightIcon fontSize="large" />
-          </Button>
-        </div>
+        {showNavigation && (
+          <div className="hidden items-center justify-between sm:flex">
+            <Button onClick={handleNextNews}>
+              <ChevronRightIcon fontSize="large" />
+            </Button>
+          </div>
+        )}
       </div>
     </div>
   );
