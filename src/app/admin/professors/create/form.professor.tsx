@@ -46,7 +46,7 @@ const VisuallyHiddenInput = styled("input")({
 });
 
 export const FormProfesssors: FC<FormProfessorsProps> = ({ apiBase }) => {
-  const [academicPositions, setAcademicPositions] = useState<Position[]>([]);
+  const [prefixes, setPrefixes] = useState<Position[]>([]);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isError, setIsError] = useState(false);
   const router = useRouter();
@@ -73,7 +73,7 @@ export const FormProfesssors: FC<FormProfessorsProps> = ({ apiBase }) => {
   } = useForm<CreateProfessorInputs>({
     resolver: zodResolver(CreateProfessorSchema),
     defaultValues: {
-      academicPositionID: null,
+      prefixID: null,
       educations: [],
       email: "",
       expertFields: [],
@@ -137,7 +137,7 @@ export const FormProfesssors: FC<FormProfessorsProps> = ({ apiBase }) => {
     setIsError(false);
     try {
       const payload: CreateProfessorPayload = {
-        academicPositionID: data.academicPositionID!,
+        prefixID: data.prefixID!,
         firstNameTh: data.firstNameTh,
         lastNameTh: data.lastNameTh,
         firstNameEn: data.firstNameEn || null,
@@ -173,7 +173,7 @@ export const FormProfesssors: FC<FormProfessorsProps> = ({ apiBase }) => {
   useEffect(() => {
     const fetchData = async () => {
       const res = await masterDataService.getMasterData();
-      setAcademicPositions(res.academicPositions);
+      setPrefixes(res.prefixes);
     };
     fetchData();
   }, [apiBase, masterDataService]);
@@ -237,7 +237,7 @@ export const FormProfesssors: FC<FormProfessorsProps> = ({ apiBase }) => {
               <div className="flex-2">
                 <RHFSelect
                   control={control}
-                  name="academicPositionID"
+                  name="prefixID"
                   label="ตำแหน่ง (ภาษาไทย)"
                   variant="outlined"
                   fullWidth
@@ -252,13 +252,13 @@ export const FormProfesssors: FC<FormProfessorsProps> = ({ apiBase }) => {
                         </span>
                       );
                     }
-                    const selected = academicPositions.find(
+                    const selected = prefixes.find(
                       (item) => item.id === value,
                     );
                     return selected?.nameTh;
                   }}
                 >
-                  {academicPositions.map((position) => (
+                  {prefixes.map((position) => (
                     <MenuItem key={position.id} value={position.id}>
                       {position.nameTh}
                     </MenuItem>
@@ -296,7 +296,7 @@ export const FormProfesssors: FC<FormProfessorsProps> = ({ apiBase }) => {
               <div className="flex-2">
                 <RHFSelect
                   control={control}
-                  name="academicPositionID"
+                  name="prefixID"
                   label="ตำแหน่ง (ภาษาอังกฤษ)"
                   variant="outlined"
                   fullWidth
@@ -311,13 +311,13 @@ export const FormProfesssors: FC<FormProfessorsProps> = ({ apiBase }) => {
                         </span>
                       );
                     }
-                    const selected = academicPositions.find(
+                    const selected = prefixes.find(
                       (item) => item.id === value,
                     );
                     return selected?.nameEn;
                   }}
                 >
-                  {academicPositions.map((position) => (
+                  {prefixes.map((position) => (
                     <MenuItem key={position.id} value={position.id}>
                       {position.nameEn}
                     </MenuItem>
