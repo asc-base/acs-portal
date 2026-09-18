@@ -28,6 +28,7 @@ export interface QueryStudent {
 export interface ICreateStudent {
   studentCode: string;
   email: string;
+  prefixID?: number | null;
   firstNameTh: string;
   lastNameTh: string;
   firstNameEn: string | null;
@@ -43,6 +44,7 @@ export interface ICreateStudent {
 export interface IUpdateStudent {
   studentCode?: string;
   email?: string;
+  prefixID?: number | null;
   firstNameTh?: string;
   lastNameTh?: string;
   firstNameEn?: string | null;

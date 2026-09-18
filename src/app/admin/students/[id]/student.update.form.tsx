@@ -1,16 +1,21 @@
 "use client";
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { Button, Typography, Modal } from "@mui/material";
 // import AddIcon from "@mui/icons-material/Add";
 import Alert from "@mui/material/Alert";
 import Snackbar from "@mui/material/Snackbar";
+import MenuItem from "@mui/material/MenuItem";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { RHFTextField } from "@/components/form/RHFTextField";
+import { RHFSelect } from "@/components/form/RHFSelect";
 import { StudentService } from "@/core/service/student.service";
 import { StudentRepository } from "@/infra/repositories/student.repository";
+import { MasterDataService } from "@/core/service/master-data.service";
+import { MasterDataRepository } from "@/infra/repositories/master-data.repository";
+import { Position } from "@/core/domain/master-data";
 import { IUpdateStudent, IStudent } from "@/core/domain/student";
 import {
   ConfirmModal,
@@ -43,6 +48,7 @@ export const StudentUpdateForm = ({
   classBookID,
   student,
 }: StudentUpdateFormProps) => {
+  const [prefixes, setPrefixes] = useState<Position[]>([]);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isError, setIsError] = useState(false);
   const [confirmModal, setConfirmModal] = useState<ConfirmModalProps | null>(
@@ -61,6 +67,19 @@ export const StudentUpdateForm = ({
     return new StudentService(repo);
   }, [apiBase]);
 
+  const masterDataService = useMemo(() => {
+    const masterdataRepository = new MasterDataRepository(apiBase);
+    return new MasterDataService(masterdataRepository);
+  }, [apiBase]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      const res = await masterDataService.getMasterData();
+      setPrefixes(res.prefixes);
+    };
+    fetchData();
+  }, [masterDataService]);
+
   const {
     control,
     handleSubmit,
@@ -68,6 +87,7 @@ export const StudentUpdateForm = ({
   } = useForm<UpdateStudentInputs>({
     resolver: zodResolver(UpdateStudentSchema),
     defaultValues: {
+      prefixID: student.user.prefix?.id,
       firstNameTh: student.user.firstNameTh,
       lastNameTh: student.user.lastNameTh,
       firstNameEn: student.user.firstNameEn,
@@ -112,6 +132,7 @@ export const StudentUpdateForm = ({
   const onSubmit = async (data: UpdateStudentInputs) => {
     try {
       const payload: IUpdateStudent = {
+        prefixID: data.prefixID,
         firstNameTh: data.firstNameTh,
         lastNameTh: data.lastNameTh,
         firstNameEn: data.firstNameEn || null,
@@ -204,7 +225,34 @@ export const StudentUpdateForm = ({
         </div>
 
         <div className="flex-1 space-y-4">
-          <div className="grid grid-cols-2 gap-x-4">
+          <div className="grid grid-cols-3 gap-x-4">
+            <RHFSelect
+              control={control}
+              name="prefixID"
+              label="คำนำหน้า (ภาษาไทย)"
+              variant="outlined"
+              fullWidth
+              required
+              displayEmpty
+              requiredMark
+              renderValue={(value) => {
+                if (!value) {
+                  return (
+                    <span style={{ color: "#9e9e9e" }}>
+                      ระบุคำนำหน้า
+                    </span>
+                  );
+                }
+                const selected = prefixes.find((item) => item.id === value);
+                return selected?.nameTh;
+              }}
+            >
+              {prefixes.map((prefix) => (
+                <MenuItem key={prefix.id} value={prefix.id}>
+                  {prefix.nameTh}
+                </MenuItem>
+              ))}
+            </RHFSelect>
             <RHFTextField
               control={control}
               name="firstNameTh"
@@ -225,7 +273,34 @@ export const StudentUpdateForm = ({
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-x-4">
+          <div className="grid grid-cols-3 gap-x-4">
+            <RHFSelect
+              control={control}
+              name="prefixID"
+              label="คำนำหน้า (ภาษาอังกฤษ)"
+              variant="outlined"
+              fullWidth
+              required
+              displayEmpty
+              requiredMark
+              renderValue={(value) => {
+                if (!value) {
+                  return (
+                    <span style={{ color: "#9e9e9e" }}>
+                      ระบุคำนำหน้า (ภาษาอังกฤษ)
+                    </span>
+                  );
+                }
+                const selected = prefixes.find((item) => item.id === value);
+                return selected?.shortNameEn;
+              }}
+            >
+              {prefixes.map((prefix) => (
+                <MenuItem key={prefix.id} value={prefix.id}>
+                  {prefix.shortNameEn}
+                </MenuItem>
+              ))}
+            </RHFSelect>
             <RHFTextField
               control={control}
               name="firstNameEn"
