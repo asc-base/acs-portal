@@ -135,9 +135,13 @@ export const NewsInformationForm = ({
     e.target.value = "";
   };
 
-  const handleUploadComplete = (file: File) => {
+  const handleUploadComplete = (file: File, focalPoint?: { x: number; y: number }) => {
     if (cropTarget === "thumbnail") {
       setValue("thumbnail", file, { shouldDirty: true, shouldValidate: true });
+      if (isHighlight && focalPoint) {
+        setValue("thumbnailFocalPointX", focalPoint.x, { shouldDirty: true, shouldValidate: true });
+        setValue("thumbnailFocalPointY", focalPoint.y, { shouldDirty: true, shouldValidate: true });
+      }
     } else if (cropTarget === "highlight") {
       setValue("highlight", file, { shouldDirty: true, shouldValidate: true });
     }

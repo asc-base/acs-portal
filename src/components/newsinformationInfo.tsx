@@ -99,6 +99,12 @@ export const NewsInformationInfo = ({
       highlight: newsInformation.highlightURL || undefined,
       newsID: newsInformation.news.id,
       tagID: tagID,
+      ...(type === "newshighlight"
+        ? {
+            thumbnailFocalPointX: newsInformation.thumbnailFocalPointX ?? undefined,
+            thumbnailFocalPointY: newsInformation.thumbnailFocalPointY ?? undefined,
+          }
+        : {}),
     },
   });
 
@@ -139,11 +145,15 @@ export const NewsInformationInfo = ({
     e.target.value = "";
   };
 
-  const handleUploadComplete = (file: File) => {
+  const handleUploadComplete = (file: File, focalPoint?: { x: number; y: number }) => {
     const previewUrl = URL.createObjectURL(file);
     if (cropTarget === "thumbnail") {
       setValue("thumbnail", file, { shouldValidate: true, shouldDirty: true });
       setThumbnailPreview(previewUrl);
+      if (type === "newshighlight" && focalPoint) {
+        setValue("thumbnailFocalPointX", focalPoint.x, { shouldDirty: true, shouldValidate: true });
+        setValue("thumbnailFocalPointY", focalPoint.y, { shouldDirty: true, shouldValidate: true });
+      }
     } else if (cropTarget === "highlight") {
       setValue("highlight", file, { shouldValidate: true, shouldDirty: true });
       setHighlightPreview(previewUrl);
