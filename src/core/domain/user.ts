@@ -13,6 +13,8 @@ export interface IUser {
     lastNameEn: string;
     nickName?: string;
     imageUrl: string;
+    imageFocalPointX?: number | null;
+    imageFocalPointY?: number | null;
     prefix?: UserPrefix | null;
 }
 
