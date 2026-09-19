@@ -16,8 +16,6 @@ export interface IUser {
     imageFocalPointX?: number | null;
     imageFocalPointY?: number | null;
     prefix?: UserPrefix | null;
-    imageFocalPointX?: number | null;
-    imageFocalPointY?: number | null;
 }
 
 export interface UserRole {
