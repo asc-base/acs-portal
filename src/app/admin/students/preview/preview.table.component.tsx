@@ -124,7 +124,7 @@ export default function Preview_table_component({
     }
 
     try {
-      const response = await studentService.createStudentBatch({
+      await studentService.createStudentBatch({
         classBookID: Number(classBookID),
         file: importFile,
       });
