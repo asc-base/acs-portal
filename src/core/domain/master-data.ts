@@ -7,9 +7,9 @@ export interface MasterData {
   typeCourses: TypeCourse[];
   listTypes: IType[];
   educationLevels: EducationLevel[];
-  academicPositions: Position[];
   tags: Tag[];
   tagsGroups: TagsGroups[];
+  prefixes: Position[];
 }
 
 export interface Position {

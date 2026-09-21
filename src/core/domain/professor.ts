@@ -5,7 +5,7 @@ export interface IProfessor {
   id: number;
   user: IUser;
   majorPosition: Position;
-  academicPosition: Position;
+  prefix: Position;
   profRoom: string;
   expertFields: string[];
   educations: string[];
@@ -14,7 +14,7 @@ export interface IProfessor {
 
 export interface IUpdateProfessor {
   id: number;
-  academicPositionID: number;
+  prefixID: number;
   profRoom: string;
   phone: string;
   firstNameTh: string;
@@ -38,7 +38,7 @@ export interface QueryProfessor {
 }
 
 export interface ICreateProfessor {
-  academicPositionID: number;
+  prefixID: number;
   educations?: string;
   email: string;
   expertFields?: string;

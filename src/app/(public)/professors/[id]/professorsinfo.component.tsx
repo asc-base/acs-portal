@@ -30,11 +30,11 @@ const ProfessorsInfoComponent = ({ professorsInfo }: ProfessorsInfoProps) => {
                 <div className="md:flex-1 w-full max-w-[734px] min-h-[395px] rounded-2xl bg-neutral01 p-8 lg:p-[40px] shadow-md flex flex-col gap-5">
                     <div className="flex flex-col gap-2">
                         <h1 className="text-h1-1 font-bold text-primary01 leading-none">
-                            {professorsInfo.academicPosition?.shortNameTh}
+                            {professorsInfo.prefix?.shortNameTh}
                             {professorsInfo.user.firstNameTh} {professorsInfo.user.lastNameTh}
                         </h1>
                         <h2 className="font-light text-primary01">
-                            {professorsInfo.academicPosition?.shortNameEn}{" "}
+                            {professorsInfo.prefix?.shortNameEn}{" "}
                             {professorsInfo.user.firstNameEn} {professorsInfo.user.lastNameEn}
                         </h2>
                     </div>
