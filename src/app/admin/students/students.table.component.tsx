@@ -76,7 +76,7 @@ const StudentTableComponents = ({
   apiBase,
 }: StudentTableComponentsProps) => {
   const router = useRouter();
-  const { setImportData } = useImportStudentStore();
+  const { setImportData, setImportFile } = useImportStudentStore();
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
   const [confirmModal, setConfirmModal] = useState<ConfirmModalProps | null>(
     null,
@@ -132,6 +132,7 @@ const StudentTableComponents = ({
   };
 
   const handleUploadStudentFile = (file: File) => {
+    setImportFile(file);
     Papa.parse(file, {
       header: true,
       skipEmptyLines: true,

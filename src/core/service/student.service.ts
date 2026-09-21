@@ -4,12 +4,11 @@ import {
   QueryStudent,
   ICreateStudent,
   IUpdateStudent,
-  ICreateStudentCsv,
 } from "../domain/student";
 import { Pageable } from "@/interface/response";
 
 export class StudentService {
-  constructor(private studentRepository: IStudentRepository) {}
+  constructor(private studentRepository: IStudentRepository) { }
 
   async getStudents(query: QueryStudent): Promise<Pageable<IStudent>> {
     const response = await this.studentRepository.getStudents(query);
@@ -83,10 +82,13 @@ export class StudentService {
   }
 
   async createStudentBatch(data: {
-    students: ICreateStudentCsv[];
-    classBookID: number;
+    file: File,
+    classBookID: number,
   }): Promise<IStudent[]> {
-    const response = await this.studentRepository.createStudentBatch(data);
+    const formData = new FormData();
+    formData.append("file", data.file);
+    formData.append("classBookID", data.classBookID.toString());
+    const response = await this.studentRepository.createStudentBatch(formData);
     return response.data;
   }
 }

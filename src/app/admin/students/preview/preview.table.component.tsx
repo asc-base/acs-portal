@@ -51,7 +51,7 @@ export default function Preview_table_component({
   classBookID,
 }: PreviewStudentsProps) {
   const router = useRouter();
-  const { importData, deleteByStudentId } = useImportStudentStore();
+  const { importData, importFile, deleteByStudentId } = useImportStudentStore();
   const students: ICreateStudentCsv[] = importData;
   const [alert, setAlert] = useState<{
     open: boolean;
@@ -117,23 +117,27 @@ export default function Preview_table_component({
       showAlert("ข้อมูลนักศึกษาไม่ถูกต้อง", "error");
       return;
     }
+
+    if (!importFile) {
+      showAlert("ไม่พบไฟล์ข้อมูล", "error");
+      return;
+    }
+
     try {
       const response = await studentService.createStudentBatch({
         classBookID: Number(classBookID),
-        students: result.data,
+        file: importFile,
       });
-      if (response) {
-        setConfirmModal({
-          isOpen: true,
-          type: "success",
-          onClose: () => setConfirmModal(null),
-          onConfirm: () => {
-            router.push(
-              `/admin/students?page=1&pageSize=10&classBookID=${classBookID}`,
-            );
-          },
-        });
-      }
+      setConfirmModal({
+        isOpen: true,
+        type: "success",
+        onClose: () => setConfirmModal(null),
+        onConfirm: () => {
+          router.push(
+            `/admin/students?page=1&pageSize=10&classBookID=${classBookID}`,
+          );
+        },
+      });
     } catch (err) {
       console.log(err);
       showAlert("ไม่สามารถเพิ่มข้อมูลนักศึกษาได้", "error");
