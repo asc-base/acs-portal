@@ -1,13 +1,10 @@
 "use client";
-import { AuthRepository } from "./infra/repositories/auth.repository";
-import { AuthService } from "./core/service/auth.service";
+import { clientAuthService } from "./infra/auth-client";
 import { useAuthStore } from "./store/auth";
 
-export const initialLoad = async (apiBase: string) => {
-  const authRepository = new AuthRepository(apiBase);
-  const authService = new AuthService(authRepository);
+export const initialLoad = async () => {
   try {
-    const user = await authService.getUser();
+    const user = await clientAuthService.getUser();
     if (!user) {
       useAuthStore.getState().setUser(null);
     } else {

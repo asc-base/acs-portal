@@ -1,11 +1,11 @@
 import { IAuthRepository } from "@/core/ports/auth.repository";
 import {
+  AuthTokens,
   ForgetPasswordResponse,
   LoginRequest,
 } from "@/core/domain/auth";
 import { HttpHelper } from "@/lib/http";
 import { ApiResponse } from "@/interface/response";
-import { IUser } from "@/interface/user";
 import { UserProfile } from "@/core/domain/user";
 import { authErrorHandler } from "@/lib/auth-error-handler";
 
@@ -28,13 +28,11 @@ export class AuthRepository implements IAuthRepository {
     return response;
   }
 
-  async Login(data: LoginRequest): Promise<ApiResponse<IUser>> {
-    const response = await this.http.post<ApiResponse<IUser>>(
+  async Login(data: LoginRequest): Promise<ApiResponse<AuthTokens>> {
+    const response = await this.http.post<ApiResponse<AuthTokens>>(
       `/v1/auth/login`,
       data,
     );
-    console.log("response", response);
-
     return response;
   }
 
@@ -71,7 +69,7 @@ export class AuthRepository implements IAuthRepository {
   }
 
   async Logout(): Promise<void> {
-    authErrorHandler.withAuthErrorHandling(async () => {
+    await authErrorHandler.withAuthErrorHandling(async () => {
       await this.http.post<void>(`/v1/auth/logout`);
     });
   }

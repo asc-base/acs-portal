@@ -19,8 +19,7 @@ import ListItemIcon from "@mui/material/ListItemIcon";
 import IconButton from "@mui/material/IconButton";
 import Tooltip from "@mui/material/Tooltip";
 import Logout from "@mui/icons-material/Logout";
-import { AuthRepository } from "@/infra/repositories/auth.repository";
-import { AuthService } from "@/core/service/auth.service";
+import { clientAuthService } from "@/infra/auth-client";
 import { usePathname } from "next/navigation";
 import { useRouter } from "next/navigation";
 
@@ -226,19 +225,15 @@ const MenuBar = () => {
   );
 };
 
-export const NavbarMain = ({ baseUrl }: { baseUrl: string }) => {
+export const NavbarMain = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isHydrated, setIsHydrated] = useState(false);
   const user = useAuthStore((state) => state.user);
+  const clearUser = useAuthStore((state) => state.clearUser);
   const [userAuth, setUserAuth] = useState<IUser | null>(null);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const openMenu = Boolean(anchorEl);
   const router = useRouter();
-
-  const authService = useMemo(() => {
-    const authRepository = new AuthRepository(baseUrl);
-    return new AuthService(authRepository);
-  }, [baseUrl]);
 
   const handleMenuClick = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
@@ -248,10 +243,14 @@ export const NavbarMain = ({ baseUrl }: { baseUrl: string }) => {
     setAnchorEl(null);
   };
 
-  const handleLogout = () => {
-    authService.logout();
-    handleMenuClose();
-    router.push("/auth/student");
+  const handleLogout = async () => {
+    try {
+      await clientAuthService.logout();
+    } finally {
+      clearUser();
+      handleMenuClose();
+      router.push("/auth/student");
+    }
   };
 
   useEffect(() => {
@@ -262,8 +261,6 @@ export const NavbarMain = ({ baseUrl }: { baseUrl: string }) => {
   useEffect(() => {
     if (isHydrated) {
       setUserAuth(user);
-      // Debug log to verify store updates
-      console.log("Navbar: User state changed:", user);
     }
   }, [user, isHydrated]);
 
@@ -470,7 +467,9 @@ export const NavbarMain = ({ baseUrl }: { baseUrl: string }) => {
         )}
       </div>
 
-      <div className={`${isOpen ? "absolute z-50" : "hidden"} top-full left-0 w-full xl:static xl:block`}>
+      <div
+        className={`${isOpen ? "absolute z-50" : "hidden"} top-full left-0 w-full xl:static xl:block`}
+      >
         <MenuBar />
       </div>
     </nav>
