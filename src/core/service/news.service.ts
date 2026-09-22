@@ -1,25 +1,33 @@
 import { Pageable } from "@/interface/response";
 import {
   INews,
-  ICreateNews,
   IUpdateNews,
   INewsInformation,
 } from "../domain/news";
 import { INewsRepository } from "../ports/news.repository";
+import { CreateNewsInputs } from "../schema/news";
 import { UpsertNewsInformationInputs } from "../schema/newsinformation";
 export class NewsService {
   constructor(private readonly newsRepository: INewsRepository) {}
 
-async createNews(data: ICreateNews): Promise<INews> {
+async createNews(data: CreateNewsInputs): Promise<INews> {
   const formData = new FormData();
 
   Object.entries(data).forEach(([key, value]) => {
-    if (value instanceof File) {
-      formData.append(key, value);
-    } else if (value !== undefined && value !== null) {
-      formData.append(key, String(value));
-    }
-  });
+  if (Array.isArray(value)) {
+    value.forEach((item) => {
+      if (item instanceof File) {
+        formData.append(key, item);
+      } else if (item !== undefined && item !== null) {
+        formData.append(key, String(item));
+      }
+    });
+  } else if (value instanceof File) {
+    formData.append(key, value);
+  } else if (value !== undefined && value !== null) {
+    formData.append(key, String(value));
+  }
+});
 
   const response = await this.newsRepository.createNews(formData);
   return response.data;
