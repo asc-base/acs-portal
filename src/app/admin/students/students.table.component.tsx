@@ -136,7 +136,7 @@ const StudentTableComponents = ({
       });
       setIsUploadModalOpen(false);
       router.refresh();
-    } catch (err) {
+    } catch {
       setIsUploadModalOpen(false);
       setIsError(true);
     }
