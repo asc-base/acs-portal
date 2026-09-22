@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState } from "react";
 import Image from "next/image";
 import {
   Button,
@@ -18,8 +18,8 @@ import { RHFTextField } from "@/components/form/RHFTextField";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/store/auth";
-import { AuthRepository } from "@/infra/repositories/auth.repository";
-import { AuthService } from "@/core/service/auth.service";
+import { useLogin } from "@/hooks/useLogin";
+import { HttpError } from "@/lib/http";
 
 const Schema = z.object({
   email: z.string().trim(),
@@ -28,21 +28,11 @@ const Schema = z.object({
 });
 type FormValues = z.infer<typeof Schema>;
 
-interface StudentAuthLandingPageProps {
-  apiBase: string;
-}
-
-export default function StudentAuthLandingPage({
-  apiBase,
-}: StudentAuthLandingPageProps) {
+export default function StudentAuthLandingPage() {
   const [showPassword, setShowPassword] = useState(false);
   const router = useRouter();
   const setUser = useAuthStore((state) => state.setUser);
-
-  const authService = useMemo(() => {
-    const authRepository = new AuthRepository(apiBase);
-    return new AuthService(authRepository);
-  }, [apiBase]);
+  const { mutateAsync: login, isPending } = useLogin();
 
   const {
     control,
@@ -59,35 +49,25 @@ export default function StudentAuthLandingPage({
 
   const onSubmit = async (data: FormValues) => {
     try {
-      await new Promise((r) => setTimeout(r, 400)); // mock
       if (data.email === "00000000000") {
         setError("email", { type: "manual", message: "ไม่พบบัญชีผู้ใช้" });
         return;
       }
 
-      const loginRequest = {
+      const user = await login({
         email: data.email,
         password: data.password,
-      };
+      });
 
-      const reps = await authService.Login(loginRequest);
-
-      if (reps.status && reps.status === 200 && reps.data) {
-        // Store user data in the auth store
-        setUser(reps.data);
-        console.log("Login successful, user stored in auth store:", reps.data);
-        router.push("/home");
-      } else {
-        console.log("Login failed:", reps);
-        setError("password", {
-          type: "manual",
-          message: "ข้อมูลการเข้าสู่ระบบไม่ถูกต้อง",
-        });
-      }
-    } catch {
+      setUser(user);
+      router.push("/home");
+    } catch (error) {
       setError("password", {
         type: "manual",
-        message: "เกิดข้อผิดพลาด กรุณาลองใหม่",
+        message:
+          error instanceof HttpError && error.status === 401
+            ? "ข้อมูลการเข้าสู่ระบบไม่ถูกต้อง"
+            : "เกิดข้อผิดพลาด กรุณาลองใหม่",
       });
     }
   };
@@ -219,9 +199,10 @@ export default function StudentAuthLandingPage({
                 type="submit"
                 variant="contained"
                 fullWidth
+                disabled={isPending}
                 className="!h-12 !bg-[var(--color-primary02)] !text-base !normal-case shadow-md hover:!bg-[#1b1361]"
               >
-                เข้าสู่ระบบ
+                {isPending ? "กำลังเข้าสู่ระบบ..." : "เข้าสู่ระบบ"}
               </Button>
             </form>
           </div>

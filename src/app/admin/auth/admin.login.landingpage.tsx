@@ -8,12 +8,11 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { RHFTextField } from "@/components/form/RHFTextField";
-import { AuthRepository } from "@/infra/repositories/auth.repository";
-import { AuthService } from "@/core/service/auth.service";
-import { useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/store/auth";
 import { isAdminUser } from "@/lib/admin-access";
+import { useLogin } from "@/hooks/useLogin";
+import { HttpError } from "@/lib/http";
 
 const Schema = z.object({
   email: z.string().trim().email("กรุณากรอกอีเมลที่ถูกต้อง"),
@@ -21,24 +20,12 @@ const Schema = z.object({
 });
 type FormValues = z.infer<typeof Schema>;
 
-interface AdminLoginLandingPageProps {
-  apiBase: string;
-}
-
-export default function AdminLoginLandingPage({
-  apiBase,
-}: Readonly<AdminLoginLandingPageProps>) {
+export default function AdminLoginLandingPage() {
   const router = useRouter();
   const setUser = useAuthStore((state) => state.setUser);
   const clearUser = useAuthStore((state) => state.clearUser);
   const [showPwd, setShowPwd] = React.useState(false);
-
-  const authService = useMemo(() => {
-    const authRepository = new AuthRepository(apiBase);
-    return new AuthService(authRepository);
-  }, [apiBase]);
-
-  console.log("API URL", apiBase);
+  const { mutateAsync: login, isPending } = useLogin();
 
   const {
     control,
@@ -54,23 +41,11 @@ export default function AdminLoginLandingPage({
 
   const onSubmit = async (data: FormValues) => {
     try {
-      await new Promise((r) => setTimeout(r, 400)); // mock
-      const loginRequest = {
+      const user = await login({
         email: data.email,
         password: data.password,
-      };
+      });
 
-      const response = await authService.Login(loginRequest);
-
-      if (!response?.status) {
-        setError("password", {
-          type: "manual",
-          message: "ข้อมูลการเข้าสู่ระบบไม่ถูกต้อง",
-        });
-        return;
-      }
-
-      const user = await authService.getUser();
       if (!isAdminUser(user)) {
         clearUser();
         setError("password", {
@@ -82,10 +57,13 @@ export default function AdminLoginLandingPage({
 
       setUser(user);
       router.replace("/admin/classbook");
-    } catch {
+    } catch (error) {
       setError("password", {
         type: "manual",
-        message: "เกิดข้อผิดพลาด กรุณาลองใหม่",
+        message:
+          error instanceof HttpError && error.status === 401
+            ? "ข้อมูลการเข้าสู่ระบบไม่ถูกต้อง"
+            : "เกิดข้อผิดพลาด กรุณาลองใหม่",
       });
     }
   };
@@ -188,9 +166,10 @@ export default function AdminLoginLandingPage({
                 type="submit"
                 variant="contained"
                 fullWidth
+                disabled={isPending}
                 className="!h-12 !bg-[#1E156B] !text-base !normal-case shadow-md hover:!bg-[#1b1361]"
               >
-                เข้าสู่ระบบ
+                {isPending ? "กำลังเข้าสู่ระบบ..." : "เข้าสู่ระบบ"}
               </Button>
             </form>
           </div>

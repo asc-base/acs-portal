@@ -36,6 +36,6 @@ export class AuthService {
   }
 
   async logout(): Promise<void> {
-    this.authRepository.Logout();
+    await this.authRepository.Logout();
   }
 }

@@ -17,8 +17,7 @@ import {
 import { CropImageCard } from "@/components/cropimagecard";
 import { useRouter } from "next/navigation";
 import { IStudent, IUpdateStudent } from "@/core/domain/student";
-import { AuthRepository } from "@/infra/repositories/auth.repository";
-import { AuthService } from "@/core/service/auth.service";
+import { clientAuthService } from "@/infra/auth-client";
 import { StudentRepository } from "@/infra/repositories/student.repository";
 import { StudentService } from "@/core/service/student.service";
 
@@ -46,12 +45,6 @@ const ProfileForm = ({ apiBase }: { apiBase: string }) => {
   const [student, setStudent] = useState<IStudent | null>(null);
   const router = useRouter();
 
-  const authService = useMemo(() => {
-    const authRepo = new AuthRepository(apiBase);
-    const authSerivce = new AuthService(authRepo);
-    return authSerivce;
-  }, [apiBase]);
-
   const studentService = useMemo(() => {
     const studentRepo = new StudentRepository(apiBase);
     const studentSerivce = new StudentService(studentRepo);
@@ -61,7 +54,7 @@ const ProfileForm = ({ apiBase }: { apiBase: string }) => {
   useEffect(() => {
     const fetchStudent = async () => {
       try {
-        const user = await authService.getUser();
+        const user = await clientAuthService.getUser();
         if (!user) {
           router.push("/auth/student");
           return;
@@ -76,7 +69,7 @@ const ProfileForm = ({ apiBase }: { apiBase: string }) => {
       }
     };
     fetchStudent();
-  }, [router, authService, studentService]);
+  }, [router, studentService]);
 
   const [skillInput, setSkillInput] = useState("");
 
