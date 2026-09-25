@@ -2,6 +2,8 @@ export interface UserPrefix {
     id: number;
     nameTh: string;
     nameEn?: string;
+    shortNameTh?: string;
+    shortNameEn?: string;
 }
 
 export interface IUser {
@@ -13,6 +15,8 @@ export interface IUser {
     lastNameEn: string;
     nickName?: string;
     imageUrl: string;
+    imageFocalPointX?: number | null;
+    imageFocalPointY?: number | null;
     prefix?: UserPrefix | null;
 }
 

@@ -28,6 +28,7 @@ export interface QueryStudent {
 export interface ICreateStudent {
   studentCode: string;
   email: string;
+  prefixID?: number | null;
   firstNameTh: string;
   lastNameTh: string;
   firstNameEn: string | null;
@@ -38,11 +39,15 @@ export interface ICreateStudent {
   facebook?: string;
   instagram?: string;
   classBookID: number;
+  imageFile?: File;
+  imageFocalPointX?: number;
+  imageFocalPointY?: number;
 }
 
 export interface IUpdateStudent {
   studentCode?: string;
   email?: string;
+  prefixID?: number | null;
   firstNameTh?: string;
   lastNameTh?: string;
   firstNameEn?: string | null;
@@ -53,6 +58,9 @@ export interface IUpdateStudent {
   instagram?: string | null;
   github?: string | null;
   skills?: string[];
+  imageFile?: File;
+  imageFocalPointX?: number;
+  imageFocalPointY?: number;
 }
 
 export interface ICreateStudentCsv {
