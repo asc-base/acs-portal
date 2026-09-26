@@ -1,15 +1,16 @@
 import { ApiResponse } from "@/interface/response";
 import {
+  AuthTokens,
   LoginRequest,
   ResetPasswordPayload,
   ForgetPasswordPayload,
   ForgetPasswordResponse,
 } from "../domain/auth";
-import { IUser, UserProfile } from "../domain/user";
+import { UserProfile } from "../domain/user";
 
 export interface IAuthRepository {
   getUserData(token: string): Promise<ApiResponse<UserProfile>>;
-  Login(data: LoginRequest): Promise<ApiResponse<IUser>>;
+  Login(data: LoginRequest): Promise<ApiResponse<AuthTokens>>;
   createCredentailForgetPassowrd(
     payload: ForgetPasswordPayload,
   ): Promise<ApiResponse<ForgetPasswordResponse>>;

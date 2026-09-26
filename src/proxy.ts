@@ -3,8 +3,6 @@ import { isAdminUser } from "@/lib/admin-access";
 import { UserProfile } from "@/core/domain/user";
 import { ApiResponse } from "@/interface/response";
 
-const apiBase = `${process.env.API_URL || "https://acs-dev.service.narutchai.com"}/api`;
-
 /**
  * Stops unauthenticated and non-Admin requests before Next.js renders an
  * /admin page. /admin/auth remains public so an Admin can sign in.
@@ -17,10 +15,13 @@ export async function proxy(request: NextRequest) {
   }
 
   try {
-    const response = await fetch(`${apiBase}/v1/users/profile`, {
-      cache: "no-store",
-      headers: { Cookie: cookie },
-    });
+    const response = await fetch(
+      new URL("/api/bff/v1/users/profile", request.url),
+      {
+        cache: "no-store",
+        headers: { Cookie: cookie },
+      },
+    );
 
     if (!response.ok) {
       return NextResponse.redirect(new URL("/home", request.url));

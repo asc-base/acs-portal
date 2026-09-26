@@ -10,11 +10,9 @@ import CampaignIcon from "@mui/icons-material/Campaign";
 import BorderColorIcon from "@mui/icons-material/BorderColor";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { AuthService } from "@/core/service/auth.service";
-import { AuthRepository } from "@/infra/repositories/auth.repository";
 import { useAuthStore } from "@/store/auth";
-import { useMemo } from "react";
 import Image from "next/image";
+import { clientAuthService } from "@/infra/auth-client";
 
 const sidebarItems = [
   {
@@ -71,24 +69,17 @@ const sidebarItems = [
 export const EdgeSidebarAdmin = ({
   username,
   imageUrl,
-  apiBase,
 }: {
   username: string;
   imageUrl?: string;
-  apiBase: string;
 }) => {
   const pathName = usePathname();
   const router = useRouter();
   const { clearUser } = useAuthStore();
 
-  const authService = useMemo(() => {
-    const authRepository = new AuthRepository(apiBase);
-    return new AuthService(authRepository);
-  }, [apiBase]);
-
   const handleLogout = async () => {
     try {
-      await authService.logout();
+      await clientAuthService.logout();
       clearUser();
       router.push("/admin/auth");
     } catch (error) {

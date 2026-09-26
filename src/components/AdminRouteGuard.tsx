@@ -1,14 +1,12 @@
 "use client";
 
-import { ReactNode, useEffect, useMemo, useState } from "react";
+import { ReactNode, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { AuthRepository } from "@/infra/repositories/auth.repository";
-import { AuthService } from "@/core/service/auth.service";
 import { isAdminUser } from "@/lib/admin-access";
 import { useAuthStore } from "@/store/auth";
+import { clientAuthService } from "@/infra/auth-client";
 
 interface AdminRouteGuardProps {
-  apiBase: string;
   children: ReactNode;
 }
 
@@ -17,26 +15,18 @@ interface AdminRouteGuardProps {
  * This is intentionally based on the server profile, not persisted client
  * state, so a stale or edited local-storage value cannot grant access.
  */
-export const AdminRouteGuard = ({
-  apiBase,
-  children,
-}: AdminRouteGuardProps) => {
+export const AdminRouteGuard = ({ children }: AdminRouteGuardProps) => {
   const router = useRouter();
   const setUser = useAuthStore((state) => state.setUser);
   const clearUser = useAuthStore((state) => state.clearUser);
   const [isAuthorized, setIsAuthorized] = useState(false);
-
-  const authService = useMemo(
-    () => new AuthService(new AuthRepository(apiBase)),
-    [apiBase],
-  );
 
   useEffect(() => {
     let isActive = true;
 
     const verifyAccess = async () => {
       try {
-        const user = await authService.getUser();
+        const user = await clientAuthService.getUser();
 
         if (!isActive) {
           return;
@@ -70,7 +60,7 @@ export const AdminRouteGuard = ({
     return () => {
       isActive = false;
     };
-  }, [authService, clearUser, router, setUser]);
+  }, [clearUser, router, setUser]);
 
   if (!isAuthorized) {
     return (

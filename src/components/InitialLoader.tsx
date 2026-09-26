@@ -5,15 +5,13 @@ import { initialLoad } from "@/initial-load";
 
 export default function InitialLoader({
   children,
-  apiBase,
 }: {
   children: React.ReactNode;
-  apiBase: string;
 }) {
   useEffect(() => {
     // Run initial load on client side
-    initialLoad(apiBase).catch(console.error);
-  }, [apiBase]);
+    initialLoad().catch(console.error);
+  }, []);
 
   return <>{children}</>;
 }
