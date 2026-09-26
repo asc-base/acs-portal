@@ -99,6 +99,12 @@ export const NewsInformationInfo = ({
       highlight: newsInformation.highlightURL || undefined,
       newsID: newsInformation.news.id,
       tagID: tagID,
+      ...(type === "newshighlight"
+        ? {
+            thumbnailFocalPointX: newsInformation.thumbnailFocalPointX ?? undefined,
+            thumbnailFocalPointY: newsInformation.thumbnailFocalPointY ?? undefined,
+          }
+        : {}),
     },
   });
 
@@ -139,11 +145,15 @@ export const NewsInformationInfo = ({
     e.target.value = "";
   };
 
-  const handleUploadComplete = (file: File) => {
+  const handleUploadComplete = (file: File, focalPoint?: { x: number; y: number }) => {
     const previewUrl = URL.createObjectURL(file);
     if (cropTarget === "thumbnail") {
       setValue("thumbnail", file, { shouldValidate: true, shouldDirty: true });
       setThumbnailPreview(previewUrl);
+      if (type === "newshighlight" && focalPoint) {
+        setValue("thumbnailFocalPointX", focalPoint.x, { shouldDirty: true, shouldValidate: true });
+        setValue("thumbnailFocalPointY", focalPoint.y, { shouldDirty: true, shouldValidate: true });
+      }
     } else if (cropTarget === "highlight") {
       setValue("highlight", file, { shouldValidate: true, shouldDirty: true });
       setHighlightPreview(previewUrl);
@@ -221,37 +231,67 @@ export const NewsInformationInfo = ({
       </h3>
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+        {isHighlightType ? (
           <div className="flex flex-col gap-2">
-            <label
-              className={`text-h5 font-medium ${isEdit ? "text-neutral05" : "text-neutral04"}`}
-            >
-              {labelMain}
-            </label>
-            <div className="bg-neutral02 border-neutral03 relative flex h-[380px] w-full items-center justify-center overflow-hidden rounded-md border">
-              {thumbnailPreview ? (
-                <div className="group relative h-full w-full">
-                  <Image
-                    src={thumbnailPreview}
-                    alt="thumbnail preview"
-                    fill
-                    className="object-cover"
-                  />
-                  {isEdit && (
-                    <div className="bg-primary01/40 absolute inset-0 flex items-center justify-center opacity-0 transition-opacity duration-200 group-hover:opacity-100">
-                      <Button variant="contained" component="label">
-                        อัปโหลดรูปภาพ
-                        <VisuallyHiddenInput
-                          type="file"
-                          accept="image/*"
-                          onChange={(e) => handleFileChange(e, "thumbnail")}
-                        />
-                      </Button>
+            {thumbnailPreview ? (
+              <>
+                {isEdit && (
+                  <div className="flex items-center justify-between">
+                    <span className="text-neutral05 text-sm font-medium">
+                      ตัวอย่างภาพแต่ละขนาด
+                    </span>
+                    <Button variant="outlined" size="small" component="label">
+                      ↑ เปลี่ยนรูปภาพ
+                      <VisuallyHiddenInput
+                        type="file"
+                        accept="image/*"
+                        onChange={(e) => handleFileChange(e, "thumbnail")}
+                      />
+                    </Button>
+                  </div>
+                )}
+                <div
+                  className="grid gap-2"
+                  style={{ gridTemplateColumns: "276fr 362fr 450fr" }}
+                >
+                  {([276, 362, 450] as const).map((w, i) => (
+                    <div
+                      key={i + 1}
+                      className="relative overflow-hidden rounded-lg"
+                      style={{ height: 240 }}
+                    >
+                      <Image
+                        src={thumbnailPreview}
+                        alt={`Preview ${i + 1}`}
+                        fill
+                        className="object-cover"
+                      />
                     </div>
-                  )}
+                  ))}
                 </div>
-              ) : (
-                isEdit && (
+                <div
+                  className="grid gap-2"
+                  style={{ gridTemplateColumns: "487fr 624fr" }}
+                >
+                  {([487, 624] as const).map((w, i) => (
+                    <div
+                      key={i + 4}
+                      className="relative overflow-hidden rounded-lg"
+                      style={{ height: 204 }}
+                    >
+                      <Image
+                        src={thumbnailPreview}
+                        alt={`Preview ${i + 4}`}
+                        fill
+                        className="object-cover"
+                      />
+                    </div>
+                  ))}
+                </div>
+              </>
+            ) : (
+              isEdit && (
+                <div className="border-neutral03 bg-neutral02 flex h-[290px] w-full items-center justify-center overflow-hidden rounded-xl border">
                   <Button variant="contained" component="label">
                     อัปโหลดรูปภาพ
                     <VisuallyHiddenInput
@@ -260,54 +300,99 @@ export const NewsInformationInfo = ({
                       onChange={(e) => handleFileChange(e, "thumbnail")}
                     />
                   </Button>
-                )
-              )}
-            </div>
-          </div>
-
-          <div className="flex flex-col gap-2">
-            <label
-              className={`text-h5 font-medium ${isEdit ? "text-neutral05" : "text-neutral04"}`}
-            >
-              {labelSub}
-            </label>
-            <div className="bg-neutral02 border-neutral03 relative flex h-[380px] w-full items-center justify-center overflow-hidden rounded-md border">
-              {highlightPreview ? (
-                <div className="group relative h-full w-full">
-                  <Image
-                    src={highlightPreview}
-                    alt="highlight preview"
-                    fill
-                    className="object-cover"
-                  />
-                  {isEdit && (
-                    <div className="bg-primary01/40 absolute inset-0 flex items-center justify-center opacity-0 transition-opacity duration-200 group-hover:opacity-100">
-                      <Button variant="contained" component="label">
-                        อัปโหลดรูปภาพ
-                        <VisuallyHiddenInput
-                          type="file"
-                          accept="image/*"
-                          onChange={(e) => handleFileChange(e, "highlight")}
-                        />
-                      </Button>
-                    </div>
-                  )}
                 </div>
-              ) : (
-                isEdit && (
-                  <Button variant="contained" component="label">
-                    อัปโหลดรูปภาพ
-                    <VisuallyHiddenInput
-                      type="file"
-                      accept="image/*"
-                      onChange={(e) => handleFileChange(e, "highlight")}
+              )
+            )}
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+            <div className="flex flex-col gap-2">
+              <label
+                className={`text-h5 font-medium ${isEdit ? "text-neutral05" : "text-neutral04"}`}
+              >
+                {labelMain}
+              </label>
+              <div className="bg-neutral02 border-neutral03 relative flex h-[380px] w-full items-center justify-center overflow-hidden rounded-md border">
+                {thumbnailPreview ? (
+                  <div className="group relative h-full w-full">
+                    <Image
+                      src={thumbnailPreview}
+                      alt="thumbnail preview"
+                      fill
+                      className="object-cover"
                     />
-                  </Button>
-                )
-              )}
+                    {isEdit && (
+                      <div className="bg-primary01/40 absolute inset-0 flex items-center justify-center opacity-0 transition-opacity duration-200 group-hover:opacity-100">
+                        <Button variant="contained" component="label">
+                          อัปโหลดรูปภาพ
+                          <VisuallyHiddenInput
+                            type="file"
+                            accept="image/*"
+                            onChange={(e) => handleFileChange(e, "thumbnail")}
+                          />
+                        </Button>
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  isEdit && (
+                    <Button variant="contained" component="label">
+                      อัปโหลดรูปภาพ
+                      <VisuallyHiddenInput
+                        type="file"
+                        accept="image/*"
+                        onChange={(e) => handleFileChange(e, "thumbnail")}
+                      />
+                    </Button>
+                  )
+                )}
+              </div>
+            </div>
+
+            <div className="flex flex-col gap-2">
+              <label
+                className={`text-h5 font-medium ${isEdit ? "text-neutral05" : "text-neutral04"}`}
+              >
+                {labelSub}
+              </label>
+              <div className="bg-neutral02 border-neutral03 relative flex h-[380px] w-full items-center justify-center overflow-hidden rounded-md border">
+                {highlightPreview ? (
+                  <div className="group relative h-full w-full">
+                    <Image
+                      src={highlightPreview}
+                      alt="highlight preview"
+                      fill
+                      className="object-cover"
+                    />
+                    {isEdit && (
+                      <div className="bg-primary01/40 absolute inset-0 flex items-center justify-center opacity-0 transition-opacity duration-200 group-hover:opacity-100">
+                        <Button variant="contained" component="label">
+                          อัปโหลดรูปภาพ
+                          <VisuallyHiddenInput
+                            type="file"
+                            accept="image/*"
+                            onChange={(e) => handleFileChange(e, "highlight")}
+                          />
+                        </Button>
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  isEdit && (
+                    <Button variant="contained" component="label">
+                      อัปโหลดรูปภาพ
+                      <VisuallyHiddenInput
+                        type="file"
+                        accept="image/*"
+                        onChange={(e) => handleFileChange(e, "highlight")}
+                      />
+                    </Button>
+                  )
+                )}
+              </div>
             </div>
           </div>
-        </div>
+        )}
 
         <div className="w-full">
           <label
@@ -353,8 +438,8 @@ export const NewsInformationInfo = ({
             {selectedFile && (
               <CropImageCard
                 file={selectedFile}
-                width={590}
-                height={440}
+                width={isHighlightType ? 450 : 590}
+                height={isHighlightType ? 240 : 440}
                 onUploadComplete={handleUploadComplete}
                 onCancel={() => setOpenCrop(false)}
               />

@@ -2,8 +2,6 @@ import { z } from "zod";
 import dayjs from "dayjs";
 
 export const FocalPointSchema = z.object({
-  cardFocalPointX: z.number().optional(),
-  cardFocalPointY: z.number().optional(),
   thumbnailFocalPointX: z.number().optional(),
   thumbnailFocalPointY: z.number().optional(),
 });
@@ -19,8 +17,10 @@ export const CreateNewsSchema = z.object({
       message: "รูปแบบวันที่ไม่ถูกต้อง",
     }),
   dueDate: z.string().optional(),
-  thumbnail: z.file().optional(),
-  highlight: z.file().optional(),
+  thumbnail: z.file({ message: "กรุณาอัปโหลดภาพหน้าปก" }),
+  additionalImages: z
+    .array(z.file())
+    .min(1, "กรุณาอัปโหลดรูปภาพเพิ่มเติมอย่างน้อย 1 รูป"),
   ...FocalPointSchema.shape,
 });
 

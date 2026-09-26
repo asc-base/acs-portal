@@ -92,7 +92,6 @@ export const NewsInformationForm = ({
   });
 
   const thumbnailFile = watch("thumbnail");
-  const highlightFile = watch("highlight");
 
   const cancelForm = () => {
     if (isDirty) {
@@ -136,9 +135,13 @@ export const NewsInformationForm = ({
     e.target.value = "";
   };
 
-  const handleUploadComplete = (file: File) => {
+  const handleUploadComplete = (file: File, focalPoint?: { x: number; y: number }) => {
     if (cropTarget === "thumbnail") {
       setValue("thumbnail", file, { shouldDirty: true, shouldValidate: true });
+      if (isHighlight && focalPoint) {
+        setValue("thumbnailFocalPointX", focalPoint.x, { shouldDirty: true, shouldValidate: true });
+        setValue("thumbnailFocalPointY", focalPoint.y, { shouldDirty: true, shouldValidate: true });
+      }
     } else if (cropTarget === "highlight") {
       setValue("highlight", file, { shouldDirty: true, shouldValidate: true });
     }
@@ -184,37 +187,73 @@ export const NewsInformationForm = ({
       <form onSubmit={handleSubmit(onSubmit)}>
         {isHighlight ? (
           <div className="flex flex-col gap-6">
-            <div className="grid grid-cols-5 gap-6">
-              <div className="col-span-3 flex flex-col gap-2">
-                <div className="text-neutral05 text-sm font-medium">
-                  ภาพไฮไลต์หลัก
-                </div>
-                <div className="group border-neutral03 bg-neutral02 relative flex h-[376px] w-full items-center justify-center overflow-hidden rounded-xl border">
-                  {thumbnailFile ? (
-                    <>
-                      <Image
-                        src={
-                          thumbnailFile instanceof File
-                            ? URL.createObjectURL(thumbnailFile)
-                            : thumbnailFile
-                        }
-                        alt="Thumbnail Preview"
-                        fill
-                        className="object-cover"
+            <div className="flex flex-col gap-2">
+              {thumbnailFile ? (
+                <>
+                  <div className="flex items-center justify-between">
+                    <span className="text-neutral05 text-sm font-medium">
+                      ตัวอย่างภาพแต่ละขนาด
+                    </span>
+                    <Button variant="outlined" size="small" component="label">
+                      ↑ เปลี่ยนรูปภาพ
+                      <VisuallyHiddenInput
+                        type="file"
+                        accept="image/*"
+                        onChange={(e) => handleFileChange(e, "thumbnail")}
                       />
-                      <div className="bg-neutral05/40 absolute inset-0 flex items-center justify-center opacity-0 transition-opacity duration-200 group-hover:opacity-100">
-                        <Button variant="contained" component="label">
-                          เปลี่ยนรูปภาพ
-                          <VisuallyHiddenInput
-                            type="file"
-                            accept="image/*"
-                            onChange={(e) => handleFileChange(e, "thumbnail")}
-                          />
-                        </Button>
+                    </Button>
+                  </div>
+                  <div
+                    className="grid gap-2"
+                    style={{ gridTemplateColumns: "276fr 362fr 450fr" }}
+                  >
+                    {([276, 362, 450] as const).map((w, i) => (
+                      <div
+                        key={i + 1}
+                        className="relative overflow-hidden rounded-lg"
+                        style={{ height: 240 }}
+                      >
+                        <Image
+                          src={
+                            thumbnailFile instanceof File
+                              ? URL.createObjectURL(thumbnailFile)
+                              : thumbnailFile
+                          }
+                          alt={`Preview ${i + 1}`}
+                          fill
+                          className="object-cover"
+                        />
                       </div>
-                    </>
-                  ) : (
-                    <Button variant="contained" component="label">
+                    ))}
+                  </div>
+                  <div
+                    className="grid gap-2"
+                    style={{ gridTemplateColumns: "487fr 624fr" }}
+                  >
+                    {([487, 624] as const).map((w, i) => (
+                      <div
+                        key={i + 4}
+                        className="relative overflow-hidden rounded-lg"
+                        style={{ height: 204 }}
+                      >
+                        <Image
+                          src={
+                            thumbnailFile instanceof File
+                              ? URL.createObjectURL(thumbnailFile)
+                              : thumbnailFile
+                          }
+                          alt={`Preview ${i + 4}`}
+                          fill
+                          className="object-cover"
+                        />
+                      </div>
+                    ))}
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div className="border-neutral03 bg-neutral02 relative flex h-[290px] w-full items-center justify-center overflow-hidden rounded-xl border">
+                    <Button variant="contained" component="label" sx={{ width: 200, height: 40, borderRadius: 1 }}>
                       อัปโหลดรูปภาพ
                       <VisuallyHiddenInput
                         type="file"
@@ -222,60 +261,14 @@ export const NewsInformationForm = ({
                         onChange={(e) => handleFileChange(e, "thumbnail")}
                       />
                     </Button>
+                  </div>
+                  {errors.thumbnail && (
+                    <p className="text-accent04 text-sm">
+                      {errors.thumbnail.message}
+                    </p>
                   )}
-                </div>
-                {errors.thumbnail && (
-                  <p className="text-accent04 text-sm">
-                    {errors.thumbnail.message}
-                  </p>
-                )}
-              </div>
-
-              <div className="col-span-2 flex flex-col gap-2">
-                <div className="text-neutral05 text-sm font-medium">
-                  ภาพไฮไลต์รอง
-                </div>
-                <div className="group border-neutral03 bg-neutral02 relative flex h-[376px] w-full items-center justify-center overflow-hidden rounded-xl border">
-                  {highlightFile ? (
-                    <>
-                      <Image
-                        src={
-                          highlightFile instanceof File
-                            ? URL.createObjectURL(highlightFile)
-                            : highlightFile
-                        }
-                        alt="Highlight Preview"
-                        fill
-                        className="object-cover"
-                      />
-                      <div className="bg-neutral05/40 absolute inset-0 flex items-center justify-center opacity-0 transition-opacity duration-200 group-hover:opacity-100">
-                        <Button variant="contained" component="label">
-                          เปลี่ยนรูปภาพ
-                          <VisuallyHiddenInput
-                            type="file"
-                            accept="image/*"
-                            onChange={(e) => handleFileChange(e, "highlight")}
-                          />
-                        </Button>
-                      </div>
-                    </>
-                  ) : (
-                    <Button variant="contained" component="label">
-                      อัปโหลดรูปภาพ
-                      <VisuallyHiddenInput
-                        type="file"
-                        accept="image/*"
-                        onChange={(e) => handleFileChange(e, "highlight")}
-                      />
-                    </Button>
-                  )}
-                </div>
-                {errors.highlight && (
-                  <p className="text-accent04 text-sm">
-                    {errors.highlight.message}
-                  </p>
-                )}
-              </div>
+                </>
+              )}
             </div>
             <div className="w-full">
               <Controller
@@ -388,12 +381,8 @@ export const NewsInformationForm = ({
             {croppingFile && cropTarget && (
               <CropImageCard
                 file={croppingFile}
-                width={
-                  cropTarget === "highlight" ? 207 : isHighlight ? 706 : 590
-                }
-                height={
-                  cropTarget === "highlight" ? 180 : isHighlight ? 376 : 440
-                }
+                width={isHighlight ? 450 : 590}
+                height={isHighlight ? 240 : 440}
                 onUploadComplete={handleUploadComplete}
                 onCancel={() => {
                   setCroppingFile(null);
@@ -405,10 +394,10 @@ export const NewsInformationForm = ({
         </Modal>
 
         <div className="mt-6 flex justify-end gap-x-4">
-          <Button variant="outlined" onClick={cancelForm}>
+          <Button variant="outlined" onClick={cancelForm} sx={{ width: 200, height: 40, borderRadius: 1 }}>
             ยกเลิก
           </Button>
-          <Button type="submit" variant="contained">
+          <Button type="submit" variant="contained" sx={{ width: 200, height: 40, borderRadius: 1 }}>
             บันทึกข้อมูล
           </Button>
         </div>

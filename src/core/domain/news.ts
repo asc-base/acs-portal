@@ -28,12 +28,9 @@ export interface ICreateNews {
   title: string;
   tagID: number;
   thumbnail: File;
-  highlight: File;
   startDate: string;
   dueDate?: string;
   detail: string;
-  cardFocalPointX?: number;
-  cardFocalPointY?: number;
   thumbnailFocalPointX?: number;
   thumbnailFocalPointY?: number;
 }
@@ -57,6 +54,8 @@ export interface INewsInformation {
   thumbnailURL: string;
   highlightURL?: string;
   news: INews;
+  thumbnailFocalPointX?: number;
+  thumbnailFocalPointY?: number;
 }
 
 export interface NewsInformationPageProps {
