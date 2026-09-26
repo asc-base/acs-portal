@@ -36,8 +36,19 @@ export const UpdateNewsSchema = z.object({
   tag: z.number(),
   detail: z.string().optional(),
   thumbnail: z.union([z.string().trim().min(1), z.file()]),
-  highlight: z.union([z.string().trim().min(1), z.file()]),
   ...FocalPointSchema.shape,
+});
+
+export const UpdateNewsPayloadSchema = z.object({
+  title: z.string().optional(),
+  tagID: z.number().optional(),
+  thumbnail: z.union([z.string().trim().min(1), z.file()]).optional(),
+  startDate: z.string().optional(),
+  dueDate: z.string().optional(),
+  detail: z.string().optional(),
+  ...FocalPointSchema.shape,
+  newAdditionalImages: z.array(z.file()).optional(),
+  deletedAdditionalImagesId: z.array(z.number()).optional(),
 });
 
 export const CreateNewsInformationSchema = (type: string) =>
@@ -52,6 +63,7 @@ export const CreateNewsInformationSchema = (type: string) =>
 
 export type CreateNewsInputs = z.infer<typeof CreateNewsSchema>;
 export type UpdateNewsInputs = z.infer<typeof UpdateNewsSchema>;
+export type UpdateNewsPayload = z.infer<typeof UpdateNewsPayloadSchema>;
 export type CreateNewsInformationInputs = z.infer<
   ReturnType<typeof CreateNewsInformationSchema>
 >;
