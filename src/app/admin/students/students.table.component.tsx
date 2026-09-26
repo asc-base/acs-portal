@@ -23,7 +23,7 @@ import {
 import { useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { UploadModal } from "@/components/uploadFile";
-import { IStudent, ICreateStudentCsv } from "@/core/domain/student";
+import { IStudent } from "@/core/domain/student";
 import SearchIcon from "@mui/icons-material/Search";
 import CloseIcon from "@mui/icons-material/Close";
 import { RHFTextField } from "@/components/form/RHFTextField";
@@ -31,8 +31,6 @@ import { SearchForm } from "./students.landingpage";
 import { Control } from "react-hook-form";
 import Link from "next/link";
 import AddIcon from "@mui/icons-material/Add";
-import { useImportStudentStore } from "@/store/preview-data";
-import Papa from "papaparse";
 import { StudentService } from "@/core/service/student.service";
 import { StudentRepository } from "@/infra/repositories/student.repository";
 import {
@@ -76,7 +74,6 @@ const StudentTableComponents = ({
   apiBase,
 }: StudentTableComponentsProps) => {
   const router = useRouter();
-  const { setImportData } = useImportStudentStore();
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
   const [confirmModal, setConfirmModal] = useState<ConfirmModalProps | null>(
     null,
@@ -131,17 +128,18 @@ const StudentTableComponents = ({
     }
   };
 
-  const handleUploadStudentFile = (file: File) => {
-    Papa.parse(file, {
-      header: true,
-      skipEmptyLines: true,
-      complete: (result) => {
-        const data: ICreateStudentCsv[] = result.data as ICreateStudentCsv[];
-        setImportData(data);
-        setIsUploadModalOpen(false);
-        router.push(`/admin/students/preview?classBookID=${classBookID}`);
-      },
-    });
+  const handleUploadStudentFile = async (file: File) => {
+    try {
+      await studentService.createStudentBatch({
+        classBookID: Number(classBookID),
+        file: file,
+      });
+      setIsUploadModalOpen(false);
+      router.refresh();
+    } catch {
+      setIsUploadModalOpen(false);
+      setIsError(true);
+    }
   };
 
   return (

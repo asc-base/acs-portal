@@ -117,6 +117,7 @@ export default function Preview_table_component({
       showAlert("ข้อมูลนักศึกษาไม่ถูกต้อง", "error");
       return;
     }
+
     try {
       const response = await studentService.createStudentBatch({
         classBookID: Number(classBookID),
