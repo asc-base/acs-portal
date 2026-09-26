@@ -1,12 +1,13 @@
 import { Pageable } from "@/interface/response";
 import {
   INews,
-  IUpdateNews,
   INewsInformation,
 } from "../domain/news";
 import { INewsRepository } from "../ports/news.repository";
 import { CreateNewsInputs } from "../schema/news";
 import { UpsertNewsInformationInputs } from "../schema/newsinformation";
+import { UpdateNewsPayload } from "../schema/news";
+
 export class NewsService {
   constructor(private readonly newsRepository: INewsRepository) {}
 
@@ -61,17 +62,27 @@ async createNews(data: CreateNewsInputs): Promise<INews> {
 
   async updateNews(
     id: number,
-    data: IUpdateNews,
+    data: UpdateNewsPayload,
   ) {
     try {
       const formData = new FormData();
-     Object.entries(data).forEach(([key, value]) => {
-    if (value instanceof File) {
-      formData.append(key, value);
-    } else if (value !== undefined && value !== null) {
-      formData.append(key, String(value));
-    }
-  });
+      const { newAdditionalImages, deletedAdditionalImagesId, ...fields } = data;
+      Object.entries(fields).forEach(([key, value]) => {
+        if (value instanceof File) {
+          formData.append(key, value);
+        } else if (value !== undefined && value !== null) {
+          formData.append(key, String(value));
+        }
+      });
+      newAdditionalImages?.forEach((file) =>
+        formData.append("newAdditionalImages", file),
+      );
+      if (deletedAdditionalImagesId?.length) {
+        formData.append(
+          "deletedAdditionalImagesId",
+          JSON.stringify(deletedAdditionalImagesId),
+        );
+      }
       const response = await this.newsRepository.updateNews(id, formData);
       return response.data;
     } catch (error) {
