@@ -37,6 +37,10 @@ import {
   ConfirmModal,
   ConfirmModalProps,
 } from "@/components/modal/confirmModal";
+import {
+  UploadProgressModal,
+  UploadStatus,
+} from "@/components/modal/loadingModal";
 import Alert from "@mui/material/Alert";
 import Snackbar from "@mui/material/Snackbar";
 import EmptyState from "@/components/emptyState";
@@ -79,6 +83,7 @@ const StudentTableComponents = ({
     null,
   );
   const [isError, setIsError] = useState(false);
+  const [uploadStatus, setUploadStatus] = useState<UploadStatus | null>(null);
 
   const studentService = useMemo(() => {
     const repo = new StudentRepository(apiBase);
@@ -129,17 +134,22 @@ const StudentTableComponents = ({
   };
 
   const handleUploadStudentFile = async (file: File) => {
+    setIsUploadModalOpen(false);
+    setUploadStatus("loading");
     try {
       await studentService.createStudentBatch({
         classBookID: Number(classBookID),
         file: file,
       });
-      setIsUploadModalOpen(false);
-      router.refresh();
+      setUploadStatus("success");
     } catch {
-      setIsUploadModalOpen(false);
-      setIsError(true);
+      setUploadStatus("error");
     }
+  };
+
+  const handleUploadRetry = () => {
+    setUploadStatus(null);
+    setIsUploadModalOpen(true);
   };
 
   return (
@@ -355,6 +365,16 @@ const StudentTableComponents = ({
         </div>
       )}
       {confirmModal && <ConfirmModal {...confirmModal} />}
+      <UploadProgressModal
+        isOpen={uploadStatus !== null}
+        status={uploadStatus ?? "loading"}
+        onClose={() => setUploadStatus(null)}
+        onConfirm={() => {
+          setUploadStatus(null);
+          router.refresh();
+        }}
+        onRetry={handleUploadRetry}
+      />
     </Card>
   );
 };
