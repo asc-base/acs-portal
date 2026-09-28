@@ -138,7 +138,8 @@ export const StudentModal: React.FC<StudentModalProps> = ({
                   {student.user.firstNameTh} {student.user.lastNameTh}
                 </Typography>
                 <Typography className="!text-xs !text-neutral04 md:!text-sm text-center mb-2 md:mb-4">
-                  ({student.user.nickName || "-"}) {student.studentCode} รุ่น {classBook?.classof || "-"}
+                  {student.user.nickName?.trim() && `(${student.user.nickName.trim()}) `}
+                  {student.studentCode} รุ่น {classBook?.classof || "-"}
                 </Typography>
 
                 {/* Social Links */}
