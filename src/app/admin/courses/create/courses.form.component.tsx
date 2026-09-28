@@ -186,7 +186,18 @@ export const CourseForm: FC<CoursesFormProps> = ({ apiBase, curriculumID }) => {
           variant="outlined"
           size="small"
           requiredMark
+          displayEmpty
+          renderValue={(value) =>
+            value ? (
+              typeCourses.find((typeCourse) => typeCourse.id === value)?.type
+            ) : (
+              <span className="text-neutral04">เลือกกลุ่มวิชา</span>
+            )
+          }
         >
+          <MenuItem value={0} disabled sx={{ display: "none" }}>
+            เลือกกลุ่มวิชา
+          </MenuItem>
           {typeCourses.map((typeCourse) => (
             <MenuItem key={typeCourse.id} value={typeCourse.id}>
               {typeCourse.type}
@@ -201,6 +212,7 @@ export const CourseForm: FC<CoursesFormProps> = ({ apiBase, curriculumID }) => {
           variant="outlined"
           size="small"
           requiredMark
+          placeholder="ระบุรหัสวิชา"
         />
 
         <RHFTextField
@@ -210,6 +222,7 @@ export const CourseForm: FC<CoursesFormProps> = ({ apiBase, curriculumID }) => {
           variant="outlined"
           size="small"
           requiredMark
+          placeholder="ระบุหน่วยกิต"
         />
       </div>
 
@@ -221,6 +234,7 @@ export const CourseForm: FC<CoursesFormProps> = ({ apiBase, curriculumID }) => {
         size="small"
         fullWidth
         requiredMark
+        placeholder="ระบุชื่อวิชาภาษาอังกฤษ"
       />
 
       <RHFTextField
@@ -231,6 +245,7 @@ export const CourseForm: FC<CoursesFormProps> = ({ apiBase, curriculumID }) => {
         size="small"
         fullWidth
         requiredMark
+        placeholder="ระบุชื่อวิชาภาษาไทย"
       />
 
       <RHFTextField
@@ -242,6 +257,7 @@ export const CourseForm: FC<CoursesFormProps> = ({ apiBase, curriculumID }) => {
         multiline
         rows={6}
         requiredMark
+        placeholder="ระบุคำอธิบายรายวิชา"
       />
 
       <div className="mt-6">
@@ -286,7 +302,12 @@ export const CourseForm: FC<CoursesFormProps> = ({ apiBase, curriculumID }) => {
                         field.onChange(value?.id ?? 0);
                       }}
                       renderInput={(params) => (
-                        <TextField {...params} size="small" fullWidth />
+                        <TextField
+                          {...params}
+                          size="small"
+                          fullWidth
+                          placeholder="เลือกรหัสวิชาและชื่อวิชา"
+                        />
                       )}
                     />
                   )}
