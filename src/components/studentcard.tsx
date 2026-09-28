@@ -32,22 +32,12 @@ export const StudentCard: FC<IStudent> = (props) => {
         </div>
       )}
       <CardContent className="flex flex-initial flex-col justify-center gap-1 p-3 !pb-3 text-left lg:p-4 lg:!pb-4">
-        <Typography component="h2" className="!text-primary01 text-left !font-bold !text-sm lg:!text-base">
-          <span className="lg:hidden">
-            {`${props.user.firstNameTh} ${props.user.lastNameTh}`.length >=
-            16 ? (
-              <>
-                {props.user.firstNameTh}
-                <br />
-                {props.user.lastNameTh}
-              </>
-            ) : (
-              `${props.user.firstNameTh} ${props.user.lastNameTh}`
-            )}
-          </span>
-          <span className="hidden lg:inline">
-            {props.user.firstNameTh} {props.user.lastNameTh}
-          </span>
+        <Typography
+          noWrap
+          component="h2"
+          className="!text-primary01 text-left !font-bold !text-sm lg:!text-base !truncate w-full block"
+        >
+          {props.user.firstNameTh} {props.user.lastNameTh}
         </Typography>
         <Box className="mt-1 flex w-full flex-row items-center justify-between">
           <Typography component="h4" className="!text-neutral05 !text-xs lg:!text-sm">
