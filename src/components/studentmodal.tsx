@@ -80,87 +80,114 @@ export const StudentModal: React.FC<StudentModalProps> = ({
         </IconButton>
 
         {/* Two-Column Grid */}
-        <div className="flex flex-col gap-8 md:flex-row pt-4">
+        <div className="flex flex-col gap-8 md:flex-row pt-4 mt-6 md:mt-0">
 
           {/* Left Panel: Profile and Skills */}
           <div className="flex w-full flex-col gap-6 md:w-65.5 md:shrink-0">
 
             {/* Profile Card */}
-            <div className="flex h-112.5 w-full flex-col items-center rounded-2xl border border-neutral02 bg-white p-6 shadow-sm">
-              <div className="mb-4 overflow-hidden rounded-2xl w-full flex justify-center">
+            <div className="flex w-full flex-row items-center justify-center gap-4 rounded-2xl border border-neutral02 bg-white p-4 shadow-sm md:h-112.5 md:flex-col md:items-center md:p-6">
+              {/* Avatar */}
+              <div className="shrink-0 md:mb-4 md:w-full md:flex md:justify-center">
                 {student.user.imageUrl ? (
-                  <Image
-                    src={student.user.imageUrl}
-                    alt={`${student.user.firstNameTh} ${student.user.lastNameTh}`}
-                    width={220}
-                    height={230}
-                    className="h-57.5 w-full max-w-55 object-cover rounded-2xl"
-                  />
-                ) : (
-                  <div className="h-57.5 w-full max-w-55 overflow-hidden rounded-2xl">
-                    <StudentDefaultAvatar
-                      prefix={student.user.prefix}
+                  <>
+                    {/* Mobile */}
+                    <Image
+                      src={student.user.imageUrl}
                       alt={`${student.user.firstNameTh} ${student.user.lastNameTh}`}
-                      variant="square"
-                      sx={{ width: "100%", height: "100%" }}
+                      width={220}
+                      height={230}
+                      className="h-20 w-20 rounded-full object-cover md:hidden"
                     />
-                  </div>
+                    {/* Desktop */}
+                    <Image
+                      src={student.user.imageUrl}
+                      alt={`${student.user.firstNameTh} ${student.user.lastNameTh}`}
+                      width={220}
+                      height={230}
+                      className="hidden h-57.5 w-full max-w-55 rounded-2xl object-cover md:block"
+                    />
+                  </>
+                ) : (
+                  <>
+                    {/* Mobile */}
+                    <div className="h-20 w-20 overflow-hidden rounded-full md:hidden">
+                      <StudentDefaultAvatar
+                        prefix={student.user.prefix}
+                        alt={`${student.user.firstNameTh} ${student.user.lastNameTh}`}
+                        variant="circle"
+                        sx={{ width: "100%", height: "100%" }}
+                      />
+                    </div>
+                    {/* Desktop */}
+                    <div className="hidden h-57.5 w-full max-w-55 overflow-hidden rounded-2xl md:block">
+                      <StudentDefaultAvatar
+                        prefix={student.user.prefix}
+                        alt={`${student.user.firstNameTh} ${student.user.lastNameTh}`}
+                        variant="square"
+                        sx={{ width: "100%", height: "100%" }}
+                      />
+                    </div>
+                  </>
                 )}
               </div>
 
-              <Typography className="!text-lg !font-bold !text-neutral05 text-center mb-1">
-                {student.user.firstNameTh} {student.user.lastNameTh} ({student.user.nickName || "-"})
-              </Typography>
-              <Typography className="!text-sm !text-neutral04 text-center mb-4">
-                {student.studentCode} รุ่น {classBook?.classof || "-"}
-              </Typography>
+              {/* Info */}
+              <div className="flex flex-col items-center md:items-center">
+                <Typography className="!text-base !font-bold !text-neutral05 md:!text-lg text-center mb-0.5 md:mb-1">
+                  {student.user.firstNameTh} {student.user.lastNameTh}
+                </Typography>
+                <Typography className="!text-xs !text-neutral04 md:!text-sm text-center mb-2 md:mb-4">
+                  ({student.user.nickName || "-"}) {student.studentCode} รุ่น {classBook?.classof || "-"}
+                </Typography>
 
-              {/* Social Links */}
-              <div className="flex gap-3 justify-center">
-                {student.facebook && (
-                  <IconButton
-                    component="a"
-                    href={student.facebook}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    sx={{ p: 0.5, color: "var(--color-neutral04)", "&:hover": { color: "#1877F2" } }}
-                  >
-                    <FacebookIcon sx={{ fontSize: 22 }} />
-                  </IconButton>
-                )}
-                {student.linkedin && (
-                  <IconButton
-                    component="a"
-                    href={student.linkedin}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    sx={{ p: 0.5, color: "var(--color-neutral04)", "&:hover": { color: "#0A66C2" } }}
-                  >
-                    <LinkedInIcon sx={{ fontSize: 22 }} />
-                  </IconButton>
-                )}
-                {student.github && (
-                  <IconButton
-                    component="a"
-                    href={student.github}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    sx={{ p: 0.5, color: "var(--color-neutral04)", "&:hover": { color: "#181717" } }}
-                  >
-                    <GitHubIcon sx={{ fontSize: 22 }} />
-                  </IconButton>
-                )}
-                {student.instagram && (
-                  <IconButton
-                    component="a"
-                    href={student.instagram}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    sx={{ p: 0.5, color: "var(--color-neutral04)", "&:hover": { color: "#E1306C" } }}
-                  >
-                    <InstagramIcon sx={{ fontSize: 22 }} />
-                  </IconButton>
-                )}
+                {/* Social Links */}
+                <div className="flex gap-0.5 md:gap-1.5 justify-center">
+                  {student.facebook && (
+                    <IconButton
+                      component="a"
+                      href={student.facebook}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      sx={{ p: 0.25, color: "var(--color-neutral04)", "&:hover": { color: "#1877F2" } }}
+                    >
+                      <FacebookIcon sx={{ fontSize: { xs: 18, md: 22 } }} />
+                    </IconButton>
+                  )}
+                  {student.linkedin && (
+                    <IconButton
+                      component="a"
+                      href={student.linkedin}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      sx={{ p: 0.25, color: "var(--color-neutral04)", "&:hover": { color: "#0A66C2" } }}
+                    >
+                      <LinkedInIcon sx={{ fontSize: { xs: 18, md: 22 } }} />
+                    </IconButton>
+                  )}
+                  {student.github && (
+                    <IconButton
+                      component="a"
+                      href={student.github}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      sx={{ p: 0.25, color: "var(--color-neutral04)", "&:hover": { color: "#181717" } }}
+                    >
+                      <GitHubIcon sx={{ fontSize: { xs: 18, md: 22 } }} />
+                    </IconButton>
+                  )}
+                  {student.instagram && (
+                    <IconButton
+                      component="a"
+                      href={student.instagram}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      sx={{ p: 0.25, color: "var(--color-neutral04)", "&:hover": { color: "#E1306C" } }}
+                    >
+                      <InstagramIcon sx={{ fontSize: { xs: 18, md: 22 } }} />
+                    </IconButton>
+                  )}
+                </div>
               </div>
             </div>
 
