@@ -40,7 +40,7 @@ import {
 import {
   UploadProgressModal,
   UploadStatus,
-} from "@/components/modal/loadingModal";
+} from "@/components/modal/uploadStudentFileModal";
 import Alert from "@mui/material/Alert";
 import Snackbar from "@mui/material/Snackbar";
 import EmptyState from "@/components/emptyState";
