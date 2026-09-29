@@ -19,29 +19,14 @@ export const ProfessorCard: FC<IProfessor> = (props) => {
       <CardContent className="flex flex-1 flex-col justify-center gap-1 p-3 !pb-3 text-left lg:p-4 lg:!pb-4">
         <Typography
           component="h3"
-          className="!text-primary01 text-left !font-bold"
+          className="!text-primary01 text-left !font-bold break-words"
         >
-          <span className="lg:hidden">
-            {`${props.prefix?.shortNameTh}${props.user.firstNameTh} ${props.user.lastNameTh}`.length >=
-              16 ? (
-              <>
-                {props.prefix?.shortNameTh}
-                {props.user.firstNameTh}
-                <br />
-                {props.user.lastNameTh}
-              </>
-            ) : (
-              `${props.prefix?.shortNameTh}${props.user.firstNameTh} ${props.user.lastNameTh}`
-            )}
-          </span>
-          <span className="hidden lg:inline">
-            {props.prefix?.shortNameTh}
-            {props.user.firstNameTh} {props.user.lastNameTh}
-          </span>
+          {props.user.prefix?.nameTh}
+          {props.user.firstNameTh} {props.user.lastNameTh}
         </Typography>
 
         <Typography component="h4" className="!text-neutral05 text-left">
-          {props.prefix?.shortNameEn} {props.user.firstNameEn} {props.user.lastNameEn}
+          {props.user.prefix?.nameEn} {props.user.firstNameEn} {props.user.lastNameEn}
         </Typography>
       </CardContent>
     </div>
