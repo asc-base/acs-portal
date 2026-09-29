@@ -21,6 +21,8 @@ jobs:
   build:
     name: Build and publish
     runs-on: ubuntu-latest
+    outputs:
+      image_digest: ${{ steps.build_image.outputs.digest }}
 
     steps:
       - name: Checkout repository
@@ -37,6 +39,7 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build and publish Docker image
+        id: build_image
         uses: docker/build-push-action@v5
         with:
           context: .
@@ -64,18 +67,25 @@ jobs:
 
       - name: Update portal image version
         working-directory: infrastructure
+        env:
+          IMAGE_DIGEST: ${{ needs.build.outputs.image_digest }}
         run: |
           set -euo pipefail
 
           compose_file="staging/portal/docker-compose.yml"
-          image="${IMAGE}:${IMAGE_TAG}"
+          if [ -z "$IMAGE_DIGEST" ]; then
+            echo "Docker Buildx did not return an image digest."
+            exit 1
+          fi
 
-          if ! grep -q '^    image: ghcr.io/asc-base/acs-portal:' "$compose_file"; then
+          image="${IMAGE}@${IMAGE_DIGEST}"
+
+          if ! grep -q '^    image: ghcr.io/asc-base/acs-portal[:@]' "$compose_file"; then
             echo "Expected portal image was not found in $compose_file"
             exit 1
           fi
 
-          sed -i -E "s|^    image: ghcr.io/asc-base/acs-portal:.*$|    image: ${image}|" "$compose_file"
+          sed -i -E "s|^    image: ghcr.io/asc-base/acs-portal([:@].*)?$|    image: ${image}|" "$compose_file"
 
           if git diff --quiet -- "$compose_file"; then
             echo "Staging infrastructure already references $image"

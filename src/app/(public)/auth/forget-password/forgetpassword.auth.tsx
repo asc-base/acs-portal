@@ -6,7 +6,7 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { RHFTextField } from "@/components/form/RHFTextField";
-import { authService } from "@/infra/container";
+import { publicAuthService } from "@/infra/auth-client";
 import { ForgetPasswordSchema } from "@/core/schema/auth";
 
 /* ===== Schema & Types ===== */
@@ -31,7 +31,7 @@ export default function ForgetPasswordAuthLandingPage() {
     setMessage(null);
     setSubmitting(true);
     try {
-      const response = await authService.createCredentailForgetPassowrd({
+      const response = await publicAuthService.createCredentailForgetPassowrd({
         email: data.email,
       });
       if (!response.status) {

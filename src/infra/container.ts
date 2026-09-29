@@ -2,8 +2,6 @@ import { NewsRepository } from "./repositories/news.repository";
 import { NewsService } from "@/core/service/news.service";
 import { MasterDataRepository } from "./repositories/master-data.repository";
 import { MasterDataService } from "@/core/service/master-data.service";
-import { AuthRepository } from "./repositories/auth.repository";
-import { AuthService } from "@/core/service/auth.service";
 import { CurriculumRepository } from "./repositories/curriculum.repository";
 import { CurriculumService } from "@/core/service/curriculum.service";
 import { CourseRepository } from "./repositories/course.repository";
@@ -17,36 +15,32 @@ import { ProjectService } from "@/core/service/project.service";
 import { ClassBookRepository } from "./repositories/class-book.repository";
 import { ClassBookService } from "@/core/service/class-book.service";
 
-// Use process.env directly in server-side code (container.ts is server-only)
-// The /api/config endpoint is only for client-side usage
-export const API_URL =
-  process.env.API_URL || "https://acs-dev.service.narutchai.com";
+// API_URL is supplied when the container starts and points to the backend origin.
+export const API_URL = process.env.API_URL?.replace(/\/+$/, "") || "";
 
-export const baseUrl = `${API_URL}/api`;
+const serverBaseUrl = `${API_URL}/api`;
+export const baseUrl = "/api"; // Browser requests go through the same-origin proxy.
 
-const newsRepository = new NewsRepository(baseUrl);
+const newsRepository = new NewsRepository(serverBaseUrl);
 export const newsService = new NewsService(newsRepository);
 
-const authRepository = new AuthRepository(baseUrl);
-export const authService = new AuthService(authRepository);
-
-const masterDataRepository = new MasterDataRepository(baseUrl);
+const masterDataRepository = new MasterDataRepository(serverBaseUrl);
 export const masterDataService = new MasterDataService(masterDataRepository);
 
-const curriculumRepository = new CurriculumRepository(baseUrl);
+const curriculumRepository = new CurriculumRepository(serverBaseUrl);
 export const curriculumService = new CurriculumService(curriculumRepository);
 
-const courseRepository = new CourseRepository(baseUrl);
+const courseRepository = new CourseRepository(serverBaseUrl);
 export const courseService = new CourseService(courseRepository);
 
-const professorRepository = new ProfessorRepository(baseUrl);
+const professorRepository = new ProfessorRepository(serverBaseUrl);
 export const professorService = new ProfessorService(professorRepository);
 
-const studentRepository = new StudentRepository(baseUrl);
+const studentRepository = new StudentRepository(serverBaseUrl);
 export const studentService = new StudentService(studentRepository);
 
-const projectRepository = new ProjectRepository(baseUrl);
+const projectRepository = new ProjectRepository(serverBaseUrl);
 export const projectService = new ProjectService(projectRepository);
 
-const classBookRepository = new ClassBookRepository(baseUrl);
+const classBookRepository = new ClassBookRepository(serverBaseUrl);
 export const classBookService = new ClassBookService(classBookRepository);
