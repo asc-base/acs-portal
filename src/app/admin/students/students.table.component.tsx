@@ -23,7 +23,7 @@ import {
 import { useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { UploadModal } from "@/components/uploadFile";
-import { IStudent, ICreateStudentCsv } from "@/core/domain/student";
+import { IStudent } from "@/core/domain/student";
 import SearchIcon from "@mui/icons-material/Search";
 import CloseIcon from "@mui/icons-material/Close";
 import { RHFTextField } from "@/components/form/RHFTextField";
@@ -31,14 +31,16 @@ import { SearchForm } from "./students.landingpage";
 import { Control } from "react-hook-form";
 import Link from "next/link";
 import AddIcon from "@mui/icons-material/Add";
-import { useImportStudentStore } from "@/store/preview-data";
-import Papa from "papaparse";
 import { StudentService } from "@/core/service/student.service";
 import { StudentRepository } from "@/infra/repositories/student.repository";
 import {
   ConfirmModal,
   ConfirmModalProps,
 } from "@/components/modal/confirmModal";
+import {
+  UploadProgressModal,
+  UploadStatus,
+} from "@/components/modal/uploadStudentFileModal";
 import Alert from "@mui/material/Alert";
 import Snackbar from "@mui/material/Snackbar";
 import EmptyState from "@/components/emptyState";
@@ -76,12 +78,12 @@ const StudentTableComponents = ({
   apiBase,
 }: StudentTableComponentsProps) => {
   const router = useRouter();
-  const { setImportData } = useImportStudentStore();
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
   const [confirmModal, setConfirmModal] = useState<ConfirmModalProps | null>(
     null,
   );
   const [isError, setIsError] = useState(false);
+  const [uploadStatus, setUploadStatus] = useState<UploadStatus | null>(null);
 
   const studentService = useMemo(() => {
     const repo = new StudentRepository(apiBase);
@@ -131,17 +133,23 @@ const StudentTableComponents = ({
     }
   };
 
-  const handleUploadStudentFile = (file: File) => {
-    Papa.parse(file, {
-      header: true,
-      skipEmptyLines: true,
-      complete: (result) => {
-        const data: ICreateStudentCsv[] = result.data as ICreateStudentCsv[];
-        setImportData(data);
-        setIsUploadModalOpen(false);
-        router.push(`/admin/students/preview?classBookID=${classBookID}`);
-      },
-    });
+  const handleUploadStudentFile = async (file: File) => {
+    setIsUploadModalOpen(false);
+    setUploadStatus("loading");
+    try {
+      await studentService.createStudentBatch({
+        classBookID: Number(classBookID),
+        file: file,
+      });
+      setUploadStatus("success");
+    } catch {
+      setUploadStatus("error");
+    }
+  };
+
+  const handleUploadRetry = () => {
+    setUploadStatus(null);
+    setIsUploadModalOpen(true);
   };
 
   return (
@@ -357,6 +365,16 @@ const StudentTableComponents = ({
         </div>
       )}
       {confirmModal && <ConfirmModal {...confirmModal} />}
+      <UploadProgressModal
+        isOpen={uploadStatus !== null}
+        status={uploadStatus ?? "loading"}
+        onClose={() => setUploadStatus(null)}
+        onConfirm={() => {
+          setUploadStatus(null);
+          router.refresh();
+        }}
+        onRetry={handleUploadRetry}
+      />
     </Card>
   );
 };

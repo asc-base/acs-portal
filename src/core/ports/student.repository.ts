@@ -1,5 +1,5 @@
 import { ApiResponse, Pageable } from "@/interface/response";
-import { IStudent, QueryStudent, ICreateStudentCsv } from "../domain/student";
+import { IStudent, QueryStudent } from "../domain/student";
 
 export interface IStudentRepository {
   getStudents(query: QueryStudent): Promise<ApiResponse<Pageable<IStudent>>>;
@@ -11,8 +11,5 @@ export interface IStudentRepository {
     data: FormData,
     studentId: number,
   ): Promise<ApiResponse<IStudent>>;
-  createStudentBatch(data: {
-    classBookID: number;
-    students: ICreateStudentCsv[];
-  }): Promise<ApiResponse<IStudent[]>>;
+  createStudentBatch(data: FormData): Promise<ApiResponse<IStudent[]>>;
 }
