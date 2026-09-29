@@ -9,14 +9,15 @@ import { ApiResponse } from "@/interface/response";
  */
 export async function proxy(request: NextRequest) {
   const cookie = request.headers.get("cookie");
+  const apiUrl = process.env.API_URL?.replace(/\/+$/, "");
 
-  if (!cookie) {
+  if (!cookie || !apiUrl) {
     return NextResponse.redirect(new URL("/home", request.url));
   }
 
   try {
     const response = await fetch(
-      new URL("/api/bff/v1/users/profile", request.url),
+      `${apiUrl}/api/v1/users/profile`,
       {
         cache: "no-store",
         headers: { Cookie: cookie },
