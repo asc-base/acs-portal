@@ -1,13 +1,13 @@
-import { IUser } from "@/core/domain/user";
+import { IUser, UserProfile } from "@/core/domain/user";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
 interface AuthState {
-  user: IUser | null;
+  user: IUser | UserProfile | null;
 }
 
 export interface AuthActions {
-  setUser: (user: IUser | null) => void;
+  setUser: (user: IUser | UserProfile | null) => void;
   clearUser: () => void;
 }
 

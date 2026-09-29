@@ -2,7 +2,6 @@ import { IStudentRepository } from "@/core/ports/student.repository";
 import {
   IStudent,
   QueryStudent,
-  ICreateStudentCsv,
 } from "@/core/domain/student";
 import { HttpHelper } from "@/lib/http";
 import { ApiResponse, Pageable } from "@/interface/response";
@@ -82,10 +81,7 @@ export class StudentRepository implements IStudentRepository {
     return response;
   }
 
-  async createStudentBatch(data: {
-    classBookID: number;
-    students: ICreateStudentCsv[];
-  }): Promise<ApiResponse<IStudent[]>> {
+  async createStudentBatch(data: FormData): Promise<ApiResponse<IStudent[]>> {
     return await this.http.post<ApiResponse<IStudent[]>>(
       `/v1/students/batch`,
       data,

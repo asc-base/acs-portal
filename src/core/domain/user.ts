@@ -1,3 +1,11 @@
+export interface UserPrefix {
+    id: number;
+    nameTh: string;
+    nameEn?: string;
+    shortNameTh?: string;
+    shortNameEn?: string;
+}
+
 export interface IUser {
     id: number;
     email: string;
@@ -7,4 +15,16 @@ export interface IUser {
     lastNameEn: string;
     nickName?: string;
     imageUrl: string;
+    imageFocalPointX?: number | null;
+    imageFocalPointY?: number | null;
+    prefix?: UserPrefix | null;
+}
+
+export interface UserRole {
+    id: number;
+    name: string;
+}
+
+export interface UserProfile extends IUser {
+    roles: UserRole[];
 }

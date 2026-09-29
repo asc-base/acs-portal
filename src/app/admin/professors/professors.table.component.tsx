@@ -93,7 +93,7 @@ const ProfessorTableComponent = ({
                 </TableCell>
 
                 <TableCell align="center">
-                  {prof.academicPosition?.nameTh}
+                  {prof.prefix?.nameTh}
                 </TableCell>
 
                 <TableCell align="center">

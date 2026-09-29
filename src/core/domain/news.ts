@@ -5,6 +5,15 @@ export interface INews {
   title: string;
   thumbnailURL: string;
   highlightURL: string;
+  newsAdditionalImages?: {
+    id: number;
+    newsID: number;
+    imageUrl: string;
+  }[];
+  cardFocalPointX?: number;
+  cardFocalPointY?: number;
+  thumbnailFocalPointX?: number;
+  thumbnailFocalPointY?: number;
   detail: string;
   startDate: Date;
   dueDate: Date | null;
@@ -19,26 +28,34 @@ export interface ICreateNews {
   title: string;
   tagID: number;
   thumbnail: File;
-  highlight:File 
   startDate: string;
   dueDate?: string;
   detail: string;
+  thumbnailFocalPointX?: number;
+  thumbnailFocalPointY?: number;
 }
 
 export interface IUpdateNews {
   title?: string;
   tagID?: number;
   thumbnail?: File | string;
-  highlight?:File | string 
+  highlight?: File | string;
   startDate: string;
   dueDate?: string;
   detail?: string;
+  cardFocalPointX?: number;
+  cardFocalPointY?: number;
+  thumbnailFocalPointX?: number;
+  thumbnailFocalPointY?: number;
 }
 
 export interface INewsInformation {
   id: number;
   thumbnailURL: string;
+  highlightURL?: string;
   news: INews;
+  thumbnailFocalPointX?: number;
+  thumbnailFocalPointY?: number;
 }
 
 export interface NewsInformationPageProps {
@@ -55,4 +72,11 @@ export interface QueryNews {
   sortBy?: string;
   search?: string;
   searchBy?: string;
+}
+
+export interface IUpsertNewsFeature {
+  id?: number;
+  thumbnail?: File | string;
+  newsID: number;
+  tagID: number;
 }

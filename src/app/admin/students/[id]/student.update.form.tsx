@@ -1,17 +1,21 @@
 "use client";
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { Button, Typography, Modal } from "@mui/material";
 // import AddIcon from "@mui/icons-material/Add";
 import Alert from "@mui/material/Alert";
 import Snackbar from "@mui/material/Snackbar";
+import MenuItem from "@mui/material/MenuItem";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
-import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { RHFTextField } from "@/components/form/RHFTextField";
+import { RHFSelect } from "@/components/form/RHFSelect";
 import { StudentService } from "@/core/service/student.service";
 import { StudentRepository } from "@/infra/repositories/student.repository";
+import { MasterDataService } from "@/core/service/master-data.service";
+import { MasterDataRepository } from "@/infra/repositories/master-data.repository";
+import { Position } from "@/core/domain/master-data";
 import { IUpdateStudent, IStudent } from "@/core/domain/student";
 import {
   ConfirmModal,
@@ -19,38 +23,13 @@ import {
 } from "@/components/modal/confirmModal";
 import { styled } from "@mui/material/styles";
 import { CropImageCard } from "@/components/cropimagecard";
+import { UpdateStudentSchema, UpdateStudentInputs } from "@/core/schema/student";
 
 interface StudentUpdateFormProps {
   apiBase: string;
   classBookID: number;
   student: IStudent;
 }
-
-const Schema = z.object({
-  firstNameTh: z.string().min(1, "กรุณากรอกชื่อภาษาไทย"),
-  lastNameTh: z.string().min(1, "กรุณากรอกนามสกุลภาษาไทย"),
-  firstNameEn: z.string().min(1, "กรุณากรอกชื่อภาษาอังกฤษ"),
-  lastNameEn: z.string().min(1, "กรุณากรอกนามสกุลภาษาอังกฤษ"),
-  studentCode: z
-    .string()
-    .min(11, "กรุณากรอกรหัสนักศึกษา")
-    .regex(/^[0-9]+$/, "รหัสนักศึกษาต้องเป็นตัวเลขเท่านั้น"),
-  nickName: z.string().min(1, "กรุณากรอกชื่อเล่น"),
-  email: z.string().email("อีเมลไม่ถูกต้อง"),
-  facebook: z.string().optional(),
-  linkedin: z.string().optional(),
-  instagram: z.string().optional(),
-  github: z.string().optional(),
-  // otherProjects: z
-  //   .array(
-  //     z.object({
-  //       value: z.string().trim(),
-  //     }),
-  //   )
-  //   .optional(),
-});
-
-type FormData = z.infer<typeof Schema>;
 
 const VisuallyHiddenInput = styled("input")({
   clip: "rect(0 0 0 0)",
@@ -69,12 +48,16 @@ export const StudentUpdateForm = ({
   classBookID,
   student,
 }: StudentUpdateFormProps) => {
+  const [prefixes, setPrefixes] = useState<Position[]>([]);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [croppingFile, setCroppingFile] = useState<File | null>(null);
+  const [focalPoint, setFocalPoint] = useState<{ x: number; y: number } | null>(
+    null,
+  );
   const [isError, setIsError] = useState(false);
   const [confirmModal, setConfirmModal] = useState<ConfirmModalProps | null>(
     null,
   );
-  const [isCroping, setIsCroping] = useState(false);
 
   const previewSrc = selectedFile
     ? URL.createObjectURL(selectedFile)
@@ -87,13 +70,27 @@ export const StudentUpdateForm = ({
     return new StudentService(repo);
   }, [apiBase]);
 
+  const masterDataService = useMemo(() => {
+    const masterdataRepository = new MasterDataRepository(apiBase);
+    return new MasterDataService(masterdataRepository);
+  }, [apiBase]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      const res = await masterDataService.getMasterData();
+      setPrefixes(res.prefixes);
+    };
+    fetchData();
+  }, [masterDataService]);
+
   const {
     control,
     handleSubmit,
     formState: { isValid },
-  } = useForm<FormData>({
-    resolver: zodResolver(Schema),
+  } = useForm<UpdateStudentInputs>({
+    resolver: zodResolver(UpdateStudentSchema),
     defaultValues: {
+      prefixID: student.user.prefix?.id,
       firstNameTh: student.user.firstNameTh,
       lastNameTh: student.user.lastNameTh,
       firstNameEn: student.user.firstNameEn,
@@ -120,28 +117,34 @@ export const StudentUpdateForm = ({
     const file = event.target.files?.[0] || null;
 
     if (file) {
-      setSelectedFile(file);
-      setIsCroping(true);
+      setCroppingFile(file);
     }
+    event.target.value = "";
   };
 
-  const handleCropComplete = (croppedFile: File) => {
+  const handleCropComplete = (
+    croppedFile: File,
+    focal?: { x: number; y: number },
+  ) => {
     setSelectedFile(croppedFile);
-    setIsCroping(false);
+    if (focal) {
+      setFocalPoint(focal);
+    }
+    setCroppingFile(null);
   };
 
   const handleCropCancel = () => {
-    setIsCroping(false);
-    setSelectedFile(null);
+    setCroppingFile(null);
   };
 
-  const onSubmit = async (data: IUpdateStudent) => {
+  const onSubmit = async (data: UpdateStudentInputs) => {
     try {
       const payload: IUpdateStudent = {
+        prefixID: data.prefixID,
         firstNameTh: data.firstNameTh,
         lastNameTh: data.lastNameTh,
-        firstNameEn: data.firstNameEn,
-        lastNameEn: data.lastNameEn,
+        firstNameEn: data.firstNameEn || null,
+        lastNameEn: data.lastNameEn || null,
         studentCode: data.studentCode,
         nickName: data.nickName,
         email: data.email,
@@ -149,6 +152,8 @@ export const StudentUpdateForm = ({
         linkedin: data.linkedin,
         instagram: data.instagram,
         github: data.github,
+        imageFocalPointX: focalPoint?.x,
+        imageFocalPointY: focalPoint?.y,
       };
       const response = await studentService.updateStudent(
         payload,
@@ -230,7 +235,34 @@ export const StudentUpdateForm = ({
         </div>
 
         <div className="flex-1 space-y-4">
-          <div className="grid grid-cols-2 gap-x-4">
+          <div className="grid grid-cols-3 gap-x-4">
+            <RHFSelect
+              control={control}
+              name="prefixID"
+              label="คำนำหน้า (ภาษาไทย)"
+              variant="outlined"
+              fullWidth
+              required
+              displayEmpty
+              requiredMark
+              renderValue={(value) => {
+                if (!value) {
+                  return (
+                    <span style={{ color: "#9e9e9e" }}>
+                      ระบุคำนำหน้า
+                    </span>
+                  );
+                }
+                const selected = prefixes.find((item) => item.id === value);
+                return selected?.nameTh;
+              }}
+            >
+              {prefixes.map((prefix) => (
+                <MenuItem key={prefix.id} value={prefix.id}>
+                  {prefix.nameTh}
+                </MenuItem>
+              ))}
+            </RHFSelect>
             <RHFTextField
               control={control}
               name="firstNameTh"
@@ -251,7 +283,34 @@ export const StudentUpdateForm = ({
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-x-4">
+          <div className="grid grid-cols-3 gap-x-4">
+            <RHFSelect
+              control={control}
+              name="prefixID"
+              label="คำนำหน้า (ภาษาอังกฤษ)"
+              variant="outlined"
+              fullWidth
+              required
+              displayEmpty
+              requiredMark
+              renderValue={(value) => {
+                if (!value) {
+                  return (
+                    <span style={{ color: "#9e9e9e" }}>
+                      ระบุคำนำหน้า (ภาษาอังกฤษ)
+                    </span>
+                  );
+                }
+                const selected = prefixes.find((item) => item.id === value);
+                return selected?.shortNameEn;
+              }}
+            >
+              {prefixes.map((prefix) => (
+                <MenuItem key={prefix.id} value={prefix.id}>
+                  {prefix.shortNameEn}
+                </MenuItem>
+              ))}
+            </RHFSelect>
             <RHFTextField
               control={control}
               name="firstNameEn"
@@ -416,17 +475,19 @@ export const StudentUpdateForm = ({
       </div>
 
       {confirmModal && <ConfirmModal {...confirmModal} />}
-      {isCroping && selectedFile && (
-        <Modal open={isCroping} onClose={handleCropCancel} closeAfterTransition>
-          <CropImageCard
-            file={selectedFile}
-            width={512}
-            height={512}
-            onUploadComplete={handleCropComplete}
-            onCancel={handleCropCancel}
-          />
-        </Modal>
-      )}
+      <Modal open={!!croppingFile} onClose={handleCropCancel}>
+        <div>
+          {croppingFile && (
+            <CropImageCard
+              file={croppingFile}
+              width={536}
+              height={480}
+              onUploadComplete={handleCropComplete}
+              onCancel={handleCropCancel}
+            />
+          )}
+        </div>
+      </Modal>
     </form>
   );
 };

@@ -7,12 +7,10 @@ export const ProfessorCard: FC<IProfessor> = (props) => {
     <div className="h-full w-[280px] cursor-pointer overflow-hidden rounded-2xl shadow-lg transition-all duration-300 hover:-translate-y-2">
       <CardMedia
         sx={{
-          height: "200px",
+          height: "275px",
           width: "100%",
-          backgroundSize: "cover",
-          backgroundPosition: "center",
           objectFit: "cover",
-          objectPosition: "center",
+          objectPosition: "center 20%",
         }}
         component="img"
         image={props.user.imageUrl}
@@ -21,29 +19,14 @@ export const ProfessorCard: FC<IProfessor> = (props) => {
       <CardContent className="flex flex-1 flex-col justify-center gap-1 p-3 !pb-3 text-left lg:p-4 lg:!pb-4">
         <Typography
           component="h3"
-          className="!text-primary01 text-left !font-bold"
+          className="!text-primary01 text-left !font-bold break-words"
         >
-          <span className="lg:hidden">
-            {`${props.academicPosition?.shortNameTh}${props.user.firstNameTh} ${props.user.lastNameTh}`.length >=
-            16 ? (
-              <>
-                {props.academicPosition?.shortNameTh}
-                {props.user.firstNameTh}
-                <br />
-                {props.user.lastNameTh}
-              </>
-            ) : (
-              `${props.academicPosition?.shortNameTh}${props.user.firstNameTh} ${props.user.lastNameTh}`
-            )}
-          </span>
-          <span className="hidden lg:inline">
-            {props.academicPosition?.shortNameTh}
-            {props.user.firstNameTh} {props.user.lastNameTh}
-          </span>
+          {props.user.prefix?.nameTh}
+          {props.user.firstNameTh} {props.user.lastNameTh}
         </Typography>
 
         <Typography component="h4" className="!text-neutral05 text-left">
-          {props.academicPosition?.shortNameEn} {props.user.firstNameEn} {props.user.lastNameEn}
+          {props.user.prefix?.nameEn} {props.user.firstNameEn} {props.user.lastNameEn}
         </Typography>
       </CardContent>
     </div>

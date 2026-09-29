@@ -2,314 +2,470 @@
 
 import { useState, useMemo } from "react";
 import {
-    Button,
-    TextField,
-    Modal,
-    Autocomplete,
-    Snackbar,
-    Alert,
+  Button,
+  TextField,
+  Modal,
+  Autocomplete,
+  Snackbar,
+  Alert,
 } from "@mui/material";
 import Image from "next/image";
 import { Controller, useForm } from "react-hook-form";
-import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { CropImageCard } from "./cropimagecard";
 import { NewsRepository } from "@/infra/repositories/news.repository";
 import { NewsService } from "@/core/service/news.service";
 import { useRouter } from "next/navigation";
-import { ConfirmModal, ConfirmModalProps } from "@/components/modal/confirmModal";
+import {
+  ConfirmModal,
+  ConfirmModalProps,
+} from "@/components/modal/confirmModal";
 import { styled } from "@mui/material/styles";
 import { INewsInformation } from "@/core/domain/news";
+import {
+  UpsertNewsInformationSchema,
+  UpsertNewsInformationInputs,
+} from "@/core/schema/newsinformation";
 
 interface NewsInformationInfoProps {
-    type: string;
-    apiBase: string;
-    tagID: number;
-    newsInformation: INewsInformation;
+  type: string;
+  apiBase: string;
+  tagID: number;
+  newsInformation: INewsInformation;
 }
 
 type NewsItem = {
-    id: number;
-    title: string;
+  id: number;
+  title: string;
 };
 
-const Schema = z.object({
-    thumbnail: z.instanceof(File, { message: "กรุณาอัปโหลดรูปภาพ" }),
-    newsID: z.number().min(1, "กรุณาเลือกข่าว"),
-});
-
-type FormValues = z.infer<typeof Schema>;
-
 const VisuallyHiddenInput = styled("input")({
-    clip: "rect(0 0 0 0)",
-    clipPath: "inset(50%)",
-    height: 1,
-    overflow: "hidden",
-    position: "absolute",
-    bottom: 0,
-    left: 0,
-    whiteSpace: "nowrap",
-    width: 1,
+  clip: "rect(0 0 0 0)",
+  clipPath: "inset(50%)",
+  height: 1,
+  overflow: "hidden",
+  position: "absolute",
+  bottom: 0,
+  left: 0,
+  whiteSpace: "nowrap",
+  width: 1,
 });
 
 export const NewsInformationInfo = ({
-    type,
-    apiBase,
-    tagID,
-    newsInformation,
+  type,
+  apiBase,
+  tagID,
+  newsInformation,
 }: NewsInformationInfoProps) => {
-    const [selectedFile, setSelectedFile] = useState<File | null>(null);
-    const [croppedFile, setCroppedFile] = useState<File | null>(null);
-    const [openCrop, setOpenCrop] = useState(false);
-    const [isEdit, setIsEdit] = useState(false);
-    const [isError, setIsError] = useState(false);
-    const [confirmModal, setConfirmModal] =
-        useState<ConfirmModalProps | null>(null);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [openCrop, setOpenCrop] = useState(false);
+  const [cropTarget, setCropTarget] = useState<
+    "thumbnail" | "highlight" | null
+  >(null);
+  const [isEdit, setIsEdit] = useState(false);
+  const [isError, setIsError] = useState(false);
+  const [confirmModal, setConfirmModal] = useState<ConfirmModalProps | null>(
+    null,
+  );
 
-    const [options, setOptions] = useState<NewsItem[]>([]);
-    const [loading, setLoading] = useState(false);
+  const [thumbnailPreview, setThumbnailPreview] = useState<string>(
+    newsInformation.thumbnailURL || "",
+  );
+  const [highlightPreview, setHighlightPreview] = useState<string>(
+    newsInformation.highlightURL || "",
+  );
 
-    const router = useRouter();
+  const [options, setOptions] = useState<NewsItem[]>([]);
+  const [loading, setLoading] = useState(false);
 
-    const previewSrc = useMemo(() => {
-        if (selectedFile) {
-            return URL.createObjectURL(croppedFile as File);
-        }
-        return newsInformation.thumbnailURL;
-    }, [croppedFile, newsInformation.thumbnailURL, selectedFile]);
+  const newsService = useMemo(() => {
+    const repo = new NewsRepository(apiBase);
+    return new NewsService(repo);
+  }, [apiBase]);
 
+  const router = useRouter();
 
+  const {
+    control,
+    handleSubmit,
+    setValue,
+    formState: { isDirty, isValid },
+    reset,
+  } = useForm<UpsertNewsInformationInputs>({
+    resolver: zodResolver(UpsertNewsInformationSchema),
+    mode: "onChange",
+    defaultValues: {
+      thumbnail: newsInformation.thumbnailURL,
+      highlight: newsInformation.highlightURL || undefined,
+      newsID: newsInformation.news.id,
+      tagID: tagID,
+      ...(type === "newshighlight"
+        ? {
+            thumbnailFocalPointX: newsInformation.thumbnailFocalPointX ?? undefined,
+            thumbnailFocalPointY: newsInformation.thumbnailFocalPointY ?? undefined,
+          }
+        : {}),
+    },
+  });
 
-    const newsService = useMemo(() => {
-        const repo = new NewsRepository(apiBase);
-        return new NewsService(repo);
-    }, [apiBase]);
+  const onSubmit = async (data: UpsertNewsInformationInputs) => {
+    try {
+      const response = await newsService.upsertNewsInformation(data);
 
-    const {
-        control,
-        handleSubmit,
-        setValue,
-        formState: { isDirty, isValid },
-        reset,
-    } = useForm<FormValues>({
-        resolver: zodResolver(Schema),
-        mode: "onChange",
-        defaultValues: {
-            thumbnail: undefined,
-            newsID: newsInformation.news.id,
-        },
-    });
-
-    const onSubmit = async (data: FormValues) => {
-        try {
-            const formData = new FormData();
-
-            formData.append("thumbnail", data.thumbnail);
-            formData.append("newsID", data.newsID.toString());
-            formData.append("tagID", tagID.toString());
-            formData.append("id", newsInformation.id.toString());
-
-            const response = await newsService.upsertNewsInformation(formData);
-
-            if (response) {
-                setConfirmModal({
-                    isOpen: true,
-                    type: "success",
-                    onClose: () => setConfirmModal(null),
-                    onConfirm: () => {
-                        reset();
-                        setIsEdit(false);
-                        setConfirmModal(null);
-                        router.push(`/admin/newsinformation/${tagID}`
-                        );
-                    },
-                });
-                return;
-            }
-
-            setIsError(true);
-        } catch (error) {
-            console.error(error);
-            setIsError(true);
-        }
-
-    };
-
-    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0];
-        if (!file) return;
-        setSelectedFile(file);
-        setOpenCrop(true);
-    };
-
-    const handleUploadComplete = (file: File) => {
-        setCroppedFile(file);
-
-        setValue("thumbnail", file, {
-            shouldValidate: true,
-            shouldDirty: true,
+      if (response) {
+        setConfirmModal({
+          isOpen: true,
+          type: "success",
+          onClose: () => setConfirmModal(null),
+          onConfirm: () => {
+            resetFormState();
+            setConfirmModal(null);
+            router.push(`/admin/newsinformation/${tagID}`);
+          },
         });
-        setOpenCrop(false);
-    };
+        return;
+      }
 
-    const handleSearch = async (search: string) => {
-        setLoading(true);
-        try {
-            const { rows } = await newsService.getNews(1, 10, undefined, undefined, undefined, search);
-            setOptions(rows);
-        } finally {
-            setLoading(false);
-        }
-    };
+      setIsError(true);
+    } catch (error) {
+      console.error(error);
+      setIsError(true);
+    }
+  };
 
-    const handleCancel = () => {
-        if (isDirty) {
-            setConfirmModal({
-                isOpen: true,
-                type: "warning",
-                onClose: () => setConfirmModal(null),
-                onConfirm: () => {
-                    reset();
-                    setIsEdit(false);
-                    setSelectedFile(null);
-                    setCroppedFile(null);
-                    setConfirmModal(null);
-                },
-            });
-        } else {
-            reset();
-            setIsEdit(false);
-            setSelectedFile(null);
-            setCroppedFile(null);
-        }
-    };
+  const handleFileChange = (
+    e: React.ChangeEvent<HTMLInputElement>,
+    target: "thumbnail" | "highlight",
+  ) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setSelectedFile(file);
+    setCropTarget(target);
+    setOpenCrop(true);
+    e.target.value = "";
+  };
 
-    return (
-        <div className="px-[32px] py-[28px]">
-            <Snackbar
-                anchorOrigin={{ vertical: "top", horizontal: "right" }}
-                open={isError}
-                autoHideDuration={4000}
-                onClose={() => setIsError(false)}
-            >
-                <Alert severity="error" sx={{ width: "100%" }}>
-                    ไม่สามารถบันทึกข้อมูลได้ในขณะนี้ กรุณาลองใหม่อีกครั้ง
-                </Alert>
-            </Snackbar>
+  const handleUploadComplete = (file: File, focalPoint?: { x: number; y: number }) => {
+    const previewUrl = URL.createObjectURL(file);
+    if (cropTarget === "thumbnail") {
+      setValue("thumbnail", file, { shouldValidate: true, shouldDirty: true });
+      setThumbnailPreview(previewUrl);
+      if (type === "newshighlight" && focalPoint) {
+        setValue("thumbnailFocalPointX", focalPoint.x, { shouldDirty: true, shouldValidate: true });
+        setValue("thumbnailFocalPointY", focalPoint.y, { shouldDirty: true, shouldValidate: true });
+      }
+    } else if (cropTarget === "highlight") {
+      setValue("highlight", file, { shouldValidate: true, shouldDirty: true });
+      setHighlightPreview(previewUrl);
+    }
+    setOpenCrop(false);
+    setCropTarget(null);
+  };
 
-            <h3 className="mb-4 font-bold">
-                {type === "announcement" ? "ข่าวประชาสัมพันธ์" : "ข่าว Highlight"}
-            </h3>
+  const handleSearch = async (search: string) => {
+    setLoading(true);
+    try {
+      const { rows } = await newsService.getNews(
+        1,
+        10,
+        undefined,
+        undefined,
+        undefined,
+        search,
+      );
+      setOptions(rows);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-            <form onSubmit={handleSubmit(onSubmit)}>
-                <div className="flex gap-x-5">
-                    <div className="flex h-[440px] w-[590px] items-center justify-center overflow-hidden rounded-md">
-                        {previewSrc ? (
-                            <div className="group relative h-full w-full">
-                                <Image
-                                    src={previewSrc}
-                                    alt="preview"
-                                    fill
-                                    className="object-cover"
-                                />
-                                {isEdit && (
-                                    <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 group-hover:opacity-100">
-                                        <Button variant="contained" component="label">
-                                            อัปโหลดรูปภาพ
-                                            <VisuallyHiddenInput
-                                                type="file"
-                                                accept="image/*"
-                                                onChange={handleFileChange}
-                                            />
-                                        </Button>
-                                    </div>
-                                )}
-                            </div>
-                        ) : (
-                            isEdit && (
-                                <Button variant="contained" component="label">
-                                    อัปโหลดรูปภาพ
-                                    <VisuallyHiddenInput
-                                        type="file"
-                                        accept="image/*"
-                                        onChange={handleFileChange}
-                                    />
-                                </Button>
-                            )
-                        )}
+  const resetFormState = () => {
+    reset();
+    setIsEdit(false);
+    setSelectedFile(null);
+    setThumbnailPreview(newsInformation.thumbnailURL || "");
+    setHighlightPreview(newsInformation.highlightURL || "");
+  };
+
+  const handleCancel = () => {
+    if (isDirty) {
+      setConfirmModal({
+        isOpen: true,
+        type: "warning",
+        onClose: () => setConfirmModal(null),
+        onConfirm: () => {
+          resetFormState();
+          setConfirmModal(null);
+        },
+      });
+    } else {
+      resetFormState();
+    }
+  };
+
+  const isHighlightType = type !== "announcement";
+  const labelMain = isHighlightType ? "ภาพไฮไลต์หลัก" : "ภาพประชาสัมพันธ์หลัก";
+  const labelSub = isHighlightType ? "ภาพไฮไลต์รอง" : "ภาพประชาสัมพันธ์รอง";
+
+  return (
+    <div className="px-[32px] py-[28px]">
+      <Snackbar
+        anchorOrigin={{ vertical: "top", horizontal: "right" }}
+        open={isError}
+        autoHideDuration={4000}
+        onClose={() => setIsError(false)}
+      >
+        <Alert severity="error" sx={{ width: "100%" }}>
+          ไม่สามารถบันทึกข้อมูลได้ในขณะนี้ กรุณาลองใหม่อีกครั้ง
+        </Alert>
+      </Snackbar>
+
+      <h3 className="mb-6 font-bold">
+        {isEdit
+          ? isHighlightType
+            ? "แก้ไขข้อมูลข่าวไฮไลต์"
+            : "แก้ไขข้อมูลข่าวประชาสัมพันธ์"
+          : isHighlightType
+            ? "ข้อมูลข่าวไฮไลต์"
+            : "ข้อมูลข่าวประชาสัมพันธ์"}
+      </h3>
+
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+        {isHighlightType ? (
+          <div className="flex flex-col gap-2">
+            {thumbnailPreview ? (
+              <>
+                {isEdit && (
+                  <div className="flex items-center justify-between">
+                    <span className="text-neutral05 text-sm font-medium">
+                      ตัวอย่างภาพแต่ละขนาด
+                    </span>
+                    <Button variant="outlined" size="small" component="label">
+                      ↑ เปลี่ยนรูปภาพ
+                      <VisuallyHiddenInput
+                        type="file"
+                        accept="image/*"
+                        onChange={(e) => handleFileChange(e, "thumbnail")}
+                      />
+                    </Button>
+                  </div>
+                )}
+                <div
+                  className="grid gap-2"
+                  style={{ gridTemplateColumns: "276fr 362fr 450fr" }}
+                >
+                  {([276, 362, 450] as const).map((w, i) => (
+                    <div
+                      key={i + 1}
+                      className="relative overflow-hidden rounded-lg"
+                      style={{ height: 240 }}
+                    >
+                      <Image
+                        src={thumbnailPreview}
+                        alt={`Preview ${i + 1}`}
+                        fill
+                        className="object-cover"
+                      />
                     </div>
-
-                    <div className="w-full">
-                        <h4 className="mb-2 font-bold">ข่าวสาร</h4>
-                        <Controller
-                            name="newsID"
-                            control={control}
-                            render={({ field }) => (
-                                <Autocomplete
-                                    disabled={!isEdit}
-                                    popupIcon={null}
-                                    options={options}
-                                    loading={loading}
-                                    value={
-                                        field.value
-                                            ? options.find(o => o.id === field.value) ??
-                                            {
-                                                id: newsInformation.news.id,
-                                                title: newsInformation.news.title,
-                                            }
-                                            : null
-                                    }
-
-                                    getOptionLabel={(opt) => opt.title}
-                                    onInputChange={(_, value) => handleSearch(value)}
-                                    onChange={(_, value) => field.onChange(value?.id || 0)}
-                                    renderInput={(params) => (
-                                        <TextField
-                                            {...params}
-                                            placeholder="ค้นหาข่าว"
-                                            disabled={!isEdit}
-                                            required
-                                        />
-                                    )}
-                                />
-                            )}
-                        />
-                    </div>
+                  ))}
                 </div>
-
-                <Modal open={openCrop} onClose={() => setOpenCrop(false)}>
-                    <div>
-                        {selectedFile && (
-                            <CropImageCard
-                                file={selectedFile}
-                                width={590}
-                                height={440}
-                                onUploadComplete={handleUploadComplete}
-                                onCancel={() => setOpenCrop(false)}
-                            />
-                        )}
+                <div
+                  className="grid gap-2"
+                  style={{ gridTemplateColumns: "487fr 624fr" }}
+                >
+                  {([487, 624] as const).map((w, i) => (
+                    <div
+                      key={i + 4}
+                      className="relative overflow-hidden rounded-lg"
+                      style={{ height: 204 }}
+                    >
+                      <Image
+                        src={thumbnailPreview}
+                        alt={`Preview ${i + 4}`}
+                        fill
+                        className="object-cover"
+                      />
                     </div>
-                </Modal>
-
-                <div className="mt-6 flex justify-end gap-x-4">
-                    {isEdit ? (
-                        <>
-                            <Button variant="outlined" onClick={handleCancel}>
-                                ยกเลิก
-                            </Button>
-                            <Button type="submit" variant="contained" disabled={!isValid}>
-                                บันทึกข้อมูล
-                            </Button>
-                        </>
-                    ) : (
-                        <Button variant="contained" onClick={() => setIsEdit(true)}>
-                            แก้ไขข้อมูล
+                  ))}
+                </div>
+              </>
+            ) : (
+              isEdit && (
+                <div className="border-neutral03 bg-neutral02 flex h-[290px] w-full items-center justify-center overflow-hidden rounded-xl border">
+                  <Button variant="contained" component="label">
+                    อัปโหลดรูปภาพ
+                    <VisuallyHiddenInput
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => handleFileChange(e, "thumbnail")}
+                    />
+                  </Button>
+                </div>
+              )
+            )}
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+            <div className="flex flex-col gap-2">
+              <label
+                className={`text-h5 font-medium ${isEdit ? "text-neutral05" : "text-neutral04"}`}
+              >
+                {labelMain}
+              </label>
+              <div className="bg-neutral02 border-neutral03 relative flex h-[380px] w-full items-center justify-center overflow-hidden rounded-md border">
+                {thumbnailPreview ? (
+                  <div className="group relative h-full w-full">
+                    <Image
+                      src={thumbnailPreview}
+                      alt="thumbnail preview"
+                      fill
+                      className="object-cover"
+                    />
+                    {isEdit && (
+                      <div className="bg-primary01/40 absolute inset-0 flex items-center justify-center opacity-0 transition-opacity duration-200 group-hover:opacity-100">
+                        <Button variant="contained" component="label">
+                          อัปโหลดรูปภาพ
+                          <VisuallyHiddenInput
+                            type="file"
+                            accept="image/*"
+                            onChange={(e) => handleFileChange(e, "thumbnail")}
+                          />
                         </Button>
+                      </div>
                     )}
-                </div>
-            </form>
+                  </div>
+                ) : (
+                  isEdit && (
+                    <Button variant="contained" component="label">
+                      อัปโหลดรูปภาพ
+                      <VisuallyHiddenInput
+                        type="file"
+                        accept="image/*"
+                        onChange={(e) => handleFileChange(e, "thumbnail")}
+                      />
+                    </Button>
+                  )
+                )}
+              </div>
+            </div>
 
-            {confirmModal && <ConfirmModal {...confirmModal} />}
+            <div className="flex flex-col gap-2">
+              <label
+                className={`text-h5 font-medium ${isEdit ? "text-neutral05" : "text-neutral04"}`}
+              >
+                {labelSub}
+              </label>
+              <div className="bg-neutral02 border-neutral03 relative flex h-[380px] w-full items-center justify-center overflow-hidden rounded-md border">
+                {highlightPreview ? (
+                  <div className="group relative h-full w-full">
+                    <Image
+                      src={highlightPreview}
+                      alt="highlight preview"
+                      fill
+                      className="object-cover"
+                    />
+                    {isEdit && (
+                      <div className="bg-primary01/40 absolute inset-0 flex items-center justify-center opacity-0 transition-opacity duration-200 group-hover:opacity-100">
+                        <Button variant="contained" component="label">
+                          อัปโหลดรูปภาพ
+                          <VisuallyHiddenInput
+                            type="file"
+                            accept="image/*"
+                            onChange={(e) => handleFileChange(e, "highlight")}
+                          />
+                        </Button>
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  isEdit && (
+                    <Button variant="contained" component="label">
+                      อัปโหลดรูปภาพ
+                      <VisuallyHiddenInput
+                        type="file"
+                        accept="image/*"
+                        onChange={(e) => handleFileChange(e, "highlight")}
+                      />
+                    </Button>
+                  )
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+
+        <div className="w-full">
+          <label
+            className={`text-h5 mb-1 block font-medium ${isEdit ? "text-neutral05" : "text-neutral04"}`}
+          >
+            ข่าวสาร <span className="text-accent04">*</span>
+          </label>
+          <Controller
+            name="newsID"
+            control={control}
+            render={({ field }) => (
+              <Autocomplete
+                disabled={!isEdit}
+                popupIcon={null}
+                options={options}
+                loading={loading}
+                value={
+                  field.value
+                    ? (options.find((o) => o.id === field.value) ?? {
+                        id: newsInformation.news.id,
+                        title: newsInformation.news.title,
+                      })
+                    : null
+                }
+                getOptionLabel={(opt) => opt.title}
+                onInputChange={(_, value) => handleSearch(value)}
+                onChange={(_, value) => field.onChange(value?.id || 0)}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    placeholder="ค้นหาข่าว"
+                    disabled={!isEdit}
+                    required
+                  />
+                )}
+              />
+            )}
+          />
         </div>
-    );
+
+        <Modal open={openCrop} onClose={() => setOpenCrop(false)}>
+          <div>
+            {selectedFile && (
+              <CropImageCard
+                file={selectedFile}
+                width={isHighlightType ? 450 : 590}
+                height={isHighlightType ? 240 : 440}
+                onUploadComplete={handleUploadComplete}
+                onCancel={() => setOpenCrop(false)}
+              />
+            )}
+          </div>
+        </Modal>
+
+        <div className="mt-6 flex justify-end gap-x-4">
+          {isEdit ? (
+            <>
+              <Button variant="outlined" onClick={handleCancel}>
+                ยกเลิก
+              </Button>
+              <Button type="submit" variant="contained" disabled={!isValid}>
+                บันทึกข้อมูล
+              </Button>
+            </>
+          ) : (
+            <Button variant="contained" onClick={() => setIsEdit(true)}>
+              แก้ไขข้อมูล
+            </Button>
+          )}
+        </div>
+      </form>
+
+      {confirmModal && <ConfirmModal {...confirmModal} />}
+    </div>
+  );
 };

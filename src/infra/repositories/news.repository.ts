@@ -1,5 +1,8 @@
 import { INewsRepository } from "@/core/ports/news.repository";
-import { INews, INewsInformation } from "@/core/domain/news";
+import {
+  INews,
+  INewsInformation,
+} from "@/core/domain/news";
 import { HttpHelper } from "@/lib/http";
 import { ApiResponse, Pageable } from "@/interface/response";
 

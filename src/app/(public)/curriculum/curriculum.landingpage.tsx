@@ -6,6 +6,7 @@ import { CurriculumCard } from "@/components/curriculumcard";
 import { TypeCourseComponent } from "@/components/typecourse.component";
 import { TypeCourse } from "@/core/domain/master-data";
 import { Breadcrumbs, CircularProgress } from "@mui/material";
+import EmptyState from "@/components/emptyState";
 
 interface CurriculumListComponentProps {
   curriculum: ICurriculum[];
@@ -40,7 +41,10 @@ const CurriculumListComponents = ({
   if (!curriculum || curriculum.length === 0) {
     return (
       <div className="flex h-screen items-center justify-center">
-        No curriculum available.
+        <EmptyState 
+          title="ไม่พบข้อมูลหลักสูตร" 
+          description="ยังไม่มีข้อมูลหลักสูตรในระบบ" 
+        />
       </div>
     );
   }
@@ -78,21 +82,30 @@ const CurriculumListComponents = ({
           {isLoading ? (
             <CircularProgress />
           ) : (
-            <div className="mx-auto flex flex-wrap justify-center">
-              {typeCourse.map((item, idx) => (
-                <div
-                  key={item.id}
-                  className="box-border w-full sm:w-1/2 lg:w-1/3"
-                >
-                  <TypeCourseComponent
-                    curriculumId={focusCurriculum?.id}
-                    typeCourseId={item.id}
-                    type={item.type}
-                    description={item.description}
-                    index={idx}
+            <div className="mx-auto flex w-full flex-wrap justify-center">
+              {typeCourse.length === 0 ? (
+                <div className="w-full pt-10">
+                  <EmptyState 
+                    title="ไม่พบข้อมูลรายวิชา" 
+                    description={`ยังไม่มีข้อมูลรายวิชาสำหรับหลักสูตรปี พ.ศ. ${focusCurriculum?.year}`} 
                   />
                 </div>
-              ))}
+              ) : (
+                typeCourse.map((item, idx) => (
+                  <div
+                    key={item.id}
+                    className="box-border w-full sm:w-1/2 lg:w-1/3"
+                  >
+                    <TypeCourseComponent
+                      curriculumId={focusCurriculum?.id}
+                      typeCourseId={item.id}
+                      type={item.type}
+                      description={item.description}
+                      index={idx}
+                    />
+                  </div>
+                ))
+              )}
             </div>
           )}
         </div>

@@ -4,7 +4,6 @@ import {
   QueryStudent,
   ICreateStudent,
   IUpdateStudent,
-  ICreateStudentCsv,
 } from "../domain/student";
 import { Pageable } from "@/interface/response";
 
@@ -13,7 +12,7 @@ type CreateStudentBatchInput = {
 } & ({ file: File } | { students: ICreateStudentCsv[] });
 
 export class StudentService {
-  constructor(private studentRepository: IStudentRepository) {}
+  constructor(private studentRepository: IStudentRepository) { }
 
   async getStudents(query: QueryStudent): Promise<Pageable<IStudent>> {
     const response = await this.studentRepository.getStudents(query);
@@ -36,7 +35,9 @@ export class StudentService {
   ): Promise<IStudent> {
     const formData = new FormData();
     Object.entries(data).forEach(([key, value]) => {
-      formData.append(key, value?.toString() ?? "");
+      if (value !== null && value !== undefined && value !== "") {
+        formData.append(key, value.toString());
+      }
     });
 
     if (imageFile) {
@@ -62,7 +63,11 @@ export class StudentService {
     try {
       const formData = new FormData();
       Object.entries(data).forEach(([key, value]) => {
-        formData.append(key, value?.toString() ?? "");
+        if (key === "skills" && Array.isArray(value)) {
+          value.forEach((v) => formData.append("skills", v));
+        } else if (value !== null && value !== undefined && value !== "") {
+          formData.append(key, value.toString());
+        }
       });
       if (image) formData.append("imageFile", image);
       formData.append("classBookID", classBookID.toString());

@@ -14,63 +14,24 @@ import { MasterDataRepository } from "@/infra/repositories/master-data.repositor
 import { ProfessorService } from "@/core/service/professor.service";
 import { ProfessorRepository } from "@/infra/repositories/professor.repository";
 import { Position } from "@/core/domain/master-data";
-import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { RHFTextField } from "@/components/form/RHFTextField";
 import { RHFSelect } from "@/components/form/RHFSelect";
-import { ICreateProfessor } from "@/core/domain/professor";
 import {
   ConfirmModal,
   ConfirmModalProps,
 } from "@/components/modal/confirmModal";
 import AddCircleOutlineRoundedIcon from "@mui/icons-material/AddCircleOutlineRounded";
 import { CropImageCard } from "@/components/cropimagecard";
+import {
+  CreateProfessorInputs,
+  CreateProfessorSchema,
+  CreateProfessorPayload,
+} from "@/core/schema/professor";
 
 interface FormProfessorsProps {
   apiBase: string;
-}
-
-const Schema = z.object({
-  academicPositionID: z
-    .number()
-    .nullable()
-    .refine((v) => v !== null, {
-      message: "กรุณากรอกตำแหน่ง",
-    }),
-  educations: z.array(
-    z.object({
-      value: z.string(),
-    }),
-  ),
-  expertFields: z.array(
-    z.object({
-      value: z.string(),
-    }),
-  ),
-  email: z.string().trim().email("อีเมลไม่ถูกต้อง"),
-  firstNameEn: z
-    .string()
-    .trim()
-    .min(1, "กรุณากรอกชื่อภาษาอังกฤษ")
-    .optional()
-    .or(z.literal("")),
-  firstNameTh: z.string().trim().min(1, "กรุณากรอกชื่อภาษาไทย"),
-  lastNameEn: z
-    .string()
-    .trim()
-    .min(1, "กรุณากรอกนามสกุลภาษาอังกฤษ")
-    .optional()
-    .or(z.literal("")),
-  lastNameTh: z.string().trim().min(1, "กรุณากรอกนามสกุลภาษาไทย"),
-  phone: z
-    .string()
-    .trim()
-    .min(9, "กรุณากรอกเบอร์โทร")
-    .regex(/^[0-9]+$/, "เบอร์โทรต้องเป็นตัวเลขเท่านั้น"),
-  profRoom: z.string().min(1, "กรุณากรอกชื่อห้อง"),
-});
-
-type FormData = z.infer<typeof Schema>;
+};
 
 const VisuallyHiddenInput = styled("input")({
   clip: "rect(0 0 0 0)",
@@ -85,7 +46,7 @@ const VisuallyHiddenInput = styled("input")({
 });
 
 export const FormProfesssors: FC<FormProfessorsProps> = ({ apiBase }) => {
-  const [academicPositions, setAcademicPositions] = useState<Position[]>([]);
+  const [prefixes, setPrefixes] = useState<Position[]>([]);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isError, setIsError] = useState(false);
   const router = useRouter();
@@ -107,11 +68,12 @@ export const FormProfesssors: FC<FormProfessorsProps> = ({ apiBase }) => {
   const {
     control,
     handleSubmit,
+    setValue,
     formState: { isValid, isDirty },
-  } = useForm<FormData>({
-    resolver: zodResolver(Schema),
+  } = useForm<CreateProfessorInputs>({
+    resolver: zodResolver(CreateProfessorSchema),
     defaultValues: {
-      academicPositionID: null,
+      prefixID: null,
       educations: [],
       email: "",
       expertFields: [],
@@ -145,8 +107,12 @@ export const FormProfesssors: FC<FormProfessorsProps> = ({ apiBase }) => {
     }
   };
 
-  const handleCropComplete = (croppedFile: File) => {
+  const handleCropComplete = (croppedFile: File, focalPoint?: { x: number; y: number }) => {
     setSelectedFile(croppedFile);
+    if (focalPoint) {
+      setValue("imageFocalPointX", focalPoint.x, { shouldDirty: true });
+      setValue("imageFocalPointY", focalPoint.y, { shouldDirty: true });
+    }
     setIsCroping(false);
   };
 
@@ -167,20 +133,22 @@ export const FormProfesssors: FC<FormProfessorsProps> = ({ apiBase }) => {
     } else router.push(`/admin/professors`);
   };
 
-  const onSubmit = async (data: FormData) => {
+  const onSubmit = async (data: CreateProfessorInputs) => {
     setIsError(false);
     try {
-      const payload: ICreateProfessor = {
-        academicPositionID: data.academicPositionID!,
+      const payload: CreateProfessorPayload = {
+        prefixID: data.prefixID!,
         firstNameTh: data.firstNameTh,
         lastNameTh: data.lastNameTh,
-        firstNameEn: data.firstNameEn,
-        lastNameEn: data.lastNameEn,
+        firstNameEn: data.firstNameEn || null,
+        lastNameEn: data.lastNameEn || null,
         email: data.email,
         phone: data.phone,
         profRoom: data.profRoom,
         educations: data.educations.map((e) => e.value).join("/"),
         expertFields: data.expertFields.map((e) => e.value).join("/"),
+        imageFocalPointX: data.imageFocalPointX,
+        imageFocalPointY: data.imageFocalPointY,
       };
       const reps = await professorService.createProfessor(
         payload,
@@ -205,7 +173,7 @@ export const FormProfesssors: FC<FormProfessorsProps> = ({ apiBase }) => {
   useEffect(() => {
     const fetchData = async () => {
       const res = await masterDataService.getMasterData();
-      setAcademicPositions(res.academicPositions);
+      setPrefixes(res.prefixes);
     };
     fetchData();
   }, [apiBase, masterDataService]);
@@ -269,7 +237,7 @@ export const FormProfesssors: FC<FormProfessorsProps> = ({ apiBase }) => {
               <div className="flex-2">
                 <RHFSelect
                   control={control}
-                  name="academicPositionID"
+                  name="prefixID"
                   label="ตำแหน่ง (ภาษาไทย)"
                   variant="outlined"
                   fullWidth
@@ -284,13 +252,13 @@ export const FormProfesssors: FC<FormProfessorsProps> = ({ apiBase }) => {
                         </span>
                       );
                     }
-                    const selected = academicPositions.find(
+                    const selected = prefixes.find(
                       (item) => item.id === value,
                     );
                     return selected?.nameTh;
                   }}
                 >
-                  {academicPositions.map((position) => (
+                  {prefixes.map((position) => (
                     <MenuItem key={position.id} value={position.id}>
                       {position.nameTh}
                     </MenuItem>
@@ -328,7 +296,7 @@ export const FormProfesssors: FC<FormProfessorsProps> = ({ apiBase }) => {
               <div className="flex-2">
                 <RHFSelect
                   control={control}
-                  name="academicPositionID"
+                  name="prefixID"
                   label="ตำแหน่ง (ภาษาอังกฤษ)"
                   variant="outlined"
                   fullWidth
@@ -343,13 +311,13 @@ export const FormProfesssors: FC<FormProfessorsProps> = ({ apiBase }) => {
                         </span>
                       );
                     }
-                    const selected = academicPositions.find(
+                    const selected = prefixes.find(
                       (item) => item.id === value,
                     );
                     return selected?.nameEn;
                   }}
                 >
-                  {academicPositions.map((position) => (
+                  {prefixes.map((position) => (
                     <MenuItem key={position.id} value={position.id}>
                       {position.nameEn}
                     </MenuItem>

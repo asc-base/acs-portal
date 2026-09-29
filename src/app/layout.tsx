@@ -4,6 +4,7 @@ import "./globals.css";
 import UniversalThemeProvider from "@/components/providers/mui/UniversalThemeProvider";
 import appIcon from "./logoacs-nonbg.png";
 import InitialLoader from "@/components/InitialLoader";
+import QueryProvider from "@/components/providers/query-provider";
 
 export const metadata: Metadata = {
   title: "ACS KMUTT",
@@ -22,9 +23,11 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className="antialiased">
-        <UniversalThemeProvider>
-          <InitialLoader>{children}</InitialLoader>
-        </UniversalThemeProvider>
+        <QueryProvider>
+          <UniversalThemeProvider>
+            <InitialLoader>{children}</InitialLoader>
+          </UniversalThemeProvider>
+        </QueryProvider>
       </body>
     </html>
   );

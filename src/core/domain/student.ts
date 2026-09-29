@@ -28,30 +28,39 @@ export interface QueryStudent {
 export interface ICreateStudent {
   studentCode: string;
   email: string;
+  prefixID?: number | null;
   firstNameTh: string;
   lastNameTh: string;
-  firstNameEn: string;
-  lastNameEn: string;
+  firstNameEn: string | null;
+  lastNameEn: string | null;
   nickName?: string;
   linkedin?: string;
   github?: string;
   facebook?: string;
   instagram?: string;
   classBookID: number;
+  imageFile?: File;
+  imageFocalPointX?: number;
+  imageFocalPointY?: number;
 }
 
 export interface IUpdateStudent {
   studentCode?: string;
   email?: string;
+  prefixID?: number | null;
   firstNameTh?: string;
   lastNameTh?: string;
-  firstNameEn?: string;
-  lastNameEn?: string;
+  firstNameEn?: string | null;
+  lastNameEn?: string | null;
   nickName?: string;
   linkedin?: string | null;
   facebook?: string | null;
   instagram?: string | null;
   github?: string | null;
+  skills?: string[];
+  imageFile?: File;
+  imageFocalPointX?: number;
+  imageFocalPointY?: number;
 }
 
 export interface ICreateStudentCsv {

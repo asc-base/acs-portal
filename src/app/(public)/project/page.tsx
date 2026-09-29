@@ -39,8 +39,8 @@ const Page = async ({ searchParams }: LocalPageProps) => {
   const queryFilters: QueryProject = {
     sortBy: resolvedSearchParams.sortBy,
     sortOrder: resolvedSearchParams.sortOrder,
-    page: resolvedSearchParams.page,
-    pageSize: resolvedSearchParams.pageSize,
+    page: resolvedSearchParams.page || 1,
+    pageSize: resolvedSearchParams.pageSize || 9,
     fields: ensureArray(resolvedSearchParams.fields),
     categories: ensureArray(resolvedSearchParams.categories),
     types: ensureArray(resolvedSearchParams.types),
@@ -74,6 +74,9 @@ const Page = async ({ searchParams }: LocalPageProps) => {
         <ProjectList
           projects={projectData?.rows}
           totalRecords={projectData?.totalRecords}
+          page={projectData?.page}
+          pageSize={projectData?.pageSize}
+          sortBy={resolvedSearchParams.sortBy}
         />
       </div>
       <FilterList
