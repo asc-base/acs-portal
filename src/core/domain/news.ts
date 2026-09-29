@@ -17,8 +17,6 @@ export interface INews {
   detail: string;
   startDate: Date;
   dueDate: Date | null;
-  createdBy: number;
-  updatedBy: number;
   createdDate: Date;
   updatedDate: Date;
   tag: Tag;

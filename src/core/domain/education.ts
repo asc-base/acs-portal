@@ -7,8 +7,6 @@ export interface IEducation {
   level: EducationLevel;
   createdDate: Date;
   updatedDate: Date;
-  createdBy: number;
-  updatedBy: number;
 }
 
 export interface IUpdateEducation {

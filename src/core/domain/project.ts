@@ -27,8 +27,6 @@ export interface IProject {
   createdAt: Date;
   updatedAt: Date;
   deletedAt: null;
-  createdBy: number;
-  updatedBy: number;
 }
 
 export interface ICreateProject {
@@ -82,6 +80,4 @@ export interface IProjectAssets {
   createdAt: Date;
   updatedAt: Date;
   deletedAt: null;
-  createdBy: number;
-  updatedBy: number;
 }

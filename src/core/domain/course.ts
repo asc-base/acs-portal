@@ -14,8 +14,6 @@ export interface ICourse {
   courseNameEn: string;
   credits: string;
   detail: string;
-  createdBy: number;
-  updatedBy: number;
   createdDate: Date;
   updatedDate: Date;
   curriculum: ICurriculum;
