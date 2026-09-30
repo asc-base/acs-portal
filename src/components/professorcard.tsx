@@ -26,7 +26,7 @@ export const ProfessorCard: FC<IProfessor> = (props) => {
         </Typography>
 
         <Typography component="h4" className="!text-neutral05 text-left">
-          {props.user.prefix?.nameEn} {props.user.firstNameEn}{" "}
+          {props.user.prefix?.shortNameEn} {props.user.firstNameEn}{" "}
           {props.user.lastNameEn}
         </Typography>
       </CardContent>
