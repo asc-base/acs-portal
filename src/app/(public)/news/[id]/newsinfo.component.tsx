@@ -79,7 +79,7 @@ const NewsInfoComponent = ({ newsInfo, recommendNews }: NewsInfoProps) => {
 
       <div className="flex flex-col gap-3">
         {/* thumbnail */}
-        <div className="relative h-[180px] w-full overflow-hidden rounded-lg md:h-[465px]">
+        <div className="relative h-[180px] w-full overflow-hidden rounded-lg bg-neutral02 md:h-[465px]">
           {!loadedImages.has(activeIndex) && (
             <Skeleton
               variant="rectangular"
@@ -101,7 +101,7 @@ const NewsInfoComponent = ({ newsInfo, recommendNews }: NewsInfoProps) => {
                     src={img}
                     alt={newsInfo?.title || "news image"}
                     fill
-                    className="object-cover"
+                    className="object-contain"
                     onLoadingComplete={() => markLoaded(index)}
                     onError={() => markLoaded(index)}
                   />
