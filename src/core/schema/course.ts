@@ -14,7 +14,7 @@ export const commonCourseSchema = {
     .trim()
     .min(1, "กรุณากรอกชื่อวิชาภาษาไทย")
     .regex(/^[\p{Script=Thai}0-9\s()/-]+$/u, "กรุณากรอกเป็นภาษาไทยเท่านั้น"),
-  detail: z.string().trim().min(1, "กรุณากรอกลักษณะการเรียน"),
+  detail: z.string().trim().min(1, "กรุณากรอกหน่วยกิต"),
 };
 
 export const createCourseSchema = z.object({
