@@ -76,6 +76,21 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  async rewrites() {
+    if (process.env.NODE_ENV !== "development") return [];
+
+    const apiUrl = process.env.API_URL?.replace(/\/+$/, "");
+    if (!apiUrl) {
+      throw new Error("API_URL must be set to proxy API requests in development.");
+    }
+
+    return [
+      {
+        source: "/api/:path*",
+        destination: `${apiUrl}/api/:path*`,
+      },
+    ];
+  },
   async redirects() {
     return [
       {
