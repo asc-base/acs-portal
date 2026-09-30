@@ -62,13 +62,3 @@ export interface IUpdateStudent {
   imageFocalPointX?: number;
   imageFocalPointY?: number;
 }
-
-export interface ICreateStudentCsv {
-  studentCode: string;
-  email: string;
-  firstNameTh: string;
-  lastNameTh: string;
-  firstNameEn: string;
-  lastNameEn: string;
-  nickName?: string;
-}

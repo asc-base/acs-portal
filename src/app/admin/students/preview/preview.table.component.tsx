@@ -18,7 +18,10 @@ import {
 import { Delete } from "@mui/icons-material";
 import { useImportStudentStore } from "@/store/preview-data";
 import { useState, useMemo, useEffect } from "react";
-import { ICreateStudentCsv } from "@/core/domain/student";
+import {
+  CreateStudentCsv,
+  CreateStudentCsvSchema,
+} from "@/core/schema/student-csv";
 import { useRouter } from "next/navigation";
 import { StudentService } from "@/core/service/student.service";
 import { StudentRepository } from "@/infra/repositories/student.repository";
@@ -26,25 +29,11 @@ import {
   ConfirmModal,
   ConfirmModalProps,
 } from "@/components/modal/confirmModal";
-import { z } from "zod";
 
 interface PreviewStudentsProps {
   apiBase: string;
   classBookID: number;
 }
-
-const studentSchema = z.object({
-  firstNameTh: z.string().min(1, "ข้อมูลชื่อภาษาไทยไม่ถูกต้อง"),
-  lastNameTh: z.string().min(1, "ข้อมูลนามสกุลภาษาไทยไม่ถูกต้อง"),
-  firstNameEn: z.string().min(1, "ข้อมูลชื่อภาษาอังกฤษไม่ถูกต้อง"),
-  lastNameEn: z.string().min(1, "ข้อมูลนามสกุลภาษาอังกฤษไม่ถูกต้อง"),
-  studentCode: z
-    .string()
-    .min(11, "รหัสนักศึกษาต้องมี 11 หลัก")
-    .regex(/^[0-9]+$/, "รหัสนักศึกษาต้องเป็นตัวเลขเท่านั้น"),
-  nickName: z.string().min(1, "ข้อมูลชื่อเล่นไม่ถูกต้อง"),
-  email: z.string().email("รูปแบบอีเมลไม่ถูกต้อง"),
-});
 
 export default function Preview_table_component({
   apiBase,
@@ -52,7 +41,7 @@ export default function Preview_table_component({
 }: PreviewStudentsProps) {
   const router = useRouter();
   const { importData, deleteByStudentId } = useImportStudentStore();
-  const students: ICreateStudentCsv[] = importData;
+  const students: CreateStudentCsv[] = importData;
   const [alert, setAlert] = useState<{
     open: boolean;
     message: string;
@@ -101,17 +90,7 @@ export default function Preview_table_component({
 
 
   const onSubmit = async () => {
-    const cleanedStudents = students.map((s) => ({
-      ...s,
-      firstNameTh: s.firstNameTh.trim(),
-      lastNameTh: s.lastNameTh.trim(),
-      firstNameEn: s.firstNameEn.trim(),
-      lastNameEn: s.lastNameEn.trim(),
-      email: s.email.trim(),
-      studentCode: s.studentCode.trim(),
-    }));
-
-    const result = z.array(studentSchema).safeParse(cleanedStudents);
+    const result = CreateStudentCsvSchema.array().safeParse(students);
 
     if (!result.success) {
       showAlert("ข้อมูลนักศึกษาไม่ถูกต้อง", "error");
@@ -119,22 +98,20 @@ export default function Preview_table_component({
     }
 
     try {
-      const response = await studentService.createStudentBatch({
+      await studentService.createStudentBatch({
         classBookID: Number(classBookID),
         students: result.data,
       });
-      if (response) {
-        setConfirmModal({
-          isOpen: true,
-          type: "success",
-          onClose: () => setConfirmModal(null),
-          onConfirm: () => {
-            router.push(
-              `/admin/students?page=1&pageSize=10&classBookID=${classBookID}`,
-            );
-          },
-        });
-      }
+      setConfirmModal({
+        isOpen: true,
+        type: "success",
+        onClose: () => setConfirmModal(null),
+        onConfirm: () => {
+          router.push(
+            `/admin/students?page=1&pageSize=10&classBookID=${classBookID}`,
+          );
+        },
+      });
     } catch (err) {
       console.log(err);
       showAlert("ไม่สามารถเพิ่มข้อมูลนักศึกษาได้", "error");

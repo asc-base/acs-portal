@@ -5,14 +5,15 @@ import {
   ICreateStudent,
   IUpdateStudent,
 } from "../domain/student";
+import { CreateStudentCsv } from "../schema/student-csv";
 import { Pageable } from "@/interface/response";
 
 type CreateStudentBatchInput = {
   classBookID: number;
-} & ({ file: File } | { students: ICreateStudentCsv[] });
+} & ({ file: File } | { students: CreateStudentCsv[] });
 
 export class StudentService {
-  constructor(private studentRepository: IStudentRepository) { }
+  constructor(private studentRepository: IStudentRepository) {}
 
   async getStudents(query: QueryStudent): Promise<Pageable<IStudent>> {
     const response = await this.studentRepository.getStudents(query);
@@ -83,7 +84,7 @@ export class StudentService {
     }
   }
 
-  private createStudentCsvFile(students: ICreateStudentCsv[]): File {
+  private createStudentCsvFile(students: CreateStudentCsv[]): File {
     const headers = [
       "studentCode",
       "email",
@@ -100,7 +101,7 @@ export class StudentService {
     const rows = students.map((student) =>
       headers
         .map((header) =>
-          escapeCsvValue(student[header as keyof ICreateStudentCsv]),
+          escapeCsvValue(student[header as keyof CreateStudentCsv]),
         )
         .join(","),
     );
@@ -110,7 +111,7 @@ export class StudentService {
     });
   }
 
-  async createStudentBatch(data: CreateStudentBatchInput): Promise<IStudent[]> {
+  async createStudentBatch(data: CreateStudentBatchInput): Promise<null> {
     const formData = new FormData();
     const file =
       "file" in data ? data.file : this.createStudentCsvFile(data.students);

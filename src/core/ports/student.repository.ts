@@ -11,5 +11,5 @@ export interface IStudentRepository {
     data: FormData,
     studentId: number,
   ): Promise<ApiResponse<IStudent>>;
-  createStudentBatch(data: FormData): Promise<ApiResponse<IStudent[]>>;
+  createStudentBatch(data: FormData): Promise<ApiResponse<null>>;
 }
