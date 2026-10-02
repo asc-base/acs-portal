@@ -21,6 +21,7 @@ jobs:
   build:
     name: Build and publish
     runs-on: ubuntu-latest
+    environment: staging
     outputs:
       image_digest: ${{ steps.build_image.outputs.digest }}
 
@@ -46,6 +47,8 @@ jobs:
           file: dockerfile
           push: true
           tags: ${{ env.IMAGE }}:${{ env.IMAGE_TAG }}
+          build-args: |
+            MEDIA_PUBLIC_ORIGINS=${{ vars.MEDIA_PUBLIC_ORIGINS || 'https://acs.kmutt.ac.th,https://**.kmutt.ac.th,http://localhost:3000' }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
 

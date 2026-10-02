@@ -61,3 +61,4 @@ jobs:
           cache-to: type=gha,mode=max
           build-args: |
             NODE_ENV=production
+            MEDIA_PUBLIC_ORIGINS=${{ vars.MEDIA_PUBLIC_ORIGINS || 'https://acs.kmutt.ac.th,https://**.kmutt.ac.th,http://localhost:3000' }}

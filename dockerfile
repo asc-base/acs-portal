@@ -14,6 +14,8 @@ RUN npm install
 COPY . .
 
 # Build the Next.js application
+ARG MEDIA_PUBLIC_ORIGINS=https://acs.kmutt.ac.th,https://**.kmutt.ac.th,http://localhost:3000
+ENV MEDIA_PUBLIC_ORIGINS=${MEDIA_PUBLIC_ORIGINS}
 RUN npm run build
 
 # Expose the port the app runs on
