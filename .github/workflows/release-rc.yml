@@ -11,5 +11,5 @@ permissions:
 
 jobs:
   release:
-    uses: asc-base/acs-website-infra/.github/workflows/release-rc.yml@main
+    uses: asc-base/acs-website-infra/.github/workflows/release-rc.yml.yml@main
     secrets: inherit
