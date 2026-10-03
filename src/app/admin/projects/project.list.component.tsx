@@ -269,7 +269,7 @@ const ProjectListComponents = ({
                   key={project.id}
                   type="project"
                   data={project}
-                  onView={() => router.push(`/project/${project.id}`)}
+                  onView={() => router.push(`/admin/projects/${project.id}`)}
                   onDelete={() => confirmDeleteProject(project.id)}
                 />
               ))}

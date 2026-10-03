@@ -9,7 +9,10 @@ import BookmarkIcon from "@mui/icons-material/Bookmark";
 import CampaignIcon from "@mui/icons-material/Campaign";
 import BorderColorIcon from "@mui/icons-material/BorderColor";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
+import { useAuthStore } from "@/store/auth";
+import Image from "next/image";
+import { clientAuthService } from "@/infra/auth-client";
 
 const sidebarItems = [
   {
@@ -17,39 +20,44 @@ const sidebarItems = [
     href: "/admin/classbook",
     icon: <PersonIcon />,
     activePaths: ["/admin/students"],
+    disabled: false,
   },
   {
     name: "ข้อมูลอาจารย์",
     href: "/admin/professors",
     icon: <HailIcon />,
+    disabled: false,
   },
   {
     name: "ข้อมูลผลงาน",
     href: "/admin/projects",
     icon: <DescriptionIcon />,
+    disabled: false,
   },
   {
     name: "ข่าวประชาสัมพันธ์",
-    href: "/admin/newsinformation/25",
+    href: "/admin/news-bulletins/announcement",
     icon: <CampaignIcon />,
-    disabled: true,
+    disabled: false,
   },
   {
     name: "ข่าว Highlight",
-    href: "/admin/newsinformation/26",
+    href: "/admin/news-bulletins/highlight",
     icon: <BorderColorIcon />,
-    disabled: true,
+    disabled: false,
   },
   {
     name: "จัดการข่าวสาร",
     href: "/admin/news",
     icon: <NewspaperIcon />,
+    disabled: false,
   },
   {
     name: "จัดการหลักสูตร",
     href: "/admin/curriculum",
     icon: <BookmarkIcon />,
     activePaths: ["/admin/courses"],
+    disabled: false,
   },
   // {
   //   name: "จัดการฝึกงาน",
@@ -58,16 +66,44 @@ const sidebarItems = [
   // },
 ];
 
-export const EdgeSidebarAdmin = ({ username }: { username: string }) => {
+export const EdgeSidebarAdmin = ({
+  username,
+  imageUrl,
+}: {
+  username: string;
+  imageUrl?: string;
+}) => {
   const pathName = usePathname();
+  const router = useRouter();
+  const { clearUser } = useAuthStore();
+
+  const handleLogout = async () => {
+    try {
+      await clientAuthService.logout();
+      clearUser();
+      router.push("/admin/auth");
+    } catch (error) {
+      console.error("Logout failed:", error);
+    }
+  };
 
   return (
     <aside className="bg-neutral01 flex h-full w-full flex-col shadow-lg">
       <div>
         <div className="flex items-center gap-x-4 px-8 py-4">
+          {imageUrl && (
+            <Image
+              src={imageUrl}
+              alt="Profile"
+              width={40}
+              height={40}
+              className="border-neutral02 h-10 w-10 rounded-full border object-cover shadow-sm"
+            />
+          )}
           <AccountCircleRoundedIcon
             fontSize="large"
             className="text-neutral05"
+            style={{ display: imageUrl ? "none" : "block" }}
           />
           <h3>{username}</h3>
         </div>
@@ -110,9 +146,9 @@ export const EdgeSidebarAdmin = ({ username }: { username: string }) => {
         </nav>
       </div>
       <div className="mt-auto">
-        <Link
-          href="/logout"
-          className="hover:bg-neutral02 group flex h-[44px] items-center gap-x-4 px-8"
+        <div
+          onClick={handleLogout}
+          className="hover:bg-neutral02 group flex h-[44px] cursor-pointer items-center gap-x-4 px-8"
         >
           <h3>
             <LogoutIcon className="text-neutral04 group-hover:text-accent04" />
@@ -120,7 +156,7 @@ export const EdgeSidebarAdmin = ({ username }: { username: string }) => {
           <h4 className="text-neutral05 group-hover:text-accent04">
             ออกจากระบบ
           </h4>
-        </Link>
+        </div>
       </div>
     </aside>
   );

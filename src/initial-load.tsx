@@ -1,10 +1,10 @@
 "use client";
-import { authService } from "./infra/container";
+import { clientAuthService } from "./infra/auth-client";
 import { useAuthStore } from "./store/auth";
 
 export const initialLoad = async () => {
   try {
-    const user = await authService.getUser();
+    const user = await clientAuthService.getUser();
     if (!user) {
       useAuthStore.getState().setUser(null);
     } else {

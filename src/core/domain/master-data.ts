@@ -1,4 +1,5 @@
 import { Tag, TagsGroups } from "./list-type";
+import { NewsCategory } from "./news";
 
 export interface MasterData {
   majorPositions: Position[];
@@ -7,9 +8,10 @@ export interface MasterData {
   typeCourses: TypeCourse[];
   listTypes: IType[];
   educationLevels: EducationLevel[];
-  academicPositions: Position[];
   tags: Tag[];
   tagsGroups: TagsGroups[];
+  prefixes: Position[];
+  newsCategories: NewsCategory[];
 }
 
 export interface Position {

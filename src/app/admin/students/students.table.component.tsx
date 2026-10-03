@@ -20,9 +20,10 @@ import {
   ArrowDownward,
   ArrowUpward,
 } from "@mui/icons-material";
-import { useState, useMemo, useRef } from "react";
+import { useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
-import { IStudent, ICreateStudentCsv } from "@/core/domain/student";
+import { UploadModal } from "@/components/uploadFile";
+import { IStudent } from "@/core/domain/student";
 import SearchIcon from "@mui/icons-material/Search";
 import CloseIcon from "@mui/icons-material/Close";
 import { RHFTextField } from "@/components/form/RHFTextField";
@@ -30,17 +31,20 @@ import { SearchForm } from "./students.landingpage";
 import { Control } from "react-hook-form";
 import Link from "next/link";
 import AddIcon from "@mui/icons-material/Add";
-import { useImportStudentStore } from "@/store/preview-data";
-import Papa from "papaparse";
 import { StudentService } from "@/core/service/student.service";
 import { StudentRepository } from "@/infra/repositories/student.repository";
 import {
   ConfirmModal,
   ConfirmModalProps,
 } from "@/components/modal/confirmModal";
+import {
+  UploadProgressModal,
+  UploadStatus,
+} from "@/components/modal/uploadStudentFileModal";
 import Alert from "@mui/material/Alert";
 import Snackbar from "@mui/material/Snackbar";
 import EmptyState from "@/components/emptyState";
+import { StudentDefaultAvatar } from "@/components/student-default-avatar";
 
 interface StudentTableComponentsProps {
   students: IStudent[];
@@ -74,12 +78,12 @@ const StudentTableComponents = ({
   apiBase,
 }: StudentTableComponentsProps) => {
   const router = useRouter();
-  const inputRef = useRef<HTMLInputElement | null>(null);
-  const { setImportData } = useImportStudentStore();
+  const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
   const [confirmModal, setConfirmModal] = useState<ConfirmModalProps | null>(
     null,
   );
   const [isError, setIsError] = useState(false);
+  const [uploadStatus, setUploadStatus] = useState<UploadStatus | null>(null);
 
   const studentService = useMemo(() => {
     const repo = new StudentRepository(apiBase);
@@ -129,22 +133,23 @@ const StudentTableComponents = ({
     }
   };
 
-  const handleClick = () => {
-    inputRef.current?.click();
+  const handleUploadStudentFile = async (file: File) => {
+    setIsUploadModalOpen(false);
+    setUploadStatus("loading");
+    try {
+      await studentService.createStudentBatch({
+        classBookID: Number(classBookID),
+        file: file,
+      });
+      setUploadStatus("success");
+    } catch {
+      setUploadStatus("error");
+    }
   };
 
-  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (!e.target.files?.[0]) return;
-    const file = e.target.files[0];
-    Papa.parse(file, {
-      header: true,
-      skipEmptyLines: true,
-      complete: (result) => {
-        const data: ICreateStudentCsv[] = result.data as ICreateStudentCsv[];
-        setImportData(data);
-        router.push(`/admin/students/preview?classBookID=${classBookID}`);
-      },
-    });
+  const handleUploadRetry = () => {
+    setUploadStatus(null);
+    setIsUploadModalOpen(true);
   };
 
   return (
@@ -160,7 +165,7 @@ const StudentTableComponents = ({
           onClose={() => setIsError(false)}
           sx={{ width: "100%" }}
         >
-          ไม่สามารถลบข้อมูลนักศึกษาได้้ในขณะนี้ กรุณาลองใหม่อีกครั้ง
+          ไม่สามารถลบข้อมูลนักศึกษาได้ในขณะนี้ กรุณาลองใหม่อีกครั้ง
         </Alert>
       </Snackbar>
       <div className="flex items-center justify-between p-6">
@@ -185,23 +190,24 @@ const StudentTableComponents = ({
               <Add /> เพิ่มนักศึกษา (บุคคล)
             </Link>
           </Button>
-          <input
-            type="file"
-            ref={inputRef}
-            hidden
-            accept=".csv"
-            onChange={handleFileChange}
-          />
+
           <Button
             variant="contained"
             size="large"
             startIcon={<AddIcon />}
-            onClick={handleClick}
+            onClick={() => setIsUploadModalOpen(true)}
           >
             เพิ่มนักศึกษา (ไฟล์)
           </Button>
         </div>
       </div>
+
+      <UploadModal
+        isOpen={isUploadModalOpen}
+        onClose={() => setIsUploadModalOpen(false)}
+        title="อัปโหลดไฟล์รายชื่อนักศึกษา"
+        onUpload={handleUploadStudentFile}
+      />
 
       <TableContainer component={Paper} sx={{ boxShadow: "none", flex: 1 }}>
         <Table stickyHeader sx={{ tableLayout: "fixed" }}>
@@ -275,12 +281,21 @@ const StudentTableComponents = ({
                         sx={{ width: 64, height: 64, margin: "0 auto" }}
                       />
                     ) : (
-                      <Avatar
+                      <StudentDefaultAvatar
+                        prefix={student.user?.prefix}
+                        alt={student.user?.firstNameTh || "Student"}
                         sx={{
                           width: 64,
                           height: 64,
                           margin: "0 auto",
-                          bgcolor: "grey.300",
+                          bgcolor: "transparent",
+                          borderRadius: "50%",
+                          "& img": {
+                            width: "100%",
+                            height: "100%",
+                            transform: "scale(1.25)",
+                            transformOrigin: "center bottom",
+                          },
                         }}
                       />
                     )}
@@ -350,6 +365,16 @@ const StudentTableComponents = ({
         </div>
       )}
       {confirmModal && <ConfirmModal {...confirmModal} />}
+      <UploadProgressModal
+        isOpen={uploadStatus !== null}
+        status={uploadStatus ?? "loading"}
+        onClose={() => setUploadStatus(null)}
+        onConfirm={() => {
+          setUploadStatus(null);
+          router.refresh();
+        }}
+        onRetry={handleUploadRetry}
+      />
     </Card>
   );
 };

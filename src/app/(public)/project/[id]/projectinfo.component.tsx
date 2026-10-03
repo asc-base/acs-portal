@@ -27,6 +27,9 @@ interface ProjectInfoProps {
 const ProjectInfoComponent: FC<ProjectInfoProps> = ({ project }) => {
   const [index, setIndex] = useState(0);
 
+  const projectCategories = project?.tag?.filter((t) => t.tagsGroupsId === 3) || [];
+  const projectFields = project?.tag?.filter((t) => t.tagsGroupsId === 2) || [];
+
   const handlePrev = () => {
     setIndex((prev) =>
       prev === 0 ? (project?.assetsURL?.length || 1)- 1 : prev - 1,
@@ -40,12 +43,12 @@ const ProjectInfoComponent: FC<ProjectInfoProps> = ({ project }) => {
   };
 
   const getVisibleImages = () => {
+    const total = project?.assetsURL?.length || 0;
+    if (total === 0) return ["https://picsum.photos/seed/acs/140/90"];
+    const count = Math.min(3, total);
     const result = [];
-    for (let i = 0; i < 3; i++) {
-      result.push(
-        project?.assetsURL?.[(index + i) % (project?.assetsURL?.length || 1)] ?? 
-        "https://picsum.photos/seed/acs/140/90",
-      );
+    for (let i = 0; i < count; i++) {
+      result.push(project.assetsURL[(index + i) % total]);
     }
     return result;
   };
@@ -88,11 +91,10 @@ const ProjectInfoComponent: FC<ProjectInfoProps> = ({ project }) => {
       {/*Project detail*/}
       <div className="mb-4">
         <h5>
-          {project?.projectCategories?.[0]?.name &&
-          project?.projectFields?.[0]?.name
-            ? `${project.projectCategories[0].name} / ${project.projectFields[0].name}`
-            : project?.projectCategories?.[0]?.name ||
-              project?.projectFields?.[0]?.name ||
+          {projectCategories?.[0]?.name && projectFields?.[0]?.name
+            ? `${projectCategories[0].name} / ${projectFields[0].name}`
+            : projectCategories?.[0]?.name ||
+              projectFields?.[0]?.name ||
               "Uncategorized"}
         </h5>
         <h2 className="font-bold">{project?.title}</h2>
@@ -173,38 +175,44 @@ const ProjectInfoComponent: FC<ProjectInfoProps> = ({ project }) => {
       {/*File*/}
       <div className="mt-12 flex flex-col gap-3">
         <h2 className="text-xl font-bold">Files and.....</h2>
-        <div className="flex flex-row">
+        <div className="flex flex-row gap-1">
           <h4>Git: </h4>
           <Link
             href={project.githubURL || "#"}
-            className="text-primary05 break-all underline"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-primary05 break-all"
           >
             <p>{project?.githubURL || "N/A"}</p>
           </Link>
         </div>
-        <div className="flex flex-row">
+        <div className="flex flex-row gap-1">
           <h4>Presentation: </h4>
           <Link
             href={project?.presentationURL || "#"}
-            className="text-primary05 break-all underline"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-primary05 break-all"
           >
             <p>{project?.presentationURL || "N/A"}</p>
           </Link>
         </div>
-        <div className="flex flex-row">
+        <div className="flex flex-row gap-1">
           <h4>Document: </h4>
           <Link
             href={project?.documentURL || "#"}
-            className="text-primary05 break-all underline"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-primary05 break-all"
           >
             <p>{project?.documentURL || "N/A"}</p>
           </Link>
         </div>
         <div className="mt-2 flex flex-row item-center gap-2">
           <h4>Techstack: </h4>
-          {project.techStacks?.map((tech: string, i: number) => (
-            <span key={i} className="rounded-md bg-gray-800 px-3 py-1 text-sm font-semibold text-white">{tech}</span>
-          ))}
+          <span className="font-semibold">
+            {project.techStacks?.join(", ")}
+          </span>
         </div>
       </div>
       {/*Member*/}

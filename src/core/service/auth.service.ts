@@ -1,6 +1,6 @@
 import { IAuthRepository } from "../ports/auth.repository";
 import { ApiResponse } from "@/interface/response";
-import { IUser } from "../domain/user";
+import { UserProfile } from "../domain/user";
 import {
   ForgetPasswordPayload,
   ForgetPasswordResponse,
@@ -10,10 +10,6 @@ import {
 export class AuthService {
   constructor(private readonly authRepository: IAuthRepository) {}
 
-  /** ===== ของเดิม: ห้ามแก้ ===== */
-  async LoginAdmin(data: { email: string; password: string }) {
-    return this.authRepository.LoginAdmin(data);
-  }
   async getUserData(token: string) {
     const response = await this.authRepository.getUserData(token);
     return response.data;
@@ -35,12 +31,11 @@ export class AuthService {
     return this.authRepository.resetPassword(payload);
   }
 
-  async getUser(): Promise<void | IUser | null> {
-    const user = await this.authRepository.getUser();
-    return user;
+  async getUser(): Promise<UserProfile | null> {
+    return this.authRepository.getUser();
   }
 
   async logout(): Promise<void> {
-    this.authRepository.Logout();
+    await this.authRepository.Logout();
   }
 }

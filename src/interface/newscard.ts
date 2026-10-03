@@ -4,7 +4,9 @@ export interface NewsCardProps {
     startDate: Date;
     dueDate?: Date | null;
     thumbnailURL: string;
-    highlightURL: string;
+    highlightURL?: string | null;
+    cardFocalPointX?: number | null;
+    cardFocalPointY?: number | null;
   };
   onDelete?: () => void;
   onEdit?: () => void;

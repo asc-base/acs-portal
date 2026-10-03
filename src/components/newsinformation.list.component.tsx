@@ -4,7 +4,6 @@ import { NewsInformationPageProps } from "@/core/domain/news";
 import { useRouter } from "next/navigation";
 import { Button } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
-import Link from "next/link";
 
 const NewsInformationListComponent = ({
   newsInformation,
@@ -12,6 +11,7 @@ const NewsInformationListComponent = ({
   pageSize,
 }: NewsInformationPageProps) => {
   const router = useRouter();
+  const isActive = newsInformation.length < 6;
 
   return (
     <div className="min-h-screen p-6">
@@ -25,17 +25,25 @@ const NewsInformationListComponent = ({
           <h4>(สามารถเลือกได้สูงสุด {pageSize} ข่าวสาร)</h4>
         </div>
         {tagID === 26 ? (
-          <Link href={`/admin/newsinformation/${tagID}/create`}>
-            <Button variant="contained" startIcon={<AddIcon />} size="large">
-              เพิ่มข่าว Highlight
-            </Button>
-          </Link>
+          <Button
+            variant="contained"
+            startIcon={<AddIcon />}
+            size="large"
+            href={`/admin/newsinformation/${tagID}/create`}
+            disabled={!isActive}
+          >
+            เพิ่มข่าว Highlight
+          </Button>
         ) : (
-          <Link href={`/admin/newsinformation/${tagID}/create`}>
-            <Button variant="contained" startIcon={<AddIcon />} size="large">
-              เพิ่มข่าวประชาสัมพันธ์
-            </Button>
-          </Link>
+          <Button
+            variant="contained"
+            startIcon={<AddIcon />}
+            size="large"
+            href={`/admin/newsinformation/${tagID}/create`}
+            disabled={!isActive}
+          >
+            เพิ่มข่าวประชาสัมพันธ์
+          </Button>
         )}
       </div>
 

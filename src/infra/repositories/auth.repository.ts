@@ -1,12 +1,12 @@
 import { IAuthRepository } from "@/core/ports/auth.repository";
 import {
-  AuthResponse,
+  AuthTokens,
   ForgetPasswordResponse,
   LoginRequest,
 } from "@/core/domain/auth";
 import { HttpHelper } from "@/lib/http";
 import { ApiResponse } from "@/interface/response";
-import { IUser } from "@/interface/user";
+import { UserProfile } from "@/core/domain/user";
 import { authErrorHandler } from "@/lib/auth-error-handler";
 
 export class AuthRepository implements IAuthRepository {
@@ -18,16 +18,8 @@ export class AuthRepository implements IAuthRepository {
     this.http = new HttpHelper(this.baseUrl);
   }
 
-  async LoginAdmin(data: LoginRequest): Promise<ApiResponse<AuthResponse>> {
-    const response = await this.http.post<ApiResponse<AuthResponse>>(
-      `/v1/auth/login-admin`,
-      data,
-    );
-    return response;
-  }
-
-  async getUserData(token: string): Promise<ApiResponse<IUser>> {
-    const response = await this.http.get<ApiResponse<IUser>>(
+  async getUserData(token: string): Promise<ApiResponse<UserProfile>> {
+    const response = await this.http.get<ApiResponse<UserProfile>>(
       `/v1/users/profile`,
       {
         Authorization: `Bearer ${token}`,
@@ -36,13 +28,11 @@ export class AuthRepository implements IAuthRepository {
     return response;
   }
 
-  async Login(data: LoginRequest): Promise<ApiResponse<IUser>> {
-    const response = await this.http.post<ApiResponse<IUser>>(
+  async Login(data: LoginRequest): Promise<ApiResponse<AuthTokens>> {
+    const response = await this.http.post<ApiResponse<AuthTokens>>(
       `/v1/auth/login`,
       data,
     );
-    console.log("response", response);
-
     return response;
   }
 
@@ -67,10 +57,10 @@ export class AuthRepository implements IAuthRepository {
     return response;
   }
 
-  async getUser(): Promise<IUser | null> {
+  async getUser(): Promise<UserProfile | null> {
     return authErrorHandler.withAuthErrorHandling(async () => {
       const response =
-        await this.http.get<ApiResponse<IUser>>(`/v1/users/profile`);
+        await this.http.get<ApiResponse<UserProfile>>(`/v1/users/profile`);
       if (!response.data) {
         return null;
       }
@@ -79,7 +69,7 @@ export class AuthRepository implements IAuthRepository {
   }
 
   async Logout(): Promise<void> {
-    authErrorHandler.withAuthErrorHandling(async () => {
+    await authErrorHandler.withAuthErrorHandling(async () => {
       await this.http.post<void>(`/v1/auth/logout`);
     });
   }

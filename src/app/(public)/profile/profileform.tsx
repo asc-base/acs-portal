@@ -1,6 +1,6 @@
 "use client";
 import React, { useState, useEffect, useMemo } from "react";
-import { Button, InputAdornment, Modal } from "@mui/material";
+import { Button, InputAdornment, Modal, Chip, TextField } from "@mui/material";
 import { RHFTextField } from "@/components/form/RHFTextField";
 import { styled } from "@mui/material/styles";
 import GitHubIcon from "@mui/icons-material/GitHub";
@@ -9,11 +9,15 @@ import LinkedInIcon from "@mui/icons-material/LinkedIn";
 import InstagramIcon from "@mui/icons-material/Instagram";
 import Image from "next/image";
 import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import {
+  UpdateStudentSchema,
+  UpdateStudentInputs,
+} from "@/core/schema/student";
 import { CropImageCard } from "@/components/cropimagecard";
 import { useRouter } from "next/navigation";
-import { IStudent } from "@/core/domain/student";
-import { AuthRepository } from "@/infra/repositories/auth.repository";
-import { AuthService } from "@/core/service/auth.service";
+import { IStudent, IUpdateStudent } from "@/core/domain/student";
+import { clientAuthService } from "@/infra/auth-client";
 import { StudentRepository } from "@/infra/repositories/student.repository";
 import { StudentService } from "@/core/service/student.service";
 
@@ -29,14 +33,7 @@ const VisuallyHiddenInput = styled("input")({
   width: 1,
 });
 
-interface FormData {
-  github: string;
-  linkedin: string;
-  facebook: string;
-  instagram: string;
-  projects: { title: string }[];
-  file: string | File | null;
-}
+
 
 // interface ProfileFormProps {
 //   studentData: IStudent;
@@ -48,12 +45,6 @@ const ProfileForm = ({ apiBase }: { apiBase: string }) => {
   const [student, setStudent] = useState<IStudent | null>(null);
   const router = useRouter();
 
-  const authService = useMemo(() => {
-    const authRepo = new AuthRepository(apiBase);
-    const authSerivce = new AuthService(authRepo);
-    return authSerivce;
-  }, [apiBase]);
-
   const studentService = useMemo(() => {
     const studentRepo = new StudentRepository(apiBase);
     const studentSerivce = new StudentService(studentRepo);
@@ -63,7 +54,7 @@ const ProfileForm = ({ apiBase }: { apiBase: string }) => {
   useEffect(() => {
     const fetchStudent = async () => {
       try {
-        const user = await authService.getUser();
+        const user = await clientAuthService.getUser();
         if (!user) {
           router.push("/auth/student");
           return;
@@ -78,31 +69,66 @@ const ProfileForm = ({ apiBase }: { apiBase: string }) => {
       }
     };
     fetchStudent();
-  }, [router, authService, studentService]);
+  }, [router, studentService]);
 
-  const { handleSubmit, control, reset } = useForm<FormData>({
+  const [skillInput, setSkillInput] = useState("");
+
+  const { handleSubmit, control, reset, watch, setValue } = useForm<UpdateStudentInputs>({
+    resolver: zodResolver(UpdateStudentSchema),
     defaultValues: {
+      studentCode: student?.studentCode || "",
+      firstNameTh: student?.user?.firstNameTh || "",
+      lastNameTh: student?.user?.lastNameTh || "",
+      firstNameEn: student?.user?.firstNameEn || "",
+      lastNameEn: student?.user?.lastNameEn || "",
+      email: student?.user?.email || "",
+      nickName: student?.user?.nickName || "",
       github: student?.github || "",
       linkedin: student?.linkedin || "",
       facebook: student?.facebook || "",
       instagram: student?.instagram || "",
-      // projects:
-      //   studentData?.projects?.map((project) => ({ title: project.title })) ||
-      //   [],
-      file: student?.user?.imageUrl || null,
+      skills: student?.skills || [],
     },
   });
-  const [isCroping, setIsCroping] = useState(false);
+
+  const currentSkills = watch("skills") || [];
+
+  const handleAddSkill = () => {
+    const trimmed = skillInput.trim();
+    if (trimmed && !currentSkills.includes(trimmed)) {
+      setValue("skills", [...currentSkills, trimmed], { shouldDirty: true });
+      setSkillInput("");
+    }
+  };
+
+  const handleDeleteSkill = (skillToDelete: string) => {
+    setValue(
+      "skills",
+      currentSkills.filter((skill) => skill !== skillToDelete),
+      { shouldDirty: true }
+    );
+  };
+  const [croppingFile, setCroppingFile] = useState<File | null>(null);
+  const [focalPoint, setFocalPoint] = useState<{ x: number; y: number } | null>(null);
 
   useEffect(() => {
     reset({
+      studentCode: student?.studentCode || "",
+      firstNameTh: student?.user?.firstNameTh || "",
+      lastNameTh: student?.user?.lastNameTh || "",
+      firstNameEn: student?.user?.firstNameEn || "",
+      lastNameEn: student?.user?.lastNameEn || "",
+      email: student?.user?.email || "",
+      nickName: student?.user?.nickName || "",
       github: student?.github || "",
       linkedin: student?.linkedin || "",
       facebook: student?.facebook || "",
       instagram: student?.instagram || "",
-      file: student?.user?.imageUrl || null,
+      skills: student?.skills || [],
     });
+    setSkillInput("");
     setSelectedFile(null);
+    setFocalPoint(null);
   }, [student, reset]);
 
   const { nickName, firstNameTh, firstNameEn, lastNameTh, lastNameEn } =
@@ -112,19 +138,24 @@ const ProfileForm = ({ apiBase }: { apiBase: string }) => {
     const file = event.target.files?.[0] || null;
 
     if (file) {
-      setSelectedFile(file);
-      setIsCroping(true);
+      setCroppingFile(file);
     }
+    event.target.value = "";
   };
 
-  const handleCropComplete = (croppedFile: File) => {
+  const handleCropComplete = (
+    croppedFile: File,
+    focal?: { x: number; y: number },
+  ) => {
     setSelectedFile(croppedFile);
-    setIsCroping(false);
+    if (focal) {
+      setFocalPoint(focal);
+    }
+    setCroppingFile(null);
   };
 
   const handleCropCancel = () => {
-    setIsCroping(false);
-    setSelectedFile(null);
+    setCroppingFile(null);
   };
 
   const handleEdit = () => {
@@ -133,17 +164,26 @@ const ProfileForm = ({ apiBase }: { apiBase: string }) => {
 
   const handleCancel = () => {
     reset({
+      studentCode: student?.studentCode || "",
+      firstNameTh: student?.user?.firstNameTh || "",
+      lastNameTh: student?.user?.lastNameTh || "",
+      firstNameEn: student?.user?.firstNameEn || "",
+      lastNameEn: student?.user?.lastNameEn || "",
+      email: student?.user?.email || "",
+      nickName: student?.user?.nickName || "",
       github: student?.github || "",
       linkedin: student?.linkedin || "",
       facebook: student?.facebook || "",
       instagram: student?.instagram || "",
-      file: student?.user?.imageUrl || null,
+      skills: student?.skills || [],
     });
+    setSkillInput("");
     setSelectedFile(null);
+    setFocalPoint(null);
     setIsEditing(false);
   };
 
-  const onSubmit = async (data: FormData) => {
+  const onSubmit = async (data: UpdateStudentInputs) => {
     try {
       setIsEditing(false);
       const id = student?.id;
@@ -153,8 +193,14 @@ const ProfileForm = ({ apiBase }: { apiBase: string }) => {
         return;
       }
 
+      const payload: IUpdateStudent = {
+        ...data,
+        imageFocalPointX: focalPoint?.x,
+        imageFocalPointY: focalPoint?.y,
+      };
+
       const response = await studentService.updateStudent(
-        data,
+        payload,
         selectedFile,
         classBookID,
         id,
@@ -216,11 +262,10 @@ const ProfileForm = ({ apiBase }: { apiBase: string }) => {
                 )}
                 {isEditing && (
                   <div
-                    className={`flex items-center justify-center ${
-                      selectedFile || student?.user?.imageUrl
-                        ? "absolute inset-0 z-10 h-full w-full bg-black/40 opacity-0 transition-opacity duration-300 hover:opacity-100"
-                        : "relative h-full w-full opacity-100"
-                    } `}
+                    className={`flex items-center justify-center ${selectedFile || student?.user?.imageUrl
+                      ? "absolute inset-0 z-10 h-full w-full bg-black/40 opacity-0 transition-opacity duration-300 hover:opacity-100"
+                      : "relative h-full w-full opacity-100"
+                      } `}
                   >
                     <div className="border-neutral03 bg-neutral01/70 flex items-center justify-center rounded-lg border px-6 py-3 shadow-sm backdrop-blur-sm">
                       <span className="text-neutral05 text-base font-medium">
@@ -266,7 +311,7 @@ const ProfileForm = ({ apiBase }: { apiBase: string }) => {
               <div className="text-center">:</div>
               <div className="text-primary01 font-bold">
                 {student?.user
-                  ? `${firstNameTh} ${lastNameTh}`.trim()
+                  ? `${student.user.prefix?.nameTh || ""} ${firstNameTh} ${lastNameTh}`.trim()
                   : "สมชาย ใจดี"}
               </div>
 
@@ -275,7 +320,7 @@ const ProfileForm = ({ apiBase }: { apiBase: string }) => {
               <div className="text-center">:</div>
               <div className="text-primary01 font-bold">
                 {student?.user
-                  ? `${firstNameEn} ${lastNameEn}`.trim()
+                  ? `${student.user.prefix?.shortNameEn || ""} ${firstNameEn} ${lastNameEn}`.trim()
                   : "Somchai Jaidee"}
               </div>
             </div>
@@ -304,9 +349,9 @@ const ProfileForm = ({ apiBase }: { apiBase: string }) => {
                     },
                   },
                   "& .MuiOutlinedInput-root.Mui-focused .MuiInputAdornment-root .MuiSvgIcon-root":
-                    {
-                      color: "primary.main",
-                    },
+                  {
+                    color: "primary.main",
+                  },
                 }}
                 slotProps={{
                   input: {
@@ -338,9 +383,9 @@ const ProfileForm = ({ apiBase }: { apiBase: string }) => {
                     },
                   },
                   "& .MuiOutlinedInput-root.Mui-focused .MuiInputAdornment-root .MuiSvgIcon-root":
-                    {
-                      color: "primary.main",
-                    },
+                  {
+                    color: "primary.main",
+                  },
                 }}
                 slotProps={{
                   input: {
@@ -375,9 +420,9 @@ const ProfileForm = ({ apiBase }: { apiBase: string }) => {
                     },
                   },
                   "& .MuiOutlinedInput-root.Mui-focused .MuiInputAdornment-root .MuiSvgIcon-root":
-                    {
-                      color: "primary.main",
-                    },
+                  {
+                    color: "primary.main",
+                  },
                 }}
                 slotProps={{
                   input: {
@@ -409,9 +454,9 @@ const ProfileForm = ({ apiBase }: { apiBase: string }) => {
                     },
                   },
                   "& .MuiOutlinedInput-root.Mui-focused .MuiInputAdornment-root .MuiSvgIcon-root":
-                    {
-                      color: "primary.main",
-                    },
+                  {
+                    color: "primary.main",
+                  },
                 }}
                 slotProps={{
                   input: {
@@ -425,6 +470,73 @@ const ProfileForm = ({ apiBase }: { apiBase: string }) => {
               />
             </div>
           </div>
+        </div>
+
+
+        <div className="group text-neutral04 mt-6 flex flex-col">
+          <h4 className="group-focus-within:text-primary03">Skills</h4>
+          <div className="flex flex-col gap-2 md:flex-row md:items-start">
+            <div className="grow">
+              <TextField
+                value={skillInput}
+                onChange={(e) => setSkillInput(e.target.value)}
+                fullWidth
+                variant="outlined"
+                size="small"
+                placeholder="เพิ่ม skills ของคุณ ..."
+                disabled={!isEditing}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    handleAddSkill();
+                  }
+                }}
+                sx={{
+                  "& .MuiOutlinedInput-root": {
+                    "& fieldset": { borderColor: "var(--color-neutral03)" },
+                    "&.Mui-focused fieldset": { borderColor: "var(--color-primary03)" },
+                  },
+                }}
+              />
+            </div>
+            <Button
+              variant="contained"
+              disabled={!isEditing || !skillInput.trim()}
+              onClick={handleAddSkill}
+              sx={{
+                backgroundColor: "var(--color-primary02)",
+                color: "var(--color-neutral01)",
+                height: "40px",
+                minWidth: "100px",
+                alignSelf: "flex-start",
+                "&:hover": { backgroundColor: "var(--color-primary01)" },
+              }}
+            >
+              เพิ่ม
+            </Button>
+          </div>
+
+          {currentSkills.length > 0 && (
+            <div className="mt-1 flex flex-wrap gap-2">
+              {currentSkills.map((skill, index) => (
+                <Chip
+                  key={index}
+                  label={skill}
+                  onDelete={isEditing ? () => handleDeleteSkill(skill) : undefined}
+                  sx={{
+                    backgroundColor: "var(--color-neutral02)",
+                    borderRadius: "16px",
+                    fontSize: "var(--text-h5)",
+                    color: "var(--color-neutral05)",
+                    "& .MuiChip-deleteIcon": {
+                      color: "var(--color-neutral04)",
+                      "&:hover": { color: "var(--color-neutral05)" },
+                    },
+                  }}
+                />
+              ))}
+            </div>
+          )}
         </div>
 
         {/* Section 3: Projects */}
@@ -494,21 +606,19 @@ const ProfileForm = ({ apiBase }: { apiBase: string }) => {
             </>
           )}
         </div>
-        {isCroping && selectedFile && (
-          <Modal
-            open={isCroping}
-            onClose={handleCropCancel}
-            closeAfterTransition
-          >
-            <CropImageCard
-              width={200}
-              height={200}
-              file={selectedFile}
-              onUploadComplete={handleCropComplete}
-              onCancel={handleCropCancel}
-            />
-          </Modal>
-        )}
+        <Modal open={!!croppingFile} onClose={handleCropCancel}>
+          <div>
+            {croppingFile && (
+              <CropImageCard
+                file={croppingFile}
+                width={536}
+                height={480}
+                onUploadComplete={handleCropComplete}
+                onCancel={handleCropCancel}
+              />
+            )}
+          </div>
+        </Modal>
       </form>
     </div>
   );

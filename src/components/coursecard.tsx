@@ -68,7 +68,7 @@ const CourseCard: React.FC<CourseCardProps> = ({ course }) => {
         )} */}
 
         <h3>
-          <span className="font-bold">ลักษณะการเรียน :</span> {course.credits}
+          <span className="font-bold">หน่วยกิต :</span> {course.credits}
         </h3>
 
         <Collapse in={open}>

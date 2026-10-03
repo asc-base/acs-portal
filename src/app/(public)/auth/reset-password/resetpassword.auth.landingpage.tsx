@@ -9,7 +9,7 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { RHFTextField } from "@/components/form/RHFTextField";
 import { ResetPasswordSchema } from "@/core/schema/auth";
-import { authService } from "@/infra/container";
+import { clientAuthService } from "@/infra/auth-client";
 import { useRouter } from "next/navigation";
 
 interface ResetPasswordAuthLandingPageProps {
@@ -39,7 +39,7 @@ export default function ResetPasswordAuthLandingPage({
 
   const onSubmit = async (formData: FormValues) => {
     try {
-      await authService.resetPassword({
+      await clientAuthService.resetPassword({
         refferenceCode: referenceCode,
         password: formData.password,
       });

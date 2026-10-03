@@ -1,0 +1,15 @@
+name: Release
+
+on:
+  push:
+    branches:
+      - "release/**"
+
+permissions:
+  contents: write
+  packages: write
+
+jobs:
+  release:
+    uses: asc-base/acs-website-infra/.github/workflows/release-rc-nextjs.yml@main
+    secrets: inherit

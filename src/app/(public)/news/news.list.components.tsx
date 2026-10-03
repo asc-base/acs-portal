@@ -5,6 +5,7 @@ import { NewsCard } from "@/components/newscard";
 import { Pagination, Breadcrumbs } from "@mui/material";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import EmptyState from "@/components/emptyState";
 
 interface NewsListComponentsProps {
   news: INews[];
@@ -43,7 +44,10 @@ const NewsListComponents = ({
        <h4 className="font-bold text-accent04 mt-2 lg:mt-3 mb-4 lg:mb-6 lg:text-2xl">{category}</h4>
       {news.length === 0 ? (
         <div className="flex h-96 flex-col items-center justify-center">
-          <p className="text-gray-500">ไม่มีข่าวในหมวดหมู่นี้</p>
+          <EmptyState 
+            title="ไม่พบข่าวสารในหมวดหมู่นี้" 
+            description="เมื่อมีข้อมูลข่าวสาร ข้อมูลจะปรากฏที่นี่" 
+          />
         </div>
       ) : (
         <div className="flex w-full flex-col items-center justify-center gap-5">

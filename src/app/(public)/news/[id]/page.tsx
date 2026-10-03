@@ -15,7 +15,7 @@ const page = async ({ params }: PageProps) => {
   const { id } = await params;
 
   const newsInfo = await newsService.getNewsById(id);
-  const recommendNews = await newsService.getNews(1, 6);
+  const recommendNews = await newsService.getNews(1, 6, newsInfo.tag.id);
 
   return (
     <div>

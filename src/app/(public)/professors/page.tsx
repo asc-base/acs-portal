@@ -16,7 +16,7 @@ interface PageProps {
 const page = async ({ searchParams }: PageProps) => {
   const resolvedSearchParams = await searchParams;
 
-  const { rows, pageSize, page } = await professorService.getProfessors({
+  const { rows, pageSize, page, totalRecords } = await professorService.getProfessors({
     page: resolvedSearchParams.page || 1,
     pageSize: resolvedSearchParams.pageSize || 12,
     academicPosition: "true"
@@ -27,6 +27,7 @@ const page = async ({ searchParams }: PageProps) => {
       professors={rows}
       pageSize={pageSize}
       page={page}
+      totalRecords={totalRecords}
     />
   );
 };

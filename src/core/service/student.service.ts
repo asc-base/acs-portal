@@ -4,9 +4,13 @@ import {
   QueryStudent,
   ICreateStudent,
   IUpdateStudent,
-  ICreateStudentCsv,
 } from "../domain/student";
+import { CreateStudentCsv } from "../schema/student-csv";
 import { Pageable } from "@/interface/response";
+
+type CreateStudentBatchInput = {
+  classBookID: number;
+} & ({ file: File } | { students: CreateStudentCsv[] });
 
 export class StudentService {
   constructor(private studentRepository: IStudentRepository) {}
@@ -32,7 +36,9 @@ export class StudentService {
   ): Promise<IStudent> {
     const formData = new FormData();
     Object.entries(data).forEach(([key, value]) => {
-      formData.append(key, value?.toString() ?? "");
+      if (value !== null && value !== undefined && value !== "") {
+        formData.append(key, value.toString());
+      }
     });
 
     if (imageFile) {
@@ -58,7 +64,11 @@ export class StudentService {
     try {
       const formData = new FormData();
       Object.entries(data).forEach(([key, value]) => {
-        formData.append(key, value?.toString() ?? "");
+        if (key === "skills" && Array.isArray(value)) {
+          value.forEach((v) => formData.append("skills", v));
+        } else if (value !== null && value !== undefined && value !== "") {
+          formData.append(key, value.toString());
+        }
       });
       if (image) formData.append("imageFile", image);
       formData.append("classBookID", classBookID.toString());
@@ -74,11 +84,40 @@ export class StudentService {
     }
   }
 
-  async createStudentBatch(data: {
-    students: ICreateStudentCsv[];
-    classBookID: number;
-  }): Promise<IStudent[]> {
-    const response = await this.studentRepository.createStudentBatch(data);
+  private createStudentCsvFile(students: CreateStudentCsv[]): File {
+    const headers = [
+      "studentCode",
+      "email",
+      "firstNameTh",
+      "lastNameTh",
+      "firstNameEn",
+      "lastNameEn",
+      "nickName",
+    ];
+
+    const escapeCsvValue = (value: string | undefined) =>
+      `"${(value ?? "").replace(/"/g, '""')}"`;
+
+    const rows = students.map((student) =>
+      headers
+        .map((header) =>
+          escapeCsvValue(student[header as keyof CreateStudentCsv]),
+        )
+        .join(","),
+    );
+
+    return new File([[headers.join(","), ...rows].join("\n")], "students.csv", {
+      type: "text/csv",
+    });
+  }
+
+  async createStudentBatch(data: CreateStudentBatchInput): Promise<null> {
+    const formData = new FormData();
+    const file =
+      "file" in data ? data.file : this.createStudentCsvFile(data.students);
+    formData.append("file", file);
+    formData.append("classBookID", data.classBookID.toString());
+    const response = await this.studentRepository.createStudentBatch(formData);
     return response.data;
   }
 }

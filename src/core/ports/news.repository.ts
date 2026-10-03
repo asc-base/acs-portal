@@ -24,4 +24,6 @@ export interface INewsRepository {
   ): Promise<ApiResponse<Pageable<INewsInformation>>>;
   upsertNewsInformation(data: FormData): Promise<ApiResponse<INewsInformation>>;
   getNewsInformationById(id: number): Promise<ApiResponse<INewsInformation>>;
+  getNewsBulletins(type: "HIGHLIGHT" | "ANNOUNCEMENT"): Promise<ApiResponse<Array<{ id: number; newsID: number; type: "HIGHLIGHT" | "ANNOUNCEMENT"; news: INews }>>>;
+  setNewsBulletin(id: number, type: "HIGHLIGHT" | "ANNOUNCEMENT", enabled: boolean): Promise<ApiResponse<unknown>>;
 }

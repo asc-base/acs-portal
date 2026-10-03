@@ -1,10 +1,10 @@
-import { ICreateStudentCsv } from "@/core/domain/student";
+import { CreateStudentCsv } from "@/core/schema/student-csv";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
 type ImportStudentState = {
-  importData: ICreateStudentCsv[];
-  setImportData: (data: ICreateStudentCsv[]) => void;
+  importData: CreateStudentCsv[];
+  setImportData: (data: CreateStudentCsv[]) => void;
   clearImportData: () => void;
   deleteByStudentId: (studentId: string, index: number) => void;
 };

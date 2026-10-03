@@ -4,29 +4,61 @@ import { INews, INewsInformation } from "@/core/domain/news";
 import heroImage from "../../../../public/hero.jpg";
 import { NewsCard } from "@/components/newscard";
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { NewsCarouselComponent } from "@/components/news.carousel.component";
 import { ActivityCard } from "@/components/activitycard";
 import { Carousel } from "@/components/carousel";
 // import { useAuthStore } from "@/store/auth";
+import NewsHighlightCarousel from "@/components/newshighlightcarousel";
+
+const useCarouselStep = () => {
+  const [step, setStep] = useState(1);
+
+  useEffect(() => {
+    const calculateStep = () => {
+      const width = window.innerWidth;
+      if (width >= 1280) return 3;
+      if (width >= 768) return 2;
+      return 1;
+    };
+
+    setStep(calculateStep());
+
+    const handleResize = () => setStep(calculateStep());
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  return step;
+};
 
 interface HomePageProps {
   initNewsActivity: INews[];
   initNewsComplete: INews[];
   initNewsActivityStudent: INews[];
   initAnnoucement?: INewsInformation[];
-  // initNewsHighlight?: INewsInformation[];
+  initNewsHighlight?: INewsInformation[];
   // apibase: string;
 }
+
+const moveCarouselIndex = (
+  currentIndex: number,
+  length: number,
+  direction: 1 | -1,
+  step: number,
+) => {
+  const safeStep = Math.min(step, length);
+  return (currentIndex + direction * safeStep + length) % length;
+};
 
 const HomePage = ({
   initNewsActivity,
   initNewsComplete,
   initNewsActivityStudent,
   initAnnoucement,
-  // initNewsHighlight,
-  // apibase,
+  initNewsHighlight,
 }: HomePageProps) => {
+  const carouselStep = useCarouselStep();
   const [newsActivityActive, setNewsActivityActive] = useState(0);
   const [newsCompleteActive, setNewsCompleteActive] = useState(0);
   const [newsActivityStudentActive, setNewsActivityStudentActive] = useState(0);
@@ -34,17 +66,15 @@ const HomePage = ({
   // const user = useAuthStore((state) => state.user);
 
   const handleNextNewsActivity = () => {
-    if (initNewsActivity.length === 0) return;
-    setNewsActivityActive(
-      (prevItem) => (prevItem + 1) % initNewsActivity.length,
-    );
-  };
-
+  if (initNewsActivity.length === 0) return;
+  setNewsActivityActive((prevItem) =>
+    moveCarouselIndex(prevItem, initNewsActivity.length, 1, carouselStep),
+  );
+};
   const handlePrevNewsActivity = () => {
     if (initNewsActivity.length === 0) return;
-    setNewsActivityActive(
-      (prevItem) =>
-        (prevItem - 1 + initNewsActivity.length) % initNewsActivity.length,
+    setNewsActivityActive((prevItem) =>
+      moveCarouselIndex(prevItem, initNewsActivity.length, -1, carouselStep),
     );
   };
 
@@ -54,16 +84,14 @@ const HomePage = ({
 
   const handleNextNewsComplete = () => {
     if (initNewsComplete.length === 0) return;
-    setNewsCompleteActive(
-      (prevItem) => (prevItem + 1) % initNewsComplete.length,
+    setNewsCompleteActive((prevItem) =>
+      moveCarouselIndex(prevItem, initNewsComplete.length, 1, carouselStep),
     );
   };
-
   const handlePrevNewsComplete = () => {
     if (initNewsComplete.length === 0) return;
-    setNewsCompleteActive(
-      (prevItem) =>
-        (prevItem - 1 + initNewsComplete.length) % initNewsComplete.length,
+    setNewsCompleteActive((prevItem) =>
+      moveCarouselIndex(prevItem, initNewsComplete.length, -1, carouselStep),
     );
   };
 
@@ -74,14 +102,13 @@ const HomePage = ({
   const handleNextNewsActivityStudent = () => {
     if (initNewsActivityStudent.length === 0) return;
     setNewsActivityStudentActive((prevItem) =>
-      prevItem >= initNewsActivityStudent.length - 1 ? 0 : prevItem + 1,
+      moveCarouselIndex(prevItem, initNewsActivityStudent.length, 1, carouselStep),
     );
   };
-
   const handlePrevNewsActivityStudent = () => {
     if (initNewsActivityStudent.length === 0) return;
     setNewsActivityStudentActive((prevItem) =>
-      prevItem === 0 ? initNewsActivityStudent.length - 1 : prevItem - 1,
+      moveCarouselIndex(prevItem, initNewsActivityStudent.length, -1, carouselStep),
     );
   };
 
@@ -105,7 +132,7 @@ const HomePage = ({
             <div className="flex flex-col-reverse gap-x-6 gap-y-6 md:grid md:grid-cols-2">
               {showActivitySection ? (
                 <div>
-                  <h3 className="text-accent04 lg:text-h1-1 mb-3 items-baseline font-bold"> 
+                  <h3 className="text-accent04 lg:text-h1-1 mb-3 items-baseline font-bold">
                     งานกิจกรรมเร็ว ๆ นี้
                   </h3>
                   <div className="flex flex-col gap-y-3 md:[&>*:nth-child(n+3)]:hidden lg:[&>*:nth-child(n+3)]:block [&>*:nth-child(n+5)]:hidden">
@@ -140,6 +167,12 @@ const HomePage = ({
             </div>
           )}
 
+          {initNewsHighlight && initNewsHighlight.length > 0 && (
+            <div className="my-2">
+              <NewsHighlightCarousel newsHighlight={initNewsHighlight} />
+            </div>
+          )}
+
           <NewsCarouselComponent
             title="ข่าวประชาสัมพันธ์"
             news={initNewsActivity}
@@ -150,7 +183,7 @@ const HomePage = ({
             tagId={16}
           >
             {Array.from(
-              { length: Math.min(3, initNewsActivity.length) },
+              { length: Math.min(4, initNewsActivity.length) },
               (_, i) => {
                 const index =
                   (newsActivityActive + i) % initNewsActivity.length;
@@ -187,7 +220,7 @@ const HomePage = ({
             tagId={17}
           >
             {Array.from(
-              { length: Math.min(3, initNewsComplete.length) },
+              { length: Math.min(4, initNewsComplete.length) },
               (_, i) => {
                 const index =
                   (newsCompleteActive + i) % initNewsComplete.length;
@@ -224,7 +257,7 @@ const HomePage = ({
             tagId={18}
           >
             {Array.from(
-              { length: Math.min(3, initNewsActivityStudent.length) },
+              { length: Math.min(4, initNewsActivityStudent.length) },
               (_, i) => {
                 const index =
                   (newsActivityStudentActive + i) %

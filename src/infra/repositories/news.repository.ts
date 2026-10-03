@@ -1,5 +1,8 @@
 import { INewsRepository } from "@/core/ports/news.repository";
-import { INews, INewsInformation } from "@/core/domain/news";
+import {
+  INews,
+  INewsInformation,
+} from "@/core/domain/news";
 import { HttpHelper } from "@/lib/http";
 import { ApiResponse, Pageable } from "@/interface/response";
 
@@ -116,5 +119,16 @@ export class NewsRepository implements INewsRepository {
       `/v1/news/news-features/${id}`,
     );
     return response;
+  }
+
+  async getNewsBulletins(type: "HIGHLIGHT" | "ANNOUNCEMENT") {
+    return this.http.get<ApiResponse<Array<{ id: number; newsID: number; type: "HIGHLIGHT" | "ANNOUNCEMENT"; news: INews }>>>(`/v1/news/bulletins?type=${type}`);
+  }
+
+  async setNewsBulletin(id: number, type: "HIGHLIGHT" | "ANNOUNCEMENT", enabled: boolean) {
+    const path = `/v1/news/${id}/bulletins/${type}`;
+    return enabled
+      ? this.http.put<ApiResponse<unknown>>(path, new FormData())
+      : this.http.delete<ApiResponse<unknown>>(path);
   }
 }

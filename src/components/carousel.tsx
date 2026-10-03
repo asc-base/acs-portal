@@ -37,6 +37,9 @@ export const Carousel: FC<CarouselProps> = ({
                 <Link href={`/news/${item?.news?.id}`}>
                   <Image
                     className="object-cover"
+                    style={{
+                      objectPosition: `${item.news?.cardFocalPointX ?? 50}% ${item.news?.cardFocalPointY ?? 50}%`,
+                    }}
                     src={item?.thumbnailURL}
                     alt={`Slide ${index + 1}`}
                     fill

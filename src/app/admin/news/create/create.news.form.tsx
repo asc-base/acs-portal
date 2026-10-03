@@ -1,11 +1,12 @@
 "use client";
 import { Button, MenuItem, Alert, Snackbar, Modal } from "@mui/material";
 import React, { useState, useMemo } from "react";
+import { IconButton } from "@mui/material";
+import CloseIcon from "@mui/icons-material/Close";
 import { useForm, SubmitHandler } from "react-hook-form";
 import Image from "next/image";
 import { NewsRepository } from "@/infra/repositories/news.repository";
 import { NewsService } from "@/core/service/news.service";
-import { ICreateNews } from "@/core/domain/news";
 import { zodResolver } from "@hookform/resolvers/zod";
 import dayjs from "dayjs";
 import "dayjs/locale/th";
@@ -19,16 +20,16 @@ import {
 } from "@/components/modal/confirmModal";
 import { useRouter } from "next/navigation";
 import { styled } from "@mui/material/styles";
-import { Tag } from "@/core/domain/list-type";
+import { NewsCategory } from "@/core/domain/news";
 import { CropImageCard } from "@/components/cropimagecard";
 import { CreateNewsInputs, CreateNewsSchema } from "@/core/schema/news";
 
 dayjs.extend(buddhistEra);
 dayjs.locale("th");
 
-interface CraeteNewsProps {
+interface CreateNewsProps {
   apiBase: string;
-  categories: Tag[];
+  categories: NewsCategory[];
 }
 
 const VisuallyHiddenInput = styled("input")({
@@ -43,15 +44,16 @@ const VisuallyHiddenInput = styled("input")({
   width: 1,
 });
 
-const CreateNewsForm = ({ apiBase, categories }: CraeteNewsProps) => {
+const CreateNewsForm = ({ apiBase, categories }: CreateNewsProps) => {
   const [confirmModal, setConfirmModal] = useState<ConfirmModalProps | null>(
     null,
   );
   const [isError, setIsError] = useState(false);
   const [croppingFile, setCroppingFile] = useState<File | null>(null);
-  const [cropTarget, setCropTarget] = useState<
-    "thumbnail" | "highlight" | null
-  >(null);
+  const [cropTarget, setCropTarget] = useState<"card" | "thumbnail">("card");
+  const [selectedAssets, setSelectedAssets] = useState<File[]>([]);
+  const [draggedItemIndex, setDraggedItemIndex] = useState<number | null>(null);
+  const [dragOverItemIndex, setDragOverItemIndex] = useState<number | null>(null);
 
   const router = useRouter();
 
@@ -71,12 +73,17 @@ const CreateNewsForm = ({ apiBase, categories }: CraeteNewsProps) => {
       tagID: 0,
       detail: "",
       thumbnail: undefined,
-      highlight: undefined,
+      thumbnailImage: undefined,
+      cardFocalPointX: 50,
+      cardFocalPointY: 50,
+      thumbnailFocalPointX: 50,
+      thumbnailFocalPointY: 50,
+      additionalImages: [],
     },
   });
 
   const thumbnailFile = watch("thumbnail");
-  const highlightFile = watch("highlight");
+  const detailThumbnailFile = watch("thumbnailImage");
 
   const newsService = useMemo(() => {
     const newsRepository = new NewsRepository(apiBase);
@@ -85,7 +92,7 @@ const CreateNewsForm = ({ apiBase, categories }: CraeteNewsProps) => {
 
   const handleFileChange = (
     event: React.ChangeEvent<HTMLInputElement>,
-    target: "thumbnail" | "highlight",
+    target: "card" | "thumbnail" = "card",
   ) => {
     const file = event.target.files?.[0];
     if (!file) return;
@@ -94,18 +101,74 @@ const CreateNewsForm = ({ apiBase, categories }: CraeteNewsProps) => {
     event.target.value = "";
   };
 
-  const handleUploadComplete = (file: File) => {
-    if (cropTarget === "thumbnail") {
+  const handleUploadComplete = (
+    file: File,
+    focalPoint?: { x: number; y: number },
+  ) => {
+    if (cropTarget === "card") {
       setValue("thumbnail", file, { shouldDirty: true, shouldValidate: true });
-    } else if (cropTarget === "highlight") {
-      setValue("highlight", file, { shouldDirty: true, shouldValidate: true });
+      if (focalPoint) {
+        setValue("cardFocalPointX", focalPoint.x, { shouldDirty: true });
+        setValue("cardFocalPointY", focalPoint.y, { shouldDirty: true });
+      }
+    } else {
+      setValue("thumbnailImage", file, { shouldDirty: true, shouldValidate: true });
+      if (focalPoint) {
+        setValue("thumbnailFocalPointX", focalPoint.x, { shouldDirty: true });
+        setValue("thumbnailFocalPointY", focalPoint.y, { shouldDirty: true });
+      }
     }
     setCroppingFile(null);
-    setCropTarget(null);
+  };
+
+  const handleAssetsChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (event.target.files) {
+      const newFiles = Array.from(event.target.files);
+      const combined = [...selectedAssets, ...newFiles].slice(0, 10);
+      setSelectedAssets(combined);
+      setValue("additionalImages", combined, {
+        shouldDirty: true,
+        shouldValidate: true,
+      });
+    }
+    event.target.value = "";
+  };
+
+  const removeAsset = (indexToRemove: number) => {
+    const updated = selectedAssets.filter((_, index) => index !== indexToRemove);
+    setSelectedAssets(updated);
+    setValue("additionalImages", updated, {
+      shouldDirty: true,
+      shouldValidate: true,
+    });
+  };
+
+  const removeAllAssets = () => {
+    setSelectedAssets([]);
+    setValue("additionalImages", [], { shouldDirty: true, shouldValidate: true });
+  };
+
+  const handleDragStart = (index: number) => setDraggedItemIndex(index);
+  const handleDragEnter = (index: number) => setDragOverItemIndex(index);
+  const handleDragEnd = () => {
+    setDraggedItemIndex(null);
+    setDragOverItemIndex(null);
+  };
+  const handleDrop = (index: number) => {
+    if (draggedItemIndex !== null && draggedItemIndex !== index) {
+      const newAssets = [...selectedAssets];
+      const draggedItem = newAssets[draggedItemIndex];
+      newAssets.splice(draggedItemIndex, 1);
+      newAssets.splice(index, 0, draggedItem);
+      setSelectedAssets(newAssets);
+      setValue("additionalImages", newAssets, { shouldDirty: true });
+    }
+    setDraggedItemIndex(null);
+    setDragOverItemIndex(null);
   };
 
   const handleCancel = () => {
-    if (isDirty) {
+    if (isDirty){ 
       setConfirmModal({
         isOpen: true,
         type: "warning",
@@ -123,21 +186,20 @@ const CreateNewsForm = ({ apiBase, categories }: CraeteNewsProps) => {
   };
 
   const onSubmit: SubmitHandler<CreateNewsInputs> = async (data) => {
-    if (isDirty) {
-      try {
-        if (!data.thumbnail || !data.highlight) {
-          setIsError(true);
-          return;
-        }
-
-        const payload: ICreateNews = {
+    try {
+        const payload: CreateNewsInputs = {
           title: data.title,
           tagID: data.tagID,
           detail: data.detail,
           thumbnail: data.thumbnail,
-          highlight: data.highlight,
+          thumbnailImage: data.thumbnailImage,
           startDate: dayjs(data.startDate).toISOString(),
           dueDate: data.dueDate ? dayjs(data.dueDate).toISOString() : undefined,
+          thumbnailFocalPointX: data.thumbnailFocalPointX,
+          thumbnailFocalPointY: data.thumbnailFocalPointY,
+          cardFocalPointX: data.cardFocalPointX,
+          cardFocalPointY: data.cardFocalPointY,
+          additionalImages: data.additionalImages,
         };
 
         const response = await newsService.createNews(payload);
@@ -159,7 +221,6 @@ const CreateNewsForm = ({ apiBase, categories }: CraeteNewsProps) => {
         console.log(error);
         setIsError(true);
       }
-    }
   };
 
   return (
@@ -181,12 +242,12 @@ const CreateNewsForm = ({ apiBase, categories }: CraeteNewsProps) => {
       <h3 className="mb-6 font-bold">ข้อมูลข่าวสาร</h3>
       <form className="gap-4 p-4" onSubmit={handleSubmit(onSubmit)}>
         <div className="flex flex-col gap-4">
-          <div className="grid grid-cols-1 gap-6 md:grid-cols-5">
-            <div className="col-span-2 flex flex-col gap-2">
-              <div className="text-neutral05 text-sm font-medium">
-                ภาพหน้าปก
+          <div className="flex flex-col gap-6 md:flex-row md:items-stretch">
+            <div className="flex w-full md:w-[400px] flex-col gap-2 shrink-0">
+              <div className="text-neutral04 text-h4 font-medium">
+                ภาพการ์ด
               </div>
-              <div className="group border-neutral03 bg-neutral02 relative flex aspect-[4/3] w-full items-center justify-center overflow-hidden rounded-xl border">
+             <div className="group border-neutral03 bg-neutral02 relative flex aspect-[382/254] w-full items-center justify-center overflow-hidden rounded-xl border">
                 {thumbnailFile ? (
                   <>
                     <Image
@@ -201,7 +262,7 @@ const CreateNewsForm = ({ apiBase, categories }: CraeteNewsProps) => {
                         <VisuallyHiddenInput
                           type="file"
                           accept="image/*"
-                          onChange={(e) => handleFileChange(e, "thumbnail")}
+                          onChange={handleFileChange}
                         />
                       </Button>
                     </div>
@@ -212,66 +273,138 @@ const CreateNewsForm = ({ apiBase, categories }: CraeteNewsProps) => {
                     <VisuallyHiddenInput
                       type="file"
                       accept="image/*"
-                      onChange={(e) => handleFileChange(e, "thumbnail")}
+                      onChange={handleFileChange}
                     />
                   </Button>
                 )}
+              </div>
+              <div className="mt-3 text-neutral04 text-h4 font-medium">ภาพหน้าปก/Highlight (ไม่บังคับ)</div>
+              <div className="relative flex aspect-[382/254] w-full items-center justify-center overflow-hidden rounded-xl border border-neutral03 bg-neutral02">
+                {detailThumbnailFile ? (
+                  <Image src={URL.createObjectURL(detailThumbnailFile)} alt="ภาพหน้าปก" fill className="object-cover" />
+                ) : <span className="text-neutral04">ใช้ภาพการ์ดเป็นค่าเริ่มต้น</span>}
+                <Button variant="contained" component="label" className="absolute">
+                  {detailThumbnailFile ? "เปลี่ยนรูป" : "อัปโหลดรูป"}
+                  <VisuallyHiddenInput type="file" accept="image/*" onChange={(event) => handleFileChange(event, "thumbnail")} />
+                </Button>
               </div>
             </div>
 
-            <div className="col-span-3 flex flex-col gap-2">
-              <div className="text-neutral05 text-sm font-medium">
-                ภาพหัวเรื่อง
-              </div>
-              <div className="group border-neutral03 bg-neutral02 relative flex aspect-[2/1] w-full items-center justify-center overflow-hidden rounded-xl border md:aspect-auto md:flex-1">
-                {highlightFile ? (
-                  <>
-                    <Image
-                      src={URL.createObjectURL(highlightFile)}
-                      alt="Highlight Preview"
-                      fill
-                      className="object-cover"
-                    />
-                    <div className="bg-neutral05/40 absolute inset-0 flex items-center justify-center opacity-0 transition-opacity duration-200 group-hover:opacity-100">
-                      <Button variant="contained" component="label">
-                        อัปโหลดรูปภาพ
-                        <VisuallyHiddenInput
-                          type="file"
-                          accept="image/*"
-                          onChange={(e) => handleFileChange(e, "highlight")}
-                        />
-                      </Button>
-                    </div>
-                  </>
-                ) : (
-                  <Button variant="contained" component="label">
-                    อัปโหลดรูปภาพ
-                    <VisuallyHiddenInput
-                      type="file"
-                      accept="image/*"
-                      onChange={(e) => handleFileChange(e, "highlight")}
-                    />
-                  </Button>
-                )}
+            <div className="flex flex-1 flex-col gap-4">
+              <RHFTextField
+                name="title"
+                control={control}
+                label="หัวข้อข่าว"
+                requiredMark
+                fullWidth
+              />
+              <div className="flex flex-1 flex-col [&>div]:flex-1 [&>div]:flex [&>div]:flex-col [&_.MuiFormControl-root]:flex-1 [&_.MuiInputBase-root]:flex-1 [&_.MuiInputBase-root]:items-start [&_textarea]:!h-full [&_textarea]:!overflow-y-auto">
+                <RHFTextField
+                  control={control}
+                  name="detail"
+                  label="รายละเอียด"
+                  multiline
+                  fullWidth
+                  requiredMark
+                />
               </div>
             </div>
           </div>
-          <RHFTextField
-            name="title"
-            control={control}
-            label="หัวข้อข่าว"
-            requiredMark
-            fullWidth
-          />
-          <RHFTextField
-            control={control}
-            name="detail"
-            label="รายละเอียด"
-            minRows={4}
-            multiline
-            fullWidth
-            requiredMark
-          />
+          <div className="mt-6">
+            <div className="mb-4 flex items-center justify-between">
+              <h3 className="font-bold">
+                รูปภาพเพิ่มเติม{" "}
+                <span className="text-h4 text-neutral04 ml-2 font-normal">
+                  {selectedAssets.length} รูป - สูงสุด 10
+                </span>
+              </h3>
+              {selectedAssets.length > 0 && (
+                <button
+                  type="button"
+                  onClick={removeAllAssets}
+                  className="text-h5 text-accent04 cursor-pointer font-bold underline"
+                >
+                  ลบทั้งหมด
+                </button>
+              )}
+            </div>
+
+            {selectedAssets.length === 0 ? (
+              <div className="flex min-h-[200px] w-full flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed border-gray-300 bg-white p-10">
+                <Button variant="contained" component="label">
+                  <VisuallyHiddenInput
+                    type="file"
+                    accept="image/*"
+                    multiple
+                    onChange={handleAssetsChange}
+                  />
+                  อัปโหลดรูปภาพ
+                </Button>
+                {errors.additionalImages && (
+                  <p className="text-h5 text-accent04">
+                    {errors.additionalImages.message}
+                  </p>
+                )}
+              </div>
+            ) : (
+              <div className="grid min-h-[160px] grid-cols-5 items-start gap-4 rounded-lg">
+                {selectedAssets.map((file, index) => (
+                  <div
+                    key={`${file.name}-${index}`}
+                    draggable
+                    onDragStart={() => handleDragStart(index)}
+                    onDragEnter={() => handleDragEnter(index)}
+                    onDragOver={(e) => e.preventDefault()}
+                    onDragEnd={handleDragEnd}
+                    onDrop={() => handleDrop(index)}
+                    className={`group relative aspect-video w-full cursor-grab overflow-hidden rounded-md border-2 transition-all active:cursor-grabbing
+                      ${dragOverItemIndex === index ? "scale-105 border-dashed border-[var(--color-primary02)]" : "border-solid border-gray-200"}
+                      ${draggedItemIndex === index ? "opacity-40" : "opacity-100"}`}
+                  >
+                    <Image
+                      src={URL.createObjectURL(file)}
+                      alt="asset"
+                      fill
+                      className="pointer-events-none object-cover"
+                      draggable={false}
+                    />
+                    <IconButton
+                      size="small"
+                      sx={{
+                        position: "absolute",
+                        top: 8,
+                        right: 8,
+                        zIndex: 10,
+                        width: 24,
+                        height: 24,
+                        backgroundColor: "rgba(0,0,0,0.6)",
+                        color: "white",
+                        padding: 0,
+                        "&:hover": { backgroundColor: "rgba(0,0,0,0.8)" },
+                      }}
+                      onClick={() => removeAsset(index)}
+                    >
+                      <CloseIcon sx={{ fontSize: 16 }} />
+                    </IconButton>
+                  </div>
+                ))}
+
+                {selectedAssets.length < 10 && (
+                  <div className="flex aspect-video w-full items-center justify-center rounded-md border border-gray-200 bg-gray-50">
+                    <Button variant="contained" component="label" sx={{ height: "40px" }}>
+                      <VisuallyHiddenInput
+                        type="file"
+                        accept="image/*"
+                        multiple
+                        onChange={handleAssetsChange}
+                      />
+                      อัปโหลดรูปภาพ
+                    </Button>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
           <RHFSelect
             name="tagID"
             control={control}
@@ -305,9 +438,6 @@ const CreateNewsForm = ({ apiBase, categories }: CraeteNewsProps) => {
           {!thumbnailFile && errors.thumbnail && (
             <p className="text-accent04 text-sm">{errors.thumbnail.message}</p>
           )}
-          {!highlightFile && errors.highlight && (
-            <p className="text-accent04 text-sm">{errors.highlight.message}</p>
-          )}
         </div>
         <div className="mt-4 flex justify-end">
           <div className="flex gap-x-4">
@@ -323,16 +453,14 @@ const CreateNewsForm = ({ apiBase, categories }: CraeteNewsProps) => {
 
       <Modal open={!!croppingFile} onClose={() => setCroppingFile(null)}>
         <div>
-          {croppingFile && cropTarget && (
+          {croppingFile && (
             <CropImageCard
               file={croppingFile}
-              width={cropTarget === "thumbnail" ? 400 : 800}
-              height={cropTarget === "thumbnail" ? 300 : 400}
+              width={382}
+              height={254}
               onUploadComplete={handleUploadComplete}
-              onCancel={() => {
-                setCroppingFile(null);
-                setCropTarget(null);
-              }}
+              onCancel={() => setCroppingFile(null)}
+              preserveOriginal
             />
           )}
         </div>
