@@ -36,13 +36,13 @@ const sidebarItems = [
   },
   {
     name: "ข่าวประชาสัมพันธ์",
-    href: "/admin/newsinformation/25",
+    href: "/admin/news-bulletins/announcement",
     icon: <CampaignIcon />,
     disabled: false,
   },
   {
     name: "ข่าว Highlight",
-    href: "/admin/newsinformation/26",
+    href: "/admin/news-bulletins/highlight",
     icon: <BorderColorIcon />,
     disabled: false,
   },

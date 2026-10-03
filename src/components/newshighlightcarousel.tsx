@@ -20,8 +20,8 @@ const isValidUrl = (url?: string) => {
 };
 
 const getImageUrl = (item: INewsInformation, isMain: boolean = false) => {
-  const highlight = item.news?.highlightURL;
-  const thumbnail = item.thumbnailURL;
+  const thumbnail = item.news?.images?.find((image) => image.imageType === "THUMBNAIL")?.imageUrl ?? item.thumbnailURL;
+  const highlight = item.news?.highlightURL ?? undefined;
 
   if (isMain && isValidUrl(highlight)) {
     return highlight!;
@@ -55,6 +55,9 @@ const NewsCard = ({
       alt={item.news?.title || "Highlight News"}
       fill
       className="object-cover transition-transform duration-500 ease-out group-hover:scale-105"
+      style={{
+        objectPosition: `${item.thumbnailFocalPointX ?? 50}% ${item.thumbnailFocalPointY ?? 50}%`,
+      }}
       sizes={isMain ? "(max-width: 768px) 100vw, 60vw" : "(max-width: 768px) 50vw, 20vw"}
       priority={priority}
     />

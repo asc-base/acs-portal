@@ -1,10 +1,30 @@
 import { Tag } from "./list-type";
 
+export interface NewsCategory {
+  id: number;
+  code: string;
+  name: string;
+}
+
+export interface INewsImage {
+  id: number;
+  imageID: number;
+  imageType: "CARD" | "THUMBNAIL" | "DETAIL";
+  imageUrl: string;
+  focalPointX: number | null;
+  focalPointY: number | null;
+  sortOrder: number;
+}
+
 export interface INews {
   id: number;
   title: string;
   thumbnailURL: string;
-  highlightURL: string;
+  highlightURL?: string | null;
+  category?: NewsCategory | null;
+  images?: INewsImage[];
+  eventStartAt?: Date | null;
+  eventEndAt?: Date | null;
   newsAdditionalImages?: {
     id: number;
     newsID: number;
@@ -28,21 +48,25 @@ export interface ICreateNews {
   thumbnail: File;
   startDate: string;
   dueDate?: string;
+  thumbnailImage?: File;
   detail: string;
   thumbnailFocalPointX?: number;
   thumbnailFocalPointY?: number;
+  cardFocalPointX?: number;
+  cardFocalPointY?: number;
 }
 
 export interface IUpdateNews {
   title?: string;
   tagID?: number;
   thumbnail?: File | string;
+  thumbnailImage?: File | string;
+  cardFocalPointX?: number;
+  cardFocalPointY?: number;
   highlight?: File | string;
   startDate: string;
   dueDate?: string;
   detail?: string;
-  cardFocalPointX?: number;
-  cardFocalPointY?: number;
   thumbnailFocalPointX?: number;
   thumbnailFocalPointY?: number;
 }
@@ -54,6 +78,7 @@ export interface INewsInformation {
   news: INews;
   thumbnailFocalPointX?: number;
   thumbnailFocalPointY?: number;
+  type?: "HIGHLIGHT" | "ANNOUNCEMENT";
 }
 
 export interface NewsInformationPageProps {

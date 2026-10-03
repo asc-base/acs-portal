@@ -29,7 +29,7 @@ import {
 } from "@/components/modal/confirmModal";
 import Alert from "@mui/material/Alert";
 import Snackbar from "@mui/material/Snackbar";
-import { Tag } from "@/core/domain/list-type";
+import { NewsCategory } from "@/core/domain/news";
 import EmptyState from "@/components/emptyState";
 
 interface NewsListComponentProps {
@@ -38,7 +38,7 @@ interface NewsListComponentProps {
   page?: number;
   pageSize: number;
   apiBase: string;
-  categories: Tag[];
+  categories: NewsCategory[];
 }
 
 const searchSchema = z.object({

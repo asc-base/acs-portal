@@ -1,6 +1,6 @@
 "use client";
 import { useState, useMemo, useEffect } from "react";
-import { INews } from "@/core/domain/news";
+import { INews, NewsCategory } from "@/core/domain/news";
 import dayjs from "dayjs";
 import "dayjs/locale/th";
 import buddhistEra from "dayjs/plugin/buddhistEra";
@@ -20,7 +20,6 @@ import {
   ConfirmModal,
   ConfirmModalProps,
 } from "@/components/modal/confirmModal";
-import { Tag } from "@/core/domain/list-type";
 import { CropImageCard } from "@/components/cropimagecard";
 import {
   UpdateNewsSchema,
@@ -34,27 +33,30 @@ dayjs.locale("th");
 interface NewsInfoProps {
   news: INews;
   apiBase: string;
-  categories: Tag[];
+  categories: NewsCategory[];
 }
 
 type NewsAsset = { key: string; source: string | File; id?: number };
 
-const savedAssets = (news: INews): NewsAsset[] =>
-  (news.newsAdditionalImages ?? []).map((image) => ({
-    key: `saved-${image.id}`,
-    source: image.imageUrl,
-    id: image.id,
-  }));
+const savedAssets = (news: INews): NewsAsset[] => {
+  const details = news.images?.filter((image) => image.imageType === "DETAIL") ?? [];
+  return details.length
+    ? details.map((image) => ({ key: `saved-${image.id}`, source: image.imageUrl, id: image.id }))
+    : (news.newsAdditionalImages ?? []).map((image) => ({ key: `saved-${image.id}`, source: image.imageUrl, id: image.id }));
+};
 
 const formValues = (news: INews): UpdateNewsInputs => ({
   title: news.title,
   startDate: dayjs(news.startDate).toISOString(),
   dueDate: news.dueDate ? dayjs(news.dueDate).toISOString() : "",
-  tag: news.tag.id,
+  tag: news.category?.id ?? news.tag.id,
   detail: news.detail,
   thumbnail: news.thumbnailURL,
-  thumbnailFocalPointX: news.thumbnailFocalPointX ?? undefined,
-  thumbnailFocalPointY: news.thumbnailFocalPointY ?? undefined,
+  thumbnailImage: news.images?.find((image) => image.imageType === "THUMBNAIL")?.imageUrl ?? news.thumbnailURL,
+  thumbnailFocalPointX: news.images?.find((image) => image.imageType === "THUMBNAIL")?.focalPointX ?? 50,
+  thumbnailFocalPointY: news.images?.find((image) => image.imageType === "THUMBNAIL")?.focalPointY ?? 50,
+  cardFocalPointX: news.images?.find((image) => image.imageType === "CARD")?.focalPointX ?? news.cardFocalPointX ?? 50,
+  cardFocalPointY: news.images?.find((image) => image.imageType === "CARD")?.focalPointY ?? news.cardFocalPointY ?? 50,
 });
 
 const VisuallyHiddenInput = styled("input")({
@@ -99,6 +101,7 @@ const NewsInfo = ({ news, apiBase, categories }: NewsInfoProps) => {
   );
   const [isError, setIsError] = useState(false);
   const [croppingFile, setCroppingFile] = useState<File | null>(null);
+  const [cropTarget, setCropTarget] = useState<"card" | "thumbnail">("card");
   const [selectedAssets, setSelectedAssets] = useState<NewsAsset[]>(() =>
     savedAssets(news),
   );
@@ -126,6 +129,7 @@ const NewsInfo = ({ news, apiBase, categories }: NewsInfoProps) => {
   });
 
   const thumbnail = watch("thumbnail");
+  const thumbnailImage = watch("thumbnailImage");
   const disabled = !isEdit || isSubmitting;
   const originalAssets = savedAssets(savedNews);
   const assetsChanged =
@@ -134,9 +138,12 @@ const NewsInfo = ({ news, apiBase, categories }: NewsInfoProps) => {
       (asset, index) => asset.key !== originalAssets[index]?.key,
     );
 
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>, target: "card" | "thumbnail" = "card") => {
     const file = event.target.files?.[0];
-    if (file) setCroppingFile(file);
+    if (file) {
+      setCroppingFile(file);
+      setCropTarget(target);
+    }
     event.target.value = "";
   };
 
@@ -144,10 +151,18 @@ const NewsInfo = ({ news, apiBase, categories }: NewsInfoProps) => {
     file: File,
     focalPoint?: { x: number; y: number },
   ) => {
-    setValue("thumbnail", file, { shouldDirty: true, shouldValidate: true });
-    if (focalPoint) {
-      setValue("thumbnailFocalPointX", focalPoint.x, { shouldDirty: true });
-      setValue("thumbnailFocalPointY", focalPoint.y, { shouldDirty: true });
+    if (cropTarget === "card") {
+      setValue("thumbnail", file, { shouldDirty: true, shouldValidate: true });
+      if (focalPoint) {
+        setValue("cardFocalPointX", focalPoint.x, { shouldDirty: true });
+        setValue("cardFocalPointY", focalPoint.y, { shouldDirty: true });
+      }
+    } else {
+      setValue("thumbnailImage", file, { shouldDirty: true, shouldValidate: true });
+      if (focalPoint) {
+        setValue("thumbnailFocalPointX", focalPoint.x, { shouldDirty: true });
+        setValue("thumbnailFocalPointY", focalPoint.y, { shouldDirty: true });
+      }
     }
     setCroppingFile(null);
   };
@@ -225,18 +240,21 @@ const NewsInfo = ({ news, apiBase, categories }: NewsInfoProps) => {
 
   const onSubmit: SubmitHandler<UpdateNewsInputs> = async (data) => {
     if (!isEdit) return;
-    if (selectedAssets.length < 1 || selectedAssets.length > 10) {
-      setAssetsError("กรุณาอัปโหลดรูปภาพเพิ่มเติม 1–10 รูป");
-      return;
-    }
     const newAdditionalImages = selectedAssets.flatMap((asset) =>
       asset.source instanceof File ? [asset.source] : [],
     );
-    const deletedAdditionalImagesId = originalAssets
+    const deletedIDs = originalAssets
       .filter(
         (asset) => !selectedAssets.some((selected) => selected.id === asset.id),
       )
       .map((asset) => asset.id!);
+    const hasMediaRows = Boolean(savedNews.images?.some((image) => image.imageType === "DETAIL"));
+    const deletedImageIds = hasMediaRows ? deletedIDs : [];
+    const deletedAdditionalImagesId = hasMediaRows ? [] : deletedIDs;
+    let newIndex = 0;
+    const detailImageOrder = hasMediaRows ? JSON.stringify(selectedAssets.map((asset) =>
+      asset.id !== undefined ? String(asset.id) : `new:${newIndex++}`,
+    )) : undefined;
     if (
       !isDirty &&
       !newAdditionalImages.length &&
@@ -251,12 +269,21 @@ const NewsInfo = ({ news, apiBase, categories }: NewsInfoProps) => {
         title: data.title,
         tagID: data.tag,
         detail: data.detail,
-        thumbnail: data.thumbnail instanceof File ? data.thumbnail : undefined,
+        thumbnail: data.thumbnail,
+        cardImage: data.thumbnail instanceof File ? data.thumbnail : undefined,
+        thumbnailImage: data.thumbnailImage instanceof File ? data.thumbnailImage : undefined,
+        newsCategoryId: data.tag,
+        eventStartAt: dayjs(data.startDate).toISOString(),
+        eventEndAt: data.dueDate ? dayjs(data.dueDate).toISOString() : null,
         startDate: dayjs(data.startDate).toISOString(),
-        dueDate: data.dueDate ? dayjs(data.dueDate).toISOString() : undefined,
+        dueDate: data.dueDate ? dayjs(data.dueDate).toISOString() : "",
         thumbnailFocalPointX: data.thumbnailFocalPointX,
         thumbnailFocalPointY: data.thumbnailFocalPointY,
-        newAdditionalImages,
+        cardFocalPointX: data.cardFocalPointX,
+        cardFocalPointY: data.cardFocalPointY,
+        detailImages: newAdditionalImages,
+        deletedImageIds,
+        detailImageOrder,
         deletedAdditionalImagesId,
       };
       const response = await newsService.updateNews(savedNews.id, payload);
@@ -339,10 +366,10 @@ const NewsInfo = ({ news, apiBase, categories }: NewsInfoProps) => {
           <div className="flex flex-col gap-6 md:flex-row md:items-stretch">
             <div className="flex w-full shrink-0 flex-col gap-2 md:w-[400px]">
               <div className="text-neutral04 text-h4 font-medium">
-                ภาพหน้าปก
+                ภาพการ์ด
               </div>
               <div className="group border-neutral03 bg-neutral02 relative flex aspect-[382/254] w-full items-center justify-center overflow-hidden rounded-xl border">
-                <NewsImage source={thumbnail} alt="ภาพหน้าปก" />
+                <NewsImage source={thumbnail} alt="ภาพการ์ด" />
                 {isEdit && (
                   <div className="bg-neutral05/40 absolute inset-0 flex items-center justify-center transition-opacity duration-200 group-focus-within:opacity-100 group-hover:opacity-100 sm:opacity-0">
                     <Button
@@ -366,6 +393,16 @@ const NewsInfo = ({ news, apiBase, categories }: NewsInfoProps) => {
                   {errors.thumbnail.message}
                 </p>
               )}
+              <div className="mt-2 text-neutral04 text-h4 font-medium">ภาพหน้าปก/Highlight</div>
+              <div className="group border-neutral03 bg-neutral02 relative flex aspect-[382/254] w-full items-center justify-center overflow-hidden rounded-xl border">
+                <NewsImage source={thumbnailImage ?? thumbnail} alt="ภาพหน้าปก" />
+                {isEdit && <div className="absolute inset-0 flex items-center justify-center bg-neutral05/40 opacity-0 transition-opacity group-hover:opacity-100">
+                  <Button variant="contained" component="label" disabled={isSubmitting}>
+                    อัปโหลดรูปภาพ
+                    <VisuallyHiddenInput type="file" accept="image/*" disabled={isSubmitting} onChange={(event) => handleFileChange(event, "thumbnail")} />
+                  </Button>
+                </div>}
+              </div>
             </div>
             <div className="flex min-w-0 flex-1 flex-col gap-4">
               <RHFTextField
@@ -395,7 +432,7 @@ const NewsInfo = ({ news, apiBase, categories }: NewsInfoProps) => {
           <div className="mt-6">
             <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
               <h3 className="font-bold">
-                รูปภาพเพิ่มเติม <span className="text-accent04">*</span>
+                รูปภาพรายละเอียด
                 <span
                   className="text-h4 text-neutral04 ml-2 font-normal"
                   aria-live="polite"
@@ -622,6 +659,7 @@ const NewsInfo = ({ news, apiBase, categories }: NewsInfoProps) => {
               height={254}
               onUploadComplete={handleUploadComplete}
               onCancel={() => setCroppingFile(null)}
+              preserveOriginal
             />
           )}
         </div>

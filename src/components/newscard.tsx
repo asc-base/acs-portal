@@ -45,6 +45,7 @@ export const NewsCard: FC<NewsCardProps> = (props) => {
         component="img"
         image={news.thumbnailURL}
         alt={news.title}
+        style={{ objectPosition: `${news.cardFocalPointX ?? 50}% ${news.cardFocalPointY ?? 50}%` }}
       />
       <CardContent className="min-h-0 flex-1 overflow-hidden px-4 pt-1 lg:px-[14px] lg:pt-2" sx={{ pb: 2 }}>
         <Typography

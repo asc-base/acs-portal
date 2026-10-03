@@ -2,8 +2,10 @@ import { z } from "zod";
 import dayjs from "dayjs";
 
 export const FocalPointSchema = z.object({
-  thumbnailFocalPointX: z.number().optional(),
-  thumbnailFocalPointY: z.number().optional(),
+  thumbnailFocalPointX: z.number().min(0).max(100).optional(),
+  thumbnailFocalPointY: z.number().min(0).max(100).optional(),
+  cardFocalPointX: z.number().min(0).max(100).optional(),
+  cardFocalPointY: z.number().min(0).max(100).optional(),
 });
 
 export const CreateNewsSchema = z.object({
@@ -18,9 +20,8 @@ export const CreateNewsSchema = z.object({
     }),
   dueDate: z.string().optional(),
   thumbnail: z.file({ message: "กรุณาอัปโหลดภาพหน้าปก" }),
-  additionalImages: z
-    .array(z.file())
-    .min(1, "กรุณาอัปโหลดรูปภาพเพิ่มเติมอย่างน้อย 1 รูป"),
+  thumbnailImage: z.file().optional(),
+  additionalImages: z.array(z.file()).max(10).optional(),
   ...FocalPointSchema.shape,
 });
 
@@ -36,6 +37,7 @@ export const UpdateNewsSchema = z.object({
   tag: z.number(),
   detail: z.string().optional(),
   thumbnail: z.union([z.string().trim().min(1), z.file()]),
+  thumbnailImage: z.union([z.string().trim().min(1), z.file()]).optional(),
   ...FocalPointSchema.shape,
 });
 
@@ -43,12 +45,20 @@ export const UpdateNewsPayloadSchema = z.object({
   title: z.string().optional(),
   tagID: z.number().optional(),
   thumbnail: z.union([z.string().trim().min(1), z.file()]).optional(),
+  thumbnailImage: z.union([z.string().trim().min(1), z.file()]).optional(),
   startDate: z.string().optional(),
   dueDate: z.string().optional(),
   detail: z.string().optional(),
   ...FocalPointSchema.shape,
   newAdditionalImages: z.array(z.file()).optional(),
+  detailImages: z.array(z.file()).optional(),
+  deletedImageIds: z.array(z.number()).optional(),
+  detailImageOrder: z.string().optional(),
   deletedAdditionalImagesId: z.array(z.number()).optional(),
+  newsCategoryId: z.number().optional(),
+  eventStartAt: z.string().optional(),
+  eventEndAt: z.string().nullable().optional(),
+  cardImage: z.file().optional(),
 });
 
 export const CreateNewsInformationSchema = (type: string) =>

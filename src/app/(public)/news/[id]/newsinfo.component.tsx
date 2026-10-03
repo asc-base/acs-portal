@@ -29,11 +29,12 @@ const NewsInfoComponent = ({ newsInfo, recommendNews }: NewsInfoProps) => {
     setDate(formattedDate);
   }, [newsInfo.startDate]);
   
-  const additionalImageUrls = (newsInfo.newsAdditionalImages ?? [])
-    .slice(0, 10)
-    .map((img) => img.imageUrl);
-
-  const allImages = [newsInfo.thumbnailURL, ...additionalImageUrls].filter(Boolean) as string[];
+  const mediaThumbnail = newsInfo.images?.find((image) => image.imageType === "THUMBNAIL");
+  const detailImages = newsInfo.images?.filter((image) => image.imageType === "DETAIL") ?? [];
+  const additionalImageUrls = detailImages.length
+    ? detailImages.sort((a, b) => a.sortOrder - b.sortOrder).map((image) => image.imageUrl)
+    : (newsInfo.newsAdditionalImages ?? []).slice(0, 10).map((image) => image.imageUrl);
+  const allImages = [mediaThumbnail?.imageUrl ?? newsInfo.thumbnailURL, ...additionalImageUrls].filter(Boolean) as string[];
 
   const [thumbsSwiper, setThumbsSwiper] = useState<SwiperType | null>(null);
   const [activeIndex, setActiveIndex] = useState(0);
@@ -102,6 +103,7 @@ const NewsInfoComponent = ({ newsInfo, recommendNews }: NewsInfoProps) => {
                     alt={newsInfo?.title || "news image"}
                     fill
                     className="object-contain"
+                    style={index === 0 ? { objectPosition: `${mediaThumbnail?.focalPointX ?? newsInfo.thumbnailFocalPointX ?? 50}% ${mediaThumbnail?.focalPointY ?? newsInfo.thumbnailFocalPointY ?? 50}%` } : undefined}
                     onLoadingComplete={() => markLoaded(index)}
                     onError={() => markLoaded(index)}
                   />

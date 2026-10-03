@@ -1,49 +1,6 @@
-import { NewsInformationForm } from "@/components/newsinformationform";
-import { baseUrl, masterDataService } from "@/infra/container";
+import { redirect } from "next/navigation";
 
-export const dynamic = "force-dynamic";
-
-interface PageProps {
-  params: Promise<{
-    tagId: number;
-  }>;
-}
-
-const page = async ({ params }: PageProps) => {
+export default async function LegacyNewsBulletinCreate({ params }: { params: Promise<{ tagId: string }> }) {
   const { tagId } = await params;
-
-  const masterData = await masterDataService.getMasterData();
-
-  const tagIdNumber = Number(tagId);
-
-  const newsFeatureGroup = masterData?.tagsGroups?.find(
-    (group) => group.name === "news-feature"
-  );
-
-
-  const selectedType = masterData?.tags?.find(
-    (tag) =>
-      tag.id === tagIdNumber &&
-      tag.tagsGroupsId === newsFeatureGroup?.id
-  );
-
-  if (!selectedType) {
-    return (
-      <div className="flex items-center justify-center">
-        <h2 className="font-bold">Not found {tagId}</h2>
-      </div>
-    );
-  }
-
-  return (
-    <div className="w-full">
-      <NewsInformationForm
-        type={selectedType.name}
-        apiBase={baseUrl}
-        tagID={selectedType.id}
-      />
-    </div>
-  );
-};
-
-export default page;
+  redirect(`/admin/newsinformation/${tagId}`);
+}

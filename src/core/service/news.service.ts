@@ -13,22 +13,18 @@ export class NewsService {
 
 async createNews(data: CreateNewsInputs): Promise<INews> {
   const formData = new FormData();
-
-  Object.entries(data).forEach(([key, value]) => {
-  if (Array.isArray(value)) {
-    value.forEach((item) => {
-      if (item instanceof File) {
-        formData.append(key, item);
-      } else if (item !== undefined && item !== null) {
-        formData.append(key, String(item));
-      }
-    });
-  } else if (value instanceof File) {
-    formData.append(key, value);
-  } else if (value !== undefined && value !== null) {
-    formData.append(key, String(value));
+  formData.append("title", data.title);
+  formData.append("detail", data.detail);
+  formData.append("newsCategoryId", String(data.tagID));
+  formData.append("eventStartAt", new Date(data.startDate).toISOString());
+  if (data.dueDate) formData.append("eventEndAt", new Date(data.dueDate).toISOString());
+  formData.append("cardImage", data.thumbnail);
+  if (data.thumbnailImage) formData.append("thumbnailImage", data.thumbnailImage);
+  data.additionalImages?.forEach((file) => formData.append("detailImages", file));
+  for (const key of ["cardFocalPointX", "cardFocalPointY", "thumbnailFocalPointX", "thumbnailFocalPointY"] as const) {
+    const value = data[key];
+    if (value !== undefined) formData.append(key, String(value));
   }
-});
 
   const response = await this.newsRepository.createNews(formData);
   return response.data;
@@ -66,17 +62,31 @@ async createNews(data: CreateNewsInputs): Promise<INews> {
   ) {
     try {
       const formData = new FormData();
-      const { newAdditionalImages, deletedAdditionalImagesId, ...fields } = data;
+      const { newAdditionalImages, detailImages, deletedAdditionalImagesId, deletedImageIds, detailImageOrder, cardImage, thumbnailImage, ...fields } = data;
       Object.entries(fields).forEach(([key, value]) => {
+        if (key === "thumbnail") {
+          if (value instanceof File) formData.append("cardImage", value);
+          return;
+        }
+        if (key === "thumbnailImage") {
+          if (value instanceof File) formData.append("thumbnailImage", value);
+          return;
+        }
         if (value instanceof File) {
           formData.append(key, value);
+        } else if (key === "dueDate" && value === "") {
+          formData.append("eventEndAt", "null");
         } else if (value !== undefined && value !== null) {
           formData.append(key, String(value));
         }
       });
-      newAdditionalImages?.forEach((file) =>
-        formData.append("newAdditionalImages", file),
+      if (cardImage && !(fields.thumbnail instanceof File)) formData.append("cardImage", cardImage);
+      if (thumbnailImage instanceof File) formData.append("thumbnailImage", thumbnailImage);
+      (detailImages ?? newAdditionalImages)?.forEach((file) =>
+        formData.append("detailImages", file),
       );
+      if (deletedImageIds?.length) formData.append("deletedImageIds", JSON.stringify(deletedImageIds));
+      if (detailImageOrder) formData.append("detailImageOrder", detailImageOrder);
       if (deletedAdditionalImagesId?.length) {
         formData.append(
           "deletedAdditionalImagesId",
@@ -126,6 +136,26 @@ async createNews(data: CreateNewsInputs): Promise<INews> {
   async getNewsInformationById(id: number): Promise<INewsInformation> {
     const response = await this.newsRepository.getNewsInformationById(id);
     return response.data;
+  }
+
+  async getNewsBulletins(type: "HIGHLIGHT" | "ANNOUNCEMENT"): Promise<INewsInformation[]> {
+    const response = await this.newsRepository.getNewsBulletins(type);
+    return response.data.map(({ id, type, news }) => {
+      const imageType = type === "HIGHLIGHT" ? "THUMBNAIL" : "CARD";
+      const image = news.images?.find((row) => row.imageType === imageType);
+      return {
+      id,
+      type,
+      news,
+      thumbnailURL: image?.imageUrl ?? news.thumbnailURL,
+      thumbnailFocalPointX: image?.focalPointX ?? news.thumbnailFocalPointX,
+      thumbnailFocalPointY: image?.focalPointY ?? news.thumbnailFocalPointY,
+    };
+    });
+  }
+
+  async setNewsBulletin(id: number, type: "HIGHLIGHT" | "ANNOUNCEMENT", enabled: boolean) {
+    return this.newsRepository.setNewsBulletin(id, type, enabled);
   }
 
   async deleteNews(id: number): Promise<INews> {

@@ -20,7 +20,7 @@ import {
 } from "@/components/modal/confirmModal";
 import { useRouter } from "next/navigation";
 import { styled } from "@mui/material/styles";
-import { Tag } from "@/core/domain/list-type";
+import { NewsCategory } from "@/core/domain/news";
 import { CropImageCard } from "@/components/cropimagecard";
 import { CreateNewsInputs, CreateNewsSchema } from "@/core/schema/news";
 
@@ -29,7 +29,7 @@ dayjs.locale("th");
 
 interface CreateNewsProps {
   apiBase: string;
-  categories: Tag[];
+  categories: NewsCategory[];
 }
 
 const VisuallyHiddenInput = styled("input")({
@@ -50,6 +50,7 @@ const CreateNewsForm = ({ apiBase, categories }: CreateNewsProps) => {
   );
   const [isError, setIsError] = useState(false);
   const [croppingFile, setCroppingFile] = useState<File | null>(null);
+  const [cropTarget, setCropTarget] = useState<"card" | "thumbnail">("card");
   const [selectedAssets, setSelectedAssets] = useState<File[]>([]);
   const [draggedItemIndex, setDraggedItemIndex] = useState<number | null>(null);
   const [dragOverItemIndex, setDragOverItemIndex] = useState<number | null>(null);
@@ -72,11 +73,17 @@ const CreateNewsForm = ({ apiBase, categories }: CreateNewsProps) => {
       tagID: 0,
       detail: "",
       thumbnail: undefined,
+      thumbnailImage: undefined,
+      cardFocalPointX: 50,
+      cardFocalPointY: 50,
+      thumbnailFocalPointX: 50,
+      thumbnailFocalPointY: 50,
       additionalImages: [],
     },
   });
 
   const thumbnailFile = watch("thumbnail");
+  const detailThumbnailFile = watch("thumbnailImage");
 
   const newsService = useMemo(() => {
     const newsRepository = new NewsRepository(apiBase);
@@ -85,10 +92,12 @@ const CreateNewsForm = ({ apiBase, categories }: CreateNewsProps) => {
 
   const handleFileChange = (
     event: React.ChangeEvent<HTMLInputElement>,
+    target: "card" | "thumbnail" = "card",
   ) => {
     const file = event.target.files?.[0];
     if (!file) return;
     setCroppingFile(file);
+    setCropTarget(target);
     event.target.value = "";
   };
 
@@ -96,10 +105,18 @@ const CreateNewsForm = ({ apiBase, categories }: CreateNewsProps) => {
     file: File,
     focalPoint?: { x: number; y: number },
   ) => {
-    setValue("thumbnail", file, { shouldDirty: true, shouldValidate: true });
-    if (focalPoint) {
-      setValue("thumbnailFocalPointX", focalPoint.x, { shouldDirty: true });
-      setValue("thumbnailFocalPointY", focalPoint.y, { shouldDirty: true });
+    if (cropTarget === "card") {
+      setValue("thumbnail", file, { shouldDirty: true, shouldValidate: true });
+      if (focalPoint) {
+        setValue("cardFocalPointX", focalPoint.x, { shouldDirty: true });
+        setValue("cardFocalPointY", focalPoint.y, { shouldDirty: true });
+      }
+    } else {
+      setValue("thumbnailImage", file, { shouldDirty: true, shouldValidate: true });
+      if (focalPoint) {
+        setValue("thumbnailFocalPointX", focalPoint.x, { shouldDirty: true });
+        setValue("thumbnailFocalPointY", focalPoint.y, { shouldDirty: true });
+      }
     }
     setCroppingFile(null);
   };
@@ -175,10 +192,13 @@ const CreateNewsForm = ({ apiBase, categories }: CreateNewsProps) => {
           tagID: data.tagID,
           detail: data.detail,
           thumbnail: data.thumbnail,
+          thumbnailImage: data.thumbnailImage,
           startDate: dayjs(data.startDate).toISOString(),
           dueDate: data.dueDate ? dayjs(data.dueDate).toISOString() : undefined,
           thumbnailFocalPointX: data.thumbnailFocalPointX,
           thumbnailFocalPointY: data.thumbnailFocalPointY,
+          cardFocalPointX: data.cardFocalPointX,
+          cardFocalPointY: data.cardFocalPointY,
           additionalImages: data.additionalImages,
         };
 
@@ -225,7 +245,7 @@ const CreateNewsForm = ({ apiBase, categories }: CreateNewsProps) => {
           <div className="flex flex-col gap-6 md:flex-row md:items-stretch">
             <div className="flex w-full md:w-[400px] flex-col gap-2 shrink-0">
               <div className="text-neutral04 text-h4 font-medium">
-                ภาพหน้าปก
+                ภาพการ์ด
               </div>
              <div className="group border-neutral03 bg-neutral02 relative flex aspect-[382/254] w-full items-center justify-center overflow-hidden rounded-xl border">
                 {thumbnailFile ? (
@@ -257,6 +277,16 @@ const CreateNewsForm = ({ apiBase, categories }: CreateNewsProps) => {
                     />
                   </Button>
                 )}
+              </div>
+              <div className="mt-3 text-neutral04 text-h4 font-medium">ภาพหน้าปก/Highlight (ไม่บังคับ)</div>
+              <div className="relative flex aspect-[382/254] w-full items-center justify-center overflow-hidden rounded-xl border border-neutral03 bg-neutral02">
+                {detailThumbnailFile ? (
+                  <Image src={URL.createObjectURL(detailThumbnailFile)} alt="ภาพหน้าปก" fill className="object-cover" />
+                ) : <span className="text-neutral04">ใช้ภาพการ์ดเป็นค่าเริ่มต้น</span>}
+                <Button variant="contained" component="label" className="absolute">
+                  {detailThumbnailFile ? "เปลี่ยนรูป" : "อัปโหลดรูป"}
+                  <VisuallyHiddenInput type="file" accept="image/*" onChange={(event) => handleFileChange(event, "thumbnail")} />
+                </Button>
               </div>
             </div>
 
@@ -430,6 +460,7 @@ const CreateNewsForm = ({ apiBase, categories }: CreateNewsProps) => {
               height={254}
               onUploadComplete={handleUploadComplete}
               onCancel={() => setCroppingFile(null)}
+              preserveOriginal
             />
           )}
         </div>

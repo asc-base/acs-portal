@@ -14,17 +14,8 @@ const page = async ({ params }: PageProps) => {
 
   const news = await newsService.getNewsById(id);
 
-  const tags = await masterDataService.getMasterData();
-  const newsGroup = tags?.tagsGroups?.find(
-    (group: { name: string }) => group.name === "news",
-  );
-  
-  const categories = newsGroup
-    ? tags?.tags?.filter(
-        (tag: { tagsGroupsId: string | number }) =>
-          String(tag?.tagsGroupsId) === String(newsGroup?.id),
-      )
-    : [];
+  const masterData = await masterDataService.getMasterData();
+  const categories = masterData?.newsCategories ?? [];
 
   return (
     <div>

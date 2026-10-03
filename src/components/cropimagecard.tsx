@@ -11,6 +11,7 @@ interface CropImageCardProps {
   height: number;
   onUploadComplete: (file: File, focalPoint?: { x: number; y: number }) => void;
   onCancel: () => void;
+  preserveOriginal?: boolean;
 }
 
 export const CropImageCard = ({
@@ -19,6 +20,7 @@ export const CropImageCard = ({
   height,
   onUploadComplete,
   onCancel,
+  preserveOriginal = false,
 }: CropImageCardProps) => {
   const [zoom, setZoom] = useState(1);
   const [crop, setCrop] = useState({ x: 0, y: 0 });
@@ -64,6 +66,15 @@ export const CropImageCard = ({
     setProcessing(true);
 
     try {
+      if (preserveOriginal) {
+        const focalPoint = croppedAreaPercentage
+          ? { x: croppedAreaPercentage.x + croppedAreaPercentage.width / 2, y: croppedAreaPercentage.y + croppedAreaPercentage.height / 2 }
+          : undefined;
+        onUploadComplete(file, focalPoint);
+        setProcessing(false);
+        return;
+      }
+
       const image = new window.Image();
       image.src = previewUrl;
       await new Promise((resolve, reject) => {
