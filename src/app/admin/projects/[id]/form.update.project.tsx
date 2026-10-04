@@ -286,7 +286,7 @@ export const FormUpdateProject: FC<FormUpdateProjectProps> = ({ apiBase, project
               <CloseIcon />
             </IconButton>
             {previewImageUrl && (
-              <Image src={previewImageUrl} alt="Preview" fill className="object-contain" unoptimized />
+              <Image src={previewImageUrl} alt="Preview" fill className="object-contain" />
             )}
           </div>
         </Dialog>
@@ -298,7 +298,7 @@ export const FormUpdateProject: FC<FormUpdateProjectProps> = ({ apiBase, project
               <div className="bg-gray-50 rounded-xl overflow-hidden border border-gray-300 relative flex flex-col justify-center items-center group h-full">
                 {selectedFile ? (
                   <>
-                    <Image src={URL.createObjectURL(selectedFile)} alt="Preview" fill unoptimized className="absolute inset-0 z-0 object-cover" />
+                    <Image src={URL.createObjectURL(selectedFile)} alt="Preview" fill className="absolute inset-0 z-0 object-cover" />
                     {isEditMode && <div className="absolute inset-0 z-10 flex items-center justify-center bg-black/40 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
                       <Button variant="contained" component="label">
                         <VisuallyHiddenInput type="file" accept="image/*" onChange={handleFileChange} />
@@ -308,7 +308,7 @@ export const FormUpdateProject: FC<FormUpdateProjectProps> = ({ apiBase, project
                   </>
                 ) : initialProject.thumbnailURL ? (
                   <>
-                    <Image src={initialProject.thumbnailURL} alt="Preview" fill unoptimized className="absolute inset-0 z-0 object-cover" />
+                    <Image src={initialProject.thumbnailURL} alt="Preview" fill className="absolute inset-0 z-0 object-cover" />
                     {isEditMode && <div className="absolute inset-0 z-10 flex items-center justify-center bg-black/40 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
                       <Button variant="contained" component="label">
                         <VisuallyHiddenInput type="file" accept="image/*" onChange={handleFileChange} />
@@ -558,7 +558,7 @@ export const FormUpdateProject: FC<FormUpdateProjectProps> = ({ apiBase, project
                     className="relative aspect-video w-full rounded-md overflow-hidden border-2 border-gray-200 border-solid group cursor-pointer"
                     onClick={() => setPreviewImageUrl(url)}
                   >
-                    <Image src={url} alt={`existing-asset-${index}`} fill unoptimized className="object-cover pointer-events-none" draggable={false} />
+                    <Image src={url} alt={`existing-asset-${index}`} fill className="object-cover pointer-events-none" draggable={false} />
                     {isEditMode && (
                       <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                         <span className="text-white text-xs text-center px-2">รูปเดิม (ไม่สามารถลบได้)</span>
@@ -580,7 +580,7 @@ export const FormUpdateProject: FC<FormUpdateProjectProps> = ({ apiBase, project
                     ${dragOverItemIndex === index ? 'border-[var(--color-primary02)] border-dashed scale-105' : 'border-gray-200 border-solid'} 
                     ${draggedItemIndex === index ? 'opacity-40' : 'opacity-100'} group`}
                   >
-                    <Image src={URL.createObjectURL(file)} alt="asset" fill unoptimized className="object-cover pointer-events-none" draggable={false} />
+                    <Image src={URL.createObjectURL(file)} alt="asset" fill className="object-cover pointer-events-none" draggable={false} />
 
                     {isEditMode && <IconButton
                       size="small"

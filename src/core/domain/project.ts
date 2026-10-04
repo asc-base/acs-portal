@@ -8,6 +8,7 @@ export interface IProject {
   id: number;
   title: string;
   thumbnailURL: string;
+  thumbnailContentType?: string | null;
   details: string;
   githubURL: string;
   presentationURL: string;
@@ -15,6 +16,7 @@ export interface IProject {
   figmaURL: string;
   youtubeURL: string;
   assetsURL: string[];
+  images?: { imageUrl: string; contentType: string | null; sortOrder: number }[];
   techStacks: string[];
   member: (IUser & { role?: { id: number }; roleID?: number })[];
   tag: Tag[];

@@ -7,7 +7,7 @@ import { IProfessor } from "@/core/domain/professor";
 
 export const ProfessorCardInfo: FC<IProfessor> = (props) => {
   return (
-    <div className="flex flex-col w-[296px] h-[395px] overflow-hidden rounded-2xl bg-neutral01 p-[18px] shadow-md">
+    <div className="flex h-auto min-h-[395px] w-[296px] flex-col overflow-hidden rounded-2xl bg-neutral01 p-[18px] shadow-md">
       <CardMedia
         sx={{
           height: "295px",
@@ -42,6 +42,16 @@ export const ProfessorCardInfo: FC<IProfessor> = (props) => {
             {props.user.email}
           </span>
         </Typography>
+        {props.research_profile?.trim() ? (
+          <a
+            href={props.research_profile.trim()}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex w-fit items-center rounded-lg bg-primary01 px-4 py-2 font-semibold text-white transition-colors hover:bg-primary02 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary01"
+          >
+            Research Profile
+          </a>
+        ) : null}
       </div>
     </div>
   );

@@ -80,6 +80,7 @@ const ProfessorFormComponent = ({
       email: professor.user.email || "",
       prefixID: professor.prefix?.id || 1,
       profRoom: professor.profRoom || "",
+      research_profile: professor.research_profile || "",
       educations: [],
       expertFields: [],
     },
@@ -95,6 +96,7 @@ const ProfessorFormComponent = ({
       email: professor.user.email || "",
       prefixID: professor.prefix?.id || 1,
       profRoom: professor.profRoom || "",
+      research_profile: professor.research_profile || "",
       educations: professor.educations?.map((e) => ({ value: e })) || [],
       expertFields: professor.expertFields?.map((e) => ({ value: e })) || [],
     });
@@ -170,6 +172,7 @@ const ProfessorFormComponent = ({
         id: professor.id,
         prefixID: data.prefixID!,
         profRoom: data.profRoom,
+        research_profile: data.research_profile ?? "",
         phone: data.phone,
         firstNameTh: data.firstNameTh,
         lastNameTh: data.lastNameTh,
@@ -429,6 +432,18 @@ const ProfessorFormComponent = ({
                 required
                 placeholder="ระบุห้องพักอาจารย์"
                 requiredMark
+                disabled={!isEdit}
+              />
+            </div>
+            <div className="flex-4" />
+          </div>
+          <div className="flex flex-row gap-x-4">
+            <div className="flex-4">
+              <RHFTextField
+                control={control}
+                name="research_profile"
+                label="Research Profile"
+                placeholder="ระบุ URL แบบเต็ม (http:// หรือ https://)"
                 disabled={!isEdit}
               />
             </div>

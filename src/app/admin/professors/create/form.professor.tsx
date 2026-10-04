@@ -83,6 +83,7 @@ export const FormProfesssors: FC<FormProfessorsProps> = ({ apiBase }) => {
       lastNameTh: "",
       phone: "",
       profRoom: "",
+      research_profile: "",
     },
     mode: "onBlur",
     reValidateMode: "onChange",
@@ -145,6 +146,7 @@ export const FormProfesssors: FC<FormProfessorsProps> = ({ apiBase }) => {
         email: data.email,
         phone: data.phone,
         profRoom: data.profRoom,
+        research_profile: data.research_profile || null,
         educations: data.educations.map((e) => e.value).join("/"),
         expertFields: data.expertFields.map((e) => e.value).join("/"),
         imageFocalPointX: data.imageFocalPointX,
@@ -388,6 +390,17 @@ export const FormProfesssors: FC<FormProfessorsProps> = ({ apiBase }) => {
                 required
                 placeholder="ระบุห้องพักอาจารย์"
                 requiredMark
+              />
+            </div>
+            <div className="flex-4" />
+          </div>
+          <div className="flex flex-row gap-x-4">
+            <div className="flex-4">
+              <RHFTextField
+                control={control}
+                name="research_profile"
+                label="Research Profile"
+                placeholder="ระบุ URL แบบเต็ม (http:// หรือ https://)"
               />
             </div>
             <div className="flex-4" />
