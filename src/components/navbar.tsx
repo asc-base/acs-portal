@@ -414,7 +414,6 @@ export const NavbarMain = () => {
                 width={38}
                 height={40}
                 priority
-                unoptimized
                 className="xl:h-[62px] xl:w-[60px]"
               />
               <Image
@@ -423,7 +422,6 @@ export const NavbarMain = () => {
                 width={38}
                 height={30}
                 priority
-                unoptimized
                 className="xl:h-[50px] xl:w-[58px]"
               />
               <div>

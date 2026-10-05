@@ -3,6 +3,7 @@ export interface IClassBook {
   id: number;
   firstYearAcademic: string;
   thumbnailURL: string;
+  thumbnailContentType?: string | null;
   classof: string;
   curriculumID: number;
 }

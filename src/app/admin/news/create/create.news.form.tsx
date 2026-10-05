@@ -412,6 +412,9 @@ const CreateNewsForm = ({ apiBase, categories }: CreateNewsProps) => {
             requiredMark
             fullWidth
           >
+            <MenuItem value={0} disabled>
+              {categories.length ? "เลือกหมวดหมู่" : "ไม่พบหมวดหมู่ข่าวในระบบ"}
+            </MenuItem>
             {categories.map((tag) => (
               <MenuItem key={tag.id} value={tag.id}>
                 {tag.name}
@@ -444,7 +447,7 @@ const CreateNewsForm = ({ apiBase, categories }: CreateNewsProps) => {
             <Button variant="outlined" onClick={handleCancel} size="large">
               ยกเลิก
             </Button>
-            <Button variant="contained" type="submit" size="large">
+            <Button variant="contained" type="submit" size="large" disabled={categories.length === 0}>
               บันทึก
             </Button>
           </div>

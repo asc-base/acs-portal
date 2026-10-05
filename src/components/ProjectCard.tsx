@@ -32,7 +32,6 @@ function ProjectCardBase({ data }: ProjectCardProps) {
             fill
             className="object-cover"
             sizes="(min-width:1280px) 32vw, (min-width:768px) 48vw, 100vw"
-            unoptimized
             priority={id <= 3}
           />
         </div>

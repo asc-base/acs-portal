@@ -5,6 +5,7 @@ export interface ICurriculum {
   documentURL: string;
   description: string;
   thumbnailURL: string;
+  thumbnailContentType?: string | null;
   thumbnailFocalPointX?: number;
   thumbnailFocalPointY?: number;
 }

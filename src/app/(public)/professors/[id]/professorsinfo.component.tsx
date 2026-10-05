@@ -23,7 +23,7 @@ const ProfessorsInfoComponent = ({ professorsInfo }: ProfessorsInfoProps) => {
             </Breadcrumbs>
 
             <div className="flex flex-col md:flex-row gap-4 lg:gap-6 py-6 items-center md:items-start justify-center">
-                <div className="md:basis-auto pointer-events-none">
+                <div className="md:basis-auto">
                     <ProfessorCardInfo {...professorsInfo} />
                 </div>
 

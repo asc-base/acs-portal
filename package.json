@@ -12,6 +12,7 @@
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
+    "test:media-rewrite": "npm run build && node --test tests/media-rewrite.test.mjs",
     "lint": "eslint src"
   },
   "dependencies": {

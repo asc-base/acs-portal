@@ -12,4 +12,5 @@ export interface IProfessor {
   expertFields: string[];
   educations: string[];
   image: string;
+  research_profile?: string | null;
 }

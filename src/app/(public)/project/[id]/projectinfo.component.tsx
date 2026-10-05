@@ -61,10 +61,13 @@ const ProjectInfoComponent: FC<ProjectInfoProps> = ({ project }) => {
     return videoID ? `https://www.youtube.com/embed/${videoID}` : null;
   }
 
-  const isImage = (url?: string) => {
+  const isImage = (url?: string, contentType?: string | null) => {
     if (!url || url.includes('picsum.photos')) return true; 
-    return /\.(jpeg|jpg|gif|png|webp)$/i.test(url);
+    if (contentType) return contentType.startsWith("image/");
+    return /\.(jpeg|jpg|gif|png|svg|webp)$/i.test(url);
   };
+
+  const currentAssetType = project?.images?.find((image) => image.sortOrder === index)?.contentType;
 
   return (
     <div className="container mx-auto px-4 py-5 md:px-16">
@@ -122,7 +125,7 @@ const ProjectInfoComponent: FC<ProjectInfoProps> = ({ project }) => {
           <h2 className="mb-2 font-bold">ข้อมูลเพิ่มเติม</h2>
           <div className="flex flex-1 flex-col items-center justify-between">
             {/*Main Image*/}
-            {isImage(project?.assetsURL?.[index]) ? (
+            {isImage(project?.assetsURL?.[index], currentAssetType) ? (
               <Image
                 src={project?.assetsURL?.[index] ?? "https://picsum.photos/seed/acs/550/200"}
                 alt="main"
@@ -148,7 +151,7 @@ const ProjectInfoComponent: FC<ProjectInfoProps> = ({ project }) => {
               </IconButton>
               <div className="flex flex-1 w-full flex-row justify-center gap-x-2 px-2">
                 {getVisibleImages().map((img, i) => (
-                  isImage(img) ? (
+                  isImage(img, project?.images?.find((image) => image.sortOrder === (index + i) % (project.assetsURL.length || 1))?.contentType) ? (
                     <Image
                       key={i}
                       src={img}

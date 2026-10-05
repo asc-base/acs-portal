@@ -10,6 +10,7 @@ export interface IProfessor {
   expertFields: string[];
   educations: string[];
   phone: string;
+  research_profile?: string | null;
 }
 
 export interface IUpdateProfessor {
@@ -24,6 +25,7 @@ export interface IUpdateProfessor {
   email: string;
   expertFields?: string;
   educations?: string;
+  research_profile?: string | null;
 }
 
 export interface QueryProfessor {
@@ -49,4 +51,5 @@ export interface ICreateProfessor {
   lastNameTh: string;
   phone: string;
   profRoom: string;
+  research_profile?: string | null;
 }
