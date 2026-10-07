@@ -603,8 +603,8 @@ export const FormProjects: FC<FormProjectsProps> = ({ apiBase, initialCourses, i
                       requiredMark
                     >
                       {students.map((s) => (
-                        <MenuItem key={s.id} value={s.user.id}>
-                          {s.studentCode}
+                        <MenuItem key={s.id} value={s.id}>
+                          {s.student.studentCode}
                         </MenuItem>
                       ))}
                     </RHFSelect>
@@ -619,8 +619,8 @@ export const FormProjects: FC<FormProjectsProps> = ({ apiBase, initialCourses, i
                       requiredMark
                     >
                       {students.map((s) => (
-                        <MenuItem key={s.id} value={s.user.id}>
-                          {`${s.user.firstNameTh} ${s.user.lastNameTh}`}
+                        <MenuItem key={s.id} value={s.id}>
+                          {`${s.firstNameTh} ${s.lastNameTh}`}
                         </MenuItem>
                       ))}
                     </RHFSelect>
@@ -656,8 +656,8 @@ export const FormProjects: FC<FormProjectsProps> = ({ apiBase, initialCourses, i
                       requiredMark
                     >
                       {professors.map((p) => (
-                        <MenuItem key={p.id} value={p.user.id}>
-                          {`${p.user.firstNameTh} ${p.user.lastNameTh}`}
+                        <MenuItem key={p.id} value={p.id}>
+                          {`${p.firstNameTh} ${p.lastNameTh}`}
                         </MenuItem>
                       ))}
                     </RHFSelect>

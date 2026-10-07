@@ -274,16 +274,16 @@ const StudentTableComponents = ({
                   }}
                 >
                   <TableCell align="center" sx={{ borderBottom: "none" }}>
-                    {student.user?.imageUrl ? (
+                    {student.imageUrl ? (
                       <Avatar
-                        src={student.user.imageUrl}
-                        alt={student.user.firstNameTh || "Student"}
+                        src={student.imageUrl}
+                        alt={student.firstNameTh || "Student"}
                         sx={{ width: 64, height: 64, margin: "0 auto" }}
                       />
                     ) : (
                       <StudentDefaultAvatar
-                        prefix={student.user?.prefix}
-                        alt={student.user?.firstNameTh || "Student"}
+                        prefix={student.prefix}
+                        alt={student.firstNameTh || "Student"}
                         sx={{
                           width: 64,
                           height: 64,
@@ -301,17 +301,17 @@ const StudentTableComponents = ({
                     )}
                   </TableCell>
                   <TableCell align="center" sx={{ pr: 4 }}>
-                    {student.studentCode}
+                    {student.student.studentCode}
                   </TableCell>
                   <TableCell align="center">
-                    {`${student.user?.firstNameTh || ""} ${student.user?.lastNameTh || ""}`}
+                    {`${student.firstNameTh || ""} ${student.lastNameTh || ""}`}
                   </TableCell>
-                  <TableCell align="center">{student.user?.nickName}</TableCell>
+                  <TableCell align="center">{student.nickName}</TableCell>
                   <TableCell
                     align="left"
                     className="max-w-[200px] break-words whitespace-normal"
                   >
-                    {student.user?.email}
+                    {student.email}
                   </TableCell>
                   <TableCell align="center">
                     <IconButton

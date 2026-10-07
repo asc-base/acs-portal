@@ -70,10 +70,10 @@ const ProfessorTableComponent = ({
                 }}
               >
                 <TableCell align="center" sx={{ borderBottom: "none" }}>
-                  {prof.user?.imageUrl ? (
+                  {prof.imageUrl ? (
                     <Avatar
-                      src={prof.user.imageUrl}
-                      alt={prof.user.firstNameTh || "Professor"}
+                      src={prof.imageUrl}
+                      alt={prof.firstNameTh || "Professor"}
                       sx={{
                         width: 50,
                         height: 50,
@@ -97,15 +97,15 @@ const ProfessorTableComponent = ({
                 </TableCell>
 
                 <TableCell align="center">
-                  {`${prof.user?.firstNameTh || ""} ${prof.user?.lastNameTh || ""
+                  {`${prof.firstNameTh || ""} ${prof.lastNameTh || ""
                     }`}
                 </TableCell>
 
-                <TableCell align="center">{prof.profRoom}</TableCell>
+                <TableCell align="center">{prof.professor.profRoom}</TableCell>
 
-                <TableCell align="center">{prof.phone}</TableCell>
+                <TableCell align="center">{prof.professor.phone}</TableCell>
 
-                <TableCell align="left">{prof.user?.email}</TableCell>
+                <TableCell align="left">{prof.email}</TableCell>
 
                 <TableCell align="left">
                   <IconButton

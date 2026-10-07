@@ -3,6 +3,7 @@ import { IProfessor } from "@/core/domain/professor";
 import { HttpHelper } from "@/lib/http";
 import { ApiResponse, Pageable } from "@/interface/response";
 import { QueryProfessor } from "@/core/domain/professor";
+import { ProfessorResponseSchema } from "@/core/schema/profile-response";
 
 export class ProfessorRepository implements IProfessorRepository {
   private readonly http: HttpHelper;
@@ -53,14 +54,20 @@ export class ProfessorRepository implements IProfessorRepository {
     const url = `/v1/professors${queryString}`;
     const response =
       await this.http.get<ApiResponse<Pageable<IProfessor>>>(url);
-    return response;
+    return {
+      ...response,
+      data: {
+        ...response.data,
+        rows: ProfessorResponseSchema.array().parse(response.data.rows),
+      },
+    };
   }
 
   async getProfessorById(id: string): Promise<ApiResponse<IProfessor>> {
     const response = await this.http.get<ApiResponse<IProfessor>>(
       `/v1/professors/${id}`,
     );
-    return response;
+    return { ...response, data: ProfessorResponseSchema.parse(response.data) };
   }
 
   async updateProfessor(
@@ -71,7 +78,7 @@ export class ProfessorRepository implements IProfessorRepository {
       `/v1/professors/${id}`,
       data,
     );
-    return response;
+    return { ...response, data: ProfessorResponseSchema.parse(response.data) };
   }
 
   async createProfessor(data: FormData): Promise<ApiResponse<IProfessor>> {
@@ -79,7 +86,7 @@ export class ProfessorRepository implements IProfessorRepository {
       `/v1/professors`,
       data,
     );
-    return response;
+    return { ...response, data: ProfessorResponseSchema.parse(response.data) };
   }
 
 async deleteProfessor(id: number): Promise<ApiResponse<IProfessor>> {
@@ -88,6 +95,6 @@ async deleteProfessor(id: number): Promise<ApiResponse<IProfessor>> {
     `/v1/professors/${id}`,
   );
 
-  return response;
+  return { ...response, data: ProfessorResponseSchema.parse(response.data) };
 }
 }

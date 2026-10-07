@@ -5,6 +5,7 @@ import {
 } from "@/core/domain/student";
 import { HttpHelper } from "@/lib/http";
 import { ApiResponse, Pageable } from "@/interface/response";
+import { StudentResponseSchema } from "@/core/schema/profile-response";
 
 export class StudentRepository implements IStudentRepository {
   private readonly http: HttpHelper;
@@ -39,20 +40,26 @@ export class StudentRepository implements IStudentRepository {
     const url = `/v1/students?${searchParams.toString()}`;
 
     const response = await this.http.get<ApiResponse<Pageable<IStudent>>>(url);
-    return response;
+    return {
+      ...response,
+      data: {
+        ...response.data,
+        rows: StudentResponseSchema.array().parse(response.data.rows),
+      },
+    };
   }
   async getStudentById(id: number): Promise<ApiResponse<IStudent>> {
     const response = await this.http.get<ApiResponse<IStudent>>(
       `/v1/students/${id}`,
     );
-    return response;
+    return { ...response, data: StudentResponseSchema.parse(response.data) };
   }
 
   async getStudentByUserId(userId: number): Promise<ApiResponse<IStudent>> {
     const response = await this.http.get<ApiResponse<IStudent>>(
       `/v1/students/user/${userId}`,
     );
-    return response;
+    return { ...response, data: StudentResponseSchema.parse(response.data) };
   }
 
   async createStudent(data: FormData): Promise<ApiResponse<IStudent>> {
@@ -60,14 +67,14 @@ export class StudentRepository implements IStudentRepository {
       `/v1/students`,
       data,
     );
-    return response;
+    return { ...response, data: StudentResponseSchema.parse(response.data) };
   }
 
   async deleteStudent(id: number): Promise<ApiResponse<IStudent>> {
     const response = await this.http.delete<ApiResponse<IStudent>>(
       `/v1/students/${id}`,
     );
-    return response;
+    return { ...response, data: StudentResponseSchema.parse(response.data) };
   }
 
   async updateStudent(
@@ -78,7 +85,7 @@ export class StudentRepository implements IStudentRepository {
       `/v1/students/${studentId}`,
       data,
     );
-    return response;
+    return { ...response, data: StudentResponseSchema.parse(response.data) };
   }
 
   async createStudentBatch(data: FormData): Promise<ApiResponse<null>> {

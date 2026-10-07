@@ -89,20 +89,20 @@ export const StudentModal: React.FC<StudentModalProps> = ({
             <div className="flex w-full flex-row items-center justify-center gap-4 rounded-2xl border border-neutral02 bg-white p-4 shadow-sm md:h-112.5 md:flex-col md:items-center md:p-6">
               {/* Avatar */}
               <div className="shrink-0 md:mb-4 md:w-full md:flex md:justify-center">
-                {student.user.imageUrl ? (
+                {student.imageUrl ? (
                   <>
                     {/* Mobile */}
                     <Image
-                      src={student.user.imageUrl}
-                      alt={`${student.user.firstNameTh} ${student.user.lastNameTh}`}
+                      src={student.imageUrl}
+                      alt={`${student.firstNameTh} ${student.lastNameTh}`}
                       width={220}
                       height={230}
                       className="h-20 w-20 rounded-full object-cover md:hidden"
                     />
                     {/* Desktop */}
                     <Image
-                      src={student.user.imageUrl}
-                      alt={`${student.user.firstNameTh} ${student.user.lastNameTh}`}
+                      src={student.imageUrl}
+                      alt={`${student.firstNameTh} ${student.lastNameTh}`}
                       width={220}
                       height={230}
                       className="hidden h-57.5 w-full max-w-55 rounded-2xl object-cover md:block"
@@ -113,8 +113,8 @@ export const StudentModal: React.FC<StudentModalProps> = ({
                     {/* Mobile */}
                     <div className="h-20 w-20 overflow-hidden rounded-full md:hidden">
                       <StudentDefaultAvatar
-                        prefix={student.user.prefix}
-                        alt={`${student.user.firstNameTh} ${student.user.lastNameTh}`}
+                        prefix={student.prefix}
+                        alt={`${student.firstNameTh} ${student.lastNameTh}`}
                         variant="circle"
                         sx={{ width: "100%", height: "100%" }}
                       />
@@ -122,8 +122,8 @@ export const StudentModal: React.FC<StudentModalProps> = ({
                     {/* Desktop */}
                     <div className="hidden h-57.5 w-full max-w-55 overflow-hidden rounded-2xl md:block">
                       <StudentDefaultAvatar
-                        prefix={student.user.prefix}
-                        alt={`${student.user.firstNameTh} ${student.user.lastNameTh}`}
+                        prefix={student.prefix}
+                        alt={`${student.firstNameTh} ${student.lastNameTh}`}
                         variant="square"
                         sx={{ width: "100%", height: "100%" }}
                       />
@@ -135,19 +135,19 @@ export const StudentModal: React.FC<StudentModalProps> = ({
               {/* Info */}
               <div className="flex flex-col items-center md:items-center">
                 <Typography className="!text-base !font-bold !text-neutral05 md:!text-lg text-center mb-0.5 md:mb-1">
-                  {student.user.firstNameTh} {student.user.lastNameTh}
+                  {student.firstNameTh} {student.lastNameTh}
                 </Typography>
                 <Typography className="!text-xs !text-neutral04 md:!text-sm text-center mb-2 md:mb-4">
-                  {student.user.nickName?.trim() && `(${student.user.nickName.trim()}) `}
-                  {student.studentCode} รุ่น {classBook?.classof || "-"}
+                  {student.nickName?.trim() && `(${student.nickName.trim()}) `}
+                  {student.student.studentCode} รุ่น {classBook?.classof || "-"}
                 </Typography>
 
                 {/* Social Links */}
                 <div className="flex gap-0.5 md:gap-1.5 justify-center">
-                  {student.facebook && (
+                  {student.student.facebook && (
                     <IconButton
                       component="a"
-                      href={student.facebook}
+                      href={student.student.facebook}
                       target="_blank"
                       rel="noopener noreferrer"
                       sx={{ p: 0.25, color: "var(--color-neutral04)", "&:hover": { color: "#1877F2" } }}
@@ -155,10 +155,10 @@ export const StudentModal: React.FC<StudentModalProps> = ({
                       <FacebookIcon sx={{ fontSize: { xs: 18, md: 22 } }} />
                     </IconButton>
                   )}
-                  {student.linkedin && (
+                  {student.student.linkedin && (
                     <IconButton
                       component="a"
-                      href={student.linkedin}
+                      href={student.student.linkedin}
                       target="_blank"
                       rel="noopener noreferrer"
                       sx={{ p: 0.25, color: "var(--color-neutral04)", "&:hover": { color: "#0A66C2" } }}
@@ -166,10 +166,10 @@ export const StudentModal: React.FC<StudentModalProps> = ({
                       <LinkedInIcon sx={{ fontSize: { xs: 18, md: 22 } }} />
                     </IconButton>
                   )}
-                  {student.github && (
+                  {student.student.github && (
                     <IconButton
                       component="a"
-                      href={student.github}
+                      href={student.student.github}
                       target="_blank"
                       rel="noopener noreferrer"
                       sx={{ p: 0.25, color: "var(--color-neutral04)", "&:hover": { color: "#181717" } }}
@@ -177,10 +177,10 @@ export const StudentModal: React.FC<StudentModalProps> = ({
                       <GitHubIcon sx={{ fontSize: { xs: 18, md: 22 } }} />
                     </IconButton>
                   )}
-                  {student.instagram && (
+                  {student.student.instagram && (
                     <IconButton
                       component="a"
-                      href={student.instagram}
+                      href={student.student.instagram}
                       target="_blank"
                       rel="noopener noreferrer"
                       sx={{ p: 0.25, color: "var(--color-neutral04)", "&:hover": { color: "#E1306C" } }}
@@ -193,13 +193,13 @@ export const StudentModal: React.FC<StudentModalProps> = ({
             </div>
 
             {/* Skills Card */}
-            {student.skills && student.skills.length > 0 && (
+            {student.student.skills.length > 0 && (
               <div className="rounded-2xl border border-neutral02 bg-white p-6 shadow-sm">
                 <Typography className="!text-sm !font-bold !text-neutral05 !mb-3">
                   Skills
                 </Typography>
                 <div className="flex flex-wrap gap-2">
-                  {student.skills.map((skill) => (
+                  {student.student.skills.map((skill) => (
                     <Chip
                       key={skill}
                       label={skill}

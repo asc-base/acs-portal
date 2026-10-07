@@ -6,7 +6,7 @@ import { StudentDefaultAvatar } from "@/components/student-default-avatar";
 export const StudentCard: FC<IStudent> = (props) => {
   return (
     <Card className="flex !w-40.5 cursor-pointer flex-col !rounded-2xl transition-all duration-300 hover:-translate-y-1 md:!w-40 lg:!w-52 xl:!w-67">
-      {props.user.imageUrl ? (
+      {props.imageUrl ? (
         <CardMedia
           className="h-39.5 object-cover md:h-44 lg:h-59"
           sx={{
@@ -14,14 +14,14 @@ export const StudentCard: FC<IStudent> = (props) => {
             backgroundPosition: "center",
           }}
           component="img"
-          image={props.user.imageUrl}
-          alt={`${props.user.firstNameTh} ${props.user.lastNameTh}`}
+          image={props.imageUrl}
+          alt={`${props.firstNameTh} ${props.lastNameTh}`}
         />
       ) : (
         <div className="h-39.5 md:h-44 lg:h-59">
           <StudentDefaultAvatar
-            prefix={props.user.prefix}
-            alt={`${props.user.firstNameTh} ${props.user.lastNameTh}`}
+            prefix={props.prefix}
+            alt={`${props.firstNameTh} ${props.lastNameTh}`}
             variant="square"
             sx={{
               width: "100%",
@@ -37,14 +37,14 @@ export const StudentCard: FC<IStudent> = (props) => {
           component="h2"
           className="!text-primary01 text-left !font-bold !text-sm lg:!text-base !truncate w-full block"
         >
-          {props.user.firstNameTh} {props.user.lastNameTh}
+          {props.firstNameTh} {props.lastNameTh}
         </Typography>
         <Box className="mt-1 flex w-full flex-row items-center justify-between">
           <Typography component="h4" className="!text-neutral05 !text-xs lg:!text-sm">
-            รุ่นที่ {props.classBookID}
+            รุ่นที่ {props.student.classBookID}
           </Typography>
           <Typography component="h4" className="!text-neutral05 !text-xs lg:!text-sm">
-            {`${props.studentCode.slice(0, 2)}-${props.studentCode.slice(-3)}`}
+            {`${props.student.studentCode.slice(0, 2)}-${props.student.studentCode.slice(-3)}`}
           </Typography>
         </Box>
       </CardContent>

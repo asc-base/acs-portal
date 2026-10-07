@@ -1,20 +1,6 @@
-import { IUser } from "./user";
+import type { StudentResponse } from "../schema/profile-response";
 // import { IProject } from "./project";
-export interface IStudent {
-  id: number;
-  studentCode: string;
-  user: IUser;
-  classBookID: number | null;
-  // classBook: IClassBook;
-  // yearOfFirstAdmission:string | null;
-  // yearOfCompletion:string | null;
-  linkedin?: string | null;
-  facebook?: string | null;
-  instagram?: string | null;
-  github?: string | null;
-  skills?: string[];
-  // projects: IProject[];
-}
+export type IStudent = StudentResponse;
 
 export interface QueryStudent {
   page?: number;

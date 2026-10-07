@@ -25,7 +25,7 @@ export default function AdminClientLayout({
         <aside className="jun-sidebar w-64">
           <EdgeSidebarAdmin
             username={user ? `${user.firstNameTh} ${user.lastNameTh}` : "Admin"}
-            imageUrl={user?.imageUrl}
+            imageUrl={user?.imageUrl ?? undefined}
           />
         </aside>
         <main className="jun-content flex-1 overflow-y-auto">{children}</main>

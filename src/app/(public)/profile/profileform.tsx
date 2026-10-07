@@ -76,18 +76,18 @@ const ProfileForm = ({ apiBase }: { apiBase: string }) => {
   const { handleSubmit, control, reset, watch, setValue } = useForm<UpdateStudentInputs>({
     resolver: zodResolver(UpdateStudentSchema),
     defaultValues: {
-      studentCode: student?.studentCode || "",
-      firstNameTh: student?.user?.firstNameTh || "",
-      lastNameTh: student?.user?.lastNameTh || "",
-      firstNameEn: student?.user?.firstNameEn || "",
-      lastNameEn: student?.user?.lastNameEn || "",
-      email: student?.user?.email || "",
-      nickName: student?.user?.nickName || "",
-      github: student?.github || "",
-      linkedin: student?.linkedin || "",
-      facebook: student?.facebook || "",
-      instagram: student?.instagram || "",
-      skills: student?.skills || [],
+      studentCode: student?.student.studentCode || "",
+      firstNameTh: student?.firstNameTh || "",
+      lastNameTh: student?.lastNameTh || "",
+      firstNameEn: student?.firstNameEn || "",
+      lastNameEn: student?.lastNameEn || "",
+      email: student?.email || "",
+      nickName: student?.nickName || "",
+      github: student?.student.github || "",
+      linkedin: student?.student.linkedin || "",
+      facebook: student?.student.facebook || "",
+      instagram: student?.student.instagram || "",
+      skills: student?.student.skills || [],
     },
   });
 
@@ -113,18 +113,18 @@ const ProfileForm = ({ apiBase }: { apiBase: string }) => {
 
   useEffect(() => {
     reset({
-      studentCode: student?.studentCode || "",
-      firstNameTh: student?.user?.firstNameTh || "",
-      lastNameTh: student?.user?.lastNameTh || "",
-      firstNameEn: student?.user?.firstNameEn || "",
-      lastNameEn: student?.user?.lastNameEn || "",
-      email: student?.user?.email || "",
-      nickName: student?.user?.nickName || "",
-      github: student?.github || "",
-      linkedin: student?.linkedin || "",
-      facebook: student?.facebook || "",
-      instagram: student?.instagram || "",
-      skills: student?.skills || [],
+      studentCode: student?.student.studentCode || "",
+      firstNameTh: student?.firstNameTh || "",
+      lastNameTh: student?.lastNameTh || "",
+      firstNameEn: student?.firstNameEn || "",
+      lastNameEn: student?.lastNameEn || "",
+      email: student?.email || "",
+      nickName: student?.nickName || "",
+      github: student?.student.github || "",
+      linkedin: student?.student.linkedin || "",
+      facebook: student?.student.facebook || "",
+      instagram: student?.student.instagram || "",
+      skills: student?.student.skills || [],
     });
     setSkillInput("");
     setSelectedFile(null);
@@ -132,7 +132,7 @@ const ProfileForm = ({ apiBase }: { apiBase: string }) => {
   }, [student, reset]);
 
   const { nickName, firstNameTh, firstNameEn, lastNameTh, lastNameEn } =
-    student?.user ?? {};
+    student ?? {};
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0] || null;
@@ -164,18 +164,18 @@ const ProfileForm = ({ apiBase }: { apiBase: string }) => {
 
   const handleCancel = () => {
     reset({
-      studentCode: student?.studentCode || "",
-      firstNameTh: student?.user?.firstNameTh || "",
-      lastNameTh: student?.user?.lastNameTh || "",
-      firstNameEn: student?.user?.firstNameEn || "",
-      lastNameEn: student?.user?.lastNameEn || "",
-      email: student?.user?.email || "",
-      nickName: student?.user?.nickName || "",
-      github: student?.github || "",
-      linkedin: student?.linkedin || "",
-      facebook: student?.facebook || "",
-      instagram: student?.instagram || "",
-      skills: student?.skills || [],
+      studentCode: student?.student.studentCode || "",
+      firstNameTh: student?.firstNameTh || "",
+      lastNameTh: student?.lastNameTh || "",
+      firstNameEn: student?.firstNameEn || "",
+      lastNameEn: student?.lastNameEn || "",
+      email: student?.email || "",
+      nickName: student?.nickName || "",
+      github: student?.student.github || "",
+      linkedin: student?.student.linkedin || "",
+      facebook: student?.student.facebook || "",
+      instagram: student?.student.instagram || "",
+      skills: student?.student.skills || [],
     });
     setSkillInput("");
     setSelectedFile(null);
@@ -187,7 +187,7 @@ const ProfileForm = ({ apiBase }: { apiBase: string }) => {
     try {
       setIsEditing(false);
       const id = student?.id;
-      const classBookID = student?.classBookID;
+      const classBookID = student?.student.classBookID;
 
       if (!id || !classBookID) {
         return;
@@ -247,12 +247,12 @@ const ProfileForm = ({ apiBase }: { apiBase: string }) => {
                   cursor: isEditing ? "pointer" : "default",
                 }}
               >
-                {(selectedFile || student?.user?.imageUrl) && (
+                {(selectedFile || student?.imageUrl) && (
                   <Image
                     src={
                       selectedFile
                         ? URL.createObjectURL(selectedFile)
-                        : (student?.user?.imageUrl ?? "")
+                        : (student?.imageUrl ?? "")
                     }
                     alt="Profile"
                     width={300}
@@ -262,7 +262,7 @@ const ProfileForm = ({ apiBase }: { apiBase: string }) => {
                 )}
                 {isEditing && (
                   <div
-                    className={`flex items-center justify-center ${selectedFile || student?.user?.imageUrl
+                    className={`flex items-center justify-center ${selectedFile || student?.imageUrl
                       ? "absolute inset-0 z-10 h-full w-full bg-black/40 opacity-0 transition-opacity duration-300 hover:opacity-100"
                       : "relative h-full w-full opacity-100"
                       } `}
@@ -274,7 +274,7 @@ const ProfileForm = ({ apiBase }: { apiBase: string }) => {
                     </div>
                   </div>
                 )}
-                {!(selectedFile || student?.user?.imageUrl) && !isEditing && (
+                {!(selectedFile || student?.imageUrl) && !isEditing && (
                   <span className="text-neutral04 text-sm font-medium">
                     ไม่มีรูปโปรไฟล์
                   </span>
@@ -296,7 +296,7 @@ const ProfileForm = ({ apiBase }: { apiBase: string }) => {
               <div className="text-neutral04">รหัสนักศึกษา</div>
               <div className="text-center">:</div>
               <div className="text-primary01 font-bold">
-                {student?.studentCode || "XXXXXXXXXX"}
+                {student?.student.studentCode || "XXXXXXXXXX"}
               </div>
 
               {/* Row 2: Nickname */}
@@ -310,8 +310,8 @@ const ProfileForm = ({ apiBase }: { apiBase: string }) => {
               <div className="text-neutral04">ชื่อ - นามสกุล (ภาษาไทย)</div>
               <div className="text-center">:</div>
               <div className="text-primary01 font-bold">
-                {student?.user
-                  ? `${student.user.prefix?.nameTh || ""} ${firstNameTh} ${lastNameTh}`.trim()
+                {student
+                  ? `${student.prefix?.nameTh || ""} ${firstNameTh} ${lastNameTh}`.trim()
                   : "สมชาย ใจดี"}
               </div>
 
@@ -319,8 +319,8 @@ const ProfileForm = ({ apiBase }: { apiBase: string }) => {
               <div className="text-neutral04">ชื่อ - นามสกุล (ภาษาอังกฤษ)</div>
               <div className="text-center">:</div>
               <div className="text-primary01 font-bold">
-                {student?.user
-                  ? `${student.user.prefix?.shortNameEn || ""} ${firstNameEn} ${lastNameEn}`.trim()
+                {student
+                  ? `${student.prefix?.shortNameEn || ""} ${firstNameEn} ${lastNameEn}`.trim()
                   : "Somchai Jaidee"}
               </div>
             </div>

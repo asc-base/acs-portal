@@ -13,21 +13,21 @@ export const ProfessorCard: FC<IProfessor> = (props) => {
           objectPosition: "center 20%",
         }}
         component="img"
-        image={props.user.imageUrl}
-        alt={`${props.user.firstNameTh} ${props.user.lastNameTh}`}
+        image={props.imageUrl ?? ""}
+        alt={`${props.firstNameTh} ${props.lastNameTh}`}
       />
       <CardContent className="flex flex-1 flex-col justify-center gap-1 p-3 !pb-3 text-left lg:p-4 lg:!pb-4">
         <Typography
           component="h3"
           className="!text-primary01 text-left !font-bold break-words"
         >
-          {props.user.prefix?.shortNameTh}
-          {props.user.firstNameTh} {props.user.lastNameTh}
+          {props.prefix?.shortNameTh}
+          {props.firstNameTh} {props.lastNameTh}
         </Typography>
 
         <Typography component="h4" className="!text-neutral05 text-left">
-          {props.user.prefix?.shortNameEn} {props.user.firstNameEn}{" "}
-          {props.user.lastNameEn}
+          {props.prefix?.shortNameEn} {props.firstNameEn}{" "}
+          {props.lastNameEn}
         </Typography>
       </CardContent>
     </div>

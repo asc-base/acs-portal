@@ -1,17 +1,6 @@
-import { IUser } from "./user";
-import { Position } from "./master-data";
+import type { ProfessorResponse } from "../schema/profile-response";
 
-export interface IProfessor {
-  id: number;
-  user: IUser;
-  majorPosition: Position;
-  prefix: Position;
-  profRoom: string;
-  expertFields: string[];
-  educations: string[];
-  phone: string;
-  research_profile?: string | null;
-}
+export type IProfessor = ProfessorResponse;
 
 export interface IUpdateProfessor {
   id: number;

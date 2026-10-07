@@ -57,7 +57,7 @@ const ProfessorFormComponent = ({
   const [isCroping, setIsCroping] = useState(false);
   const [isError, setIsError] = useState(false);
   const [previewUrl, setPreviewUrl] = useState<string | null>(
-    professor.user?.imageUrl ?? null,
+    professor.imageUrl ?? null,
   );
   const [confirmModal, setConfirmModal] = useState<ConfirmModalProps | null>(
     null,
@@ -72,15 +72,15 @@ const ProfessorFormComponent = ({
   const { control, handleSubmit, reset, setValue, formState: { isDirty } } = useForm<UpdateProfessorInputs>({
     resolver: zodResolver(UpdateProfessorSchema),
     defaultValues: {
-      firstNameTh: professor.user.firstNameTh || "",
-      lastNameTh: professor.user.lastNameTh || "",
-      firstNameEn: professor.user.firstNameEn || "",
-      lastNameEn: professor.user.lastNameEn || "",
-      phone: professor.phone || "",
-      email: professor.user.email || "",
+      firstNameTh: professor.firstNameTh || "",
+      lastNameTh: professor.lastNameTh || "",
+      firstNameEn: professor.firstNameEn || "",
+      lastNameEn: professor.lastNameEn || "",
+      phone: professor.professor.phone || "",
+      email: professor.email || "",
       prefixID: professor.prefix?.id || 1,
-      profRoom: professor.profRoom || "",
-      research_profile: professor.research_profile || "",
+      profRoom: professor.professor.profRoom || "",
+      research_profile: professor.professor.research_profile || "",
       educations: [],
       expertFields: [],
     },
@@ -88,17 +88,17 @@ const ProfessorFormComponent = ({
 
   useEffect(() => {
     reset({
-      firstNameTh: professor.user.firstNameTh || "",
-      lastNameTh: professor.user.lastNameTh || "",
-      firstNameEn: professor.user.firstNameEn || "",
-      lastNameEn: professor.user.lastNameEn || "",
-      phone: professor.phone || "",
-      email: professor.user.email || "",
+      firstNameTh: professor.firstNameTh || "",
+      lastNameTh: professor.lastNameTh || "",
+      firstNameEn: professor.firstNameEn || "",
+      lastNameEn: professor.lastNameEn || "",
+      phone: professor.professor.phone || "",
+      email: professor.email || "",
       prefixID: professor.prefix?.id || 1,
-      profRoom: professor.profRoom || "",
-      research_profile: professor.research_profile || "",
-      educations: professor.educations?.map((e) => ({ value: e })) || [],
-      expertFields: professor.expertFields?.map((e) => ({ value: e })) || [],
+      profRoom: professor.professor.profRoom || "",
+      research_profile: professor.professor.research_profile || "",
+      educations: professor.professor.educations.map((e) => ({ value: e })),
+      expertFields: professor.professor.expertFields.map((e) => ({ value: e })),
     });
   }, [professor, reset]);
 
@@ -140,7 +140,7 @@ const ProfessorFormComponent = ({
 
   const handleCropCancel = () => {
     setSelectedFile(null);
-    setPreviewUrl(professor.user?.imageUrl ?? null);
+    setPreviewUrl(professor.imageUrl ?? null);
     setIsEdit(false);
   };
 

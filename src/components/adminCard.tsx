@@ -56,8 +56,8 @@ const ProjectContent: FC<{ project: IProject }> = ({ project }) => {
           {project.projectMembers.map((member, idx) => (
             <Avatar
               key={idx}
-              alt={member.user.firstNameTh}
-              src={member.user.imageUrl}
+              alt={member.firstNameTh}
+              src={member.imageUrl ?? undefined}
             />
           ))}
         </AvatarGroup>

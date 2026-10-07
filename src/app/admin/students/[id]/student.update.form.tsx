@@ -61,7 +61,7 @@ export const StudentUpdateForm = ({
 
   const previewSrc = selectedFile
     ? URL.createObjectURL(selectedFile)
-    : student.user.imageUrl;
+    : student.imageUrl;
 
   const router = useRouter();
 
@@ -90,18 +90,18 @@ export const StudentUpdateForm = ({
   } = useForm<UpdateStudentInputs>({
     resolver: zodResolver(UpdateStudentSchema),
     defaultValues: {
-      prefixID: student.user.prefix?.id,
-      firstNameTh: student.user.firstNameTh,
-      lastNameTh: student.user.lastNameTh,
-      firstNameEn: student.user.firstNameEn,
-      lastNameEn: student.user.lastNameEn,
-      studentCode: student.studentCode,
-      nickName: student.user.nickName,
-      email: student.user.email,
-      facebook: student.facebook || undefined,
-      linkedin: student.linkedin || undefined,
-      instagram: student.instagram || undefined,
-      github: student.github || undefined,
+      prefixID: student.prefix?.id,
+      firstNameTh: student.firstNameTh,
+      lastNameTh: student.lastNameTh,
+      firstNameEn: student.firstNameEn ?? "",
+      lastNameEn: student.lastNameEn ?? "",
+      studentCode: student.student.studentCode,
+      nickName: student.nickName ?? "",
+      email: student.email,
+      facebook: student.student.facebook || undefined,
+      linkedin: student.student.linkedin || undefined,
+      instagram: student.student.instagram || undefined,
+      github: student.student.github || undefined,
       // otherProjects: [{ value: "" }],
     },
     mode: "onBlur",

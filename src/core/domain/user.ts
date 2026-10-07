@@ -1,24 +1,7 @@
-export interface UserPrefix {
-    id: number;
-    nameTh: string;
-    nameEn?: string;
-    shortNameTh?: string;
-    shortNameEn?: string;
-}
+import type { UserResponse } from "../schema/profile-response";
 
-export interface IUser {
-    id: number;
-    email: string;
-    firstNameTh: string;
-    lastNameTh: string;
-    firstNameEn: string;
-    lastNameEn: string;
-    nickName?: string;
-    imageUrl: string;
-    imageFocalPointX?: number | null;
-    imageFocalPointY?: number | null;
-    prefix?: UserPrefix | null;
-}
+export type { UserPrefix } from "../schema/profile-response";
+export type IUser = UserResponse;
 
 export interface UserRole {
     id: number;
