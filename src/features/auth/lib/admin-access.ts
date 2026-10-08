@@ -9,4 +9,5 @@ const isAdminName = (value: unknown): boolean =>
  */
 export const isAdminUser = (
   user: UserProfile | null | undefined,
-): boolean => user?.roles.some((role) => isAdminName(role.name)) ?? false;
+): boolean => Array.isArray(user?.roles) &&
+  user.roles.some((role) => isAdminName(role.name));

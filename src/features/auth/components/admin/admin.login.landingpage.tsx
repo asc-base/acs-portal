@@ -4,76 +4,17 @@ import * as React from "react";
 import Image from "next/image";
 import { Button, Typography, IconButton, InputAdornment } from "@mui/material";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
 import { RHFTextField } from "@/shared/components/form/RHFTextField";
-import { useRouter } from "next/navigation";
-import { useAuthStore } from "@/features/auth/store/auth";
-import { isAdminUser } from "@/features/auth/lib/admin-access";
-import { useLogin } from "@/features/auth/hooks/useLogin";
-import { HttpError } from "@/shared/lib/http";
-
-const Schema = z.object({
-  email: z.string().trim().email("กรุณากรอกอีเมลที่ถูกต้อง"),
-  password: z.string().min(6, "รหัสผ่านอย่างน้อย 6 ตัวอักษร"),
-});
-type FormValues = z.infer<typeof Schema>;
+import { useAdminLoginForm } from "@/features/auth/hooks/useAdminLoginForm";
 
 export default function AdminLoginLandingPage() {
-  const router = useRouter();
-  const setUser = useAuthStore((state) => state.setUser);
-  const clearUser = useAuthStore((state) => state.clearUser);
   const [showPwd, setShowPwd] = React.useState(false);
-  const { mutateAsync: login, isPending } = useLogin();
-
   const {
     control,
-    handleSubmit,
-    formState: { errors },
-    setError,
-  } = useForm<FormValues>({
-    resolver: zodResolver(Schema),
-    defaultValues: { email: "", password: "" },
-    mode: "onChange",
-    reValidateMode: "onChange",
-  });
-
-  const onSubmit = async (data: FormValues) => {
-    try {
-      const user = await login({
-        email: data.email,
-        password: data.password,
-      });
-
-      if (!isAdminUser(user)) {
-        clearUser();
-        setError("password", {
-          type: "manual",
-          message: "บัญชีนี้ไม่มีสิทธิ์เข้าถึงระบบผู้ดูแล",
-        });
-        return;
-      }
-
-      setUser(user);
-      router.replace("/admin/classbook");
-    } catch (error) {
-      setError("password", {
-        type: "manual",
-        message:
-          error instanceof HttpError && error.status === 401
-            ? "ข้อมูลการเข้าสู่ระบบไม่ถูกต้อง"
-            : "เกิดข้อผิดพลาด กรุณาลองใหม่",
-      });
-    }
-  };
-
-  const onInvalid = () => {
-    const el = document.querySelector(
-      "[aria-invalid='true']",
-    ) as HTMLElement | null;
-    el?.focus();
-  };
+    errors,
+    isPending,
+    submit,
+  } = useAdminLoginForm();
 
   return (
     // <lg = 1 คอลัมน์ (ซ่อนรูป) | >=lg = 2 คอลัมน์
@@ -106,11 +47,11 @@ export default function AdminLoginLandingPage() {
             </Typography>
 
             <form
-              onSubmit={handleSubmit(onSubmit, onInvalid)}
+              onSubmit={submit}
               className="mt-8 w-full space-y-5"
               noValidate
             >
-              <RHFTextField<FormValues>
+              <RHFTextField
                 name="email"
                 control={control}
                 label="อีเมล"
@@ -122,7 +63,7 @@ export default function AdminLoginLandingPage() {
                 aria-invalid={!!errors.email}
               />
 
-              <RHFTextField<FormValues>
+              <RHFTextField
                 name="password"
                 control={control}
                 label="รหัสผ่าน"

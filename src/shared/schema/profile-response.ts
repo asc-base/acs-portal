@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { RoleSchema } from "@/shared/schema/references";
 
 export const UserPrefixSchema = z.object({
   id: z.number(),
@@ -21,6 +22,10 @@ export const UserResponseSchema = z.object({
   imageFocalPointX: z.number().nullable().optional(),
   imageFocalPointY: z.number().nullable().optional(),
   prefix: UserPrefixSchema.nullable().optional(),
+});
+
+export const UserProfileSchema = UserResponseSchema.extend({
+  roles: z.array(RoleSchema),
 });
 
 export const StudentResponseSchema = UserResponseSchema.extend({
@@ -49,5 +54,6 @@ export const ProfessorResponseSchema = UserResponseSchema.extend({
 
 export type UserPrefix = z.infer<typeof UserPrefixSchema>;
 export type UserResponse = z.infer<typeof UserResponseSchema>;
+export type UserProfileResponse = z.infer<typeof UserProfileSchema>;
 export type StudentResponse = z.infer<typeof StudentResponseSchema>;
 export type ProfessorResponse = z.infer<typeof ProfessorResponseSchema>;

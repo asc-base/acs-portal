@@ -1,3 +1,12 @@
+import type { z } from "zod";
+import type {
+  AuthTokensSchema,
+  ForgetPasswordRequestSchema,
+  ForgetPasswordResponseSchema,
+  LoginRequestSchema,
+  ResetPasswordRequestSchema,
+} from "@/features/auth/schema/auth";
+
 export interface Auth {
   id: string;
   email: string;
@@ -5,25 +14,8 @@ export interface Auth {
   role: string;
 }
 
-export interface LoginRequest {
-  email: string;
-  password: string;
-}
-
-export interface AuthTokens {
-  accessToken: string;
-  refreshToken: string;
-}
-
-export interface ForgetPasswordPayload {
-  email: string;
-}
-
-export interface ForgetPasswordResponse {
-  message?: string;
-}
-
-export interface ResetPasswordPayload {
-  refferenceCode: string;
-  password: string;
-}
+export type LoginRequest = z.infer<typeof LoginRequestSchema>;
+export type AuthTokens = z.infer<typeof AuthTokensSchema>;
+export type ForgetPasswordPayload = z.infer<typeof ForgetPasswordRequestSchema>;
+export type ForgetPasswordResponse = z.infer<typeof ForgetPasswordResponseSchema>;
+export type ResetPasswordPayload = z.infer<typeof ResetPasswordRequestSchema>;
