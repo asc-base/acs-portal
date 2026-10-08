@@ -1,8 +1,12 @@
 import { IProjectRepository } from "@/features/projects/ports/project.repository";
-import { IProject, QueryProject } from "@/features/projects/domain/project";
+import type { IProject, QueryProject } from "@/features/projects/domain/project";
 import { Pageable } from "@/shared/types/response";
 import { HttpHelper } from "@/shared/lib/http";
 import { ApiResponse } from "@/shared/types/response";
+import {
+  ProjectPageSchema,
+  ProjectSchema,
+} from "@/features/projects/schema/project";
 export class ProjectRepository implements IProjectRepository {
   private http: HttpHelper;
   private baseUrl: string;
@@ -35,32 +39,32 @@ export class ProjectRepository implements IProjectRepository {
 
     const queryString = params.toString() ? `?${params.toString()}` : "";
     const url = `/v1/project${queryString}`;
-    const response = await this.http.get<ApiResponse<Pageable<IProject>>>(url);
-    return response;
+    const response = await this.http.get<ApiResponse<unknown>>(url);
+    return { ...response, data: ProjectPageSchema.parse(response.data) };
   }
 
   async getProjectById(id: string): Promise<ApiResponse<IProject>> {
     const url = `/v1/project/${id}`;
-    const response = await this.http.get<ApiResponse<IProject>>(url);
-    return response;
+    const response = await this.http.get<ApiResponse<unknown>>(url);
+    return { ...response, data: ProjectSchema.parse(response.data) };
   }
 
   async createProject(formData: FormData): Promise<ApiResponse<IProject>> {
     const url = `/v1/project`;
-    const response = await this.http.post<ApiResponse<IProject>>(url, formData);
+    const response = await this.http.post<ApiResponse<unknown>>(url, formData);
 
-    return response;
+    return { ...response, data: ProjectSchema.parse(response.data) };
   }
 
   async deleteProject(id: number): Promise<ApiResponse<IProject>> {
     const url = `/v1/project/${id}`;
-    const response = await this.http.delete<ApiResponse<IProject>>(url);
-    return response;
+    const response = await this.http.delete<ApiResponse<unknown>>(url);
+    return { ...response, data: ProjectSchema.parse(response.data) };
   }
   async updateProject(id: string, formData: FormData): Promise<ApiResponse<IProject>> {
     const url = `/v1/project/${id}`;
-    const response = await this.http.put<ApiResponse<IProject>>(url, formData);
-    
-    return response;
+    const response = await this.http.put<ApiResponse<unknown>>(url, formData);
+
+    return { ...response, data: ProjectSchema.parse(response.data) };
   }
 }

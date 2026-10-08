@@ -1,12 +1,11 @@
 "use client";
 
 import React, { FC, useState } from "react";
-import { Breadcrumbs } from "@mui/material";
+import { Avatar, Breadcrumbs } from "@mui/material";
 import Link from "next/link";
 import Image from "next/image";
 import { IconButton } from "@mui/material";
 import { ArrowBackIos, ArrowForwardIos } from "@mui/icons-material";
-import { StudentCard } from "@/features/students/components/studentcard";
 //import { ProfessorCard } from "@/features/professors/components/professorcard";
 import { IProject } from "@/features/projects/domain/project";
 import InsertDriveFileIcon from '@mui/icons-material/InsertDriveFile';
@@ -223,9 +222,14 @@ const ProjectInfoComponent: FC<ProjectInfoProps> = ({ project }) => {
           <div className="mt-12">
             <h2 className="mb-6 text-2xl font-bold">คณะผู้จัดทำและอาจารย์ที่ปรึกษา</h2>
             <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-              {project?.projectMembers?.map((member, index) => (
-                <StudentCard key={index} {...member} />
-                //<ProfessorCard key={index} {...member} />
+              {project.member.map((member) => (
+                <div key={member.id} className="flex items-center gap-3 rounded-xl border border-neutral03 p-4">
+                  <Avatar
+                    alt={`${member.firstNameTh} ${member.lastNameTh}`}
+                    src={member.imageUrl ?? undefined}
+                  />
+                  <span className="font-semibold">{member.firstNameTh} {member.lastNameTh}</span>
+                </div>
               ))}
             </div>
           </div>

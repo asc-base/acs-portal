@@ -1,12 +1,21 @@
 import { Pageable } from "@/shared/types/response";
-import { IProject, QueryProject, ICreateProject, IUpdateProject } from "@/features/projects/domain/project";
+import type { IProject } from "@/features/projects/schema/project";
+import {
+  CreateProjectRequestSchema,
+  ProjectIdSchema,
+  QueryProjectSchema,
+  UpdateProjectRequestSchema,
+  type CreateProjectRequest,
+  type QueryProjectInput,
+  type UpdateProjectRequest,
+} from "@/features/projects/schema/project";
 import { IProjectRepository } from "../ports/project.repository";
 
 export class ProjectService {
   constructor(private projectRepository: IProjectRepository) { }
 
-  async getProjects(query: QueryProject): Promise<Pageable<IProject>> {
-    const response = await this.projectRepository.getProjects(query);
+  async getProjects(query: QueryProjectInput): Promise<Pageable<IProject>> {
+    const response = await this.projectRepository.getProjects(QueryProjectSchema.parse(query));
     return response.data;
   }
 
@@ -16,12 +25,13 @@ export class ProjectService {
   }
 
   async createProject(
-    payload: ICreateProject,
+    payload: CreateProjectRequest,
     files: { thumbnailFile: File; assets: File[] },
   ): Promise<IProject> {
     const formData = new FormData();
+    const request = CreateProjectRequestSchema.parse(payload);
 
-    Object.entries(payload).forEach(([key, value]) => {
+    Object.entries(request).forEach(([key, value]) => {
       if (value === null || value === undefined) return;
       if (Array.isArray(value) || typeof value === 'object') {
         formData.append(key, JSON.stringify(value));
@@ -38,14 +48,16 @@ export class ProjectService {
   }
 
   async deleteProject(id: number): Promise<IProject> {
-    const response = await this.projectRepository.deleteProject(id);
+    const projectID = ProjectIdSchema.parse(id);
+    const response = await this.projectRepository.deleteProject(projectID);
     return response.data;
   }
 
-  async updateProject(id: string, payload: IUpdateProject, files?: { thumbnailFile?: File | null; assets?: File[] }): Promise<IProject> {
+  async updateProject(id: string, payload: UpdateProjectRequest, files?: { thumbnailFile?: File | null; assets?: File[] }): Promise<IProject> {
     const formData = new FormData();
+    const request = UpdateProjectRequestSchema.parse(payload);
 
-    Object.entries(payload).forEach(([key, value]) => {
+    Object.entries(request).forEach(([key, value]) => {
       if (value === null || value === undefined) return;
       if (Array.isArray(value) || typeof value === 'object') {
         formData.append(key, JSON.stringify(value));
