@@ -4,55 +4,24 @@ import { useState } from "react";
 import Image from "next/image";
 import { Button, Typography, IconButton, InputAdornment } from "@mui/material";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
 import { RHFTextField } from "@/shared/components/form/RHFTextField";
-import { ResetPasswordSchema } from "@/features/auth/schema/auth";
-import { clientAuthService } from "@/features/auth/client";
-import { useRouter } from "next/navigation";
+import { useResetPasswordForm } from "@/features/auth/hooks/useResetPasswordForm";
 
 interface ResetPasswordAuthLandingPageProps {
   referenceCode: string;
 }
-
-type FormValues = z.infer<typeof ResetPasswordSchema>;
 
 export default function ResetPasswordAuthLandingPage({
   referenceCode,
 }: ResetPasswordAuthLandingPageProps) {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const router = useRouter();
-
   const {
     control,
-    handleSubmit,
-    formState: { errors },
-    reset,
-    setError,
-  } = useForm<FormValues>({
-    resolver: zodResolver(ResetPasswordSchema),
-    defaultValues: { password: "", confirmPassword: "" },
-    mode: "onChange",
-  });
-
-  const onSubmit = async (formData: FormValues) => {
-    try {
-      await clientAuthService.resetPassword({
-        refferenceCode: referenceCode,
-        password: formData.password,
-      });
-      alert("เปลี่ยนรหัสผ่านสำเร็จ");
-      reset();
-      router.push("/auth/login");
-    } catch {
-      setError("password", {
-        type: "manual",
-        message: "เกิดข้อผิดพลาด กรุณาลองใหม่",
-      });
-    }
-  };
+    errors,
+    isPending,
+    submit,
+  } = useResetPasswordForm(referenceCode);
 
   return (
     <main className="min-h-screen w-full bg-[var(--background)]">
@@ -88,8 +57,8 @@ export default function ResetPasswordAuthLandingPage({
           </Typography>
 
           {/* FORM */}
-          <form onSubmit={handleSubmit(onSubmit)} className="mt-8 space-y-5">
-            <RHFTextField<FormValues>
+          <form onSubmit={submit} className="mt-8 space-y-5">
+            <RHFTextField
               name="password"
               control={control}
               label="รหัสผ่านใหม่"
@@ -113,7 +82,7 @@ export default function ResetPasswordAuthLandingPage({
               }}
             />
 
-            <RHFTextField<FormValues>
+            <RHFTextField
               name="confirmPassword"
               control={control}
               label="ยืนยันรหัสผ่านใหม่"
@@ -141,6 +110,7 @@ export default function ResetPasswordAuthLandingPage({
               <Button
                 type="submit"
                 variant="contained"
+                disabled={isPending}
                 className="!h-12 w-full !bg-[var(--color-primary02)] !text-base !normal-case shadow-md hover:!bg-[#1b1361] md:w-1/2"
               >
                 เปลี่ยนรหัสผ่าน

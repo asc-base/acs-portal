@@ -1,17 +1,12 @@
 "use client";
 
-import { useEffect } from "react";
-import { initialLoad } from "@/features/auth/initial-load";
+import { useInitialLoad } from "@/features/auth/initial-load";
 
 export default function InitialLoader({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  useEffect(() => {
-    // Run initial load on client side
-    initialLoad().catch(console.error);
-  }, []);
-
+  useInitialLoad();
   return <>{children}</>;
 }

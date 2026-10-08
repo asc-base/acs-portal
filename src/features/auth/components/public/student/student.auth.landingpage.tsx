@@ -11,73 +11,19 @@ import {
   InputAdornment,
 } from "@mui/material";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
-import { useForm, Controller } from "react-hook-form";
-import { z } from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
+import { Controller } from "react-hook-form";
 import { RHFTextField } from "@/shared/components/form/RHFTextField";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useAuthStore } from "@/features/auth/store/auth";
-import { useLogin } from "@/features/auth/hooks/useLogin";
-import { HttpError } from "@/shared/lib/http";
-
-const Schema = z.object({
-  email: z.string().trim(),
-  password: z.string().min(1, "รหัสผ่านอย่างน้อย 6 ตัวอักษร"),
-  remember: z.boolean(),
-});
-type FormValues = z.infer<typeof Schema>;
+import { useStudentLoginForm } from "@/features/auth/hooks/useStudentLoginForm";
 
 export default function StudentAuthLandingPage() {
   const [showPassword, setShowPassword] = useState(false);
-  const router = useRouter();
-  const setUser = useAuthStore((state) => state.setUser);
-  const { mutateAsync: login, isPending } = useLogin();
-
   const {
     control,
-    handleSubmit,
-    formState: { errors },
-    // reset,
-    setError,
-  } = useForm<FormValues>({
-    resolver: zodResolver(Schema),
-    defaultValues: { email: "", password: "", remember: true },
-    mode: "onChange",
-    reValidateMode: "onChange",
-  });
-
-  const onSubmit = async (data: FormValues) => {
-    try {
-      if (data.email === "00000000000") {
-        setError("email", { type: "manual", message: "ไม่พบบัญชีผู้ใช้" });
-        return;
-      }
-
-      const user = await login({
-        email: data.email,
-        password: data.password,
-      });
-
-      setUser(user);
-      router.push("/home");
-    } catch (error) {
-      setError("password", {
-        type: "manual",
-        message:
-          error instanceof HttpError && error.status === 401
-            ? "ข้อมูลการเข้าสู่ระบบไม่ถูกต้อง"
-            : "เกิดข้อผิดพลาด กรุณาลองใหม่",
-      });
-    }
-  };
-
-  const onInvalid = () => {
-    const el = document.querySelector(
-      "[aria-invalid='true']",
-    ) as HTMLElement | null;
-    el?.focus();
-  };
+    errors,
+    isPending,
+    submit,
+  } = useStudentLoginForm();
 
   return (
     // <lg = 1 คอลัมน์ (ซ่อนรูป) | >=lg = 2 คอลัมน์
@@ -119,11 +65,11 @@ export default function StudentAuthLandingPage() {
             </p>
 
             <form
-              onSubmit={handleSubmit(onSubmit, onInvalid)}
+              onSubmit={submit}
               className="mt-8 w-full space-y-5"
               noValidate
             >
-              <RHFTextField<FormValues>
+              <RHFTextField
                 name="email"
                 control={control}
                 label="รหัสนักศึกษา"
@@ -135,7 +81,7 @@ export default function StudentAuthLandingPage() {
                 aria-invalid={!!errors.email}
               />
 
-              <RHFTextField<FormValues>
+              <RHFTextField
                 name="password"
                 control={control}
                 label="รหัสผ่าน"

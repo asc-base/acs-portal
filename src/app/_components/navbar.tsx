@@ -6,20 +6,19 @@ import YouTubeIcon from "@mui/icons-material/YouTube";
 import Link from "next/link";
 import { Button } from "@mui/material";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
-import { useState, useEffect, useMemo } from "react";
+import { useState, useMemo } from "react";
 import MenuIcon from "@mui/icons-material/Menu";
 import CloseIcon from "@mui/icons-material/Close";
 import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
+import { useLogout, useCurrentUser } from "@/features/auth/client";
 import { useAuthStore } from "@/features/auth/store/auth";
 import UserIcon from "@mui/icons-material/Person";
-import { IUser } from "@/shared/domain/user";
 import Menu from "@mui/material/Menu";
 import MenuItem from "@mui/material/MenuItem";
 import ListItemIcon from "@mui/material/ListItemIcon";
 import IconButton from "@mui/material/IconButton";
 import Tooltip from "@mui/material/Tooltip";
 import Logout from "@mui/icons-material/Logout";
-import { clientAuthService } from "@/features/auth/client";
 import { usePathname } from "next/navigation";
 import { useRouter } from "next/navigation";
 
@@ -227,10 +226,13 @@ const MenuBar = () => {
 
 export const NavbarMain = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const [isHydrated, setIsHydrated] = useState(false);
-  const user = useAuthStore((state) => state.user);
   const clearUser = useAuthStore((state) => state.clearUser);
-  const [userAuth, setUserAuth] = useState<IUser | null>(null);
+  const { mutateAsync: logout } = useLogout({ clearSessionOnError: true });
+  const session = useCurrentUser();
+  const userAuth =
+    session.isFetchedAfterMount && !session.isFetching && !session.isError
+      ? session.data ?? null
+      : null;
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const openMenu = Boolean(anchorEl);
   const router = useRouter();
@@ -245,24 +247,13 @@ export const NavbarMain = () => {
 
   const handleLogout = async () => {
     try {
-      await clientAuthService.logout();
+      await logout();
     } finally {
       clearUser();
       handleMenuClose();
       router.push("/auth/student");
     }
   };
-
-  useEffect(() => {
-    // Handle hydration for persisted store
-    setIsHydrated(true);
-  }, []);
-
-  useEffect(() => {
-    if (isHydrated) {
-      setUserAuth(user);
-    }
-  }, [user, isHydrated]);
 
   const majorName = "วิทยาการคอมพิวเตอร์ประยุกต์/Applied Computer Science";
 

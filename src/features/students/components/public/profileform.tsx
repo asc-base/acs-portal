@@ -17,7 +17,7 @@ import {
 import { CropImageCard } from "@/shared/components/cropimagecard";
 import { useRouter } from "next/navigation";
 import { IStudent, IUpdateStudent } from "@/features/students/domain/student";
-import { clientAuthService } from "@/features/auth/client";
+import { useCurrentUser } from "@/features/auth/client";
 import { studentService } from "@/features/students/client";
 
 
@@ -44,17 +44,24 @@ const ProfileForm = () => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [student, setStudent] = useState<IStudent | null>(null);
   const router = useRouter();
+  const {
+    data: user,
+    isError: sessionError,
+    isFetchedAfterMount,
+    isFetching,
+  } = useCurrentUser();
   useEffect(() => {
+    if (!isFetchedAfterMount || isFetching) {
+      return;
+    }
+    if (sessionError || !user) {
+      router.push("/auth/student");
+      return;
+    }
+
     const fetchStudent = async () => {
       try {
-        const user = await clientAuthService.getUser();
-        if (!user) {
-          router.push("/auth/student");
-          return;
-        }
-        const studentResponse = await studentService.getStudentByUserId(
-          user.id,
-        );
+        const studentResponse = await studentService.getStudentByUserId(user.id);
         setStudent(studentResponse);
       } catch (error) {
         console.error("Error fetching student profile:", error);
@@ -62,7 +69,7 @@ const ProfileForm = () => {
       }
     };
     fetchStudent();
-  }, [router]);
+  }, [isFetchedAfterMount, isFetching, router, sessionError, user]);
 
   const [skillInput, setSkillInput] = useState("");
 

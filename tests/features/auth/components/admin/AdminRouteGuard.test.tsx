@@ -6,11 +6,16 @@ import { useAuthStore } from "@/features/auth/store/auth";
 import { AdminRouteGuard } from "@/features/auth/components/admin/AdminRouteGuard";
 
 const mocks = vi.hoisted(() => ({
-  getUser: vi.fn(),
+  session: {
+    data: undefined as UserProfile | null | undefined,
+    isFetchedAfterMount: false,
+    isFetching: true,
+    isError: false,
+  },
   router: { replace: vi.fn() },
 }));
 vi.mock("@/features/auth/client", () => ({
-  clientAuthService: { getUser: mocks.getUser },
+  useCurrentUser: () => mocks.session,
 }));
 vi.mock("next/navigation", () => ({ useRouter: () => mocks.router }));
 
@@ -23,7 +28,12 @@ const admin: UserProfile = {
 };
 
 beforeEach(() => {
-  mocks.getUser.mockReset();
+  mocks.session = {
+    data: undefined,
+    isFetchedAfterMount: false,
+    isFetching: true,
+    isError: false,
+  };
   mocks.router.replace.mockReset();
   useAuthStore.getState().clearUser();
   localStorage.clear();
@@ -34,17 +44,6 @@ afterEach(() => {
   localStorage.clear();
 });
 
-function deferredProfile() {
-  let resolve!: (user: UserProfile | null) => void;
-  let reject!: (error: Error) => void;
-  const promise = new Promise<UserProfile | null>((done, fail) => {
-    resolve = done;
-    reject = fail;
-  });
-  mocks.getUser.mockReturnValue(promise);
-  return { resolve, reject };
-}
-
 function renderGuard() {
   return render(
     <AdminRouteGuard>
@@ -54,10 +53,9 @@ function renderGuard() {
 }
 
 describe("AdminRouteGuard", () => {
-  it("keeps children hidden with a stale persisted admin until the server authorizes access", async () => {
-    const pending = deferredProfile();
+  it("waits for a fresh server profile before exposing a persisted admin", async () => {
     useAuthStore.getState().setUser(admin);
-    renderGuard();
+    const view = renderGuard();
     expect(screen.queryByText("Protected admin content")).toBeNull();
     expect(
       screen
@@ -65,24 +63,122 @@ describe("AdminRouteGuard", () => {
         .getAttribute("aria-busy"),
     ).toBe("true");
     expect(mocks.router.replace).not.toHaveBeenCalled();
+
     const serverAdmin = {
       ...admin,
       id: 2,
       roles: [{ id: 2, name: " aDmIn " }],
     };
-    await act(async () => {
-      pending.resolve(serverAdmin);
+    act(() => {
+      mocks.session = {
+        data: serverAdmin,
+        isFetchedAfterMount: true,
+        isFetching: false,
+        isError: false,
+      };
+      view.rerender(
+        <AdminRouteGuard>
+          <p>Protected admin content</p>
+        </AdminRouteGuard>,
+      );
     });
+
     expect(screen.getByText("Protected admin content")).toBeTruthy();
     expect(useAuthStore.getState().user).toBe(serverAdmin);
-    expect(mocks.getUser).toHaveBeenCalledOnce();
     expect(mocks.router.replace).not.toHaveBeenCalled();
   });
 
-  it("replaces stale admin state with the non-admin profile and redirects without exposing children", async () => {
+  it("hides previously authorized content while fresh validation is pending and after it denies access", async () => {
+    mocks.session = {
+      data: admin,
+      isFetchedAfterMount: true,
+      isFetching: false,
+      isError: false,
+    };
+    const view = renderGuard();
+    await waitFor(() =>
+      expect(screen.getByText("Protected admin content")).toBeTruthy(),
+    );
+
+    act(() => {
+      mocks.session = {
+        data: admin,
+        isFetchedAfterMount: true,
+        isFetching: true,
+        isError: false,
+      };
+      view.rerender(
+        <AdminRouteGuard>
+          <p>Protected admin content</p>
+        </AdminRouteGuard>,
+      );
+    });
+    expect(screen.queryByText("Protected admin content")).toBeNull();
+
+    const student = { ...admin, id: 2, roles: [{ id: 2, name: "Student" }] };
+    act(() => {
+      mocks.session = {
+        data: student,
+        isFetchedAfterMount: true,
+        isFetching: false,
+        isError: false,
+      };
+      view.rerender(
+        <AdminRouteGuard>
+          <p>Protected admin content</p>
+        </AdminRouteGuard>,
+      );
+    });
+    await waitFor(() =>
+      expect(mocks.router.replace).toHaveBeenCalledWith("/home"),
+    );
+    expect(screen.queryByText("Protected admin content")).toBeNull();
+    expect(useAuthStore.getState().user).toBe(student);
+  });
+
+  it("hides children and clears identity when a fresh profile request fails after authorization", async () => {
+    mocks.session = {
+      data: admin,
+      isFetchedAfterMount: true,
+      isFetching: false,
+      isError: false,
+    };
+    const view = renderGuard();
+    await waitFor(() =>
+      expect(screen.getByText("Protected admin content")).toBeTruthy(),
+    );
+
+    act(() => {
+      mocks.session = {
+        data: admin,
+        isFetchedAfterMount: true,
+        isFetching: false,
+        isError: true,
+      };
+      view.rerender(
+        <AdminRouteGuard>
+          <p>Protected admin content</p>
+        </AdminRouteGuard>,
+      );
+    });
+
+    await waitFor(() =>
+      expect(mocks.router.replace).toHaveBeenCalledWith("/home"),
+    );
+    expect(screen.queryByText("Protected admin content")).toBeNull();
+    expect(useAuthStore.getState().user).toBeNull();
+  });
+
+  it("replaces a persisted admin with the current non-admin profile and redirects", async () => {
     const student = { ...admin, id: 2, roles: [{ id: 2, name: "Student" }] };
     useAuthStore.getState().setUser(admin);
-    mocks.getUser.mockResolvedValue(student);
+    mocks.session = {
+      data: student,
+      isFetchedAfterMount: true,
+      isFetching: false,
+      isError: false,
+    };
+
     renderGuard();
     await waitFor(() =>
       expect(mocks.router.replace).toHaveBeenCalledWith("/home"),
@@ -91,49 +187,23 @@ describe("AdminRouteGuard", () => {
     expect(screen.queryByText("Protected admin content")).toBeNull();
   });
 
-  it.each(["null", "rejection"])(
-    "clears stale state and redirects for a %s profile result",
+  it.each(["unauthenticated", "invalid profile"]) (
+    "clears persisted admin and redirects for %s session data",
     async (kind) => {
       useAuthStore.getState().setUser(admin);
-      if (kind === "null") mocks.getUser.mockResolvedValue(null);
-      else mocks.getUser.mockRejectedValue(new Error("profile unavailable"));
+      mocks.session = {
+        data: kind === "unauthenticated" ? null : undefined,
+        isFetchedAfterMount: true,
+        isFetching: false,
+        isError: kind === "invalid profile",
+      };
+
       renderGuard();
       await waitFor(() =>
         expect(mocks.router.replace).toHaveBeenCalledWith("/home"),
       );
       expect(useAuthStore.getState().user).toBeNull();
       expect(screen.queryByText("Protected admin content")).toBeNull();
-    },
-  );
-
-  it("denies a malformed profile with missing roles using the existing catch path", async () => {
-    // A missing roles field currently throws in isAdminUser; see KNOWN_ISSUES.md.
-    const malformed: Partial<UserProfile> = { ...admin };
-    delete malformed.roles;
-    mocks.getUser.mockResolvedValue(malformed);
-    useAuthStore.getState().setUser(admin);
-    renderGuard();
-    await waitFor(() =>
-      expect(mocks.router.replace).toHaveBeenCalledWith("/home"),
-    );
-    expect(useAuthStore.getState().user).toBeNull();
-    expect(screen.queryByText("Protected admin content")).toBeNull();
-  });
-
-  it.each(["admin", "null", "rejection"])(
-    "ignores a late %s result after unmount",
-    async (kind) => {
-      const pending = deferredProfile();
-      const { unmount } = renderGuard();
-      unmount();
-      const newerUser = { ...admin, id: 3, roles: [] };
-      useAuthStore.getState().setUser(newerUser);
-      await act(async () => {
-        if (kind === "rejection") pending.reject(new Error("late failure"));
-        else pending.resolve(kind === "admin" ? admin : null);
-      });
-      expect(useAuthStore.getState().user).toBe(newerUser);
-      expect(mocks.router.replace).not.toHaveBeenCalled();
     },
   );
 });
