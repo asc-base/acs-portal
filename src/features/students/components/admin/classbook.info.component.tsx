@@ -1,18 +1,13 @@
 "use client";
-import { useState } from "react";
 import { Button, Card, MenuItem, Alert, Snackbar, Modal } from "@mui/material";
 import Image from "next/image";
 import { styled } from "@mui/material/styles";
 import { RHFTextField } from "@/shared/components/form/RHFTextField";
 import { RHFSelect } from "@/shared/components/form/RHFSelect";
-import { useForm } from "react-hook-form";
-import { UpdateClassbookInputs, updateClassBookSchema } from "@/features/classbook/schema/classbook";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { IClassBook } from "@/features/classbook/domain/classbook";
-import { ConfirmModal, ConfirmModalProps } from "@/shared/components/modal/confirmModal";
+import type { IClassBook } from "@/features/classbook/domain/classbook";
+import { ConfirmModal } from "@/shared/components/modal/confirmModal";
 import { CropImageCard } from "@/shared/components/cropimagecard";
-import { useCurriculums } from "@/features/curriculum/client";
-import { classBookService } from "@/features/classbook/client";
+import { useUpdateClassbookController } from "@/features/classbook/hooks/use-update-classbook-controller";
 
 
 interface CurriculumFormProps {
@@ -32,110 +27,30 @@ const VisuallyHiddenInput = styled("input")({
 });
 
 export const ClassBookInfoComponent = ({ classBook }: CurriculumFormProps) => {
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [isEdit, setIsEdit] = useState(false);
-  const [isCroping, setIsCroping] = useState(false);
-  const [confirmModal, setConfirmModal] = useState<ConfirmModalProps | null>(
-    null,
-  );
-  const [isError, setIsError] = useState(false);
-  const { data: curriculumPage } = useCurriculums({
-    orderBy: "year",
-    sortBy: "desc",
-  });
-  const curriculums = curriculumPage?.rows ?? [];
-
+  const {
+    form: {
+      control,
+      handleSubmit,
+      formState: { isValid },
+    },
+    curriculums,
+    selectedFile,
+    isEdit,
+    setIsEdit,
+    croppingFile,
+    confirmModal,
+    isError,
+    isPending,
+    handleFileChange,
+    handleUploadComplete,
+    handleCropCancel,
+    handleCancel,
+    onSubmit,
+    handleCloseAlert,
+  } = useUpdateClassbookController(classBook);
   const previewSrc = selectedFile
     ? URL.createObjectURL(selectedFile)
     : classBook.thumbnailURL;
-  const {
-    control,
-    handleSubmit,
-    reset,
-    setValue,
-    formState: { isValid, isDirty },
-  } = useForm<UpdateClassbookInputs>({
-    resolver: zodResolver(updateClassBookSchema),
-    defaultValues: {
-      classof: classBook.classof.toString() ?? "",
-      firstYearAcademic: classBook.firstYearAcademic ?? "",
-      curriculumID: classBook.curriculumID ?? 0,
-    },
-    mode: "onBlur",
-    reValidateMode: "onChange",
-  });
-
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      setSelectedFile(file);
-      setIsCroping(true);
-    } else {
-      setSelectedFile(null);
-    }
-  };
-
-  const handleCropComplete = (croppedFile: File, focalPoint?: { x: number; y: number }) => {
-    setSelectedFile(croppedFile);
-    if (focalPoint) {
-      setValue("imageFocalPointX", focalPoint.x, { shouldDirty: true });
-      setValue("imageFocalPointY", focalPoint.y, { shouldDirty: true });
-    }
-    setIsCroping(false);
-  };
-
-  const handleCropCancel = () => {
-    setIsCroping(false);
-    setSelectedFile(null);
-  };
-
-  const handleCancle = () => {
-    if (isDirty || selectedFile) {
-      setConfirmModal({
-        isOpen: true,
-        type: "warning",
-        onClose: () => setConfirmModal(null),
-        onConfirm: () => {
-          setIsEdit(false);
-          reset();
-          setSelectedFile(null);
-          setConfirmModal(null);
-        },
-      });
-    } else {
-      setIsEdit(false);
-      reset();
-      setSelectedFile(null);
-    }
-  };
-
-  const onSubmit = async (data: UpdateClassbookInputs) => {
-    if (isDirty || selectedFile) {
-      try {
-        const response = await classBookService.updateClassBook(
-          data,
-          selectedFile,
-          classBook.id,
-        );
-
-        if (!response) setIsError(true);
-        else {
-          setConfirmModal({
-            isOpen: true,
-            type: "success",
-            onClose: () => setConfirmModal(null),
-            onConfirm: () => {
-              setConfirmModal(null);
-              setIsEdit(false);
-            },
-          });
-        }
-      } catch (error) {
-        console.log(error);
-        setIsError(true);
-      }
-    }
-  };
 
   return (
     <div>
@@ -143,11 +58,11 @@ export const ClassBookInfoComponent = ({ classBook }: CurriculumFormProps) => {
         anchorOrigin={{ vertical: "top", horizontal: "right" }}
         open={isError}
         autoHideDuration={4000}
-        onClose={() => setIsError(false)}
+        onClose={handleCloseAlert}
       >
         <Alert
           severity="error"
-          onClose={() => setIsError(false)}
+          onClose={handleCloseAlert}
           sx={{ width: "100%" }}
         >
           ไม่สามารถเพิ่มข้อมูลนักศึกษาได้
@@ -161,11 +76,11 @@ export const ClassBookInfoComponent = ({ classBook }: CurriculumFormProps) => {
               anchorOrigin={{ vertical: "top", horizontal: "right" }}
               open={isError}
               autoHideDuration={4000}
-              onClose={() => setIsError(false)}
+              onClose={handleCloseAlert}
             >
               <Alert
                 severity="error"
-                onClose={() => setIsError(false)}
+                onClose={handleCloseAlert}
                 sx={{ width: "100%" }}
               >
                 ไม่สามารถเพิ่มข้อมูลนักศึกษาได้
@@ -243,7 +158,7 @@ export const ClassBookInfoComponent = ({ classBook }: CurriculumFormProps) => {
                   <Button
                     variant="outlined"
                     size="large"
-                    onClick={handleCancle}
+                    onClick={handleCancel}
                   >
                     ยกเลิก
                   </Button>
@@ -251,7 +166,7 @@ export const ClassBookInfoComponent = ({ classBook }: CurriculumFormProps) => {
                     type="submit"
                     variant="contained"
                     size="large"
-                    disabled={!isValid}
+                    disabled={!isValid || isPending}
                   >
                     บันทึกข้อมูล
                   </Button>
@@ -270,13 +185,17 @@ export const ClassBookInfoComponent = ({ classBook }: CurriculumFormProps) => {
         </div>
       </Card>
       {confirmModal && <ConfirmModal {...confirmModal} />}
-      {isCroping && selectedFile && (
-        <Modal open={isCroping} onClose={handleCropCancel} closeAfterTransition>
+      {croppingFile && (
+        <Modal
+          open={Boolean(croppingFile)}
+          onClose={handleCropCancel}
+          closeAfterTransition
+        >
           <CropImageCard
-            file={selectedFile}
+            file={croppingFile}
             width={512}
             height={512}
-            onUploadComplete={handleCropComplete}
+            onUploadComplete={handleUploadComplete}
             onCancel={handleCropCancel}
           />
         </Modal>

@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
-import type { ApiResponse } from "@/shared/types/response";
+import { ZodError } from "zod";
+import type { ClassBookResponse } from "@/features/classbook/schema/classbook";
 import type {
   IClassBook,
   ICreateClassBook,
@@ -8,15 +9,23 @@ import type {
 import type { IClassBookRepository } from "@/features/classbook/ports/class-book.repository";
 import { ClassBookService } from "@/features/classbook/service/class-book.service";
 
+const curriculum = {
+  id: 3,
+  year: "2025",
+  title: "Applied Computer Science",
+  documentURL: "https://example.test/curriculum.pdf",
+  description: "Undergraduate curriculum",
+  thumbnailURL: "https://example.test/curriculum.png",
+};
 const classbook: IClassBook = {
   id: 42,
   firstYearAcademic: "2025",
-  image: "classbook.png",
   thumbnailURL: "thumbnail.png",
   classof: "68",
   curriculumID: 3,
+  curriculum,
 };
-const saved: ApiResponse<IClassBook> = {
+const saved: ClassBookResponse = {
   data: classbook,
   status: 200,
   statusCode: 200,
@@ -52,8 +61,8 @@ describe("ClassBookService multipart requests", () => {
     const service = new ClassBookService(repository);
     const thumbnail = image("classbook.png");
 
-    await expect(service.createClassBook(validCreate, thumbnail)).resolves.toBe(
-      saved,
+    await expect(service.createClassBook(validCreate, thumbnail)).resolves.toEqual(
+      classbook,
     );
 
     const form = repository.createClassBook.mock.calls[0]![0];
@@ -87,18 +96,43 @@ describe("ClassBookService multipart requests", () => {
     );
   });
 
-  it("returns null when create, update, or delete fails", async () => {
+  it("parses query, identifier, and mutation data before reaching the repository", async () => {
+    const repository = createRepository();
+    repository.getClassBooks.mockResolvedValue({
+      data: { rows: [classbook], totalRecords: 1, page: 2, pageSize: 10 },
+      status: 200,
+      statusCode: 200,
+    });
+    const service = new ClassBookService(repository);
+
+    await expect(service.getClassBooks({ page: "2", pageSize: "10" })).resolves
+      .toEqual({ rows: [classbook], totalRecords: 1, page: 2, pageSize: 10 });
+    expect(repository.getClassBooks).toHaveBeenCalledWith({ page: 2, pageSize: 10 });
+    await expect(service.getClassBooks({ page: "0" })).rejects.toBeInstanceOf(
+      ZodError,
+    );
+    await expect(service.createClassBook({ ...validCreate, curriculumID: 0 }, image("bad.png")))
+      .rejects.toBeInstanceOf(ZodError);
+    await expect(service.updateClassBook({ curriculumID: 0 }, null, 42)).rejects
+      .toBeInstanceOf(ZodError);
+    await expect(service.deleteClassBook(0)).rejects.toBeInstanceOf(ZodError);
+    expect(repository.createClassBook).not.toHaveBeenCalled();
+    expect(repository.updateClassBook).not.toHaveBeenCalled();
+    expect(repository.deleteClassBook).not.toHaveBeenCalled();
+  });
+
+  it("preserves mutation failures for callers", async () => {
     const repository = createRepository();
     const error = new Error("Save failed");
-    const log = vi.spyOn(console, "error").mockImplementation(() => undefined);
     repository.createClassBook.mockRejectedValue(error);
     repository.updateClassBook.mockRejectedValue(error);
     repository.deleteClassBook.mockRejectedValue(error);
     const service = new ClassBookService(repository);
 
-    await expect(service.createClassBook(validCreate, image("new.png"))).resolves.toBeNull();
-    await expect(service.updateClassBook({}, null, 42)).resolves.toBeNull();
-    await expect(service.deleteClassBook(42)).resolves.toBeNull();
-    expect(log).toHaveBeenCalledTimes(3);
+    await expect(service.createClassBook(validCreate, image("new.png"))).rejects.toBe(
+      error,
+    );
+    await expect(service.updateClassBook({}, null, 42)).rejects.toBe(error);
+    await expect(service.deleteClassBook(42)).rejects.toBe(error);
   });
 });
