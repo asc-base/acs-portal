@@ -1,13 +1,20 @@
 import { IAuthRepository } from "@/features/auth/ports/auth.repository";
 import {
   AuthTokens,
+  ForgetPasswordPayload,
   ForgetPasswordResponse,
   LoginRequest,
+  ResetPasswordPayload,
 } from "@/features/auth/domain/auth";
 import { HttpHelper } from "@/shared/lib/http";
 import { ApiResponse } from "@/shared/types/response";
 import { UserProfile } from "@/shared/domain/user";
 import { authErrorHandler } from "@/features/auth/lib/auth-error-handler";
+import {
+  AuthTokensSchema,
+  ForgetPasswordResponseSchema,
+} from "@/features/auth/schema/auth";
+import { UserProfileSchema } from "@/shared/schema/profile-response";
 
 export class AuthRepository implements IAuthRepository {
   private readonly http: HttpHelper;
@@ -25,6 +32,7 @@ export class AuthRepository implements IAuthRepository {
         Authorization: `Bearer ${token}`,
       },
     );
+    response.data = UserProfileSchema.parse(response.data);
     return response;
   }
 
@@ -33,27 +41,29 @@ export class AuthRepository implements IAuthRepository {
       `/v1/auth/login`,
       data,
     );
+    response.data = AuthTokensSchema.parse(response.data);
     return response;
   }
 
-  async createCredentailForgetPassowrd(payload: {
-    email: string;
-  }): Promise<ApiResponse<{ message?: string }>> {
-    const response = await this.http.post<ApiResponse<{ message?: string }>>(
+  async createCredentailForgetPassowrd(
+    payload: ForgetPasswordPayload,
+  ): Promise<ApiResponse<ForgetPasswordResponse>> {
+    const response = await this.http.post<ApiResponse<ForgetPasswordResponse>>(
       `/v1/auth/forget-password`,
       payload,
     );
+    response.data = ForgetPasswordResponseSchema.parse(response.data);
     return response;
   }
 
-  async resetPassword(payload: {
-    refferenceCode: string;
-    password: string;
-  }): Promise<ApiResponse<ForgetPasswordResponse>> {
+  async resetPassword(
+    payload: ResetPasswordPayload,
+  ): Promise<ApiResponse<ForgetPasswordResponse>> {
     const response = await this.http.post<ApiResponse<ForgetPasswordResponse>>(
       `/v1/auth/reset-password`,
       payload,
     );
+    response.data = ForgetPasswordResponseSchema.parse(response.data);
     return response;
   }
 
@@ -64,7 +74,7 @@ export class AuthRepository implements IAuthRepository {
       if (!response.data) {
         return null;
       }
-      return response.data;
+      return UserProfileSchema.parse(response.data);
     });
   }
 

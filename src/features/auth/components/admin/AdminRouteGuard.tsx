@@ -1,10 +1,10 @@
 "use client";
 
-import { ReactNode, useEffect, useState } from "react";
+import { ReactNode, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { isAdminUser } from "@/features/auth/lib/admin-access";
 import { useAuthStore } from "@/features/auth/store/auth";
-import { clientAuthService } from "@/features/auth/client";
+import { useCurrentUser } from "@/features/auth/client";
 
 interface AdminRouteGuardProps {
   children: ReactNode;
@@ -12,55 +12,48 @@ interface AdminRouteGuardProps {
 
 /**
  * Verifies the current cookie-backed session before exposing any admin UI.
- * This is intentionally based on the server profile, not persisted client
- * state, so a stale or edited local-storage value cannot grant access.
+ * This is intentionally based on a fresh server profile, not persisted state.
  */
 export const AdminRouteGuard = ({ children }: AdminRouteGuardProps) => {
   const router = useRouter();
+  const storedUser = useAuthStore((state) => state.user);
   const setUser = useAuthStore((state) => state.setUser);
   const clearUser = useAuthStore((state) => state.clearUser);
-  const [isAuthorized, setIsAuthorized] = useState(false);
+  const { data, isError, isFetchedAfterMount, isFetching } = useCurrentUser();
+  const isAuthorized =
+    isFetchedAfterMount &&
+    !isFetching &&
+    !isError &&
+    isAdminUser(data) &&
+    storedUser === data;
 
   useEffect(() => {
-    let isActive = true;
+    if (!isFetchedAfterMount || isFetching) {
+      return;
+    }
 
-    const verifyAccess = async () => {
-      try {
-        const user = await clientAuthService.getUser();
+    const user = isError ? null : data;
+    if (user && isAdminUser(user)) {
+      setUser(user);
+      return;
+    }
 
-        if (!isActive) {
-          return;
-        }
-
-        if (isAdminUser(user)) {
-          setUser(user);
-          setIsAuthorized(true);
-          return;
-        }
-
-        if (user) {
-          setUser(user);
-        } else {
-          clearUser();
-        }
-      } catch {
-        // A failed profile request is treated as an unauthenticated session.
-        if (isActive) {
-          clearUser();
-        }
-      }
-
-      if (isActive) {
-        router.replace("/home");
-      }
-    };
-
-    verifyAccess();
-
-    return () => {
-      isActive = false;
-    };
-  }, [clearUser, router, setUser]);
+    if (isError || !user) {
+      clearUser();
+    } else {
+      setUser(user);
+    }
+    router.replace("/home");
+  }, [
+    clearUser,
+    data,
+    isError,
+    isFetchedAfterMount,
+    isFetching,
+    router,
+    setUser,
+    storedUser,
+  ]);
 
   if (!isAuthorized) {
     return (

@@ -1,4 +1,0 @@
-# Auth behavior found while adding unit tests
-
-- `lib/admin-access.ts`: `isAdminUser` calls `user.roles.some` without checking whether a non-null API profile has a roles array. A malformed profile without `roles` throws instead of returning false, despite the comment saying missing roles are denied. `AdminRouteGuard` catches this, clears the store and redirects to `/home`; its regression test preserves that behavior. This ticket does not change runtime validation or production code.
-- `components/public/forget-password/forgetpassword.auth.tsx`: submission sets `submitting` to true and never resets it on either success or rejection. The submit button stays disabled after the first valid submission, so users cannot retry a failed request. This existing form bug is outside the requested schema/service/hook/guard tests and remains unchanged.
