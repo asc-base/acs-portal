@@ -5,7 +5,7 @@ import type {
 } from "@/features/professors/domain/professor";
 import { ProfessorRepository } from "@/features/professors/repositories/professor.repository";
 import { ProfessorService } from "@/features/professors/service/professor.service";
-import { HttpHelper } from "@/shared/lib/http";
+import { HttpError, HttpHelper } from "@/shared/lib/http";
 
 const professor = {
   id: 9,
@@ -60,12 +60,12 @@ describe("professor create/update multipart requests", () => {
     expect(Array.from(form.entries())).toEqual([
       ["prefixID", "2"],
       ["educations", "PhD"],
-      ["expertFields", "Computer science"],
-      ["firstNameTh", "สมชาย"],
-      ["lastNameTh", "ใจดี"],
-      ["firstNameEn", ""],
-      ["lastNameEn", ""],
       ["email", "somchai@example.test"],
+      ["expertFields", "Computer science"],
+      ["firstNameEn", ""],
+      ["firstNameTh", "สมชาย"],
+      ["lastNameEn", ""],
+      ["lastNameTh", "ใจดี"],
       ["phone", "0812345678"],
       ["profRoom", "A201"],
       ["research_profile", ""],
@@ -116,13 +116,12 @@ describe("professor create/update multipart requests", () => {
     ]);
   });
 
-  it("returns null and logs repository failures for create and update", async () => {
+  it("preserves repository failures for create and update", async () => {
     const repository = new ProfessorRepository("https://example.test");
-    const createError = new Error("Create failed");
-    const updateError = new Error("Update failed");
+    const createError = new HttpError("Create failed", 502);
+    const updateError = new HttpError("Update failed", 503);
     vi.spyOn(repository, "createProfessor").mockRejectedValue(createError);
     vi.spyOn(repository, "updateProfessor").mockRejectedValue(updateError);
-    const log = vi.spyOn(console, "error").mockImplementation(() => undefined);
     const service = new ProfessorService(repository);
     const createData: ICreateProfessor = {
       prefixID: 2,
@@ -144,18 +143,43 @@ describe("professor create/update multipart requests", () => {
       email: "somchai@example.test",
     };
 
-    expect(await service.createProfessor(createData, null)).toBeNull();
-    expect(await service.updateProfessor("9", updateData, null)).toBeNull();
-    expect(log).toHaveBeenNthCalledWith(
-      1,
-      "Failed to create professor:",
+    await expect(service.createProfessor(createData, null)).rejects.toBe(
       createError,
     );
-    expect(log).toHaveBeenNthCalledWith(
-      2,
-      "Failed to update professor:",
+    await expect(service.updateProfessor("9", updateData, null)).rejects.toBe(
       updateError,
     );
+  });
+
+  it("rejects invalid create and update payloads before repository calls", async () => {
+    const repository = new ProfessorRepository("https://example.test");
+    const createProfessor = vi.spyOn(repository, "createProfessor");
+    const updateProfessor = vi.spyOn(repository, "updateProfessor");
+    const service = new ProfessorService(repository);
+
+    await expect(
+      service.createProfessor({ prefixID: "2" } as never, null),
+    ).rejects.toThrow();
+    await expect(
+      service.updateProfessor("9", { id: "9" } as never, null),
+    ).rejects.toThrow();
+    expect(createProfessor).not.toHaveBeenCalled();
+    expect(updateProfessor).not.toHaveBeenCalled();
+  });
+
+  it("preserves HttpError status and rejects invalid query data before repository access", async () => {
+    const repository = new ProfessorRepository("https://example.test");
+    const error = new HttpError("forbidden", 403);
+    const getProfessors = vi
+      .spyOn(repository, "getProfessors")
+      .mockRejectedValue(error);
+    const service = new ProfessorService(repository);
+
+    await expect(service.getProfessors({ page: 1 })).rejects.toBe(error);
+    await expect(
+      service.getProfessors({ page: "1" } as never),
+    ).rejects.toThrow();
+    expect(getProfessors).toHaveBeenCalledOnce();
   });
 });
 

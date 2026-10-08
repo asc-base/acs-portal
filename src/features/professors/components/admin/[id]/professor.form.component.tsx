@@ -1,31 +1,19 @@
 "use client";
-import React, { useState, useEffect } from "react";
 import { Button, Typography, Snackbar, Alert, Modal } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import AddIcon from "@mui/icons-material/Add";
 import Image from "next/image";
-import { useForm, useFieldArray } from "react-hook-form";
 import { IProfessor } from "@/features/professors/domain/professor";
 import { Position } from "@/features/master-data/domain/master-data";
 import { Delete } from "@mui/icons-material";
-import { zodResolver } from "@hookform/resolvers/zod";
 import MenuItem from "@mui/material/MenuItem";
 import { RHFTextField } from "@/shared/components/form/RHFTextField";
 import { CropImageCard } from "@/shared/components/cropimagecard";
 import { RHFSelect } from "@/shared/components/form/RHFSelect";
 import AddCircleOutlineRoundedIcon from "@mui/icons-material/AddCircleOutlineRounded";
 import IconButton from "@mui/material/IconButton";
-import {
-  ConfirmModal,
-  ConfirmModalProps,
-} from "@/shared/components/modal/confirmModal";
-import { useRouter } from "next/navigation";
-import {
-  UpdateProfessorInputs,
-  UpdateProfessorSchema,
-  UpdateProfessorPayload,
-} from "@/features/professors/schema/professor";
-import { professorService } from "@/features/professors/client";
+import { ConfirmModal } from "@/shared/components/modal/confirmModal";
+import { useUpdateProfessorForm } from "@/features/professors/hooks/useUpdateProfessorForm";
 
 
 const VisuallyHiddenInput = styled("input")({
@@ -46,169 +34,41 @@ interface ProfessorFormComponentProps {
 };
 
 const ProfessorFormComponent = ({ professor, prefixes }: ProfessorFormComponentProps) => {
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [isEdit, setIsEdit] = useState(false);
-  const [isCroping, setIsCroping] = useState(false);
-  const [isError, setIsError] = useState(false);
-  const [previewUrl, setPreviewUrl] = useState<string | null>(
-    professor.imageUrl ?? null,
-  );
-  const [confirmModal, setConfirmModal] = useState<ConfirmModalProps | null>(
-    null,
-  );
-  const router = useRouter();
-  const { control, handleSubmit, reset, setValue, formState: { isDirty } } = useForm<UpdateProfessorInputs>({
-    resolver: zodResolver(UpdateProfessorSchema),
-    defaultValues: {
-      firstNameTh: professor.firstNameTh || "",
-      lastNameTh: professor.lastNameTh || "",
-      firstNameEn: professor.firstNameEn || "",
-      lastNameEn: professor.lastNameEn || "",
-      phone: professor.professor.phone || "",
-      email: professor.email || "",
-      prefixID: professor.prefix?.id || 1,
-      profRoom: professor.professor.profRoom || "",
-      research_profile: professor.professor.research_profile || "",
-      educations: [],
-      expertFields: [],
-    },
-  });
-
-  useEffect(() => {
-    reset({
-      firstNameTh: professor.firstNameTh || "",
-      lastNameTh: professor.lastNameTh || "",
-      firstNameEn: professor.firstNameEn || "",
-      lastNameEn: professor.lastNameEn || "",
-      phone: professor.professor.phone || "",
-      email: professor.email || "",
-      prefixID: professor.prefix?.id || 1,
-      profRoom: professor.professor.profRoom || "",
-      research_profile: professor.professor.research_profile || "",
-      educations: professor.professor.educations.map((e) => ({ value: e })),
-      expertFields: professor.professor.expertFields.map((e) => ({ value: e })),
-    });
-  }, [professor, reset]);
-
   const {
-    fields: educationFields,
-    append: appendEducation,
-    remove: removeEducation,
-  } = useFieldArray({
     control,
-    name: "educations",
-  });
-
-  const {
-    fields: expertFieldsList,
-    append: appendExpert,
-    remove: removeExpert,
-  } = useFieldArray({
-    control,
-    name: "expertFields",
-  });
-
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0] || null;
-    if (file) {
-      setSelectedFile(file);
-      setIsCroping(true);
-    }
-  };
-
-  const handleCropComplete = (croppedFile: File, focalPoint?: { x: number; y: number },) => {
-    setSelectedFile(croppedFile);
-    setPreviewUrl(URL.createObjectURL(croppedFile));
-    if (focalPoint) {
-      setValue("imageFocalPointX", focalPoint.x, { shouldDirty: true });
-      setValue("imageFocalPointY", focalPoint.y, { shouldDirty: true });
-    }
-    setIsCroping(false);
-  };
-
-  const handleCropCancel = () => {
-    setSelectedFile(null);
-    setPreviewUrl(professor.imageUrl ?? null);
-    setIsEdit(false);
-  };
-
-  const handleCancel = () => {
-    const hasChanged = isDirty || !!selectedFile;
-
-    if (hasChanged) {
-      setConfirmModal({
-        isOpen: true,
-        type: "warning",
-        onClose: () => setConfirmModal(null),
-        onConfirm: () => {
-          setConfirmModal(null);
-          reset();
-          setSelectedFile(null);
-          setIsEdit(false);
-        },
-      });
-      return;
-    }
-
-    setIsEdit(false);
-  };
-
-  const onSubmit = async (data: UpdateProfessorInputs) => {
-    setIsError(false);
-    try {
-      const updateData: UpdateProfessorPayload = {
-        id: professor.id,
-        prefixID: data.prefixID!,
-        profRoom: data.profRoom,
-        research_profile: data.research_profile ?? "",
-        phone: data.phone,
-        firstNameTh: data.firstNameTh,
-        lastNameTh: data.lastNameTh,
-        firstNameEn: data.firstNameEn || null,
-        lastNameEn: data.lastNameEn || null,
-        email: data.email,
-        expertFields: data.expertFields.map((e) => e.value).join("/"),
-        educations: data.educations.map((e) => e.value).join("/"),
-        imageFocalPointX: data.imageFocalPointX,
-        imageFocalPointY: data.imageFocalPointY,
-      };
-
-      const res = await professorService.updateProfessor(
-        professor.id.toString(),
-        updateData,
-        selectedFile,
-      );
-
-      if (!res) {
-        setIsError(true);
-        return;
-      }
-      setConfirmModal({
-        isOpen: true,
-        type: "success",
-        onClose: () => setConfirmModal(null),
-        onConfirm: () => router.push(`/admin/professors`),
-      });
-      setIsEdit(false);
-    } catch (error) {
-      console.error(error);
-      setIsError(true);
-    }
-  };
-
-
+    submit,
+    isEdit,
+    startEditing,
+    educationFields,
+    appendEducation,
+    removeEducation,
+    expertFields,
+    appendExpert,
+    removeExpert,
+    selectedFile,
+    previewUrl,
+    isCropping,
+    confirmModal,
+    isPending,
+    isError,
+    clearError,
+    handleFileChange,
+    handleCropComplete,
+    handleCropCancel,
+    handleCancel,
+  } = useUpdateProfessorForm(professor);
 
   return (
-    <form className="space-y-4 p-8" onSubmit={handleSubmit(onSubmit)}>
+    <form className="space-y-4 p-8" onSubmit={submit}>
       <Snackbar
         anchorOrigin={{ vertical: "top", horizontal: "right" }}
         open={isError}
         autoHideDuration={4000}
-        onClose={() => setIsError(false)}
+        onClose={clearError}
       >
         <Alert
           severity="error"
-          onClose={() => setIsError(false)}
+          onClose={clearError}
           sx={{ width: "100%" }}
         >
           ไม่สามารถแก้ไขข้อมูลอาจารย์ได้
@@ -240,7 +100,9 @@ const ProfessorFormComponent = ({ professor, prefixes }: ProfessorFormComponentP
                     <VisuallyHiddenInput
                       type="file"
                       accept="image/*"
-                      onChange={handleFileChange}
+                      onChange={(event) =>
+                        handleFileChange(event.target.files?.[0] ?? null)
+                      }
                     />
                     อัปโหลดรูปภาพ
                   </Button>
@@ -251,7 +113,9 @@ const ProfessorFormComponent = ({ professor, prefixes }: ProfessorFormComponentP
                 <VisuallyHiddenInput
                   type="file"
                   accept="image/*"
-                  onChange={handleFileChange}
+                  onChange={(event) =>
+                    handleFileChange(event.target.files?.[0] ?? null)
+                  }
                 />
                 อัปโหลดรูปภาพ
               </Button>
@@ -496,7 +360,7 @@ const ProfessorFormComponent = ({ professor, prefixes }: ProfessorFormComponentP
               </AddCircleOutlineRoundedIcon>
             )}
           </div>
-          {expertFieldsList.map((field, index) => (
+          {expertFields.map((field, index) => (
             <div
               key={field.id}
               className="mt-2 flex flex-row items-center gap-x-4"
@@ -527,7 +391,7 @@ const ProfessorFormComponent = ({ professor, prefixes }: ProfessorFormComponentP
       {!isEdit ? (
         <div className="mt-8 flex justify-end gap-x-4">
           <Button
-            onClick={() => setIsEdit(true)}
+            onClick={startEditing}
             variant="contained"
             size="large"
           >
@@ -539,14 +403,14 @@ const ProfessorFormComponent = ({ professor, prefixes }: ProfessorFormComponentP
           <Button onClick={handleCancel} variant="outlined" size="large">
             ยกเลิก
           </Button>
-          <Button type="submit" variant="contained" size="large">
-            บันทึกข้อมูล
+          <Button type="submit" variant="contained" size="large" disabled={isPending}>
+            {isPending ? "กำลังบันทึก..." : "บันทึกข้อมูล"}
           </Button>
         </div>
       )}
 
-      {isCroping && selectedFile && (
-        <Modal open={isCroping} onClose={handleCropCancel} closeAfterTransition>
+      {isCropping && selectedFile && (
+        <Modal open={isCropping} onClose={handleCropCancel} closeAfterTransition>
           <CropImageCard
             file={selectedFile}
             width={512}
