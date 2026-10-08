@@ -43,7 +43,7 @@ export const NewsCard: FC<NewsCardProps> = (props) => {
           hasActions ? "h-[180px] lg:h-[240px]" : "h-[221px] md:h-[196px] lg:h-[221px]"
         }`}
         component="img"
-        image={news.thumbnailURL}
+        image={news.thumbnailURL ?? ""}
         alt={news.title}
         style={{ objectPosition: `${news.cardFocalPointX ?? 50}% ${news.cardFocalPointY ?? 50}%` }}
       />

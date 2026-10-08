@@ -5,6 +5,13 @@ import {
 } from "@/features/news/domain/news";
 import { HttpHelper } from "@/shared/lib/http";
 import { ApiResponse, Pageable } from "@/shared/types/response";
+import {
+  NewsBulletinsSchema,
+  NewsFeatureResponseSchema,
+  NewsInformationsPageSchema,
+  NewsPageSchema,
+  NewsResponseSchema,
+} from "@/features/news/schema/news";
 
 export class NewsRepository implements INewsRepository {
   private readonly http: HttpHelper;
@@ -17,7 +24,7 @@ export class NewsRepository implements INewsRepository {
 
   async createNews(data: FormData): Promise<ApiResponse<INews>> {
     const response = await this.http.post<ApiResponse<INews>>(`/v1/news`, data);
-    return response;
+    return { ...response, data: NewsResponseSchema.parse(response.data) };
   }
 
   async getNews(
@@ -52,12 +59,15 @@ export class NewsRepository implements INewsRepository {
     }
 
     const response = await this.http.get<ApiResponse<Pageable<INews>>>(url);
-    return response;
+    return { ...response, data: NewsPageSchema.parse(response.data) };
   }
 
-  async getNewsById(id: string): Promise<ApiResponse<INews>> {
-    const response = await this.http.get<ApiResponse<INews>>(`/v1/news/${id}`);
-    return response;
+  async getNewsById(id: string): Promise<ApiResponse<INews | null>> {
+    const response = await this.http.get<ApiResponse<INews | null>>(`/v1/news/${id}`);
+    return {
+      ...response,
+      data: response.data === null ? null : NewsResponseSchema.parse(response.data),
+    };
   }
 
   async updateNews(id: number, news: FormData): Promise<ApiResponse<INews>> {
@@ -65,14 +75,14 @@ export class NewsRepository implements INewsRepository {
       `/v1/news/${id}`,
       news,
     );
-    return response;
+    return { ...response, data: NewsResponseSchema.parse(response.data) };
   }
 
   async deleteNews(id: number): Promise<ApiResponse<INews>> {
     const response = await this.http.delete<ApiResponse<INews>>(
       `/v1/news/${id}`,
     );
-    return response;
+    return { ...response, data: NewsResponseSchema.parse(response.data) };
   }
 
   async getNewsInformations(
@@ -99,7 +109,7 @@ export class NewsRepository implements INewsRepository {
     const response =
       await this.http.get<ApiResponse<Pageable<INewsInformation>>>(url);
 
-    return response;
+    return { ...response, data: NewsInformationsPageSchema.parse(response.data) };
   }
 
   async upsertNewsInformation(
@@ -109,7 +119,7 @@ export class NewsRepository implements INewsRepository {
       `/v1/news/news-features/`,
       data,
     );
-    return response;
+    return { ...response, data: NewsFeatureResponseSchema.parse(response.data) };
   }
 
   async getNewsInformationById(
@@ -118,11 +128,14 @@ export class NewsRepository implements INewsRepository {
     const response = await this.http.get<ApiResponse<INewsInformation>>(
       `/v1/news/news-features/${id}`,
     );
-    return response;
+    return { ...response, data: NewsFeatureResponseSchema.parse(response.data) };
   }
 
   async getNewsBulletins(type: "HIGHLIGHT" | "ANNOUNCEMENT") {
-    return this.http.get<ApiResponse<Array<{ id: number; newsID: number; type: "HIGHLIGHT" | "ANNOUNCEMENT"; news: INews }>>>(`/v1/news/bulletins?type=${type}`);
+    const response = await this.http.get<ApiResponse<unknown>>(
+      `/v1/news/bulletins?type=${type}`,
+    );
+    return { ...response, data: NewsBulletinsSchema.parse(response.data) };
   }
 
   async setNewsBulletin(id: number, type: "HIGHLIGHT" | "ANNOUNCEMENT", enabled: boolean) {

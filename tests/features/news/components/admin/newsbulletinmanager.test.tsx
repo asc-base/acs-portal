@@ -8,8 +8,10 @@ import {
   waitFor,
 } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import type { INews } from "@/features/news/domain/news";
 import type { NewsService } from "@/features/news/service/news.service";
+import { NewsService as NewsServiceClass } from "@/features/news/service/news.service";
 import { NewsBulletinManager } from "@/features/news/components/admin/newsbulletinmanager";
 
 const service = vi.hoisted(() => ({
@@ -17,7 +19,7 @@ const service = vi.hoisted(() => ({
   getNewsBulletins: vi.fn<NewsService["getNewsBulletins"]>(),
   setNewsBulletin: vi.fn<NewsService["setNewsBulletin"]>(),
 }));
-vi.mock("@/features/news/client", () => ({ newsService: service }));
+let enabled = new Set<number>();
 vi.mock("next/image", () => ({
   default: ({
     src,
@@ -55,10 +57,10 @@ const firstNews: INews = {
       sortOrder: 0,
     },
   ],
-  startDate: new Date("2026-10-08T08:00:00.000Z"),
+  startDate: "2026-10-08T08:00:00.000Z",
   dueDate: null,
-  createdDate: new Date("2026-10-08T08:00:00.000Z"),
-  updatedDate: new Date("2026-10-08T08:00:00.000Z"),
+  createdDate: "2026-10-08T08:00:00.000Z",
+  updatedDate: "2026-10-08T08:00:00.000Z",
   tag: { id: 1, name: "Legacy category", tagsGroupsId: 1 },
   category: { id: 2, name: "Current category", code: "CURRENT" },
 };
@@ -88,21 +90,37 @@ function deferred<T>() {
 
 beforeEach(() => {
   vi.resetAllMocks();
+  enabled = new Set([firstNews.id]);
+  vi.spyOn(NewsServiceClass.prototype, "getNews").mockImplementation((...args) => service.getNews(...args));
+  vi.spyOn(NewsServiceClass.prototype, "getNewsBulletins").mockImplementation((...args) => service.getNewsBulletins(...args));
+  vi.spyOn(NewsServiceClass.prototype, "setNewsBulletin").mockImplementation((...args) => service.setNewsBulletin(...args));
   service.getNews.mockResolvedValue(page);
-  service.getNewsBulletins.mockImplementation(async (type) => [
-    {
+  service.getNewsBulletins.mockImplementation(async (type) =>
+    Array.from(enabled, (newsID) => ({
       id: 91,
       type,
-      news: firstNews,
+      news: newsID === firstNews.id ? firstNews : secondNews,
       thumbnailURL: firstNews.thumbnailURL,
-    },
-  ]);
-  service.setNewsBulletin.mockResolvedValue({
-    data: null,
-    status: 200,
-    statusCode: 200,
+    })),
+  );
+  service.setNewsBulletin.mockImplementation(async (id, _type, next) => {
+    if (next) enabled.add(id);
+    else enabled.delete(id);
+    return { data: null, status: 200, statusCode: 200 };
   });
 });
+
+function renderManager(type: "HIGHLIGHT" | "ANNOUNCEMENT") {
+  const queryClient = new QueryClient({
+    defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
+  });
+  const view = render(
+    <QueryClientProvider client={queryClient}>
+      <NewsBulletinManager type={type} />
+    </QueryClientProvider>,
+  );
+  return { ...view, queryClient };
+}
 
 describe("NewsBulletinManager", () => {
   it.each([
@@ -124,7 +142,7 @@ describe("NewsBulletinManager", () => {
       const pending =
         deferred<Awaited<ReturnType<NewsService["getNewsBulletins"]>>>();
       service.getNewsBulletins.mockReturnValueOnce(pending.promise);
-      const { container } = render(<NewsBulletinManager type={type} />);
+      const { container } = renderManager(type);
       expect(screen.getByRole("heading", { name: heading })).toBeTruthy();
       expect(screen.queryByText(firstNews.title)).toBeNull();
       await act(async () => {
@@ -162,7 +180,7 @@ describe("NewsBulletinManager", () => {
   );
 
   it("searches only on submit, trims the term, resets page and retains search while paginating", async () => {
-    render(<NewsBulletinManager type="HIGHLIGHT" />);
+    renderManager("HIGHLIGHT");
     await screen.findByText(firstNews.title);
     fireEvent.click(screen.getByRole("button", { name: "Go to page 2" }));
     await waitFor(() =>
@@ -226,21 +244,22 @@ describe("NewsBulletinManager", () => {
     const pending =
       deferred<Awaited<ReturnType<NewsService["setNewsBulletin"]>>>();
     service.setNewsBulletin.mockReturnValueOnce(pending.promise);
-    render(<NewsBulletinManager type="ANNOUNCEMENT" />);
+    renderManager("ANNOUNCEMENT");
     const [first, second] = await screen.findAllByRole("switch");
     fireEvent.click(first);
-    expect(service.setNewsBulletin).toHaveBeenCalledWith(
+    await waitFor(() => expect(service.setNewsBulletin).toHaveBeenCalledWith(
       firstNews.id,
       "ANNOUNCEMENT",
       false,
-    );
+    ));
     expect(first).toHaveProperty("disabled", true);
     expect(first).toHaveProperty("checked", true);
     expect(second).toHaveProperty("disabled", false);
     await act(async () => {
+      enabled.delete(firstNews.id);
       pending.resolve({ data: null, status: 200, statusCode: 200 });
     });
-    expect(first).toHaveProperty("checked", false);
+    await waitFor(() => expect(first).toHaveProperty("checked", false));
     expect(first).toHaveProperty("disabled", false);
     expect(screen.queryByRole("alert")).toBeNull();
   });
@@ -249,15 +268,15 @@ describe("NewsBulletinManager", () => {
     const pending =
       deferred<Awaited<ReturnType<NewsService["setNewsBulletin"]>>>();
     service.setNewsBulletin.mockReturnValueOnce(pending.promise);
-    render(<NewsBulletinManager type="HIGHLIGHT" />);
+    renderManager("HIGHLIGHT");
     const switches = await screen.findAllByRole("switch");
     const target = switches[1];
     fireEvent.click(target);
-    expect(service.setNewsBulletin).toHaveBeenCalledWith(
+    await waitFor(() => expect(service.setNewsBulletin).toHaveBeenCalledWith(
       secondNews.id,
       "HIGHLIGHT",
       true,
-    );
+    ));
     expect(target).toHaveProperty("disabled", true);
     expect(target).toHaveProperty("checked", false);
     await act(async () => pending.reject(new Error("Save failed")));
@@ -286,7 +305,7 @@ describe("NewsBulletinManager", () => {
       const error = new Error("Load failed");
       if (source === "news") service.getNews.mockRejectedValueOnce(error);
       else service.getNewsBulletins.mockRejectedValueOnce(error);
-      render(<NewsBulletinManager type="HIGHLIGHT" />);
+      renderManager("HIGHLIGHT");
       expect(await screen.findByRole("alert")).toHaveProperty(
         "textContent",
         "โหลดหรือบันทึกข้อมูลไม่สำเร็จ",

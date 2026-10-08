@@ -1,5 +1,6 @@
 import { ApiResponse, Pageable } from "@/shared/types/response";
 import { INews, INewsInformation } from "@/features/news/domain/news";
+import type { NewsBulletin } from "@/features/news/schema/news";
 
 export interface INewsRepository {
   createNews(data: FormData): Promise<ApiResponse<INews>>;
@@ -12,7 +13,7 @@ export interface INewsRepository {
     search?: string,
     searchBy?: string,
   ): Promise<ApiResponse<Pageable<INews>>>;
-  getNewsById(id: string): Promise<ApiResponse<INews>>;
+  getNewsById(id: string): Promise<ApiResponse<INews | null>>;
   updateNews(id: number, news: FormData): Promise<ApiResponse<INews>>;
   deleteNews(id: number): Promise<ApiResponse<INews>>;
   getNewsInformations(
@@ -24,6 +25,6 @@ export interface INewsRepository {
   ): Promise<ApiResponse<Pageable<INewsInformation>>>;
   upsertNewsInformation(data: FormData): Promise<ApiResponse<INewsInformation>>;
   getNewsInformationById(id: number): Promise<ApiResponse<INewsInformation>>;
-  getNewsBulletins(type: "HIGHLIGHT" | "ANNOUNCEMENT"): Promise<ApiResponse<Array<{ id: number; newsID: number; type: "HIGHLIGHT" | "ANNOUNCEMENT"; news: INews }>>>;
+  getNewsBulletins(type: "HIGHLIGHT" | "ANNOUNCEMENT"): Promise<ApiResponse<NewsBulletin[]>>;
   setNewsBulletin(id: number, type: "HIGHLIGHT" | "ANNOUNCEMENT", enabled: boolean): Promise<ApiResponse<unknown>>;
 }

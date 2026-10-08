@@ -5,10 +5,10 @@ export const newsItem = (id: number): INews => ({
   title: `News ${id}`,
   thumbnailURL: `/thumbnail-${id}.jpg`,
   detail: "Detail",
-  startDate: new Date("2026-10-08T12:00:00Z"),
+  startDate: "2026-10-08T12:00:00Z",
   dueDate: null,
-  createdDate: new Date("2026-10-08T12:00:00Z"),
-  updatedDate: new Date("2026-10-08T12:00:00Z"),
+  createdDate: "2026-10-08T12:00:00Z",
+  updatedDate: "2026-10-08T12:00:00Z",
   tag: { id: 16, name: "News", tagsGroupsId: 1 },
 });
 

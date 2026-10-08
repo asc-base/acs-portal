@@ -1,31 +1,19 @@
 "use client";
 import { Button, MenuItem, Alert, Snackbar, Modal } from "@mui/material";
-import React, { useState } from "react";
+import React from "react";
 import { IconButton } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
-import { useForm, SubmitHandler } from "react-hook-form";
 import Image from "next/image";
-import { zodResolver } from "@hookform/resolvers/zod";
-import dayjs from "dayjs";
-import "dayjs/locale/th";
-import buddhistEra from "dayjs/plugin/buddhistEra";
 import { RHFTextField } from "@/shared/components/form/RHFTextField";
 import { RHFSelect } from "@/shared/components/form/RHFSelect";
 import { RHFDatePickerDayjs } from "@/shared/components/form/RHFDatePicker";
 import {
   ConfirmModal,
-  ConfirmModalProps,
 } from "@/shared/components/modal/confirmModal";
-import { useRouter } from "next/navigation";
 import { styled } from "@mui/material/styles";
 import { NewsCategory } from "@/features/news/domain/news";
 import { CropImageCard } from "@/shared/components/cropimagecard";
-import { CreateNewsInputs, CreateNewsSchema } from "@/features/news/schema/news";
-import { newsService } from "@/features/news/client";
-
-
-dayjs.extend(buddhistEra);
-dayjs.locale("th");
+import { useCreateNewsForm } from "@/features/news/hooks/useCreateNewsForm";
 
 interface CreateNewsProps {
   categories: NewsCategory[];
@@ -44,42 +32,30 @@ const VisuallyHiddenInput = styled("input")({
 });
 
 const CreateNewsForm = ({ categories }: CreateNewsProps) => {
-  const [confirmModal, setConfirmModal] = useState<ConfirmModalProps | null>(
-    null,
-  );
-  const [isError, setIsError] = useState(false);
-  const [croppingFile, setCroppingFile] = useState<File | null>(null);
-  const [cropTarget, setCropTarget] = useState<"card" | "thumbnail">("card");
-  const [selectedAssets, setSelectedAssets] = useState<File[]>([]);
-  const [draggedItemIndex, setDraggedItemIndex] = useState<number | null>(null);
-  const [dragOverItemIndex, setDragOverItemIndex] = useState<number | null>(null);
-
-  const router = useRouter();
-
   const {
     control,
-    handleSubmit,
-    reset,
-    setValue,
     watch,
-    formState: { isDirty, errors },
-  } = useForm<CreateNewsInputs>({
-    resolver: zodResolver(CreateNewsSchema),
-    defaultValues: {
-      title: "",
-      startDate: "",
-      dueDate: "",
-      tagID: 0,
-      detail: "",
-      thumbnail: undefined,
-      thumbnailImage: undefined,
-      cardFocalPointX: 50,
-      cardFocalPointY: 50,
-      thumbnailFocalPointX: 50,
-      thumbnailFocalPointY: 50,
-      additionalImages: [],
-    },
-  });
+    errors,
+    submit,
+    confirmModal,
+    isError,
+    clearError,
+    croppingFile,
+    selectedAssets,
+    draggedItemIndex,
+    dragOverItemIndex,
+    handleFileSelection,
+    handleCropComplete,
+    cancelCrop,
+    addAssets,
+    removeAsset,
+    removeAssets,
+    handleDragStart,
+    handleDragEnter,
+    handleDragEnd,
+    handleDrop,
+    handleCancel,
+  } = useCreateNewsForm();
 
   const thumbnailFile = watch("thumbnail");
   const detailThumbnailFile = watch("thumbnailImage");
@@ -88,132 +64,14 @@ const CreateNewsForm = ({ categories }: CreateNewsProps) => {
     target: "card" | "thumbnail" = "card",
   ) => {
     const file = event.target.files?.[0];
-    if (!file) return;
-    setCroppingFile(file);
-    setCropTarget(target);
+    if (file) handleFileSelection(file, target);
     event.target.value = "";
   };
-
-  const handleUploadComplete = (
-    file: File,
-    focalPoint?: { x: number; y: number },
-  ) => {
-    if (cropTarget === "card") {
-      setValue("thumbnail", file, { shouldDirty: true, shouldValidate: true });
-      if (focalPoint) {
-        setValue("cardFocalPointX", focalPoint.x, { shouldDirty: true });
-        setValue("cardFocalPointY", focalPoint.y, { shouldDirty: true });
-      }
-    } else {
-      setValue("thumbnailImage", file, { shouldDirty: true, shouldValidate: true });
-      if (focalPoint) {
-        setValue("thumbnailFocalPointX", focalPoint.x, { shouldDirty: true });
-        setValue("thumbnailFocalPointY", focalPoint.y, { shouldDirty: true });
-      }
-    }
-    setCroppingFile(null);
-  };
+  const handleUploadComplete = handleCropComplete;
 
   const handleAssetsChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    if (event.target.files) {
-      const newFiles = Array.from(event.target.files);
-      const combined = [...selectedAssets, ...newFiles].slice(0, 10);
-      setSelectedAssets(combined);
-      setValue("additionalImages", combined, {
-        shouldDirty: true,
-        shouldValidate: true,
-      });
-    }
+    if (event.target.files) addAssets(Array.from(event.target.files));
     event.target.value = "";
-  };
-
-  const removeAsset = (indexToRemove: number) => {
-    const updated = selectedAssets.filter((_, index) => index !== indexToRemove);
-    setSelectedAssets(updated);
-    setValue("additionalImages", updated, {
-      shouldDirty: true,
-      shouldValidate: true,
-    });
-  };
-
-  const removeAllAssets = () => {
-    setSelectedAssets([]);
-    setValue("additionalImages", [], { shouldDirty: true, shouldValidate: true });
-  };
-
-  const handleDragStart = (index: number) => setDraggedItemIndex(index);
-  const handleDragEnter = (index: number) => setDragOverItemIndex(index);
-  const handleDragEnd = () => {
-    setDraggedItemIndex(null);
-    setDragOverItemIndex(null);
-  };
-  const handleDrop = (index: number) => {
-    if (draggedItemIndex !== null && draggedItemIndex !== index) {
-      const newAssets = [...selectedAssets];
-      const draggedItem = newAssets[draggedItemIndex];
-      newAssets.splice(draggedItemIndex, 1);
-      newAssets.splice(index, 0, draggedItem);
-      setSelectedAssets(newAssets);
-      setValue("additionalImages", newAssets, { shouldDirty: true });
-    }
-    setDraggedItemIndex(null);
-    setDragOverItemIndex(null);
-  };
-
-  const handleCancel = () => {
-    if (isDirty){ 
-      setConfirmModal({
-        isOpen: true,
-        type: "warning",
-        onClose: () => setConfirmModal(null),
-        onConfirm: () => {
-          reset();
-          setConfirmModal(null);
-          router.push(`/admin/news?page=1&pageSize=9&category=&title=`);
-        },
-      });
-    } else {
-      reset();
-      router.push(`/admin/news?page=1&pageSize=9&category=&title=`);
-    }
-  };
-
-  const onSubmit: SubmitHandler<CreateNewsInputs> = async (data) => {
-    try {
-        const payload: CreateNewsInputs = {
-          title: data.title,
-          tagID: data.tagID,
-          detail: data.detail,
-          thumbnail: data.thumbnail,
-          thumbnailImage: data.thumbnailImage,
-          startDate: dayjs(data.startDate).toISOString(),
-          dueDate: data.dueDate ? dayjs(data.dueDate).toISOString() : undefined,
-          thumbnailFocalPointX: data.thumbnailFocalPointX,
-          thumbnailFocalPointY: data.thumbnailFocalPointY,
-          cardFocalPointX: data.cardFocalPointX,
-          cardFocalPointY: data.cardFocalPointY,
-          additionalImages: data.additionalImages,
-        };
-
-        const response = await newsService.createNews(payload);
-
-        if (response) {
-          setConfirmModal({
-            isOpen: true,
-            type: "success",
-            onClose: () => setConfirmModal(null),
-            onConfirm: () => {
-              setConfirmModal(null);
-              router.push(`/admin/news?page=1&pageSize=9&category=&title=`);
-            },
-          });
-        } else {
-          setIsError(true);
-        }
-      } catch (error) {
-        console.log(error);
-        setIsError(true);
-      }
   };
 
   return (
@@ -222,18 +80,18 @@ const CreateNewsForm = ({ categories }: CreateNewsProps) => {
         anchorOrigin={{ vertical: "top", horizontal: "right" }}
         open={isError}
         autoHideDuration={4000}
-        onClose={() => setIsError(false)}
+        onClose={clearError}
       >
         <Alert
           severity="error"
-          onClose={() => setIsError(false)}
+          onClose={clearError}
           sx={{ width: "100%" }}
         >
           ไม่สามารถเพิ่มข่าวสารได้
         </Alert>
       </Snackbar>
       <h3 className="mb-6 font-bold">ข้อมูลข่าวสาร</h3>
-      <form className="gap-4 p-4" onSubmit={handleSubmit(onSubmit)}>
+      <form className="gap-4 p-4" onSubmit={submit}>
         <div className="flex flex-col gap-4">
           <div className="flex flex-col gap-6 md:flex-row md:items-stretch">
             <div className="flex w-full md:w-[400px] flex-col gap-2 shrink-0">
@@ -314,7 +172,7 @@ const CreateNewsForm = ({ categories }: CreateNewsProps) => {
               {selectedAssets.length > 0 && (
                 <button
                   type="button"
-                  onClick={removeAllAssets}
+                  onClick={removeAssets}
                   className="text-h5 text-accent04 cursor-pointer font-bold underline"
                 >
                   ลบทั้งหมด
@@ -447,7 +305,7 @@ const CreateNewsForm = ({ categories }: CreateNewsProps) => {
         </div>
       </form>
 
-      <Modal open={!!croppingFile} onClose={() => setCroppingFile(null)}>
+      <Modal open={!!croppingFile} onClose={cancelCrop}>
         <div>
           {croppingFile && (
             <CropImageCard
@@ -455,7 +313,7 @@ const CreateNewsForm = ({ categories }: CreateNewsProps) => {
               width={382}
               height={254}
               onUploadComplete={handleUploadComplete}
-              onCancel={() => setCroppingFile(null)}
+              onCancel={cancelCrop}
               preserveOriginal
             />
           )}
