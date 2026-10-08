@@ -27,7 +27,7 @@ import {
   ConfirmModal,
   ConfirmModalProps,
 } from "@/shared/components/modal/confirmModal";
-import { studentService } from "@/features/students/client";
+import { useCreateStudentBatch } from "@/features/students/client";
 
 
 interface PreviewStudentsProps {
@@ -36,6 +36,7 @@ interface PreviewStudentsProps {
 
 export default function Preview_table_component({ classBookID }: PreviewStudentsProps) {
   const router = useRouter();
+  const createStudentBatch = useCreateStudentBatch();
   const { importData, deleteByStudentId } = useImportStudentStore();
   const students: CreateStudentCsv[] = importData;
   const [alert, setAlert] = useState<{
@@ -88,7 +89,7 @@ export default function Preview_table_component({ classBookID }: PreviewStudents
     }
 
     try {
-      await studentService.createStudentBatch({
+      await createStudentBatch.mutateAsync({
         classBookID: Number(classBookID),
         students: result.data,
       });
