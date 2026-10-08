@@ -37,6 +37,27 @@ function createRepository() {
 }
 
 describe("CurriculumService multipart requests", () => {
+  it("rejects invalid query and request data before reaching the repository", async () => {
+    const repository = createRepository();
+    const service = new CurriculumService(repository);
+
+    await expect(service.getCurriculum({ page: 0 })).rejects.toThrow();
+    await expect(service.getCurriculumById(0)).rejects.toThrow();
+    await expect(
+      service.createCurriculum({ ...createInput, title: " " }, image("x.png")),
+    ).rejects.toThrow();
+    await expect(
+      service.createCurriculum(createInput, undefined as never),
+    ).rejects.toThrow();
+    await expect(
+      service.updateCurriculum(curriculum.id, { documentURL: "bad" }, null),
+    ).rejects.toThrow();
+    expect(repository.getCurriculum).not.toHaveBeenCalled();
+    expect(repository.getCurriculumById).not.toHaveBeenCalled();
+    expect(repository.createCurriculum).not.toHaveBeenCalled();
+    expect(repository.updateCurriculum).not.toHaveBeenCalled();
+  });
+
   it("creates the expected fields and unwraps the response", async () => {
     const repository = createRepository();
     const service = new CurriculumService(repository);

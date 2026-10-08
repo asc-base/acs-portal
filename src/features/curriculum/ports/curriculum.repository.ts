@@ -1,16 +1,20 @@
-import { ApiResponse, Pageable } from "@/shared/types/response";
-import { ICurriculum, QueryCurriculum } from "@/features/curriculum/domain/curriculum";
+import type {
+  CurriculumPageResponse,
+  CurriculumResponse,
+  NullableCurriculumResponse,
+} from "@/features/curriculum/schema/curriculum";
+import type { QueryCurriculum } from "@/features/curriculum/domain/curriculum";
 
 export interface ICurriculumRepository {
   getCurriculum(
     query: QueryCurriculum,
-  ): Promise<ApiResponse<Pageable<ICurriculum>>>;
+  ): Promise<CurriculumPageResponse>;
 
-  getCurriculumById(id: number): Promise<ApiResponse<ICurriculum> | null>;
-  createCurriculum(data: FormData): Promise<ApiResponse<ICurriculum>>;
+  getCurriculumById(id: number): Promise<NullableCurriculumResponse | null>;
+  createCurriculum(data: FormData): Promise<CurriculumResponse>;
   updateCurriculum(
     id: number,
     data: FormData,
-  ): Promise<ApiResponse<ICurriculum>>;
-  deleteCurriculum(id: number): Promise<ApiResponse<ICurriculum>>;
+  ): Promise<CurriculumResponse>;
+  deleteCurriculum(id: number): Promise<CurriculumResponse>;
 }

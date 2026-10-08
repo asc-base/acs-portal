@@ -1,21 +1,12 @@
 "use client";
-import { useState } from "react";
-import { useForm } from "react-hook-form";
 import { Button, Modal } from "@mui/material";
 import Image from "next/image";
-import { useRouter } from "next/navigation";
-import { zodResolver } from "@hookform/resolvers/zod";
-import dayjs from "dayjs";
 import { styled } from "@mui/material/styles";
 import { RHFTextField } from "@/shared/components/form/RHFTextField";
 import { RHFDatePickerDayjs } from "@/shared/components/form/RHFDatePicker";
-import {
-  ConfirmModal,
-  ConfirmModalProps,
-} from "@/shared/components/modal/confirmModal";
-import { CreateCurriculumSchema, CreateCurriculumInputs } from "@/features/curriculum/schema/curriculum";
+import { ConfirmModal } from "@/shared/components/modal/confirmModal";
 import { CropImageCard } from "@/shared/components/cropimagecard";
-import { curriculumService } from "@/features/curriculum/client";
+import { useCreateCurriculumController } from "@/features/curriculum/hooks/use-create-curriculum-controller";
 
 const VisuallyHiddenInput = styled("input")({
   clip: "rect(0 0 0 0)",
@@ -30,87 +21,19 @@ const VisuallyHiddenInput = styled("input")({
 });
 
 export const CurriculumForm = () => {
-  const router = useRouter();
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [fileError, setFileError] = useState<string | null>(null);
-  const [croppingFile, setCroppingFile] = useState<File | null>(null);
-  const [confirmModal, setConfirmModal] = useState<ConfirmModalProps | null>(
-    null,
-  );
   const {
-    handleSubmit,
-    setValue,
-    control,
-    formState: { isDirty },
-  } = useForm<CreateCurriculumInputs>({
-    resolver: zodResolver(CreateCurriculumSchema),
-    mode: "onChange",
-    defaultValues: {
-      title: "",
-      year: "",
-      documentURL: "",
-      description: "",
-    },
-  });
-
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    setCroppingFile(file);
-    e.target.value = "";
-  };
-
-  const handleUploadComplete = (file: File, focalPoint?: { x: number; y: number }) => {
-    setSelectedFile(file);
-    if (focalPoint) {
-      setValue("thumbnailFocalPointX", focalPoint.x);
-      setValue("thumbnailFocalPointY", focalPoint.y);
-    }
-    setCroppingFile(null);
-  };
-
-  const handleCancel = () => {
-    if (isDirty) {
-      setConfirmModal({
-        isOpen: true,
-        type: "warning",
-        onClose: () => setConfirmModal(null),
-        onConfirm: () => router.back(),
-      });
-    } else {
-      router.back();
-    }
-  };
-
-  const onSubmit = async (data: CreateCurriculumInputs) => {
-    if (!selectedFile) {
-      setFileError("กรุณาอัปโหลดรูปภาพ");
-      return;
-    }
-    setFileError(null);
-
-    try {
-      const year = dayjs(data.year).year().toString();
-      const response = await curriculumService.createCurriculum(
-        {
-          ...data,
-          year,
-        },
-        selectedFile!,
-      );
-
-      if (response) {
-        setConfirmModal({
-          isOpen: true,
-          type: "success",
-          onClose: () => setConfirmModal(null),
-          onConfirm: () => router.push(`/admin/curriculum`),
-        });
-      }
-    } catch (error) {
-      console.error("Submit Error:", error);
-    }
-  };
+    form,
+    selectedFile,
+    fileError,
+    croppingFile,
+    confirmModal,
+    handleFileChange,
+    handleUploadComplete,
+    handleCancel,
+    handleCropCancel,
+    onSubmit,
+  } = useCreateCurriculumController();
+  const { handleSubmit, control } = form;
 
   return (
     <div className="p-8">
@@ -211,7 +134,7 @@ export const CurriculumForm = () => {
           </Button>
         </div>
 
-        <Modal open={!!croppingFile} onClose={() => setCroppingFile(null)}>
+        <Modal open={!!croppingFile} onClose={handleCropCancel}>
           <div>
             {croppingFile && (
               <CropImageCard
@@ -219,7 +142,7 @@ export const CurriculumForm = () => {
                 width={512}
                 height={512}
                 onUploadComplete={handleUploadComplete}
-                onCancel={() => setCroppingFile(null)}
+                onCancel={handleCropCancel}
               />
             )}
           </div>
