@@ -22,21 +22,20 @@ import { useRouter } from "next/navigation";
 import { ICourse } from "@/features/courses/domain/course";
 import { ArrowDownward, ArrowUpward, Edit, Delete } from "@mui/icons-material";
 import Link from "next/link";
-import { Control } from "react-hook-form";
+import type { Control } from "react-hook-form";
 import { TypeCourse } from "@/features/master-data/domain/master-data";
 import { RHFTextField } from "@/shared/components/form/RHFTextField";
 import SearchIcon from "@mui/icons-material/Search";
 import AddIcon from "@mui/icons-material/Add";
 import CloseIcon from "@mui/icons-material/Close";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-import { SearchForm } from "@/features/courses/components/admin/courses.landingpage";
+import type { CourseSearch } from "@/features/courses/schema/course";
 import {
   ConfirmModal,
   ConfirmModalProps,
 } from "@/shared/components/modal/confirmModal";
 import EmptyState from "@/shared/components/emptyState";
 import { UploadModal } from "@/shared/components/uploadFile";
-import { courseService } from "@/features/courses/client";
 
 
 interface CourseTableComponentsProps {
@@ -44,7 +43,7 @@ interface CourseTableComponentsProps {
   onSort: (sortBy: string) => void;
   orderBy?: string;
   sortBy?: "asc" | "desc";
-  control: Control<SearchForm>;
+  control: Control<CourseSearch>;
   watchedSearch?: string;
   onResetSearch: () => void;
   curriculumID: number;
@@ -55,70 +54,18 @@ interface CourseTableComponentsProps {
   typeCourses: TypeCourse[];
   typeCourseID?: number;
   handleFilterTypeCourse: (event: SelectChangeEvent) => void;
+  confirmDeleteCourse: (courseId: number) => void;
+  handleUploadCourseFile: (file: File) => Promise<boolean>;
+  errorMessage: string;
+  confirmModal: ConfirmModalProps | null;
+  handleCloseAlert: () => void;
 }
 
-const CourseTableComponents = ({ courses, onSort, sortBy, orderBy, control, watchedSearch, onResetSearch, typeCourses, typeCourseID, handleFilterTypeCourse, curriculumID, totalRecords, pageSize, page, handleNextPage }: CourseTableComponentsProps) => {
+const CourseTableComponents = ({ courses, onSort, sortBy, orderBy, control, watchedSearch, onResetSearch, typeCourses, typeCourseID, handleFilterTypeCourse, curriculumID, totalRecords, pageSize, page, handleNextPage, confirmDeleteCourse, handleUploadCourseFile, errorMessage, confirmModal, handleCloseAlert }: CourseTableComponentsProps) => {
   const router = useRouter();
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
-  const [errorMessage, setErrorMessage] = useState("");
-  const [confirmModal, setConfirmModal] = useState<ConfirmModalProps | null>(
-    null,
-  );
   const handleEdit = (courseId: number) => {
     router.push(`/admin/courses/${courseId}?curriculumID=${curriculumID}`);
-  };
-
-  const confirmDeleteCourse = (courseId: number) => {
-    setConfirmModal({
-      isOpen: true,
-      type: "delete",
-      onClose: () => setConfirmModal(null),
-      onConfirm: () => {
-        handleDelete(courseId);
-        setConfirmModal(null);
-      },
-    });
-  };
-
-  const handleDelete = async (courseId: number) => {
-    try {
-      const reps = await courseService.deleteCourse(courseId);
-      if (!reps) {
-        setErrorMessage("ไม่สามารถลบรายวิชาได้");
-        return;
-      }
-      setConfirmModal({
-        isOpen: true,
-        type: "success",
-        onClose: () => setConfirmModal(null),
-        onConfirm: () => {
-          setConfirmModal(null);
-          router.refresh();
-        },
-        title: "ลบข้อมูลสำเร็จ",
-        description: "ข้อมูลถูกลบออกจากระบบแล้ว",
-        confirmText: "เสร็จสิ้น",
-      });
-    } catch (error) {
-      console.error(error);
-      setErrorMessage("ไม่สามารถลบรายวิชาได้");
-    }
-  };
-
-  const handleCloseAlert = () => {
-    setErrorMessage("");
-  };
-
-  const handleUploadCourseFile = async (file: File) => {
-    try {
-      await courseService.createCourseBatch(file);
-
-      setIsUploadModalOpen(false);
-      router.refresh();
-    } catch (error) {
-      console.error(error);
-      setErrorMessage("ไม่สามารถอัปโหลดข้อมูลรายวิชาได้");
-    }
   };
 
   return (
@@ -194,7 +141,9 @@ const CourseTableComponents = ({ courses, onSort, sortBy, orderBy, control, watc
         isOpen={isUploadModalOpen}
         onClose={() => setIsUploadModalOpen(false)}
         title="อัปโหลดไฟล์รายวิชา"
-        onUpload={handleUploadCourseFile}
+        onUpload={async (file) => {
+          if (await handleUploadCourseFile(file)) setIsUploadModalOpen(false);
+        }}
       />
       {confirmModal && <ConfirmModal {...confirmModal} />}
 
