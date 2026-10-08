@@ -51,4 +51,16 @@ describe("professor profile response parsing", () => {
 
     await expect(repository.getProfessorById("9")).rejects.toThrow();
   });
+
+  it("rejects invalid list pagination at the repository boundary", async () => {
+    const http = new HttpHelper("https://example.test");
+    vi.spyOn(http, "get").mockResolvedValue({
+      data: { rows: [professor], totalRecords: "1", page: 1, pageSize: 10 },
+      status: 200,
+      statusCode: 200,
+    });
+    const repository = new ProfessorRepository("https://example.test", http);
+
+    await expect(repository.getProfessors({})).rejects.toThrow();
+  });
 });

@@ -1,8 +1,8 @@
-import { IProfessorRepository } from "@/features/professors/ports/professor.repository";
-import { IProfessor } from "@/features/professors/domain/professor";
+import type { IProfessorRepository } from "@/features/professors/ports/professor.repository";
+import type { IProfessor, QueryProfessor } from "@/features/professors/domain/professor";
 import { HttpHelper } from "@/shared/lib/http";
-import { ApiResponse, Pageable } from "@/shared/types/response";
-import { QueryProfessor } from "@/features/professors/domain/professor";
+import type { ApiResponse } from "@/shared/types/response";
+import { ProfessorPageSchema, type ProfessorPage } from "@/features/professors/schema/professor";
 import { ProfessorResponseSchema } from "@/shared/schema/profile-response";
 
 export class ProfessorRepository implements IProfessorRepository {
@@ -16,7 +16,7 @@ export class ProfessorRepository implements IProfessorRepository {
 
   async getProfessors(
     query: QueryProfessor,
-  ): Promise<ApiResponse<Pageable<IProfessor>>> {
+  ): Promise<ApiResponse<ProfessorPage>> {
     const {
       page,
       pageSize,
@@ -53,13 +53,10 @@ export class ProfessorRepository implements IProfessorRepository {
     const queryString = params.toString() ? `?${params.toString()}` : "";
     const url = `/v1/professors${queryString}`;
     const response =
-      await this.http.get<ApiResponse<Pageable<IProfessor>>>(url);
+      await this.http.get<ApiResponse<ProfessorPage>>(url);
     return {
       ...response,
-      data: {
-        ...response.data,
-        rows: ProfessorResponseSchema.array().parse(response.data.rows),
-      },
+      data: ProfessorPageSchema.parse(response.data),
     };
   }
 
