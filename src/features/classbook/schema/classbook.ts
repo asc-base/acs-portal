@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { CurriculumSchema } from "@/features/curriculum/schema/curriculum";
 import { CommonFocalPointSchema } from "@/shared/schema/user";
+import { PageMetadataSchema } from "@/shared/schema/page-metadata";
 
 const queryPageNumber = z
   .union([z.number(), z.string()])
@@ -57,9 +58,7 @@ export const ClassBookSchema = z.object({
 
 export const ClassBookPageSchema = z.object({
   rows: z.array(ClassBookSchema),
-  totalRecords: z.number(),
-  page: z.number(),
-  pageSize: z.number(),
+  ...PageMetadataSchema.shape,
 });
 
 export const ClassBookResponseSchema = z

@@ -20,7 +20,7 @@ Browser requests use `/api`; the development rewrite forwards them to `API_URL`.
 - `tests/features/<name>` mirrors feature-owned unit tests; `tests/shared` holds tests for shared code.
 - `src/proxy.ts` handles admin access and media requests.
 
-Features expose `client.ts` for browser calls and `server.ts` for server rendered data where both are needed. Server calls forward only the current request's Cookie and use `no-store`; client calls go through `/api` with credentials.
+Feature schemas define validated form, request, query, and response data; exported TypeScript data types are derived from those schemas. `client.ts` exposes browser queries and mutations, while feature `hooks/` own form and controller logic. Server-rendered data uses feature `server.ts` entrypoints. Server calls forward only the current request's Cookie and use `no-store`; client calls go through `/api` with credentials.
 
 ## Checks
 

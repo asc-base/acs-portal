@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { PageMetadataSchema } from "@/shared/schema/page-metadata";
 
 const documentURLField = z
   .string()
@@ -52,9 +53,7 @@ export const CurriculumSchema = z.object({
 
 export const CurriculumPageSchema = z.object({
   rows: z.array(CurriculumSchema),
-  totalRecords: z.number(),
-  page: z.number(),
-  pageSize: z.number(),
+  ...PageMetadataSchema.shape,
 });
 
 export const CurriculumResponseSchema = z

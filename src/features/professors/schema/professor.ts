@@ -1,6 +1,7 @@
 import z from "zod";
 import { CommonUserSchema, CommonFocalPointSchema } from "@/shared/schema/user";
 import { ProfessorResponseSchema } from "@/shared/schema/profile-response";
+import { PageMetadataSchema } from "@/shared/schema/page-metadata";
 
 const researchProfileURL = z
   .string()
@@ -82,9 +83,7 @@ export const ProfessorSearchSchema = z.object({
 
 export const ProfessorPageSchema = z.object({
   rows: ProfessorResponseSchema.array(),
-  totalRecords: z.number(),
-  page: z.number(),
-  pageSize: z.number(),
+  ...PageMetadataSchema.shape,
 });
 
 export type CreateProfessorInputs = z.input<typeof CreateProfessorSchema>;
