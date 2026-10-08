@@ -1,5 +1,1 @@
-export interface IExample {
-  id: number;
-  title: string;
-  body: string;
-}
+export type { IExample } from "@/features/example/schema/example";

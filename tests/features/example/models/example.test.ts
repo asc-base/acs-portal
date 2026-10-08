@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { getExampleData } from "@/features/example/models/example";
 
-const posts = [{ id: 1, title: "Post", body: "Example body" }];
+const posts = [{ userId: 1, id: 1, title: "Post", body: "Example body" }];
 const fetchMock = vi.fn<typeof fetch>();
 
 beforeEach(() => {
@@ -32,6 +32,14 @@ describe("getExampleData", () => {
 
     expect(result).toBeInstanceOf(Error);
     expect(result).toEqual(new Error("Failed to fetch example data"));
+  });
+
+  it("rejects API data that does not match the post schema", async () => {
+    fetchMock.mockResolvedValue(
+      new Response(JSON.stringify([{ ...posts[0], id: "1" }]), { status: 200 }),
+    );
+
+    await expect(getExampleData()).rejects.toMatchObject({ name: "ZodError" });
   });
 
   it("propagates a network rejection", async () => {

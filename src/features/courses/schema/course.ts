@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { CurriculumSchema } from "@/features/curriculum/schema/curriculum";
 import { TypeCourseSchema } from "@/features/master-data/schema/master-data";
+import { PageMetadataSchema } from "@/shared/schema/page-metadata";
 
 const commonCourseSchema = z.object({
   typeCourseID: z.number().min(1, "กรุณาเลือกกลุ่มวิชา"),
@@ -91,9 +92,7 @@ export const CourseSchema = z.object({
 
 export const CoursePageSchema = z.object({
   rows: z.array(CourseSchema),
-  totalRecords: z.number(),
-  page: z.number(),
-  pageSize: z.number(),
+  ...PageMetadataSchema.shape,
 });
 
 export const CourseResponseSchema = z

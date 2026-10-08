@@ -7,7 +7,9 @@ vi.mock("@/features/example/viewmodels/example", () => ({
   fetchExampleData: vi.fn(),
 }));
 
-const posts: IExample[] = [{ id: 1, title: "Post", body: "Example body" }];
+const posts: IExample[] = [
+  { userId: 1, id: 1, title: "Post", body: "Example body" },
+];
 
 beforeEach(() => {
   vi.mocked(fetchExampleData).mockReset();

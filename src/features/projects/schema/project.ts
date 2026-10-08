@@ -2,6 +2,7 @@ import { z } from "zod";
 import { CourseSchema } from "@/features/courses/schema/course";
 import { RoleSchema, TagSchema } from "@/shared/schema/references";
 import { UserResponseSchema } from "@/shared/schema/profile-response";
+import { PageMetadataSchema } from "@/shared/schema/page-metadata";
 
 const projectFormSchema = z.object({
   title: z.string().trim().min(1, "กรุณากรอกหัวข้อ"),
@@ -111,9 +112,7 @@ export const ProjectSchema = z.object({
 
 export const ProjectPageSchema = z.object({
   rows: z.array(ProjectSchema),
-  totalRecords: z.number(),
-  page: z.number(),
-  pageSize: z.number(),
+  ...PageMetadataSchema.shape,
 });
 
 export const ProjectResponseSchema = z
