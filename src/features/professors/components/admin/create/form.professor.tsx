@@ -1,30 +1,19 @@
 "use client";
-import React, { FC, useState } from "react";
-import { useForm, useFieldArray } from "react-hook-form";
+import type { FC } from "react";
 import { Button, Modal, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import AddIcon from "@mui/icons-material/Add";
 import MenuItem from "@mui/material/MenuItem";
 import Alert from "@mui/material/Alert";
 import Snackbar from "@mui/material/Snackbar";
-import { useRouter } from "next/navigation";
 import Image from "next/image";
-import { zodResolver } from "@hookform/resolvers/zod";
 import { RHFTextField } from "@/shared/components/form/RHFTextField";
 import { RHFSelect } from "@/shared/components/form/RHFSelect";
-import {
-  ConfirmModal,
-  ConfirmModalProps,
-} from "@/shared/components/modal/confirmModal";
+import { ConfirmModal } from "@/shared/components/modal/confirmModal";
 import AddCircleOutlineRoundedIcon from "@mui/icons-material/AddCircleOutlineRounded";
 import { CropImageCard } from "@/shared/components/cropimagecard";
-import {
-  CreateProfessorInputs,
-  CreateProfessorSchema,
-  CreateProfessorPayload,
-} from "@/features/professors/schema/professor";
 import { useMasterData } from "@/features/master-data/client";
-import { professorService } from "@/features/professors/client";
+import { useCreateProfessorForm } from "@/features/professors/hooks/useCreateProfessorForm";
 
 
 const VisuallyHiddenInput = styled("input")({
@@ -42,131 +31,37 @@ const VisuallyHiddenInput = styled("input")({
 export const FormProfesssors: FC = () => {
   const { data: masterData, isPending: isMasterDataPending, isError: isMasterDataError } = useMasterData();
   const prefixes = masterData?.prefixes ?? [];
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [isError, setIsError] = useState(false);
-  const router = useRouter();
-  const [confirmModal, setConfirmModal] = useState<ConfirmModalProps | null>(
-    null,
-  );
-  const [isCroping, setIsCroping] = useState(false);
   const {
     control,
-    handleSubmit,
-    setValue,
-    formState: { isValid, isDirty },
-  } = useForm<CreateProfessorInputs>({
-    resolver: zodResolver(CreateProfessorSchema),
-    defaultValues: {
-      prefixID: null,
-      educations: [],
-      email: "",
-      expertFields: [],
-      firstNameEn: "",
-      firstNameTh: "",
-      lastNameEn: "",
-      lastNameTh: "",
-      phone: "",
-      profRoom: "",
-      research_profile: "",
-    },
-    mode: "onBlur",
-    reValidateMode: "onChange",
-  });
-
-  const { fields: educationFields, append: appendEducation } = useFieldArray({
-    control,
-    name: "educations",
-  });
-
-  const { fields: expertFields, append: appendExpert } = useFieldArray({
-    control,
-    name: "expertFields",
-  });
-
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0] || null;
-
-    if (file) {
-      setSelectedFile(file);
-      setIsCroping(true);
-    }
-  };
-
-  const handleCropComplete = (croppedFile: File, focalPoint?: { x: number; y: number }) => {
-    setSelectedFile(croppedFile);
-    if (focalPoint) {
-      setValue("imageFocalPointX", focalPoint.x, { shouldDirty: true });
-      setValue("imageFocalPointY", focalPoint.y, { shouldDirty: true });
-    }
-    setIsCroping(false);
-  };
-
-  const handleCropCancel = () => {
-    setIsCroping(false);
-    setSelectedFile(null);
-  };
-
-  const cancelForm = () => {
-    const hasAnyValue = isDirty || !!selectedFile;
-    if (hasAnyValue) {
-      setConfirmModal({
-        isOpen: true,
-        type: "warning",
-        onClose: () => setConfirmModal(null),
-        onConfirm: () => router.push(`/admin/professors`),
-      });
-    } else router.push(`/admin/professors`);
-  };
-
-  const onSubmit = async (data: CreateProfessorInputs) => {
-    setIsError(false);
-    try {
-      const payload: CreateProfessorPayload = {
-        prefixID: data.prefixID!,
-        firstNameTh: data.firstNameTh,
-        lastNameTh: data.lastNameTh,
-        firstNameEn: data.firstNameEn || null,
-        lastNameEn: data.lastNameEn || null,
-        email: data.email,
-        phone: data.phone,
-        profRoom: data.profRoom,
-        research_profile: data.research_profile || null,
-        educations: data.educations.map((e) => e.value).join("/"),
-        expertFields: data.expertFields.map((e) => e.value).join("/"),
-        imageFocalPointX: data.imageFocalPointX,
-        imageFocalPointY: data.imageFocalPointY,
-      };
-      const reps = await professorService.createProfessor(
-        payload,
-        selectedFile!,
-      );
-      if (!reps) {
-        setIsError(true);
-        return;
-      }
-      setConfirmModal({
-        isOpen: true,
-        type: "success",
-        onClose: () => setConfirmModal(null),
-        onConfirm: () => router.push(`/admin/professors`),
-      });
-    } catch (error) {
-      console.error(error);
-      setIsError(true);
-    }
-  };
+    submit,
+    isValid,
+    selectedFile,
+    isCropping,
+    confirmModal,
+    isPending,
+    isError,
+    clearError,
+    educationFields,
+    appendEducation,
+    expertFields,
+    appendExpert,
+    handleFileChange,
+    handleCropComplete,
+    handleCropCancel,
+    cancelForm,
+  } = useCreateProfessorForm();
 
   return (
-    <form className="space-y-4 p-8" onSubmit={handleSubmit(onSubmit)}>
+    <form className="space-y-4 p-8" onSubmit={submit}>
       <Snackbar
         anchorOrigin={{ vertical: "top", horizontal: "right" }}
         open={isError}
         autoHideDuration={4000}
-        onClose={() => setIsError(false)}
+        onClose={clearError}
       >
         <Alert
           severity="error"
-          onClose={() => setIsError(false)}
+          onClose={clearError}
           sx={{ width: "100%" }}
         >
           ไม่สามารถเพิ่มข้อมูลอาจารย์ได้
@@ -196,7 +91,9 @@ export const FormProfesssors: FC = () => {
                     <VisuallyHiddenInput
                       type="file"
                       accept="image/*"
-                      onChange={handleFileChange}
+                      onChange={(event) =>
+                        handleFileChange(event.target.files?.[0] ?? null)
+                      }
                     />
                     อัปโหลดรูปภาพ
                   </Button>
@@ -207,7 +104,9 @@ export const FormProfesssors: FC = () => {
                 <VisuallyHiddenInput
                   type="file"
                   accept="image/*"
-                  onChange={handleFileChange}
+                  onChange={(event) =>
+                    handleFileChange(event.target.files?.[0] ?? null)
+                  }
                 />
                 อัปโหลดรูปภาพ
               </Button>
@@ -459,14 +358,14 @@ export const FormProfesssors: FC = () => {
           type="submit"
           variant="contained"
           size="large"
-          disabled={!isValid}
+          disabled={!isValid || isPending}
         >
-          บันทึกข้อมูล
+          {isPending ? "กำลังบันทึก..." : "บันทึกข้อมูล"}
         </Button>
       </div>
       {confirmModal && <ConfirmModal {...confirmModal} />}
-      {isCroping && selectedFile && (
-        <Modal open={isCroping} onClose={handleCropCancel} closeAfterTransition>
+      {isCropping && selectedFile && (
+        <Modal open={isCropping} onClose={handleCropCancel} closeAfterTransition>
           <CropImageCard
             file={selectedFile}
             width={512}
