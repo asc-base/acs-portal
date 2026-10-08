@@ -1,23 +1,25 @@
-import { ICourseRepository } from "@/features/courses/ports/course.repository";
-import {
-  ICourse,
-  ICreateCourse,
-  IUpdateCourse,
+import type { ICourseRepository } from "@/features/courses/ports/course.repository";
+import type {
   QueryCourse,
-} from "@/features/courses/domain/course";
+  CreateCourseRequest,
+  UpdateCourseRequest,
+} from "@/features/courses/schema/course";
+import {
+  CourseBatchResponseSchema,
+  CoursePageResponseSchema,
+  CourseResponseSchema,
+  NullableCourseResponseSchema,
+} from "@/features/courses/schema/course";
 import { HttpHelper } from "@/shared/lib/http";
-import { ApiResponse, Pageable } from "@/shared/types/response";
 
 export class CourseRepository implements ICourseRepository {
   private readonly http: HttpHelper;
-  private readonly baseUrl: string;
 
   constructor(baseUrl: string, http = new HttpHelper(baseUrl)) {
-    this.baseUrl = baseUrl;
     this.http = http;
   }
 
-  async getCourse(query: QueryCourse): Promise<ApiResponse<Pageable<ICourse>>> {
+  async getCourse(query: QueryCourse) {
     const params = new URLSearchParams();
 
     if (query.page !== undefined) params.append("page", query.page.toString());
@@ -29,57 +31,38 @@ export class CourseRepository implements ICourseRepository {
       params.append("curriculumID", query.curriculumID.toString());
     if (query.typeCourseID !== undefined)
       params.append("typeCourseID", query.typeCourseID.toString());
-    if (query.search !== undefined)
-      params.append("search", query.search.toString());
-    if (query.orderBy !== undefined)
-      params.append("orderBy", query.orderBy.toString());
-    if (query.sortBy !== undefined)
-      params.append("sortBy", query.sortBy.toString());
+    if (query.search !== undefined) params.append("search", query.search);
+    if (query.orderBy !== undefined) params.append("orderBy", query.orderBy);
+    if (query.sortBy !== undefined) params.append("sortBy", query.sortBy);
 
-    const url = `/v1/courses?${params.toString()}`;
-
-    const response = await this.http.get<ApiResponse<Pageable<ICourse>>>(url);
-    return response;
+    const response = await this.http.get<unknown>(
+      `/v1/courses?${params.toString()}`,
+    );
+    return CoursePageResponseSchema.parse(response);
   }
 
-  async createCourse(data: ICreateCourse): Promise<ApiResponse<ICourse>> {
-    const response = await this.http.post<ApiResponse<ICourse>>(
-      `/v1/courses`,
-      data,
-    );
-    return response;
+  async createCourse(data: CreateCourseRequest) {
+    const response = await this.http.post<unknown>(`/v1/courses`, data);
+    return CourseResponseSchema.parse(response);
   }
 
-  async getCourseById(id: number): Promise<ApiResponse<ICourse> | null> {
-    const response = await this.http.get<ApiResponse<ICourse>>(
-      `/v1/courses/${id}`,
-    );
-    return response;
+  async getCourseById(id: number) {
+    const response = await this.http.get<unknown>(`/v1/courses/${id}`);
+    return response === null ? null : NullableCourseResponseSchema.parse(response);
   }
 
-  async updateCourse(
-    id: number,
-    data: IUpdateCourse,
-  ): Promise<ApiResponse<ICourse>> {
-    const response = await this.http.patch<ApiResponse<ICourse>>(
-      `/v1/courses/${id}`,
-      data,
-    );
-    return response;
+  async updateCourse(id: number, data: UpdateCourseRequest) {
+    const response = await this.http.patch<unknown>(`/v1/courses/${id}`, data);
+    return CourseResponseSchema.parse(response);
   }
 
-  async deleteCourse(id: number): Promise<ApiResponse<ICourse>> {
-    const response = await this.http.delete<ApiResponse<ICourse>>(
-      `/v1/courses/${id}`,
-    );
-    return response;
+  async deleteCourse(id: number) {
+    const response = await this.http.delete<unknown>(`/v1/courses/${id}`);
+    return CourseResponseSchema.parse(response);
   }
 
-  async createCourseBatch(data: FormData): Promise<ApiResponse<ICourse>> {
-    const response = await this.http.post<ApiResponse<ICourse>>(
-      `/v1/courses/batch`,
-      data,
-    );
-    return response;
+  async createCourseBatch(data: FormData) {
+    const response = await this.http.post<unknown>(`/v1/courses/batch`, data);
+    return CourseBatchResponseSchema.parse(response);
   }
 }
