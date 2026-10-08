@@ -1,7 +1,8 @@
 import React from "react";
 import CoursesLandingpage from "@/features/courses/components/admin/courses.landingpage";
 
-import { QueryCourse } from "@/features/courses/domain/course";
+import type { QueryCourse } from "@/features/courses/domain/course";
+import { QueryCourseSchema } from "@/features/courses/schema/course";
 import { createCourseServerService } from "@/features/courses/server";
 import { createMasterDataServerService } from "@/features/master-data/server";
 import { createCurriculumServerService } from "@/features/curriculum/server";
@@ -20,8 +21,7 @@ const page = async ({ searchParams }: PageProps) => {
   const curriculumService = await createCurriculumServerService();
 
   const search = await searchParams;
-
-  const query: QueryCourse = {
+  const query = QueryCourseSchema.parse({
     page: search.page ?? 1,
     pageSize: 7,
     curriculumID: search.curriculumID ?? 1,
@@ -29,7 +29,7 @@ const page = async ({ searchParams }: PageProps) => {
     search: search.search ?? "",
     orderBy: search.orderBy ?? "courseCode",
     sortBy: search.sortBy ?? "asc",
-  };
+  });
 
   const { rows, pageSize, page, totalRecords } = await courseService.getCourse(query);
   
@@ -52,6 +52,7 @@ const page = async ({ searchParams }: PageProps) => {
       pageSize={pageSize}
       page={page}
       curriculumID={query.curriculumID!}
+      search={query.search}
       typeCourses={typeCourses}
       typeCourseID={query.typeCourseID}
       sortBy={query.sortBy}

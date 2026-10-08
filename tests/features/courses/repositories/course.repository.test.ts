@@ -1,6 +1,8 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
+import { ZodError } from "zod";
 import { HttpHelper } from "@/shared/lib/http";
-import type { ICourse, QueryCourse } from "@/features/courses/domain/course";
+import type { ICourse } from "@/features/courses/domain/course";
+import type { QueryCourse } from "@/features/courses/schema/course";
 import { CourseRepository } from "@/features/courses/repositories/course.repository";
 
 const coursePage = {
@@ -61,6 +63,25 @@ describe("course query construction", () => {
       "https://api.example.test/v1/courses?page=0&pageSize=0",
       expect.objectContaining({ method: "GET" }),
     );
+  });
+
+  it("rejects malformed course pages at the repository boundary", async () => {
+    vi.spyOn(globalThis, "fetch").mockResolvedValue(
+      new Response(
+        JSON.stringify(
+          response({
+            rows: [{ id: 7 }],
+            totalRecords: 1,
+            page: 1,
+            pageSize: 10,
+          }),
+        ),
+        { headers: { "content-type": "application/json" } },
+      ),
+    );
+    const repository = new CourseRepository("https://api.example.test");
+
+    await expect(repository.getCourse({})).rejects.toBeInstanceOf(ZodError);
   });
 });
 

@@ -1,15 +1,10 @@
 "use client";
-import { useEffect, useCallback } from "react";
-import { useRouter, useSearchParams, usePathname } from "next/navigation";
-import { SelectChangeEvent } from "@mui/material";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
 import CourseTableComponents from "@/features/courses/components/admin/courses.table.component";
 import { ICourse } from "@/features/courses/domain/course";
 import { TypeCourse } from "@/features/master-data/domain/master-data";
 import { ICurriculum } from "@/features/curriculum/domain/curriculum";
 import { CurriculumInfoComponent } from "@/features/courses/components/admin/curriculum.info.component";
+import { useCourseListController } from "@/features/courses/hooks/use-course-list-controller";
 
 interface CoursesLandingPageProps {
   courses: ICourse[];
@@ -25,85 +20,19 @@ interface CoursesLandingPageProps {
   curriculum: ICurriculum;
 }
 
-const searchSchema = z.object({
-  search: z.string().optional(),
-});
-
-export type SearchForm = z.infer<typeof searchSchema>;
-
 const CoursesLandingpage = ({ courses, totalRecords, pageSize, curriculumID, typeCourses, typeCourseID, page, search, sortBy, orderBy, curriculum }: CoursesLandingPageProps) => {
-  const router = useRouter();
-  const pathname = usePathname();
-  const searchParams = useSearchParams();
-
   const {
-    control: searchControl,
-    reset: searchReset,
-    watch,
-  } = useForm<SearchForm>({
-    resolver: zodResolver(searchSchema),
-    defaultValues: { search },
-  });
-
-  const watchedSearch = watch("search");
-
-  const handleResetSearch = () => {
-    searchReset({ search: "" });
-  };
-
-  const handleNextPage = useCallback(
-    (currentPage: number) => {
-      const params = new URLSearchParams(searchParams.toString());
-      params.set("page", currentPage.toString());
-      router.push(`${pathname}?${params.toString()}`, { scroll: false });
-    },
-    [pathname, router, searchParams],
-  );
-
-  useEffect(() => {
-    const delayDebounceFn = setTimeout(() => {
-      const params = new URLSearchParams(searchParams.toString());
-      if (watchedSearch) {
-        params.set("search", watchedSearch);
-        params.set("page", "1");
-      } else {
-        params.delete("search");
-      }
-      const newSearch = params.toString();
-      if (searchParams.toString() !== newSearch) {
-        router.push(`${pathname}?${newSearch}`, { scroll: false });
-      }
-    }, 500);
-
-    return () => clearTimeout(delayDebounceFn);
-  }, [watchedSearch, pathname, router, searchParams]);
-
-  const handleSort = (orderBy: string) => {
-    const params = new URLSearchParams(searchParams.toString());
-
-    const currentOrderBy = params.get("orderBy");
-    const currentSortBy = params.get("sortBy") as "asc" | "desc" | null;
-    const newOrder =
-      currentOrderBy === orderBy && currentSortBy === "desc" ? "asc" : "desc";
-
-    params.set("orderBy", orderBy);
-    params.set("sortBy", newOrder);
-    router.push(`${pathname}?${params.toString()}`, { scroll: false });
-  };
-
-  const handleFilterTypeCourse = (event: SelectChangeEvent) => {
-    const value = event.target.value;
-    const params = new URLSearchParams(searchParams.toString());
-
-    if (value === "all") {
-      params.delete("typeCourseID");
-    } else {
-      params.set("typeCourseID", value);
-    }
-
-    params.set("page", "1");
-    router.push(`${pathname}?${params.toString()}`, { scroll: false });
-  };
+    form,
+    watchedSearch,
+    handleNextPage,
+    handleSort,
+    handleFilterTypeCourse,
+    confirmDeleteCourse,
+    handleUploadCourseFile,
+    errorMessage,
+    confirmModal,
+    handleCloseAlert,
+  } = useCourseListController(search);
 
   return (
     <div className="px-6 pt-6">
@@ -120,9 +49,9 @@ const CoursesLandingpage = ({ courses, totalRecords, pageSize, curriculumID, typ
           onSort={handleSort}
           sortBy={sortBy}
           orderBy={orderBy}
-          control={searchControl}
+          control={form.control}
           watchedSearch={watchedSearch}
-          onResetSearch={handleResetSearch}
+          onResetSearch={() => form.reset({ search: "" })}
           curriculumID={curriculumID}
           totalRecords={totalRecords}
           page={page}
@@ -130,7 +59,12 @@ const CoursesLandingpage = ({ courses, totalRecords, pageSize, curriculumID, typ
           handleNextPage={handleNextPage}
           typeCourses={typeCourses}
           typeCourseID={typeCourseID}
-          handleFilterTypeCourse={handleFilterTypeCourse}
+          handleFilterTypeCourse={(event) => handleFilterTypeCourse(event.target.value)}
+          confirmDeleteCourse={confirmDeleteCourse}
+          handleUploadCourseFile={handleUploadCourseFile}
+          errorMessage={errorMessage}
+          confirmModal={confirmModal}
+          handleCloseAlert={handleCloseAlert}
         />
       </div>
     </div>
