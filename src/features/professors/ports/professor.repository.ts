@@ -1,11 +1,11 @@
-import { ApiResponse, Pageable } from "@/shared/types/response";
-import { IProfessor} from "@/features/professors/domain/professor";
-import { QueryProfessor } from "@/features/professors/domain/professor";
+import type { ApiResponse } from "@/shared/types/response";
+import type { IProfessor, QueryProfessor } from "@/features/professors/domain/professor";
+import type { ProfessorPage } from "@/features/professors/schema/professor";
 
 export interface IProfessorRepository {
   getProfessors(
     query: QueryProfessor,
-  ): Promise<ApiResponse<Pageable<IProfessor>>>;
+  ): Promise<ApiResponse<ProfessorPage>>;
   getProfessorById(id: string): Promise<ApiResponse<IProfessor>>;
   updateProfessor(
     data: FormData,

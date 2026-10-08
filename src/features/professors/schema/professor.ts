@@ -1,5 +1,6 @@
 import z from "zod";
 import { CommonUserSchema, CommonFocalPointSchema } from "@/shared/schema/user";
+import { ProfessorResponseSchema } from "@/shared/schema/profile-response";
 
 const researchProfileURL = z
   .string()
@@ -21,24 +22,16 @@ export const CommonProfessorSchema = z.object({
   research_profile: researchProfileURL.optional(),
 });
 
-export const CreateProfessorSchema = z.object({
+const ProfessorFormSchema = z.object({
   prefixID: z.number().nullable().refine((v) => v !== null, { message: "กรุณาเลือกคำนำหน้าชื่อ" }),
   educations: z.array(z.object({ value: z.string().trim().min(1, "กรุณากรอกข้อมูล"), }),),
   expertFields: z.array(z.object({ value: z.string().trim().min(1, "กรุณากรอกข้อมูล"), }),),
   ...CommonUserSchema.shape,
   ...CommonProfessorSchema.shape,
-  ...CommonFocalPointSchema.shape,
 });
 
-
-export const UpdateProfessorSchema = z.object({
-  prefixID: z.number().nullable().refine((v) => v !== null, { message: "กรุณาเลือกคำนำหน้าชื่อ" }),
-  educations: z.array(z.object({ value: z.string().trim().min(1, "กรุณากรอกข้อมูล"), }),),
-  expertFields: z.array(z.object({ value: z.string().trim().min(1, "กรุณากรอกข้อมูล"), }),),
-  ...CommonUserSchema.shape,
-  ...CommonProfessorSchema.shape,
-  ...CommonFocalPointSchema.shape,
-});
+export const CreateProfessorSchema = ProfessorFormSchema;
+export const UpdateProfessorSchema = ProfessorFormSchema;
 
 export const CreateProfessorPayloadSchema = z.object({
   prefixID: z.number(),
@@ -72,7 +65,32 @@ export const UpdateProfessorPayloadSchema = z.object({
   ...CommonFocalPointSchema.shape,
 });
 
-export type CreateProfessorInputs = z.infer<typeof CreateProfessorSchema>;
-export type UpdateProfessorInputs = z.infer<typeof UpdateProfessorSchema>;
-export type CreateProfessorPayload = z.infer<typeof CreateProfessorPayloadSchema>;
-export type UpdateProfessorPayload = z.infer<typeof UpdateProfessorPayloadSchema>;
+export const ProfessorQuerySchema = z.object({
+  page: z.number().optional(),
+  pageSize: z.number().optional(),
+  educations: z.string().optional(),
+  expertFields: z.string().optional(),
+  majorPosition: z.string().optional(),
+  academicPosition: z.string().optional(),
+  search: z.string().optional(),
+  searchBy: z.string().optional(),
+});
+
+export const ProfessorSearchSchema = z.object({
+  search: z.string().optional(),
+});
+
+export const ProfessorPageSchema = z.object({
+  rows: ProfessorResponseSchema.array(),
+  totalRecords: z.number(),
+  page: z.number(),
+  pageSize: z.number(),
+});
+
+export type CreateProfessorInputs = z.input<typeof CreateProfessorSchema>;
+export type UpdateProfessorInputs = z.input<typeof UpdateProfessorSchema>;
+export type CreateProfessorPayload = z.output<typeof CreateProfessorPayloadSchema>;
+export type UpdateProfessorPayload = z.output<typeof UpdateProfessorPayloadSchema>;
+export type QueryProfessor = z.infer<typeof ProfessorQuerySchema>;
+export type ProfessorSearch = z.infer<typeof ProfessorSearchSchema>;
+export type ProfessorPage = z.infer<typeof ProfessorPageSchema>;

@@ -1,17 +1,24 @@
-import { IProfessorRepository } from "../ports/professor.repository";
-import {
+import type { IProfessorRepository } from "../ports/professor.repository";
+import type {
   IProfessor,
   IUpdateProfessor,
   ICreateProfessor,
 } from "@/features/professors/domain/professor";
-import { Pageable } from "@/shared/types/response";
-import { QueryProfessor } from "@/features/professors/domain/professor";
+import type { ApiResponse } from "@/shared/types/response";
+import type { QueryProfessor, ProfessorPage } from "@/features/professors/schema/professor";
+import {
+  CreateProfessorPayloadSchema,
+  ProfessorQuerySchema,
+  UpdateProfessorPayloadSchema,
+} from "@/features/professors/schema/professor";
 
 export class ProfessorService {
   constructor(private professorRepository: IProfessorRepository) {}
 
-  async getProfessors(query: QueryProfessor): Promise<Pageable<IProfessor>> {
-    const response = await this.professorRepository.getProfessors(query);
+  async getProfessors(query: QueryProfessor): Promise<ProfessorPage> {
+    const response = await this.professorRepository.getProfessors(
+      ProfessorQuerySchema.parse(query),
+    );
     return response.data;
   }
 
@@ -20,41 +27,38 @@ export class ProfessorService {
     return response.data;
   }
 
-  async updateProfessor(id: string, data: IUpdateProfessor, imageFile: File | null ) {
-    try{
+  async updateProfessor(
+    id: string,
+    data: IUpdateProfessor,
+    imageFile: File | null,
+  ): Promise<ApiResponse<IProfessor>> {
+    const payload = UpdateProfessorPayloadSchema.parse(data);
     const formData = new FormData();
-    Object.entries(data).forEach(([key, value]) => {
+    Object.entries(payload).forEach(([key, value]) => {
       formData.append(key, value?.toString() ?? "");
     });
     if (imageFile) {
       formData.append("imageFile", imageFile);
     }
-    const response = await this.professorRepository.updateProfessor(formData,id);
-      return response;
-    } catch (error) {
-      console.error("Failed to update professor:", error);
-      return null;
-    }
+    return this.professorRepository.updateProfessor(formData, id);
   }
 
-  async createProfessor(data: ICreateProfessor, imageFile: File | null) {
-    try {
-      const formData = new FormData();
-      Object.entries(data).forEach(([key, value]) => {
-        formData.append(key, value?.toString() ?? "");
-      });
-      if (imageFile) {
+  async createProfessor(
+    data: ICreateProfessor,
+    imageFile: File | null,
+  ): Promise<ApiResponse<IProfessor>> {
+    const payload = CreateProfessorPayloadSchema.parse(data);
+    const formData = new FormData();
+    Object.entries(payload).forEach(([key, value]) => {
+      formData.append(key, value?.toString() ?? "");
+    });
+    if (imageFile) {
       formData.append("imageFile", imageFile);
-      }
-      const response = await this.professorRepository.createProfessor(formData);
-      return response;
-    } catch (error) {
-      console.error("Failed to create professor:", error);
-      return null;
     }
+    return this.professorRepository.createProfessor(formData);
   }
   
-  async deleteProfessor(id: number): Promise<IProfessor | null> {
+  async deleteProfessor(id: number): Promise<IProfessor> {
     const response = await this.professorRepository.deleteProfessor(id);
     return response.data;
   }
