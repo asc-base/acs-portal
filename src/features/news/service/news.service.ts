@@ -8,8 +8,10 @@ import { UpsertNewsInformationSchema } from "@/features/news/schema/newsinformat
 import type { INews, INewsInformation } from "@/features/news/domain/news";
 import type { INewsRepository } from "../ports/news.repository";
 import type { CreateNewsPayload, NewsQueryInput, UpdateNewsPayload } from "@/features/news/schema/news";
+import type { NewsBulletin } from "@/features/news/schema/news";
 import type { UpsertNewsInformationInputs } from "@/features/news/schema/newsinformation";
 import type { Pageable } from "@/shared/types/response";
+import type { ApiResponse } from "@/shared/types/response";
 
 export class NewsService {
   constructor(private readonly newsRepository: INewsRepository) {}
@@ -195,7 +197,11 @@ export class NewsService {
     });
   }
 
-  async setNewsBulletin(id: number, type: "HIGHLIGHT" | "ANNOUNCEMENT", enabled: boolean) {
+  async setNewsBulletin(
+    id: number,
+    type: "HIGHLIGHT" | "ANNOUNCEMENT",
+    enabled: boolean,
+  ): Promise<ApiResponse<NewsBulletin | null>> {
     const request = SetNewsBulletinSchema.parse({ id, type, enabled });
     return this.newsRepository.setNewsBulletin(
       request.id,
