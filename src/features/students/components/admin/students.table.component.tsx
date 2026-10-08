@@ -20,7 +20,6 @@ import {
   ArrowDownward,
   ArrowUpward,
 } from "@mui/icons-material";
-import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { UploadModal } from "@/shared/components/uploadFile";
 import { IStudent } from "@/features/students/domain/student";
@@ -37,13 +36,12 @@ import {
 } from "@/shared/components/modal/confirmModal";
 import {
   UploadProgressModal,
-  UploadStatus,
 } from "@/features/students/components/admin/uploadStudentFileModal";
 import Alert from "@mui/material/Alert";
 import Snackbar from "@mui/material/Snackbar";
 import EmptyState from "@/shared/components/emptyState";
 import { StudentDefaultAvatar } from "@/features/students/components/student-default-avatar";
-import { useCreateStudentBatch } from "@/features/students/client";
+import { useStudentCsvUploadController } from "@/features/students/hooks/use-student-csv-upload-controller";
 
 
 interface StudentTableComponentsProps {
@@ -67,30 +65,9 @@ interface StudentTableComponentsProps {
 
 const StudentTableComponents = ({ students, onSort, sortBy, orderBy, control, watchedSearch, onResetSearch, totalRecords, classBookID, page, pageSize, handleNextPage, confirmDeleteStudent, confirmModal, errorMessage, handleCloseError }: StudentTableComponentsProps) => {
   const router = useRouter();
-  const createStudentBatch = useCreateStudentBatch();
-  const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
-  const [uploadStatus, setUploadStatus] = useState<UploadStatus | null>(null);
+  const csvUpload = useStudentCsvUploadController(classBookID);
   const handleEdit = (studentId: number) => {
     router.push(`/admin/students/${studentId}?classBookID=${classBookID}`);
-  };
-
-  const handleUploadStudentFile = async (file: File) => {
-    setIsUploadModalOpen(false);
-    setUploadStatus("loading");
-    try {
-      await createStudentBatch.mutateAsync({
-        classBookID: Number(classBookID),
-        file: file,
-      });
-      setUploadStatus("success");
-    } catch {
-      setUploadStatus("error");
-    }
-  };
-
-  const handleUploadRetry = () => {
-    setUploadStatus(null);
-    setIsUploadModalOpen(true);
   };
 
   return (
@@ -107,6 +84,16 @@ const StudentTableComponents = ({ students, onSort, sortBy, orderBy, control, wa
           sx={{ width: "100%" }}
         >
           {errorMessage}
+        </Alert>
+      </Snackbar>
+      <Snackbar
+        anchorOrigin={{ vertical: "top", horizontal: "right" }}
+        open={!!csvUpload.errorMessage}
+        autoHideDuration={4000}
+        onClose={csvUpload.closeError}
+      >
+        <Alert severity="error" onClose={csvUpload.closeError} sx={{ width: "100%" }}>
+          {csvUpload.errorMessage}
         </Alert>
       </Snackbar>
       <div className="flex items-center justify-between p-6">
@@ -136,7 +123,7 @@ const StudentTableComponents = ({ students, onSort, sortBy, orderBy, control, wa
             variant="contained"
             size="large"
             startIcon={<AddIcon />}
-            onClick={() => setIsUploadModalOpen(true)}
+            onClick={csvUpload.openUploadModal}
           >
             เพิ่มนักศึกษา (ไฟล์)
           </Button>
@@ -144,10 +131,10 @@ const StudentTableComponents = ({ students, onSort, sortBy, orderBy, control, wa
       </div>
 
       <UploadModal
-        isOpen={isUploadModalOpen}
-        onClose={() => setIsUploadModalOpen(false)}
+        isOpen={csvUpload.isUploadModalOpen}
+        onClose={csvUpload.closeUploadModal}
         title="อัปโหลดไฟล์รายชื่อนักศึกษา"
-        onUpload={handleUploadStudentFile}
+        onUpload={csvUpload.handleUpload}
       />
 
       <TableContainer component={Paper} sx={{ boxShadow: "none", flex: 1 }}>
@@ -307,14 +294,11 @@ const StudentTableComponents = ({ students, onSort, sortBy, orderBy, control, wa
       )}
       {confirmModal && <ConfirmModal {...confirmModal} />}
       <UploadProgressModal
-        isOpen={uploadStatus !== null}
-        status={uploadStatus ?? "loading"}
-        onClose={() => setUploadStatus(null)}
-        onConfirm={() => {
-          setUploadStatus(null);
-          router.refresh();
-        }}
-        onRetry={handleUploadRetry}
+        isOpen={csvUpload.uploadStatus !== null}
+        status={csvUpload.uploadStatus ?? "loading"}
+        onClose={csvUpload.closeUploadProgress}
+        onConfirm={csvUpload.confirmUpload}
+        onRetry={csvUpload.retryUpload}
       />
     </Card>
   );

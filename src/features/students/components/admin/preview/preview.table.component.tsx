@@ -14,125 +14,32 @@ import {
   Alert,
   AlertTitle,
   Snackbar,
+  TextField,
 } from "@mui/material";
-import { Delete } from "@mui/icons-material";
-import { useImportStudentStore } from "@/features/students/store/preview-data";
-import { useState, useMemo, useEffect } from "react";
-import {
-  CreateStudentCsv,
-  CreateStudentCsvSchema,
-} from "@/features/students/schema/student-csv";
-import { useRouter } from "next/navigation";
-import {
-  ConfirmModal,
-  ConfirmModalProps,
-} from "@/shared/components/modal/confirmModal";
-import { useCreateStudentBatch } from "@/features/students/client";
-
+import { Delete, Done, Edit } from "@mui/icons-material";
+import { ConfirmModal } from "@/shared/components/modal/confirmModal";
+import { useStudentCsvPreviewController } from "@/features/students/hooks/use-student-csv-preview-controller";
 
 interface PreviewStudentsProps {
   classBookID: number;
 }
 
 export default function Preview_table_component({ classBookID }: PreviewStudentsProps) {
-  const router = useRouter();
-  const createStudentBatch = useCreateStudentBatch();
-  const { importData, deleteByStudentId } = useImportStudentStore();
-  const students: CreateStudentCsv[] = importData;
-  const [alert, setAlert] = useState<{
-    open: boolean;
-    message: string;
-    severity: "error" | "warning" | "success" | "info";
-  }>({
-    open: false,
-    message: "",
-    severity: "error",
-  });
-
-  const [confirmModal, setConfirmModal] = useState<ConfirmModalProps | null>(
-    null,
-  );
-
-  const showAlert = (
-    message: string,
-    severity: "error" | "warning" | "success" | "info" = "error",
-  ) => {
-    setAlert({
-      open: true,
-      message,
-      severity,
-    });
-  };
-
-  const handleCloseAlert = () => {
-    setAlert((prev) => ({ ...prev, open: false }));
-  };
-  const deleteStudentRowById = (studentId: string, index: number) => {
-    setConfirmModal({
-      isOpen: true,
-      type: "delete",
-      onClose: () => setConfirmModal(null),
-      onConfirm: () => {
-        deleteByStudentId(studentId, index);
-        setConfirmModal(null);
-      },
-    });
-  };
-
-
-  const onSubmit = async () => {
-    const result = CreateStudentCsvSchema.array().safeParse(students);
-
-    if (!result.success) {
-      showAlert("ข้อมูลนักศึกษาไม่ถูกต้อง", "error");
-      return;
-    }
-
-    try {
-      await createStudentBatch.mutateAsync({
-        classBookID: Number(classBookID),
-        students: result.data,
-      });
-      setConfirmModal({
-        isOpen: true,
-        type: "success",
-        onClose: () => setConfirmModal(null),
-        onConfirm: () => {
-          router.push(
-            `/admin/students?page=1&pageSize=10&classBookID=${classBookID}`,
-          );
-        },
-      });
-    } catch (err) {
-      console.log(err);
-      showAlert("ไม่สามารถเพิ่มข้อมูลนักศึกษาได้", "error");
-    }
-  };
-
-  const duplicateIds = useMemo(() => {
-    const seen = new Set<string>();
-    const duplicate = new Set<string>();
-
-    students.forEach((student) => {
-      if (seen.has(student.studentCode)) duplicate.add(student.studentCode);
-      else seen.add(student.studentCode);
-    });
-
-    return [...duplicate];
-  }, [students]);
-
-  const isSubmitDisabled = students.length === 0 || duplicateIds.length > 0;
-
-  useEffect(() => {
-    if (duplicateIds.length > 0) {
-      showAlert(
-        "เนื่องจากมีข้อมูลบางรายการซ้ำกัน กรุณาแก้ไขก่อนดำเนินการถัดไป",
-        "error",
-      );
-    } else {
-      setAlert((prev) => ({ ...prev, open: false }));
-    }
-  }, [duplicateIds]);
+  const {
+    students,
+    duplicateIds,
+    rowErrors,
+    isSubmitDisabled,
+    alert,
+    confirmModal,
+    editingIndex,
+    onSubmit,
+    onCloseAlert,
+    onBack,
+    toggleRowEditing,
+    updateStudentRow,
+    deleteStudentRowById,
+  } = useStudentCsvPreviewController(classBookID);
 
   return (
     <div className="p-6">
@@ -140,12 +47,12 @@ export default function Preview_table_component({ classBookID }: PreviewStudents
         anchorOrigin={{ vertical: "top", horizontal: "right" }}
         open={alert.open}
         autoHideDuration={4000}
-        onClose={handleCloseAlert}
+        onClose={onCloseAlert}
       >
         <Alert
           severity={alert.severity}
-          onClose={handleCloseAlert}
-          sx={{ width: "100%" }}
+          onClose={onCloseAlert}
+          sx={{ width: "100%", whiteSpace: "pre-line" }}
         >
           <AlertTitle>กรุณาตรวจสอบข้อมูลอีกครั้ง</AlertTitle>
           {alert.message}
@@ -158,21 +65,17 @@ export default function Preview_table_component({ classBookID }: PreviewStudents
         <TableContainer component={Paper} sx={{ boxShadow: "none" }}>
           <Table>
             <TableHead>
-              <TableRow
-                sx={{ borderBottom: "1px solid var(--color-neutral04)" }}
-              >
+              <TableRow sx={{ borderBottom: "1px solid var(--color-neutral04)" }}>
                 <TableCell align="center">
                   <div className="flex items-center justify-center gap-1">
                     <h3 className="font-bold">รหัสนักศึกษา</h3>
                   </div>
                 </TableCell>
-
                 <TableCell align="center">
                   <div className="flex items-center justify-center gap-1">
                     <h3 className="font-bold">ชื่อ นามสกุล</h3>
                   </div>
                 </TableCell>
-
                 <TableCell align="center">
                   <h3 className="font-bold">ชื่อเล่น</h3>
                 </TableCell>
@@ -184,61 +87,84 @@ export default function Preview_table_component({ classBookID }: PreviewStudents
             </TableHead>
 
             <TableBody>
-              {students?.length > 0 ? (
-                students?.map((student, index) => {
-                  const isDuplicate = duplicateIds.find(
-                    (id) => student.studentCode === id,
-                  );
+              {students.length > 0 ? (
+                students.map((student, index) => {
+                  const isDuplicate = duplicateIds.includes(student.studentCode.trim());
+                  const isEditing = editingIndex === index;
+                  const hasRowError = rowErrors.some((error) => error.startsWith(`แถว ${index + 2}:`));
                   return (
                     <TableRow
-                      key={`${student.studentCode}-${index}`}
+                      key={index}
                       sx={{
                         "& .MuiTableCell-root": {
-                          color: isDuplicate ? "error.main" : "inherit",
+                          color: isDuplicate || hasRowError ? "error.main" : "inherit",
                         },
                       }}
                     >
-                      <TableCell
-                        align="center"
-                        sx={{ borderBottom: "none", fontSize: 18 }}
-                      >
-                        {student.studentCode}
+                      <TableCell align="center" sx={{ borderBottom: "none", fontSize: 18 }}>
+                        {isEditing ? (
+                          <TextField
+                            size="small"
+                            aria-label="รหัสนักศึกษา"
+                            value={student.studentCode}
+                            onChange={(event) => updateStudentRow(index, "studentCode", event.target.value)}
+                          />
+                        ) : student.studentCode}
                       </TableCell>
-                      <TableCell
-                        align="center"
-                        sx={{ borderBottom: "none", fontSize: 18 }}
-                      >
-                        {`${student?.firstNameTh || ""} ${student?.lastNameTh || ""}`}
+                      <TableCell align="center" sx={{ borderBottom: "none", fontSize: 18 }}>
+                        {isEditing ? (
+                          <div className="flex gap-2">
+                            <TextField
+                              size="small"
+                              label="ชื่อ"
+                              aria-label="ชื่อ"
+                              value={student.firstNameTh}
+                              onChange={(event) => updateStudentRow(index, "firstNameTh", event.target.value)}
+                            />
+                            <TextField
+                              size="small"
+                              label="นามสกุล"
+                              aria-label="นามสกุล"
+                              value={student.lastNameTh}
+                              onChange={(event) => updateStudentRow(index, "lastNameTh", event.target.value)}
+                            />
+                          </div>
+                        ) : `${student.firstNameTh || ""} ${student.lastNameTh || ""}`}
                       </TableCell>
-                      <TableCell
-                        align="center"
-                        sx={{ borderBottom: "none", fontSize: 18 }}
-                      >
-                        {student?.nickName}
+                      <TableCell align="center" sx={{ borderBottom: "none", fontSize: 18 }}>
+                        {isEditing ? (
+                          <TextField
+                            size="small"
+                            aria-label="ชื่อเล่น"
+                            value={student.nickName ?? ""}
+                            onChange={(event) => updateStudentRow(index, "nickName", event.target.value)}
+                          />
+                        ) : student.nickName}
                       </TableCell>
-                      <TableCell
-                        align="center"
-                        sx={{ borderBottom: "none", fontSize: 18 }}
-                      >
-                        {student?.email}
+                      <TableCell align="center" sx={{ borderBottom: "none", fontSize: 18 }}>
+                        {isEditing ? (
+                          <TextField
+                            size="small"
+                            aria-label="อีเมล"
+                            value={student.email}
+                            onChange={(event) => updateStudentRow(index, "email", event.target.value)}
+                          />
+                        ) : student.email}
                       </TableCell>
-                      <TableCell
-                        align="center"
-                        sx={{ borderBottom: "none", fontSize: 18 }}
-                      >
-                        {/* <IconButton
+                      <TableCell align="center" sx={{ borderBottom: "none", fontSize: 18 }}>
+                        <IconButton
                           color="primary"
                           size="small"
-                          onClick={() => editStudentRowById(student.studentCode)}
+                          aria-label={isEditing ? "Save student row" : "Edit student row"}
+                          onClick={() => toggleRowEditing(index)}
                         >
-                          <Edit />
-                        </IconButton> */}
+                          {isEditing ? <Done /> : <Edit />}
+                        </IconButton>
                         <IconButton
                           color="error"
                           size="small"
-                          onClick={() =>
-                            deleteStudentRowById(student.studentCode, index)
-                          }
+                          aria-label="Delete student row"
+                          onClick={() => deleteStudentRowById(student.studentCode, index)}
                         >
                           <Delete />
                         </IconButton>
@@ -248,11 +174,7 @@ export default function Preview_table_component({ classBookID }: PreviewStudents
                 })
               ) : (
                 <TableRow>
-                  <TableCell
-                    colSpan={6}
-                    align="center"
-                    sx={{ py: 4, color: "text.secondary" }}
-                  >
+                  <TableCell colSpan={6} align="center" sx={{ py: 4, color: "text.secondary" }}>
                     ไม่พบนักศึกษาในรุ่นนี้
                   </TableCell>
                 </TableRow>
@@ -262,21 +184,10 @@ export default function Preview_table_component({ classBookID }: PreviewStudents
         </TableContainer>
       </Card>
       <div className="mt-6 flex justify-end gap-2">
-        <Button
-          variant="contained"
-          size="large"
-          onClick={() =>
-            router.push(`/admin/students?classBookID=${classBookID}`)
-          }
-        >
+        <Button variant="contained" size="large" onClick={onBack}>
           ย้อนกลับ
         </Button>
-        <Button
-          variant="contained"
-          size="large"
-          onClick={onSubmit}
-          disabled={isSubmitDisabled}
-        >
+        <Button variant="contained" size="large" onClick={onSubmit} disabled={isSubmitDisabled}>
           บันทึกข้อมูล
         </Button>
       </div>
