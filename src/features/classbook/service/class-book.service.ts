@@ -1,37 +1,45 @@
-import { IClassBookRepository } from "../ports/class-book.repository";
-import {
-  QueryClassBook,
+import type { IClassBookRepository } from "@/features/classbook/ports/class-book.repository";
+import type {
   IClassBook,
+  QueryClassBookInput,
   ICreateClassBook,
   IUpdateClassBook,
 } from "@/features/classbook/domain/classbook";
-import { Pageable } from "@/shared/types/response";
+import {
+  ClassBookIdSchema,
+  ClassBookQuerySchema,
+  CreateClassbookRequestSchema,
+  UpdateClassbookRequestSchema,
+  type ClassBookPage,
+} from "@/features/classbook/schema/classbook";
+
 export class ClassBookService {
   constructor(private readonly classBookRepository: IClassBookRepository) {}
 
-  async getClassBooks(query: QueryClassBook): Promise<Pageable<IClassBook>> {
-    const response = await this.classBookRepository.getClassBooks(query);
+  async getClassBooks(query: QueryClassBookInput): Promise<ClassBookPage> {
+    const response = await this.classBookRepository.getClassBooks(
+      ClassBookQuerySchema.parse(query),
+    );
     return response.data;
   }
 
   async getClassBookById(id: number): Promise<IClassBook | null> {
-    const response = await this.classBookRepository.getClassBookById(id);
-    return response ? response.data : null;
+    const response = await this.classBookRepository.getClassBookById(
+      ClassBookIdSchema.parse(id),
+    );
+    return response?.data ?? null;
   }
 
   async createClassBook(data: ICreateClassBook, thumbnailFile: File) {
-    try {
-      const formData = new FormData();
-      Object.entries(data).forEach(([key, value]) => {
-        formData.append(key, value?.toString() ?? "");
-      });
-      formData.append("thumbnailFile", thumbnailFile);
-      const response = await this.classBookRepository.createClassBook(formData);
-      return response;
-    } catch (error) {
-      console.error("Failed to create class book:", error);
-      return null;
-    }
+    const { thumbnailFile: requestThumbnail, ...request } =
+      CreateClassbookRequestSchema.parse({ ...data, thumbnailFile });
+    const formData = new FormData();
+    Object.entries(request).forEach(([key, value]) => {
+      formData.append(key, value?.toString() ?? "");
+    });
+    formData.append("thumbnailFile", requestThumbnail);
+    const response = await this.classBookRepository.createClassBook(formData);
+    return response.data;
   }
 
   async updateClassBook(
@@ -39,34 +47,28 @@ export class ClassBookService {
     thumbnailFile: File | null,
     id: number,
   ) {
-    try {
-      const formData = new FormData();
-      Object.entries(data).forEach(([key, value]) => {
-        formData.append(key, value?.toString() ?? "");
-      });
+    const request = UpdateClassbookRequestSchema.parse({
+      ...data,
+      ...(thumbnailFile ? { thumbnailFile } : {}),
+    });
+    const { thumbnailFile: requestThumbnail, ...requestData } = request;
+    const formData = new FormData();
+    Object.entries(requestData).forEach(([key, value]) => {
+      formData.append(key, value?.toString() ?? "");
+    });
+    if (requestThumbnail) formData.append("thumbnailFile", requestThumbnail);
 
-      if (thumbnailFile) {
-        formData.append("thumbnailFile", thumbnailFile);
-      }
-
-      const response = await this.classBookRepository.updateClassBook(
-        formData,
-        id,
-      );
-      return response;
-    } catch (error) {
-      console.error("Failed to update class book:", error);
-      return null;
-    }
+    const response = await this.classBookRepository.updateClassBook(
+      formData,
+      ClassBookIdSchema.parse(id),
+    );
+    return response.data;
   }
 
-  async deleteClassBook(id: number) {
-    try {
-      const response = await this.classBookRepository.deleteClassBook(id);
-      return response;
-    } catch (error) {
-      console.error("Failed to delete class book:", error);
-      return null;
-    }
+  async deleteClassBook(id: number): Promise<IClassBook> {
+    const response = await this.classBookRepository.deleteClassBook(
+      ClassBookIdSchema.parse(id),
+    );
+    return response.data;
   }
 }

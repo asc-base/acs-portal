@@ -1,7 +1,7 @@
 import React from "react";
 
 import ClassBookListComponents from "@/features/classbook/components/admin/classbook.list.component";
-import { QueryClassBook } from "@/features/classbook/domain/classbook";
+import type { QueryClassBookInput } from "@/features/classbook/domain/classbook";
 import { createClassBookServerService } from "@/features/classbook/server";
 
 
@@ -9,7 +9,7 @@ import { createClassBookServerService } from "@/features/classbook/server";
 export const dynamic = "force-dynamic";
 
 interface PageProps {
-  searchParams: Promise<QueryClassBook>;
+  searchParams: Promise<QueryClassBookInput>;
 }
 
 const page = async ({ searchParams }: PageProps) => {
@@ -17,7 +17,7 @@ const page = async ({ searchParams }: PageProps) => {
 
   const resolvedSearchParams = await searchParams;
 
-  const query: QueryClassBook = {
+  const query: QueryClassBookInput = {
     page: resolvedSearchParams.page || 1,
     pageSize: resolvedSearchParams.pageSize || 12,
     orderBy: "createdAt",
@@ -34,6 +34,7 @@ const page = async ({ searchParams }: PageProps) => {
       pageSize={pageSize}
       page={page}
       sortBy={query.sortBy}
+      search={query.search}
     />
   );
 };

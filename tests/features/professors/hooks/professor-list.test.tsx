@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import type { ReactNode } from "react";
-import { act, renderHook, waitFor } from "@testing-library/react";
+import { act, renderHook } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { useProfessorListController } from "@/features/professors/hooks/useProfessorListController";
@@ -87,8 +87,10 @@ describe("professor list controller", () => {
 
     act(() => result.current.confirmDeleteProfessor(9));
     expect(result.current.confirmModal?.type).toBe("delete");
-    act(() => result.current.confirmModal?.onConfirm());
-    await waitFor(() => expect(result.current.confirmModal?.type).toBe("success"));
+    await act(async () => {
+      await result.current.confirmModal?.onConfirm();
+    });
+    expect(result.current.confirmModal?.type).toBe("success");
 
     act(() => result.current.confirmModal?.onConfirm());
     expect(navigation.router.refresh).toHaveBeenCalledOnce();

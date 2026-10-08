@@ -1,4 +1,5 @@
 import React from "react";
+import { notFound } from "next/navigation";
 import NewsInfoComponent from "@/features/news/components/public/[id]/newsinfo.component";
 import { createNewsServerService } from "@/features/news/server";
 
@@ -19,7 +20,8 @@ const page = async ({ params }: PageProps) => {
   const { id } = await params;
 
   const newsInfo = await newsService.getNewsById(id);
-  const recommendNews = await newsService.getNews(1, 6, newsInfo.tag.id);
+  if (!newsInfo) notFound();
+  const recommendNews = await newsService.getNews(1, 6, newsInfo.tag?.id);
 
   return (
     <div>

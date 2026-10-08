@@ -1,6 +1,1 @@
-export interface IClassBook {
-    id: number;
-    firstYearAcademic: string;
-    image: string;
-    classof: number;
-}
+export type { IClassBook } from "@/features/classbook/domain/classbook";

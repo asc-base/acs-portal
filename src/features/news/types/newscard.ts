@@ -1,9 +1,9 @@
 export interface NewsCardProps {
   news: {
     title: string;
-    startDate: Date;
-    dueDate?: Date | null;
-    thumbnailURL: string;
+    startDate: string;
+    dueDate?: string | null;
+    thumbnailURL: string | null;
     highlightURL?: string | null;
     cardFocalPointX?: number | null;
     cardFocalPointY?: number | null;
