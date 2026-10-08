@@ -223,10 +223,7 @@ const ProjectInfoComponent: FC<ProjectInfoProps> = ({ project }) => {
           <div className="mt-12">
             <h2 className="mb-6 text-2xl font-bold">คณะผู้จัดทำและอาจารย์ที่ปรึกษา</h2>
             <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-              {project?.projectMembers?.map((member, index) => (
-                <StudentCard key={index} {...member} />
-                //<ProfessorCard key={index} {...member} />
-              ))}
+              {project.member.map((member) => <StudentCard key={member.id} {...member} />)}
             </div>
           </div>
     </div>

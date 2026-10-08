@@ -1,7 +1,7 @@
 import React from "react";
 
 import ProjectListComponents from "@/features/projects/components/admin/project.list.component";
-import { QueryProject } from "@/features/projects/domain/project";
+import type { QueryProjectInput } from "@/features/projects/schema/project";
 import { createProjectServerService } from "@/features/projects/server";
 
 
@@ -10,7 +10,7 @@ export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
 interface PageProps {
-  searchParams: Promise<QueryProject>;
+  searchParams: Promise<QueryProjectInput>;
 }
 
 const page = async ({ searchParams }: PageProps) => {
@@ -18,7 +18,7 @@ const page = async ({ searchParams }: PageProps) => {
 
   const resolvedSearchParams = await searchParams;
 
-  const query: QueryProject = {
+  const query = {
     page: resolvedSearchParams.page || 1,
     pageSize: resolvedSearchParams.pageSize || 10,
     sortBy: "createdAt",

@@ -1,9 +1,11 @@
 import { FC } from "react";
 import { Card, CardContent, CardMedia, Typography, Box } from "@mui/material";
-import { IStudent } from "@/features/students/domain/student";
+import type { StudentResponse, UserResponse } from "@/shared/schema/profile-response";
 import { StudentDefaultAvatar } from "@/features/students/components/student-default-avatar";
 
-export const StudentCard: FC<IStudent> = (props) => {
+type StudentCardProps = UserResponse & { student?: StudentResponse["student"] };
+
+export const StudentCard: FC<StudentCardProps> = (props) => {
   return (
     <Card className="flex !w-40.5 cursor-pointer flex-col !rounded-2xl transition-all duration-300 hover:-translate-y-1 md:!w-40 lg:!w-52 xl:!w-67">
       {props.imageUrl ? (
@@ -39,14 +41,16 @@ export const StudentCard: FC<IStudent> = (props) => {
         >
           {props.firstNameTh} {props.lastNameTh}
         </Typography>
-        <Box className="mt-1 flex w-full flex-row items-center justify-between">
-          <Typography component="h4" className="!text-neutral05 !text-xs lg:!text-sm">
-            รุ่นที่ {props.student.classBookID}
-          </Typography>
-          <Typography component="h4" className="!text-neutral05 !text-xs lg:!text-sm">
-            {`${props.student.studentCode.slice(0, 2)}-${props.student.studentCode.slice(-3)}`}
-          </Typography>
-        </Box>
+        {props.student && (
+          <Box className="mt-1 flex w-full flex-row items-center justify-between">
+            <Typography component="h4" className="!text-neutral05 !text-xs lg:!text-sm">
+              รุ่นที่ {props.student.classBookID}
+            </Typography>
+            <Typography component="h4" className="!text-neutral05 !text-xs lg:!text-sm">
+              {`${props.student.studentCode.slice(0, 2)}-${props.student.studentCode.slice(-3)}`}
+            </Typography>
+          </Box>
+        )}
       </CardContent>
     </Card>
   );

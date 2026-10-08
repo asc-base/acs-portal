@@ -1,11 +1,11 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { HttpHelper } from "@/shared/lib/http";
-import type { IProject, QueryProject } from "@/features/projects/domain/project";
+import type { QueryProject } from "@/features/projects/schema/project";
 import { ProjectRepository } from "@/features/projects/repositories/project.repository";
+import { projectEnvelope, projectFixture, projectPageFixture } from "../fixtures";
 
-const project = { id: 17, title: "Project" } as IProject;
-const page = { rows: [project], totalRecords: 1, page: 2, pageSize: 15 };
-const response = <T>(data: T) => ({ data, status: 200, statusCode: 200 });
+const page = { ...projectPageFixture, page: 2, pageSize: 15 };
+const response = projectEnvelope;
 
 afterEach(() => vi.restoreAllMocks());
 
@@ -28,7 +28,7 @@ describe("project repository queries", () => {
       search: "AI & systems?view=1",
     };
 
-    await expect(repository.getProjects(query)).resolves.toBe(payload);
+    await expect(repository.getProjects(query)).resolves.toEqual(payload);
 
     const url = get.mock.calls[0]![0];
     expect(url).toBe(
@@ -49,7 +49,7 @@ describe("project repository queries", () => {
   it("routes list and CRUD calls to their project endpoints and returns responses", async () => {
     const http = new HttpHelper();
     const listResponse = response(page);
-    const projectResponse = response(project);
+    const projectResponse = response(projectFixture);
     const get = vi
       .spyOn(http, "get")
       .mockResolvedValueOnce(listResponse)
@@ -62,13 +62,11 @@ describe("project repository queries", () => {
     const repository = new ProjectRepository("", http);
     const form = new FormData();
 
-    await expect(repository.getProjects({})).resolves.toBe(listResponse);
-    await expect(repository.getProjectById("17")).resolves.toBe(projectResponse);
-    await expect(repository.createProject(form)).resolves.toBe(projectResponse);
-    await expect(repository.updateProject("17", form)).resolves.toBe(
-      projectResponse,
-    );
-    await expect(repository.deleteProject(17)).resolves.toBe(projectResponse);
+    await expect(repository.getProjects({})).resolves.toEqual(listResponse);
+    await expect(repository.getProjectById("17")).resolves.toEqual(projectResponse);
+    await expect(repository.createProject(form)).resolves.toEqual(projectResponse);
+    await expect(repository.updateProject("17", form)).resolves.toEqual(projectResponse);
+    await expect(repository.deleteProject(17)).resolves.toEqual(projectResponse);
 
     expect(get).toHaveBeenNthCalledWith(1, "/v1/project");
     expect(get).toHaveBeenNthCalledWith(2, "/v1/project/17");
@@ -91,5 +89,13 @@ describe("project repository queries", () => {
       "https://api.example.test/v1/project?page=2",
       expect.objectContaining({ method: "GET" }),
     );
+  });
+
+  it("rejects malformed project DTOs and pagination at the repository boundary", async () => {
+    const http = new HttpHelper();
+    vi.spyOn(http, "get").mockResolvedValue(response({ rows: [{ id: 17 }], totalRecords: 1, page: 1, pageSize: 10 }));
+    const repository = new ProjectRepository("", http);
+
+    await expect(repository.getProjects({})).rejects.toThrow();
   });
 });
