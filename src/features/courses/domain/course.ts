@@ -1,56 +1,10 @@
-import { ICurriculum } from "@/features/curriculum/domain/curriculum";
-import { TypeCourse } from "@/features/master-data/domain/master-data";
-
-export interface ITypeCourse {
-  id: number;
-  name: string;
-  description: string;
-}
-
-export interface ICourse {
-  id: number;
-  courseCode: string;
-  courseNameTh: string;
-  courseNameEn: string;
-  credits: string;
-  detail: string;
-  createdDate: Date;
-  updatedDate: Date;
-  curriculum: ICurriculum;
-  prerequisites: ICourse[];
-  typeCourse: TypeCourse;
-}
-
-export interface QueryCourse {
-  page?: number;
-  pageSize?: number;
-  prerequisite?: boolean;
-  curriculumID?: number;
-  typeCourseID?: number;
-  search?: string;
-  orderBy?: string;
-  sortBy?: "asc" | "desc";
-}
-
-export interface ICreateCourse {
-  courseCode: string;
-  typeCourseID: number;
-  courseNameTh: string;
-  courseNameEn: string;
-  credits: string;
-  detail: string;
-  preCoursesID?: number[];
-  curriculumID: number;
-}
-
-export interface IUpdateCourse {
-  courseCode?: string;
-  typeCourseID?: number;
-  courseNameTh?: string;
-  courseNameEn?: string;
-  credits?: string;
-  detail?: string;
-  curriculumID: number;
-  newPrecourseId?: number[];
-  deletePrecourseId?: number[];
-}
+export type {
+  ICourse,
+  CoursePage,
+  QueryCourseInput,
+  CreateCourseRequest,
+  UpdateCourseRequest,
+} from "@/features/courses/schema/course";
+export type { QueryCourseInput as QueryCourse } from "@/features/courses/schema/course";
+export type { CreateCourseRequest as ICreateCourse } from "@/features/courses/schema/course";
+export type { UpdateCourseRequest as IUpdateCourse } from "@/features/courses/schema/course";

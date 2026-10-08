@@ -1,16 +1,18 @@
-import { ApiResponse, Pageable } from "@/shared/types/response";
-import {
-  ICourse,
-  ICreateCourse,
-  IUpdateCourse,
+import type {
+  CourseBatchResponse,
+  CoursePageResponse,
+  CourseResponse,
+  NullableCourseResponse,
   QueryCourse,
-} from "@/features/courses/domain/course";
+  CreateCourseRequest,
+  UpdateCourseRequest,
+} from "@/features/courses/schema/course";
 
 export interface ICourseRepository {
-  getCourse(query: QueryCourse): Promise<ApiResponse<Pageable<ICourse>>>;
-  createCourse(data: ICreateCourse): Promise<ApiResponse<ICourse>>;
-  getCourseById(id: number): Promise<ApiResponse<ICourse> | null>;
-  updateCourse(id: number, data: IUpdateCourse): Promise<ApiResponse<ICourse>>;
-  deleteCourse(id: number): Promise<ApiResponse<ICourse>>;
-  createCourseBatch(data: FormData): Promise<ApiResponse<ICourse>>;
+  getCourse(query: QueryCourse): Promise<CoursePageResponse>;
+  createCourse(data: CreateCourseRequest): Promise<CourseResponse>;
+  getCourseById(id: number): Promise<NullableCourseResponse | null>;
+  updateCourse(id: number, data: UpdateCourseRequest): Promise<CourseResponse>;
+  deleteCourse(id: number): Promise<CourseResponse>;
+  createCourseBatch(data: FormData): Promise<CourseBatchResponse>;
 }
