@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   ProfessorResponseSchema,
   StudentResponseSchema,
+  UserProfileSchema,
 } from "@/shared/schema/profile-response";
 
 const user = {
@@ -17,6 +18,21 @@ const user = {
 };
 
 describe("profile response schemas", () => {
+  it("validates the current user profile and its required role list", () => {
+    const profile = {
+      ...user,
+      roles: [{ id: 1, name: "Admin" }],
+    };
+
+    expect(UserProfileSchema.parse(profile)).toEqual(profile);
+    expect(
+      UserProfileSchema.safeParse({ ...profile, roles: undefined }).success,
+    ).toBe(false);
+    expect(
+      UserProfileSchema.safeParse({ ...profile, roles: [{ id: 1, name: 2 }] })
+        .success,
+    ).toBe(false);
+  });
   it("uses the user ID as the student root and allows nullable profile data", () => {
     const response = {
       ...user,

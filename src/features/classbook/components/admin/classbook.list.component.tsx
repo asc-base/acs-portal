@@ -4,7 +4,6 @@ import { IClassBook } from "@/features/classbook/domain/classbook";
 import {
   MenuItem,
   Select,
-  SelectChangeEvent,
   Button,
   Pagination,
   Snackbar,
@@ -15,18 +14,10 @@ import AddIcon from "@mui/icons-material/Add";
 import SearchIcon from "@mui/icons-material/Search";
 import CloseIcon from "@mui/icons-material/Close";
 import EmptyState from "@/shared/components/emptyState";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { RHFTextField } from "@/shared/components/form/RHFTextField";
-import { useRouter, usePathname, useSearchParams } from "next/navigation";
-import {
-  ConfirmModal,
-  ConfirmModalProps,
-} from "@/shared/components/modal/confirmModal";
-import { classBookService } from "@/features/classbook/client";
+import { ConfirmModal } from "@/shared/components/modal/confirmModal";
+import { useClassBookListController } from "@/features/classbook/hooks/use-class-book-list-controller";
 
 
 interface ClassBookListComponentsProps {
@@ -38,106 +29,19 @@ interface ClassBookListComponentsProps {
   search?: string;
 }
 
-const searchSchema = z.object({
-  search: z.string().optional(),
-});
-
-type SearchForm = z.infer<typeof searchSchema>;
-
 const ClassBookListComponents = ({ classbooks, totalRecords, pageSize, page, sortBy, search }: ClassBookListComponentsProps) => {
-  const router = useRouter();
-  const pathname = usePathname();
-  const searchParams = useSearchParams();
-  const [isError, setIsError] = useState(false);
-  const [confirmModal, setConfirmModal] = useState<ConfirmModalProps | null>(
-    null,
-  );
-
-  const { control, reset, watch } = useForm<SearchForm>({
-    resolver: zodResolver(searchSchema),
-    defaultValues: { search },
-  });
-
-  const handleResetSearch = () => {
-    reset({ search: "" });
-  };
-
-  const handleNextPage = useCallback(
-    (currentPage: number) => {
-      const params = new URLSearchParams(searchParams.toString());
-      params.set("page", currentPage.toString());
-      router.push(`${pathname}?${params.toString()}`);
-    },
-    [pathname, router, searchParams],
-  );
-
-  const watchedSearch = watch("search");
-
-  const handleSortOrder = (event: SelectChangeEvent) => {
-    const newSortOrder = event.target.value as "asc" | "desc";
-    const params = new URLSearchParams(searchParams.toString());
-    params.set("orderBy", "createdAt");
-    params.set("sortBy", newSortOrder);
-    router.push(`${pathname}?${params.toString()}`);
-  };
-  const confirmDeleteClassbook = (id: number) => {
-    setConfirmModal({
-      isOpen: true,
-      type: "delete",
-      onClose: () => setConfirmModal(null),
-      onConfirm: () => {
-        deleteClassbook(id);
-        setConfirmModal(null);
-      },
-    });
-  };
-
-  const deleteClassbook = async (id: number) => {
-    try {
-      const reps = await classBookService.deleteClassBook(id);
-      if (!reps) {
-        setIsError(true);
-        return;
-      }
-      setConfirmModal({
-        isOpen: true,
-        type: "success",
-        onClose: () => setConfirmModal(null),
-        onConfirm: () => {
-          setConfirmModal(null);
-          router.refresh();
-        },
-        title: "ลบข้อมูลสำเร็จ",
-        description: "ข้อมูลถูกลบออกจากระบบแล้ว",
-        confirmText: "เสร็จสิ้น",
-      });
-    } catch (error) {
-      console.error(error);
-      setIsError(true);
-    }
-  };
-
-  const handleCloseAlert = () => {
-    setIsError(false);
-  };
-
-  useEffect(() => {
-    const delayDebounceFn = setTimeout(() => {
-      const params = new URLSearchParams(searchParams.toString());
-      if (watchedSearch) {
-        params.set("search", watchedSearch);
-        params.set("page", "1");
-      } else {
-        params.delete("search");
-      }
-      const newSearch = params.toString();
-      if (searchParams.toString() !== newSearch) {
-        router.push(`${pathname}?${newSearch}`, { scroll: false });
-      }
-    }, 500);
-
-    return () => clearTimeout(delayDebounceFn);
-  }, [watchedSearch, pathname, router, searchParams]);
+  const {
+    form: { control },
+    watchedSearch,
+    isError,
+    confirmModal,
+    handleResetSearch,
+    handleNextPage,
+    handleViewClassbook,
+    handleSortOrder,
+    confirmDeleteClassbook,
+    handleCloseAlert,
+  } = useClassBookListController(search);
 
   return (
     <div className="flex min-h-screen flex-col px-8 py-5">
@@ -178,7 +82,9 @@ const ClassBookListComponents = ({ classbooks, totalRecords, pageSize, page, sor
           />
 
           <Select
-            onChange={handleSortOrder}
+            onChange={(event) =>
+              handleSortOrder(event.target.value as "asc" | "desc")
+            }
             size="small"
             value={sortBy ?? "desc"}
             displayEmpty
@@ -217,11 +123,7 @@ const ClassBookListComponents = ({ classbooks, totalRecords, pageSize, page, sor
                 key={classbook.id}
                 type="classBook"
                 data={classbook}
-                onView={() =>
-                  router.push(
-                    `/admin/students?page=1&pageSize=10&classBookID=${classbook.id}`,
-                  )
-                }
+                onView={() => handleViewClassbook(classbook.id)}
                 onDelete={() => confirmDeleteClassbook(classbook.id)}
               />
             ))}

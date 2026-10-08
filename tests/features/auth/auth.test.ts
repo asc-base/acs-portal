@@ -5,7 +5,17 @@ import { HttpError, HttpHelper } from "@/shared/lib/http";
 import { AuthService } from "@/features/auth/service/auth.service";
 import { AuthRepository } from "@/features/auth/repositories/auth.repository";
 import type { IAuthRepository } from "@/features/auth/ports/auth.repository";
-import { ForgetPasswordSchema, ResetPasswordSchema } from "@/features/auth/schema/auth";
+import {
+  AdminLoginFormSchema,
+  AuthTokensSchema,
+  ForgetPasswordRequestSchema,
+  ForgetPasswordResponseSchema,
+  ForgetPasswordSchema,
+  LoginRequestSchema,
+  ResetPasswordRequestSchema,
+  ResetPasswordSchema,
+  StudentLoginFormSchema,
+} from "@/features/auth/schema/auth";
 import { useAuthStore } from "@/features/auth/store/auth";
 import { authErrorHandler } from "@/features/auth/lib/auth-error-handler";
 import { isAdminUser } from "@/features/auth/lib/admin-access";
@@ -33,6 +43,40 @@ afterEach(() => {
 });
 
 describe("auth schemas", () => {
+  it("keeps student and admin login validation separate from the request shape", () => {
+    expect(
+      StudentLoginFormSchema.parse({
+        email: " 00000000001 ",
+        password: "x",
+        remember: true,
+      }),
+    ).toEqual({ email: "00000000001", password: "x", remember: true });
+    expect(
+      AdminLoginFormSchema.safeParse({ email: "invalid", password: "secret" })
+        .success,
+    ).toBe(false);
+    expect(LoginRequestSchema.parse(credentials)).toEqual(credentials);
+    expect(() => LoginRequestSchema.parse({ email: user.email })).toThrow();
+  });
+
+  it("validates auth response and request payloads with the existing endpoint spelling", () => {
+    const tokens = { accessToken: "access", refreshToken: "refresh" };
+    expect(AuthTokensSchema.parse(tokens)).toEqual(tokens);
+    expect(ForgetPasswordRequestSchema.parse({ email: user.email })).toEqual({
+      email: user.email,
+    });
+    expect(ForgetPasswordResponseSchema.parse(null)).toBeNull();
+    expect(ResetPasswordRequestSchema.parse({
+      refferenceCode: "reference",
+      password: "secret",
+    })).toEqual({ refferenceCode: "reference", password: "secret" });
+    expect(
+      ResetPasswordRequestSchema.safeParse({
+        referenceCode: "reference",
+        password: "secret",
+      }).success,
+    ).toBe(false);
+  });
   it("accepts a valid email and rejects empty or malformed emails", () => {
     expect(ForgetPasswordSchema.parse({ email: user.email })).toEqual({
       email: user.email,
@@ -80,6 +124,31 @@ describe("auth schemas", () => {
         ]),
       );
     }
+  });
+
+  it("validates auth input at the service boundary before calling the repository", async () => {
+    const repository: IAuthRepository = {
+      getUserData: vi.fn(),
+      Login: vi.fn(),
+      createCredentailForgetPassowrd: vi.fn(),
+      resetPassword: vi.fn(),
+      getUser: vi.fn(),
+      Logout: vi.fn(),
+    };
+    const service = new AuthService(repository);
+
+    await expect(
+      service.Login({ email: user.email, password: 1 } as never),
+    ).rejects.toThrow();
+    await expect(
+      service.createCredentailForgetPassowrd({ email: "invalid" }),
+    ).rejects.toThrow();
+    await expect(
+      service.resetPassword({ refferenceCode: "reference", password: "short" }),
+    ).rejects.toThrow();
+    expect(repository.Login).not.toHaveBeenCalled();
+    expect(repository.createCredentailForgetPassowrd).not.toHaveBeenCalled();
+    expect(repository.resetPassword).not.toHaveBeenCalled();
   });
 
   it("attaches password mismatch to confirmPassword", () => {
@@ -164,19 +233,24 @@ describe("AuthService", () => {
 
 describe("AuthRepository", () => {
   it("uses the existing auth endpoints, payloads and explicit token header", async () => {
-    const response = { data: user };
+    const response = { data: { message: "ok" } };
+    const profileResponse = { data: user };
+    const tokensResponse = {
+      data: { accessToken: "access", refreshToken: "refresh" },
+    };
     const get = vi
       .spyOn(HttpHelper.prototype, "get")
-      .mockResolvedValue(response);
+      .mockResolvedValue(profileResponse);
     const post = vi
       .spyOn(HttpHelper.prototype, "post")
+      .mockResolvedValueOnce(tokensResponse)
       .mockResolvedValue(response);
     const repository = new AuthRepository("/api");
-    await expect(repository.getUserData("token")).resolves.toBe(response);
+    await expect(repository.getUserData("token")).resolves.toBe(profileResponse);
     expect(get).toHaveBeenCalledWith("/v1/users/profile", {
       Authorization: "Bearer token",
     });
-    await expect(repository.Login(credentials)).resolves.toBe(response);
+    await expect(repository.Login(credentials)).resolves.toBe(tokensResponse);
     expect(post).toHaveBeenLastCalledWith("/v1/auth/login", credentials);
     await repository.createCredentailForgetPassowrd({ email: user.email });
     expect(post).toHaveBeenLastCalledWith("/v1/auth/forget-password", {
@@ -200,9 +274,24 @@ describe("AuthRepository", () => {
       .mockResolvedValueOnce({ data: user })
       .mockResolvedValueOnce({});
     const repository = new AuthRepository("/api");
-    await expect(repository.getUser()).resolves.toBe(user);
+    await expect(repository.getUser()).resolves.toEqual(user);
     await expect(repository.getUser()).resolves.toBeNull();
     expect(get).toHaveBeenCalledWith("/v1/users/profile");
+  });
+
+  it("rejects malformed server profiles and token data at the repository boundary", async () => {
+    const get = vi.spyOn(HttpHelper.prototype, "get").mockResolvedValue({
+      data: { ...user, roles: undefined },
+    });
+    const post = vi.spyOn(HttpHelper.prototype, "post").mockResolvedValue({
+      data: { accessToken: "access" },
+    });
+    const repository = new AuthRepository("/api");
+
+    await expect(repository.getUser()).rejects.toThrow();
+    await expect(repository.Login(credentials)).rejects.toThrow();
+    expect(get).toHaveBeenCalledOnce();
+    expect(post).toHaveBeenCalledOnce();
   });
 
   it("handles profile/logout 401 but leaves login 401 rejected", async () => {
@@ -310,6 +399,7 @@ describe("store, 401 handling and admin role", () => {
       isAdminUser({ ...user, roles: [{ id: 1, name: "SuperAdmin" }] }),
     ).toBe(false);
     expect(isAdminUser({ ...user, roles: [] })).toBe(false);
+    expect(isAdminUser({ ...user, roles: undefined } as never)).toBe(false);
     expect(isAdminUser(null)).toBe(false);
     expect(isAdminUser(undefined)).toBe(false);
   });

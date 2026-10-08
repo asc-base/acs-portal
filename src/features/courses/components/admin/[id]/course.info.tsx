@@ -1,5 +1,5 @@
 "use client";
-import { FC, useEffect, useState } from "react";
+import { FC } from "react";
 import {
   Button,
   MenuItem,
@@ -11,22 +11,13 @@ import {
 } from "@mui/material";
 import AddCircleOutlineRoundedIcon from "@mui/icons-material/AddCircleOutlineRounded";
 import DeleteIcon from "@mui/icons-material/Delete";
-import { useForm, useFieldArray, Controller } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
+import { Controller } from "react-hook-form";
 import { RHFTextField } from "@/shared/components/form/RHFTextField";
 import { RHFSelect } from "@/shared/components/form/RHFSelect";
-import { useRouter } from "next/navigation";
-import { ICourse, IUpdateCourse } from "@/features/courses/domain/course";
-import {
-  ConfirmModal,
-  ConfirmModalProps,
-} from "@/shared/components/modal/confirmModal";
-import {
-  updateCourseSchema,
-  UpdateCourseSchemaInput,
-} from "@/features/courses/schema/course";
-import { courseService } from "@/features/courses/client";
+import type { ICourse } from "@/features/courses/domain/course";
+import { ConfirmModal } from "@/shared/components/modal/confirmModal";
 import { useMasterData } from "@/features/master-data/client";
+import { useUpdateCourseController } from "@/features/courses/hooks/use-update-course-controller";
 
 
 interface CoursesFormProps {
@@ -35,126 +26,23 @@ interface CoursesFormProps {
 }
 
 export const CourseInfo: FC<CoursesFormProps> = ({ curriculumID, course }) => {
-  const router = useRouter();
   const { data: masterData, isPending: isMasterDataPending, isError: isMasterDataError } = useMasterData();
   const typeCourses = masterData?.typeCourses ?? [];
-  const [courses, setCourses] = useState<ICourse[]>([]);
-  const [isError, setIsError] = useState(false);
-  const [confirmModal, setConfirmModal] = useState<ConfirmModalProps | null>(
-    null,
-  );
-  const currentCourseId = course?.id;
   const {
-    control,
-    handleSubmit,
-    watch,
-    formState: { isDirty },
-  } = useForm<UpdateCourseSchemaInput>({
-    resolver: zodResolver(updateCourseSchema),
-    mode: "onChange",
-    defaultValues: {
-      typeCourseID: course.typeCourse.id,
-      courseCode: course.courseCode,
-      credits: course.credits,
-      courseNameEn: course.courseNameEn,
-      courseNameTh: course.courseNameTh,
-      detail: course.detail,
-      preCoursesID:
-        course.prerequisites?.map((p) => ({
-          id: p.id,
-        })) ?? [],
-    },
-  });
-
-  const watchedPreCourses = watch("preCoursesID");
-
-  const { fields, append, remove } = useFieldArray({
-    control,
-    name: "preCoursesID",
-  });
-
-  const handleCancel = () => {
-    if (isDirty) {
-      setConfirmModal({
-        isOpen: true,
-        type: "warning",
-        onClose: () => setConfirmModal(null),
-        onConfirm: () => router.back(),
-      });
-    } else {
-      router.back();
-    }
-  };
-
-  const onSubmit = async (data: UpdateCourseSchemaInput) => {
-    setIsError(false);
-
-    try {
-      const oldPrecourseIds = course.prerequisites?.map((p) => p.id) ?? [];
-
-      const currentPrecourseIds = (data.preCoursesID ?? [])
-        .map((p) => p.id)
-        .filter((id): id is number => typeof id === "number" && id !== 0);
-
-      const newPrecourseId = currentPrecourseIds.filter(
-        (id) => !oldPrecourseIds.includes(id),
-      );
-      const deletePrecourseId = oldPrecourseIds.filter(
-        (id) => !currentPrecourseIds.includes(id),
-      );
-
-      const updateData: IUpdateCourse = {
-        courseCode: data.courseCode,
-        typeCourseID: Number(data.typeCourseID),
-        courseNameTh: data.courseNameTh,
-        courseNameEn: data.courseNameEn,
-        credits: data.credits,
-        detail: data.detail,
-        newPrecourseId,
-        deletePrecourseId,
-        curriculumID: curriculumID,
-      };
-      console.log("SEND UPDATE DATA", updateData);
-      const response = await courseService.updateCourse(course.id, updateData);
-
-      if (!response) {
-        setIsError(true);
-        return;
-      }
-
-      setConfirmModal({
-        isOpen: true,
-        type: "success",
-        onClose: () => setConfirmModal(null),
-        onConfirm: () =>
-          router.push(
-            `/admin/courses?page=1&pageSize=10&curriculumID=${curriculumID}`,
-          ),
-      });
-    } catch (error) {
-      console.error("Update Course Error:", error);
-      setIsError(true);
-    }
-  };
-
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const courseRes = await courseService.getCourse({
-          curriculumID,
-          orderBy: "courseCode",
-          sortBy: "asc",
-        });
-        setCourses(courseRes.rows);
-      } catch (err) {
-        console.error(err);
-        setIsError(true);
-      }
-    };
-    fetchData();
-  }, [curriculumID]);
-
-  const handleCloseAlert = () => setIsError(false);
+    form,
+    courses,
+    currentCourseId,
+    isError,
+    confirmModal,
+    watchedPreCourses,
+    fields,
+    append,
+    remove,
+    onSubmit,
+    handleCancel,
+    handleCloseAlert,
+  } = useUpdateCourseController(curriculumID, course);
+  const { control, handleSubmit } = form;
 
   return (
     <form className="space-y-4 p-8" onSubmit={handleSubmit(onSubmit)}>

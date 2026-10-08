@@ -1,21 +1,16 @@
 "use client";
-import { useState, useMemo } from "react";
-import { useForm } from "react-hook-form";
+import { useMemo } from "react";
 import { Button, Card, Modal } from "@mui/material";
 import Image from "next/image";
-import { zodResolver } from "@hookform/resolvers/zod";
-import dayjs from "dayjs";
 import { styled } from "@mui/material/styles";
-import { useRouter } from "next/navigation";
 import { RHFTextField } from "@/shared/components/form/RHFTextField";
 import { RHFDatePickerDayjs } from "@/shared/components/form/RHFDatePicker";
-import { ICurriculum } from "@/features/curriculum/domain/curriculum";
-import { ConfirmModal, ConfirmModalProps } from "@/shared/components/modal/confirmModal";
+import type { ICurriculum } from "@/features/curriculum/domain/curriculum";
+import { ConfirmModal } from "@/shared/components/modal/confirmModal";
 import Alert from "@mui/material/Alert";
 import Snackbar from "@mui/material/Snackbar";
-import { UpdateCurriculumSchema, UpdateCurriculumInputs } from "@/features/curriculum/schema/curriculum";
 import { CropImageCard } from "@/shared/components/cropimagecard";
-import { curriculumService } from "@/features/curriculum/client";
+import { useUpdateCurriculumController } from "@/features/curriculum/hooks/use-update-curriculum-controller";
 
 
 interface CurriculumInfoProps {
@@ -35,12 +30,22 @@ const VisuallyHiddenInput = styled("input")({
 });
 
 export const CurriculumInfoComponent = ({ curriculum }: CurriculumInfoProps) => {
-  const router = useRouter();
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [isEdit, setIsEdit] = useState(false);
-  const [croppingFile, setCroppingFile] = useState<File | null>(null);
-  const [confirmModal, setConfirmModal] = useState<ConfirmModalProps | null>(null);
-  const [isError, setIsError] = useState(false);
+  const {
+    form,
+    selectedFile,
+    isEdit,
+    setIsEdit,
+    croppingFile,
+    confirmModal,
+    isError,
+    setIsError,
+    handleFileChange,
+    handleUploadComplete,
+    handleCropCancel,
+    handleCancel,
+    onSubmit,
+  } = useUpdateCurriculumController(curriculum);
+  const { control, handleSubmit, formState: { isValid } } = form;
 
   const previewSrc = useMemo(() => {
     if (selectedFile) {
@@ -48,98 +53,6 @@ export const CurriculumInfoComponent = ({ curriculum }: CurriculumInfoProps) => 
     }
     return curriculum.thumbnailURL;
   }, [selectedFile, curriculum.thumbnailURL]);
-  const {
-    control,
-    handleSubmit,
-    reset,
-    setValue,
-    formState: { isDirty, isValid },
-  } = useForm<UpdateCurriculumInputs>({
-    resolver: zodResolver(UpdateCurriculumSchema),
-    defaultValues: {
-      title: curriculum.title ?? "",
-      year: curriculum.year ?? "",
-      documentURL: curriculum.documentURL ?? "",
-      description: curriculum.description ?? "",
-      thumbnailFocalPointX: curriculum.thumbnailFocalPointX,
-      thumbnailFocalPointY: curriculum.thumbnailFocalPointY,
-    },
-    mode: "onBlur",
-    reValidateMode: "onChange",
-  });
-
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    setCroppingFile(file);
-    e.target.value = "";
-  };
-
-  const handleUploadComplete = (file: File, focalPoint?: { x: number; y: number }) => {
-    setSelectedFile(file);
-    if (focalPoint) {
-      setValue("thumbnailFocalPointX", focalPoint.x);
-      setValue("thumbnailFocalPointY", focalPoint.y);
-    }
-    setCroppingFile(null);
-  };
-
-  const onSubmit = async (data: UpdateCurriculumInputs) => {
-    try {
-      const year = dayjs(data.year).year().toString();
-
-      const response = await curriculumService.updateCurriculum(
-        curriculum.id,
-        {
-          ...data,
-          year,
-        },
-        selectedFile
-      );
-
-      if (response) {
-        setConfirmModal({
-          isOpen: true,
-          type: "success",
-          onClose: () => setConfirmModal(null),
-          onConfirm: () => {
-            setConfirmModal(null)
-            setIsEdit(false);
-            router.push(
-              `/admin/courses?page=1&pageSize=10&curriculumID=${curriculum.id}`
-            );
-          },
-        });
-        return;
-      }
-
-      setIsError(true);
-    } catch (error) {
-      console.error("Update Error:", error);
-      setIsError(true);
-    }
-  };
-
-  const handleCancel = () => {
-    if (isDirty || selectedFile) {
-      setConfirmModal({
-        isOpen: true,
-        type: "warning",
-        onClose: () => setConfirmModal(null),
-        onConfirm: () => {
-          setIsEdit(false);
-          reset();
-          setSelectedFile(null);
-          setConfirmModal(null);
-        },
-      });
-    } else {
-      setIsEdit(false);
-      reset();
-      setSelectedFile(null);
-    }
-  };
-
   return (
     <div>
       <Card>
@@ -277,7 +190,7 @@ export const CurriculumInfoComponent = ({ curriculum }: CurriculumInfoProps) => 
         </div>
       </Card>
 
-      <Modal open={!!croppingFile} onClose={() => setCroppingFile(null)}>
+      <Modal open={!!croppingFile} onClose={handleCropCancel}>
         <div>
           {croppingFile && (
             <CropImageCard
@@ -285,7 +198,7 @@ export const CurriculumInfoComponent = ({ curriculum }: CurriculumInfoProps) => 
               width={512}
               height={512}
               onUploadComplete={handleUploadComplete}
-              onCancel={() => setCroppingFile(null)}
+              onCancel={handleCropCancel}
             />
           )}
         </div>

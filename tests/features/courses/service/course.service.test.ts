@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import type { ApiResponse, Pageable } from "@/shared/types/response";
+import type { CoursePage } from "@/features/courses/schema/course";
 import type {
   ICourse,
   ICreateCourse,
@@ -16,8 +16,6 @@ const course: ICourse = {
   courseNameEn: "Introduction to Programming",
   credits: "3 (3-0-6)",
   detail: "An introductory course",
-  createdDate: new Date("2026-01-01T00:00:00.000Z"),
-  updatedDate: new Date("2026-01-02T00:00:00.000Z"),
   curriculum: {
     id: 2,
     year: "2026",
@@ -33,16 +31,18 @@ const course: ICourse = {
     description: "Core course",
   },
 };
-const page: Pageable<ICourse> = {
+const page: CoursePage = {
   rows: [course],
   totalRecords: 1,
   page: 1,
   pageSize: 10,
 };
-const response = <T>(data: T): ApiResponse<T> => ({
+const response = <T>(data: T) => ({
   data,
   status: 200,
   statusCode: 200,
+  msg: "Success",
+  err: null,
 });
 
 function createRepository() {
@@ -64,7 +64,7 @@ function createRepository() {
       .mockResolvedValue(response(course)),
     createCourseBatch: vi
       .fn<ICourseRepository["createCourseBatch"]>()
-      .mockResolvedValue(response(course)),
+      .mockResolvedValue(response(null)),
   } satisfies ICourseRepository;
 }
 
@@ -72,7 +72,7 @@ describe("CourseService result handling", () => {
   it("unwraps list and CRUD response data and preserves a missing course", async () => {
     const repository = createRepository();
     const service = new CourseService(repository);
-    const query: QueryCourse = { curriculumID: 2, page: 1 };
+    const query: QueryCourse = { curriculumID: "2", page: 1 };
     const create: ICreateCourse = {
       courseCode: "CS101",
       typeCourseID: 1,
@@ -85,12 +85,21 @@ describe("CourseService result handling", () => {
     const update: IUpdateCourse = { courseCode: "CS101A", curriculumID: 2 };
 
     await expect(service.getCourse(query)).resolves.toBe(page);
+    expect(repository.getCourse).toHaveBeenCalledWith({ curriculumID: 2, page: 1 });
     await expect(service.getCourseById(course.id)).resolves.toBe(course);
     await expect(service.createCourse(create)).resolves.toBe(course);
     await expect(service.updateCourse(course.id, update)).resolves.toBe(course);
     await expect(service.deleteCourse(course.id)).resolves.toBe(course);
     repository.getCourseById.mockResolvedValueOnce(null);
     await expect(service.getCourseById(404)).resolves.toBeNull();
+  });
+
+  it("rejects malformed query input before calling the repository", async () => {
+    const repository = createRepository();
+    const service = new CourseService(repository);
+
+    await expect(service.getCourse({ page: "not-a-number" })).rejects.toThrow();
+    expect(repository.getCourse).not.toHaveBeenCalled();
   });
 
   it("wraps a batch file in the backend's file FormData field", async () => {
@@ -100,7 +109,7 @@ describe("CourseService result handling", () => {
       type: "text/csv",
     });
 
-    await expect(service.createCourseBatch(file)).resolves.toBe(course);
+    await expect(service.createCourseBatch(file)).resolves.toBeNull();
 
     const form = repository.createCourseBatch.mock.calls[0]![0];
     expect(form.get("file")).toBe(file);

@@ -1,49 +1,17 @@
 "use client";
-import { useState } from "react";
 import Image from "next/image";
 import { Button, Typography } from "@mui/material";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
 import { RHFTextField } from "@/shared/components/form/RHFTextField";
-import { clientAuthService } from "@/features/auth/client";
-import { ForgetPasswordSchema } from "@/features/auth/schema/auth";
-
-/* ===== Schema & Types ===== */
-const Schema = ForgetPasswordSchema;
-type FormValues = z.infer<typeof Schema>;
+import { useForgetPasswordForm } from "@/features/auth/hooks/useForgetPasswordForm";
 
 export default function ForgetPasswordAuthLandingPage() {
-  const [submitting, setSubmitting] = useState(false);
-  const [message, setMessage] = useState<string | null>(null);
   const {
     control,
-    handleSubmit,
-    reset,
-    formState: { errors },
-  } = useForm<FormValues>({
-    resolver: zodResolver(Schema),
-    defaultValues: { email: "" },
-    mode: "onChange",
-  });
-
-  const onSubmit = async (data: FormValues) => {
-    setMessage(null);
-    setSubmitting(true);
-    try {
-      const response = await clientAuthService.createCredentailForgetPassowrd({
-        email: data.email,
-      });
-      if (!response.status) {
-        setMessage(
-          "ระบบได้ส่งรหัสผ่านชั่วคราวไปยังอีเมลของคุณแล้ว โปรดตรวจสอบอีเมล",
-        );
-        reset();
-      }
-    } catch (error) {
-      console.log(error);
-    }
-  };
+    errors,
+    isPending,
+    message,
+    submit,
+  } = useForgetPasswordForm();
 
   return (
     <main className="min-h-screen w-full bg-[var(--background)]">
@@ -74,8 +42,8 @@ export default function ForgetPasswordAuthLandingPage() {
           </Typography>
 
           {/* FORM */}
-          <form onSubmit={handleSubmit(onSubmit)} className="mt-8 space-y-5">
-            <RHFTextField<FormValues>
+          <form onSubmit={submit} className="mt-8 space-y-5">
+            <RHFTextField
               name="email"
               control={control}
               label="อีเมล"
@@ -88,7 +56,7 @@ export default function ForgetPasswordAuthLandingPage() {
               <Button
                 type="submit"
                 variant="contained"
-                disabled={submitting}
+                disabled={isPending}
                 className="!h-12 w-full !bg-[var(--color-primary02)] !text-base !normal-case shadow-md hover:!bg-[#1b1361] md:w-1/2"
               >
                 รับรหัสผ่านชั่วคราว
