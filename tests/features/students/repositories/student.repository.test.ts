@@ -39,4 +39,28 @@ describe("student response parsing", () => {
     );
     await expect(repository.getStudents({})).rejects.toBeInstanceOf(ZodError);
   });
+
+  it("validates pagination metadata and preserves an absent user profile", async () => {
+    const http = new HttpHelper();
+    const get = vi.spyOn(http, "get");
+    const repository = new StudentRepository("", http);
+    get.mockResolvedValueOnce(
+      response({ rows: [student], totalRecords: "1", page: 1, pageSize: 10 }),
+    );
+    await expect(repository.getStudents({})).rejects.toBeInstanceOf(ZodError);
+
+    get.mockResolvedValueOnce(response(null));
+    await expect(repository.getStudentByUserId(4)).resolves.toEqual(response(null));
+  });
+
+  it("validates the legitimate null batch-import response", async () => {
+    const http = new HttpHelper();
+    const post = vi.spyOn(http, "post");
+    const repository = new StudentRepository("", http);
+    post.mockResolvedValueOnce(response(null));
+    await expect(repository.createStudentBatch(new FormData())).resolves.toEqual(response(null));
+
+    post.mockResolvedValueOnce(response({ imported: 1 }));
+    await expect(repository.createStudentBatch(new FormData())).rejects.toBeInstanceOf(ZodError);
+  });
 });

@@ -1,26 +1,18 @@
 "use client";
-import React, { useState } from "react";
-import { useForm } from "react-hook-form";
+import React from "react";
 import { Button, Typography, Modal } from "@mui/material";
 // import AddIcon from "@mui/icons-material/Add";
 import Alert from "@mui/material/Alert";
 import Snackbar from "@mui/material/Snackbar";
 import MenuItem from "@mui/material/MenuItem";
-import { useRouter } from "next/navigation";
 import Image from "next/image";
-import { zodResolver } from "@hookform/resolvers/zod";
 import { RHFTextField } from "@/shared/components/form/RHFTextField";
 import { RHFSelect } from "@/shared/components/form/RHFSelect";
-import { IUpdateStudent, IStudent } from "@/features/students/domain/student";
-import {
-  ConfirmModal,
-  ConfirmModalProps,
-} from "@/shared/components/modal/confirmModal";
+import { IStudent } from "@/features/students/domain/student";
+import { ConfirmModal } from "@/shared/components/modal/confirmModal";
 import { styled } from "@mui/material/styles";
 import { CropImageCard } from "@/shared/components/cropimagecard";
-import { UpdateStudentSchema, UpdateStudentInputs } from "@/features/students/schema/student";
-import { studentService } from "@/features/students/client";
-import { useMasterData } from "@/features/master-data/client";
+import { useUpdateStudentController } from "@/features/students/hooks/use-update-student-controller";
 
 
 interface StudentUpdateFormProps {
@@ -41,118 +33,25 @@ const VisuallyHiddenInput = styled("input")({
 });
 
 export const StudentUpdateForm = ({ classBookID, student }: StudentUpdateFormProps) => {
-  const { data: masterData, isPending: isMasterDataPending, isError: isMasterDataError } = useMasterData();
-  const prefixes = masterData?.prefixes ?? [];
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [croppingFile, setCroppingFile] = useState<File | null>(null);
-  const [focalPoint, setFocalPoint] = useState<{ x: number; y: number } | null>(
-    null,
-  );
-  const [isError, setIsError] = useState(false);
-  const [confirmModal, setConfirmModal] = useState<ConfirmModalProps | null>(
-    null,
-  );
-
-  const previewSrc = selectedFile
-    ? URL.createObjectURL(selectedFile)
-    : student.imageUrl;
-
-  const router = useRouter();
   const {
     control,
     handleSubmit,
-    formState: { isValid },
-  } = useForm<UpdateStudentInputs>({
-    resolver: zodResolver(UpdateStudentSchema),
-    defaultValues: {
-      prefixID: student.prefix?.id,
-      firstNameTh: student.firstNameTh,
-      lastNameTh: student.lastNameTh,
-      firstNameEn: student.firstNameEn ?? "",
-      lastNameEn: student.lastNameEn ?? "",
-      studentCode: student.student.studentCode,
-      nickName: student.nickName ?? "",
-      email: student.email,
-      facebook: student.student.facebook || undefined,
-      linkedin: student.student.linkedin || undefined,
-      instagram: student.student.instagram || undefined,
-      github: student.student.github || undefined,
-      // otherProjects: [{ value: "" }],
-    },
-    mode: "onBlur",
-    reValidateMode: "onChange",
-  });
-
-  // const { fields: otherProjects, append: appendOtherProjects } = useFieldArray({
-  //   control,
-  //   name: "otherProjects",
-  // });
-
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0] || null;
-
-    if (file) {
-      setCroppingFile(file);
-    }
-    event.target.value = "";
-  };
-
-  const handleCropComplete = (
-    croppedFile: File,
-    focal?: { x: number; y: number },
-  ) => {
-    setSelectedFile(croppedFile);
-    if (focal) {
-      setFocalPoint(focal);
-    }
-    setCroppingFile(null);
-  };
-
-  const handleCropCancel = () => {
-    setCroppingFile(null);
-  };
-
-  const onSubmit = async (data: UpdateStudentInputs) => {
-    try {
-      const payload: IUpdateStudent = {
-        prefixID: data.prefixID,
-        firstNameTh: data.firstNameTh,
-        lastNameTh: data.lastNameTh,
-        firstNameEn: data.firstNameEn || null,
-        lastNameEn: data.lastNameEn || null,
-        studentCode: data.studentCode,
-        nickName: data.nickName,
-        email: data.email,
-        facebook: data.facebook,
-        linkedin: data.linkedin,
-        instagram: data.instagram,
-        github: data.github,
-        imageFocalPointX: focalPoint?.x,
-        imageFocalPointY: focalPoint?.y,
-      };
-      const response = await studentService.updateStudent(
-        payload,
-        selectedFile,
-        classBookID,
-        student.id,
-      );
-
-      if (!response) setIsError(true);
-      else {
-        setConfirmModal({
-          isOpen: true,
-          type: "success",
-          onClose: () => setConfirmModal(null),
-          onConfirm: () => {
-            router.push(`/admin/students?classBookID=${classBookID}`);
-          },
-        });
-      }
-    } catch (error) {
-      console.log(error);
-      setIsError(true);
-    }
-  };
+    isValid,
+    prefixes,
+    isMasterDataPending,
+    isMasterDataError,
+    previewSrc,
+    croppingFile,
+    handleFileChange,
+    handleCropComplete,
+    handleCropCancel,
+    handleCancel,
+    confirmModal,
+    isError,
+    isPending,
+    onSubmit,
+    handleCloseError,
+  } = useUpdateStudentController(classBookID, student);
 
   return (
     <form className="space-y-4 p-8" onSubmit={handleSubmit(onSubmit)}>
@@ -160,11 +59,11 @@ export const StudentUpdateForm = ({ classBookID, student }: StudentUpdateFormPro
         anchorOrigin={{ vertical: "top", horizontal: "right" }}
         open={isError}
         autoHideDuration={4000}
-        onClose={() => setIsError(false)}
+        onClose={handleCloseError}
       >
         <Alert
           severity="error"
-          onClose={() => setIsError(false)}
+          onClose={handleCloseError}
           sx={{ width: "100%" }}
         >
           ไม่สามารถบันทึกข้อมูลได้ในขณะนี้ กรุณาลองใหม่อีกครั้ง
@@ -430,16 +329,7 @@ export const StudentUpdateForm = ({ classBookID, student }: StudentUpdateFormPro
         <Button
           variant="outlined"
           size="large"
-          onClick={() => {
-            setConfirmModal({
-              isOpen: true,
-              type: "warning",
-              onClose: () => setConfirmModal(null),
-              onConfirm: () => {
-                router.push(`/admin/students?classBookID=${classBookID}`);
-              },
-            });
-          }}
+          onClick={handleCancel}
         >
           ยกเลิก
         </Button>
@@ -447,7 +337,7 @@ export const StudentUpdateForm = ({ classBookID, student }: StudentUpdateFormPro
           type="submit"
           variant="contained"
           size="large"
-          disabled={!isValid}
+          disabled={!isValid || isPending}
         >
           บันทึกข้อมูล
         </Button>
