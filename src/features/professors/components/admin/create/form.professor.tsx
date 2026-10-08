@@ -1,5 +1,5 @@
 "use client";
-import React, { FC, useState, useEffect } from "react";
+import React, { FC, useState } from "react";
 import { useForm, useFieldArray } from "react-hook-form";
 import { Button, Modal, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
@@ -9,7 +9,6 @@ import Alert from "@mui/material/Alert";
 import Snackbar from "@mui/material/Snackbar";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
-import { Position } from "@/features/master-data/domain/master-data";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { RHFTextField } from "@/shared/components/form/RHFTextField";
 import { RHFSelect } from "@/shared/components/form/RHFSelect";
@@ -24,7 +23,7 @@ import {
   CreateProfessorSchema,
   CreateProfessorPayload,
 } from "@/features/professors/schema/professor";
-import { masterDataService } from "@/features/master-data/client";
+import { useMasterData } from "@/features/master-data/client";
 import { professorService } from "@/features/professors/client";
 
 
@@ -41,7 +40,8 @@ const VisuallyHiddenInput = styled("input")({
 });
 
 export const FormProfesssors: FC = () => {
-  const [prefixes, setPrefixes] = useState<Position[]>([]);
+  const { data: masterData, isPending: isMasterDataPending, isError: isMasterDataError } = useMasterData();
+  const prefixes = masterData?.prefixes ?? [];
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isError, setIsError] = useState(false);
   const router = useRouter();
@@ -156,14 +156,6 @@ export const FormProfesssors: FC = () => {
     }
   };
 
-  useEffect(() => {
-    const fetchData = async () => {
-      const res = await masterDataService.getMasterData();
-      setPrefixes(res.prefixes);
-    };
-    fetchData();
-  }, []);
-
   return (
     <form className="space-y-4 p-8" onSubmit={handleSubmit(onSubmit)}>
       <Snackbar
@@ -180,6 +172,9 @@ export const FormProfesssors: FC = () => {
           ไม่สามารถเพิ่มข้อมูลอาจารย์ได้
         </Alert>
       </Snackbar>
+
+      {isMasterDataPending && <Alert severity="info">กำลังโหลดตัวเลือกคำนำหน้า...</Alert>}
+      {isMasterDataError && <Alert severity="error">ไม่สามารถโหลดตัวเลือกคำนำหน้าได้</Alert>}
       <div>
         <Typography variant="h6" fontWeight="bold">
           ข้อมูลส่วนตัว
@@ -230,6 +225,7 @@ export const FormProfesssors: FC = () => {
                   required
                   displayEmpty
                   requiredMark
+                  disabled={isMasterDataPending}
                   renderValue={(value) => {
                     if (!value) {
                       return (
@@ -289,6 +285,7 @@ export const FormProfesssors: FC = () => {
                   required
                   displayEmpty
                   requiredMark
+                  disabled={isMasterDataPending}
                   renderValue={(value) => {
                     if (!value) {
                       return (

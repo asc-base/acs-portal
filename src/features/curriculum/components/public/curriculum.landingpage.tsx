@@ -100,7 +100,7 @@ const CurriculumListComponents = ({
                       curriculumId={focusCurriculum?.id}
                       typeCourseId={item.id}
                       type={item.type}
-                      description={item.description}
+                      description={item.description ?? ""}
                       index={idx}
                     />
                   </div>

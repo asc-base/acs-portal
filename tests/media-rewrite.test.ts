@@ -171,8 +171,7 @@ test("the production build rewrites public images using runtime RustFS settings"
         } }));
       } else if (path === "/api/v1/master-data") {
         response.end(JSON.stringify({ data: {
-          majorPositions: [], types: [], roles: [], typeCourses: [], listTypes: [], educationLevels: [],
-          tags: [], tagsGroups: [], prefixes: [], newsCategories: [],
+          roles: [], typeCourses: [], tagsGroups: [], tags: [], prefixes: [], newsCategories: [],
         } }));
       } else if (path.startsWith("/api/v1/news/") || path.startsWith("/api/v1/curriculums")) {
         response.end(JSON.stringify({ data: { rows: [], totalRecords: 0, page: 1, pageSize: 12 } }));
