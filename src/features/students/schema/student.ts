@@ -2,6 +2,7 @@ import { z } from "zod";
 import { CommonUserSchema } from "@/shared/schema/user";
 import { StudentResponseSchema } from "@/shared/schema/profile-response";
 import { CreateStudentCsvSchema } from "@/features/students/schema/student-csv";
+import { PageMetadataSchema } from "@/shared/schema/page-metadata";
 
 const optionalSocialLink = (hostname: RegExp, message: string) =>
     z.string().trim().pipe(
@@ -109,9 +110,7 @@ export const StudentSearchSchema = QueryStudentSchema.pick({ search: true });
 
 export const StudentPageSchema = z.object({
     rows: StudentResponseSchema.array(),
-    totalRecords: z.number(),
-    page: z.number(),
-    pageSize: z.number(),
+    ...PageMetadataSchema.shape,
 });
 export const StudentBatchResponseSchema = z.null();
 export const StudentIdSchema = z.number();

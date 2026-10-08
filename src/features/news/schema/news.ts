@@ -1,6 +1,7 @@
 import { z } from "zod";
 import dayjs from "dayjs";
 import { NewsCategorySchema, TagSchema } from "@/shared/schema/references";
+import { PageMetadataSchema } from "@/shared/schema/page-metadata";
 
 export const NewsImageSchema = z.object({
   id: z.number(),
@@ -42,9 +43,7 @@ export const NewsResponseSchema = z.object({
 
 export const NewsPageSchema = z.object({
   rows: z.array(NewsResponseSchema),
-  totalRecords: z.number(),
-  page: z.number(),
-  pageSize: z.number(),
+  ...PageMetadataSchema.shape,
 });
 
 export const NewsBulletinTypeSchema = z.enum(["HIGHLIGHT", "ANNOUNCEMENT"]);
@@ -81,9 +80,7 @@ export const NewsFeatureResponseSchema = NewsInformationSchema.extend({
 
 export const NewsInformationsPageSchema = z.object({
   rows: z.array(NewsFeatureResponseSchema),
-  totalRecords: z.number(),
-  page: z.number(),
-  pageSize: z.number(),
+  ...PageMetadataSchema.shape,
 });
 
 const QueryNumberSchema = z.union([
