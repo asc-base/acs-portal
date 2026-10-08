@@ -6,7 +6,7 @@ import AddIcon from "@mui/icons-material/Add";
 import Image from "next/image";
 import { useForm, useFieldArray } from "react-hook-form";
 import { IProfessor } from "@/features/professors/domain/professor";
-import { EducationLevel, Position } from "@/features/master-data/domain/master-data";
+import { Position } from "@/features/master-data/domain/master-data";
 import { Delete } from "@mui/icons-material";
 import { zodResolver } from "@hookform/resolvers/zod";
 import MenuItem from "@mui/material/MenuItem";
@@ -43,7 +43,6 @@ const VisuallyHiddenInput = styled("input")({
 interface ProfessorFormComponentProps {
   professor: IProfessor;
   prefixes: Position[];
-  educationLevel: EducationLevel[];
 };
 
 const ProfessorFormComponent = ({ professor, prefixes }: ProfessorFormComponentProps) => {

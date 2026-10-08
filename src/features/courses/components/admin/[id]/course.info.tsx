@@ -21,13 +21,12 @@ import {
   ConfirmModal,
   ConfirmModalProps,
 } from "@/shared/components/modal/confirmModal";
-import { TypeCourse } from "@/features/master-data/domain/master-data";
 import {
   updateCourseSchema,
   UpdateCourseSchemaInput,
 } from "@/features/courses/schema/course";
 import { courseService } from "@/features/courses/client";
-import { masterDataService as typeCourseService } from "@/features/master-data/client";
+import { useMasterData } from "@/features/master-data/client";
 
 
 interface CoursesFormProps {
@@ -37,7 +36,8 @@ interface CoursesFormProps {
 
 export const CourseInfo: FC<CoursesFormProps> = ({ curriculumID, course }) => {
   const router = useRouter();
-  const [typeCourses, setTypeCourses] = useState<TypeCourse[]>([]);
+  const { data: masterData, isPending: isMasterDataPending, isError: isMasterDataError } = useMasterData();
+  const typeCourses = masterData?.typeCourses ?? [];
   const [courses, setCourses] = useState<ICourse[]>([]);
   const [isError, setIsError] = useState(false);
   const [confirmModal, setConfirmModal] = useState<ConfirmModalProps | null>(
@@ -140,16 +140,11 @@ export const CourseInfo: FC<CoursesFormProps> = ({ curriculumID, course }) => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [typeRes, courseRes] = await Promise.all([
-          typeCourseService.getMasterData(),
-          courseService.getCourse({
-            curriculumID,
-            orderBy: "courseCode",
-            sortBy: "asc",
-          }),
-        ]);
-
-        setTypeCourses(typeRes.typeCourses);
+        const courseRes = await courseService.getCourse({
+          curriculumID,
+          orderBy: "courseCode",
+          sortBy: "asc",
+        });
         setCourses(courseRes.rows);
       } catch (err) {
         console.error(err);
@@ -178,6 +173,9 @@ export const CourseInfo: FC<CoursesFormProps> = ({ curriculumID, course }) => {
         </Alert>
       </Snackbar>
 
+      {isMasterDataPending && <Alert severity="info">กำลังโหลดตัวเลือกกลุ่มวิชา...</Alert>}
+      {isMasterDataError && <Alert severity="error">ไม่สามารถโหลดตัวเลือกกลุ่มวิชาได้</Alert>}
+
       <h3 className="mb-4 text-lg font-bold">แก้ไขข้อมูลรายวิชา</h3>
 
       <div className="grid grid-cols-3 gap-4">
@@ -187,6 +185,7 @@ export const CourseInfo: FC<CoursesFormProps> = ({ curriculumID, course }) => {
           label="กลุ่มวิชา"
           variant="outlined"
           size="small"
+          disabled={isMasterDataPending}
           requiredMark
         >
           {typeCourses.map((typeCourse) => (

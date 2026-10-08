@@ -1,6 +1,5 @@
 "use client";
 import React from "react";
-import { IType } from "@/features/master-data/domain/master-data";
 import { Button, FormControlLabel, FormGroup } from "@mui/material";
 import ExpandLessIcon from "@mui/icons-material/ExpandLess";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
@@ -12,7 +11,7 @@ import { useRouter, usePathname, useSearchParams } from "next/navigation";
 
 interface FilterComponentProps {
   header: string;
-  list: IType[] | ICourse[] | IClassBook[] | Tag[];
+  list: ICourse[] | IClassBook[] | Tag[];
   searchBy: string;
 }
 

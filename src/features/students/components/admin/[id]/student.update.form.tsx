@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { Button, Typography, Modal } from "@mui/material";
 // import AddIcon from "@mui/icons-material/Add";
@@ -11,7 +11,6 @@ import Image from "next/image";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { RHFTextField } from "@/shared/components/form/RHFTextField";
 import { RHFSelect } from "@/shared/components/form/RHFSelect";
-import { Position } from "@/features/master-data/domain/master-data";
 import { IUpdateStudent, IStudent } from "@/features/students/domain/student";
 import {
   ConfirmModal,
@@ -21,7 +20,7 @@ import { styled } from "@mui/material/styles";
 import { CropImageCard } from "@/shared/components/cropimagecard";
 import { UpdateStudentSchema, UpdateStudentInputs } from "@/features/students/schema/student";
 import { studentService } from "@/features/students/client";
-import { masterDataService } from "@/features/master-data/client";
+import { useMasterData } from "@/features/master-data/client";
 
 
 interface StudentUpdateFormProps {
@@ -42,7 +41,8 @@ const VisuallyHiddenInput = styled("input")({
 });
 
 export const StudentUpdateForm = ({ classBookID, student }: StudentUpdateFormProps) => {
-  const [prefixes, setPrefixes] = useState<Position[]>([]);
+  const { data: masterData, isPending: isMasterDataPending, isError: isMasterDataError } = useMasterData();
+  const prefixes = masterData?.prefixes ?? [];
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [croppingFile, setCroppingFile] = useState<File | null>(null);
   const [focalPoint, setFocalPoint] = useState<{ x: number; y: number } | null>(
@@ -58,14 +58,6 @@ export const StudentUpdateForm = ({ classBookID, student }: StudentUpdateFormPro
     : student.imageUrl;
 
   const router = useRouter();
-  useEffect(() => {
-    const fetchData = async () => {
-      const res = await masterDataService.getMasterData();
-      setPrefixes(res.prefixes);
-    };
-    fetchData();
-  }, []);
-
   const {
     control,
     handleSubmit,
@@ -178,6 +170,8 @@ export const StudentUpdateForm = ({ classBookID, student }: StudentUpdateFormPro
           ไม่สามารถบันทึกข้อมูลได้ในขณะนี้ กรุณาลองใหม่อีกครั้ง
         </Alert>
       </Snackbar>
+      {isMasterDataPending && <Alert severity="info">กำลังโหลดตัวเลือกคำนำหน้า...</Alert>}
+      {isMasterDataError && <Alert severity="error">ไม่สามารถโหลดตัวเลือกคำนำหน้าได้</Alert>}
       <Typography variant="h6" fontWeight="bold">
         ข้อมูลส่วนตัว
       </Typography>
@@ -228,6 +222,7 @@ export const StudentUpdateForm = ({ classBookID, student }: StudentUpdateFormPro
               required
               displayEmpty
               requiredMark
+              disabled={isMasterDataPending}
               renderValue={(value) => {
                 if (!value) {
                   return (
@@ -276,6 +271,7 @@ export const StudentUpdateForm = ({ classBookID, student }: StudentUpdateFormPro
               required
               displayEmpty
               requiredMark
+              disabled={isMasterDataPending}
               renderValue={(value) => {
                 if (!value) {
                   return (
