@@ -1,0 +1,620 @@
+"use client";
+import React, { useState, useEffect } from "react";
+import { Button, InputAdornment, Modal, Chip, TextField } from "@mui/material";
+import { RHFTextField } from "@/shared/components/form/RHFTextField";
+import { styled } from "@mui/material/styles";
+import GitHubIcon from "@mui/icons-material/GitHub";
+import FacebookRoundedIcon from "@mui/icons-material/FacebookRounded";
+import LinkedInIcon from "@mui/icons-material/LinkedIn";
+import InstagramIcon from "@mui/icons-material/Instagram";
+import Image from "next/image";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import {
+  UpdateStudentSchema,
+  UpdateStudentInputs,
+} from "@/features/students/schema/student";
+import { CropImageCard } from "@/shared/components/cropimagecard";
+import { useRouter } from "next/navigation";
+import { IStudent, IUpdateStudent } from "@/features/students/domain/student";
+import { clientAuthService } from "@/features/auth/client";
+import { studentService } from "@/features/students/client";
+
+
+const VisuallyHiddenInput = styled("input")({
+  clip: "rect(0 0 0 0)",
+  clipPath: "inset(50%)",
+  height: 1,
+  overflow: "hidden",
+  position: "absolute",
+  bottom: 0,
+  left: 0,
+  whiteSpace: "nowrap",
+  width: 1,
+});
+
+
+
+// interface ProfileFormProps {
+//   studentData: IStudent;
+// }
+
+const ProfileForm = () => {
+  const [isEditing, setIsEditing] = useState(false);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [student, setStudent] = useState<IStudent | null>(null);
+  const router = useRouter();
+  useEffect(() => {
+    const fetchStudent = async () => {
+      try {
+        const user = await clientAuthService.getUser();
+        if (!user) {
+          router.push("/auth/student");
+          return;
+        }
+        const studentResponse = await studentService.getStudentByUserId(
+          user.id,
+        );
+        setStudent(studentResponse);
+      } catch (error) {
+        console.error("Error fetching student profile:", error);
+        router.push("/auth/student");
+      }
+    };
+    fetchStudent();
+  }, [router]);
+
+  const [skillInput, setSkillInput] = useState("");
+
+  const { handleSubmit, control, reset, watch, setValue } = useForm<UpdateStudentInputs>({
+    resolver: zodResolver(UpdateStudentSchema),
+    defaultValues: {
+      studentCode: student?.student.studentCode || "",
+      firstNameTh: student?.firstNameTh || "",
+      lastNameTh: student?.lastNameTh || "",
+      firstNameEn: student?.firstNameEn || "",
+      lastNameEn: student?.lastNameEn || "",
+      email: student?.email || "",
+      nickName: student?.nickName || "",
+      github: student?.student.github || "",
+      linkedin: student?.student.linkedin || "",
+      facebook: student?.student.facebook || "",
+      instagram: student?.student.instagram || "",
+      skills: student?.student.skills || [],
+    },
+  });
+
+  const currentSkills = watch("skills") || [];
+
+  const handleAddSkill = () => {
+    const trimmed = skillInput.trim();
+    if (trimmed && !currentSkills.includes(trimmed)) {
+      setValue("skills", [...currentSkills, trimmed], { shouldDirty: true });
+      setSkillInput("");
+    }
+  };
+
+  const handleDeleteSkill = (skillToDelete: string) => {
+    setValue(
+      "skills",
+      currentSkills.filter((skill) => skill !== skillToDelete),
+      { shouldDirty: true }
+    );
+  };
+  const [croppingFile, setCroppingFile] = useState<File | null>(null);
+  const [focalPoint, setFocalPoint] = useState<{ x: number; y: number } | null>(null);
+
+  useEffect(() => {
+    reset({
+      studentCode: student?.student.studentCode || "",
+      firstNameTh: student?.firstNameTh || "",
+      lastNameTh: student?.lastNameTh || "",
+      firstNameEn: student?.firstNameEn || "",
+      lastNameEn: student?.lastNameEn || "",
+      email: student?.email || "",
+      nickName: student?.nickName || "",
+      github: student?.student.github || "",
+      linkedin: student?.student.linkedin || "",
+      facebook: student?.student.facebook || "",
+      instagram: student?.student.instagram || "",
+      skills: student?.student.skills || [],
+    });
+    setSkillInput("");
+    setSelectedFile(null);
+    setFocalPoint(null);
+  }, [student, reset]);
+
+  const { nickName, firstNameTh, firstNameEn, lastNameTh, lastNameEn } =
+    student ?? {};
+
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0] || null;
+
+    if (file) {
+      setCroppingFile(file);
+    }
+    event.target.value = "";
+  };
+
+  const handleCropComplete = (
+    croppedFile: File,
+    focal?: { x: number; y: number },
+  ) => {
+    setSelectedFile(croppedFile);
+    if (focal) {
+      setFocalPoint(focal);
+    }
+    setCroppingFile(null);
+  };
+
+  const handleCropCancel = () => {
+    setCroppingFile(null);
+  };
+
+  const handleEdit = () => {
+    setIsEditing(true);
+  };
+
+  const handleCancel = () => {
+    reset({
+      studentCode: student?.student.studentCode || "",
+      firstNameTh: student?.firstNameTh || "",
+      lastNameTh: student?.lastNameTh || "",
+      firstNameEn: student?.firstNameEn || "",
+      lastNameEn: student?.lastNameEn || "",
+      email: student?.email || "",
+      nickName: student?.nickName || "",
+      github: student?.student.github || "",
+      linkedin: student?.student.linkedin || "",
+      facebook: student?.student.facebook || "",
+      instagram: student?.student.instagram || "",
+      skills: student?.student.skills || [],
+    });
+    setSkillInput("");
+    setSelectedFile(null);
+    setFocalPoint(null);
+    setIsEditing(false);
+  };
+
+  const onSubmit = async (data: UpdateStudentInputs) => {
+    try {
+      setIsEditing(false);
+      const id = student?.id;
+      const classBookID = student?.student.classBookID;
+
+      if (!id || !classBookID) {
+        return;
+      }
+
+      const payload: IUpdateStudent = {
+        ...data,
+        imageFocalPointX: focalPoint?.x,
+        imageFocalPointY: focalPoint?.y,
+      };
+
+      const response = await studentService.updateStudent(
+        payload,
+        selectedFile,
+        classBookID,
+        id,
+      );
+      if (response) {
+        setStudent(response);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  return (
+    <div className="w-full flex-col px-20 py-6">
+      <h2 className="text-primary01 mb-4 font-bold">แก้ไขโปรไฟล์</h2>
+      <h3 className="text-primary01 text-xl font-bold">
+        ข้อมูลส่วนตัว
+        <span className="text-accent04 ml-2 text-sm font-bold">
+          (หากต้องการแก้ไขติดต่อแอดมิน)
+        </span>
+      </h3>
+      <form onSubmit={handleSubmit(onSubmit)}>
+        {/* Section 1 */}
+        <div className="flex flex-col items-center gap-x-10 md:flex-row">
+          {/* Profile Image */}
+          <div className="mt-6 mb-16 flex flex-row items-center gap-x-8">
+            <div className="relative inline-block">
+              <Button
+                component={isEditing ? "label" : "div"}
+                disabled={!isEditing}
+                className="group relative flex items-center justify-center overflow-hidden rounded-2xl p-0"
+                sx={{
+                  borderRadius: "16px",
+                  width: "176px",
+                  height: "176px",
+                  padding: 0,
+                  minWidth: 0,
+                  backgroundColor: "var(--color-neutral02)",
+                  "&:hover": {
+                    backgroundColor: isEditing
+                      ? "var(--color-neutral03)"
+                      : "var(--color-neutral02)",
+                  },
+                  cursor: isEditing ? "pointer" : "default",
+                }}
+              >
+                {(selectedFile || student?.imageUrl) && (
+                  <Image
+                    src={
+                      selectedFile
+                        ? URL.createObjectURL(selectedFile)
+                        : (student?.imageUrl ?? "")
+                    }
+                    alt="Profile"
+                    width={300}
+                    height={300}
+                    className="h-full w-full object-cover transition-opacity"
+                  />
+                )}
+                {isEditing && (
+                  <div
+                    className={`flex items-center justify-center ${selectedFile || student?.imageUrl
+                      ? "absolute inset-0 z-10 h-full w-full bg-black/40 opacity-0 transition-opacity duration-300 hover:opacity-100"
+                      : "relative h-full w-full opacity-100"
+                      } `}
+                  >
+                    <div className="border-neutral03 bg-neutral01/70 flex items-center justify-center rounded-lg border px-6 py-3 shadow-sm backdrop-blur-sm">
+                      <span className="text-neutral05 text-base font-medium">
+                        อัปโหลดรูปภาพ
+                      </span>
+                    </div>
+                  </div>
+                )}
+                {!(selectedFile || student?.imageUrl) && !isEditing && (
+                  <span className="text-neutral04 text-sm font-medium">
+                    ไม่มีรูปโปรไฟล์
+                  </span>
+                )}
+                {isEditing && (
+                  <VisuallyHiddenInput
+                    type="file"
+                    accept="image/*"
+                    onChange={handleFileChange}
+                  />
+                )}
+              </Button>
+            </div>
+          </div>
+          {/* Personal Info */}
+          <div className="text-neutral04 w-full">
+            <div className="grid grid-cols-[1fr_auto_1fr] gap-y-6 text-base md:grid-cols-[max-content_24px_1fr]">
+              {/* Row 1: Student ID */}
+              <div className="text-neutral04">รหัสนักศึกษา</div>
+              <div className="text-center">:</div>
+              <div className="text-primary01 font-bold">
+                {student?.student.studentCode || "XXXXXXXXXX"}
+              </div>
+
+              {/* Row 2: Nickname */}
+              <div className="text-neutral04">ชื่อเล่น</div>
+              <div className="text-center">:</div>
+              <div className="text-primary01 font-bold">
+                {nickName || "ก้องภพ"}
+              </div>
+
+              {/* Row 3: Full Name TH */}
+              <div className="text-neutral04">ชื่อ - นามสกุล (ภาษาไทย)</div>
+              <div className="text-center">:</div>
+              <div className="text-primary01 font-bold">
+                {student
+                  ? `${student.prefix?.nameTh || ""} ${firstNameTh} ${lastNameTh}`.trim()
+                  : "สมชาย ใจดี"}
+              </div>
+
+              {/* Row 4: Full Name EN */}
+              <div className="text-neutral04">ชื่อ - นามสกุล (ภาษาอังกฤษ)</div>
+              <div className="text-center">:</div>
+              <div className="text-primary01 font-bold">
+                {student
+                  ? `${student.prefix?.shortNameEn || ""} ${firstNameEn} ${lastNameEn}`.trim()
+                  : "Somchai Jaidee"}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Section 2: Social Links */}
+        <div className="text-neutral04 mt-6 flex flex-col gap-4">
+          <div className="flex flex-col gap-4 md:flex-row">
+            <div className="group md:w-1/2">
+              <h4 className="group-focus-within:text-primary03">Github</h4>
+              <RHFTextField
+                name="github"
+                control={control}
+                placeholder="http://github.com/"
+                fullWidth
+                variant="outlined"
+                disabled={!isEditing}
+                sx={{
+                  "& .MuiOutlinedInput-root": {
+                    "& fieldset": {
+                      borderColor: "neutral03",
+                    },
+                    "&.Mui-focused fieldset": {
+                      borderColor: "primary03",
+                    },
+                  },
+                  "& .MuiOutlinedInput-root.Mui-focused .MuiInputAdornment-root .MuiSvgIcon-root":
+                  {
+                    color: "primary.main",
+                  },
+                }}
+                slotProps={{
+                  input: {
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <GitHubIcon />
+                      </InputAdornment>
+                    ),
+                  },
+                }}
+              />
+            </div>
+            <div className="group md:w-1/2">
+              <h4 className="group-focus-within:text-primary03">LinkIn</h4>
+              <RHFTextField
+                name="linkedin"
+                control={control}
+                placeholder="https://www.linkin.com/in/"
+                fullWidth
+                variant="outlined"
+                disabled={!isEditing}
+                sx={{
+                  "& .MuiOutlinedInput-root": {
+                    "& fieldset": {
+                      borderColor: "neutral03",
+                    },
+                    "&.Mui-focused fieldset": {
+                      borderColor: "primary03",
+                    },
+                  },
+                  "& .MuiOutlinedInput-root.Mui-focused .MuiInputAdornment-root .MuiSvgIcon-root":
+                  {
+                    color: "primary.main",
+                  },
+                }}
+                slotProps={{
+                  input: {
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <LinkedInIcon />
+                      </InputAdornment>
+                    ),
+                  },
+                }}
+              />
+            </div>
+          </div>
+
+          <div className="flex flex-col gap-4 md:flex-row">
+            <div className="group md:w-1/2">
+              <h4 className="group-focus-within:text-primary03">Facebook</h4>
+              <RHFTextField
+                name="facebook"
+                control={control}
+                placeholder="https://facebook.com/"
+                fullWidth
+                variant="outlined"
+                disabled={!isEditing}
+                sx={{
+                  "& .MuiOutlinedInput-root": {
+                    "& fieldset": {
+                      borderColor: "neutral03",
+                    },
+                    "&.Mui-focused fieldset": {
+                      borderColor: "primary03",
+                    },
+                  },
+                  "& .MuiOutlinedInput-root.Mui-focused .MuiInputAdornment-root .MuiSvgIcon-root":
+                  {
+                    color: "primary.main",
+                  },
+                }}
+                slotProps={{
+                  input: {
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <FacebookRoundedIcon />
+                      </InputAdornment>
+                    ),
+                  },
+                }}
+              />
+            </div>
+            <div className="group md:w-1/2">
+              <h4 className="group-focus-within:text-primary03">Instagram</h4>
+              <RHFTextField
+                name="instagram"
+                control={control}
+                placeholder="https://instagram.com/"
+                fullWidth
+                variant="outlined"
+                disabled={!isEditing}
+                sx={{
+                  "& .MuiOutlinedInput-root": {
+                    "& fieldset": {
+                      borderColor: "neutral03",
+                    },
+                    "&.Mui-focused fieldset": {
+                      borderColor: "primary03",
+                    },
+                  },
+                  "& .MuiOutlinedInput-root.Mui-focused .MuiInputAdornment-root .MuiSvgIcon-root":
+                  {
+                    color: "primary.main",
+                  },
+                }}
+                slotProps={{
+                  input: {
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <InstagramIcon />
+                      </InputAdornment>
+                    ),
+                  },
+                }}
+              />
+            </div>
+          </div>
+        </div>
+
+
+        <div className="group text-neutral04 mt-6 flex flex-col">
+          <h4 className="group-focus-within:text-primary03">Skills</h4>
+          <div className="flex flex-col gap-2 md:flex-row md:items-start">
+            <div className="grow">
+              <TextField
+                value={skillInput}
+                onChange={(e) => setSkillInput(e.target.value)}
+                fullWidth
+                variant="outlined"
+                size="small"
+                placeholder="เพิ่ม skills ของคุณ ..."
+                disabled={!isEditing}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    handleAddSkill();
+                  }
+                }}
+                sx={{
+                  "& .MuiOutlinedInput-root": {
+                    "& fieldset": { borderColor: "var(--color-neutral03)" },
+                    "&.Mui-focused fieldset": { borderColor: "var(--color-primary03)" },
+                  },
+                }}
+              />
+            </div>
+            <Button
+              variant="contained"
+              disabled={!isEditing || !skillInput.trim()}
+              onClick={handleAddSkill}
+              sx={{
+                backgroundColor: "var(--color-primary02)",
+                color: "var(--color-neutral01)",
+                height: "40px",
+                minWidth: "100px",
+                alignSelf: "flex-start",
+                "&:hover": { backgroundColor: "var(--color-primary01)" },
+              }}
+            >
+              เพิ่ม
+            </Button>
+          </div>
+
+          {currentSkills.length > 0 && (
+            <div className="mt-1 flex flex-wrap gap-2">
+              {currentSkills.map((skill, index) => (
+                <Chip
+                  key={index}
+                  label={skill}
+                  onDelete={isEditing ? () => handleDeleteSkill(skill) : undefined}
+                  sx={{
+                    backgroundColor: "var(--color-neutral02)",
+                    borderRadius: "16px",
+                    fontSize: "var(--text-h5)",
+                    color: "var(--color-neutral05)",
+                    "& .MuiChip-deleteIcon": {
+                      color: "var(--color-neutral04)",
+                      "&:hover": { color: "var(--color-neutral05)" },
+                    },
+                  }}
+                />
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Section 3: Projects */}
+        {/* Commented out due to incomplete implementation */}
+
+        {/* <div className="mt-6 flex flex-row items-center justify-between">
+          <h3 className="text-primary01 mb-4 font-bold">โปรเจกต์อื่นๆ</h3>
+          <AddCircleOutlineRoundedIcon
+            sx={{ fontSize: 36, color: "primary.main", cursor: "pointer" }}
+            onClick={handleAddProject}
+          />
+        </div>
+        {projects.map((_, index) => (
+          <div key={index + 1}>
+            <h4 className="min-w-[60px] text-sm font-medium text-gray-600">
+              {index + 1}.
+            </h4>
+            <div className="item-center flex flex-row">
+              <Controller
+                name={`projects.${index}.title`}
+                control={control}
+                render={({ field }) => (
+                  <TextField
+                    {...field}
+                    value={field.value ?? ""}
+                    placeholder="กรอกชื่อโปรเจกต์..."
+                    fullWidth
+                    variant="outlined"
+                  />
+                )}
+              />
+            </div>
+          </div>
+        ))} */}
+
+        <div className="mt-6 flex w-full flex-row justify-center gap-x-4 align-bottom md:justify-end">
+          {!isEditing ? (
+            <Button
+              variant="contained"
+              color="primary"
+              size="medium"
+              className="px-16 py-8"
+              onClick={handleEdit}
+            >
+              แก้ไขข้อมูล
+            </Button>
+          ) : (
+            <>
+              <Button
+                variant="outlined"
+                color="primary"
+                size="medium"
+                className="px-16 py-8"
+                onClick={handleCancel}
+              >
+                ยกเลิก
+              </Button>
+              <Button
+                type="submit"
+                variant="contained"
+                color="primary"
+                size="medium"
+                className="px-16 py-8"
+              >
+                บันทึกข้อมูล
+              </Button>
+            </>
+          )}
+        </div>
+        <Modal open={!!croppingFile} onClose={handleCropCancel}>
+          <div>
+            {croppingFile && (
+              <CropImageCard
+                file={croppingFile}
+                width={536}
+                height={480}
+                onUploadComplete={handleCropComplete}
+                onCancel={handleCropCancel}
+              />
+            )}
+          </div>
+        </Modal>
+      </form>
+    </div>
+  );
+};
+
+export default ProfileForm;

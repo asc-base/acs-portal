@@ -1,37 +1,36 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# ACS Portal
 
-## Getting Started
+Next.js frontend for the Applied Computer Science program at KMUTT.
 
-First, run the development server:
+## Development
+
+Set `API_URL` to the backend origin and run:
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Browser requests use `/api`; the development rewrite forwards them to `API_URL`. Server entrypoints call the backend directly.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Source layout
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- `src/app` contains Next.js route entrypoints and application layouts.
+- `src/features/<name>` groups each feature's screens, schemas, domain types, services, and repositories.
+- `src/shared` contains reusable UI, common schemas/types, HTTP transport, and theme.
+- `tests/features/<name>` mirrors feature-owned unit tests; `tests/shared` holds tests for shared code.
+- `src/proxy.ts` handles admin access and media requests.
 
-## Learn More
+Features expose `client.ts` for browser calls and `server.ts` for server rendered data where both are needed. Server calls forward only the current request's Cookie and use `no-store`; client calls go through `/api` with credentials.
 
-To learn more about Next.js, take a look at the following resources:
+## Checks
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```bash
+npm test
+npm run test:watch
+npm test -- tests/features/students
+npm run lint
+npm run build
+npm run test:media-rewrite
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
-# acs-fe
+Vitest runs TypeScript tests under `tests/features/` and `tests/shared/` in Node by default; individual UI tests can opt into jsdom. The media and SSR integration command builds the app before running its Node test. Next.js supports Node.js 20.9 or newer; the test tooling requires Node.js 22.22.2 or newer in the 22.x line, 24.15 or newer in the 24.x line, or 26 or newer.

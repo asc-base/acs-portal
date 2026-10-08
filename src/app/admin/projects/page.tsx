@@ -1,8 +1,10 @@
 import React from "react";
-import { projectService } from "@/infra/container";
-import ProjectListComponents from "./project.list.component";
-import { QueryProject } from "@/core/domain/project";
-import { baseUrl } from "@/infra/container";
+
+import ProjectListComponents from "@/features/projects/components/admin/project.list.component";
+import { QueryProject } from "@/features/projects/domain/project";
+import { createProjectServerService } from "@/features/projects/server";
+
+
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -12,6 +14,8 @@ interface PageProps {
 }
 
 const page = async ({ searchParams }: PageProps) => {
+  const projectService = await createProjectServerService();
+
   const resolvedSearchParams = await searchParams;
 
   const query: QueryProject = {
@@ -31,7 +35,6 @@ const page = async ({ searchParams }: PageProps) => {
       page={page}
       sortOrder={query.sortOrder}
       search={query.search}
-      apiBase={baseUrl}
     />
   );
 };

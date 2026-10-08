@@ -1,7 +1,11 @@
 import React from "react";
-import CoursesLandingpage from "./courses.landingpage";
-import { courseService, masterDataService, curriculumService, baseUrl } from "@/infra/container";
-import { QueryCourse } from "@/core/domain/course";
+import CoursesLandingpage from "@/features/courses/components/admin/courses.landingpage";
+
+import { QueryCourse } from "@/features/courses/domain/course";
+import { createCourseServerService } from "@/features/courses/server";
+import { createMasterDataServerService } from "@/features/master-data/server";
+import { createCurriculumServerService } from "@/features/curriculum/server";
+
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -11,6 +15,10 @@ interface PageProps {
 }
 
 const page = async ({ searchParams }: PageProps) => {
+  const courseService = await createCourseServerService();
+  const masterDataService = await createMasterDataServerService();
+  const curriculumService = await createCurriculumServerService();
+
   const search = await searchParams;
 
   const query: QueryCourse = {
@@ -49,7 +57,6 @@ const page = async ({ searchParams }: PageProps) => {
       sortBy={query.sortBy}
       orderBy={query.orderBy}
       curriculum={curriculum}
-      apiBase={baseUrl}
     />
   );
 };

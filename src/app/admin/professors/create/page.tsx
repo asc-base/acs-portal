@@ -1,9 +1,9 @@
 import React from "react";
-import { FormProfesssors } from "./form.professor";
-import { baseUrl } from "@/infra/container";
+import { FormProfesssors } from "@/features/professors/components/admin/create/form.professor";
+
 
 export const dynamic = "force-dynamic";
 
 export default function page() {
-  return <FormProfesssors apiBase={baseUrl} />;
+  return <FormProfesssors />;
 }

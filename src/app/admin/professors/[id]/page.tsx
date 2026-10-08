@@ -1,8 +1,11 @@
 import React from "react";
-import { professorService } from "@/infra/container";
-import { masterDataService } from "@/infra/container";
-import ProfessorFormComponent from "./professor.form.component";
-import { baseUrl } from "@/infra/container";
+
+
+import ProfessorFormComponent from "@/features/professors/components/admin/[id]/professor.form.component";
+import { createProfessorServerService } from "@/features/professors/server";
+import { createMasterDataServerService } from "@/features/master-data/server";
+
+
 
 export const dynamic = "force-dynamic";
 
@@ -11,6 +14,9 @@ interface PageProps {
 }
 
 export default async function Page({ params }: PageProps) {
+  const professorService = await createProfessorServerService();
+  const masterDataService = await createMasterDataServerService();
+
   const resolveParams = await params;
   const professor = await professorService.getProfessorById(resolveParams.id);
   const masterData = await masterDataService.getMasterData();
@@ -22,7 +28,6 @@ export default async function Page({ params }: PageProps) {
       professor={professor}
       prefixes={prefixes}
       educationLevel={educationLevel}
-      apiBase={baseUrl}
     />
   );
 }

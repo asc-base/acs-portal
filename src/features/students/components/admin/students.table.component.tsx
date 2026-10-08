@@ -1,0 +1,361 @@
+"use client";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
+  Avatar,
+  IconButton,
+  Card,
+  Pagination,
+  Button,
+} from "@mui/material";
+import {
+  Edit,
+  Delete,
+  Add,
+  ArrowDownward,
+  ArrowUpward,
+} from "@mui/icons-material";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { UploadModal } from "@/shared/components/uploadFile";
+import { IStudent } from "@/features/students/domain/student";
+import SearchIcon from "@mui/icons-material/Search";
+import CloseIcon from "@mui/icons-material/Close";
+import { RHFTextField } from "@/shared/components/form/RHFTextField";
+import { SearchForm } from "@/features/students/components/admin/students.landingpage";
+import { Control } from "react-hook-form";
+import Link from "next/link";
+import AddIcon from "@mui/icons-material/Add";
+import {
+  ConfirmModal,
+  ConfirmModalProps,
+} from "@/shared/components/modal/confirmModal";
+import {
+  UploadProgressModal,
+  UploadStatus,
+} from "@/features/students/components/admin/uploadStudentFileModal";
+import Alert from "@mui/material/Alert";
+import Snackbar from "@mui/material/Snackbar";
+import EmptyState from "@/shared/components/emptyState";
+import { StudentDefaultAvatar } from "@/features/students/components/student-default-avatar";
+import { studentService } from "@/features/students/client";
+
+
+interface StudentTableComponentsProps {
+  students: IStudent[];
+  onSort: (sortBy: string) => void;
+  orderBy?: string;
+  sortBy?: "asc" | "desc";
+  control: Control<SearchForm>;
+  watchedSearch?: string;
+  onResetSearch: () => void;
+  totalRecords: number;
+  classBookID: number;
+  page: number;
+  pageSize: number;
+  handleNextPage: (page: number) => void;
+}
+
+const StudentTableComponents = ({ students, onSort, sortBy, orderBy, control, watchedSearch, onResetSearch, totalRecords, classBookID, page, pageSize, handleNextPage }: StudentTableComponentsProps) => {
+  const router = useRouter();
+  const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
+  const [confirmModal, setConfirmModal] = useState<ConfirmModalProps | null>(
+    null,
+  );
+  const [isError, setIsError] = useState(false);
+  const [uploadStatus, setUploadStatus] = useState<UploadStatus | null>(null);
+  const handleEdit = (studentId: number) => {
+    router.push(`/admin/students/${studentId}?classBookID=${classBookID}`);
+  };
+
+  const handleDelete = (id: number) => {
+    setConfirmModal({
+      isOpen: true,
+      type: "delete",
+      onClose: () => setConfirmModal(null),
+      onConfirm: () => {
+        onDelete(id);
+      },
+    });
+  };
+
+  const onDelete = async (id: number) => {
+    try {
+      const response = await studentService.deleteStudent(id);
+
+      if (response) {
+        setConfirmModal({
+          isOpen: true,
+          type: "success",
+          onClose: () => setConfirmModal(null),
+          onConfirm: () => {
+            setConfirmModal(null);
+            router.push(
+              `/admin/students?page=1&pageSize=10&classBookID=${classBookID}`,
+            );
+          },
+          title: "ลบข้อมูลสำเร็จ",
+          description: "ข้อมูลถูกลบออกจากฐานข้อมูลแล้ว",
+          confirmText: "เสร็จสิ้น",
+        });
+      } else {
+        setIsError(true);
+      }
+    } catch (error) {
+      console.log(error);
+      setIsError(true);
+    }
+  };
+
+  const handleUploadStudentFile = async (file: File) => {
+    setIsUploadModalOpen(false);
+    setUploadStatus("loading");
+    try {
+      await studentService.createStudentBatch({
+        classBookID: Number(classBookID),
+        file: file,
+      });
+      setUploadStatus("success");
+    } catch {
+      setUploadStatus("error");
+    }
+  };
+
+  const handleUploadRetry = () => {
+    setUploadStatus(null);
+    setIsUploadModalOpen(true);
+  };
+
+  return (
+    <Card sx={{ height: 700, display: "flex", flexDirection: "column" }}>
+      <Snackbar
+        anchorOrigin={{ vertical: "top", horizontal: "right" }}
+        open={isError}
+        autoHideDuration={4000}
+        onClose={() => setIsError(false)}
+      >
+        <Alert
+          severity="error"
+          onClose={() => setIsError(false)}
+          sx={{ width: "100%" }}
+        >
+          ไม่สามารถลบข้อมูลนักศึกษาได้ในขณะนี้ กรุณาลองใหม่อีกครั้ง
+        </Alert>
+      </Snackbar>
+      <div className="flex items-center justify-between p-6">
+        <h3 className="font-bold">นักศึกษาทั้งหมด ({totalRecords} คน)</h3>
+        <div className="flex gap-6">
+          <RHFTextField
+            name="search"
+            control={control}
+            startIcon={<SearchIcon />}
+            endIcon={
+              watchedSearch ? (
+                <CloseIcon onClick={onResetSearch} />
+              ) : (
+                <span style={{ width: "24px" }} />
+              )
+            }
+            placeholder="ค้นหารุ่นนักศึกษา"
+            size="small"
+          />
+          <Button variant="contained" size="large">
+            <Link href={`/admin/students/create?classBookID=${classBookID}`}>
+              <Add /> เพิ่มนักศึกษา (บุคคล)
+            </Link>
+          </Button>
+
+          <Button
+            variant="contained"
+            size="large"
+            startIcon={<AddIcon />}
+            onClick={() => setIsUploadModalOpen(true)}
+          >
+            เพิ่มนักศึกษา (ไฟล์)
+          </Button>
+        </div>
+      </div>
+
+      <UploadModal
+        isOpen={isUploadModalOpen}
+        onClose={() => setIsUploadModalOpen(false)}
+        title="อัปโหลดไฟล์รายชื่อนักศึกษา"
+        onUpload={handleUploadStudentFile}
+      />
+
+      <TableContainer component={Paper} sx={{ boxShadow: "none", flex: 1 }}>
+        <Table stickyHeader sx={{ tableLayout: "fixed" }}>
+          <TableHead>
+            <TableRow sx={{ borderBottom: "1px solid var(--color-neutral04)" }}>
+              <TableCell align="center" sx={{ width: "15%" }}>
+                <h3 className="font-bold">รูปภาพ</h3>
+              </TableCell>
+              <TableCell align="center" sx={{ width: "18%" }}>
+                <div className="flex items-center justify-center gap-1">
+                  <h3 className="font-bold">รหัสนักศึกษา</h3>
+                  <IconButton
+                    size="small"
+                    onClick={() => onSort("studentCode")}
+                  >
+                    {orderBy === "studentCode" ? (
+                      sortBy === "asc" ? (
+                        <ArrowUpward
+                          fontSize="small"
+                          sx={{ color: "var(--color-primary01)" }}
+                        />
+                      ) : (
+                        <ArrowDownward
+                          fontSize="small"
+                          sx={{ color: "var(--color-primary01)" }}
+                        />
+                      )
+                    ) : (
+                      <ArrowDownward
+                        fontSize="small"
+                        sx={{ color: "var(--color-neutral04)" }}
+                      />
+                    )}
+                  </IconButton>
+                </div>
+              </TableCell>
+
+              <TableCell align="center">
+                <div className="flex items-center justify-center gap-1">
+                  <h3 className="font-bold">ชื่อ นามสกุล</h3>
+                </div>
+              </TableCell>
+
+              <TableCell align="center" sx={{ width: "10%" }}>
+                <h3 className="font-bold">ชื่อเล่น</h3>
+              </TableCell>
+              <TableCell align="center">
+                <h3 className="font-bold">อีเมล</h3>
+              </TableCell>
+              <TableCell sx={{ width: "15%" }} />
+            </TableRow>
+          </TableHead>
+
+          <TableBody>
+            {students?.length > 0 ? (
+              students.map((student) => (
+                <TableRow
+                  key={student.id}
+                  sx={{
+                    "& td": {
+                      borderBottom: "none",
+                      fontSize: 18,
+                    },
+                  }}
+                >
+                  <TableCell align="center" sx={{ borderBottom: "none" }}>
+                    {student.imageUrl ? (
+                      <Avatar
+                        src={student.imageUrl}
+                        alt={student.firstNameTh || "Student"}
+                        sx={{ width: 64, height: 64, margin: "0 auto" }}
+                      />
+                    ) : (
+                      <StudentDefaultAvatar
+                        prefix={student.prefix}
+                        alt={student.firstNameTh || "Student"}
+                        sx={{
+                          width: 64,
+                          height: 64,
+                          margin: "0 auto",
+                          bgcolor: "transparent",
+                          borderRadius: "50%",
+                          "& img": {
+                            width: "100%",
+                            height: "100%",
+                            transform: "scale(1.25)",
+                            transformOrigin: "center bottom",
+                          },
+                        }}
+                      />
+                    )}
+                  </TableCell>
+                  <TableCell align="center" sx={{ pr: 4 }}>
+                    {student.student.studentCode}
+                  </TableCell>
+                  <TableCell align="center">
+                    {`${student.firstNameTh || ""} ${student.lastNameTh || ""}`}
+                  </TableCell>
+                  <TableCell align="center">{student.nickName}</TableCell>
+                  <TableCell
+                    align="left"
+                    className="max-w-[200px] break-words whitespace-normal"
+                  >
+                    {student.email}
+                  </TableCell>
+                  <TableCell align="center">
+                    <IconButton
+                      color="primary"
+                      size="small"
+                      onClick={() => handleEdit(student.id)}
+                    >
+                      <Edit />
+                    </IconButton>
+                    <IconButton
+                      color="error"
+                      size="small"
+                      onClick={() => handleDelete(student.id)}
+                    >
+                      <Delete />
+                    </IconButton>
+                  </TableCell>
+                </TableRow>
+              ))
+            ) : (
+              <TableRow
+                sx={{
+                  "& td": {
+                    borderBottom: "none",
+                  },
+                }}
+              >
+                <TableCell colSpan={6}>
+                  <div className="flex min-h-[460px] items-center justify-center">
+                    <EmptyState
+                      title="ไม่พบข้อมูลนักศึกษาในขณะนี้"
+                      description="ไม่พบนักศึกษาในรุ่นนี้ กรุณาเพิ่มข้อมูลนักศึกษา"
+                    />
+                  </div>
+                </TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
+      </TableContainer>
+      {totalRecords > 0 && (
+        <div className="mt-auto mb-6 flex justify-center">
+          <Pagination
+            shape="rounded"
+            count={Math.ceil(totalRecords / pageSize)}
+            page={page}
+            onChange={(_, currentPage) => handleNextPage(currentPage)}
+            color="primary"
+            size="large"
+          />
+        </div>
+      )}
+      {confirmModal && <ConfirmModal {...confirmModal} />}
+      <UploadProgressModal
+        isOpen={uploadStatus !== null}
+        status={uploadStatus ?? "loading"}
+        onClose={() => setUploadStatus(null)}
+        onConfirm={() => {
+          setUploadStatus(null);
+          router.refresh();
+        }}
+        onRetry={handleUploadRetry}
+      />
+    </Card>
+  );
+};
+
+export default StudentTableComponents;

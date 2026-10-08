@@ -1,0 +1,75 @@
+"use client";
+import React from "react";
+import { INews } from "@/features/news/domain/news";
+import { NewsCard } from "@/features/news/components/newscard";
+import { Pagination, Breadcrumbs } from "@mui/material";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import EmptyState from "@/shared/components/emptyState";
+
+interface NewsListComponentsProps {
+  news: INews[];
+  totalRecords: number;
+  pageSize: number;
+  page: number;
+  category: string;
+  tagId?: number;
+}
+
+const NewsListComponents = ({
+  news,
+  totalRecords,
+  pageSize,
+  page,
+  category,
+  tagId,
+}: NewsListComponentsProps) => {
+  const router = useRouter();
+
+  const handleNextPage = (currentPage: number) => {
+    router.push(
+      `/news?category=${category}&page=${currentPage}&pageSize=${pageSize}&tagId=${tagId}`,
+    );
+  };
+
+  return (
+    <div className="container mx-auto px-12 py-6 lg:py-8 md:px-8">
+      <div className="flex flex-col items-start justify-start gap-2">
+        <Breadcrumbs aria-label="breadcrumb" separator=">>" className="mb-4">
+          <Link href="/">หน้าหลัก</Link>
+          <p>ประชาสัมพันธ์</p>
+          {category && <span>{category}</span>}
+        </Breadcrumbs>
+      </div>
+       <h4 className="font-bold text-accent04 mt-2 lg:mt-3 mb-4 lg:mb-6 lg:text-2xl">{category}</h4>
+      {news.length === 0 ? (
+        <div className="flex h-96 flex-col items-center justify-center">
+          <EmptyState 
+            title="ไม่พบข่าวสารในหมวดหมู่นี้" 
+            description="เมื่อมีข้อมูลข่าวสาร ข้อมูลจะปรากฏที่นี่" 
+          />
+        </div>
+      ) : (
+        <div className="flex w-full flex-col items-center justify-center gap-5">
+          <div className="grid w-full grid-cols-1 justify-items-center gap-4 md:grid-cols-2 lg:grid-cols-3">
+            {news.map((item) => (
+              <Link key={item.id} href={`/news/${item.id}`}>
+                <NewsCard news={item} />
+              </Link>
+            ))}
+          </div>
+          <Pagination
+            shape="rounded"
+            count={Math.ceil(totalRecords / pageSize)}
+            page={page}
+            onChange={(_, currentPage) => handleNextPage(currentPage)}
+            color="primary"
+            size="large"
+          />
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default NewsListComponents;

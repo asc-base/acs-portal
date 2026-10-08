@@ -1,0 +1,294 @@
+"use client";
+import { useState, useEffect } from "react";
+import { Button, Card, MenuItem, Alert, Snackbar, Modal } from "@mui/material";
+import Image from "next/image";
+import { styled } from "@mui/material/styles";
+import { RHFTextField } from "@/shared/components/form/RHFTextField";
+import { RHFSelect } from "@/shared/components/form/RHFSelect";
+import { useForm } from "react-hook-form";
+import { UpdateClassbookInputs, updateClassBookSchema } from "@/features/classbook/schema/classbook";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { IClassBook } from "@/features/classbook/domain/classbook";
+import { ICurriculum } from "@/features/curriculum/domain/curriculum";
+import { ConfirmModal, ConfirmModalProps } from "@/shared/components/modal/confirmModal";
+import { CropImageCard } from "@/shared/components/cropimagecard";
+import { curriculumService as cuurriculumService } from "@/features/curriculum/client";
+import { classBookService } from "@/features/classbook/client";
+
+
+interface CurriculumFormProps {
+  classBook: IClassBook;
+}
+
+const VisuallyHiddenInput = styled("input")({
+  clip: "rect(0 0 0 0)",
+  clipPath: "inset(50%)",
+  height: 1,
+  overflow: "hidden",
+  position: "absolute",
+  bottom: 0,
+  left: 0,
+  whiteSpace: "nowrap",
+  width: 1,
+});
+
+export const ClassBookInfoComponent = ({ classBook }: CurriculumFormProps) => {
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [isEdit, setIsEdit] = useState(false);
+  const [isCroping, setIsCroping] = useState(false);
+  const [confirmModal, setConfirmModal] = useState<ConfirmModalProps | null>(
+    null,
+  );
+  const [isError, setIsError] = useState(false);
+  const [curriculums, setCurriculums] = useState<ICurriculum[]>([]);
+
+  const previewSrc = selectedFile
+    ? URL.createObjectURL(selectedFile)
+    : classBook.thumbnailURL;
+  const {
+    control,
+    handleSubmit,
+    reset,
+    setValue,
+    formState: { isValid, isDirty },
+  } = useForm<UpdateClassbookInputs>({
+    resolver: zodResolver(updateClassBookSchema),
+    defaultValues: {
+      classof: classBook.classof.toString() ?? "",
+      firstYearAcademic: classBook.firstYearAcademic ?? "",
+      curriculumID: classBook.curriculumID ?? 0,
+    },
+    mode: "onBlur",
+    reValidateMode: "onChange",
+  });
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setSelectedFile(file);
+      setIsCroping(true);
+    } else {
+      setSelectedFile(null);
+    }
+  };
+
+  const handleCropComplete = (croppedFile: File, focalPoint?: { x: number; y: number }) => {
+    setSelectedFile(croppedFile);
+    if (focalPoint) {
+      setValue("imageFocalPointX", focalPoint.x, { shouldDirty: true });
+      setValue("imageFocalPointY", focalPoint.y, { shouldDirty: true });
+    }
+    setIsCroping(false);
+  };
+
+  const handleCropCancel = () => {
+    setIsCroping(false);
+    setSelectedFile(null);
+  };
+
+  const handleCancle = () => {
+    if (isDirty || selectedFile) {
+      setConfirmModal({
+        isOpen: true,
+        type: "warning",
+        onClose: () => setConfirmModal(null),
+        onConfirm: () => {
+          setIsEdit(false);
+          reset();
+          setSelectedFile(null);
+          setConfirmModal(null);
+        },
+      });
+    } else {
+      setIsEdit(false);
+      reset();
+      setSelectedFile(null);
+    }
+  };
+
+  const onSubmit = async (data: UpdateClassbookInputs) => {
+    if (isDirty || selectedFile) {
+      try {
+        const response = await classBookService.updateClassBook(
+          data,
+          selectedFile,
+          classBook.id,
+        );
+
+        if (!response) setIsError(true);
+        else {
+          setConfirmModal({
+            isOpen: true,
+            type: "success",
+            onClose: () => setConfirmModal(null),
+            onConfirm: () => {
+              setConfirmModal(null);
+              setIsEdit(false);
+            },
+          });
+        }
+      } catch (error) {
+        console.log(error);
+        setIsError(true);
+      }
+    }
+  };
+
+  useEffect(() => {
+    const fetchCurriculums = async () => {
+      const response = await cuurriculumService.getCurriculum({
+        orderBy: "year",
+        sortBy: "desc",
+      });
+      setCurriculums(response.rows);
+    };
+    fetchCurriculums();
+  }, []);
+
+  return (
+    <div>
+      <Snackbar
+        anchorOrigin={{ vertical: "top", horizontal: "right" }}
+        open={isError}
+        autoHideDuration={4000}
+        onClose={() => setIsError(false)}
+      >
+        <Alert
+          severity="error"
+          onClose={() => setIsError(false)}
+          sx={{ width: "100%" }}
+        >
+          ไม่สามารถเพิ่มข้อมูลนักศึกษาได้
+        </Alert>
+      </Snackbar>
+      <Card>
+        <div className="p-6">
+          <h3 className="mb-6 font-bold">ข้อมูลรุ่นการศึกษา</h3>
+          <form className="space-y-4" onSubmit={handleSubmit(onSubmit)}>
+            <Snackbar
+              anchorOrigin={{ vertical: "top", horizontal: "right" }}
+              open={isError}
+              autoHideDuration={4000}
+              onClose={() => setIsError(false)}
+            >
+              <Alert
+                severity="error"
+                onClose={() => setIsError(false)}
+                sx={{ width: "100%" }}
+              >
+                ไม่สามารถเพิ่มข้อมูลนักศึกษาได้
+              </Alert>
+            </Snackbar>
+            <div className="flex gap-x-10 gap-y-2">
+              <div className="bg-neutral02 border-neutral04 relative flex h-[284px] w-[400px] flex-col items-center justify-center overflow-hidden rounded-md">
+                {previewSrc ? (
+                  <div className="group relative h-full w-full">
+                    <Image src={previewSrc} alt="Preview" fill priority />
+                    {isEdit && (
+                      <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
+                        <Button variant="contained" component="label">
+                          <VisuallyHiddenInput
+                            type="file"
+                            accept="image/*"
+                            onChange={handleFileChange}
+                          />
+                          อัปโหลดรูปภาพ
+                        </Button>
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  isEdit && (
+                    <Button variant="contained" component="label" size="large">
+                      อัปโหลดรูปภาพ
+                      <VisuallyHiddenInput
+                        type="file"
+                        accept="image/*"
+                        onChange={handleFileChange}
+                      />
+                    </Button>
+                  )
+                )}
+              </div>
+
+              <div className="flex w-full flex-col space-y-4">
+                <RHFTextField
+                  control={control}
+                  name="classof"
+                  label="รุ่นการศึกษา"
+                  variant="outlined"
+                  disabled={!isEdit}
+                  requiredMark
+                />
+                <RHFTextField
+                  control={control}
+                  name="firstYearAcademic"
+                  label="ปีการศึกษา"
+                  variant="outlined"
+                  disabled={!isEdit}
+                  requiredMark
+                />
+                <RHFSelect
+                  name="curriculumID"
+                  control={control}
+                  label="หลักสูตร"
+                  variant="outlined"
+                  fullWidth
+                  disabled={!isEdit}
+                  requiredMark
+                >
+                  {curriculums.map((curriculum) => (
+                    <MenuItem key={curriculum.id} value={curriculum.id}>
+                      {curriculum.title} พ.ศ.{curriculum.year}
+                    </MenuItem>
+                  ))}
+                </RHFSelect>
+              </div>
+            </div>
+            <div className="mt-6 flex justify-end gap-2">
+              {isEdit ? (
+                <>
+                  <Button
+                    variant="outlined"
+                    size="large"
+                    onClick={handleCancle}
+                  >
+                    ยกเลิก
+                  </Button>
+                  <Button
+                    type="submit"
+                    variant="contained"
+                    size="large"
+                    disabled={!isValid}
+                  >
+                    บันทึกข้อมูล
+                  </Button>
+                </>
+              ) : (
+                <Button
+                  variant="contained"
+                  size="large"
+                  onClick={() => setIsEdit(true)}
+                >
+                  แก้ไขข้อมูล
+                </Button>
+              )}
+            </div>
+          </form>
+        </div>
+      </Card>
+      {confirmModal && <ConfirmModal {...confirmModal} />}
+      {isCroping && selectedFile && (
+        <Modal open={isCroping} onClose={handleCropCancel} closeAfterTransition>
+          <CropImageCard
+            file={selectedFile}
+            width={512}
+            height={512}
+            onUploadComplete={handleCropComplete}
+            onCancel={handleCropCancel}
+          />
+        </Modal>
+      )}
+    </div>
+  );
+};

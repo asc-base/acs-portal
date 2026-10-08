@@ -1,13 +1,12 @@
 import React from "react";
-import { FormUpdateProject } from "./form.update.project";
-import { 
-  baseUrl, 
-  courseService, 
-  masterDataService, 
-  studentService, 
-  professorService,
-  projectService
-} from "@/infra/container";
+import { FormUpdateProject } from "@/features/projects/components/admin/[id]/form.update.project";
+import { createCourseServerService } from "@/features/courses/server";
+import { createMasterDataServerService } from "@/features/master-data/server";
+import { createStudentServerService } from "@/features/students/server";
+import { createProfessorServerService } from "@/features/professors/server";
+import { createProjectServerService } from "@/features/projects/server";
+
+
 
 export const dynamic = "force-dynamic";
 
@@ -16,6 +15,12 @@ interface PageProps {
 }
 
 export default async function page({ params }: PageProps) {
+  const courseService = await createCourseServerService();
+  const masterDataService = await createMasterDataServerService();
+  const studentService = await createStudentServerService();
+  const professorService = await createProfessorServerService();
+  const projectService = await createProjectServerService();
+
   const resolveParams = await params;
   const projectId = resolveParams.id;
 
@@ -33,7 +38,6 @@ export default async function page({ params }: PageProps) {
 
   return (
     <FormUpdateProject 
-      apiBase={baseUrl} 
       projectId={projectId}
       initialProject={projectData}
       initialCourses={coursesRes.rows || []}

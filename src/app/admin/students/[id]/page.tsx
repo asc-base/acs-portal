@@ -1,5 +1,7 @@
-import { StudentUpdateForm } from "./student.update.form";
-import { baseUrl, studentService } from "@/infra/container";
+import { StudentUpdateForm } from "@/features/students/components/admin/[id]/student.update.form";
+import { createStudentServerService } from "@/features/students/server";
+
+
 
 export const dynamic = "force-dynamic";
 
@@ -13,6 +15,8 @@ interface PageProps {
 }
 
 const page = async ({ params, searchParams }: PageProps) => {
+  const studentService = await createStudentServerService();
+
   const resolvesearchParams = await searchParams;
   const resolveParams = await params;
   const classBookID = Number(resolvesearchParams.classBookID);
@@ -22,7 +26,6 @@ const page = async ({ params, searchParams }: PageProps) => {
 
   return (
     <StudentUpdateForm
-      apiBase={baseUrl}
       classBookID={classBookID}
       student={student}
     />

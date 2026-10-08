@@ -1,5 +1,5 @@
 import React from "react";
-import AdminLoginLandingPage from "./admin.login.landingpage";
+import AdminLoginLandingPage from "@/features/auth/components/admin/admin.login.landingpage";
 
 export const dynamic = "force-dynamic";
 

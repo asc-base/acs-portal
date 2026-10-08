@@ -1,6 +1,9 @@
 import React from "react";
-import StudentsListComponent from "./students.list.component";
-import { studentService, classBookService } from "@/infra/container";
+import StudentsListComponent from "@/features/students/components/public/students.list.component";
+import { createStudentServerService } from "@/features/students/server";
+import { createClassBookServerService } from "@/features/classbook/server";
+
+
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -16,6 +19,9 @@ interface PageProps {
 }
 
 const page = async ({ searchParams }: PageProps) => {
+  const studentService = await createStudentServerService();
+  const classBookService = await createClassBookServerService();
+
   const resolvedSearchParams = await searchParams;
   const { rows, pageSize, page, totalRecords } =
     await studentService.getStudents({

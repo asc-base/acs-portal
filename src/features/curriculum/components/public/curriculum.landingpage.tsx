@@ -1,0 +1,117 @@
+"use client";
+import React, { useState, useEffect } from "react";
+import Link from "next/link";
+import { ICurriculum } from "@/features/curriculum/domain/curriculum";
+import { CurriculumCard } from "@/features/curriculum/components/curriculumcard";
+import { TypeCourseComponent } from "@/features/curriculum/components/typecourse.component";
+import { TypeCourse } from "@/features/master-data/domain/master-data";
+import { Breadcrumbs, CircularProgress } from "@mui/material";
+import EmptyState from "@/shared/components/emptyState";
+
+interface CurriculumListComponentProps {
+  curriculum: ICurriculum[];
+  typeCourse: TypeCourse[];
+}
+
+const CurriculumListComponents = ({
+  curriculum,
+  typeCourse,
+}: CurriculumListComponentProps) => {
+  const [focusCurriculum, setFocusCurriculum] = useState<ICurriculum>(
+    curriculum[0],
+  );
+  const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    if (!focusCurriculum) return;
+    setIsLoading(true);
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [focusCurriculum, typeCourse]);
+
+  const handleSelectFocusCurriculum = (curriculum: ICurriculum) => {
+    setFocusCurriculum(curriculum);
+  };
+
+  console.log("curriculum", curriculum);
+
+  if (!curriculum || curriculum.length === 0) {
+    return (
+      <div className="flex h-screen items-center justify-center">
+        <EmptyState 
+          title="ไม่พบข้อมูลหลักสูตร" 
+          description="ยังไม่มีข้อมูลหลักสูตรในระบบ" 
+        />
+      </div>
+    );
+  }
+
+  return (
+    <div className="container mx-auto px-10 py-5">
+      <div className="flex flex-col gap-2">
+        <Breadcrumbs aria-label="breadcrumb" separator=">>" className="mb-4">
+          <Link href="/">หน้าหลัก</Link>
+          <p>หลักสูตร</p>
+        </Breadcrumbs>
+
+        <div className="mt-4 mb-10 flex flex-col gap-4 md:flex-row">
+          {curriculum.map((item) => (
+            <CurriculumCard
+              key={item.id}
+              curriculum={item}
+              focusCurriculum={focusCurriculum.id}
+              setFocusCurriculum={() => handleSelectFocusCurriculum(item)}
+            />
+          ))}
+        </div>
+
+        <div className="mb-6 gap-2 text-center">
+          <h1 className="text-primary01 font-bold sm:text-lg md:text-4xl lg:text-5xl">
+            รายวิชาตามหลักสูตรปี พ.ศ.{" "}
+            {isLoading ? "..." : focusCurriculum?.year}
+          </h1>
+          <h4 className="text-primary01 text-sm sm:text-base md:text-lg lg:text-xl">
+            รายการวิชาทั้งหมดจากหลักสูตรปี{" "}
+            {isLoading ? "..." : focusCurriculum?.year}
+          </h4>
+        </div>
+        <div className="flex justify-center">
+          {isLoading ? (
+            <CircularProgress />
+          ) : (
+            <div className="mx-auto flex w-full flex-wrap justify-center">
+              {typeCourse.length === 0 ? (
+                <div className="w-full pt-10">
+                  <EmptyState 
+                    title="ไม่พบข้อมูลรายวิชา" 
+                    description={`ยังไม่มีข้อมูลรายวิชาสำหรับหลักสูตรปี พ.ศ. ${focusCurriculum?.year}`} 
+                  />
+                </div>
+              ) : (
+                typeCourse.map((item, idx) => (
+                  <div
+                    key={item.id}
+                    className="box-border w-full sm:w-1/2 lg:w-1/3"
+                  >
+                    <TypeCourseComponent
+                      curriculumId={focusCurriculum?.id}
+                      typeCourseId={item.id}
+                      type={item.type}
+                      description={item.description}
+                      index={idx}
+                    />
+                  </div>
+                ))
+              )}
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default CurriculumListComponents;

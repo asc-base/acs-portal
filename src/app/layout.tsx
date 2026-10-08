@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
 // Removed Google Fonts to avoid network timeouts during build
 import "./globals.css";
-import UniversalThemeProvider from "@/components/providers/mui/UniversalThemeProvider";
+import UniversalThemeProvider from "@/shared/theme/providers/mui/UniversalThemeProvider";
 import appIcon from "./logoacs-nonbg.png";
-import InitialLoader from "@/components/InitialLoader";
-import QueryProvider from "@/components/providers/query-provider";
+import InitialLoader from "@/features/auth/components/InitialLoader";
+import QueryProvider from "@/shared/theme/providers/query-provider";
 
 export const metadata: Metadata = {
   title: "ACS KMUTT",

@@ -1,6 +1,8 @@
 import React from "react";
-import ProfessorsListComponent from "./professors.list.compnent";
-import { professorService } from "@/infra/container";
+import ProfessorsListComponent from "@/features/professors/components/public/professors.list.compnent";
+import { createProfessorServerService } from "@/features/professors/server";
+
+
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -14,6 +16,8 @@ interface PageProps {
 }
 
 const page = async ({ searchParams }: PageProps) => {
+  const professorService = await createProfessorServerService();
+
   const resolvedSearchParams = await searchParams;
 
   const { rows, pageSize, page, totalRecords } = await professorService.getProfessors({

@@ -1,5 +1,5 @@
-import Preview_table_component from "./preview.table.component";
-import { baseUrl } from "@/infra/container";
+import Preview_table_component from "@/features/students/components/admin/preview/preview.table.component";
+
 
 export const dynamic = "force-dynamic";
 
@@ -14,7 +14,7 @@ const page = async ({ searchParams }: PageProps) => {
   const classBookID = Number(resolveparams.classBookID);
 
   return (
-    <Preview_table_component apiBase={baseUrl} classBookID={classBookID} />
+    <Preview_table_component classBookID={classBookID} />
   );
 };
 

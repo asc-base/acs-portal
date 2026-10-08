@@ -1,7 +1,9 @@
 import React from "react";
-import { classBookService, baseUrl } from "@/infra/container";
-import ClassBookListComponents from "./classbook.list.component";
-import { QueryClassBook } from "@/core/domain/classbook";
+
+import ClassBookListComponents from "@/features/classbook/components/admin/classbook.list.component";
+import { QueryClassBook } from "@/features/classbook/domain/classbook";
+import { createClassBookServerService } from "@/features/classbook/server";
+
 
 
 export const dynamic = "force-dynamic";
@@ -11,6 +13,8 @@ interface PageProps {
 }
 
 const page = async ({ searchParams }: PageProps) => {
+  const classBookService = await createClassBookServerService();
+
   const resolvedSearchParams = await searchParams;
 
   const query: QueryClassBook = {
@@ -30,7 +34,6 @@ const page = async ({ searchParams }: PageProps) => {
       pageSize={pageSize}
       page={page}
       sortBy={query.sortBy}
-      apiBase={baseUrl}
     />
   );
 };

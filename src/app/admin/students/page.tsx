@@ -1,6 +1,9 @@
-import StudentsLandingpage from "./students.landingpage";
-import { studentService, classBookService, baseUrl } from "@/infra/container";
-import { QueryStudent } from "@/core/domain/student";
+import StudentsLandingpage from "@/features/students/components/admin/students.landingpage";
+
+import { QueryStudent } from "@/features/students/domain/student";
+import { createStudentServerService } from "@/features/students/server";
+import { createClassBookServerService } from "@/features/classbook/server";
+
 
 
 export const dynamic = "force-dynamic";
@@ -11,6 +14,9 @@ interface PageProps {
 }
 
 const page = async ({ searchParams }: PageProps) => {
+  const studentService = await createStudentServerService();
+  const classBookService = await createClassBookServerService();
+
   const search = await searchParams;
 
   const query: QueryStudent = {
@@ -45,7 +51,6 @@ const page = async ({ searchParams }: PageProps) => {
       classBookID={query.classBookID!}
       sortBy={query.sortBy}
       orderBy={query.orderBy}
-      apiBase={baseUrl}
       classBook={classBook}
     />
   );
