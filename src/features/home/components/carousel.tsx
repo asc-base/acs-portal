@@ -40,7 +40,7 @@ export const Carousel: FC<CarouselProps> = ({
                     style={{
                       objectPosition: `${item.news?.cardFocalPointX ?? 50}% ${item.news?.cardFocalPointY ?? 50}%`,
                     }}
-                    src={item?.thumbnailURL}
+                    src={item?.thumbnailURL ?? "/carousel.jpg"}
                     alt={`Slide ${index + 1}`}
                     fill
                     sizes="(max-width: 640px) 100vw, (max-width: 1280px) 100vw, 1152px"

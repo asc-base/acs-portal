@@ -9,7 +9,7 @@ interface NewsHighlightCarouselProps {
   newsHighlight: INewsInformation[];
 }
 
-const isValidUrl = (url?: string) => {
+const isValidUrl = (url?: string | null) => {
   return (
     url &&
     typeof url === "string" &&

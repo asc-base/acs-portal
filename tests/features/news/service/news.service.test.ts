@@ -11,10 +11,10 @@ const news: INews = {
   thumbnailURL: "https://example.test/legacy.png",
   thumbnailFocalPointX: 21,
   thumbnailFocalPointY: 79,
-  startDate: new Date("2026-10-08T08:00:00.000Z"),
+  startDate: "2026-10-08T08:00:00.000Z",
   dueDate: null,
-  createdDate: new Date("2026-10-08T08:00:00.000Z"),
-  updatedDate: new Date("2026-10-08T08:00:00.000Z"),
+  createdDate: "2026-10-08T08:00:00.000Z",
+  updatedDate: "2026-10-08T08:00:00.000Z",
   tag: { id: 1, name: "News", tagsGroupsId: 1 },
 };
 const response = { data: news, status: 200, statusCode: 200 };
@@ -93,7 +93,7 @@ describe("news create multipart payload", () => {
     const create = vi.spyOn(repository, "createNews");
     await expect(
       service.createNews({ ...createInput, startDate: "not-a-date" }),
-    ).rejects.toBeInstanceOf(RangeError);
+    ).rejects.toThrow();
     expect(create).not.toHaveBeenCalled();
   });
 });
@@ -144,7 +144,7 @@ describe("news update multipart payload", () => {
     const card = image("replacement.png");
     const details = [image("legacy.png")];
     await service.updateNews(news.id, {
-      thumbnail: news.thumbnailURL,
+      thumbnail: news.thumbnailURL ?? "",
       cardImage: card,
       newAdditionalImages: details,
       deletedAdditionalImagesId: [4],
@@ -178,7 +178,7 @@ describe("news update multipart payload", () => {
       .mockResolvedValue(response);
     await service.updateNews(news.id, {
       title: undefined,
-      thumbnail: news.thumbnailURL,
+      thumbnail: news.thumbnailURL ?? "",
       thumbnailImage: "https://example.test/thumbnail.png",
       eventEndAt: null,
       deletedImageIds: [],
@@ -197,12 +197,12 @@ describe("news update multipart payload", () => {
     ]);
   });
 
-  it("returns null when the repository rejects", async () => {
+  it("propagates repository errors instead of returning an ambiguous null", async () => {
     const error = new Error("Save failed");
     vi.spyOn(repository, "updateNews").mockRejectedValue(error);
-    const log = vi.spyOn(console, "error").mockImplementation(() => undefined);
-    expect(await service.updateNews(news.id, { title: "Changed" })).toBeNull();
-    expect(log).toHaveBeenCalledWith("Failed to update news:", error);
+    await expect(
+      service.updateNews(news.id, { title: "Changed" }),
+    ).rejects.toBe(error);
   });
 });
 

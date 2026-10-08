@@ -24,7 +24,7 @@ import {
   UpsertNewsInformationSchema,
   UpsertNewsInformationInputs,
 } from "@/features/news/schema/newsinformation";
-import { newsService } from "@/features/news/client";
+import { useNews, useUpsertNewsInformation } from "@/features/news/client";
 
 
 interface NewsInformationInfoProps {
@@ -62,16 +62,17 @@ export const NewsInformationInfo = ({ type, tagID, newsInformation }: NewsInform
     null,
   );
 
-  const [thumbnailPreview, setThumbnailPreview] = useState<string>(
-    newsInformation.thumbnailURL || "",
-  );
+  const [thumbnailPreview, setThumbnailPreview] = useState<string>(newsInformation.thumbnailURL || "");
   const [highlightPreview, setHighlightPreview] = useState<string>(
     newsInformation.highlightURL || "",
   );
 
-  const [options, setOptions] = useState<NewsItem[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [search, setSearch] = useState("");
+  const [searchActive, setSearchActive] = useState(false);
   const router = useRouter();
+  const mutation = useUpsertNewsInformation();
+  const newsQuery = useNews({ page: 1, pageSize: 10, search: search || undefined }, searchActive);
+  const options: NewsItem[] = newsQuery.data?.rows ?? [];
 
   const {
     control,
@@ -83,7 +84,7 @@ export const NewsInformationInfo = ({ type, tagID, newsInformation }: NewsInform
     resolver: zodResolver(UpsertNewsInformationSchema),
     mode: "onChange",
     defaultValues: {
-      thumbnail: newsInformation.thumbnailURL,
+      thumbnail: newsInformation.thumbnailURL ?? "",
       highlight: newsInformation.highlightURL || undefined,
       newsID: newsInformation.news.id,
       tagID: tagID,
@@ -98,27 +99,21 @@ export const NewsInformationInfo = ({ type, tagID, newsInformation }: NewsInform
 
   const onSubmit = async (data: UpsertNewsInformationInputs) => {
     try {
-      const response = await newsService.upsertNewsInformation(data);
-
-      if (response) {
-        setConfirmModal({
-          isOpen: true,
-          type: "success",
-          onClose: () => setConfirmModal(null),
-          onConfirm: () => {
-            resetFormState();
-            setConfirmModal(null);
-            router.push(`/admin/newsinformation/${tagID}`);
-          },
-        });
-        return;
-      }
-
+      await mutation.mutateAsync(data);
+    } catch {
       setIsError(true);
-    } catch (error) {
-      console.error(error);
-      setIsError(true);
+      return;
     }
+    setConfirmModal({
+      isOpen: true,
+      type: "success",
+      onClose: () => setConfirmModal(null),
+      onConfirm: () => {
+        resetFormState();
+        setConfirmModal(null);
+        router.push(`/admin/newsinformation/${tagID}`);
+      },
+    });
   };
 
   const handleFileChange = (
@@ -150,21 +145,9 @@ export const NewsInformationInfo = ({ type, tagID, newsInformation }: NewsInform
     setCropTarget(null);
   };
 
-  const handleSearch = async (search: string) => {
-    setLoading(true);
-    try {
-      const { rows } = await newsService.getNews(
-        1,
-        10,
-        undefined,
-        undefined,
-        undefined,
-        search,
-      );
-      setOptions(rows);
-    } finally {
-      setLoading(false);
-    }
+  const handleSearch = (value: string) => {
+    setSearch(value);
+    setSearchActive(true);
   };
 
   const resetFormState = () => {
@@ -396,7 +379,7 @@ export const NewsInformationInfo = ({ type, tagID, newsInformation }: NewsInform
                 disabled={!isEdit}
                 popupIcon={null}
                 options={options}
-                loading={loading}
+                loading={searchActive && newsQuery.isPending}
                 value={
                   field.value
                     ? (options.find((o) => o.id === field.value) ?? {

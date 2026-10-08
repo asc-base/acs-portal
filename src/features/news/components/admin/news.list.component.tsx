@@ -1,35 +1,29 @@
 "use client";
 
 import { INews } from "@/features/news/domain/news";
-import { useState, useEffect, useCallback } from "react";
 import {
   Button,
   Pagination,
   Select,
   MenuItem,
-  SelectChangeEvent,
 } from "@mui/material";
-import { useRouter, usePathname, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { AdminCard } from "@/shared/components/adminCard";
 import AddIcon from "@mui/icons-material/Add";
 import SearchIcon from "@mui/icons-material/Search";
 import CloseIcon from "@mui/icons-material/Close";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import DoneIcon from "@mui/icons-material/Done";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
 import { RHFTextField } from "@/shared/components/form/RHFTextField";
 import {
   ConfirmModal,
-  ConfirmModalProps,
 } from "@/shared/components/modal/confirmModal";
 import Alert from "@mui/material/Alert";
 import Snackbar from "@mui/material/Snackbar";
 import { NewsCategory } from "@/features/news/domain/news";
 import EmptyState from "@/shared/components/emptyState";
-import { newsService } from "@/features/news/client";
+import { useNewsListController } from "@/features/news/hooks/useNewsListController";
 
 
 interface NewsListComponentProps {
@@ -40,123 +34,32 @@ interface NewsListComponentProps {
   categories: NewsCategory[];
 }
 
-const searchSchema = z.object({
-  search: z.string().optional(),
-});
-
-type SearchForm = z.infer<typeof searchSchema>;
-
 const NewsListComponent = (initValue: NewsListComponentProps) => {
   const router = useRouter();
-  const pathname = usePathname();
-  const searchParams = useSearchParams();
-
-  const [category, setCategory] = useState<string>("all");
-  const [confirmModal, setConfirmModal] = useState<ConfirmModalProps | null>(
-    null,
-  );
-  const [isError, setIsError] = useState(false);
-  const { control, reset, watch } = useForm<SearchForm>({
-    resolver: zodResolver(searchSchema),
-    defaultValues: { search: "" },
-  });
-
-  const watchedSearch = watch("search");
-
-  const handleResetSearch = () => {
-    reset({ search: "" });
-  };
-
-  useEffect(() => {
-    const delayDebounce = setTimeout(() => {
-      const params = new URLSearchParams(searchParams.toString());
-      if (watchedSearch) {
-        params.set("search", watchedSearch);
-        params.set("searchBy", "title");
-        params.set("page", "1");
-      } else {
-        params.delete("search");
-        params.delete("searchBy");
-      }
-      const newSearch = params.toString();
-      if (searchParams.toString() !== newSearch) {
-        router.push(`${pathname}?${newSearch}`, { scroll: false });
-      }
-    }, 500);
-    return () => clearTimeout(delayDebounce);
-  }, [pathname, router, searchParams, watchedSearch]);
-
-  const handleFilterCategory = (event: SelectChangeEvent<string>) => {
-    const value = event.target.value;
-    setCategory(value);
-    const params = new URLSearchParams(searchParams.toString());
-
-    if (value === "all") {
-      params.delete("tagID");
-    } else {
-      params.set("tagID", value);
-    }
-    params.set("page", "1");
-    router.push(`${pathname}?${params.toString()}`, { scroll: false });
-  };
-
-  const onDelete = async (id: number) => {
-    try {
-      const response = await newsService.deleteNews(id);
-
-      if (response) {
-        setConfirmModal({
-          isOpen: true,
-          type: "success",
-          onClose: () => setConfirmModal(null),
-          onConfirm: () => {
-            setConfirmModal(null);
-            router.refresh();
-          },
-          title: "ลบข้อมูลสำเร็จ",
-          description: "ข้อมูลถูกลบออกจากฐานข้อมูลแล้ว",
-          confirmText: "เสร็จสิ้น",
-        });
-      } else {
-        setIsError(true);
-      }
-    } catch (error) {
-      console.log(error);
-      setIsError(true);
-    }
-  };
-
-  const confirmDeleteNews = (id: number) => {
-    setConfirmModal({
-      isOpen: true,
-      type: "delete",
-      onClose: () => setConfirmModal(null),
-      onConfirm: () => {
-        onDelete(id);
-      },
-    });
-  };
-
-  const handleNextPage = useCallback(
-    (currentPage: number) => {
-      const params = new URLSearchParams(searchParams.toString());
-      params.set("page", currentPage.toString());
-      router.push(`${pathname}?${params.toString()}`);
-    },
-    [pathname, router, searchParams],
-  );
+  const {
+    control,
+    category,
+    watchedSearch,
+    confirmModal,
+    resetSearch,
+    handleFilterCategory,
+    handleNextPage,
+    confirmDeleteNews,
+    isDeleteError,
+    clearDeleteError,
+  } = useNewsListController();
 
   return (
     <div className="flex min-h-screen flex-col px-8 py-5">
       <Snackbar
         anchorOrigin={{ vertical: "top", horizontal: "right" }}
-        open={isError}
+        open={isDeleteError}
         autoHideDuration={4000}
-        onClose={() => setIsError(false)}
+        onClose={clearDeleteError}
       >
         <Alert
           severity="error"
-          onClose={() => setIsError(false)}
+          onClose={clearDeleteError}
           sx={{ width: "100%" }}
         >
           ไม่สามารถลบข้อมูลข่าวได้ในขณะนี้ กรุณาลองใหม่อีกครั้ง
@@ -173,7 +76,7 @@ const NewsListComponent = (initValue: NewsListComponentProps) => {
             startIcon={<SearchIcon />}
             endIcon={
               watchedSearch ? (
-                <CloseIcon onClick={handleResetSearch} />
+                <CloseIcon onClick={resetSearch} />
               ) : (
                 <span style={{ width: "24px" }} />
               )
@@ -186,7 +89,7 @@ const NewsListComponent = (initValue: NewsListComponentProps) => {
             size="small"
             value={category ?? "all"}
             displayEmpty
-            onChange={handleFilterCategory}
+            onChange={(event) => handleFilterCategory(event.target.value)}
             renderValue={(value) => {
               if (value === "all") return "ทั้งหมด";
               return (

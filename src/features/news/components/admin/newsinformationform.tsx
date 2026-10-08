@@ -23,7 +23,7 @@ import {
   UpsertNewsInformationSchema,
   UpsertNewsInformationInputs,
 } from "@/features/news/schema/newsinformation";
-import { newsService } from "@/features/news/client";
+import { useNews, useUpsertNewsInformation } from "@/features/news/client";
 
 
 interface NewsInformationFormProps {
@@ -58,10 +58,15 @@ export const NewsInformationForm = ({ type, tagID }: NewsInformationFormProps) =
     null,
   );
   const [isError, setIsError] = useState(false);
-
-  const [options, setOptions] = useState<NewsItem[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [search, setSearch] = useState("");
+  const [searchActive, setSearchActive] = useState(false);
   const router = useRouter();
+  const mutation = useUpsertNewsInformation();
+  const newsQuery = useNews(
+    { page: 1, pageSize: 10, search: search || undefined, searchBy: "title" },
+    searchActive,
+  );
+  const options: NewsItem[] = newsQuery.data?.rows ?? [];
 
   const {
     control,
@@ -95,22 +100,17 @@ export const NewsInformationForm = ({ type, tagID }: NewsInformationFormProps) =
 
   const onSubmit = async (data: UpsertNewsInformationInputs) => {
     try {
-      const response = await newsService.upsertNewsInformation(data);
-
-      if (response) {
-        setConfirmModal({
-          isOpen: true,
-          type: "success",
-          onClose: () => setConfirmModal(null),
-          onConfirm: () => router.push(`/admin/newsinformation/${tagID}`),
-        });
-        return;
-      }
-
-      setIsError(true);
+      await mutation.mutateAsync(data);
     } catch {
       setIsError(true);
+      return;
     }
+    setConfirmModal({
+      isOpen: true,
+      type: "success",
+      onClose: () => setConfirmModal(null),
+      onConfirm: () => router.push(`/admin/newsinformation/${tagID}`),
+    });
   };
 
   const handleFileChange = (
@@ -138,22 +138,9 @@ export const NewsInformationForm = ({ type, tagID }: NewsInformationFormProps) =
     setCropTarget(null);
   };
 
-  const handleSearch = async (search: string) => {
-    setLoading(true);
-    try {
-      const response = await newsService.getNews(
-        1,
-        10,
-        undefined,
-        undefined,
-        undefined,
-        search || undefined,
-        "title",
-      );
-      setOptions(response.rows);
-    } finally {
-      setLoading(false);
-    }
+  const handleSearch = (value: string) => {
+    setSearch(value);
+    setSearchActive(true);
   };
 
   return (
@@ -267,7 +254,7 @@ export const NewsInformationForm = ({ type, tagID }: NewsInformationFormProps) =
                   <Autocomplete
                     popupIcon={null}
                     options={options}
-                    loading={loading}
+              loading={searchActive && newsQuery.isPending}
                     getOptionLabel={(opt) => opt.title}
                     isOptionEqualToValue={(a, b) => a.id === b.id}
                     onInputChange={(_, value) => handleSearch(value)}
@@ -338,7 +325,7 @@ export const NewsInformationForm = ({ type, tagID }: NewsInformationFormProps) =
                   <Autocomplete
                     popupIcon={null}
                     options={options}
-                    loading={loading}
+                    loading={searchActive && newsQuery.isPending}
                     getOptionLabel={(opt) => opt.title}
                     isOptionEqualToValue={(a, b) => a.id === b.id}
                     onInputChange={(_, value) => handleSearch(value)}

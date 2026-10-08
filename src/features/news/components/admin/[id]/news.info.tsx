@@ -4,10 +4,7 @@ import { INews, NewsCategory } from "@/features/news/domain/news";
 import dayjs from "dayjs";
 import "dayjs/locale/th";
 import buddhistEra from "dayjs/plugin/buddhistEra";
-import { useForm, SubmitHandler } from "react-hook-form";
 import { RHFTextField } from "@/shared/components/form/RHFTextField";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { RHFSelect } from "@/shared/components/form/RHFSelect";
 import { Button, MenuItem, Alert, Snackbar, Modal, IconButton, } from "@mui/material";
@@ -16,15 +13,9 @@ import { RHFDatePickerDayjs } from "@/shared/components/form/RHFDatePicker";
 import { styled } from "@mui/material/styles";
 import {
   ConfirmModal,
-  ConfirmModalProps,
 } from "@/shared/components/modal/confirmModal";
 import { CropImageCard } from "@/shared/components/cropimagecard";
-import {
-  UpdateNewsSchema,
-  UpdateNewsInputs,
-  UpdateNewsPayload,
-} from "@/features/news/schema/news";
-import { newsService } from "@/features/news/client";
+import { useUpdateNewsForm } from "@/features/news/hooks/useUpdateNewsForm";
 
 
 dayjs.extend(buddhistEra);
@@ -34,29 +25,6 @@ interface NewsInfoProps {
   news: INews;
   categories: NewsCategory[];
 }
-
-type NewsAsset = { key: string; source: string | File; id?: number };
-
-const savedAssets = (news: INews): NewsAsset[] => {
-  const details = news.images?.filter((image) => image.imageType === "DETAIL") ?? [];
-  return details.length
-    ? details.map((image) => ({ key: `saved-${image.id}`, source: image.imageUrl, id: image.id }))
-    : (news.newsAdditionalImages ?? []).map((image) => ({ key: `saved-${image.id}`, source: image.imageUrl, id: image.id }));
-};
-
-const formValues = (news: INews): UpdateNewsInputs => ({
-  title: news.title,
-  startDate: dayjs(news.startDate).toISOString(),
-  dueDate: news.dueDate ? dayjs(news.dueDate).toISOString() : "",
-  tag: news.category?.id ?? news.tag.id,
-  detail: news.detail,
-  thumbnail: news.thumbnailURL,
-  thumbnailImage: news.images?.find((image) => image.imageType === "THUMBNAIL")?.imageUrl ?? news.thumbnailURL,
-  thumbnailFocalPointX: news.images?.find((image) => image.imageType === "THUMBNAIL")?.focalPointX ?? 50,
-  thumbnailFocalPointY: news.images?.find((image) => image.imageType === "THUMBNAIL")?.focalPointY ?? 50,
-  cardFocalPointX: news.images?.find((image) => image.imageType === "CARD")?.focalPointX ?? news.cardFocalPointX ?? 50,
-  cardFocalPointY: news.images?.find((image) => image.imageType === "CARD")?.focalPointY ?? news.cardFocalPointY ?? 50,
-});
 
 const VisuallyHiddenInput = styled("input")({
   clip: "rect(0 0 0 0)",
@@ -92,115 +60,51 @@ const NewsImage = ({ source, alt }: { source: string | File; alt: string }) => {
 };
 
 const NewsInfo = ({ news, categories }: NewsInfoProps) => {
-  const router = useRouter();
-  const [savedNews, setSavedNews] = useState(news);
-  const [isEdit, setIsEdit] = useState(false);
-  const [confirmModal, setConfirmModal] = useState<ConfirmModalProps | null>(
-    null,
-  );
-  const [isError, setIsError] = useState(false);
-  const [croppingFile, setCroppingFile] = useState<File | null>(null);
-  const [cropTarget, setCropTarget] = useState<"card" | "thumbnail">("card");
-  const [selectedAssets, setSelectedAssets] = useState<NewsAsset[]>(() =>
-    savedAssets(news),
-  );
-  const [assetsError, setAssetsError] = useState("");
-  const [draggedItemIndex, setDraggedItemIndex] = useState<number | null>(null);
-  const [dragOverItemIndex, setDragOverItemIndex] = useState<number | null>(
-    null,
-  );
   const {
     control,
-    handleSubmit,
-    reset,
-    setValue,
-    watch,
-    formState: { isDirty, isSubmitting, errors },
-  } = useForm<UpdateNewsInputs>({
-    resolver: zodResolver(UpdateNewsSchema),
-    defaultValues: formValues(news),
-  });
+    errors,
+    isEdit,
+    confirmModal,
+    croppingFile,
+    selectedAssets,
+    assetsError,
+    draggedItemIndex,
+    dragOverItemIndex,
+    thumbnail,
+    thumbnailImage,
+    disabled,
+    isPending,
+    isError,
+    clearError,
+    submit,
+    handleFileSelection,
+    handleCropComplete,
+    addAssets,
+    removeAsset,
+    moveAsset,
+    removeAllAssets,
+    handleDragStart,
+    handleDragEnter,
+    handleDragEnd,
+    handleDrop,
+    handleCancel,
+    startEditing,
+    cancelCrop,
+  } = useUpdateNewsForm(news);
 
-  const thumbnail = watch("thumbnail");
-  const thumbnailImage = watch("thumbnailImage");
-  const disabled = !isEdit || isSubmitting;
-  const originalAssets = savedAssets(savedNews);
-  const assetsChanged =
-    selectedAssets.length !== originalAssets.length ||
-    selectedAssets.some(
-      (asset, index) => asset.key !== originalAssets[index]?.key,
-    );
-
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>, target: "card" | "thumbnail" = "card") => {
-    const file = event.target.files?.[0];
-    if (file) {
-      setCroppingFile(file);
-      setCropTarget(target);
-    }
-    event.target.value = "";
-  };
-
-  const handleUploadComplete = (
-    file: File,
-    focalPoint?: { x: number; y: number },
+  const handleFileChange = (
+    event: React.ChangeEvent<HTMLInputElement>,
+    target: "card" | "thumbnail" = "card",
   ) => {
-    if (cropTarget === "card") {
-      setValue("thumbnail", file, { shouldDirty: true, shouldValidate: true });
-      if (focalPoint) {
-        setValue("cardFocalPointX", focalPoint.x, { shouldDirty: true });
-        setValue("cardFocalPointY", focalPoint.y, { shouldDirty: true });
-      }
-    } else {
-      setValue("thumbnailImage", file, { shouldDirty: true, shouldValidate: true });
-      if (focalPoint) {
-        setValue("thumbnailFocalPointX", focalPoint.x, { shouldDirty: true });
-        setValue("thumbnailFocalPointY", focalPoint.y, { shouldDirty: true });
-      }
-    }
-    setCroppingFile(null);
-  };
-
-  const updateAssets = (assets: NewsAsset[]) => {
-    setSelectedAssets(assets);
-    setAssetsError("");
-  };
-
-  const handleAssetsChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(event.target.files ?? []);
+    const file = event.target.files?.[0];
+    if (file) handleFileSelection(file, target);
     event.target.value = "";
-    if (!files.length) return;
-    if (selectedAssets.length + files.length > 10) {
-      setAssetsError("อัปโหลดรูปภาพเพิ่มเติมได้สูงสุด 10 รูป");
-      return;
-    }
-    if (files.some((file) => !file.type.startsWith("image/"))) {
-      setAssetsError("กรุณาเลือกไฟล์รูปภาพเท่านั้น");
-      return;
-    }
-    updateAssets([
-      ...selectedAssets,
-      ...files.map((file) => ({ key: crypto.randomUUID(), source: file })),
-    ]);
   };
-
-  const handleDragEnd = () => {
-    setDraggedItemIndex(null);
-    setDragOverItemIndex(null);
+  const handleUploadComplete = handleCropComplete;
+  const handleAssetsChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    addAssets(Array.from(event.target.files ?? []));
+    event.target.value = "";
   };
-
-  const moveAsset = (from: number, to: number) => {
-    if (disabled || from === to || !selectedAssets[from] || !selectedAssets[to])
-      return;
-    const assets = [...selectedAssets];
-    assets.splice(to, 0, assets.splice(from, 1)[0]);
-    updateAssets(assets);
-  };
-
-  const handleDrop = (index: number) => {
-    if (draggedItemIndex !== null) moveAsset(draggedItemIndex, index);
-    handleDragEnd();
-  };
-
   const assetAtPointer = (event: React.PointerEvent<HTMLDivElement>) => {
     const key = document
       .elementFromPoint(event.clientX, event.clientY)
@@ -208,127 +112,18 @@ const NewsInfo = ({ news, categories }: NewsInfoProps) => {
     return selectedAssets.findIndex((asset) => asset.key === key);
   };
 
-  const resetEditing = () => {
-    reset(formValues(savedNews));
-    updateAssets(savedAssets(savedNews));
-    handleDragEnd();
-    setCroppingFile(null);
-    setIsError(false);
-    setIsEdit(false);
-    setConfirmModal(null);
-  };
-
-  const handleCancel = () => {
-    if (isDirty || assetsChanged) {
-      setConfirmModal({
-        isOpen: true,
-        type: "warning",
-        onClose: () => setConfirmModal(null),
-        onConfirm: resetEditing,
-      });
-    } else {
-      resetEditing();
-    }
-  };
-
-  const onSubmit: SubmitHandler<UpdateNewsInputs> = async (data) => {
-    if (!isEdit) return;
-    const newAdditionalImages = selectedAssets.flatMap((asset) =>
-      asset.source instanceof File ? [asset.source] : [],
-    );
-    const deletedIDs = originalAssets
-      .filter(
-        (asset) => !selectedAssets.some((selected) => selected.id === asset.id),
-      )
-      .map((asset) => asset.id!);
-    const hasMediaRows = Boolean(savedNews.images?.some((image) => image.imageType === "DETAIL"));
-    const deletedImageIds = hasMediaRows ? deletedIDs : [];
-    const deletedAdditionalImagesId = hasMediaRows ? [] : deletedIDs;
-    let newIndex = 0;
-    const detailImageOrder = hasMediaRows ? JSON.stringify(selectedAssets.map((asset) =>
-      asset.id !== undefined ? String(asset.id) : `new:${newIndex++}`,
-    )) : undefined;
-    if (
-      !isDirty &&
-      !newAdditionalImages.length &&
-      !deletedAdditionalImagesId.length
-    ) {
-      resetEditing();
-      return;
-    }
-    setIsError(false);
-    try {
-      const payload: UpdateNewsPayload = {
-        title: data.title,
-        tagID: data.tag,
-        detail: data.detail,
-        thumbnail: data.thumbnail,
-        cardImage: data.thumbnail instanceof File ? data.thumbnail : undefined,
-        thumbnailImage: data.thumbnailImage instanceof File ? data.thumbnailImage : undefined,
-        newsCategoryId: data.tag,
-        eventStartAt: dayjs(data.startDate).toISOString(),
-        eventEndAt: data.dueDate ? dayjs(data.dueDate).toISOString() : null,
-        startDate: dayjs(data.startDate).toISOString(),
-        dueDate: data.dueDate ? dayjs(data.dueDate).toISOString() : "",
-        thumbnailFocalPointX: data.thumbnailFocalPointX,
-        thumbnailFocalPointY: data.thumbnailFocalPointY,
-        cardFocalPointX: data.cardFocalPointX,
-        cardFocalPointY: data.cardFocalPointY,
-        detailImages: newAdditionalImages,
-        deletedImageIds,
-        detailImageOrder,
-        deletedAdditionalImagesId,
-      };
-      const response = await newsService.updateNews(savedNews.id, payload);
-      if (!response) {
-        setIsError(true);
-        return;
-      }
-      const latestNews = await newsService
-        .getNewsById(String(savedNews.id))
-        .catch(() => ({
-          ...savedNews,
-          ...response,
-          newsAdditionalImages: [
-            ...(savedNews.newsAdditionalImages ?? []).filter(
-              (image) => !deletedAdditionalImagesId.includes(image.id),
-            ),
-            ...(response.newsAdditionalImages ?? []),
-          ],
-        }));
-      setSavedNews(latestNews);
-      reset(formValues(latestNews));
-      updateAssets(savedAssets(latestNews));
-      handleDragEnd();
-      setConfirmModal({
-        isOpen: true,
-        type: "success",
-        onClose: () => setConfirmModal(null),
-        onConfirm: () => {
-          setConfirmModal(null);
-          setIsEdit(false);
-          router.push(`/admin/news?page=1`);
-          router.refresh();
-        },
-      });
-    } catch (error) {
-      console.error(error);
-      setIsError(true);
-    }
-  };
-
   const uploadAssetsButton = (
     <Button
       variant="contained"
       component="label"
-      disabled={isSubmitting}
+      disabled={isPending}
       sx={{ height: "40px" }}
     >
       <VisuallyHiddenInput
         type="file"
         accept="image/*"
         multiple
-        disabled={isSubmitting}
+        disabled={isPending}
         onChange={handleAssetsChange}
       />
       อัปโหลดรูปภาพ
@@ -341,11 +136,11 @@ const NewsInfo = ({ news, categories }: NewsInfoProps) => {
         anchorOrigin={{ vertical: "top", horizontal: "right" }}
         open={isError}
         autoHideDuration={4000}
-        onClose={() => setIsError(false)}
+        onClose={clearError}
       >
         <Alert
           severity="error"
-          onClose={() => setIsError(false)}
+          onClose={clearError}
           sx={{ width: "100%" }}
         >
           ไม่สามารถบันทึกข้อมูลข่าวสารได้
@@ -354,7 +149,7 @@ const NewsInfo = ({ news, categories }: NewsInfoProps) => {
       <h3 className="mb-6 font-bold">
         {isEdit ? "แก้ไขข้อมูลข่าวสาร" : "ข้อมูลข่าวสาร"}
       </h3>
-      <form className="gap-4 p-4" onSubmit={handleSubmit(onSubmit)}>
+      <form className="gap-4 p-4" onSubmit={submit}>
         <div className="flex flex-col gap-4">
           <div className="flex flex-col gap-6 md:flex-row md:items-stretch">
             <div className="flex w-full shrink-0 flex-col gap-2 md:w-[400px]">
@@ -368,13 +163,13 @@ const NewsInfo = ({ news, categories }: NewsInfoProps) => {
                     <Button
                       variant="contained"
                       component="label"
-                      disabled={isSubmitting}
+                      disabled={isPending}
                     >
                       อัปโหลดรูปภาพ
                       <VisuallyHiddenInput
                         type="file"
                         accept="image/*"
-                        disabled={isSubmitting}
+                        disabled={isPending}
                         onChange={handleFileChange}
                       />
                     </Button>
@@ -390,9 +185,9 @@ const NewsInfo = ({ news, categories }: NewsInfoProps) => {
               <div className="group border-neutral03 bg-neutral02 relative flex aspect-[382/254] w-full items-center justify-center overflow-hidden rounded-xl border">
                 <NewsImage source={thumbnailImage ?? thumbnail} alt="ภาพหน้าปก" />
                 {isEdit && <div className="absolute inset-0 flex items-center justify-center bg-neutral05/40 opacity-0 transition-opacity group-hover:opacity-100">
-                  <Button variant="contained" component="label" disabled={isSubmitting}>
+                  <Button variant="contained" component="label" disabled={isPending}>
                     อัปโหลดรูปภาพ
-                    <VisuallyHiddenInput type="file" accept="image/*" disabled={isSubmitting} onChange={(event) => handleFileChange(event, "thumbnail")} />
+                    <VisuallyHiddenInput type="file" accept="image/*" disabled={isPending} onChange={(event) => handleFileChange(event, "thumbnail")} />
                   </Button>
                 </div>}
               </div>
@@ -436,8 +231,8 @@ const NewsInfo = ({ news, categories }: NewsInfoProps) => {
               {isEdit && selectedAssets.length > 0 && (
                 <button
                   type="button"
-                  disabled={isSubmitting}
-                  onClick={() => updateAssets([])}
+                  disabled={isPending}
+                  onClick={removeAllAssets}
                   className="text-h5 text-accent04 cursor-pointer font-bold underline disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   ลบทั้งหมด
@@ -471,8 +266,8 @@ const NewsInfo = ({ news, categories }: NewsInfoProps) => {
                       )
                         return;
                       event.currentTarget.setPointerCapture(event.pointerId);
-                      setDraggedItemIndex(index);
-                      setDragOverItemIndex(index);
+                      handleDragStart(index);
+                      handleDragEnter(index);
                     }}
                     onPointerMove={(event) => {
                       if (
@@ -481,7 +276,7 @@ const NewsInfo = ({ news, categories }: NewsInfoProps) => {
                         draggedItemIndex === null
                       )
                         return;
-                      setDragOverItemIndex(assetAtPointer(event));
+                      handleDragEnter(assetAtPointer(event));
                     }}
                     onPointerUp={(event) => {
                       if (event.pointerType !== "mouse")
@@ -510,11 +305,11 @@ const NewsInfo = ({ news, categories }: NewsInfoProps) => {
                       if (disabled) return;
                       event.dataTransfer.setData("text/plain", asset.key);
                       event.dataTransfer.effectAllowed = "move";
-                      setDraggedItemIndex(index);
+                      handleDragStart(index);
                     }}
                     onDragEnter={() => {
                       if (!disabled && draggedItemIndex !== null)
-                        setDragOverItemIndex(index);
+                        handleDragEnter(index);
                     }}
                     onDragOver={(event) => {
                       if (!disabled && draggedItemIndex !== null)
@@ -535,7 +330,7 @@ const NewsInfo = ({ news, categories }: NewsInfoProps) => {
                       <IconButton
                         type="button"
                         size="small"
-                        disabled={isSubmitting}
+                        disabled={isPending}
                         aria-label={`ลบรูปภาพเพิ่มเติม ${index + 1}`}
                         sx={{
                           position: "absolute",
@@ -549,11 +344,7 @@ const NewsInfo = ({ news, categories }: NewsInfoProps) => {
                           padding: 0,
                           "&:hover": { backgroundColor: "rgba(0,0,0,0.8)" },
                         }}
-                        onClick={() =>
-                          updateAssets(
-                            selectedAssets.filter((_, i) => i !== index),
-                          )
-                        }
+                        onClick={() => removeAsset(index)}
                       >
                         <CloseIcon sx={{ fontSize: 16 }} />
                       </IconButton>
@@ -616,7 +407,7 @@ const NewsInfo = ({ news, categories }: NewsInfoProps) => {
                 type="button"
                 variant="outlined"
                 onClick={handleCancel}
-                disabled={isSubmitting}
+                disabled={isPending}
                 size="large"
               >
                 ยกเลิก
@@ -624,17 +415,17 @@ const NewsInfo = ({ news, categories }: NewsInfoProps) => {
               <Button
                 variant="contained"
                 type="submit"
-                disabled={isSubmitting}
+              disabled={isPending}
                 size="large"
               >
-                {isSubmitting ? "กำลังบันทึก..." : "บันทึก"}
+                {isPending ? "กำลังบันทึก..." : "บันทึก"}
               </Button>
             </>
           ) : (
             <Button
               type="button"
               variant="contained"
-              onClick={() => setIsEdit(true)}
+              onClick={startEditing}
               size="large"
             >
               แก้ไขข้อมูล
@@ -643,7 +434,7 @@ const NewsInfo = ({ news, categories }: NewsInfoProps) => {
         </div>
       </form>
 
-      <Modal open={!!croppingFile} onClose={() => setCroppingFile(null)}>
+      <Modal open={!!croppingFile} onClose={cancelCrop}>
         <div>
           {croppingFile && (
             <CropImageCard
@@ -651,7 +442,7 @@ const NewsInfo = ({ news, categories }: NewsInfoProps) => {
               width={382}
               height={254}
               onUploadComplete={handleUploadComplete}
-              onCancel={() => setCroppingFile(null)}
+              onCancel={cancelCrop}
               preserveOriginal
             />
           )}
