@@ -1,3 +1,4 @@
+import { notFound } from "next/navigation";
 import NewsInfo from "@/features/news/components/admin/[id]/news.info";
 import { createMasterDataServerService } from "@/features/master-data/server";
 import { createNewsServerService } from "@/features/news/server";
@@ -19,6 +20,7 @@ const page = async ({ params }: PageProps) => {
   const { id } = await params;
 
   const news = await newsService.getNewsById(id);
+  if (!news) notFound();
 
   const masterData = await masterDataService.getMasterData();
   const categories = masterData?.newsCategories ?? [];

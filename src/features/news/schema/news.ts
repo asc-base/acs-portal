@@ -1,5 +1,106 @@
 import { z } from "zod";
 import dayjs from "dayjs";
+import { NewsCategorySchema, TagSchema } from "@/shared/schema/references";
+
+export const NewsImageSchema = z.object({
+  id: z.number(),
+  imageID: z.number(),
+  imageType: z.enum(["CARD", "THUMBNAIL", "DETAIL"]),
+  imageUrl: z.string(),
+  focalPointX: z.number().nullable(),
+  focalPointY: z.number().nullable(),
+  sortOrder: z.number(),
+});
+
+const NewsAdditionalImageSchema = z.object({
+  id: z.number(),
+  newsID: z.number().optional(),
+  imageUrl: z.string(),
+});
+
+export const NewsResponseSchema = z.object({
+  id: z.number(),
+  title: z.string(),
+  thumbnailURL: z.string().nullable(),
+  highlightURL: z.string().nullable().optional(),
+  detail: z.string(),
+  startDate: z.string(),
+  dueDate: z.string().nullable().optional(),
+  eventStartAt: z.string().nullable().optional(),
+  eventEndAt: z.string().nullable().optional(),
+  category: NewsCategorySchema.nullable().optional(),
+  tag: TagSchema.nullable().optional(),
+  images: z.array(NewsImageSchema).optional(),
+  newsAdditionalImages: z.array(NewsAdditionalImageSchema).optional(),
+  cardFocalPointX: z.number().nullable().optional(),
+  cardFocalPointY: z.number().nullable().optional(),
+  thumbnailFocalPointX: z.number().nullable().optional(),
+  thumbnailFocalPointY: z.number().nullable().optional(),
+  createdDate: z.string().optional(),
+  updatedDate: z.string().optional(),
+});
+
+export const NewsPageSchema = z.object({
+  rows: z.array(NewsResponseSchema),
+  totalRecords: z.number(),
+  page: z.number(),
+  pageSize: z.number(),
+});
+
+export const NewsBulletinTypeSchema = z.enum(["HIGHLIGHT", "ANNOUNCEMENT"]);
+export const SetNewsBulletinSchema = z.object({
+  id: z.number(),
+  type: NewsBulletinTypeSchema,
+  enabled: z.boolean(),
+});
+export const NewsBulletinSchema = z.object({
+  id: z.number(),
+  newsID: z.number(),
+  type: NewsBulletinTypeSchema,
+  news: NewsResponseSchema,
+});
+export const NewsBulletinsSchema = z.array(NewsBulletinSchema);
+
+export const NewsInformationSchema = z.object({
+  id: z.number(),
+  newsID: z.number().optional(),
+  tagID: z.number().optional(),
+  thumbnailURL: z.string().nullable(),
+  highlightURL: z.string().nullable().optional(),
+  news: NewsResponseSchema,
+  thumbnailFocalPointX: z.number().nullable().optional(),
+  thumbnailFocalPointY: z.number().nullable().optional(),
+  type: NewsBulletinTypeSchema.optional(),
+});
+
+export const NewsFeatureResponseSchema = NewsInformationSchema.extend({
+  newsID: z.number(),
+  tagID: z.number(),
+  thumbnailURL: z.string(),
+});
+
+export const NewsInformationsPageSchema = z.object({
+  rows: z.array(NewsFeatureResponseSchema),
+  totalRecords: z.number(),
+  page: z.number(),
+  pageSize: z.number(),
+});
+
+const QueryNumberSchema = z.union([
+  z.number(),
+  z.string().transform((value) => Number(value)).pipe(z.number()),
+]);
+
+export const NewsQuerySchema = z.object({
+  page: QueryNumberSchema.optional(),
+  pageSize: QueryNumberSchema.optional(),
+  tagID: QueryNumberSchema.optional(),
+  orderBy: z.string().optional(),
+  sortBy: z.string().optional(),
+  search: z.string().optional(),
+  searchBy: z.string().optional(),
+});
+export const NewsSearchSchema = z.object({ search: z.string().optional() });
 
 export const FocalPointSchema = z.object({
   thumbnailFocalPointX: z.number().min(0).max(100).optional(),
@@ -61,6 +162,8 @@ export const UpdateNewsPayloadSchema = z.object({
   cardImage: z.file().optional(),
 });
 
+export const CreateNewsPayloadSchema = CreateNewsSchema;
+
 export const CreateNewsInformationSchema = (type: string) =>
   z.object({
     thumbnail: z.instanceof(File, { message: "กรุณาอัปโหลดรูปภาพ" }),
@@ -71,9 +174,18 @@ export const CreateNewsInformationSchema = (type: string) =>
     newsID: z.number().min(1, "กรุณาเลือกข่าว"),
   });
 
-export type CreateNewsInputs = z.infer<typeof CreateNewsSchema>;
-export type UpdateNewsInputs = z.infer<typeof UpdateNewsSchema>;
-export type UpdateNewsPayload = z.infer<typeof UpdateNewsPayloadSchema>;
+export type INews = z.infer<typeof NewsResponseSchema>;
+export type INewsImage = z.infer<typeof NewsImageSchema>;
+export type INewsInformation = z.infer<typeof NewsInformationSchema>;
+export type NewsBulletin = z.infer<typeof NewsBulletinSchema>;
+export type SetNewsBulletin = z.infer<typeof SetNewsBulletinSchema>;
+export type QueryNews = z.output<typeof NewsQuerySchema>;
+export type NewsQueryInput = z.input<typeof NewsQuerySchema>;
+export type NewsSearch = z.infer<typeof NewsSearchSchema>;
+export type CreateNewsInputs = z.input<typeof CreateNewsSchema>;
+export type CreateNewsPayload = z.output<typeof CreateNewsPayloadSchema>;
+export type UpdateNewsInputs = z.input<typeof UpdateNewsSchema>;
+export type UpdateNewsPayload = z.output<typeof UpdateNewsPayloadSchema>;
 export type CreateNewsInformationInputs = z.infer<
   ReturnType<typeof CreateNewsInformationSchema>
 >;
