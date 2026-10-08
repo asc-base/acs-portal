@@ -6,6 +6,10 @@ import {
 import { HttpHelper } from "@/shared/lib/http";
 import { ApiResponse, Pageable } from "@/shared/types/response";
 import { StudentResponseSchema } from "@/shared/schema/profile-response";
+import {
+  StudentBatchResponseSchema,
+  StudentPageSchema,
+} from "@/features/students/schema/student";
 
 export class StudentRepository implements IStudentRepository {
   private readonly http: HttpHelper;
@@ -42,10 +46,7 @@ export class StudentRepository implements IStudentRepository {
     const response = await this.http.get<ApiResponse<Pageable<IStudent>>>(url);
     return {
       ...response,
-      data: {
-        ...response.data,
-        rows: StudentResponseSchema.array().parse(response.data.rows),
-      },
+      data: StudentPageSchema.parse(response.data),
     };
   }
   async getStudentById(id: number): Promise<ApiResponse<IStudent>> {
@@ -55,11 +56,14 @@ export class StudentRepository implements IStudentRepository {
     return { ...response, data: StudentResponseSchema.parse(response.data) };
   }
 
-  async getStudentByUserId(userId: number): Promise<ApiResponse<IStudent>> {
-    const response = await this.http.get<ApiResponse<IStudent>>(
+  async getStudentByUserId(userId: number): Promise<ApiResponse<IStudent | null>> {
+    const response = await this.http.get<ApiResponse<IStudent | null>>(
       `/v1/students/user/${userId}`,
     );
-    return { ...response, data: StudentResponseSchema.parse(response.data) };
+    return {
+      ...response,
+      data: response.data === null ? null : StudentResponseSchema.parse(response.data),
+    };
   }
 
   async createStudent(data: FormData): Promise<ApiResponse<IStudent>> {
@@ -89,9 +93,10 @@ export class StudentRepository implements IStudentRepository {
   }
 
   async createStudentBatch(data: FormData): Promise<ApiResponse<null>> {
-    return await this.http.post<ApiResponse<null>>(
+    const response = await this.http.post<ApiResponse<unknown>>(
       `/v1/students/batch`,
       data,
     );
+    return { ...response, data: StudentBatchResponseSchema.parse(response.data) };
   }
 }

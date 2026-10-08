@@ -27,8 +27,8 @@ import { IStudent } from "@/features/students/domain/student";
 import SearchIcon from "@mui/icons-material/Search";
 import CloseIcon from "@mui/icons-material/Close";
 import { RHFTextField } from "@/shared/components/form/RHFTextField";
-import { SearchForm } from "@/features/students/components/admin/students.landingpage";
-import { Control } from "react-hook-form";
+import type { Control } from "react-hook-form";
+import type { StudentSearch } from "@/features/students/schema/student";
 import Link from "next/link";
 import AddIcon from "@mui/icons-material/Add";
 import {
@@ -43,7 +43,7 @@ import Alert from "@mui/material/Alert";
 import Snackbar from "@mui/material/Snackbar";
 import EmptyState from "@/shared/components/emptyState";
 import { StudentDefaultAvatar } from "@/features/students/components/student-default-avatar";
-import { studentService } from "@/features/students/client";
+import { useCreateStudentBatch } from "@/features/students/client";
 
 
 interface StudentTableComponentsProps {
@@ -51,7 +51,7 @@ interface StudentTableComponentsProps {
   onSort: (sortBy: string) => void;
   orderBy?: string;
   sortBy?: "asc" | "desc";
-  control: Control<SearchForm>;
+  control: Control<StudentSearch>;
   watchedSearch?: string;
   onResetSearch: () => void;
   totalRecords: number;
@@ -59,64 +59,26 @@ interface StudentTableComponentsProps {
   page: number;
   pageSize: number;
   handleNextPage: (page: number) => void;
+  confirmDeleteStudent: (id: number) => void;
+  confirmModal: ConfirmModalProps | null;
+  errorMessage: string;
+  handleCloseError: () => void;
 }
 
-const StudentTableComponents = ({ students, onSort, sortBy, orderBy, control, watchedSearch, onResetSearch, totalRecords, classBookID, page, pageSize, handleNextPage }: StudentTableComponentsProps) => {
+const StudentTableComponents = ({ students, onSort, sortBy, orderBy, control, watchedSearch, onResetSearch, totalRecords, classBookID, page, pageSize, handleNextPage, confirmDeleteStudent, confirmModal, errorMessage, handleCloseError }: StudentTableComponentsProps) => {
   const router = useRouter();
+  const createStudentBatch = useCreateStudentBatch();
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
-  const [confirmModal, setConfirmModal] = useState<ConfirmModalProps | null>(
-    null,
-  );
-  const [isError, setIsError] = useState(false);
   const [uploadStatus, setUploadStatus] = useState<UploadStatus | null>(null);
   const handleEdit = (studentId: number) => {
     router.push(`/admin/students/${studentId}?classBookID=${classBookID}`);
-  };
-
-  const handleDelete = (id: number) => {
-    setConfirmModal({
-      isOpen: true,
-      type: "delete",
-      onClose: () => setConfirmModal(null),
-      onConfirm: () => {
-        onDelete(id);
-      },
-    });
-  };
-
-  const onDelete = async (id: number) => {
-    try {
-      const response = await studentService.deleteStudent(id);
-
-      if (response) {
-        setConfirmModal({
-          isOpen: true,
-          type: "success",
-          onClose: () => setConfirmModal(null),
-          onConfirm: () => {
-            setConfirmModal(null);
-            router.push(
-              `/admin/students?page=1&pageSize=10&classBookID=${classBookID}`,
-            );
-          },
-          title: "ลบข้อมูลสำเร็จ",
-          description: "ข้อมูลถูกลบออกจากฐานข้อมูลแล้ว",
-          confirmText: "เสร็จสิ้น",
-        });
-      } else {
-        setIsError(true);
-      }
-    } catch (error) {
-      console.log(error);
-      setIsError(true);
-    }
   };
 
   const handleUploadStudentFile = async (file: File) => {
     setIsUploadModalOpen(false);
     setUploadStatus("loading");
     try {
-      await studentService.createStudentBatch({
+      await createStudentBatch.mutateAsync({
         classBookID: Number(classBookID),
         file: file,
       });
@@ -135,16 +97,16 @@ const StudentTableComponents = ({ students, onSort, sortBy, orderBy, control, wa
     <Card sx={{ height: 700, display: "flex", flexDirection: "column" }}>
       <Snackbar
         anchorOrigin={{ vertical: "top", horizontal: "right" }}
-        open={isError}
+        open={!!errorMessage}
         autoHideDuration={4000}
-        onClose={() => setIsError(false)}
+        onClose={handleCloseError}
       >
         <Alert
           severity="error"
-          onClose={() => setIsError(false)}
+          onClose={handleCloseError}
           sx={{ width: "100%" }}
         >
-          ไม่สามารถลบข้อมูลนักศึกษาได้ในขณะนี้ กรุณาลองใหม่อีกครั้ง
+          {errorMessage}
         </Alert>
       </Snackbar>
       <div className="flex items-center justify-between p-6">
@@ -303,7 +265,7 @@ const StudentTableComponents = ({ students, onSort, sortBy, orderBy, control, wa
                     <IconButton
                       color="error"
                       size="small"
-                      onClick={() => handleDelete(student.id)}
+                      onClick={() => confirmDeleteStudent(student.id)}
                     >
                       <Delete />
                     </IconButton>

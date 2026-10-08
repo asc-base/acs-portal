@@ -1,5 +1,12 @@
 import { describe, expect, it } from "vitest";
-import { CreateStudentSchema, UpdateStudentSchema } from "@/features/students/schema/student";
+import {
+  CreateStudentRequestSchema,
+  CreateStudentSchema,
+  QueryStudentSchema,
+  StudentPageSchema,
+  UpdateStudentRequestSchema,
+  UpdateStudentSchema,
+} from "@/features/students/schema/student";
 
 const validStudent = {
   prefixID: 1,
@@ -63,5 +70,72 @@ describe("student social links", () => {
     const result = CreateStudentSchema.safeParse({ ...validStudent, ...change });
 
     expect(result.success).toBe(false);
+  });
+});
+
+describe("student request and query schemas", () => {
+  it("parses query-string numbers without changing filter values", () => {
+    expect(
+      QueryStudentSchema.parse({
+        page: "2",
+        pageSize: "5",
+        classBookID: "3",
+        search: "somchai",
+        orderBy: "studentCode",
+        sortBy: "desc",
+      }),
+    ).toEqual({
+      page: 2,
+      pageSize: 5,
+      classBookID: 3,
+      search: "somchai",
+      orderBy: "studentCode",
+      sortBy: "desc",
+    });
+  });
+
+  it("keeps multipart files and skills in validated requests", () => {
+    const profileImage = new File(["image"], "profile.png", { type: "image/png" });
+    expect(
+      CreateStudentRequestSchema.parse({
+        ...validStudent,
+        classBookID: 3,
+        imageFile: profileImage,
+        skills: ["React"],
+      }),
+    ).toMatchObject({ classBookID: 3, imageFile: profileImage, skills: ["React"] });
+    expect(
+      UpdateStudentRequestSchema.parse({
+        classBookID: 3,
+        skills: ["React"],
+        imageFile: profileImage,
+      }),
+    ).toMatchObject({ classBookID: 3, imageFile: profileImage, skills: ["React"] });
+    expect(
+      UpdateStudentRequestSchema.safeParse({ classBookID: 3, email: "bad" })
+        .success,
+    ).toBe(false);
+  });
+
+  it("validates pagination metadata and response rows", () => {
+    const row = {
+      id: 1,
+      email: "student@example.com",
+      firstNameTh: "สมชาย",
+      lastNameTh: "ใจดี",
+      student: {
+        id: 2,
+        studentCode: "64000000001",
+        classBookID: null,
+        skills: [],
+      },
+    };
+    expect(
+      StudentPageSchema.parse({ rows: [row], totalRecords: 1, page: 1, pageSize: 10 }),
+    ).toEqual({ rows: [row], totalRecords: 1, page: 1, pageSize: 10 });
+    expect(
+      StudentPageSchema.safeParse({ rows: [row], totalRecords: "1", page: 1, pageSize: 10 })
+        .success,
+    ).toBe(false);
   });
 });
