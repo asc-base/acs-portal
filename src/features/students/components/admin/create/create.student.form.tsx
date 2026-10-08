@@ -1,26 +1,17 @@
 "use client";
-import React, { FC, useState } from "react";
-import { useForm } from "react-hook-form";
+import React, { FC } from "react";
 import { Button, Typography, Modal } from "@mui/material";
 // import AddIcon from "@mui/icons-material/Add";
 import Alert from "@mui/material/Alert";
 import Snackbar from "@mui/material/Snackbar";
 import MenuItem from "@mui/material/MenuItem";
-import { useRouter } from "next/navigation";
 import Image from "next/image";
-import { zodResolver } from "@hookform/resolvers/zod";
 import { RHFTextField } from "@/shared/components/form/RHFTextField";
 import { RHFSelect } from "@/shared/components/form/RHFSelect";
-import { ICreateStudent } from "@/features/students/domain/student";
-import {
-  ConfirmModal,
-  ConfirmModalProps,
-} from "@/shared/components/modal/confirmModal";
+import { ConfirmModal } from "@/shared/components/modal/confirmModal";
 import { styled } from "@mui/material/styles";
 import { CropImageCard } from "@/shared/components/cropimagecard";
-import { CreateStudentSchema, CreateStudentInputs } from "@/features/students/schema/student";
-import { studentService } from "@/features/students/client";
-import { useMasterData } from "@/features/master-data/client";
+import { useCreateStudentController } from "@/features/students/hooks/use-create-student-controller";
 
 
 interface FormProfessorsProps {
@@ -40,115 +31,25 @@ const VisuallyHiddenInput = styled("input")({
 });
 
 export const CreateStudentForm: FC<FormProfessorsProps> = ({ classBookID }) => {
-  const { data: masterData, isPending: isMasterDataPending, isError: isMasterDataError } = useMasterData();
-  const prefixes = masterData?.prefixes ?? [];
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [croppingFile, setCroppingFile] = useState<File | null>(null);
-  const [focalPoint, setFocalPoint] = useState<{ x: number; y: number } | null>(
-    null,
-  );
-  const [isError, setIsError] = useState(false);
-  const [confirmModal, setConfirmModal] = useState<ConfirmModalProps | null>(
-    null,
-  );
-
-  const router = useRouter();
   const {
     control,
     handleSubmit,
-    formState: { isValid },
-  } = useForm<CreateStudentInputs>({
-    resolver: zodResolver(CreateStudentSchema),
-    defaultValues: {
-      prefixID: null,
-      firstNameTh: "",
-      lastNameTh: "",
-      firstNameEn: "",
-      lastNameEn: "",
-      studentCode: "",
-      nickName: "",
-      email: "",
-      facebook: undefined,
-      linkedin: undefined,
-      instagram: undefined,
-      github: undefined,
-      // otherProjects: [{ value: "" }],
-    },
-    mode: "onBlur",
-    reValidateMode: "onChange",
-  });
-
-  // const { fields: otherProjects, append: appendOtherProjects } = useFieldArray({
-  //   control,
-  //   name: "otherProjects",
-  // });
-
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0] || null;
-
-    if (file) {
-      setCroppingFile(file);
-    }
-    event.target.value = "";
-  };
-
-  const handleCropComplete = (
-    croppedFile: File,
-    focal?: { x: number; y: number },
-  ) => {
-    setSelectedFile(croppedFile);
-    if (focal) {
-      setFocalPoint(focal);
-    }
-    setCroppingFile(null);
-  };
-
-  const handleCropCancel = () => {
-    setCroppingFile(null);
-  };
-
-  const onSubmit = async (data: CreateStudentInputs) => {
-    try {
-      const payload: ICreateStudent = {
-        prefixID: data.prefixID,
-        firstNameTh: data.firstNameTh,
-        lastNameTh: data.lastNameTh,
-        firstNameEn: data.firstNameEn || null,
-        lastNameEn: data.lastNameEn || null,
-        studentCode: data.studentCode,
-        nickName: data.nickName,
-        email: data.email,
-        facebook: data.facebook,
-        linkedin: data.linkedin,
-        instagram: data.instagram,
-        github: data.github,
-        classBookID: classBookID,
-        imageFocalPointX: focalPoint?.x,
-        imageFocalPointY: focalPoint?.y,
-      };
-      const response = await studentService.createStudent(
-        payload,
-        selectedFile,
-      );
-
-      if (!response) setIsError(true);
-      else {
-        setConfirmModal({
-          isOpen: true,
-          type: "success",
-          onClose: () => setConfirmModal(null),
-          onConfirm: () => {
-            router.push(
-              `/admin/students?page=1&pageSize=10&classBookID=${classBookID}`,
-            );
-          },
-        });
-      }
-    } catch (error) {
-      console.log(error);
-      setIsError(true);
-    }
-  };
+    isValid,
+    prefixes,
+    isMasterDataPending,
+    isMasterDataError,
+    selectedFile,
+    croppingFile,
+    handleFileChange,
+    handleCropComplete,
+    handleCropCancel,
+    handleCancel,
+    confirmModal,
+    isError,
+    isPending,
+    onSubmit,
+    handleCloseError,
+  } = useCreateStudentController(classBookID);
 
   return (
     <form className="space-y-4 p-8" onSubmit={handleSubmit(onSubmit)}>
@@ -156,11 +57,11 @@ export const CreateStudentForm: FC<FormProfessorsProps> = ({ classBookID }) => {
         anchorOrigin={{ vertical: "top", horizontal: "right" }}
         open={isError}
         autoHideDuration={4000}
-        onClose={() => setIsError(false)}
+        onClose={handleCloseError}
       >
         <Alert
           severity="error"
-          onClose={() => setIsError(false)}
+          onClose={handleCloseError}
           sx={{ width: "100%" }}
         >
           ไม่สามารถเพิ่มข้อมูลนักศึกษาได้
@@ -427,18 +328,7 @@ export const CreateStudentForm: FC<FormProfessorsProps> = ({ classBookID }) => {
         <Button
           variant="outlined"
           size="large"
-          onClick={() => {
-            setConfirmModal({
-              isOpen: true,
-              type: "warning",
-              onClose: () => setConfirmModal(null),
-              onConfirm: () => {
-                router.push(
-                  `/admin/students?page=1&pageSize=10&classBookID=${classBookID}`,
-                );
-              },
-            });
-          }}
+          onClick={handleCancel}
         >
           ยกเลิก
         </Button>
@@ -446,7 +336,7 @@ export const CreateStudentForm: FC<FormProfessorsProps> = ({ classBookID }) => {
           type="submit"
           variant="contained"
           size="large"
-          disabled={!isValid}
+          disabled={!isValid || isPending}
         >
           บันทึกข้อมูล
         </Button>

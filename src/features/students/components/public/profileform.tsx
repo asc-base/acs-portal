@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React from "react";
 import { Button, InputAdornment, Modal, Chip, TextField } from "@mui/material";
 import { RHFTextField } from "@/shared/components/form/RHFTextField";
 import { styled } from "@mui/material/styles";
@@ -8,17 +8,8 @@ import FacebookRoundedIcon from "@mui/icons-material/FacebookRounded";
 import LinkedInIcon from "@mui/icons-material/LinkedIn";
 import InstagramIcon from "@mui/icons-material/Instagram";
 import Image from "next/image";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import {
-  UpdateStudentSchema,
-  UpdateStudentInputs,
-} from "@/features/students/schema/student";
 import { CropImageCard } from "@/shared/components/cropimagecard";
-import { useRouter } from "next/navigation";
-import { IStudent, IUpdateStudent } from "@/features/students/domain/student";
-import { useCurrentUser } from "@/features/auth/client";
-import { studentService } from "@/features/students/client";
+import { useStudentProfileController } from "@/features/students/hooks/use-student-profile-controller";
 
 
 const VisuallyHiddenInput = styled("input")({
@@ -35,183 +26,29 @@ const VisuallyHiddenInput = styled("input")({
 
 
 
-// interface ProfileFormProps {
-//   studentData: IStudent;
-// }
-
 const ProfileForm = () => {
-  const [isEditing, setIsEditing] = useState(false);
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [student, setStudent] = useState<IStudent | null>(null);
-  const router = useRouter();
   const {
-    data: user,
-    isError: sessionError,
-    isFetchedAfterMount,
-    isFetching,
-  } = useCurrentUser();
-  useEffect(() => {
-    if (!isFetchedAfterMount || isFetching) {
-      return;
-    }
-    if (sessionError || !user) {
-      router.push("/auth/student");
-      return;
-    }
-
-    const fetchStudent = async () => {
-      try {
-        const studentResponse = await studentService.getStudentByUserId(user.id);
-        setStudent(studentResponse);
-      } catch (error) {
-        console.error("Error fetching student profile:", error);
-        router.push("/auth/student");
-      }
-    };
-    fetchStudent();
-  }, [isFetchedAfterMount, isFetching, router, sessionError, user]);
-
-  const [skillInput, setSkillInput] = useState("");
-
-  const { handleSubmit, control, reset, watch, setValue } = useForm<UpdateStudentInputs>({
-    resolver: zodResolver(UpdateStudentSchema),
-    defaultValues: {
-      studentCode: student?.student.studentCode || "",
-      firstNameTh: student?.firstNameTh || "",
-      lastNameTh: student?.lastNameTh || "",
-      firstNameEn: student?.firstNameEn || "",
-      lastNameEn: student?.lastNameEn || "",
-      email: student?.email || "",
-      nickName: student?.nickName || "",
-      github: student?.student.github || "",
-      linkedin: student?.student.linkedin || "",
-      facebook: student?.student.facebook || "",
-      instagram: student?.student.instagram || "",
-      skills: student?.student.skills || [],
-    },
-  });
-
-  const currentSkills = watch("skills") || [];
-
-  const handleAddSkill = () => {
-    const trimmed = skillInput.trim();
-    if (trimmed && !currentSkills.includes(trimmed)) {
-      setValue("skills", [...currentSkills, trimmed], { shouldDirty: true });
-      setSkillInput("");
-    }
-  };
-
-  const handleDeleteSkill = (skillToDelete: string) => {
-    setValue(
-      "skills",
-      currentSkills.filter((skill) => skill !== skillToDelete),
-      { shouldDirty: true }
-    );
-  };
-  const [croppingFile, setCroppingFile] = useState<File | null>(null);
-  const [focalPoint, setFocalPoint] = useState<{ x: number; y: number } | null>(null);
-
-  useEffect(() => {
-    reset({
-      studentCode: student?.student.studentCode || "",
-      firstNameTh: student?.firstNameTh || "",
-      lastNameTh: student?.lastNameTh || "",
-      firstNameEn: student?.firstNameEn || "",
-      lastNameEn: student?.lastNameEn || "",
-      email: student?.email || "",
-      nickName: student?.nickName || "",
-      github: student?.student.github || "",
-      linkedin: student?.student.linkedin || "",
-      facebook: student?.student.facebook || "",
-      instagram: student?.student.instagram || "",
-      skills: student?.student.skills || [],
-    });
-    setSkillInput("");
-    setSelectedFile(null);
-    setFocalPoint(null);
-  }, [student, reset]);
-
-  const { nickName, firstNameTh, firstNameEn, lastNameTh, lastNameEn } =
-    student ?? {};
-
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0] || null;
-
-    if (file) {
-      setCroppingFile(file);
-    }
-    event.target.value = "";
-  };
-
-  const handleCropComplete = (
-    croppedFile: File,
-    focal?: { x: number; y: number },
-  ) => {
-    setSelectedFile(croppedFile);
-    if (focal) {
-      setFocalPoint(focal);
-    }
-    setCroppingFile(null);
-  };
-
-  const handleCropCancel = () => {
-    setCroppingFile(null);
-  };
-
-  const handleEdit = () => {
-    setIsEditing(true);
-  };
-
-  const handleCancel = () => {
-    reset({
-      studentCode: student?.student.studentCode || "",
-      firstNameTh: student?.firstNameTh || "",
-      lastNameTh: student?.lastNameTh || "",
-      firstNameEn: student?.firstNameEn || "",
-      lastNameEn: student?.lastNameEn || "",
-      email: student?.email || "",
-      nickName: student?.nickName || "",
-      github: student?.student.github || "",
-      linkedin: student?.student.linkedin || "",
-      facebook: student?.student.facebook || "",
-      instagram: student?.student.instagram || "",
-      skills: student?.student.skills || [],
-    });
-    setSkillInput("");
-    setSelectedFile(null);
-    setFocalPoint(null);
-    setIsEditing(false);
-  };
-
-  const onSubmit = async (data: UpdateStudentInputs) => {
-    try {
-      setIsEditing(false);
-      const id = student?.id;
-      const classBookID = student?.student.classBookID;
-
-      if (!id || !classBookID) {
-        return;
-      }
-
-      const payload: IUpdateStudent = {
-        ...data,
-        imageFocalPointX: focalPoint?.x,
-        imageFocalPointY: focalPoint?.y,
-      };
-
-      const response = await studentService.updateStudent(
-        payload,
-        selectedFile,
-        classBookID,
-        id,
-      );
-      if (response) {
-        setStudent(response);
-      }
-    } catch (error) {
-      console.log(error);
-    }
-  };
+    isEditing,
+    handleEdit,
+    selectedFile,
+    student,
+    control,
+    handleSubmit,
+    currentSkills,
+    handleAddSkill,
+    handleDeleteSkill,
+    croppingFile,
+    handleFileChange,
+    handleCropComplete,
+    handleCropCancel,
+    handleCancel,
+    onSubmit,
+    skillInput,
+    setSkillInput,
+    previewSrc,
+    isPending,
+  } = useStudentProfileController();
+  const { nickName, firstNameTh, firstNameEn, lastNameTh, lastNameEn } = student ?? {};
 
   return (
     <div className="w-full flex-col px-20 py-6">
@@ -251,7 +88,7 @@ const ProfileForm = () => {
                   <Image
                     src={
                       selectedFile
-                        ? URL.createObjectURL(selectedFile)
+                        ? previewSrc ?? ""
                         : (student?.imageUrl ?? "")
                     }
                     alt="Profile"
@@ -600,6 +437,7 @@ const ProfileForm = () => {
                 color="primary"
                 size="medium"
                 className="px-16 py-8"
+                disabled={isPending}
               >
                 บันทึกข้อมูล
               </Button>

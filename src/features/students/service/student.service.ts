@@ -1,42 +1,49 @@
 import { IStudentRepository } from "../ports/student.repository";
-import {
-  IStudent,
-  QueryStudent,
-  ICreateStudent,
-  IUpdateStudent,
-} from "@/features/students/domain/student";
+import type { IStudent } from "@/features/students/domain/student";
+import type { QueryStudentInput } from "@/features/students/schema/student";
 import { CreateStudentCsv } from "@/features/students/schema/student-csv";
 import { Pageable } from "@/shared/types/response";
+import {
+  CreateStudentBatchRequestSchema,
+  CreateStudentRequestSchema,
+  QueryStudentSchema,
+  StudentIdSchema,
+  UpdateStudentRequestSchema,
+} from "@/features/students/schema/student";
 
-type CreateStudentBatchInput = {
-  classBookID: number;
-} & ({ file: File } | { students: CreateStudentCsv[] });
+import type {
+  CreateStudentBatchRequest,
+  CreateStudentRequest,
+  UpdateStudentRequest,
+} from "@/features/students/schema/student";
 
 export class StudentService {
   constructor(private studentRepository: IStudentRepository) {}
 
-  async getStudents(query: QueryStudent): Promise<Pageable<IStudent>> {
-    const response = await this.studentRepository.getStudents(query);
+  async getStudents(query: QueryStudentInput): Promise<Pageable<IStudent>> {
+    const response = await this.studentRepository.getStudents(
+      QueryStudentSchema.parse(query),
+    );
     return response.data;
   }
 
   async getStudentById(id: number): Promise<IStudent> {
-    const response = await this.studentRepository.getStudentById(id);
+    const response = await this.studentRepository.getStudentById(StudentIdSchema.parse(id));
     return response.data;
   }
 
-  async getStudentByUserId(userId: number): Promise<IStudent> {
-    const response = await this.studentRepository.getStudentByUserId(userId);
+  async getStudentByUserId(userId: number): Promise<IStudent | null> {
+    const response = await this.studentRepository.getStudentByUserId(StudentIdSchema.parse(userId));
     return response.data;
   }
 
-  async createStudent(
-    data: ICreateStudent,
-    imageFile: File | null,
-  ): Promise<IStudent> {
+  async createStudent(input: CreateStudentRequest): Promise<IStudent> {
+    const { imageFile, ...data } = CreateStudentRequestSchema.parse(input);
     const formData = new FormData();
     Object.entries(data).forEach(([key, value]) => {
-      if (value !== null && value !== undefined && value !== "") {
+      if (key === "skills" && Array.isArray(value)) {
+        value.forEach((skill) => formData.append("skills", skill));
+      } else if (value !== null && value !== undefined && value !== "") {
         formData.append(key, value.toString());
       }
     });
@@ -51,37 +58,23 @@ export class StudentService {
   }
 
   async deleteStudent(id: number): Promise<IStudent> {
-    const response = await this.studentRepository.deleteStudent(id);
+    const response = await this.studentRepository.deleteStudent(StudentIdSchema.parse(id));
     return response.data;
   }
 
-  async updateStudent(
-    data: IUpdateStudent,
-    image: File | null,
-    classBookID: number,
-    studentID: number,
-  ): Promise<IStudent | null> {
-    try {
-      const formData = new FormData();
-      Object.entries(data).forEach(([key, value]) => {
-        if (key === "skills" && Array.isArray(value)) {
-          value.forEach((v) => formData.append("skills", v));
-        } else if (value !== null && value !== undefined && value !== "") {
-          formData.append(key, value.toString());
-        }
-      });
-      if (image) formData.append("imageFile", image);
-      formData.append("classBookID", classBookID.toString());
-
-      const response = await this.studentRepository.updateStudent(
-        formData,
-        studentID,
-      );
-      return response.data;
-    } catch (error) {
-      console.error("Failed to update student:", error);
-      return null;
-    }
+  async updateStudent(studentID: number, input: UpdateStudentRequest): Promise<IStudent> {
+    const { imageFile, ...data } = UpdateStudentRequestSchema.parse(input);
+    const formData = new FormData();
+    Object.entries(data).forEach(([key, value]) => {
+      if (key === "skills" && Array.isArray(value)) {
+        value.forEach((skill) => formData.append("skills", skill));
+      } else if (value !== null && value !== undefined && value !== "") {
+        formData.append(key, value.toString());
+      }
+    });
+    if (imageFile) formData.append("imageFile", imageFile);
+    const response = await this.studentRepository.updateStudent(formData, StudentIdSchema.parse(studentID));
+    return response.data;
   }
 
   private createStudentCsvFile(students: CreateStudentCsv[]): File {
@@ -111,7 +104,8 @@ export class StudentService {
     });
   }
 
-  async createStudentBatch(data: CreateStudentBatchInput): Promise<null> {
+  async createStudentBatch(input: CreateStudentBatchRequest): Promise<null> {
+    const data = CreateStudentBatchRequestSchema.parse(input);
     const formData = new FormData();
     const file =
       "file" in data ? data.file : this.createStudentCsvFile(data.students);

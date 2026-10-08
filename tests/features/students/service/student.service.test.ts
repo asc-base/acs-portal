@@ -62,7 +62,7 @@ describe("StudentService multipart requests", () => {
     const repository = createRepository();
     const service = new StudentService(repository);
 
-    expect(await service.createStudent(validCreate, null)).toBe(student);
+    expect(await service.createStudent(validCreate)).toBe(student);
 
     const form = repository.createStudent.mock.calls[0]![0];
     expect(form.get("studentCode")).toBe("64000000001");
@@ -83,7 +83,7 @@ describe("StudentService multipart requests", () => {
     const service = new StudentService(repository);
     const profileImage = image("student.png");
 
-    await service.createStudent(validCreate, profileImage);
+    await service.createStudent({ ...validCreate, imageFile: profileImage });
 
     expect(repository.createStudent.mock.calls[0]![0].get("imageFile")).toBe(profileImage);
   });
@@ -94,19 +94,16 @@ describe("StudentService multipart requests", () => {
     const profileImage = image("updated.png");
 
     expect(
-      await service.updateStudent(
-        {
+      await service.updateStudent(7, {
+        classBookID: 42,
+        imageFile: profileImage,
           email: "edited@example.com",
           skills: ["TypeScript", "React"],
           facebook: "",
           linkedin: null,
           imageFocalPointX: 0,
           imageFocalPointY: 100,
-        },
-        profileImage,
-        42,
-        7,
-      ),
+      }),
     ).toBe(student);
 
     const [form, studentID] = repository.updateStudent.mock.calls[0]!;
@@ -121,15 +118,15 @@ describe("StudentService multipart requests", () => {
     expect(form.has("linkedin")).toBe(false);
   });
 
-  it("keeps the existing null result when an update fails", async () => {
+  it("propagates update failures", async () => {
     const repository = createRepository();
     const error = new Error("Save failed");
     repository.updateStudent.mockRejectedValue(error);
-    const log = vi.spyOn(console, "error").mockImplementation(() => undefined);
     const service = new StudentService(repository);
 
-    await expect(service.updateStudent({ email: "edited@example.com" }, null, 42, 7)).resolves.toBeNull();
-    expect(log).toHaveBeenCalledWith("Failed to update student:", error);
+    await expect(
+      service.updateStudent(7, { classBookID: 42, email: "edited@example.com" }),
+    ).rejects.toBe(error);
   });
 
   it("passes through a supplied CSV file with classBookID", async () => {
@@ -187,7 +184,7 @@ describe("StudentService repository errors", () => {
     await expect(service.getStudents({})).rejects.toBe(error);
     await expect(service.getStudentById(1)).rejects.toBe(error);
     await expect(service.getStudentByUserId(1)).rejects.toBe(error);
-    await expect(service.createStudent(validCreate, null)).rejects.toBe(error);
+    await expect(service.createStudent(validCreate)).rejects.toBe(error);
     await expect(service.deleteStudent(1)).rejects.toBe(error);
     await expect(
       service.createStudentBatch({
@@ -195,5 +192,35 @@ describe("StudentService repository errors", () => {
         file: new File(["students"], "students.csv", { type: "text/csv" }),
       }),
     ).rejects.toBe(error);
+  });
+
+  it("parses query strings before repository serialization", async () => {
+    const repository = createRepository();
+    const service = new StudentService(repository);
+
+    await service.getStudents({ page: "2", pageSize: "5", classBookID: "3" });
+
+    expect(repository.getStudents).toHaveBeenCalledWith({
+      page: 2,
+      pageSize: 5,
+      classBookID: 3,
+    });
+    await expect(service.getStudents({ page: "bad" })).rejects.toThrow();
+  });
+
+  it("preserves an absent user profile as null", async () => {
+    const repository = createRepository();
+    repository.getStudentByUserId.mockResolvedValueOnce(response(null));
+    const service = new StudentService(repository);
+
+    await expect(service.getStudentByUserId(4)).resolves.toBeNull();
+  });
+
+  it("rejects invalid public IDs before calling the repository", async () => {
+    const repository = createRepository();
+    const service = new StudentService(repository);
+
+    await expect(service.getStudentById(Number.NaN)).rejects.toThrow();
+    expect(repository.getStudentById).not.toHaveBeenCalled();
   });
 });

@@ -1,13 +1,9 @@
 "use client";
-import { useEffect, useCallback } from "react";
-import { useRouter, usePathname, useSearchParams } from "next/navigation";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
 import StudentTableComponents from "@/features/students/components/admin/students.table.component";
 import { IStudent } from "@/features/students/domain/student";
 import { ClassBookInfoComponent } from "@/features/students/components/admin/classbook.info.component";
 import { IClassBook } from "@/features/classbook/domain/classbook";
+import { useStudentListController } from "@/features/students/hooks/use-student-list-controller";
 interface StudentsLandingPageProps {
   students: IStudent[];
   totalRecords: number;
@@ -20,73 +16,18 @@ interface StudentsLandingPageProps {
   sortBy?: "asc" | "desc";
 }
 
-const searchSchema = z.object({
-  search: z.string().optional(),
-});
-
-export type SearchForm = z.infer<typeof searchSchema>;
-
 const StudentsLandingpage = ({ students, totalRecords, pageSize, page, classBookID, classBook, search, sortBy, orderBy }: StudentsLandingPageProps) => {
-  const router = useRouter();
-  const pathname = usePathname();
-  const searchParams = useSearchParams();
-
   const {
-    control: searchControl,
-    reset: searchReset,
-    watch,
-  } = useForm<SearchForm>({
-    resolver: zodResolver(searchSchema),
-    defaultValues: { search },
-  });
-
-  const watchedSearch = watch("search");
-
-  const handleResetSearch = () => {
-    searchReset({ search: "" });
-    const params = new URLSearchParams(searchParams.toString());
-    params.delete("search");
-    router.push(`${pathname}?${params.toString()}`);
-  };
-
-  const handleNextPage = useCallback(
-    (currentPage: number) => {
-      const params = new URLSearchParams(searchParams.toString());
-      params.set("page", currentPage.toString());
-      router.push(`${pathname}?${params.toString()}`);
-    },
-    [pathname, router, searchParams],
-  );
-
-  const handleSort = (orderBy: string) => {
-    const params = new URLSearchParams(searchParams.toString());
-    const currentOrderBy = params.get("orderBy");
-    const currentSortBy = params.get("sortBy") as "asc" | "desc" | null;
-    const newOrder =
-      currentOrderBy === orderBy && currentSortBy === "desc" ? "asc" : "desc";
-
-    params.set("orderBy", orderBy);
-    params.set("sortBy", newOrder);
-    router.push(`${pathname}?${params.toString()}`, { scroll: false });
-  };
-
-  useEffect(() => {
-    const delayDebounceFn = setTimeout(() => {
-      const params = new URLSearchParams(searchParams.toString());
-      if (watchedSearch) {
-        params.set("search", watchedSearch);
-        params.set("page", "1");
-      } else {
-        params.delete("search");
-      }
-      const newSearch = params.toString();
-      if (searchParams.toString() !== newSearch) {
-        router.push(`${pathname}?${newSearch}`, { scroll: false });
-      }
-    }, 500);
-
-    return () => clearTimeout(delayDebounceFn);
-  }, [watchedSearch, pathname, router, searchParams]);
+    control,
+    watchedSearch,
+    handleResetSearch,
+    handleNextPage,
+    handleSort,
+    confirmDeleteStudent,
+    confirmModal,
+    errorMessage,
+    handleCloseError,
+  } = useStudentListController(search, classBookID);
 
   return (
     <div className="px-6 pt-6">
@@ -102,7 +43,7 @@ const StudentsLandingpage = ({ students, totalRecords, pageSize, page, classBook
           onSort={handleSort}
           orderBy={orderBy}
           sortBy={sortBy}
-          control={searchControl}
+          control={control}
           watchedSearch={watchedSearch}
           onResetSearch={handleResetSearch}
           totalRecords={totalRecords}
@@ -110,6 +51,10 @@ const StudentsLandingpage = ({ students, totalRecords, pageSize, page, classBook
           page={page}
           pageSize={pageSize}
           handleNextPage={handleNextPage}
+          confirmDeleteStudent={confirmDeleteStudent}
+          confirmModal={confirmModal}
+          errorMessage={errorMessage}
+          handleCloseError={handleCloseError}
         />
       </div>
     </div>
