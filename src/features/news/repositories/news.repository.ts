@@ -5,13 +5,16 @@ import {
 } from "@/features/news/domain/news";
 import { HttpHelper } from "@/shared/lib/http";
 import { ApiResponse, Pageable } from "@/shared/types/response";
+import { z } from "zod";
 import {
   NewsBulletinsSchema,
+  NewsBulletinSchema,
   NewsFeatureResponseSchema,
   NewsInformationsPageSchema,
   NewsPageSchema,
   NewsResponseSchema,
 } from "@/features/news/schema/news";
+import type { NewsBulletin } from "@/features/news/schema/news";
 
 export class NewsRepository implements INewsRepository {
   private readonly http: HttpHelper;
@@ -138,10 +141,17 @@ export class NewsRepository implements INewsRepository {
     return { ...response, data: NewsBulletinsSchema.parse(response.data) };
   }
 
-  async setNewsBulletin(id: number, type: "HIGHLIGHT" | "ANNOUNCEMENT", enabled: boolean) {
+  async setNewsBulletin(
+    id: number,
+    type: "HIGHLIGHT" | "ANNOUNCEMENT",
+    enabled: boolean,
+  ): Promise<ApiResponse<NewsBulletin | null>> {
     const path = `/v1/news/${id}/bulletins/${type}`;
-    return enabled
-      ? this.http.put<ApiResponse<unknown>>(path, new FormData())
-      : this.http.delete<ApiResponse<unknown>>(path);
+    if (enabled) {
+      const response = await this.http.put<ApiResponse<unknown>>(path, new FormData());
+      return { ...response, data: NewsBulletinSchema.parse(response.data) };
+    }
+    const response = await this.http.delete<ApiResponse<unknown>>(path);
+    return { ...response, data: z.null().parse(response.data) };
   }
 }

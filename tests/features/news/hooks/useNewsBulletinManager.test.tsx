@@ -107,7 +107,7 @@ describe("news bulletin manager controller", () => {
     vi.mocked(fetch).mockImplementation(async (_input, init) => {
       if (init?.method === "PUT") {
         enabled = true;
-        return response(null);
+        return response({ id: 91, newsID: news.id, type: "HIGHLIGHT", news });
       }
       if (String(_input).includes("/bulletins"))
         return response([{ id: 91, newsID: 7, type: "HIGHLIGHT", news }]);

@@ -106,7 +106,18 @@ beforeEach(() => {
   service.setNewsBulletin.mockImplementation(async (id, _type, next) => {
     if (next) enabled.add(id);
     else enabled.delete(id);
-    return { data: null, status: 200, statusCode: 200 };
+    return {
+      data: next
+        ? {
+            id: 91,
+            newsID: id,
+            type: _type,
+            news: id === firstNews.id ? firstNews : secondNews,
+          }
+        : null,
+      status: 200,
+      statusCode: 200,
+    };
   });
 });
 
