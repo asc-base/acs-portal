@@ -31,8 +31,6 @@ const course: ICourse = {
     id: 1,
     type: "Core",
     description: "Core course",
-    createdDate: new Date("2026-01-01T00:00:00.000Z"),
-    updatedDate: new Date("2026-01-02T00:00:00.000Z"),
   },
 };
 const page: Pageable<ICourse> = {

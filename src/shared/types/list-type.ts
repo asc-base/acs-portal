@@ -1,10 +1,5 @@
-export interface Tag {
-  id: number;
-  name: string;
-  tagsGroupsId: number;
-}
+import type { z } from "zod";
+import { TagGroupSchema, TagSchema } from "@/shared/schema/references";
 
-export interface TagsGroups {
-  id: number;
-  name: string;
-}
+export type Tag = z.infer<typeof TagSchema>;
+export type TagsGroups = z.infer<typeof TagGroupSchema>;

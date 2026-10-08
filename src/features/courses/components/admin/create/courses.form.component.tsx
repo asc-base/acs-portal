@@ -17,7 +17,6 @@ import { RHFTextField } from "@/shared/components/form/RHFTextField";
 import { RHFSelect } from "@/shared/components/form/RHFSelect";
 import { useRouter } from "next/navigation";
 import { ICreateCourse, ICourse } from "@/features/courses/domain/course";
-import { TypeCourse } from "@/features/master-data/domain/master-data";
 import {
   ConfirmModal,
   ConfirmModalProps,
@@ -27,7 +26,7 @@ import {
   createCourseSchema,
 } from "@/features/courses/schema/course";
 import { courseService } from "@/features/courses/client";
-import { masterDataService as typeCourseService } from "@/features/master-data/client";
+import { useMasterData } from "@/features/master-data/client";
 
 
 interface CoursesFormProps {
@@ -36,7 +35,8 @@ interface CoursesFormProps {
 
 export const CourseForm: FC<CoursesFormProps> = ({ curriculumID }) => {
   const router = useRouter();
-  const [typeCourses, setTypeCourses] = useState<TypeCourse[]>([]);
+  const { data: masterData, isPending: isMasterDataPending, isError: isMasterDataError } = useMasterData();
+  const typeCourses = masterData?.typeCourses ?? [];
   const [courses, setCourses] = useState<ICourse[]>([]);
   const [isError, setIsError] = useState(false);
   const [confirmModal, setConfirmModal] = useState<ConfirmModalProps | null>(
@@ -125,16 +125,11 @@ export const CourseForm: FC<CoursesFormProps> = ({ curriculumID }) => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [typeRes, courseRes] = await Promise.all([
-          typeCourseService.getMasterData(),
-          courseService.getCourse({
-            curriculumID,
-            orderBy: "courseCode",
-            sortBy: "asc",
-          }),
-        ]);
-
-        setTypeCourses(typeRes.typeCourses);
+        const courseRes = await courseService.getCourse({
+          curriculumID,
+          orderBy: "courseCode",
+          sortBy: "asc",
+        });
         setCourses(courseRes.rows);
       } catch (err) {
         console.error(err);
@@ -163,6 +158,9 @@ export const CourseForm: FC<CoursesFormProps> = ({ curriculumID }) => {
         </Alert>
       </Snackbar>
 
+      {isMasterDataPending && <Alert severity="info">กำลังโหลดตัวเลือกกลุ่มวิชา...</Alert>}
+      {isMasterDataError && <Alert severity="error">ไม่สามารถโหลดตัวเลือกกลุ่มวิชาได้</Alert>}
+
       <h3 className="mb-4 text-lg font-bold">ข้อมูลรายวิชา</h3>
 
       <div className="grid grid-cols-3 gap-4">
@@ -172,6 +170,7 @@ export const CourseForm: FC<CoursesFormProps> = ({ curriculumID }) => {
           label="กลุ่มวิชา"
           variant="outlined"
           size="small"
+          disabled={isMasterDataPending}
           requiredMark
           displayEmpty
           renderValue={(value) =>

@@ -1,6 +1,5 @@
-import { MasterData } from "@/features/master-data/domain/master-data";
-import { ApiResponse } from "@/shared/types/response";
+import type { MasterData } from "@/features/master-data/schema/master-data";
 
 export interface IMasterDataRepository {
-  getMasterData(): Promise<ApiResponse<MasterData>>;
+  getMasterData(): Promise<{ data: MasterData }>;
 }
