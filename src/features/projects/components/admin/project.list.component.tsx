@@ -4,7 +4,6 @@ import { AdminCard } from "@/shared/components/adminCard";
 import {
   MenuItem,
   Select,
-  SelectChangeEvent,
   Button,
   Pagination,
   Snackbar,
@@ -16,16 +15,9 @@ import AddIcon from "@mui/icons-material/Add";
 import SearchIcon from "@mui/icons-material/Search";
 import CloseIcon from "@mui/icons-material/Close";
 import EmptyState from "@/shared/components/emptyState";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useEffect, useCallback, useState } from "react";
-import {
-  ConfirmModal,
-  ConfirmModalProps,
-} from "@/shared/components/modal/confirmModal";
-import { IProject, QueryProject } from "@/features/projects/domain/project";
-import { projectService } from "@/features/projects/client";
+import { ConfirmModal } from "@/shared/components/modal/confirmModal";
+import type { IProject } from "@/features/projects/domain/project";
+import { useProjectListController } from "@/features/projects/hooks/use-project-list-controller";
 
 
 interface ProjectListComponentsProps {
@@ -37,96 +29,21 @@ interface ProjectListComponentsProps {
   search?: string;
 }
 
-const searchSchema = z.object({
-  search: z.string().optional(),
-});
-
-type SearchForm = z.infer<typeof searchSchema>;
-
 const ProjectListComponents = ({ projects, totalRecords, pageSize, page, sortOrder, search }: ProjectListComponentsProps) => {
   const router = useRouter();
-  const [confirmModal, setConfirmModal] = useState<ConfirmModalProps | null>(
-    null,
-  );
-  const [isError, setIsError] = useState(false);
-  const onDelete = async (id: number) => {
-    try {
-      const response = await projectService.deleteProject(id);
+  const {
+    form,
+    watchedSearch,
+    confirmModal,
+    isError,
+    setIsError,
+    handleSortOrder,
+    handleNextPage,
+    confirmDeleteProject,
+  } = useProjectListController({ page, pageSize, sortOrder, search });
+  const { register, reset } = form;
 
-      if (response) {
-        setConfirmModal({
-          isOpen: true,
-          type: "success",
-          onClose: () => setConfirmModal(null),
-          onConfirm: () => {
-            setConfirmModal(null);
-            router.refresh();
-          },
-          title: "ลบข้อมูลสำเร็จ",
-          description: "ข้อมูลถูกลบออกจากฐานข้อมูลแล้ว",
-          confirmText: "เสร็จสิ้น",
-        });
-      } else {
-        setIsError(true);
-      }
-    } catch (error) {
-      console.log(error);
-      setIsError(true);
-    }
-  };
-
-  const confirmDeleteProject = (id: number) => {
-    setConfirmModal({
-      isOpen: true,
-      type: "delete",
-      onClose: () => setConfirmModal(null),
-      onConfirm: () => {
-        onDelete(id);
-      },
-    });
-  };
-
-  const { register, reset, watch } = useForm<SearchForm>({
-    resolver: zodResolver(searchSchema),
-    defaultValues: { search },
-  });
-
-  const watchedSearch = watch("search");
-
-  const SearchProjectUrl = useCallback(
-    (query: Partial<QueryProject>) => {
-      const params = new URLSearchParams({
-        page: (query.page ?? page ?? 1).toString(),
-        pageSize: (query.pageSize ?? pageSize ?? 10).toString(),
-        sortBy: "createdAt",
-        sortOrder: query.sortOrder ?? sortOrder ?? "desc",
-        search: query.search ?? watchedSearch ?? "",
-      });
-      return `/admin/projects?${params.toString()}`;
-    },
-    [page, pageSize, sortOrder, watchedSearch],
-  );
-
-  useEffect(() => {
-    const handler = setTimeout(() => {
-      router.push(SearchProjectUrl({ page: 1, search: watchedSearch }));
-    }, 300);
-
-    return () => clearTimeout(handler);
-  }, [watchedSearch, SearchProjectUrl, router]);
-
-  const handleSortOrder = (event: SelectChangeEvent) => {
-    const newSortOrder = event.target.value as "asc" | "desc";
-    router.push(SearchProjectUrl({ sortOrder: newSortOrder }));
-  };
-
-  const handleClickAddProject = () => {
-    router.push("/admin/projects/create");
-  };
-
-  const handleNextPage = (currentPage: number) => {
-    router.push(SearchProjectUrl({ page: currentPage }));
-  };
+  const handleClickAddProject = () => router.push("/admin/projects/create");
 
   return (
     <div className="min-h-screen px-8 py-5">
@@ -174,7 +91,7 @@ const ProjectListComponents = ({ projects, totalRecords, pageSize, page, sortOrd
           </form>
 
           <Select
-            onChange={handleSortOrder}
+            onChange={(event) => handleSortOrder(event.target.value as "asc" | "desc")}
             size="small"
             value={sortOrder ?? "desc"}
             displayEmpty

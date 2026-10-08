@@ -1,17 +1,14 @@
 "use client";
-import React, { FC, useState } from "react";
-import { useForm, useFieldArray, SubmitHandler } from "react-hook-form";
+import React, { FC } from "react";
 import { Button, IconButton, Modal, Box, Snackbar, Dialog } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import MenuItem from "@mui/material/MenuItem";
 import Alert from "@mui/material/Alert";
-import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { Tag } from "@/shared/types/list-type";
-import { zodResolver } from "@hookform/resolvers/zod";
 import { RHFTextField } from "@/shared/components/form/RHFTextField";
 import { RHFSelect } from "@/shared/components/form/RHFSelect";
-import { ConfirmModal, ConfirmModalProps } from "@/shared/components/modal/confirmModal";
+import { ConfirmModal } from "@/shared/components/modal/confirmModal";
 import { AddCircleOutlineOutlined } from "@mui/icons-material";
 import DeleteIcon from "@mui/icons-material/Delete";
 import CloseIcon from "@mui/icons-material/Close";
@@ -23,13 +20,12 @@ import { CropImageCard } from "@/shared/components/cropimagecard";
 import { MasterData } from "@/features/master-data/domain/master-data";
 import { IStudent } from "@/features/students/domain/student";
 import { IProfessor } from "@/features/professors/domain/professor";
-import { IProject } from "@/features/projects/domain/project";
-import { updateProjectSchema, ProjectFormValues } from "@/features/projects/schema/project";
-import { projectService as projectsService } from "@/features/projects/client";
+import type { IProject } from "@/features/projects/domain/project";
+import { useUpdateProjectController } from "@/features/projects/hooks/use-update-project-controller";
 
 interface FormUpdateProjectProps {
   projectId: string;
-  initialProject: Partial<IProject>;
+  initialProject: IProject;
   initialCourses: ICourse[];
   initialMasterData: MasterData;
   initialStudents: IStudent[];
@@ -52,216 +48,22 @@ export const FormUpdateProject: FC<FormUpdateProjectProps> = ({ projectId, initi
   const courses = initialCourses;
   const students = initialStudents;
   const professors = initialProfessors;
-  const types: Tag[] = initialMasterData?.tags?.filter((t: Tag) => t.tagsGroupsId === 1) || [];
-  const categories: Tag[] = initialMasterData?.tags?.filter((t: Tag) => t.tagsGroupsId === 3) || [];
-
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [imageError, setImageError] = useState(false);
-  const [assetsError, setAssetsError] = useState(false);
-  const [isCroping, setIsCroping] = useState(false);
-  const [selectedAssets, setSelectedAssets] = useState<File[]>([]);
-
-  const [draggedItemIndex, setDraggedItemIndex] = useState<number | null>(null);
-  const [dragOverItemIndex, setDragOverItemIndex] = useState<number | null>(null);
-
-  const [tempThumbFile, setTempThumbFile] = useState<File | null>(null);
-
-  const [errorMsg, setErrorMsg] = useState("");
-  const [isError, setIsError] = useState(false);
-  const router = useRouter();
-  const [confirmModal, setConfirmModal] = useState<ConfirmModalProps | null>(null);
-  const [isEditMode, setIsEditMode] = useState(false);
-  const [previewImageUrl, setPreviewImageUrl] = useState<string | null>(null);
-
-  const initCourses = initialProject.course?.map((c: ICourse) => ({ value: c.id })) || [];
-  const initTypes = initialProject.tag?.filter((t) => t.tagsGroupsId === 1).map((t) => ({ value: t.id })) || [];
-  const initCategories = initialProject.tag?.filter((t) => t.tagsGroupsId === 3).map((t) => ({ value: t.id })) || [];
-  const initTechStacks = initialProject.techStacks?.map((ts: string) => ({ value: ts })) || [];
-  const initStudents = initialProject.member?.filter((m) => m.role?.id === 2 || m.roleID === 2).map((m) => ({ userID: m.id })) || [];
-  const initAdvisors = initialProject.member?.filter((m) => m.role?.id === 3 || m.roleID === 3).map((m) => ({ userID: m.id })) || [];
-
-
-  const { control, handleSubmit, reset, setValue, formState: { isDirty } } = useForm<ProjectFormValues>({
-    resolver: zodResolver(updateProjectSchema),
-    defaultValues: {
-      title: initialProject.title || "",
-      details: initialProject.details || "",
-      youtubeURL: initialProject.youtubeURL || "",
-      githubURL: initialProject.githubURL || "",
-      documentURL: initialProject.documentURL || "",
-      presentationURL: initialProject.presentationURL || "",
-      projectCourses: initCourses.length > 0 ? initCourses : [{ value: 0 }],
-      projectTypes: initTypes.length > 0 ? initTypes : [{ value: 0 }],
-      projectCategories: initCategories.length > 0 ? initCategories : [{ value: 0 }],
-      techStacks: initTechStacks.length > 0 ? initTechStacks : [{ value: "" }],
-      students: initStudents.length > 0 ? initStudents : [{ userID: 0 }],
-      advisors: initAdvisors.length > 0 ? initAdvisors : [{ userID: 0 }],
-    },
-    mode: "onChange",
-  });
-
-  const { fields: projectCoursesFields, append: appendProjectCourses, remove: removeProjectCourses } = useFieldArray({ control, name: "projectCourses" });
-  const { fields: projectTypesFields, append: appendProjectTypes, remove: removeProjectTypes } = useFieldArray({ control, name: "projectTypes" });
-  const { fields: projectCategoriesFields, append: appendProjectCategories, remove: removeProjectCategories } = useFieldArray({ control, name: "projectCategories" });
-  const { fields: techStacksFields, append: appendTechStacks, remove: removeTechStacks } = useFieldArray({ control, name: "techStacks" });
-  const { fields: studentsFields, append: appendStudents, remove: removeStudents } = useFieldArray({ control, name: "students" });
-  const { fields: advisorsFields, append: appendAdvisors, remove: removeAdvisors } = useFieldArray({ control, name: "advisors" });
-
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      setTempThumbFile(file);
-      setIsCroping(true);
-    }
-    event.target.value = "";
-  };
-
-  const handleCropComplete = (croppedFile: File, focalPoint?: { x: number; y: number }) => {
-    setSelectedFile(croppedFile);
-    if (focalPoint) {
-      setValue("thumbnailFocalPointX", focalPoint.x, { shouldDirty: true });
-      setValue("thumbnailFocalPointY", focalPoint.y, { shouldDirty: true });
-    }
-    setImageError(false);
-    setIsCroping(false);
-    setTempThumbFile(null);
-  };
-
-  const handleCropCancel = () => {
-    setIsCroping(false);
-    setTempThumbFile(null);
-  };
-
-  const handleAssetsChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    if (event.target.files) {
-      const newFiles = Array.from(event.target.files);
-      setSelectedAssets((prev) => {
-        const combined = [...prev, ...newFiles];
-        return combined.slice(0, 10);
-      });
-      setAssetsError(false);
-    }
-  };
-
-  const removeAsset = (indexToRemove: number) => setSelectedAssets((prev) => prev.filter((_, index) => index !== indexToRemove));
-  const removeAllAssets = () => setSelectedAssets([]);
-
-  const handleDragStart = (index: number) => setDraggedItemIndex(index);
-  const handleDragEnter = (index: number) => setDragOverItemIndex(index);
-  const handleDragEnd = () => {
-    setDraggedItemIndex(null);
-    setDragOverItemIndex(null);
-  };
-  const handleDrop = (index: number) => {
-    if (draggedItemIndex !== null && draggedItemIndex !== index) {
-      setSelectedAssets((prev) => {
-        const newAssets = [...prev];
-        const draggedItem = newAssets[draggedItemIndex];
-        newAssets.splice(draggedItemIndex, 1);
-        newAssets.splice(index, 0, draggedItem);
-        return newAssets;
-      });
-    }
-    setDraggedItemIndex(null);
-    setDragOverItemIndex(null);
-  };
-
-  const cancelForm = () => {
-    const hasAnyValue = isDirty || !!selectedFile || selectedAssets.length > 0;
-    if (hasAnyValue) {
-      setConfirmModal({
-        isOpen: true,
-        type: "warning",
-        onClose: () => setConfirmModal(null),
-        onConfirm: () => {
-          setConfirmModal(null);
-          reset();
-          setSelectedFile(null);
-          setSelectedAssets([]);
-          setIsEditMode(false);
-        }
-      });
-    } else {
-      setIsEditMode(false);
-    }
-  };
-
-  const onSubmit: SubmitHandler<ProjectFormValues> = async (data) => {
-    try {
-      console.log("Form data:", data);
-      const oldCourses = initialProject.course?.map((c) => c.id) || [];
-      const oldTypes = initialProject.tag?.filter((t) => t.tagsGroupsId === 1).map((t) => t.id) || [];
-      const oldCategories = initialProject.tag?.filter((t) => t.tagsGroupsId === 3).map((t) => t.id) || [];
-      const oldTags = [...oldTypes, ...oldCategories];
-      const oldStudents = initialProject.member?.filter((m) => m.role?.id === 2 || m.roleID === 2).map((m) => m.id) || [];
-      const oldAdvisors = initialProject.member?.filter((m) => m.role?.id === 3 || m.roleID === 3).map((m) => m.id) || [];
-
-      const newCoursesFromForm = data.projectCourses.map((c) => Number(c.value)).filter((v) => v > 0);
-      const newTagsFromForm = [...data.projectTypes, ...data.projectCategories].map((t) => Number(t.value)).filter((v) => v > 0);
-      const newStudentsFromForm = data.students.map((s) => Number(s.userID)).filter((v) => v > 0);
-      const newAdvisorsFromForm = data.advisors.map((a) => Number(a.userID)).filter((v) => v > 0);
-
-      const newCoursesID = newCoursesFromForm.filter((id) => !oldCourses.includes(id));
-      const deletedCoursesID = oldCourses.filter((id) => !newCoursesFromForm.includes(id));
-
-      const newtagsID = newTagsFromForm.filter((id) => !oldTags.includes(id));
-      const deletedtagsID = oldTags.filter((id) => !newTagsFromForm.includes(id));
-
-      const newStudentsID = newStudentsFromForm.filter((id) => !oldStudents.includes(id));
-      const newAdvisorsID = newAdvisorsFromForm.filter((id) => !oldAdvisors.includes(id));
-      const deletedStudentsID = oldStudents.filter((id) => !newStudentsFromForm.includes(id));
-      const deletedAdvisorsID = oldAdvisors.filter((id) => !newAdvisorsFromForm.includes(id));
-
-      const newMembers = [
-        ...newStudentsID.map((id) => ({ userID: id, roleID: 2 })),
-        ...newAdvisorsID.map((id) => ({ userID: id, roleID: 3 })),
-      ];
-      const deletedmembersID = [...deletedStudentsID, ...deletedAdvisorsID];
-
-      const payload = {
-        title: data.title,
-        details: data.details,
-        youtubeURL: data.youtubeURL,
-        githubURL: data.githubURL,
-        documentURL: data.documentURL,
-        presentationURL: data.presentationURL,
-        figmaURL: null,
-        techStacks: data.techStacks.map((t) => t.value).filter((v) => v !== ""),
-        newtagsID,
-        deletedtagsID,
-        newMembers,
-        deletedmembersID,
-        newCoursesID,
-        deletedCoursesID,
-        thumbnailFocalPointX: data.thumbnailFocalPointX,
-        thumbnailFocalPointY: data.thumbnailFocalPointY,
-      };
-
-      const files = {
-        thumbnailFile: selectedFile || null,
-        assets: selectedAssets.length > 0 ? selectedAssets : undefined
-      };
-
-      await projectsService.updateProject(projectId, payload, files);
-      setConfirmModal({
-        isOpen: true,
-        title: "สำเร็จ",
-        description: "อัปเดตข้อมูลโครงงานสำเร็จแล้ว",
-        type: "success",
-        confirmText: "ตกลง",
-        onClose: () => setConfirmModal(null),
-        onConfirm: () => {
-          setConfirmModal(null);
-          router.push("/admin/projects");
-        }
-      });
-
-    } catch (error) {
-      console.error(error);
-      setErrorMsg("ไม่สามารถอัปเดตข้อมูลได้ กรุณาลองใหม่อีกครั้ง");
-      setIsError(true);
-    }
-  };
+  const types: Tag[] = initialMasterData?.tags?.filter((t) => t.tagsGroupsId === 1) || [];
+  const categories: Tag[] = initialMasterData?.tags?.filter((t) => t.tagsGroupsId === 3) || [];
+  const {
+    selectedFile, imageError, assetsError, isCroping, selectedAssets,
+    draggedItemIndex, dragOverItemIndex, tempThumbFile, errorMsg, isError,
+    setIsError, confirmModal, isEditMode, setIsEditMode, previewImageUrl,
+    setPreviewImageUrl, control, handleSubmit, projectCoursesFields,
+    appendProjectCourses, removeProjectCourses, projectTypesFields,
+    appendProjectTypes, removeProjectTypes, projectCategoriesFields,
+    appendProjectCategories, removeProjectCategories, techStacksFields,
+    appendTechStacks, removeTechStacks, studentsFields, appendStudents,
+    removeStudents, advisorsFields, appendAdvisors, removeAdvisors,
+    handleFileChange, handleCropComplete, handleCropCancel, handleAssetsChange,
+    removeAsset, removeAllAssets, handleDragStart, handleDragEnter,
+    handleDragEnd, handleDrop, cancelForm, onSubmit,
+  } = useUpdateProjectController(projectId, initialProject);
 
   return (
     <form className="space-y-4 p-8 relative" onSubmit={handleSubmit(onSubmit)}>
