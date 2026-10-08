@@ -72,20 +72,25 @@ describe("news query construction", () => {
 
 describe("bulletin enable/disable requests", () => {
   it.each(["HIGHLIGHT", "ANNOUNCEMENT"] as const)(
-    "enables and disables %s at the same resource",
+    "parses the %s enable DTO and accepts null on disable at the same resource",
     async (type) => {
       const http = new HttpHelper();
-      const put = vi.spyOn(http, "put").mockResolvedValue({ data: null });
+      const bulletin = { id: 91, newsID: 7, type, news: newsFixture };
+      const put = vi.spyOn(http, "put").mockResolvedValue({ data: bulletin });
       const remove = vi.spyOn(http, "delete").mockResolvedValue({ data: null });
       const repository = new NewsRepository("", http);
       const path = `/v1/news/7/bulletins/${type}`;
-      await repository.setNewsBulletin(7, type, true);
+      await expect(repository.setNewsBulletin(7, type, true)).resolves.toMatchObject({
+        data: bulletin,
+      });
       expect(put).toHaveBeenCalledWith(path, expect.any(FormData));
       expect(Array.from((put.mock.calls[0][1] as FormData).entries())).toEqual(
         [],
       );
       expect(remove).not.toHaveBeenCalled();
-      await repository.setNewsBulletin(7, type, false);
+      await expect(repository.setNewsBulletin(7, type, false)).resolves.toMatchObject({
+        data: null,
+      });
       expect(remove).toHaveBeenCalledWith(path);
       expect(put).toHaveBeenCalledTimes(1);
     },
@@ -98,6 +103,19 @@ describe("bulletin enable/disable requests", () => {
     await expect(
       new NewsRepository("", http).setNewsBulletin(7, "HIGHLIGHT", true),
     ).rejects.toBe(error);
+  });
+
+  it("rejects malformed successful bulletin mutations", async () => {
+    const http = new HttpHelper();
+    vi.spyOn(http, "put").mockResolvedValue({ data: null });
+    await expect(
+      new NewsRepository("", http).setNewsBulletin(7, "HIGHLIGHT", true),
+    ).rejects.toBeInstanceOf(ZodError);
+
+    vi.spyOn(http, "delete").mockResolvedValue({ data: { removed: true } });
+    await expect(
+      new NewsRepository("", http).setNewsBulletin(7, "HIGHLIGHT", false),
+    ).rejects.toBeInstanceOf(ZodError);
   });
 });
 
