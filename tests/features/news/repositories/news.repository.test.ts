@@ -1,14 +1,31 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
+import { readFileSync } from "node:fs";
+import { ZodError } from "zod";
 import { HttpHelper } from "@/shared/lib/http";
 import { NewsService } from "@/features/news/service/news.service";
 import { NewsRepository } from "@/features/news/repositories/news.repository";
 
 afterEach(() => vi.restoreAllMocks());
 
+const newsFixture = JSON.parse(
+  readFileSync(new URL("../fixtures/news.json", import.meta.url), "utf8"),
+);
+
 describe("news query construction", () => {
+  it("rejects invalid pagination at the service boundary", async () => {
+    const repository = new NewsRepository("");
+    const get = vi.spyOn(repository, "getNews");
+    const service = new NewsService(repository);
+
+    await expect(service.getNews(Number.NaN, 12)).rejects.toThrow();
+    expect(get).not.toHaveBeenCalled();
+  });
+
   it("encodes populated filters without allowing search text to introduce parameters", async () => {
     const http = new HttpHelper();
-    const get = vi.spyOn(http, "get").mockResolvedValue({ data: { rows: [] } });
+    const get = vi.spyOn(http, "get").mockResolvedValue({
+      data: { rows: [], totalRecords: 0, page: 1, pageSize: 12 },
+    });
     const repository = new NewsRepository("https://example.test", http);
     await repository.getNews(
       2,
@@ -33,9 +50,9 @@ describe("news query construction", () => {
     "omits empty optional filters (tagID: %s)",
     async (tagID) => {
       const http = new HttpHelper();
-      const get = vi
-        .spyOn(http, "get")
-        .mockResolvedValue({ data: { rows: [] } });
+      const get = vi.spyOn(http, "get").mockResolvedValue({
+        data: { rows: [], totalRecords: 0, page: 1, pageSize: 9 },
+      });
       await new NewsRepository("", http).getNews(1, 9, tagID, "", "", "", "");
       expect(get).toHaveBeenCalledWith("/v1/news/?page=1&pageSize=9");
     },
@@ -46,7 +63,7 @@ describe("news query construction", () => {
     const http = new HttpHelper();
     const get = vi.spyOn(http, "get").mockResolvedValue({ data: page });
     const service = new NewsService(new NewsRepository("", http));
-    expect(await service.getNews(1, 9)).toBe(page);
+    expect(await service.getNews(1, 9)).toEqual(page);
     expect(get).toHaveBeenCalledWith(
       "/v1/news/?page=1&pageSize=9&orderBy=startDate&sortBy=desc",
     );
@@ -81,5 +98,43 @@ describe("bulletin enable/disable requests", () => {
     await expect(
       new NewsRepository("", http).setNewsBulletin(7, "HIGHLIGHT", true),
     ).rejects.toBe(error);
+  });
+});
+
+describe("news API response parsing", () => {
+  it("parses current JSON DTOs and page metadata at the repository boundary", async () => {
+    const http = new HttpHelper();
+    const page = { rows: [newsFixture], totalRecords: 1, page: 1, pageSize: 12 };
+    vi.spyOn(http, "get").mockResolvedValue({ data: page });
+
+    await expect(new NewsRepository("", http).getNews(1, 12)).resolves.toMatchObject({
+      data: page,
+    });
+  });
+
+  it("rejects malformed API data instead of exposing an unchecked news page", async () => {
+    const http = new HttpHelper();
+    vi.spyOn(http, "get").mockResolvedValue({
+      data: { rows: [{ ...newsFixture, startDate: 12 }], totalRecords: 1, page: 1, pageSize: 12 },
+    });
+
+    await expect(new NewsRepository("", http).getNews(1, 12)).rejects.toBeInstanceOf(
+      ZodError,
+    );
+  });
+
+  it("parses nullable bulletin DTOs before their presentation mapping", async () => {
+    const bulletinFixture = JSON.parse(
+      readFileSync(
+        new URL("../fixtures/news-bulletins.json", import.meta.url),
+        "utf8",
+      ),
+    );
+    const http = new HttpHelper();
+    vi.spyOn(http, "get").mockResolvedValue({ data: bulletinFixture });
+
+    await expect(
+      new NewsRepository("", http).getNewsBulletins("ANNOUNCEMENT"),
+    ).resolves.toMatchObject({ data: bulletinFixture });
   });
 });

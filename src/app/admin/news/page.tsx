@@ -1,6 +1,6 @@
 import NewsListComponent from "@/features/news/components/admin/news.list.component";
 
-import { QueryNews } from "@/features/news/domain/news";
+import type { NewsQueryInput } from "@/features/news/schema/news";
 import { createNewsServerService } from "@/features/news/server";
 import { createMasterDataServerService } from "@/features/master-data/server";
 
@@ -8,7 +8,7 @@ import { createMasterDataServerService } from "@/features/master-data/server";
 export const dynamic = "force-dynamic";
 
 interface PageProps {
-  searchParams: Promise<QueryNews>;
+  searchParams: Promise<NewsQueryInput>;
 }
 
 const page = async ({ searchParams }: PageProps) => {
