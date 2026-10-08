@@ -1,19 +1,20 @@
-import { IClassBookRepository } from "@/features/classbook/ports/class-book.repository";
-import { IClassBook, QueryClassBook } from "@/features/classbook/domain/classbook";
+import type { IClassBookRepository } from "@/features/classbook/ports/class-book.repository";
+import type { QueryClassBook } from "@/features/classbook/domain/classbook";
 import { HttpHelper } from "@/shared/lib/http";
-import { ApiResponse, Pageable } from "@/shared/types/response";
+import {
+  ClassBookPageResponseSchema,
+  ClassBookResponseSchema,
+  NullableClassBookResponseSchema,
+} from "@/features/classbook/schema/classbook";
 
 export class ClassBookRepository implements IClassBookRepository {
   private readonly http: HttpHelper;
-  private readonly baseUrl: string;
 
   constructor(baseUrl: string, http = new HttpHelper(baseUrl)) {
-    this.baseUrl = baseUrl;
     this.http = http;
   }
-  async getClassBooks(
-    query: QueryClassBook,
-  ): Promise<ApiResponse<Pageable<IClassBook>>> {
+
+  async getClassBooks(query: QueryClassBook) {
     const {
       page,
       pageSize,
@@ -21,49 +22,46 @@ export class ClassBookRepository implements IClassBookRepository {
       sortBy = "desc",
       search,
       searchBy = "classof",
+      curriculumID,
     } = query;
 
     const params = new URLSearchParams();
     if (page !== undefined) params.append("page", page.toString());
     if (pageSize !== undefined) params.append("pageSize", pageSize.toString());
-    if (search) {
-      params.append("search", search);
-    }
+    if (search) params.append("search", search);
     params.append("searchBy", searchBy);
+    if (curriculumID !== undefined) {
+      params.append("curriculumID", curriculumID.toString());
+    }
     params.append("orderBy", orderBy);
     params.append("sortBy", sortBy);
 
     const queryString = params.toString() ? `?${params.toString()}` : "";
-    const url = `/v1/class-books${queryString}`;
-    const response =
-      await this.http.get<ApiResponse<Pageable<IClassBook>>>(url);
-    return response;
+    const response = await this.http.get<unknown>(
+      `/v1/class-books${queryString}`,
+    );
+    return ClassBookPageResponseSchema.parse(response);
   }
 
-  async getClassBookById(id: number): Promise<ApiResponse<IClassBook> | null> {
-    const url = `/v1/class-books/${id}`;
-    const response = await this.http.get<ApiResponse<IClassBook>>(url);
-    return response;
+  async getClassBookById(id: number) {
+    const response = await this.http.get<unknown>(`/v1/class-books/${id}`);
+    return response === null
+      ? null
+      : NullableClassBookResponseSchema.parse(response);
   }
 
-  async createClassBook(data: FormData): Promise<ApiResponse<IClassBook>> {
-    const url = `/v1/class-books`;
-    const response = await this.http.post<ApiResponse<IClassBook>>(url, data);
-    return response;
+  async createClassBook(data: FormData) {
+    const response = await this.http.post<unknown>("/v1/class-books", data);
+    return ClassBookResponseSchema.parse(response);
   }
 
-  async updateClassBook(
-    data: FormData,
-    id: number,
-  ): Promise<ApiResponse<IClassBook>> {
-    const url = `/v1/class-books/${id}`;
-    const response = await this.http.patch<ApiResponse<IClassBook>>(url, data);
-    return response;
+  async updateClassBook(data: FormData, id: number) {
+    const response = await this.http.patch<unknown>(`/v1/class-books/${id}`, data);
+    return ClassBookResponseSchema.parse(response);
   }
 
-  async deleteClassBook(id: number): Promise<ApiResponse<IClassBook>> {
-    const url = `/v1/class-books/${id}`;
-    const response = await this.http.delete<ApiResponse<IClassBook>>(url);
-    return response;
+  async deleteClassBook(id: number) {
+    const response = await this.http.delete<unknown>(`/v1/class-books/${id}`);
+    return ClassBookResponseSchema.parse(response);
   }
 }

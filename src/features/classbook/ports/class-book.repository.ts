@@ -1,12 +1,14 @@
-import { IClassBook, QueryClassBook } from "@/features/classbook/domain/classbook";
-import { ApiResponse, Pageable } from "@/shared/types/response";
+import type { QueryClassBook } from "@/features/classbook/domain/classbook";
+import type {
+  ClassBookPageResponse,
+  ClassBookResponse,
+  NullableClassBookResponse,
+} from "@/features/classbook/schema/classbook";
 
 export interface IClassBookRepository {
-  getClassBooks(
-    query: QueryClassBook,
-  ): Promise<ApiResponse<Pageable<IClassBook>>>;
-  getClassBookById(id: number): Promise<ApiResponse<IClassBook> | null>;
-  createClassBook(data: FormData): Promise<ApiResponse<IClassBook>>;
-  updateClassBook(data: FormData, id: number): Promise<ApiResponse<IClassBook>>;
-  deleteClassBook(id: number): Promise<ApiResponse<IClassBook>>;
+  getClassBooks(query: QueryClassBook): Promise<ClassBookPageResponse>;
+  getClassBookById(id: number): Promise<NullableClassBookResponse | null>;
+  createClassBook(data: FormData): Promise<ClassBookResponse>;
+  updateClassBook(data: FormData, id: number): Promise<ClassBookResponse>;
+  deleteClassBook(id: number): Promise<ClassBookResponse>;
 }
