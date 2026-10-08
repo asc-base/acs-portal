@@ -1,7 +1,11 @@
-import { ICurriculumRepository } from "@/features/curriculum/ports/curriculum.repository";
-import { ICurriculum, QueryCurriculum } from "@/features/curriculum/domain/curriculum";
-import { Pageable, ApiResponse } from "@/shared/types/response";
+import type { ICurriculumRepository } from "@/features/curriculum/ports/curriculum.repository";
+import type { QueryCurriculum } from "@/features/curriculum/domain/curriculum";
 import { HttpHelper } from "@/shared/lib/http";
+import {
+  CurriculumPageResponseSchema,
+  CurriculumResponseSchema,
+  NullableCurriculumResponseSchema,
+} from "@/features/curriculum/schema/curriculum";
 
 export class CurriculumRepository implements ICurriculumRepository {
   private readonly http: HttpHelper;
@@ -14,7 +18,7 @@ export class CurriculumRepository implements ICurriculumRepository {
 
   async getCurriculum(
     query: QueryCurriculum,
-  ): Promise<ApiResponse<Pageable<ICurriculum>>> {
+  ) {
     const searchParams = new URLSearchParams({
       page: query.page?.toString() || "1",
       pageSize: query.pageSize?.toString() || "10",
@@ -32,42 +36,39 @@ export class CurriculumRepository implements ICurriculumRepository {
 
     const url = `/v1/curriculums?${searchParams.toString()}`;
 
-    const response =
-      await this.http.get<ApiResponse<Pageable<ICurriculum>>>(url);
-    return response;
+    const response = await this.http.get<unknown>(url);
+    return CurriculumPageResponseSchema.parse(response);
   }
 
-  async getCurriculumById(
-    id: number,
-  ): Promise<ApiResponse<ICurriculum> | null> {
+  async getCurriculumById(id: number) {
     const url = `/v1/curriculums/${id}`;
-    const response = await this.http.get<ApiResponse<ICurriculum>>(url);
-    return response;
+    const response = await this.http.get<unknown>(url);
+    return response === null ? null : NullableCurriculumResponseSchema.parse(response);
   }
 
-  async createCurriculum(data: FormData): Promise<ApiResponse<ICurriculum>> {
-    const response = await this.http.post<ApiResponse<ICurriculum>>(
+  async createCurriculum(data: FormData) {
+    const response = await this.http.post<unknown>(
       `/v1/curriculums/`,
       data,
     );
-    return response;
+    return CurriculumResponseSchema.parse(response);
   }
 
   async updateCurriculum(
     id: number,
     data: FormData,
-  ): Promise<ApiResponse<ICurriculum>> {
-    const response = await this.http.patch<ApiResponse<ICurriculum>>(
+  ) {
+    const response = await this.http.patch<unknown>(
       `/v1/curriculums/${id}`,
       data,
     );
-    return response;
+    return CurriculumResponseSchema.parse(response);
   }
 
-  async deleteCurriculum(id: number): Promise<ApiResponse<ICurriculum>> {
-    const response = await this.http.delete<ApiResponse<ICurriculum>>(
+  async deleteCurriculum(id: number) {
+    const response = await this.http.delete<unknown>(
       `/v1/curriculums/${id}`,
     );
-    return response;
+    return CurriculumResponseSchema.parse(response);
   }
 }

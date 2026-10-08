@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Button, Card, MenuItem, Alert, Snackbar, Modal } from "@mui/material";
 import Image from "next/image";
 import { styled } from "@mui/material/styles";
@@ -9,10 +9,9 @@ import { useForm } from "react-hook-form";
 import { UpdateClassbookInputs, updateClassBookSchema } from "@/features/classbook/schema/classbook";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { IClassBook } from "@/features/classbook/domain/classbook";
-import { ICurriculum } from "@/features/curriculum/domain/curriculum";
 import { ConfirmModal, ConfirmModalProps } from "@/shared/components/modal/confirmModal";
 import { CropImageCard } from "@/shared/components/cropimagecard";
-import { curriculumService as cuurriculumService } from "@/features/curriculum/client";
+import { useCurriculums } from "@/features/curriculum/client";
 import { classBookService } from "@/features/classbook/client";
 
 
@@ -40,7 +39,11 @@ export const ClassBookInfoComponent = ({ classBook }: CurriculumFormProps) => {
     null,
   );
   const [isError, setIsError] = useState(false);
-  const [curriculums, setCurriculums] = useState<ICurriculum[]>([]);
+  const { data: curriculumPage } = useCurriculums({
+    orderBy: "year",
+    sortBy: "desc",
+  });
+  const curriculums = curriculumPage?.rows ?? [];
 
   const previewSrc = selectedFile
     ? URL.createObjectURL(selectedFile)
@@ -133,17 +136,6 @@ export const ClassBookInfoComponent = ({ classBook }: CurriculumFormProps) => {
       }
     }
   };
-
-  useEffect(() => {
-    const fetchCurriculums = async () => {
-      const response = await cuurriculumService.getCurriculum({
-        orderBy: "year",
-        sortBy: "desc",
-      });
-      setCurriculums(response.rows);
-    };
-    fetchCurriculums();
-  }, []);
 
   return (
     <div>

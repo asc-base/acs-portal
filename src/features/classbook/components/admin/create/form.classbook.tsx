@@ -1,5 +1,5 @@
 "use client";
-import React, { FC, useEffect, useState } from "react";
+import React, { FC, useState } from "react";
 import Image from "next/image";
 import { Button, MenuItem, Alert, Snackbar, Modal } from "@mui/material";
 import { styled } from "@mui/material/styles";
@@ -8,14 +8,13 @@ import { useForm } from "react-hook-form";
 import { CreateClassbookInputs, createClassbookSchema } from "@/features/classbook/schema/classbook";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { RHFSelect } from "@/shared/components/form/RHFSelect";
-import { ICurriculum } from "@/features/curriculum/domain/curriculum";
 import { useRouter } from "next/navigation";
 import {
   ConfirmModal,
   ConfirmModalProps,
 } from "@/shared/components/modal/confirmModal";
 import { CropImageCard } from "@/shared/components/cropimagecard";
-import { curriculumService as cuurriculumService } from "@/features/curriculum/client";
+import { useCurriculums } from "@/features/curriculum/client";
 import { classBookService } from "@/features/classbook/client";
 
 
@@ -33,7 +32,11 @@ const VisuallyHiddenInput = styled("input")({
 
 export const FormClassbook: FC = () => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [curriculums, setCurriculums] = useState<ICurriculum[]>([]);
+  const { data: curriculumPage } = useCurriculums({
+    orderBy: "year",
+    sortBy: "desc",
+  });
+  const curriculums = curriculumPage?.rows ?? [];
   const [isError, setIsError] = useState(false);
   const router = useRouter();
   const [confirmModal, setConfirmModal] = useState<ConfirmModalProps | null>(
@@ -114,17 +117,6 @@ export const FormClassbook: FC = () => {
   const handleCloseAlert = () => {
     setIsError(false);
   };
-
-  useEffect(() => {
-    const fetchCurriculums = async () => {
-      const response = await cuurriculumService.getCurriculum({
-        orderBy: "year",
-        sortBy: "desc",
-      });
-      setCurriculums(response.rows);
-    };
-    fetchCurriculums();
-  }, []);
 
   return (
     <form className="space-y-4 p-8" onSubmit={handleSubmit(onSubmit)}>

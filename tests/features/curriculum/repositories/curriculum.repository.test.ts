@@ -64,6 +64,31 @@ describe("curriculum responses and paths", () => {
     expect(get).toHaveBeenCalledWith("/v1/curriculums/404");
   });
 
+  it("rejects malformed curriculum DTOs and preserves a null DTO absence", async () => {
+    const http = new HttpHelper();
+    const get = vi.spyOn(http, "get");
+    const repository = new CurriculumRepository("", http);
+    get.mockResolvedValueOnce(
+      response({ ...curriculum, thumbnailURL: undefined }),
+    );
+    get.mockResolvedValueOnce(response(null));
+
+    await expect(repository.getCurriculumById(42)).rejects.toThrow();
+    await expect(repository.getCurriculumById(404)).resolves.toEqual(
+      response(null),
+    );
+  });
+
+  it("rejects malformed curriculum list pagination", async () => {
+    const http = new HttpHelper();
+    vi.spyOn(http, "get").mockResolvedValue(
+      response({ rows: [curriculum], totalRecords: "1", page: 1, pageSize: 10 }),
+    );
+    const repository = new CurriculumRepository("", http);
+
+    await expect(repository.getCurriculum({})).rejects.toThrow();
+  });
+
   it("uses the expected item and mutation request paths", async () => {
     const http = new HttpHelper();
     const itemResponse = response(curriculum);
