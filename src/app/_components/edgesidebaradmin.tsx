@@ -11,8 +11,8 @@ import BorderColorIcon from "@mui/icons-material/BorderColor";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useAuthStore } from "@/features/auth/store/auth";
+import { useLogout } from "@/features/auth/client";
 import Image from "next/image";
-import { clientAuthService } from "@/features/auth/client";
 
 const sidebarItems = [
   {
@@ -76,10 +76,11 @@ export const EdgeSidebarAdmin = ({
   const pathName = usePathname();
   const router = useRouter();
   const { clearUser } = useAuthStore();
+  const { mutateAsync: logout } = useLogout();
 
   const handleLogout = async () => {
     try {
-      await clientAuthService.logout();
+      await logout();
       clearUser();
       router.push("/admin/auth");
     } catch (error) {
