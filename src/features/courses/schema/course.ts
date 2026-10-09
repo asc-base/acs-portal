@@ -40,7 +40,7 @@ export const CreateCourseRequestSchema = commonCourseSchema.extend({
 export const UpdateCourseRequestSchema = commonCourseSchema
   .partial()
   .extend({
-    curriculumID: courseId,
+    curriculumID: courseId.optional(),
     newPrecourseId: z.array(courseId).optional(),
     deletePrecourseId: z.array(courseId).optional(),
   });

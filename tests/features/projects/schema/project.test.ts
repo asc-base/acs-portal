@@ -138,7 +138,6 @@ describe("project request mapping", () => {
       githubURL: project.githubURL,
       documentURL: project.documentURL,
       presentationURL: project.presentationURL,
-      figmaURL: null,
       techStacks: ["TypeScript"],
       newtagsID: [5],
       deletedtagsID: [6],

@@ -148,7 +148,7 @@ describe("student profile controller", () => {
     expect(patchBody?.getAll("skills")).toEqual(["TypeScript", "React"]);
     expect(patchBody?.get("imageFocalPointX")).toBe("0");
     expect(patchBody?.get("imageFocalPointY")).toBe("100");
-    expect(patchBody?.get("classBookID")).toBe("3");
+    expect(patchBody?.has("classBookID")).toBe(false);
 
     savedStudent = { ...student, imageUrl: "https://example.test/new.png" };
     await act(async () => {
@@ -182,7 +182,12 @@ describe("student profile controller", () => {
     });
     const { result } = renderHook(() => useStudentProfileController(), { wrapper });
     await waitFor(() => expect(result.current.student).toEqual(student));
-    act(() => result.current.handleEdit());
+    act(() => {
+      result.current.handleEdit();
+      result.current.form.setValue("github", "https://github.com/edited", {
+        shouldDirty: true,
+      });
+    });
 
     await act(async () => {
       await result.current.form.handleSubmit(result.current.onSubmit)();

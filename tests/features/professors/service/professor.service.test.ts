@@ -80,7 +80,6 @@ describe("professor create/update multipart requests", () => {
       new ProfessorRepository("https://example.test", http),
     );
     const data: IUpdateProfessor = {
-      id: 9,
       prefixID: 2,
       profRoom: "A201",
       phone: "0812345678",
@@ -101,7 +100,6 @@ describe("professor create/update multipart requests", () => {
     );
     const form = patch.mock.calls[0][1] as FormData;
     expect(Array.from(form.entries())).toEqual([
-      ["id", "9"],
       ["prefixID", "2"],
       ["profRoom", "A201"],
       ["phone", "0812345678"],
@@ -114,6 +112,19 @@ describe("professor create/update multipart requests", () => {
       ["educations", "PhD"],
       ["research_profile", "https://example.test/profile"],
     ]);
+  });
+
+  it("omits undefined update fields from multipart data", async () => {
+    const http = new HttpHelper("https://example.test");
+    const patch = vi.spyOn(http, "patch").mockResolvedValue(response);
+    const service = new ProfessorService(
+      new ProfessorRepository("https://example.test", http),
+    );
+
+    await service.updateProfessor("9", { educations: "PhD" }, null);
+
+    const form = patch.mock.calls[0]?.[1] as FormData;
+    expect(Array.from(form.entries())).toEqual([["educations", "PhD"]]);
   });
 
   it("preserves repository failures for create and update", async () => {
@@ -132,7 +143,6 @@ describe("professor create/update multipart requests", () => {
       profRoom: "A201",
     };
     const updateData: IUpdateProfessor = {
-      id: 9,
       prefixID: 2,
       profRoom: "A201",
       phone: "0812345678",
@@ -161,7 +171,7 @@ describe("professor create/update multipart requests", () => {
       service.createProfessor({ prefixID: "2" } as never, null),
     ).rejects.toThrow();
     await expect(
-      service.updateProfessor("9", { id: "9" } as never, null),
+      service.updateProfessor("9", { prefixID: "invalid" } as never, null),
     ).rejects.toThrow();
     expect(createProfessor).not.toHaveBeenCalled();
     expect(updateProfessor).not.toHaveBeenCalled();
@@ -177,7 +187,7 @@ describe("professor create/update multipart requests", () => {
 
     await expect(service.getProfessors({ page: 1 })).rejects.toBe(error);
     await expect(
-      service.getProfessors({ page: "1" } as never),
+      service.getProfessors({ page: "invalid" } as never),
     ).rejects.toThrow();
     expect(getProfessors).toHaveBeenCalledOnce();
   });
@@ -196,7 +206,8 @@ describe("professor service reads", () => {
       new ProfessorRepository("https://example.test", http),
     );
 
-    const page = await service.getProfessors({ page: 1, pageSize: 10 });
+    const page = await service.getProfessors({ page: "1", pageSize: "10" });
+    expect(http.get).toHaveBeenCalledWith("/v1/professors?page=1&pageSize=10");
     expect(page).toEqual({
       rows: [professor],
       totalRecords: 1,

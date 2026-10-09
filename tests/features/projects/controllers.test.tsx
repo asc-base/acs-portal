@@ -127,6 +127,8 @@ describe("project form controllers", () => {
     expect(body.get("newMembers")).toBe('[{"userID":11,"roleID":2}]');
     expect(body.get("deletedmembersID")).toBe("[7]");
     expect(body.get("thumbnailFile")).toBe(thumbnail);
+    expect(body.has("title")).toBe(false);
+    expect(body.has("figmaURL")).toBe(false);
     expect(body.get("thumbnailFocalPointX")).toBe("-10");
     expect(body.get("thumbnailFocalPointY")).toBe("120");
     expect(body.getAll("assets")).toEqual(result.current.selectedAssets);

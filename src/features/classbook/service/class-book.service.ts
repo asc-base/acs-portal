@@ -54,6 +54,7 @@ export class ClassBookService {
     const { thumbnailFile: requestThumbnail, ...requestData } = request;
     const formData = new FormData();
     Object.entries(requestData).forEach(([key, value]) => {
+      if (value === undefined) return;
       formData.append(key, value?.toString() ?? "");
     });
     if (requestThumbnail) formData.append("thumbnailFile", requestThumbnail);

@@ -104,6 +104,12 @@ export class NewsService {
       }
       if (value instanceof File) {
         formData.append(key, value);
+      } else if (
+        key === "eventEndAt" &&
+        value === null &&
+        fields.dueDate === undefined
+      ) {
+        formData.append("eventEndAt", "null");
       } else if (key === "dueDate" && value === "") {
         formData.append("eventEndAt", "null");
       } else if (value !== undefined && value !== null) {

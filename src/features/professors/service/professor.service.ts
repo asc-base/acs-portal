@@ -5,7 +5,7 @@ import type {
   ICreateProfessor,
 } from "@/features/professors/domain/professor";
 import type { ApiResponse } from "@/shared/types/response";
-import type { QueryProfessor, ProfessorPage } from "@/features/professors/schema/professor";
+import type { QueryProfessorInput, ProfessorPage } from "@/features/professors/schema/professor";
 import {
   CreateProfessorPayloadSchema,
   ProfessorQuerySchema,
@@ -15,7 +15,7 @@ import {
 export class ProfessorService {
   constructor(private professorRepository: IProfessorRepository) {}
 
-  async getProfessors(query: QueryProfessor): Promise<ProfessorPage> {
+  async getProfessors(query: QueryProfessorInput): Promise<ProfessorPage> {
     const response = await this.professorRepository.getProfessors(
       ProfessorQuerySchema.parse(query),
     );
@@ -35,6 +35,7 @@ export class ProfessorService {
     const payload = UpdateProfessorPayloadSchema.parse(data);
     const formData = new FormData();
     Object.entries(payload).forEach(([key, value]) => {
+      if (value === undefined) return;
       formData.append(key, value?.toString() ?? "");
     });
     if (imageFile) {

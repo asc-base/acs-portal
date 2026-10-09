@@ -14,7 +14,7 @@ export const TagSchema = z.object({
 export const TagGroupSchema = z.object({
   id: z.number(),
   name: z.string(),
-  tags: z.array(TagSchema),
+  tags: z.array(TagSchema).default([]),
 });
 
 export const NewsCategorySchema = z.object({

@@ -172,7 +172,7 @@ describe("news update multipart payload", () => {
     },
   );
 
-  it("omits unchanged URLs, null/undefined values and empty deletion arrays", async () => {
+  it("preserves explicit null as a clear marker and omits empty deletion arrays", async () => {
     const update = vi
       .spyOn(repository, "updateNews")
       .mockResolvedValue(response);
@@ -184,7 +184,9 @@ describe("news update multipart payload", () => {
       deletedImageIds: [],
       deletedAdditionalImagesId: [],
     });
-    expect(Array.from(update.mock.calls[0][1].entries())).toEqual([]);
+    expect(Array.from(update.mock.calls[0][1].entries())).toEqual([
+      ["eventEndAt", "null"],
+    ]);
   });
 
   it("clears the end date with an explicit multipart null marker", async () => {

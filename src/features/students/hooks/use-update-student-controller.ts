@@ -11,6 +11,22 @@ import {
   UpdateStudentRequestSchema,
 } from "@/features/students/schema/student";
 import type { UpdateStudentFormInput } from "@/features/students/schema/student";
+import { changedFields } from "@/shared/lib/changed-fields";
+
+const formValues = (student: IStudent): UpdateStudentFormInput => ({
+  prefixID: student.prefix?.id ?? null,
+  firstNameTh: student.firstNameTh,
+  lastNameTh: student.lastNameTh,
+  firstNameEn: student.firstNameEn ?? "",
+  lastNameEn: student.lastNameEn ?? "",
+  studentCode: student.student.studentCode,
+  nickName: student.nickName ?? "",
+  email: student.email,
+  facebook: student.student.facebook ?? "",
+  linkedin: student.student.linkedin ?? "",
+  instagram: student.student.instagram ?? "",
+  github: student.student.github ?? "",
+});
 
 export function useUpdateStudentController(classBookID: number, student: IStudent) {
   const router = useRouter();
@@ -23,20 +39,7 @@ export function useUpdateStudentController(classBookID: number, student: IStuden
   const [confirmModal, setConfirmModal] = useState<ConfirmModalProps | null>(null);
   const form = useForm<UpdateStudentFormInput>({
     resolver: zodResolver(UpdateStudentFormSchema),
-    defaultValues: {
-      prefixID: student.prefix?.id ?? null,
-      firstNameTh: student.firstNameTh,
-      lastNameTh: student.lastNameTh,
-      firstNameEn: student.firstNameEn ?? "",
-      lastNameEn: student.lastNameEn ?? "",
-      studentCode: student.student.studentCode,
-      nickName: student.nickName ?? "",
-      email: student.email,
-      facebook: student.student.facebook || undefined,
-      linkedin: student.student.linkedin || undefined,
-      instagram: student.student.instagram || undefined,
-      github: student.student.github || undefined,
-    },
+    defaultValues: formValues(student),
     mode: "onBlur",
     reValidateMode: "onChange",
   });
@@ -67,13 +70,34 @@ export function useUpdateStudentController(classBookID: number, student: IStuden
   const onSubmit: SubmitHandler<UpdateStudentFormInput> = async (data) => {
     setIsError(false);
     try {
+      const changed = changedFields(data, formValues(student));
       const request = UpdateStudentRequestSchema.parse({
-        ...data,
-        classBookID,
-        imageFile: selectedFile,
-        imageFocalPointX: focalPoint?.x,
-        imageFocalPointY: focalPoint?.y,
+        ...changed,
+        ...(changed.firstNameEn !== undefined && {
+          firstNameEn: changed.firstNameEn || null,
+        }),
+        ...(changed.lastNameEn !== undefined && {
+          lastNameEn: changed.lastNameEn || null,
+        }),
+        ...(changed.nickName !== undefined && { nickName: changed.nickName || null }),
+        ...(changed.facebook !== undefined && { facebook: changed.facebook || null }),
+        ...(changed.linkedin !== undefined && { linkedin: changed.linkedin || null }),
+        ...(changed.instagram !== undefined && { instagram: changed.instagram || null }),
+        ...(changed.github !== undefined && { github: changed.github || null }),
+        ...(changed.skills !== undefined && {
+          skills: changed.skills.length > 0 ? changed.skills : null,
+        }),
+        ...(selectedFile && { imageFile: selectedFile }),
+        ...(selectedFile && focalPoint &&
+          focalPoint.x !== student.imageFocalPointX && {
+          imageFocalPointX: focalPoint.x,
+        }),
+        ...(selectedFile && focalPoint &&
+          focalPoint.y !== student.imageFocalPointY && {
+          imageFocalPointY: focalPoint.y,
+        }),
       });
+      if (Object.keys(request).length === 0) return;
       await updateStudent.mutateAsync({ id: student.id, data: request });
       setConfirmModal({
         isOpen: true,

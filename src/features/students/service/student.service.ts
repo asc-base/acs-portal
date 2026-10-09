@@ -67,7 +67,10 @@ export class StudentService {
     const formData = new FormData();
     Object.entries(data).forEach(([key, value]) => {
       if (key === "skills" && Array.isArray(value)) {
-        value.forEach((skill) => formData.append("skills", skill));
+        if (value.length === 0) formData.append("skills", "");
+        else value.forEach((skill) => formData.append("skills", skill));
+      } else if (value === null) {
+        formData.append(key, "");
       } else if (value !== null && value !== undefined && value !== "") {
         formData.append(key, value.toString());
       }

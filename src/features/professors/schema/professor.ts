@@ -51,7 +51,6 @@ export const CreateProfessorPayloadSchema = z.object({
 });
 
 export const UpdateProfessorPayloadSchema = z.object({
-  id: z.number(),
   prefixID: z.number(),
   profRoom: z.string(),
   phone: z.string(),
@@ -64,11 +63,16 @@ export const UpdateProfessorPayloadSchema = z.object({
   educations: z.string().optional(),
   research_profile: z.string().nullable().optional(),
   ...CommonFocalPointSchema.shape,
-});
+}).partial();
+
+const queryNumber = z
+  .union([z.number(), z.string()])
+  .transform(Number)
+  .pipe(z.number());
 
 export const ProfessorQuerySchema = z.object({
-  page: z.number().optional(),
-  pageSize: z.number().optional(),
+  page: queryNumber.optional(),
+  pageSize: queryNumber.optional(),
   educations: z.string().optional(),
   expertFields: z.string().optional(),
   majorPosition: z.string().optional(),
@@ -90,6 +94,7 @@ export type CreateProfessorInputs = z.input<typeof CreateProfessorSchema>;
 export type UpdateProfessorInputs = z.input<typeof UpdateProfessorSchema>;
 export type CreateProfessorPayload = z.output<typeof CreateProfessorPayloadSchema>;
 export type UpdateProfessorPayload = z.output<typeof UpdateProfessorPayloadSchema>;
+export type QueryProfessorInput = z.input<typeof ProfessorQuerySchema>;
 export type QueryProfessor = z.infer<typeof ProfessorQuerySchema>;
 export type ProfessorSearch = z.infer<typeof ProfessorSearchSchema>;
 export type ProfessorPage = z.infer<typeof ProfessorPageSchema>;

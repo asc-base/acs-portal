@@ -59,7 +59,7 @@ export class CurriculumService {
     const { thumbnailFile: requestThumbnail, ...requestData } = request;
     const formData = new FormData();
     Object.entries(requestData).forEach(([key, value]) => {
-      if (value !== undefined && value !== null) {
+      if (value !== undefined) {
         formData.append(key, value.toString());
       }
     });

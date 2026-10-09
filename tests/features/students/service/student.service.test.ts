@@ -115,6 +115,25 @@ describe("StudentService multipart requests", () => {
     expect(form.get("imageFile")).toBe(profileImage);
     expect(form.get("classBookID")).toBe("42");
     expect(form.has("facebook")).toBe(false);
+    expect(form.get("linkedin")).toBe("");
+  });
+
+  it("omits unchanged student fields and encodes explicit clears", async () => {
+    const repository = createRepository();
+    const service = new StudentService(repository);
+
+    await service.updateStudent(7, {
+      studentCode: "64000000001",
+      classBookID: undefined,
+      skills: null,
+      facebook: null,
+    });
+
+    const form = repository.updateStudent.mock.calls[0]![0];
+    expect(form.has("studentCode")).toBe(true);
+    expect(form.has("classBookID")).toBe(false);
+    expect(form.get("skills")).toBe("");
+    expect(form.get("facebook")).toBe("");
     expect(form.has("linkedin")).toBe(false);
   });
 

@@ -6,10 +6,12 @@ import type { ConfirmModalProps } from "@/shared/components/modal/confirmModal";
 import { useUpdateProject } from "@/features/projects/client";
 import {
   UpdateProjectFormSchema,
+  UpdateProjectRequestSchema,
   projectFormToUpdateRequest,
 } from "@/features/projects/schema/project";
 import type { IProject, ProjectFormInput } from "@/features/projects/schema/project";
 import { useProjectImages } from "@/features/projects/hooks/use-project-images";
+import { changedFields } from "@/shared/lib/changed-fields";
 
 export function useUpdateProjectController(projectId: string, initialProject: IProject) {
   const router = useRouter();
@@ -25,22 +27,23 @@ export function useUpdateProjectController(projectId: string, initialProject: IP
   const initTechStacks = initialProject.techStacks.map((value) => ({ value }));
   const initStudents = initialProject.member.filter(({ role }) => role.id === 2).map(({ id }) => ({ userID: id }));
   const initAdvisors = initialProject.member.filter(({ role }) => role.id === 3).map(({ id }) => ({ userID: id }));
+  const defaultValues: ProjectFormInput = {
+    title: initialProject.title,
+    details: initialProject.details,
+    youtubeURL: initialProject.youtubeURL,
+    githubURL: initialProject.githubURL,
+    documentURL: initialProject.documentURL,
+    presentationURL: initialProject.presentationURL,
+    projectCourses: initCourses.length > 0 ? initCourses : [{ value: 0 }],
+    projectTypes: initTypes.length > 0 ? initTypes : [{ value: 0 }],
+    projectCategories: initCategories.length > 0 ? initCategories : [{ value: 0 }],
+    techStacks: initTechStacks.length > 0 ? initTechStacks : [{ value: "" }],
+    students: initStudents.length > 0 ? initStudents : [{ userID: 0 }],
+    advisors: initAdvisors.length > 0 ? initAdvisors : [{ userID: 0 }],
+  };
   const form = useForm<ProjectFormInput>({
     resolver: zodResolver(UpdateProjectFormSchema),
-    defaultValues: {
-      title: initialProject.title,
-      details: initialProject.details,
-      youtubeURL: initialProject.youtubeURL,
-      githubURL: initialProject.githubURL,
-      documentURL: initialProject.documentURL,
-      presentationURL: initialProject.presentationURL,
-      projectCourses: initCourses.length > 0 ? initCourses : [{ value: 0 }],
-      projectTypes: initTypes.length > 0 ? initTypes : [{ value: 0 }],
-      projectCategories: initCategories.length > 0 ? initCategories : [{ value: 0 }],
-      techStacks: initTechStacks.length > 0 ? initTechStacks : [{ value: "" }],
-      students: initStudents.length > 0 ? initStudents : [{ userID: 0 }],
-      advisors: initAdvisors.length > 0 ? initAdvisors : [{ userID: 0 }],
-    },
+    defaultValues,
     mode: "onChange",
   });
   const projectImages = useProjectImages(
@@ -75,13 +78,25 @@ export function useUpdateProjectController(projectId: string, initialProject: IP
 
   const onSubmit: SubmitHandler<ProjectFormInput> = async (data) => {
     try {
+      const request = UpdateProjectRequestSchema.parse(
+        changedFields(
+          projectFormToUpdateRequest(data, initialProject),
+          projectFormToUpdateRequest(defaultValues, initialProject),
+        ),
+      );
+      const files = {
+        thumbnailFile: projectImages.selectedFile,
+        assets: projectImages.selectedAssets.length > 0 ? projectImages.selectedAssets : undefined,
+      };
+      if (
+        Object.keys(request).length === 0 &&
+        !files.thumbnailFile &&
+        !files.assets?.length
+      ) return;
       await updateProject.mutateAsync({
         id: projectId,
-        payload: projectFormToUpdateRequest(data, initialProject),
-        files: {
-          thumbnailFile: projectImages.selectedFile,
-          assets: projectImages.selectedAssets.length > 0 ? projectImages.selectedAssets : undefined,
-        },
+        payload: request,
+        files,
       });
       setConfirmModal({
         isOpen: true,

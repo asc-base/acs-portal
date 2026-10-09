@@ -114,6 +114,8 @@ describe("curriculum form and list controllers", () => {
     expect(url).toBe("/api/v1/curriculums/42");
     expect(init?.method).toBe("PATCH");
     expect(body.get("year")).toBe("2026");
+    expect(body.has("title")).toBe(false);
+    expect(body.has("documentURL")).toBe(false);
     expect(body.get("thumbnailFocalPointX")).toBe("15");
     expect(body.get("thumbnailFile")).toBe(thumbnailFile);
     act(() => result.current.confirmModal?.onConfirm());

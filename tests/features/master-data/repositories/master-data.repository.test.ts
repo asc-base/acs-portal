@@ -57,6 +57,27 @@ describe("MasterDataRepository", () => {
     );
   });
 
+  it("defaults missing tags on all groups returned by the API", async () => {
+    const tagsGroups = Array.from({ length: 5 }, (_, index) => ({
+      id: index + 1,
+      name: `group-${index + 1}`,
+    }));
+    vi.spyOn(globalThis, "fetch").mockResolvedValue(
+      new Response(
+        JSON.stringify({ ...response, data: { ...data, tagsGroups } }),
+        { headers: { "content-type": "application/json" } },
+      ),
+    );
+    const repository = new MasterDataRepository("https://api.example.test");
+
+    await expect(repository.getMasterData()).resolves.toMatchObject({
+      data: {
+        tagsGroups: tagsGroups.map((group) => ({ ...group, tags: [] })),
+        tags: data.tags,
+      },
+    });
+  });
+
   it("rejects malformed master-data returned by the API", async () => {
     vi.spyOn(globalThis, "fetch").mockResolvedValue(
       new Response(JSON.stringify({ data: { ...data, tags: [{ id: 7, name: "research" }] } }), {

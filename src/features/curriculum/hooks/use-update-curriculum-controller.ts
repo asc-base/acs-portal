@@ -10,6 +10,7 @@ import {
   type UpdateCurriculumInputs,
 } from "@/features/curriculum/schema/curriculum";
 import type { ConfirmModalProps } from "@/shared/components/modal/confirmModal";
+import { changedFields } from "@/shared/lib/changed-fields";
 
 export function useUpdateCurriculumController(curriculum: ICurriculum) {
   const router = useRouter();
@@ -21,16 +22,17 @@ export function useUpdateCurriculumController(curriculum: ICurriculum) {
     null,
   );
   const [isError, setIsError] = useState(false);
+  const defaultValues: UpdateCurriculumInputs = {
+    title: curriculum.title ?? "",
+    year: curriculum.year ?? "",
+    documentURL: curriculum.documentURL ?? "",
+    description: curriculum.description ?? "",
+    thumbnailFocalPointX: curriculum.thumbnailFocalPointX ?? undefined,
+    thumbnailFocalPointY: curriculum.thumbnailFocalPointY ?? undefined,
+  };
   const form = useForm<UpdateCurriculumInputs>({
     resolver: zodResolver(UpdateCurriculumSchema),
-    defaultValues: {
-      title: curriculum.title ?? "",
-      year: curriculum.year ?? "",
-      documentURL: curriculum.documentURL ?? "",
-      description: curriculum.description ?? "",
-      thumbnailFocalPointX: curriculum.thumbnailFocalPointX ?? undefined,
-      thumbnailFocalPointY: curriculum.thumbnailFocalPointY ?? undefined,
-    },
+    defaultValues,
     mode: "onBlur",
     reValidateMode: "onChange",
   });
@@ -78,10 +80,17 @@ export function useUpdateCurriculumController(curriculum: ICurriculum) {
   };
 
   const onSubmit: SubmitHandler<UpdateCurriculumInputs> = async (data) => {
+    const year = dayjs(data.year).year().toString();
+    const initialYear = dayjs(defaultValues.year).year().toString();
+    const changed = changedFields(
+      { ...data, year },
+      { ...defaultValues, year: initialYear },
+    );
+    if (Object.keys(changed).length === 0 && !selectedFile) return;
     try {
       await updateCurriculum.mutateAsync({
         id: curriculum.id,
-        data: { ...data, year: dayjs(data.year).year().toString() },
+        data: changed,
         thumbnailFile: selectedFile,
       });
       setConfirmModal({

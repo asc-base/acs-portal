@@ -134,6 +134,8 @@ describe("classbook form and list controllers", () => {
     const body = init?.body as FormData;
     expect(url).toBe("/api/v1/class-books/42");
     expect(body.get("classof")).toBe("69");
+    expect(body.has("firstYearAcademic")).toBe(false);
+    expect(body.has("curriculumID")).toBe(false);
     expect(body.get("imageFocalPointX")).toBe("15");
     expect(body.get("imageFocalPointY")).toBe("80");
     expect(body.get("thumbnailFile")).toBe(thumbnailFile);

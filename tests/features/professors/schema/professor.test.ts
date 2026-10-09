@@ -124,7 +124,14 @@ describe("professor request and query schemas", () => {
       search: "  Somchai  ",
       searchBy: "firstNameTh",
     });
-    expect(ProfessorQuerySchema.safeParse({ page: "1" }).success).toBe(false);
+    expect(ProfessorQuerySchema.safeParse({ page: "invalid" }).success).toBe(false);
+  });
+
+  it("converts pagination values from URL strings into numbers", () => {
+    expect(ProfessorQuerySchema.parse({ page: "1", pageSize: "12" })).toEqual({
+      page: 1,
+      pageSize: 12,
+    });
   });
 
   it("validates pagination alongside professor list response rows", () => {

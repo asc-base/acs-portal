@@ -78,7 +78,11 @@ describe("update news form controller", () => {
       expect.objectContaining({ method: "PATCH", body }),
     );
     expect(body.get("title")).toBe("Changed title");
-    expect(body.get("newsCategoryId")).toBe("2");
+    expect(body.has("newsCategoryId")).toBe(false);
+    expect(body.has("eventStartAt")).toBe(false);
+    expect(body.has("detail")).toBe(false);
+    expect(body.has("cardFocalPointX")).toBe(false);
+    expect(body.has("title")).toBe(true);
     expect(body.getAll("detailImages")).toEqual([added]);
     expect(body.get("deletedImageIds")).toBe("[11]");
     expect(body.get("detailImageOrder")).toBe('["12","new:0"]');

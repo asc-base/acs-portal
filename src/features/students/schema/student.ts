@@ -72,15 +72,17 @@ export const CreateStudentRequestSchema = CreateStudentFormSchema.extend({
 export const UpdateStudentFieldsSchema = UpdateStudentFormSchema.partial();
 
 export const UpdateStudentRequestSchema = UpdateStudentFieldsSchema.extend({
-    classBookID: z.number(),
+    classBookID: z.number().optional(),
     imageFile: z.file().nullable().optional(),
     prefixID: z.number().nullable().optional(),
+    nickName: UpdateStudentFormSchema.shape.nickName.nullable().optional(),
     firstNameEn: UpdateStudentFormSchema.shape.firstNameEn.nullable(),
     lastNameEn: UpdateStudentFormSchema.shape.lastNameEn.nullable(),
     facebook: UpdateStudentFormSchema.shape.facebook.nullable(),
     linkedin: UpdateStudentFormSchema.shape.linkedin.nullable(),
     instagram: UpdateStudentFormSchema.shape.instagram.nullable(),
     github: UpdateStudentFormSchema.shape.github.nullable(),
+    skills: UpdateStudentFormSchema.shape.skills.nullable().optional(),
     imageFocalPointX: z.number().nullable().optional(),
     imageFocalPointY: z.number().nullable().optional(),
 });

@@ -9,6 +9,7 @@ import {
   UpdateStudentRequestSchema,
 } from "@/features/students/schema/student";
 import type { StudentProfileFormInput } from "@/features/students/schema/student";
+import { changedFields } from "@/shared/lib/changed-fields";
 
 export function useStudentProfileController() {
   const router = useRouter();
@@ -102,13 +103,34 @@ export function useStudentProfileController() {
   const onSubmit: SubmitHandler<StudentProfileFormInput> = async (data) => {
     if (!student || !user || student.student.classBookID === null) return;
     try {
+      const initialValues: StudentProfileFormInput = {
+        github: student.student.github ?? "",
+        linkedin: student.student.linkedin ?? "",
+        facebook: student.student.facebook ?? "",
+        instagram: student.student.instagram ?? "",
+        skills: student.student.skills,
+      };
+      const changed = changedFields(data, initialValues);
       const request = UpdateStudentRequestSchema.parse({
-        ...data,
-        classBookID: student.student.classBookID,
-        imageFile: selectedFile,
-        imageFocalPointX: focalPoint?.x,
-        imageFocalPointY: focalPoint?.y,
+        ...changed,
+        ...(changed.facebook !== undefined && { facebook: changed.facebook || null }),
+        ...(changed.linkedin !== undefined && { linkedin: changed.linkedin || null }),
+        ...(changed.instagram !== undefined && { instagram: changed.instagram || null }),
+        ...(changed.github !== undefined && { github: changed.github || null }),
+        ...(changed.skills !== undefined && {
+          skills: changed.skills.length > 0 ? changed.skills : null,
+        }),
+        ...(selectedFile && { imageFile: selectedFile }),
+        ...(selectedFile && focalPoint &&
+          focalPoint.x !== student.imageFocalPointX && {
+          imageFocalPointX: focalPoint.x,
+        }),
+        ...(selectedFile && focalPoint &&
+          focalPoint.y !== student.imageFocalPointY && {
+          imageFocalPointY: focalPoint.y,
+        }),
       });
+      if (Object.keys(request).length === 0) return;
       await updateStudent.mutateAsync({
         id: student.id,
         data: request,

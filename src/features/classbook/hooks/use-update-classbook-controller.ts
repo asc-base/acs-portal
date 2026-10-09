@@ -9,6 +9,8 @@ import {
 import { useUpdateClassBook } from "@/features/classbook/client";
 import { useCurriculums } from "@/features/curriculum/client";
 import type { ConfirmModalProps } from "@/shared/components/modal/confirmModal";
+import { UpdateClassbookDataSchema } from "@/features/classbook/schema/classbook";
+import { changedFields } from "@/shared/lib/changed-fields";
 
 export function useUpdateClassbookController(classBook: IClassBook) {
   const updateClassBook = useUpdateClassBook();
@@ -24,15 +26,16 @@ export function useUpdateClassbookController(classBook: IClassBook) {
     null,
   );
   const [isError, setIsError] = useState(false);
+  const defaultValues: UpdateClassbookInputs = {
+    classof: classBook.classof.toString(),
+    firstYearAcademic: classBook.firstYearAcademic ?? "",
+    curriculumID: classBook.curriculumID ?? 0,
+    imageFocalPointX: classBook.imageFocalPointX ?? undefined,
+    imageFocalPointY: classBook.imageFocalPointY ?? undefined,
+  };
   const form = useForm<UpdateClassbookInputs>({
     resolver: zodResolver(updateClassBookSchema),
-    defaultValues: {
-      classof: classBook.classof.toString() ?? "",
-      firstYearAcademic: classBook.firstYearAcademic ?? "",
-      curriculumID: classBook.curriculumID ?? 0,
-      imageFocalPointX: classBook.imageFocalPointX ?? undefined,
-      imageFocalPointY: classBook.imageFocalPointY ?? undefined,
-    },
+    defaultValues,
     mode: "onBlur",
     reValidateMode: "onChange",
   });
@@ -85,12 +88,15 @@ export function useUpdateClassbookController(classBook: IClassBook) {
   };
 
   const onSubmit: SubmitHandler<UpdateClassbookInputs> = async (data) => {
-    if (!form.formState.isDirty && !selectedFile) return;
+    const changed = UpdateClassbookDataSchema.parse(
+      changedFields(data, defaultValues),
+    );
+    if (Object.keys(changed).length === 0 && !selectedFile) return;
     setIsError(false);
     try {
       await updateClassBook.mutateAsync({
         id: classBook.id,
-        data,
+        data: changed,
         thumbnailFile: selectedFile,
       });
       setConfirmModal({

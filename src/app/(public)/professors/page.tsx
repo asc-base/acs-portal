@@ -9,8 +9,8 @@ export const revalidate = 0;
 
 interface PageProps {
   searchParams: Promise<{
-    page?: number;
-    pageSize?: number;
+    page?: string;
+    pageSize?: string;
     academicPosition?: string;
   }>;
 }

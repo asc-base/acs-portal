@@ -128,7 +128,36 @@ describe("professor form controllers", () => {
       imageFocalPointY: "0.9",
       imageFile: image,
     });
+    expect(body.has("phone")).toBe(false);
+    expect(body.has("email")).toBe(false);
+    expect(body.has("id")).toBe(false);
     expect(result.current.isEdit).toBe(false);
     expect(result.current.confirmModal?.type).toBe("success");
+  });
+
+  it("sends an empty education list when every education is removed", async () => {
+    const fetch = vi.spyOn(globalThis, "fetch").mockResolvedValue(response());
+    const { result } = renderHook(() => useUpdateProfessorForm(professor), {
+      wrapper,
+    });
+    await waitFor(() => expect(result.current.educationFields).toHaveLength(1));
+
+    act(() => result.current.removeEducation(0));
+    await act(async () => result.current.submit(submitEvent()));
+
+    const body = fetch.mock.calls[0]?.[1]?.body as FormData;
+    expect(body.get("educations")).toBe("");
+    expect(body.has("phone")).toBe(false);
+  });
+
+  it("does not issue a request when the professor form is unchanged", async () => {
+    const fetch = vi.spyOn(globalThis, "fetch").mockResolvedValue(response());
+    const { result } = renderHook(() => useUpdateProfessorForm(professor), {
+      wrapper,
+    });
+
+    await act(async () => result.current.submit(submitEvent()));
+
+    expect(fetch).not.toHaveBeenCalled();
   });
 });

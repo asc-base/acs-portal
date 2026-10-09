@@ -7,8 +7,8 @@ export const dynamic = "force-dynamic";
 
 interface PageProps {
   searchParams: Promise<{
-    page?: number;
-    pageSize?: number;
+    page?: string;
+    pageSize?: string;
     search?: string;
     searchBy?: string;
   }>;

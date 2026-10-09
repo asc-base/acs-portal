@@ -130,10 +130,11 @@ describe("course form controllers", () => {
 
     const updateCall = fetch.mock.calls.find(([, init]) => init?.method === "PATCH");
     expect(JSON.parse(updateCall?.[1]?.body as string)).toMatchObject({
-      curriculumID: 2,
       newPrecourseId: [5],
       deletePrecourseId: [4],
     });
+    expect(JSON.parse(updateCall?.[1]?.body as string)).not.toHaveProperty("courseCode");
+    expect(JSON.parse(updateCall?.[1]?.body as string)).not.toHaveProperty("curriculumID");
     expect(JSON.parse(updateCall?.[1]?.body as string)).not.toHaveProperty("preCoursesID");
     act(() => queryClient.clear());
   });

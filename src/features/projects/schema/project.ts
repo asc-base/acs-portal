@@ -171,7 +171,6 @@ export function projectFormToUpdateRequest(
     githubURL: data.githubURL,
     documentURL: data.documentURL,
     presentationURL: data.presentationURL,
-    figmaURL: null,
     techStacks: data.techStacks.map(({ value }) => value).filter(Boolean),
     newtagsID: tags.filter((id) => !oldTags.includes(id)),
     deletedtagsID: oldTags.filter((id) => !tags.includes(id)),

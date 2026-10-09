@@ -13,6 +13,7 @@ import {
 } from "@/features/news/schema/news";
 import { useNewsById, useUpdateNews } from "@/features/news/client";
 import type { ConfirmModalProps } from "@/shared/components/modal/confirmModal";
+import { changedFields } from "@/shared/lib/changed-fields";
 
 type NewsAsset = { key: string; source: string | File; id?: number };
 
@@ -107,6 +108,7 @@ export function useUpdateNewsForm(news: INews) {
 
   const submit = handleSubmit(async (data) => {
     if (!isEdit) return;
+    const changed = changedFields(data, formValues(savedNews));
     const newAdditionalImages = selectedAssets.flatMap((asset) =>
       asset.source instanceof File ? [asset.source] : [],
     );
@@ -125,31 +127,43 @@ export function useUpdateNewsForm(news: INews) {
         )
       : undefined;
 
-    if (!isDirty && !assetsChanged) {
+    if (Object.keys(changed).length === 0 && !assetsChanged) {
       resetEditing();
       return;
     }
 
     const payload: UpdateNewsPayload = {
-      title: data.title,
-      tagID: data.tag,
-      detail: data.detail,
-      thumbnail: data.thumbnail,
-      cardImage: data.thumbnail instanceof File ? data.thumbnail : undefined,
-      thumbnailImage: data.thumbnailImage instanceof File ? data.thumbnailImage : undefined,
-      newsCategoryId: data.tag,
-      eventStartAt: dayjs(data.startDate).toISOString(),
-      eventEndAt: data.dueDate ? dayjs(data.dueDate).toISOString() : null,
-      startDate: dayjs(data.startDate).toISOString(),
-      dueDate: data.dueDate ? dayjs(data.dueDate).toISOString() : "",
-      thumbnailFocalPointX: data.thumbnailFocalPointX,
-      thumbnailFocalPointY: data.thumbnailFocalPointY,
-      cardFocalPointX: data.cardFocalPointX,
-      cardFocalPointY: data.cardFocalPointY,
-      detailImages: newAdditionalImages,
-      deletedImageIds,
-      detailImageOrder,
-      deletedAdditionalImagesId,
+      ...(changed.title !== undefined && { title: data.title }),
+      ...(changed.tag !== undefined && { newsCategoryId: data.tag }),
+      ...(changed.detail !== undefined && { detail: data.detail }),
+      ...(changed.thumbnail instanceof File && { thumbnail: data.thumbnail }),
+      ...(changed.thumbnailImage instanceof File && {
+        thumbnailImage: data.thumbnailImage,
+      }),
+      ...(changed.startDate !== undefined && {
+        eventStartAt: dayjs(data.startDate).toISOString(),
+      }),
+      ...(changed.dueDate !== undefined && {
+        eventEndAt: data.dueDate ? dayjs(data.dueDate).toISOString() : null,
+      }),
+      ...(changed.thumbnailFocalPointX !== undefined && {
+        thumbnailFocalPointX: data.thumbnailFocalPointX,
+      }),
+      ...(changed.thumbnailFocalPointY !== undefined && {
+        thumbnailFocalPointY: data.thumbnailFocalPointY,
+      }),
+      ...(changed.cardFocalPointX !== undefined && {
+        cardFocalPointX: data.cardFocalPointX,
+      }),
+      ...(changed.cardFocalPointY !== undefined && {
+        cardFocalPointY: data.cardFocalPointY,
+      }),
+      ...(newAdditionalImages.length > 0 && { detailImages: newAdditionalImages }),
+      ...(deletedImageIds.length > 0 && { deletedImageIds }),
+      ...(detailImageOrder && { detailImageOrder }),
+      ...(deletedAdditionalImagesId.length > 0 && {
+        deletedAdditionalImagesId,
+      }),
     };
 
     let response;

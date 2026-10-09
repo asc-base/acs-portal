@@ -12,6 +12,23 @@ import {
 } from "@/features/professors/schema/professor";
 import { useUpdateProfessor } from "@/features/professors/client";
 import type { ConfirmModalProps } from "@/shared/components/modal/confirmModal";
+import { changedFields } from "@/shared/lib/changed-fields";
+
+const formValues = (professor: IProfessor): UpdateProfessorInputs => ({
+  firstNameTh: professor.firstNameTh || "",
+  lastNameTh: professor.lastNameTh || "",
+  firstNameEn: professor.firstNameEn || "",
+  lastNameEn: professor.lastNameEn || "",
+  phone: professor.professor.phone || "",
+  email: professor.email || "",
+  prefixID: professor.prefix?.id || 1,
+  profRoom: professor.professor.profRoom || "",
+  research_profile: professor.professor.research_profile || "",
+  imageFocalPointX: professor.imageFocalPointX ?? undefined,
+  imageFocalPointY: professor.imageFocalPointY ?? undefined,
+  educations: professor.professor.educations.map((value) => ({ value })),
+  expertFields: professor.professor.expertFields.map((value) => ({ value })),
+});
 
 export function useUpdateProfessorForm(professor: IProfessor) {
   const router = useRouter();
@@ -31,35 +48,11 @@ export function useUpdateProfessorForm(professor: IProfessor) {
     formState: { isDirty },
   } = useForm<UpdateProfessorInputs>({
     resolver: zodResolver(UpdateProfessorSchema),
-    defaultValues: {
-      firstNameTh: professor.firstNameTh || "",
-      lastNameTh: professor.lastNameTh || "",
-      firstNameEn: professor.firstNameEn || "",
-      lastNameEn: professor.lastNameEn || "",
-      phone: professor.professor.phone || "",
-      email: professor.email || "",
-      prefixID: professor.prefix?.id || 1,
-      profRoom: professor.professor.profRoom || "",
-      research_profile: professor.professor.research_profile || "",
-      educations: [],
-      expertFields: [],
-    },
+    defaultValues: formValues(professor),
   });
 
   useEffect(() => {
-    reset({
-      firstNameTh: professor.firstNameTh || "",
-      lastNameTh: professor.lastNameTh || "",
-      firstNameEn: professor.firstNameEn || "",
-      lastNameEn: professor.lastNameEn || "",
-      phone: professor.professor.phone || "",
-      email: professor.email || "",
-      prefixID: professor.prefix?.id || 1,
-      profRoom: professor.professor.profRoom || "",
-      research_profile: professor.professor.research_profile || "",
-      educations: professor.professor.educations.map((value) => ({ value })),
-      expertFields: professor.professor.expertFields.map((value) => ({ value })),
-    });
+    reset(formValues(professor));
   }, [professor, reset]);
 
   const {
@@ -74,22 +67,38 @@ export function useUpdateProfessorForm(professor: IProfessor) {
   } = useFieldArray({ control, name: "expertFields" });
 
   const onSubmit = async (data: UpdateProfessorInputs) => {
+    const changed = changedFields(data, formValues(professor));
     const payload = UpdateProfessorPayloadSchema.parse({
-      id: professor.id,
-      prefixID: data.prefixID,
-      profRoom: data.profRoom,
-      research_profile: data.research_profile ?? "",
-      phone: data.phone,
-      firstNameTh: data.firstNameTh,
-      lastNameTh: data.lastNameTh,
-      firstNameEn: data.firstNameEn || null,
-      lastNameEn: data.lastNameEn || null,
-      email: data.email,
-      expertFields: data.expertFields.map((expert) => expert.value).join("/"),
-      educations: data.educations.map((education) => education.value).join("/"),
-      imageFocalPointX: data.imageFocalPointX,
-      imageFocalPointY: data.imageFocalPointY,
+      ...(changed.prefixID !== undefined && { prefixID: changed.prefixID }),
+      ...(changed.profRoom !== undefined && { profRoom: changed.profRoom }),
+      ...(changed.research_profile !== undefined && {
+        research_profile: changed.research_profile || null,
+      }),
+      ...(changed.phone !== undefined && { phone: changed.phone }),
+      ...(changed.firstNameTh !== undefined && { firstNameTh: changed.firstNameTh }),
+      ...(changed.lastNameTh !== undefined && { lastNameTh: changed.lastNameTh }),
+      ...(changed.firstNameEn !== undefined && {
+        firstNameEn: changed.firstNameEn || null,
+      }),
+      ...(changed.lastNameEn !== undefined && {
+        lastNameEn: changed.lastNameEn || null,
+      }),
+      ...(changed.email !== undefined && { email: changed.email }),
+      ...(changed.expertFields !== undefined && {
+        expertFields: changed.expertFields.map(({ value }) => value).join("/"),
+      }),
+      ...(changed.educations !== undefined && {
+        educations: changed.educations.map(({ value }) => value).join("/"),
+      }),
+      ...(changed.imageFocalPointX !== undefined && {
+        imageFocalPointX: changed.imageFocalPointX,
+      }),
+      ...(changed.imageFocalPointY !== undefined && {
+        imageFocalPointY: changed.imageFocalPointY,
+      }),
     });
+
+    if (Object.keys(payload).length === 0 && !selectedFile) return;
     try {
       await mutation.mutateAsync({
         id: professor.id.toString(),

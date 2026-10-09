@@ -10,6 +10,7 @@ import {
   UpdateCourseRequestSchema,
 } from "@/features/courses/schema/course";
 import type { UpdateCourseFormInput } from "@/features/courses/schema/course";
+import { changedFields } from "@/shared/lib/changed-fields";
 
 export function useUpdateCourseController(
   curriculumID: number,
@@ -26,18 +27,19 @@ export function useUpdateCourseController(
   const [confirmModal, setConfirmModal] = useState<ConfirmModalProps | null>(
     null,
   );
+  const defaultValues: UpdateCourseFormInput = {
+    typeCourseID: course.typeCourse.id,
+    courseCode: course.courseCode,
+    credits: course.credits,
+    courseNameEn: course.courseNameEn,
+    courseNameTh: course.courseNameTh,
+    detail: course.detail,
+    preCoursesID: course.prerequisites.map(({ id }) => ({ id })),
+  };
   const form = useForm<UpdateCourseFormInput>({
     resolver: zodResolver(UpdateCourseFormSchema),
     mode: "onChange",
-    defaultValues: {
-      typeCourseID: course.typeCourse.id,
-      courseCode: course.courseCode,
-      credits: course.credits,
-      courseNameEn: course.courseNameEn,
-      courseNameTh: course.courseNameTh,
-      detail: course.detail,
-      preCoursesID: course.prerequisites.map(({ id }) => ({ id })),
-    },
+    defaultValues,
   });
   const { fields, append, remove } = useFieldArray({
     control: form.control,
@@ -65,25 +67,30 @@ export function useUpdateCourseController(
   const onSubmit: SubmitHandler<UpdateCourseFormInput> = async (data) => {
     setIsError(false);
     try {
+      const changed = changedFields(data, defaultValues);
       const oldPrecourseIds = course.prerequisites.map(({ id }) => id);
       const currentPrecourseIds = (data.preCoursesID ?? [])
         .map(({ id }) => id)
         .filter((id): id is number => id !== undefined && id !== 0);
+      const newPrecourseId = currentPrecourseIds.filter(
+        (id) => !oldPrecourseIds.includes(id),
+      );
+      const deletePrecourseId = oldPrecourseIds.filter(
+        (id) => !currentPrecourseIds.includes(id),
+      );
       const request = UpdateCourseRequestSchema.parse({
-        courseCode: data.courseCode,
-        typeCourseID: Number(data.typeCourseID),
-        courseNameTh: data.courseNameTh,
-        courseNameEn: data.courseNameEn,
-        credits: data.credits,
-        detail: data.detail,
-        newPrecourseId: currentPrecourseIds.filter(
-          (id) => !oldPrecourseIds.includes(id),
-        ),
-        deletePrecourseId: oldPrecourseIds.filter(
-          (id) => !currentPrecourseIds.includes(id),
-        ),
-        curriculumID,
+        ...(changed.courseCode !== undefined && { courseCode: changed.courseCode }),
+        ...(changed.typeCourseID !== undefined && {
+          typeCourseID: Number(changed.typeCourseID),
+        }),
+        ...(changed.courseNameTh !== undefined && { courseNameTh: changed.courseNameTh }),
+        ...(changed.courseNameEn !== undefined && { courseNameEn: changed.courseNameEn }),
+        ...(changed.credits !== undefined && { credits: changed.credits }),
+        ...(changed.detail !== undefined && { detail: changed.detail }),
+        ...(newPrecourseId.length > 0 && { newPrecourseId }),
+        ...(deletePrecourseId.length > 0 && { deletePrecourseId }),
       });
+      if (Object.keys(request).length === 0) return;
       await updateCourse.mutateAsync({ id: course.id, data: request });
       setConfirmModal({
         isOpen: true,

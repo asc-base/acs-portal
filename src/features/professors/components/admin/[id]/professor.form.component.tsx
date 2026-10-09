@@ -88,6 +88,7 @@ const ProfessorFormComponent = ({ professor, prefixes }: ProfessorFormComponentP
                   alt="Preview"
                   width={384}
                   height={192}
+                  loading="eager"
                   style={{ objectFit: "cover" }}
                   className="h-full w-full rounded-xl object-cover"
                 />
