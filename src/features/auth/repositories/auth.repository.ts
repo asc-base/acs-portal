@@ -49,7 +49,7 @@ export class AuthRepository implements IAuthRepository {
     payload: ForgetPasswordPayload,
   ): Promise<ApiResponse<ForgetPasswordResponse>> {
     const response = await this.http.post<ApiResponse<ForgetPasswordResponse>>(
-      `/v1/auth/forget-password`,
+      `/v1/auth/credentials`,
       payload,
     );
     response.data = ForgetPasswordResponseSchema.parse(response.data);
@@ -60,8 +60,8 @@ export class AuthRepository implements IAuthRepository {
     payload: ResetPasswordPayload,
   ): Promise<ApiResponse<ForgetPasswordResponse>> {
     const response = await this.http.post<ApiResponse<ForgetPasswordResponse>>(
-      `/v1/auth/reset-password`,
-      payload,
+      `/v1/auth/reset-password/${encodeURIComponent(payload.token)}`,
+      { newPassword: payload.newPassword },
     );
     response.data = ForgetPasswordResponseSchema.parse(response.data);
     return response;

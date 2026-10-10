@@ -6,18 +6,24 @@ export const revalidate = 0;
 
 interface PageProps {
   searchParams: Promise<{
-    referenceCode: string;
+    token?: string | string[];
+    error?: string | string[];
   }>;
 }
 
 const Page = async function name({ searchParams }: PageProps) {
   const resolvedSearchParams = await searchParams;
 
-  const referenceCode = resolvedSearchParams.referenceCode;
+  const token = resolvedSearchParams.token;
+  const hasError = resolvedSearchParams.error !== undefined;
+  const validToken =
+    !hasError && typeof token === "string" && token.trim().length > 0
+      ? token
+      : null;
 
   return (
     <div className="w-full">
-      <ResetPasswordAuthLandingPage referenceCode={referenceCode} />
+      <ResetPasswordAuthLandingPage token={validToken} />
     </div>
   );
 };

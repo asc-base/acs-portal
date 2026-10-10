@@ -59,21 +59,23 @@ describe("auth schemas", () => {
     expect(() => LoginRequestSchema.parse({ email: user.email })).toThrow();
   });
 
-  it("validates auth response and request payloads with the existing endpoint spelling", () => {
+  it("validates auth response and reset request payloads", () => {
     const tokens = { accessToken: "access", refreshToken: "refresh" };
     expect(AuthTokensSchema.parse(tokens)).toEqual(tokens);
     expect(ForgetPasswordRequestSchema.parse({ email: user.email })).toEqual({
       email: user.email,
     });
     expect(ForgetPasswordResponseSchema.parse(null)).toBeNull();
-    expect(ResetPasswordRequestSchema.parse({
-      refferenceCode: "reference",
-      password: "secret",
-    })).toEqual({ refferenceCode: "reference", password: "secret" });
+    expect(
+      ResetPasswordRequestSchema.parse({
+        token: "reset-token",
+        newPassword: "secret",
+      }),
+    ).toEqual({ token: "reset-token", newPassword: "secret" });
     expect(
       ResetPasswordRequestSchema.safeParse({
-        referenceCode: "reference",
-        password: "secret",
+        token: "",
+        newPassword: "secret",
       }).success,
     ).toBe(false);
   });
@@ -144,7 +146,7 @@ describe("auth schemas", () => {
       service.createCredentailForgetPassowrd({ email: "invalid" }),
     ).rejects.toThrow();
     await expect(
-      service.resetPassword({ refferenceCode: "reference", password: "short" }),
+      service.resetPassword({ token: "reference", newPassword: "short" }),
     ).rejects.toThrow();
     expect(repository.Login).not.toHaveBeenCalled();
     expect(repository.createCredentailForgetPassowrd).not.toHaveBeenCalled();
@@ -214,7 +216,7 @@ describe("AuthService", () => {
     expect(repository.createCredentailForgetPassowrd).toHaveBeenCalledWith({
       email: user.email,
     });
-    const reset = { refferenceCode: "reference", password: "secret" };
+    const reset = { token: "reset-token", newPassword: "secret" };
     await expect(service.resetPassword(reset)).resolves.toBe(response);
     expect(repository.resetPassword).toHaveBeenCalledWith(reset);
   });
@@ -233,7 +235,7 @@ describe("AuthService", () => {
 
 describe("AuthRepository", () => {
   it("uses the existing auth endpoints, payloads and explicit token header", async () => {
-    const response = { data: { message: "ok" } };
+    const response = { data: null, status: 200, statusCode: 200 };
     const profileResponse = { data: user };
     const tokensResponse = {
       data: { accessToken: "access", refreshToken: "refresh" },
@@ -253,16 +255,15 @@ describe("AuthRepository", () => {
     await expect(repository.Login(credentials)).resolves.toBe(tokensResponse);
     expect(post).toHaveBeenLastCalledWith("/v1/auth/login", credentials);
     await repository.createCredentailForgetPassowrd({ email: user.email });
-    expect(post).toHaveBeenLastCalledWith("/v1/auth/forget-password", {
+    expect(post).toHaveBeenLastCalledWith("/v1/auth/credentials", {
       email: user.email,
     });
     await repository.resetPassword({
-      refferenceCode: "reference",
-      password: "secret",
+      token: "reset/token",
+      newPassword: "secret",
     });
-    expect(post).toHaveBeenLastCalledWith("/v1/auth/reset-password", {
-      refferenceCode: "reference",
-      password: "secret",
+    expect(post).toHaveBeenLastCalledWith("/v1/auth/reset-password/reset%2Ftoken", {
+      newPassword: "secret",
     });
     await expect(repository.Logout()).resolves.toBeUndefined();
     expect(post).toHaveBeenLastCalledWith("/v1/auth/logout");

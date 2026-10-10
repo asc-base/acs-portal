@@ -2,26 +2,53 @@
 
 import { useState } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { Button, Typography, IconButton, InputAdornment } from "@mui/material";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
 import { RHFTextField } from "@/shared/components/form/RHFTextField";
 import { useResetPasswordForm } from "@/features/auth/hooks/useResetPasswordForm";
 
 interface ResetPasswordAuthLandingPageProps {
-  referenceCode: string;
+  token: string | null;
 }
 
 export default function ResetPasswordAuthLandingPage({
-  referenceCode,
+  token,
 }: ResetPasswordAuthLandingPageProps) {
+  if (!token) {
+    return (
+      <main className="flex min-h-screen w-full items-center justify-center bg-[var(--background)] px-4">
+        <div className="w-full max-w-[680px] p-8 text-center">
+          <Typography
+            variant="h5"
+            className="font-semibold text-[var(--color-primary01)]"
+          >
+            ลิงก์ตั้งรหัสผ่านใช้ไม่ได้หรือหมดอายุแล้ว
+          </Typography>
+          <Link
+            className="mt-6 inline-block text-[var(--color-primary02)] underline"
+            href="/auth/forget-password"
+          >
+            ขอลิงก์ตั้งรหัสผ่านใหม่
+          </Link>
+        </div>
+      </main>
+    );
+  }
+
+  return <ResetPasswordForm token={token} />;
+}
+
+function ResetPasswordForm({ token }: { token: string }) {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const {
     control,
     errors,
+    errorMessage,
     isPending,
     submit,
-  } = useResetPasswordForm(referenceCode);
+  } = useResetPasswordForm(token);
 
   return (
     <main className="min-h-screen w-full bg-[var(--background)]">
@@ -116,6 +143,14 @@ export default function ResetPasswordAuthLandingPage({
                 เปลี่ยนรหัสผ่าน
               </Button>
             </div>
+            {errorMessage ? (
+              <p
+                role="alert"
+                className="rounded-xl bg-red-50 p-3 text-sm text-red-800"
+              >
+                {errorMessage}
+              </p>
+            ) : null}
           </form>
         </div>
       </div>

@@ -166,7 +166,7 @@ describe("auth client hooks", () => {
 
     await act(async () => {
       await expect(
-        result.current.mutateAsync({ refferenceCode: "ref", password: "secret1" }),
+        result.current.mutateAsync({ token: "ref", newPassword: "secret1" }),
       ).rejects.toThrow();
     });
 

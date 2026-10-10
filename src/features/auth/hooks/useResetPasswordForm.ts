@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
@@ -7,8 +8,9 @@ import { z } from "zod";
 import { useResetPassword } from "@/features/auth/client";
 import { ResetPasswordSchema } from "@/features/auth/schema/auth";
 
-export function useResetPasswordForm(referenceCode: string) {
+export function useResetPasswordForm(token: string) {
   const router = useRouter();
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const { mutateAsync, isPending } = useResetPassword();
   const form = useForm<
     z.input<typeof ResetPasswordSchema>,
@@ -21,19 +23,17 @@ export function useResetPasswordForm(referenceCode: string) {
   });
 
   const submit = form.handleSubmit(async (data) => {
+    setErrorMessage(null);
     try {
-      await mutateAsync({ refferenceCode: referenceCode, password: data.password });
+      await mutateAsync({ token, newPassword: data.password });
       alert("เปลี่ยนรหัสผ่านสำเร็จ");
       form.reset();
-      router.push("/auth/login");
+      router.replace("/auth/student");
     } catch {
-      form.setError("password", {
-        type: "manual",
-        message: "เกิดข้อผิดพลาด กรุณาลองใหม่",
-      });
+      setErrorMessage("เปลี่ยนรหัสผ่านไม่สำเร็จ กรุณาลองใหม่หรือขอลิงก์ใหม่");
     }
   });
 
   const { errors } = form.formState;
-  return { ...form, errors, isPending, submit };
+  return { ...form, errors, errorMessage, isPending, submit };
 }

@@ -41,6 +41,6 @@ export const ResetPasswordSchema = z
   });
 
 export const ResetPasswordRequestSchema = z.object({
-  refferenceCode: z.string(),
-  password: z.string().min(6, "รหัสผ่านอย่างน้อย 6 ตัวอักษร"),
+  token: z.string().min(1),
+  newPassword: z.string().min(6, "รหัสผ่านอย่างน้อย 6 ตัวอักษร"),
 });
