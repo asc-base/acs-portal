@@ -2,6 +2,7 @@ import z from "zod";
 import { CommonUserSchema, CommonFocalPointSchema } from "@/shared/schema/user";
 import { ProfessorResponseSchema } from "@/shared/schema/profile-response";
 import { PageMetadataSchema } from "@/shared/schema/page-metadata";
+import { ProfessorPersonnelTypeSchema } from "@/shared/schema/professor-personnel";
 
 const researchProfileURL = z
   .string()
@@ -18,6 +19,7 @@ const researchProfileURL = z
   }, "กรุณากรอก URL แบบเต็มที่ขึ้นต้นด้วย http:// หรือ https://");
 
 export const CommonProfessorSchema = z.object({
+  personnelType: ProfessorPersonnelTypeSchema.optional(),
   phone: z.string().trim().regex(/^0[0-9]{8,9}$/, "เบอร์โทรต้องเป็นตัวเลข 9-10 หลัก และขึ้นต้นด้วย 0"),
   profRoom: z.string().trim().min(1, "กรุณากรอกชื่อห้อง"),
   research_profile: researchProfileURL.optional(),
@@ -35,6 +37,7 @@ export const CreateProfessorSchema = ProfessorFormSchema;
 export const UpdateProfessorSchema = ProfessorFormSchema;
 
 export const CreateProfessorPayloadSchema = z.object({
+  personnelType: ProfessorPersonnelTypeSchema.optional(),
   prefixID: z.number(),
   educations: z.string().optional(),
   email: z.string(),
@@ -51,6 +54,7 @@ export const CreateProfessorPayloadSchema = z.object({
 });
 
 export const UpdateProfessorPayloadSchema = z.object({
+  personnelType: ProfessorPersonnelTypeSchema.optional(),
   prefixID: z.number(),
   profRoom: z.string(),
   phone: z.string(),
@@ -71,6 +75,7 @@ const queryNumber = z
   .pipe(z.number());
 
 export const ProfessorQuerySchema = z.object({
+  personnelGroup: z.enum(["academic", "staff"]).optional(),
   page: queryNumber.optional(),
   pageSize: queryNumber.optional(),
   educations: z.string().optional(),

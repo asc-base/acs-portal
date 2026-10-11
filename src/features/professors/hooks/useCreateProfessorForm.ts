@@ -26,6 +26,7 @@ export function useCreateProfessorForm() {
   } = useForm<CreateProfessorInputs>({
     resolver: zodResolver(CreateProfessorSchema),
     defaultValues: {
+      personnelType: "LECTURER",
       prefixID: null,
       educations: [],
       email: "",
@@ -52,6 +53,7 @@ export function useCreateProfessorForm() {
 
   const onSubmit = async (data: CreateProfessorInputs) => {
     const payload = CreateProfessorPayloadSchema.parse({
+      personnelType: data.personnelType,
       prefixID: data.prefixID,
       firstNameTh: data.firstNameTh,
       lastNameTh: data.lastNameTh,

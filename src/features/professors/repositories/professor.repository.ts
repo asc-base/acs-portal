@@ -20,6 +20,7 @@ export class ProfessorRepository implements IProfessorRepository {
     const {
       page,
       pageSize,
+      personnelGroup,
       educations,
       expertFields,
       majorPosition,
@@ -29,6 +30,7 @@ export class ProfessorRepository implements IProfessorRepository {
     } = query;
 
     const params = new URLSearchParams();
+    if (personnelGroup) params.append("personnelGroup", personnelGroup);
     if (page !== undefined) params.append("page", page.toString());
     if (pageSize !== undefined) params.append("pageSize", pageSize.toString());
 

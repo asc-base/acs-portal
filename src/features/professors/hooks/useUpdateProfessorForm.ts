@@ -15,6 +15,7 @@ import type { ConfirmModalProps } from "@/shared/components/modal/confirmModal";
 import { changedFields } from "@/shared/lib/changed-fields";
 
 const formValues = (professor: IProfessor): UpdateProfessorInputs => ({
+  personnelType: professor.professor.personnelType ?? "LECTURER",
   firstNameTh: professor.firstNameTh || "",
   lastNameTh: professor.lastNameTh || "",
   firstNameEn: professor.firstNameEn || "",
@@ -69,6 +70,7 @@ export function useUpdateProfessorForm(professor: IProfessor) {
   const onSubmit = async (data: UpdateProfessorInputs) => {
     const changed = changedFields(data, formValues(professor));
     const payload = UpdateProfessorPayloadSchema.parse({
+      ...(changed.personnelType !== undefined && { personnelType: changed.personnelType }),
       ...(changed.prefixID !== undefined && { prefixID: changed.prefixID }),
       ...(changed.profRoom !== undefined && { profRoom: changed.profRoom }),
       ...(changed.research_profile !== undefined && {

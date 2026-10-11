@@ -51,6 +51,7 @@ export class ProfessorService {
     const payload = CreateProfessorPayloadSchema.parse(data);
     const formData = new FormData();
     Object.entries(payload).forEach(([key, value]) => {
+      if (value === undefined) return;
       formData.append(key, value?.toString() ?? "");
     });
     if (imageFile) {

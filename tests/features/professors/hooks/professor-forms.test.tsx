@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { useCreateProfessorForm } from "@/features/professors/hooks/useCreateProfessorForm";
 import { useUpdateProfessorForm } from "@/features/professors/hooks/useUpdateProfessorForm";
+import { useController } from "react-hook-form";
 
 const router = vi.hoisted(() => ({ push: vi.fn(), refresh: vi.fn() }));
 vi.mock("next/navigation", () => ({ useRouter: () => router }));
@@ -58,6 +59,19 @@ function response() {
 }
 
 describe("professor form controllers", () => {
+  it("updates only personnel type when changing a legacy professor to a curriculum head", async () => {
+    const fetch = vi.spyOn(globalThis, "fetch").mockResolvedValue(response());
+    const { result } = renderHook(() => {
+      const form = useUpdateProfessorForm(professor);
+      const personnel = useController({ control: form.control, name: "personnelType" });
+      return { form, personnel };
+    }, { wrapper });
+    await act(async () => result.current.personnel.field.onChange("CURRICULUM_HEAD"));
+    await act(async () => result.current.form.submit(submitEvent()));
+    const body = fetch.mock.calls[0]?.[1]?.body as FormData;
+    expect(Object.fromEntries(body.entries())).toEqual({ personnelType: "CURRICULUM_HEAD" });
+  });
+
   it("maps create field arrays, crop points, and the image into the multipart request", async () => {
     const fetch = vi.spyOn(globalThis, "fetch").mockResolvedValue(response());
     const { result } = renderHook(() => useCreateProfessorForm(), { wrapper });
@@ -72,6 +86,7 @@ describe("professor form controllers", () => {
       result.current.setValue("email", "somchai@example.test");
       result.current.setValue("phone", "0812345678");
       result.current.setValue("profRoom", "A201");
+      result.current.setValue("personnelType", "CURRICULUM_STAFF");
       result.current.appendEducation({ value: "B.Sc." });
       result.current.appendEducation({ value: "PhD" });
       result.current.appendExpert({ value: "Systems" });
@@ -88,6 +103,7 @@ describe("professor form controllers", () => {
     );
     expect(Object.fromEntries(body.entries())).toMatchObject({
       prefixID: "2",
+      personnelType: "CURRICULUM_STAFF",
       educations: "B.Sc./PhD",
       expertFields: "Systems/AI",
       firstNameEn: "",

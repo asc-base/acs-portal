@@ -9,6 +9,7 @@ import Snackbar from "@mui/material/Snackbar";
 import Image from "next/image";
 import { RHFTextField } from "@/shared/components/form/RHFTextField";
 import { RHFSelect } from "@/shared/components/form/RHFSelect";
+import { professorPersonnelLabels } from "@/shared/schema/professor-personnel";
 import { ConfirmModal } from "@/shared/components/modal/confirmModal";
 import AddCircleOutlineRoundedIcon from "@mui/icons-material/AddCircleOutlineRounded";
 import { CropImageCard } from "@/shared/components/cropimagecard";
@@ -272,7 +273,18 @@ export const FormProfesssors: FC = () => {
                 requiredMark
               />
             </div>
-            <div className="flex-4" />
+            <div className="flex-4">
+              <RHFSelect
+                control={control}
+                name="personnelType"
+                label="ประเภทบุคลากร"
+                inputProps={{ "aria-label": "ประเภทบุคลากร" }}
+              >
+                {Object.entries(professorPersonnelLabels).map(([value, label]) => (
+                  <MenuItem key={value} value={value}>{label}</MenuItem>
+                ))}
+              </RHFSelect>
+            </div>
           </div>
           <div className="flex flex-row gap-x-4">
             <div className="flex-4">

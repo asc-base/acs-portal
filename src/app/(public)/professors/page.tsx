@@ -11,7 +11,7 @@ interface PageProps {
   searchParams: Promise<{
     page?: string;
     pageSize?: string;
-    academicPosition?: string;
+    staffPage?: string;
   }>;
 }
 
@@ -20,18 +20,23 @@ const page = async ({ searchParams }: PageProps) => {
 
   const resolvedSearchParams = await searchParams;
 
-  const { rows, pageSize, page, totalRecords } = await professorService.getProfessors({
-    page: resolvedSearchParams.page || 1,
-    pageSize: resolvedSearchParams.pageSize || 12,
-    academicPosition: "true"
-  });
+  const [academics, staff] = await Promise.all([
+    professorService.getProfessors({
+      page: resolvedSearchParams.page || 1,
+      pageSize: resolvedSearchParams.pageSize || 12,
+      personnelGroup: "academic",
+    }),
+    professorService.getProfessors({
+      page: resolvedSearchParams.staffPage || 1,
+      pageSize: resolvedSearchParams.pageSize || 12,
+      personnelGroup: "staff",
+    }),
+  ]);
 
   return (
     <ProfessorsListComponent
-      professors={rows}
-      pageSize={pageSize}
-      page={page}
-      totalRecords={totalRecords}
+      academics={academics}
+      staff={staff}
     />
   );
 };

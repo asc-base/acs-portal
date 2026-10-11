@@ -10,6 +10,7 @@ import MenuItem from "@mui/material/MenuItem";
 import { RHFTextField } from "@/shared/components/form/RHFTextField";
 import { CropImageCard } from "@/shared/components/cropimagecard";
 import { RHFSelect } from "@/shared/components/form/RHFSelect";
+import { professorPersonnelLabels } from "@/shared/schema/professor-personnel";
 import AddCircleOutlineRoundedIcon from "@mui/icons-material/AddCircleOutlineRounded";
 import IconButton from "@mui/material/IconButton";
 import { ConfirmModal } from "@/shared/components/modal/confirmModal";
@@ -288,7 +289,19 @@ const ProfessorFormComponent = ({ professor, prefixes }: ProfessorFormComponentP
                 disabled={!isEdit}
               />
             </div>
-            <div className="flex-4" />
+            <div className="flex-4">
+              <RHFSelect
+                control={control}
+                name="personnelType"
+                label="ประเภทบุคลากร"
+                inputProps={{ "aria-label": "ประเภทบุคลากร" }}
+                disabled={!isEdit}
+              >
+                {Object.entries(professorPersonnelLabels).map(([value, label]) => (
+                  <MenuItem key={value} value={value}>{label}</MenuItem>
+                ))}
+              </RHFSelect>
+            </div>
           </div>
           <div className="flex flex-row gap-x-4">
             <div className="flex-4">

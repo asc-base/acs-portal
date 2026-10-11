@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { RoleSchema } from "@/shared/schema/references";
+import { ProfessorPersonnelTypeSchema } from "@/shared/schema/professor-personnel";
 
 export const UserPrefixSchema = z.object({
   id: z.number(),
@@ -43,6 +44,7 @@ export const StudentResponseSchema = UserResponseSchema.extend({
 
 export const ProfessorResponseSchema = UserResponseSchema.extend({
   professor: z.object({
+    personnelType: ProfessorPersonnelTypeSchema.nullable().optional(),
     id: z.number(),
     profRoom: z.string(),
     phone: z.string(),

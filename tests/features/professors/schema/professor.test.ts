@@ -23,6 +23,16 @@ describe.each([
   ["create", CreateProfessorSchema],
   ["update", UpdateProfessorSchema],
 ])("%s professor schema", (_name, schema) => {
+  it.each([undefined, "CURRICULUM_HEAD", "LECTURER", "CURRICULUM_STAFF"])(
+    "accepts optional personnel type %s", (personnelType) => {
+      expect(schema.safeParse({ ...validProfessor, personnelType }).success).toBe(true);
+    },
+  );
+
+  it("rejects an unknown personnel type", () => {
+    expect(schema.safeParse({ ...validProfessor, personnelType: "ADMIN" }).success).toBe(false);
+  });
+
   it("requires a prefix, education and expert field", () => {
     expect(schema.safeParse(validProfessor).success).toBe(true);
     expect(schema.safeParse({ ...validProfessor, prefixID: null }).success).toBe(

@@ -29,6 +29,11 @@ export const ProfessorCard: FC<IProfessor> = (props) => {
           {props.prefix?.shortNameEn} {props.firstNameEn}{" "}
           {props.lastNameEn}
         </Typography>
+        {props.professor.personnelType === "CURRICULUM_HEAD" && (
+          <Typography className="!text-accent04 !font-bold">
+            หัวหน้าหลักสูตร
+          </Typography>
+        )}
       </CardContent>
     </div>
   );

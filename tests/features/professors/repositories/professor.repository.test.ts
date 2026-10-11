@@ -23,6 +23,18 @@ const response = { data: professor, status: 200, statusCode: 200 };
 afterEach(() => vi.restoreAllMocks());
 
 describe("professor profile response parsing", () => {
+  it("forwards the personnel group and retains the optional response type", async () => {
+    const http = new HttpHelper("https://example.test");
+    const row = { ...professor, professor: { ...professor.professor, personnelType: "CURRICULUM_STAFF" } };
+    const get = vi.spyOn(http, "get").mockResolvedValue({
+      data: { rows: [row], totalRecords: 1, page: 1, pageSize: 12 }, status: 200,
+    });
+    const repository = new ProfessorRepository("https://example.test", http);
+    const result = await repository.getProfessors({ personnelGroup: "staff", page: 1, pageSize: 12 });
+    expect(get).toHaveBeenCalledWith("/v1/professors?personnelGroup=staff&page=1&pageSize=12");
+    expect(result.data.rows[0].professor.personnelType).toBe("CURRICULUM_STAFF");
+  });
+
   it("parses the user-root response with nested professor fields", async () => {
     const http = new HttpHelper("https://example.test");
     const get = vi.spyOn(http, "get").mockResolvedValue(response);
