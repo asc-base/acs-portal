@@ -76,6 +76,8 @@ const queryNumber = z
 
 export const ProfessorQuerySchema = z.object({
   personnelGroup: z.enum(["academic", "staff"]).optional(),
+  orderBy: z.string().optional(),
+  sortBy: z.enum(["asc", "desc"]).optional(),
   page: queryNumber.optional(),
   pageSize: queryNumber.optional(),
   educations: z.string().optional(),

@@ -35,6 +35,24 @@ describe("professor profile response parsing", () => {
     expect(result.data.rows[0].professor.personnelType).toBe("CURRICULUM_STAFF");
   });
 
+  it("serializes professor display name sort in the list query", async () => {
+    const http = new HttpHelper("https://example.test");
+    const get = vi.spyOn(http, "get").mockResolvedValue({
+      data: { rows: [professor], totalRecords: 1, page: 1, pageSize: 12 },
+      status: 200,
+    });
+    await new ProfessorRepository("https://example.test", http).getProfessors({
+      personnelGroup: "academic",
+      orderBy: "displayNameTh",
+      sortBy: "asc",
+      page: 1,
+      pageSize: 12,
+    });
+    expect(get).toHaveBeenCalledWith(
+      "/v1/professors?personnelGroup=academic&orderBy=displayNameTh&sortBy=asc&page=1&pageSize=12",
+    );
+  });
+
   it("parses the user-root response with nested professor fields", async () => {
     const http = new HttpHelper("https://example.test");
     const get = vi.spyOn(http, "get").mockResolvedValue(response);

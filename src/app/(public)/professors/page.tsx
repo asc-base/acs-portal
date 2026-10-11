@@ -25,11 +25,15 @@ const page = async ({ searchParams }: PageProps) => {
       page: resolvedSearchParams.page || 1,
       pageSize: resolvedSearchParams.pageSize || 12,
       personnelGroup: "academic",
+      orderBy: "displayNameTh",
+      sortBy: "asc",
     }),
     professorService.getProfessors({
       page: resolvedSearchParams.staffPage || 1,
       pageSize: resolvedSearchParams.pageSize || 12,
       personnelGroup: "staff",
+      orderBy: "displayNameTh",
+      sortBy: "asc",
     }),
   ]);
 

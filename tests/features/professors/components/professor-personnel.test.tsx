@@ -126,8 +126,14 @@ describe("public professor personnel sections", () => {
       }),
     });
     expect(mocks.getProfessors.mock.calls).toEqual([
-      [{ page: "2", pageSize: "12", personnelGroup: "academic" }],
-      [{ page: "3", pageSize: "12", personnelGroup: "staff" }],
+      [{
+        page: "2", pageSize: "12", personnelGroup: "academic",
+        orderBy: "displayNameTh", sortBy: "asc",
+      }],
+      [{
+        page: "3", pageSize: "12", personnelGroup: "staff",
+        orderBy: "displayNameTh", sortBy: "asc",
+      }],
     ]);
   });
 });
