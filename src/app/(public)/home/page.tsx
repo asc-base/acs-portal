@@ -1,5 +1,7 @@
-import HomePage from "./home";
-import { newsService } from "@/infra/container";
+import HomePage from "@/features/home/components/public/home";
+import { createNewsServerService } from "@/features/news/server";
+
+
 
 // Force dynamic rendering to avoid build-time API calls
 export const dynamic = "force-dynamic";
@@ -10,6 +12,8 @@ export const metadata = {
 };
 
 const MainPage = async () => {
+  const newsService = await createNewsServerService();
+
   const [
     initNewsActivity,
     initNewsComplete,

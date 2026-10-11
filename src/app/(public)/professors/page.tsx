@@ -1,33 +1,46 @@
 import React from "react";
-import ProfessorsListComponent from "./professors.list.compnent";
-import { professorService } from "@/infra/container";
+import ProfessorsListComponent from "@/features/professors/components/public/professors.list.compnent";
+import { createProfessorServerService } from "@/features/professors/server";
+
+
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
 interface PageProps {
   searchParams: Promise<{
-    page?: number;
-    pageSize?: number;
-    academicPosition?: string;
+    page?: string;
+    pageSize?: string;
+    staffPage?: string;
   }>;
 }
 
 const page = async ({ searchParams }: PageProps) => {
+  const professorService = await createProfessorServerService();
+
   const resolvedSearchParams = await searchParams;
 
-  const { rows, pageSize, page, totalRecords } = await professorService.getProfessors({
-    page: resolvedSearchParams.page || 1,
-    pageSize: resolvedSearchParams.pageSize || 12,
-    academicPosition: "true"
-  });
+  const [academics, staff] = await Promise.all([
+    professorService.getProfessors({
+      page: resolvedSearchParams.page || 1,
+      pageSize: resolvedSearchParams.pageSize || 12,
+      personnelGroup: "academic",
+      orderBy: "displayNameTh",
+      sortBy: "asc",
+    }),
+    professorService.getProfessors({
+      page: resolvedSearchParams.staffPage || 1,
+      pageSize: resolvedSearchParams.pageSize || 12,
+      personnelGroup: "staff",
+      orderBy: "displayNameTh",
+      sortBy: "asc",
+    }),
+  ]);
 
   return (
     <ProfessorsListComponent
-      professors={rows}
-      pageSize={pageSize}
-      page={page}
-      totalRecords={totalRecords}
+      academics={academics}
+      staff={staff}
     />
   );
 };

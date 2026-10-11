@@ -1,0 +1,121 @@
+"use client";
+
+import * as React from "react";
+import Image from "next/image";
+import { Button, Typography, IconButton, InputAdornment } from "@mui/material";
+import { Visibility, VisibilityOff } from "@mui/icons-material";
+import { RHFTextField } from "@/shared/components/form/RHFTextField";
+import { useAdminLoginForm } from "@/features/auth/hooks/useAdminLoginForm";
+
+export default function AdminLoginLandingPage() {
+  const [showPwd, setShowPwd] = React.useState(false);
+  const {
+    control,
+    errors,
+    isPending,
+    submit,
+  } = useAdminLoginForm();
+
+  return (
+    // <lg = 1 คอลัมน์ (ซ่อนรูป) | >=lg = 2 คอลัมน์
+    <main className="grid min-h-screen w-screen grid-cols-1 overflow-x-hidden bg-white lg:grid-cols-2">
+      {/* LEFT: แสดงเฉพาะเมื่อ >= lg */}
+      <section className="relative hidden w-full items-center bg-[#F3F0FF] lg:block">
+        <Image
+          src="/ImageLoginAdmin.svg"
+          alt="Student illustration"
+          fill
+          priority
+          className="object-cover object-center"
+        />
+      </section>
+
+      {/* RIGHT: ฟอร์ม*/}
+      <section className="flex h-full w-full items-center justify-center px-6">
+        <div className="mx-auto w-full max-w-[1200px] px-0 md:px-6 lg:px-8">
+          <div className="mx-auto w-full max-w-[520px]">
+            <Typography
+              variant="h3"
+              className="text-left !leading-tight !font-extrabold text-[#2A179C]"
+              sx={{
+                // xs=มือถือ, sm=เล็ก, md=แท็บเล็ต, lg=เดสก์ท็อป
+                fontSize: { xs: 28, sm: 32, md: 40, lg: 48 },
+                lineHeight: 1.15,
+              }}
+            >
+              Welcome Admin
+            </Typography>
+
+            <form
+              onSubmit={submit}
+              className="mt-8 w-full space-y-5"
+              noValidate
+            >
+              <RHFTextField
+                name="email"
+                control={control}
+                label="อีเมล"
+                placeholder="อีเมล"
+                requiredMark
+                inputProps={{
+                  inputMode: "email",
+                }}
+                aria-invalid={!!errors.email}
+              />
+
+              <RHFTextField
+                name="password"
+                control={control}
+                label="รหัสผ่าน"
+                placeholder="********"
+                type={showPwd ? "text" : "password"}
+                aria-invalid={!!errors.password}
+                sx={{
+                  "& .MuiOutlinedInput-notchedOutline": {
+                    borderColor: "#4F46E5",
+                  },
+                  "&:hover .MuiOutlinedInput-notchedOutline": {
+                    borderColor: "#4338CA",
+                  },
+                  "& .Mui-focused .MuiOutlinedInput-notchedOutline": {
+                    borderColor: "#4F46E5",
+                  },
+                  borderRadius: "8px",
+                }}
+                InputProps={{
+                  endAdornment: (
+                    <InputAdornment position="end">
+                      <IconButton
+                        aria-label={showPwd ? "ซ่อนรหัสผ่าน" : "แสดงรหัสผ่าน"}
+                        onClick={() => setShowPwd((s) => !s)}
+                        edge="end"
+                      >
+                        {showPwd ? <VisibilityOff /> : <Visibility />}
+                      </IconButton>
+                    </InputAdornment>
+                  ),
+                }}
+              />
+
+              <div className="flex items-center justify-end">
+                <a href="#" className="text-sm text-gray-600 hover:underline">
+                  ลืมรหัสผ่าน ?
+                </a>
+              </div>
+
+              <Button
+                type="submit"
+                variant="contained"
+                fullWidth
+                disabled={isPending}
+                className="!h-12 !bg-[#1E156B] !text-base !normal-case shadow-md hover:!bg-[#1b1361]"
+              >
+                {isPending ? "กำลังเข้าสู่ระบบ..." : "เข้าสู่ระบบ"}
+              </Button>
+            </form>
+          </div>
+        </div>
+      </section>
+    </main>
+  );
+}

@@ -1,5 +1,5 @@
-import { baseUrl } from "@/infra/container";
-import { CourseForm } from "./courses.form.component";
+
+import { CourseForm } from "@/features/courses/components/admin/create/courses.form.component";
 
 
 export const dynamic = "force-dynamic";
@@ -17,7 +17,6 @@ export default async function Page({ searchParams }: PageProps) {
   return (
     <div className="w-full">
       <CourseForm
-        apiBase={baseUrl}
         curriculumID={curriculumID}
       />
     </div>

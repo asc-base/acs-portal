@@ -1,0 +1,51 @@
+import { ClassbookCard } from "@/features/classbook/components/ClassbookCard";
+import Link from "next/link";
+import { IClassBook } from "@/features/classbook/domain/classbook";
+import { FC } from "react";
+import { Breadcrumbs } from "@mui/material";
+import EmptyState from "@/shared/components/emptyState";
+
+interface PageProps {
+  classBooks: IClassBook[];
+}
+
+const ClassBookLandingPage: FC<PageProps> = ({ classBooks }) => {
+  return (
+    <main className="container mx-auto px-6 py-6 md:px-16 lg:py-8 xl:px-8">
+      <div className="flex flex-col items-start justify-start gap-2">
+        <Breadcrumbs aria-label="breadcrumb" separator=">>">
+          <Link href="/">หน้าหลัก</Link>
+          <p>เกี่ยวกับเรา</p>
+          <p>ทำเนียบรุ่น</p>
+        </Breadcrumbs>
+      </div>
+
+      <h4 className="text-accent04 mt-2 mb-4 font-bold lg:mt-3 lg:mb-6 lg:text-2xl">
+        ทำเนียบรุ่น นักศึกษาวิทยาการคอมพิวเตอร์ประยุกต์
+      </h4>
+
+      {/* Grid 2 คอลัมน์ (Desktop) / 1 คอลัมน์ (Mobile) */}
+      {classBooks.length === 0 ? (
+        <div className="flex h-96 flex-col items-center justify-center">
+          <EmptyState 
+            title="ไม่พบข้อมูลรุ่นในขณะนี้" 
+            description="เมื่อมีข้อมูลรุ่น ข้อมูลจะปรากฏที่นี่"  
+          />
+        </div>
+      ) : (
+        <div className="grid gap-6 px-1 md:gap-8 xl:grid-cols-2">
+          {classBooks.map((item, i) => (
+            <Link
+              key={item.id}
+              href={`/students?page=1&pageSize=12&classBookID=${item.id}`}
+            >
+              <ClassbookCard {...item} classof={item.classof} priority={i < 2} />
+            </Link>
+          ))}
+        </div>
+      )}
+    </main>
+  );
+};
+
+export default ClassBookLandingPage;

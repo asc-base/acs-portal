@@ -1,8 +1,10 @@
 import { ReactNode } from "react";
-import { NavbarMain } from "@/components/navbar";
-import { Footer } from "@/components/footer";
-import { curriculumService } from "@/infra/container";
-import { QueryCurriculum, ICurriculum } from "@/core/domain/curriculum";
+import { NavbarMain } from "@/app/_components/navbar";
+import { Footer } from "@/app/_components/footer";
+
+import { QueryCurriculum, ICurriculum } from "@/features/curriculum/domain/curriculum";
+import { createCurriculumServerService } from "@/features/curriculum/server";
+
 
 export const dynamic = "force-dynamic";
 
@@ -12,6 +14,8 @@ const query: QueryCurriculum = {
 };
 
 const layout = async ({ children }: Readonly<{ children: ReactNode }>) => {
+  const curriculumService = await createCurriculumServerService();
+
   let rows: ICurriculum[] = [];
   try {
     const result = await curriculumService.getCurriculum(query);

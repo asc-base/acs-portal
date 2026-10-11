@@ -1,5 +1,7 @@
-import ProjectInfoComponent from "./projectinfo.component";
-import { projectService } from "@/infra/container";
+import ProjectInfoComponent from "@/features/projects/components/public/[id]/projectinfo.component";
+import { createProjectServerService } from "@/features/projects/server";
+
+
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -9,6 +11,8 @@ interface PageProps {
 }
 
 const Page = async ({ params }: PageProps) => {
+  const projectService = await createProjectServerService();
+
   const { id } = await params;
   const info = await projectService.getProjectById(id);
 

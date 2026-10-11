@@ -1,6 +1,8 @@
 import React from "react";
-import { newsService } from "@/infra/container";
-import NewsListComponents from "./news.list.components";
+
+import NewsListComponents from "@/features/news/components/public/news.list.components";
+import { createNewsServerService } from "@/features/news/server";
+
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -15,6 +17,8 @@ interface PageProps {
 }
 
 const page = async ({ searchParams }: PageProps) => {
+  const newsService = await createNewsServerService();
+
   const resolvedSearchParams = await searchParams;
   const { rows, totalRecords, pageSize, page } = await newsService.getNews(
     resolvedSearchParams.page || 1,

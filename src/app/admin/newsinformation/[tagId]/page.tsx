@@ -1,10 +1,14 @@
 import { notFound } from "next/navigation";
-import { baseUrl, masterDataService } from "@/infra/container";
-import { NewsBulletinManager } from "@/components/newsbulletinmanager";
+
+import { NewsBulletinManager } from "@/features/news/components/admin/newsbulletinmanager";
+import { createMasterDataServerService } from "@/features/master-data/server";
+
 
 export const dynamic = "force-dynamic";
 
 export default async function NewsInformationPage({ params }: { params: Promise<{ tagId: string }> }) {
+  const masterDataService = await createMasterDataServerService();
+
   const { tagId } = await params;
   const master = await masterDataService.getMasterData();
   const group = master?.tagsGroups?.find((item) => item.name === "news-feature");
@@ -15,5 +19,5 @@ export default async function NewsInformationPage({ params }: { params: Promise<
       ? "ANNOUNCEMENT"
       : null;
   if (!type) notFound();
-  return <NewsBulletinManager apiBase={baseUrl} type={type} />;
+  return <NewsBulletinManager type={type} />;
 }
