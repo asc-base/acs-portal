@@ -35,6 +35,7 @@ function response() {
       detail: "News details",
       startDate: "2026-10-08T08:00:00.000Z",
       dueDate: null,
+      category: null,
     },
     status: 200,
   }), { headers: { "content-type": "application/json" } });

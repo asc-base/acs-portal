@@ -1,5 +1,5 @@
 import React from "react";
-import { redirect } from "next/navigation";
+import { notFound } from "next/navigation";
 import ProjectList from "@/features/projects/components/public/project.list.components";
 
 export const dynamic = "force-dynamic";
@@ -23,6 +23,7 @@ interface LocalPageProps {
     categoryIds?: string | string[];
     projectTypeIds?: string | string[];
     tagID?: string | string[];
+    tagId?: string | string[];
     fields?: string | string[];
     categories?: string | string[];
     types?: string | string[];
@@ -46,48 +47,11 @@ const Page = async ({ searchParams }: LocalPageProps) => {
     createClassBookServerService(),
   ]);
   const resolvedSearchParams = (await searchParams) || {};
+  if (["tagID", "tagId", "fields", "categories", "types"].some((key) => key in resolvedSearchParams)) notFound();
   const masterData = await masterDataService.getMasterData();
   const categories = masterData.categories;
   const fields = masterData.fields;
   const types = masterData.projectTypes;
-  const canonicalFilters = [
-    { oldKey: "fields", newKey: "fieldIds", groupName: "field", lookups: masterData.fields },
-    { oldKey: "categories", newKey: "categoryIds", groupName: "category", lookups: masterData.categories },
-    { oldKey: "types", newKey: "projectTypeIds", groupName: "type", lookups: masterData.projectTypes },
-  ] as const;
-  const legacyKeys = canonicalFilters.map(({ oldKey }) => oldKey);
-  const legacyTagIDs = (ensureArray(resolvedSearchParams.tagID) ?? []).map(Number);
-  let hasLegacyFilters = false;
-  for (const filter of canonicalFilters) {
-    const values = ensureArray(resolvedSearchParams[filter.oldKey]);
-    if (!values?.length) continue;
-    hasLegacyFilters = true;
-    for (const value of values) {
-      const legacyID = Number(value);
-      const tag = masterData.tags.find((item) => item.id === legacyID);
-      const groupName = masterData.tagsGroups.find((group) => group.id === tag?.tagsGroupsId)?.name;
-      const lookup = groupName === filter.groupName && tag
-        ? filter.lookups.find((item) => item.name === tag.name)
-        : undefined;
-      if (lookup) {
-        const direct = ensureArray(resolvedSearchParams[filter.newKey]) ?? [];
-        direct.push(String(lookup.id));
-        (resolvedSearchParams as Record<string, string | string[] | undefined>)[filter.newKey] = direct;
-      } else {
-        legacyTagIDs.push(legacyID);
-      }
-    }
-  }
-  if (hasLegacyFilters) {
-    const params = new URLSearchParams();
-    for (const [key, value] of Object.entries(resolvedSearchParams)) {
-      if (legacyKeys.includes(key as typeof legacyKeys[number]) || key === "tagID") continue;
-      for (const item of Array.isArray(value) ? value : value === undefined ? [] : [value]) params.append(key, String(item));
-    }
-    for (const id of new Set(legacyTagIDs)) params.append("tagID", String(id));
-    redirect(`/project?${params.toString()}`);
-  }
-
   const queryFilters: QueryProject = {
     sortBy: resolvedSearchParams.sortBy,
     sortOrder: resolvedSearchParams.sortOrder,
@@ -96,7 +60,6 @@ const Page = async ({ searchParams }: LocalPageProps) => {
     fieldIds: ensureArray(resolvedSearchParams.fieldIds),
     categoryIds: ensureArray(resolvedSearchParams.categoryIds),
     projectTypeIds: ensureArray(resolvedSearchParams.projectTypeIds),
-    tagID: ensureArray(resolvedSearchParams.tagID),
     courses: ensureArray(resolvedSearchParams.courses),
     classBooks: ensureArray(resolvedSearchParams.classBooks),
   };

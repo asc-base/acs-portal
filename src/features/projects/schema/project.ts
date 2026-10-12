@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { CourseSchema } from "@/features/courses/schema/course";
-import { ProjectLookupSchema, RoleSchema, TagSchema } from "@/shared/schema/references";
+import { ProjectLookupSchema, RoleSchema } from "@/shared/schema/references";
 import { UserResponseSchema } from "@/shared/schema/profile-response";
 import { PageMetadataSchema } from "@/shared/schema/page-metadata";
 
@@ -42,19 +42,16 @@ const projectMemberRequest = z.object({ userID: projectId, roleID: projectId });
 export const CreateProjectRequestSchema = z.object({
   ...requestFields,
   coursesID: z.array(projectId),
-  tagsID: z.array(projectId).optional(),
   fieldIds: z.array(projectId).optional(),
   categoryIds: z.array(projectId).optional(),
   projectTypeIds: z.array(projectId).optional(),
   techStacks: z.array(z.string()),
   members: z.array(projectMemberRequest),
-});
+}).strict();
 
 export const UpdateProjectRequestSchema = z.object({
   ...z.object(requestFields).partial().shape,
   figmaURL: z.string().nullable().optional(),
-  newtagsID: z.array(projectId).optional(),
-  deletedtagsID: z.array(projectId).optional(),
   fieldIds: z.array(projectId).optional(),
   categoryIds: z.array(projectId).optional(),
   projectTypeIds: z.array(projectId).optional(),
@@ -63,7 +60,7 @@ export const UpdateProjectRequestSchema = z.object({
   newCoursesID: z.array(projectId).optional(),
   deletedCoursesID: z.array(projectId).optional(),
   techStacks: z.array(z.string()).optional(),
-});
+}).strict();
 
 const queryPageNumber = z
   .union([z.number(), z.string()])
@@ -81,14 +78,10 @@ export const QueryProjectSchema = z.object({
   fieldIds: queryList.optional(),
   categoryIds: queryList.optional(),
   projectTypeIds: queryList.optional(),
-  tagID: queryList.optional(),
-  fields: queryList.optional(),
-  categories: queryList.optional(),
-  types: queryList.optional(),
   courses: queryList.optional(),
   classBooks: queryList.optional(),
   search: z.string().optional(),
-});
+}).strict();
 export const ProjectIdSchema = projectId;
 
 export const ProjectSearchSchema = QueryProjectSchema.pick({ search: true });
@@ -115,13 +108,12 @@ export const ProjectSchema = z.object({
   assetsURL: z.array(z.string()),
   images: z.array(ProjectImageSchema).optional(),
   techStacks: z.array(z.string()),
-  tag: z.array(TagSchema),
   fields: z.array(ProjectLookupSchema),
   categories: z.array(ProjectLookupSchema),
   projectTypes: z.array(ProjectLookupSchema),
   member: z.array(UserResponseSchema.extend({ role: RoleSchema })),
   course: z.array(CourseSchema),
-});
+}).strict();
 
 export const ProjectPageSchema = z.object({
   rows: z.array(ProjectSchema),
@@ -185,8 +177,8 @@ export function projectFormToUpdateRequest(
     documentURL: data.documentURL,
     presentationURL: data.presentationURL,
     techStacks: data.techStacks.map(({ value }) => value).filter(Boolean),
-    categoryIds: categories,
-    projectTypeIds: projectTypes,
+    ...(!sameIds(current.categories.map(({ id }) => id), categories) && { categoryIds: categories }),
+    ...(!sameIds(current.projectTypes.map(({ id }) => id), projectTypes) && { projectTypeIds: projectTypes }),
     newMembers: [
       ...students.filter((id) => !oldStudents.includes(id)).map((userID) => ({ userID, roleID: 2 })),
       ...advisors.filter((id) => !oldAdvisors.includes(id)).map((userID) => ({ userID, roleID: 3 })),
@@ -200,6 +192,10 @@ export function projectFormToUpdateRequest(
     thumbnailFocalPointX: data.thumbnailFocalPointX,
     thumbnailFocalPointY: data.thumbnailFocalPointY,
   });
+}
+
+function sameIds(current: number[], next: number[]) {
+  return current.length === next.length && current.every((id) => next.includes(id));
 }
 
 export type ProjectFormInput = z.input<typeof projectFormSchema>;

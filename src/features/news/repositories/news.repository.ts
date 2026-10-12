@@ -1,7 +1,6 @@
 import { INewsRepository } from "@/features/news/ports/news.repository";
 import {
   INews,
-  INewsInformation,
 } from "@/features/news/domain/news";
 import { HttpHelper } from "@/shared/lib/http";
 import { ApiResponse, Pageable } from "@/shared/types/response";
@@ -9,8 +8,6 @@ import { z } from "zod";
 import {
   NewsBulletinsSchema,
   NewsBulletinSchema,
-  NewsFeatureResponseSchema,
-  NewsInformationsPageSchema,
   NewsPageSchema,
   NewsResponseSchema,
 } from "@/features/news/schema/news";
@@ -33,16 +30,14 @@ export class NewsRepository implements INewsRepository {
   async getNews(
     page: number,
     pageSize: number,
-    tagID?: number,
+    newsCategoryId?: number,
     orderBy?: string,
     sortBy?: string,
     search?: string,
     searchBy?: string,
-    newsCategoryId?: number,
   ): Promise<ApiResponse<Pageable<INews>>> {
     let url = `/v1/news/?page=${page}&pageSize=${pageSize}`;
 
-    if (tagID) url += `&tagID=${encodeURIComponent(tagID)}`;
     if (newsCategoryId !== undefined) url += `&newsCategoryId=${encodeURIComponent(newsCategoryId)}`;
 
     if (orderBy && orderBy !== "") {
@@ -86,52 +81,6 @@ export class NewsRepository implements INewsRepository {
       `/v1/news/${id}`,
     );
     return { ...response, data: NewsResponseSchema.parse(response.data) };
-  }
-
-  async getNewsInformations(
-    page: number,
-    pageSize: number,
-    tagId?: number,
-    orderBy?: string,
-    sortBy?: string,
-  ): Promise<ApiResponse<Pageable<INewsInformation>>> {
-    let url = `/v1/news/news-features/?tagID=${tagId}&page=${page}&pageSize=${pageSize}`;
-
-    if (tagId && tagId !== null) {
-      url += `&tagID=${encodeURIComponent(tagId)}`;
-    }
-
-    if (orderBy && orderBy !== "") {
-      url += `&orderBy=${encodeURIComponent(orderBy)}`;
-    }
-
-    if (sortBy && sortBy !== "") {
-      url += `&sortBy=${encodeURIComponent(sortBy)}`;
-    }
-
-    const response =
-      await this.http.get<ApiResponse<Pageable<INewsInformation>>>(url);
-
-    return { ...response, data: NewsInformationsPageSchema.parse(response.data) };
-  }
-
-  async upsertNewsInformation(
-    data: FormData,
-  ): Promise<ApiResponse<INewsInformation>> {
-    const response = await this.http.put<ApiResponse<INewsInformation>>(
-      `/v1/news/news-features/`,
-      data,
-    );
-    return { ...response, data: NewsFeatureResponseSchema.parse(response.data) };
-  }
-
-  async getNewsInformationById(
-    id: number,
-  ): Promise<ApiResponse<INewsInformation>> {
-    const response = await this.http.get<ApiResponse<INewsInformation>>(
-      `/v1/news/news-features/${id}`,
-    );
-    return { ...response, data: NewsFeatureResponseSchema.parse(response.data) };
   }
 
   async getNewsBulletins(type: "HIGHLIGHT" | "ANNOUNCEMENT") {

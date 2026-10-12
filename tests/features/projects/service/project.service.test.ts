@@ -26,7 +26,9 @@ describe("project create multipart payload", () => {
       presentationURL: "https://example.test/presentation",
       figmaURL: "",
       coursesID: [3, 8],
-      tagsID: [2, 5],
+      fieldIds: [1],
+      categoryIds: [2],
+      projectTypeIds: [3],
       techStacks: ["TypeScript", "React"],
       members: [{ userID: 7, roleID: 2 }],
       thumbnailFocalPointX: 0,
@@ -40,7 +42,9 @@ describe("project create multipart payload", () => {
     expect(form.get("thumbnailFocalPointX")).toBe("0");
     expect(form.get("thumbnailFocalPointY")).toBe("75");
     expect(form.get("coursesID")).toBe("[3,8]");
-    expect(form.get("tagsID")).toBe("[2,5]");
+    expect(form.get("fieldIds")).toBe("[1]");
+    expect(form.get("categoryIds")).toBe("[2]");
+    expect(form.get("projectTypeIds")).toBe("[3]");
     expect(form.get("techStacks")).toBe('["TypeScript","React"]');
     expect(form.get("members")).toBe('[{"userID":7,"roleID":2}]');
     expect(form.get("thumbnailFile")).toBe(thumbnailFile);
@@ -64,8 +68,8 @@ describe("project update multipart payload", () => {
       presentationURL: "https://example.test/presentation",
       figmaURL: null,
       techStacks: ["TypeScript"],
-      newtagsID: [5],
-      deletedtagsID: [2],
+      categoryIds: [5],
+      projectTypeIds: [2],
       newMembers: [{ userID: 8, roleID: 2 }],
       deletedmembersID: [7],
       newCoursesID: [9],
@@ -78,8 +82,8 @@ describe("project update multipart payload", () => {
     const form = update.mock.calls[0]![1];
     expect(form.get("title")).toBe("Updated project");
     expect(form.get("techStacks")).toBe('["TypeScript"]');
-    expect(form.get("newtagsID")).toBe("[5]");
-    expect(form.get("deletedtagsID")).toBe("[2]");
+    expect(form.get("categoryIds")).toBe("[5]");
+    expect(form.get("projectTypeIds")).toBe("[2]");
     expect(form.get("newMembers")).toBe('[{"userID":8,"roleID":2}]');
     expect(form.get("deletedmembersID")).toBe("[7]");
     expect(form.get("newCoursesID")).toBe("[9]");
@@ -98,8 +102,8 @@ describe("project service request parsing", () => {
     const getProjects = vi.spyOn(repository, "getProjects").mockResolvedValue(projectEnvelope(projectPageFixture));
     const service = new ProjectService(repository);
 
-    await expect(service.getProjects({ page: "2", pageSize: 5, fields: "1" })).resolves.toEqual(projectPageFixture);
-    expect(getProjects).toHaveBeenCalledWith({ page: 2, pageSize: 5, fields: ["1"] });
+    await expect(service.getProjects({ page: "2", pageSize: 5, fieldIds: "1" })).resolves.toEqual(projectPageFixture);
+    expect(getProjects).toHaveBeenCalledWith({ page: 2, pageSize: 5, fieldIds: ["1"] });
   });
 
   it("rejects malformed request IDs before making a repository call", async () => {
@@ -114,7 +118,7 @@ describe("project service request parsing", () => {
       documentURL: "document",
       presentationURL: "presentation",
       coursesID: [0],
-      tagsID: [2],
+      fieldIds: [0],
       techStacks: ["TypeScript"],
       members: [{ userID: 7, roleID: 2 }],
     };

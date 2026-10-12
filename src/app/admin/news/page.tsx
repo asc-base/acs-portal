@@ -1,4 +1,5 @@
 import NewsListComponent from "@/features/news/components/admin/news.list.component";
+import { notFound } from "next/navigation";
 
 import type { NewsQueryInput } from "@/features/news/schema/news";
 import { createNewsServerService } from "@/features/news/server";
@@ -16,15 +17,15 @@ const page = async ({ searchParams }: PageProps) => {
   const masterDataService = await createMasterDataServerService();
 
   const search = await searchParams;
+  if ("tagID" in search) notFound();
   const { rows, totalRecords, page, pageSize } = await newsService.getNews(
     search.page || 1,
     search.pageSize || 12,
-    search.tagID,
+    search.newsCategoryId,
     search.orderBy,
     search.sortBy,
     search.search,
     search.searchBy,
-    search.newsCategoryId,
   );
 
   const masterData = await masterDataService.getMasterData();

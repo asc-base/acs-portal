@@ -1,6 +1,6 @@
 "use client";
 import { HeroCard } from "@/shared/components/herocard";
-import { INews, INewsInformation } from "@/features/news/domain/news";
+import { INews, INewsBulletin } from "@/features/news/domain/news";
 import heroImage from "../../../../../public/hero.jpg";
 import { NewsCard } from "@/features/news/components/newscard";
 import Link from "next/link";
@@ -36,8 +36,9 @@ interface HomePageProps {
   initNewsActivity: INews[];
   initNewsComplete: INews[];
   initNewsActivityStudent: INews[];
-  initAnnoucement?: INewsInformation[];
-  initNewsHighlight?: INewsInformation[];
+  initAnnoucement?: INewsBulletin[];
+  initNewsHighlight?: INewsBulletin[];
+  newsCategoryIds: Partial<Record<"ANNOUNCEMENT" | "STUDENT_ACHIEVEMENT" | "STUDENT_ACTIVITY", number>>;
   // apibase: string;
 }
 
@@ -57,6 +58,7 @@ const HomePage = ({
   initNewsActivityStudent,
   initAnnoucement,
   initNewsHighlight,
+  newsCategoryIds,
 }: HomePageProps) => {
   const carouselStep = useCarouselStep();
   const [newsActivityActive, setNewsActivityActive] = useState(0);
@@ -180,7 +182,8 @@ const HomePage = ({
             handlePrevNews={handlePrevNewsActivity}
             activeIndex={newsActivityActive}
             handleSetActiveIndex={handleSetNewsActivity}
-            tagId={16}
+            newsCategoryCode="ANNOUNCEMENT"
+            newsCategoryId={newsCategoryIds.ANNOUNCEMENT}
           >
             {Array.from(
               { length: Math.min(4, initNewsActivity.length) },
@@ -217,7 +220,8 @@ const HomePage = ({
             handlePrevNews={handlePrevNewsComplete}
             activeIndex={newsCompleteActive}
             handleSetActiveIndex={handleSetNewsComplete}
-            tagId={17}
+            newsCategoryCode="STUDENT_ACHIEVEMENT"
+            newsCategoryId={newsCategoryIds.STUDENT_ACHIEVEMENT}
           >
             {Array.from(
               { length: Math.min(4, initNewsComplete.length) },
@@ -254,7 +258,8 @@ const HomePage = ({
             handlePrevNews={handlePrevNewsActivityStudent}
             activeIndex={newsActivityStudentActive}
             handleSetActiveIndex={handleSetNewsActivityStudent}
-            tagId={18}
+            newsCategoryCode="STUDENT_ACTIVITY"
+            newsCategoryId={newsCategoryIds.STUDENT_ACTIVITY}
           >
             {Array.from(
               { length: Math.min(4, initNewsActivityStudent.length) },

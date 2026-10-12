@@ -12,6 +12,7 @@ const news = {
   detail: "News details",
   startDate: "2026-10-08T08:00:00.000Z",
   dueDate: null,
+  category: null,
   images: [],
 };
 let queryClient: QueryClient;

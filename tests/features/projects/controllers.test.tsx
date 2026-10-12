@@ -91,7 +91,6 @@ describe("project form controllers", () => {
   it("sends literal update diffs with the existing role IDs and thumbnail files", async () => {
     const project: IProject = {
       ...projectFixture,
-      tag: [...projectFixture.tag, { id: 6, name: "Old category", tagsGroupsId: 3 }],
       categories: [{ id: 1, name: "Education" }, { id: 5, name: "Business" }],
       projectTypes: [{ id: 1, name: "Research" }],
       member: [
@@ -126,8 +125,7 @@ describe("project form controllers", () => {
     expect(body.get("deletedCoursesID")).toBe("[3]");
     expect(body.get("categoryIds")).toBe("[5]");
     expect(body.get("projectTypeIds")).toBe("[2]");
-    expect(body.has("newtagsID")).toBe(false);
-    expect(body.has("deletedtagsID")).toBe(false);
+    expect(body.has("fieldIds")).toBe(false);
     expect(body.get("newMembers")).toBe('[{"userID":11,"roleID":2}]');
     expect(body.get("deletedmembersID")).toBe("[7]");
     expect(body.get("thumbnailFile")).toBe(thumbnail);

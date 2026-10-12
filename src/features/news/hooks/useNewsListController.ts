@@ -51,7 +51,6 @@ export function useNewsListController() {
 
   const handleFilterCategory = (value: string) => {
     const params = new URLSearchParams(searchParams.toString());
-    params.delete("tagID");
     if (value === "all") params.delete("newsCategoryId");
     else params.set("newsCategoryId", value);
     params.set("page", "1");

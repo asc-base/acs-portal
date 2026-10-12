@@ -4,13 +4,10 @@ import {
   SetNewsBulletinSchema,
   UpdateNewsPayloadSchema,
 } from "@/features/news/schema/news";
-import { UpsertNewsInformationSchema } from "@/features/news/schema/newsinformation";
-import type { INews, INewsInformation } from "@/features/news/domain/news";
+import type { INews, INewsBulletin } from "@/features/news/domain/news";
 import type { INewsRepository } from "../ports/news.repository";
 import type { CreateNewsPayload, NewsQueryInput, UpdateNewsPayload } from "@/features/news/schema/news";
 import type { NewsBulletin } from "@/features/news/schema/news";
-import type { UpsertNewsInformationInputs } from "@/features/news/schema/newsinformation";
-import type { Pageable } from "@/shared/types/response";
 import type { ApiResponse } from "@/shared/types/response";
 
 export class NewsService {
@@ -48,17 +45,15 @@ export class NewsService {
   async getNews(
     page: NonNullable<NewsQueryInput["page"]>,
     pageSize: NonNullable<NewsQueryInput["pageSize"]>,
-    tagID?: NewsQueryInput["tagID"],
+    newsCategoryId?: NewsQueryInput["newsCategoryId"],
     orderBy: string = "startDate",
     sortBy: string = "desc",
     search?: string,
     searchBy?: string,
-    newsCategoryId?: NewsQueryInput["newsCategoryId"],
   ) {
     const query = NewsQuerySchema.parse({
       page,
       pageSize,
-      tagID,
       newsCategoryId,
       orderBy,
       sortBy,
@@ -68,12 +63,11 @@ export class NewsService {
     const response = await this.newsRepository.getNews(
       query.page ?? Number(page),
       query.pageSize ?? Number(pageSize),
-      query.tagID,
+      query.newsCategoryId,
       query.orderBy,
       query.sortBy,
       query.search,
       query.searchBy,
-      query.newsCategoryId,
     );
     return response.data;
   }
@@ -142,61 +136,16 @@ export class NewsService {
     return response.data;
   }
 
-  async getNewsInformations(
-    page: NonNullable<NewsQueryInput["page"]>,
-    pageSize: NonNullable<NewsQueryInput["pageSize"]>,
-    tagId?: NewsQueryInput["tagID"],
-    orderBy?: string,
-    sortBy?: string,
-  ): Promise<Pageable<INewsInformation>> {
-    const query = NewsQuerySchema.parse({
-      page,
-      pageSize,
-      tagID: tagId,
-      orderBy,
-      sortBy,
-    });
-    const response = await this.newsRepository.getNewsInformations(
-      query.page ?? Number(page),
-      query.pageSize ?? Number(pageSize),
-      query.tagID,
-      query.orderBy,
-      query.sortBy,
-    );
-    return response.data;
-  }
-
-  async upsertNewsInformation(
-    data: UpsertNewsInformationInputs,
-  ): Promise<INewsInformation> {
-    const payload = UpsertNewsInformationSchema.parse(data);
-    const formData = new FormData();
-    Object.entries(payload).forEach(([key, value]) => {
-      if (value instanceof File) {
-        formData.append(key, value);
-      } else if (value !== undefined && value !== null) {
-        formData.append(key, String(value));
-      }
-    });
-
-    const response = await this.newsRepository.upsertNewsInformation(formData);
-    return response.data;
-  }
-
-  async getNewsInformationById(id: number): Promise<INewsInformation> {
-    const response = await this.newsRepository.getNewsInformationById(id);
-    return response.data;
-  }
-
   async getNewsBulletins(
     type: "HIGHLIGHT" | "ANNOUNCEMENT",
-  ): Promise<INewsInformation[]> {
+  ): Promise<INewsBulletin[]> {
     const response = await this.newsRepository.getNewsBulletins(type);
     return response.data.map(({ id, type, news }) => {
       const imageType = type === "HIGHLIGHT" ? "THUMBNAIL" : "CARD";
       const image = news.images?.find((row) => row.imageType === imageType);
       return {
         id,
+        newsID: news.id,
         type,
         news,
         thumbnailURL: image?.imageUrl ?? news.thumbnailURL,

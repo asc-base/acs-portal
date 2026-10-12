@@ -38,7 +38,7 @@ describe("news query construction", () => {
     );
     const url = get.mock.calls[0][0];
     expect(url).toBe(
-      "/v1/news/?page=2&pageSize=12&tagID=3&orderBy=createdAt&sortBy=desc&search=%E0%B8%82%E0%B9%88%E0%B8%B2%E0%B8%A7%20A%26B%3F%20x%3D1&searchBy=title%20%26%20detail",
+      "/v1/news/?page=2&pageSize=12&newsCategoryId=3&orderBy=createdAt&sortBy=desc&search=%E0%B8%82%E0%B9%88%E0%B8%B2%E0%B8%A7%20A%26B%3F%20x%3D1&searchBy=title%20%26%20detail",
     );
     const params = new URL(url, "https://example.test").searchParams;
     expect(params.get("search")).toBe("ข่าว A&B? x=1");
@@ -46,26 +46,23 @@ describe("news query construction", () => {
     expect(params.has("x")).toBe(false);
   });
 
-  it("sends category filters separately while keeping legacy tag filters available", async () => {
+  it("sends the category filter in its own namespace", async () => {
     const http = new HttpHelper();
     const get = vi.spyOn(http, "get").mockResolvedValue({
       data: { rows: [], totalRecords: 0, page: 1, pageSize: 12 },
     });
-    await new NewsRepository("", http).getNews(1, 12, undefined, "", "", "", "", 1);
+    await new NewsRepository("", http).getNews(1, 12, 1, "", "", "", "");
     expect(get).toHaveBeenCalledWith("/v1/news/?page=1&pageSize=12&newsCategoryId=1");
   });
 
-  it.each([undefined, 0])(
-    "omits empty optional filters (tagID: %s)",
-    async (tagID) => {
-      const http = new HttpHelper();
-      const get = vi.spyOn(http, "get").mockResolvedValue({
-        data: { rows: [], totalRecords: 0, page: 1, pageSize: 9 },
-      });
-      await new NewsRepository("", http).getNews(1, 9, tagID, "", "", "", "");
-      expect(get).toHaveBeenCalledWith("/v1/news/?page=1&pageSize=9");
-    },
-  );
+  it("omits the category filter when no category is selected", async () => {
+    const http = new HttpHelper();
+    const get = vi.spyOn(http, "get").mockResolvedValue({
+      data: { rows: [], totalRecords: 0, page: 1, pageSize: 9 },
+    });
+    await new NewsRepository("", http).getNews(1, 9);
+    expect(get).toHaveBeenCalledWith("/v1/news/?page=1&pageSize=9");
+  });
 
   it("applies service ordering defaults while preserving response pagination", async () => {
     const page = { rows: [], totalRecords: 0, page: 1, pageSize: 9 };

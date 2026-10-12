@@ -11,7 +11,6 @@ import {
   type SetNewsBulletin,
   type UpdateNewsPayload,
 } from "@/features/news/schema/news";
-import type { UpsertNewsInformationInputs } from "@/features/news/schema/newsinformation";
 import { baseUrl } from "@/shared/config/api.client";
 
 const newsService = new NewsService(new NewsRepository(baseUrl));
@@ -22,8 +21,6 @@ const newsKeys = {
   detail: (id: string | number) => ["news", "detail", String(id)] as const,
   bulletins: (type: "HIGHLIGHT" | "ANNOUNCEMENT") =>
     ["news", "bulletins", type] as const,
-  information: (query: QueryNews) => ["news", "information", query] as const,
-  informationDetail: (id: number) => ["news", "information", id] as const,
 };
 
 export function useNews(query: QueryNews, enabled = true) {
@@ -34,18 +31,16 @@ export function useNews(query: QueryNews, enabled = true) {
       newsService.getNews(
         parsed.page ?? 1,
         parsed.pageSize ?? 12,
-        parsed.tagID,
+        parsed.newsCategoryId,
         parsed.orderBy,
         parsed.sortBy,
         parsed.search,
         parsed.searchBy,
-        parsed.newsCategoryId,
       ),
     retry: false,
     enabled,
   });
 }
-
 export function useNewsById(id: string | number, enabled = true) {
   return useQuery({
     queryKey: newsKeys.detail(id),
@@ -102,41 +97,6 @@ export function useSetNewsBulletin() {
     onSuccess: (_, { type }) => {
       return queryClient.invalidateQueries({ queryKey: newsKeys.bulletins(type) });
     },
-    retry: false,
-  });
-}
-
-export function useNewsInformation(query: QueryNews) {
-  const parsed = NewsQuerySchema.parse(query);
-  return useQuery({
-    queryKey: newsKeys.information(parsed),
-    queryFn: () =>
-      newsService.getNewsInformations(
-        parsed.page ?? 1,
-        parsed.pageSize ?? 12,
-        parsed.tagID,
-        parsed.orderBy,
-        parsed.sortBy,
-      ),
-    retry: false,
-  });
-}
-
-export function useNewsInformationById(id: number) {
-  return useQuery({
-    queryKey: newsKeys.informationDetail(id),
-    queryFn: () => newsService.getNewsInformationById(id),
-    retry: false,
-  });
-}
-
-export function useUpsertNewsInformation() {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: (data: UpsertNewsInformationInputs) =>
-      newsService.upsertNewsInformation(data),
-    onSuccess: () =>
-      queryClient.invalidateQueries({ queryKey: ["news", "information"] }),
     retry: false,
   });
 }

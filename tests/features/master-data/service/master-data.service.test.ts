@@ -6,8 +6,6 @@ import { MasterDataService } from "@/features/master-data/service/master-data.se
 const data: MasterData = {
   roles: [],
   typeCourses: [],
-  tags: [],
-  tagsGroups: [],
   prefixes: [],
   newsCategories: [],
   fields: [], categories: [], projectTypes: [],

@@ -2,7 +2,6 @@ import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import {
   NewsBulletinsSchema,
-  NewsFeatureResponseSchema,
   NewsPageSchema,
   NewsQuerySchema,
   NewsResponseSchema,
@@ -28,17 +27,6 @@ describe("news response schemas", () => {
     expect(NewsBulletinsSchema.parse(bulletins)).toEqual(bulletins);
   });
 
-  it("accepts the current news-feature DTO around its nested news response", () => {
-    const feature = {
-      id: 91,
-      newsID: news.id,
-      tagID: 26,
-      thumbnailURL: "https://example.test/feature.png",
-      news,
-    };
-    expect(NewsFeatureResponseSchema.parse(feature)).toEqual(feature);
-  });
-
   it("validates paginated response metadata and rows", () => {
     expect(
       NewsPageSchema.parse({
@@ -55,12 +43,14 @@ describe("news response schemas", () => {
   });
 
   it("normalizes Next.js query strings and rejects nonnumeric pagination", () => {
-    expect(NewsQuerySchema.parse({ page: "2", pageSize: "12", tagID: "16", newsCategoryId: "1" })).toMatchObject({
+    expect(NewsQuerySchema.parse({ page: "2", pageSize: "12", newsCategoryId: "1" })).toMatchObject({
       page: 2,
       pageSize: 12,
-      tagID: 16,
       newsCategoryId: 1,
     });
     expect(NewsQuerySchema.safeParse({ page: "not-a-page" }).success).toBe(false);
+    expect(NewsQuerySchema.safeParse({ tagID: "16" }).success).toBe(false);
+    expect(NewsQuerySchema.safeParse({ tagId: "16" }).success).toBe(false);
+    expect(NewsResponseSchema.safeParse({ ...news, tag: { id: 16, name: "legacy" } }).success).toBe(false);
   });
 });

@@ -27,9 +27,9 @@ const MainPage = async () => {
     initAnnoucement,
     initNewsHighlight,
   ] = await Promise.all([
-    categoryId("ANNOUNCEMENT") === undefined ? Promise.resolve({ rows: [] }) : newsService.getNews(1, 6, undefined, undefined, undefined, undefined, undefined, categoryId("ANNOUNCEMENT")).catch(() => ({ rows: [] })),
-    categoryId("STUDENT_ACHIEVEMENT") === undefined ? Promise.resolve({ rows: [] }) : newsService.getNews(1, 6, undefined, undefined, undefined, undefined, undefined, categoryId("STUDENT_ACHIEVEMENT")).catch(() => ({ rows: [] })),
-    categoryId("STUDENT_ACTIVITY") === undefined ? Promise.resolve({ rows: [] }) : newsService.getNews(1, 6, undefined, undefined, undefined, undefined, undefined, categoryId("STUDENT_ACTIVITY")).catch(() => ({ rows: [] })),
+    categoryId("ANNOUNCEMENT") === undefined ? Promise.resolve({ rows: [] }) : newsService.getNews(1, 6, categoryId("ANNOUNCEMENT")).catch(() => ({ rows: [] })),
+    categoryId("STUDENT_ACHIEVEMENT") === undefined ? Promise.resolve({ rows: [] }) : newsService.getNews(1, 6, categoryId("STUDENT_ACHIEVEMENT")).catch(() => ({ rows: [] })),
+    categoryId("STUDENT_ACTIVITY") === undefined ? Promise.resolve({ rows: [] }) : newsService.getNews(1, 6, categoryId("STUDENT_ACTIVITY")).catch(() => ({ rows: [] })),
     newsService.getNewsBulletins("ANNOUNCEMENT").catch(() => []),
     newsService.getNewsBulletins("HIGHLIGHT").catch(() => []),
   ]);
@@ -41,6 +41,11 @@ const MainPage = async () => {
       initNewsActivityStudent={initNewsActivityStudent.rows || []}
       initAnnoucement={initAnnoucement}
       initNewsHighlight={initNewsHighlight}
+      newsCategoryIds={{
+        ANNOUNCEMENT: categoryId("ANNOUNCEMENT"),
+        STUDENT_ACHIEVEMENT: categoryId("STUDENT_ACHIEVEMENT"),
+        STUDENT_ACTIVITY: categoryId("STUDENT_ACTIVITY"),
+      }}
     />
   );
 };

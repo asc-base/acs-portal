@@ -102,6 +102,13 @@ describe("UpdateNewsSchema", () => {
   });
 });
 
+describe("retired tag payloads", () => {
+  it("rejects tagID on both create and update", () => {
+    expect(CreateNewsSchema.safeParse({ ...createInput, tagID: 16 }).success).toBe(false);
+    expect(UpdateNewsSchema.safeParse({ ...updateInput, tagID: 16 }).success).toBe(false);
+  });
+});
+
 describe("news focal points", () => {
   it("accepts omitted values and the inclusive zero/100 boundaries", () => {
     expect(FocalPointSchema.parse({})).toEqual({});

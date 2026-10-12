@@ -13,7 +13,6 @@ interface NewsListComponentsProps {
   pageSize: number;
   page: number;
   category: string;
-  tagId?: number;
   newsCategoryId?: number;
 }
 
@@ -23,14 +22,13 @@ const NewsListComponents = ({
   pageSize,
   page,
   category,
-  tagId,
   newsCategoryId,
 }: NewsListComponentsProps) => {
   const router = useRouter();
 
   const handleNextPage = (currentPage: number) => {
     router.push(
-      `/news?category=${encodeURIComponent(category)}&page=${currentPage}&pageSize=${pageSize}${newsCategoryId !== undefined ? `&newsCategoryId=${newsCategoryId}` : tagId !== undefined ? `&tagId=${tagId}` : ""}`,
+      `/news?category=${encodeURIComponent(category)}&page=${currentPage}&pageSize=${pageSize}${newsCategoryId !== undefined ? `&newsCategoryId=${newsCategoryId}` : ""}`,
     );
   };
 

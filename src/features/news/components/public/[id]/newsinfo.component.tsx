@@ -19,7 +19,7 @@ interface NewsInfoProps {
 }
 
 const NewsInfoComponent = ({ newsInfo, recommendNews }: NewsInfoProps) => {
-  const newsCategory = newsInfo.category ?? newsInfo.tag;
+  const newsCategory = newsInfo.category;
   const [date, setDate] = useState<string>("");
   useEffect(() => {
     const formattedDate = `${new Date(newsInfo.startDate).getDate()} ${new Date(
@@ -74,9 +74,7 @@ const NewsInfoComponent = ({ newsInfo, recommendNews }: NewsInfoProps) => {
         <Link
           href={newsInfo.category
             ? `/news?category=${encodeURIComponent(newsInfo.category.name)}&page=1&pageSize=12&newsCategoryId=${newsInfo.category.id}`
-            : newsInfo.tag
-              ? `/news?category=${encodeURIComponent(newsInfo.tag.name)}&page=1&pageSize=12&tagId=${newsInfo.tag.id}`
-              : "/news"}
+            : "/news"}
         >
           {newsCategory?.name ?? "ข่าวสาร"}
         </Link>

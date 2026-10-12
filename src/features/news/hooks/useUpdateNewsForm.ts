@@ -5,7 +5,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import dayjs from "dayjs";
 import { useRouter } from "next/navigation";
-import type { INews, NewsCategory } from "@/features/news/domain/news";
+import type { INews } from "@/features/news/domain/news";
 import {
   UpdateNewsInputs,
   UpdateNewsPayload,
@@ -24,11 +24,11 @@ const savedAssets = (news: INews): NewsAsset[] => {
     : (news.newsAdditionalImages ?? []).map((image) => ({ key: `saved-${image.id}`, source: image.imageUrl, id: image.id }));
 };
 
-const formValues = (news: INews, categories: NewsCategory[] = []): UpdateNewsInputs => ({
+const formValues = (news: INews): UpdateNewsInputs => ({
   title: news.title,
   startDate: dayjs(news.startDate).toISOString(),
   dueDate: news.dueDate ? dayjs(news.dueDate).toISOString() : "",
-  newsCategoryId: news.category?.id ?? categories.find((category) => category.name === news.tag?.name)?.id ?? 0,
+  newsCategoryId: news.category?.id ?? 0,
   detail: news.detail,
   thumbnail: news.thumbnailURL ?? "",
   thumbnailImage:
@@ -53,7 +53,7 @@ const formValues = (news: INews, categories: NewsCategory[] = []): UpdateNewsInp
     50,
 });
 
-export function useUpdateNewsForm(news: INews, categories: NewsCategory[] = []) {
+export function useUpdateNewsForm(news: INews) {
   const router = useRouter();
   const mutation = useUpdateNews();
   const savedNewsQuery = useNewsById(news.id, false);
@@ -75,7 +75,7 @@ export function useUpdateNewsForm(news: INews, categories: NewsCategory[] = []) 
     formState: { isDirty, errors },
   } = useForm<UpdateNewsInputs>({
     resolver: zodResolver(UpdateNewsSchema),
-    defaultValues: formValues(news, categories),
+    defaultValues: formValues(news),
   });
 
   const thumbnail = watch("thumbnail");
@@ -87,7 +87,7 @@ export function useUpdateNewsForm(news: INews, categories: NewsCategory[] = []) 
     selectedAssets.some((asset, index) => asset.key !== originalAssets[index]?.key);
 
   const resetEditing = () => {
-    reset(formValues(savedNews, categories));
+    reset(formValues(savedNews));
     setSelectedAssets(savedAssets(savedNews));
     setDraggedItemIndex(null);
     setDragOverItemIndex(null);
@@ -108,7 +108,7 @@ export function useUpdateNewsForm(news: INews, categories: NewsCategory[] = []) 
 
   const submit = handleSubmit(async (data) => {
     if (!isEdit) return;
-    const changed = changedFields(data, formValues(savedNews, categories));
+    const changed = changedFields(data, formValues(savedNews));
     const newAdditionalImages = selectedAssets.flatMap((asset) =>
       asset.source instanceof File ? [asset.source] : [],
     );
@@ -183,7 +183,7 @@ export function useUpdateNewsForm(news: INews, categories: NewsCategory[] = []) 
       ],
     };
     setSavedNews(latestNews);
-    reset(formValues(latestNews, categories));
+    reset(formValues(latestNews));
     setSelectedAssets(savedAssets(latestNews));
     setDraggedItemIndex(null);
     setDragOverItemIndex(null);

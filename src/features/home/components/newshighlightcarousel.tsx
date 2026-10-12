@@ -2,11 +2,11 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { INewsInformation } from "@/features/news/domain/news";
+import { INewsBulletin } from "@/features/news/domain/news";
 import { useState, useEffect } from "react";
 
 interface NewsHighlightCarouselProps {
-  newsHighlight: INewsInformation[];
+  newsHighlight: INewsBulletin[];
 }
 
 const isValidUrl = (url?: string | null) => {
@@ -19,7 +19,7 @@ const isValidUrl = (url?: string | null) => {
   );
 };
 
-const getImageUrl = (item: INewsInformation, isMain: boolean = false) => {
+const getImageUrl = (item: INewsBulletin, isMain: boolean = false) => {
   const thumbnail = item.news?.images?.find((image) => image.imageType === "THUMBNAIL")?.imageUrl ?? item.thumbnailURL;
   const highlight = item.news?.highlightURL ?? undefined;
 
@@ -41,7 +41,7 @@ const NewsCard = ({
   priority = false,
   className = "",
 }: {
-  item: INewsInformation;
+  item: INewsBulletin;
   isMain?: boolean;
   priority?: boolean;
   className?: string;
@@ -72,7 +72,7 @@ const NewsCard = ({
 const NewsHighlightCarousel = ({
   newsHighlight,
 }: NewsHighlightCarouselProps) => {
-  const [rePositionNews, setPositions] = useState<INewsInformation[]>(
+  const [rePositionNews, setPositions] = useState<INewsBulletin[]>(
     newsHighlight || []
   );
 

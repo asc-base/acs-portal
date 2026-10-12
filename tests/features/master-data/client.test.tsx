@@ -8,8 +8,6 @@ import { useMasterData } from "@/features/master-data/client";
 const data = {
   roles: [],
   typeCourses: [],
-  tagsGroups: [],
-  tags: [],
   prefixes: [],
   newsCategories: [],
   fields: [], categories: [], projectTypes: [],

@@ -15,7 +15,7 @@ const news: INews = {
   dueDate: null,
   createdDate: "2026-10-08T08:00:00.000Z",
   updatedDate: "2026-10-08T08:00:00.000Z",
-  tag: { id: 1, name: "News", tagsGroupsId: 1 },
+  category: null,
 };
 const response = { data: news, status: 200, statusCode: 200 };
 const image = (name: string) => new File([name], name, { type: "image/png" });
@@ -254,6 +254,7 @@ describe("bulletin presentation rules", () => {
       expect(await service.getNewsBulletins(type)).toEqual([
         {
           id: 91,
+          newsID: news.id,
           type,
           news: nestedNews,
           thumbnailURL: url,

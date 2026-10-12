@@ -61,7 +61,6 @@ const firstNews: INews = {
   dueDate: null,
   createdDate: "2026-10-08T08:00:00.000Z",
   updatedDate: "2026-10-08T08:00:00.000Z",
-  tag: { id: 1, name: "Legacy category", tagsGroupsId: 1 },
   category: { id: 2, name: "Current category", code: "CURRENT" },
 };
 const secondNews: INews = {
@@ -98,6 +97,7 @@ beforeEach(() => {
   service.getNewsBulletins.mockImplementation(async (type) =>
     Array.from(enabled, (newsID) => ({
       id: 91,
+      newsID,
       type,
       news: newsID === firstNews.id ? firstNews : secondNews,
       thumbnailURL: firstNews.thumbnailURL,
@@ -160,6 +160,7 @@ describe("NewsBulletinManager", () => {
         pending.resolve([
           {
             id: 91,
+            newsID: firstNews.id,
             type,
             news: firstNews,
             thumbnailURL: firstNews.thumbnailURL,
@@ -175,13 +176,12 @@ describe("NewsBulletinManager", () => {
         "desc",
         undefined,
         "title",
-        undefined,
       );
       expect(service.getNewsBulletins).toHaveBeenCalledWith(type);
       expect(switches[0]).toHaveProperty("checked", true);
       expect(switches[1]).toHaveProperty("checked", false);
       expect(screen.getByText("Current category")).toBeTruthy();
-      expect(screen.getByText("Legacy category")).toBeTruthy();
+      expect(screen.getByText("ข่าวสาร")).toBeTruthy();
       const images = container.querySelectorAll("img");
       expect(images[0].getAttribute("src")).toBe(imageURL);
       expect(images[0].style.objectPosition).toBe(position);
@@ -204,7 +204,6 @@ describe("NewsBulletinManager", () => {
         "desc",
         undefined,
         "title",
-        undefined,
       ),
     );
     const callsBeforeTyping = service.getNews.mock.calls.length;
@@ -222,7 +221,6 @@ describe("NewsBulletinManager", () => {
         "desc",
         "ข่าว A&B",
         "title",
-        undefined,
       ),
     );
     fireEvent.click(screen.getByRole("button", { name: "Go to page 2" }));
@@ -235,7 +233,6 @@ describe("NewsBulletinManager", () => {
         "desc",
         "ข่าว A&B",
         "title",
-        undefined,
       ),
     );
     fireEvent.change(screen.getByRole("textbox", { name: "ค้นหาข่าว" }), {
@@ -251,7 +248,6 @@ describe("NewsBulletinManager", () => {
         "desc",
         undefined,
         "title",
-        undefined,
       ),
     );
   });
@@ -340,7 +336,6 @@ describe("NewsBulletinManager", () => {
         "desc",
         "retry",
         "title",
-        undefined,
       );
     },
   );

@@ -32,7 +32,7 @@ beforeEach(() => {
     }),
   } as never);
   getNews.mockImplementation(async (...args) => ({
-    rows: { 1: activity, 2: complete, 3: student }[args[7] as 1 | 2 | 3],
+    rows: { 1: activity, 2: complete, 3: student }[args[2] as 1 | 2 | 3],
   }));
   getNewsBulletins.mockImplementation(async (type) =>
     type === "ANNOUNCEMENT" ? announcement : highlight,
@@ -45,9 +45,9 @@ describe("async home page", () => {
     expect(createNewsServerService).toHaveBeenCalledOnce();
     expect(createMasterDataServerService).toHaveBeenCalledOnce();
     expect(getNews.mock.calls).toEqual([
-      [1, 6, undefined, undefined, undefined, undefined, undefined, 1],
-      [1, 6, undefined, undefined, undefined, undefined, undefined, 2],
-      [1, 6, undefined, undefined, undefined, undefined, undefined, 3],
+      [1, 6, 1],
+      [1, 6, 2],
+      [1, 6, 3],
     ]);
     expect(getNewsBulletins.mock.calls).toEqual([
       ["ANNOUNCEMENT"],
@@ -59,6 +59,7 @@ describe("async home page", () => {
       initNewsActivityStudent: student,
       initAnnoucement: announcement,
       initNewsHighlight: highlight,
+      newsCategoryIds: { ANNOUNCEMENT: 1, STUDENT_ACHIEVEMENT: 2, STUDENT_ACTIVITY: 3 },
     });
   });
 
@@ -66,7 +67,7 @@ describe("async home page", () => {
     "isolates failure of request %s from other successful requests",
     async (failed) => {
       getNews.mockImplementation(async (...args) => {
-        const categoryId = args[7] as 1 | 2 | 3;
+        const categoryId = args[2] as 1 | 2 | 3;
         if (categoryId - 1 === failed) throw new Error("News unavailable");
         return { rows: { 1: activity, 2: complete, 3: student }[categoryId] };
       });
@@ -76,7 +77,9 @@ describe("async home page", () => {
         return type === "ANNOUNCEMENT" ? announcement : highlight;
       });
       const page = await MainPage();
-      expect(Object.values(page.props)).toEqual(
+      const { newsCategoryIds, ...newsProps } = page.props;
+      expect(newsCategoryIds).toEqual({ ANNOUNCEMENT: 1, STUDENT_ACHIEVEMENT: 2, STUDENT_ACTIVITY: 3 });
+      expect(Object.values(newsProps)).toEqual(
         [activity, complete, student, announcement, highlight].map(
           (value, i) => (i === failed ? [] : value),
         ),
@@ -93,9 +96,12 @@ describe("async home page", () => {
       initNewsActivityStudent: [],
       initAnnoucement: [],
       initNewsHighlight: [],
+      newsCategoryIds: { ANNOUNCEMENT: 1, STUDENT_ACHIEVEMENT: 2, STUDENT_ACTIVITY: 3 },
     });
     getNews.mockRejectedValue(new Error("Unavailable"));
-    expect(Object.values((await MainPage()).props)).toEqual([
+    const { newsCategoryIds, ...newsProps } = (await MainPage()).props;
+    expect(newsCategoryIds).toEqual({ ANNOUNCEMENT: 1, STUDENT_ACHIEVEMENT: 2, STUDENT_ACTIVITY: 3 });
+    expect(Object.values(newsProps)).toEqual([
       [],
       [],
       [],

@@ -15,6 +15,7 @@ const props = {
   initNewsActivityStudent: Array.from({ length: 6 }, (_, i) =>
     newsItem(i + 21),
   ),
+  newsCategoryIds: { ANNOUNCEMENT: 1, STUDENT_ACHIEVEMENT: 2, STUDENT_ACTIVITY: 3 },
 };
 const originalWidth = window.innerWidth;
 
@@ -92,7 +93,7 @@ describe("home news navigation", () => {
           "https://example.test",
         ).searchParams;
         expect(query.get("category")).toBe(name);
-        expect(query.get("tagId")).toBe(String(16 + i));
+        expect(query.get("newsCategoryId")).toBe(String(i + 1));
         expect(query.get("page")).toBe("1");
         expect(query.get("pageSize")).toBe("12");
       });
@@ -111,6 +112,7 @@ describe("home news navigation", () => {
         initNewsActivity={[]}
         initNewsComplete={[]}
         initNewsActivityStudent={[]}
+        newsCategoryIds={{ ANNOUNCEMENT: 1, STUDENT_ACHIEVEMENT: 2, STUDENT_ACTIVITY: 3 }}
       />,
     );
     [

@@ -24,11 +24,6 @@ const page = async ({ params }: PageProps) => {
   const recommendNews = await newsService.getNews(
     1,
     6,
-    newsInfo.category ? undefined : newsInfo.tag?.id,
-    undefined,
-    undefined,
-    undefined,
-    undefined,
     newsInfo.category?.id,
   );
 

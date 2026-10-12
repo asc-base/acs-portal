@@ -7,6 +7,7 @@ import {
   ProjectPageResponseSchema,
   UpdateProjectFormSchema,
   UpdateProjectRequestSchema,
+  QueryProjectSchema,
   projectFormToCreateRequest,
   projectFormToUpdateRequest,
 } from "@/features/projects/schema/project";
@@ -142,7 +143,6 @@ describe("project request mapping", () => {
       presentationURL: project.presentationURL,
       techStacks: ["TypeScript"],
       categoryIds: [5],
-      projectTypeIds: [2],
       newMembers: [
         { userID: 11, roleID: 2 },
         { userID: 10, roleID: 3 },
@@ -180,7 +180,6 @@ describe("project response schemas", () => {
     assetsURL: ["https://example.test/asset.png"],
     images: [{ imageUrl: "https://example.test/asset.png", contentType: null, sortOrder: 0 }],
     techStacks: ["TypeScript"],
-    tag: [{ id: 2, name: "Software", tagsGroupsId: 1 }],
     fields: [],
     categories: [],
     projectTypes: [],
@@ -198,7 +197,7 @@ describe("project response schemas", () => {
     }],
   };
 
-  it("accepts the current project DTO with optional legacy fields absent", () => {
+  it("accepts the current project DTO with lookup arrays", () => {
     expect(ProjectSchema.parse(projectDTO)).toEqual(projectDTO);
     expect(ProjectResponseSchema.parse({ status: 200, statusCode: 200, data: projectDTO }).data).toEqual(projectDTO);
     expect(ProjectPageResponseSchema.parse({
@@ -213,5 +212,13 @@ describe("project response schemas", () => {
   it("rejects a malformed member and malformed pagination", () => {
     expect(ProjectSchema.safeParse({ ...projectDTO, member: [{ id: 7 }] }).success).toBe(false);
     expect(ProjectPageResponseSchema.safeParse({ status: 200, data: { rows: [], totalRecords: "1", page: 1, pageSize: 10 } }).success).toBe(false);
+  });
+
+  it("rejects legacy tag payloads and project filters", () => {
+    const request = projectFormToCreateRequest(project);
+    expect(CreateProjectRequestSchema.safeParse({ ...request, tagsID: [16] }).success).toBe(false);
+    expect(UpdateProjectRequestSchema.safeParse({ newtagsID: [16] }).success).toBe(false);
+    expect(QueryProjectSchema.safeParse({ fields: "16" }).success).toBe(false);
+    expect(QueryProjectSchema.safeParse({ tagID: "16" }).success).toBe(false);
   });
 });

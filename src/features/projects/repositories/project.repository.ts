@@ -28,10 +28,6 @@ export class ProjectRepository implements IProjectRepository {
     if (query.fieldIds) query.fieldIds.forEach((id) => params.append("fieldIds", id));
     if (query.categoryIds) query.categoryIds.forEach((id) => params.append("categoryIds", id));
     if (query.projectTypeIds) query.projectTypeIds.forEach((id) => params.append("projectTypeIds", id));
-    query.tagID?.forEach((id) => params.append("tagID", id));
-    query.fields?.forEach((id) => params.append("tagID", id));
-    query.categories?.forEach((id) => params.append("tagID", id));
-    query.types?.forEach((id) => params.append("tagID", id));
     if (query.courses && query.courses.length > 0)
       query.courses.forEach((id) => params.append("courseID", id));
     if (query.classBooks && query.classBooks.length > 0)

@@ -3,72 +3,21 @@ import { MasterDataSchema } from "@/features/master-data/schema/master-data";
 
 const dto = {
   roles: [{ id: 1, name: "Admin" }],
-  typeCourses: [
-    { id: 2, type: "Core", description: null },
-    { id: 3, type: "Elective" },
-  ],
-  tagsGroups: [
-    {
-      id: 4,
-      name: "project",
-      tags: [{ id: 5, name: "research", tagsGroupsId: 4 }],
-    },
-  ],
-  tags: [{ id: 5, name: "research", tagsGroupsId: 4 }],
-  prefixes: [
-    {
-      id: 6,
-      sequence: 1,
-      nameTh: "อาจารย์",
-      nameEn: "Lecturer",
-      shortNameTh: "อ.",
-      shortNameEn: "Lect.",
-    },
-  ],
+  typeCourses: [{ id: 2, type: "Core", description: null }],
+  prefixes: [{ id: 6, sequence: 1, nameTh: "อาจารย์", nameEn: "Lecturer", shortNameTh: "อ.", shortNameEn: "Lect." }],
   newsCategories: [{ id: 7, code: "NEWS", name: "News" }],
-  fields: [], categories: [], projectTypes: [],
+  fields: [{ id: 1, name: "AI" }],
+  categories: [{ id: 1, name: "Education" }],
+  projectTypes: [{ id: 1, name: "Research" }],
 };
 
 describe("MasterDataSchema", () => {
-  it("parses the current master-data DTO and preserves nullable optional fields", () => {
+  it("parses the master-data contract with separate classification lookups", () => {
     expect(MasterDataSchema.parse(dto)).toEqual(dto);
   });
 
-  it("defaults missing tags on all groups while preserving top-level tags", () => {
-    const tagsGroups = Array.from({ length: 5 }, (_, index) => ({
-      id: index + 1,
-      name: `group-${index + 1}`,
-    }));
-
-    expect(MasterDataSchema.parse({ ...dto, tagsGroups })).toMatchObject({
-      tagsGroups: tagsGroups.map((group) => ({ ...group, tags: [] })),
-      tags: dto.tags,
-    });
-  });
-
-  it("preserves valid nested tags and rejects malformed nested tags", () => {
-    const validTag = { id: 5, name: "research", tagsGroupsId: 4 };
-
-    expect(
-      MasterDataSchema.parse({
-        ...dto,
-        tagsGroups: [{ id: 4, name: "project", tags: [validTag] }],
-      }).tagsGroups[0].tags,
-    ).toEqual([validTag]);
-
-    for (const tags of [null, [{ id: 5, name: "research" }]]) {
-      expect(() =>
-        MasterDataSchema.parse({
-          ...dto,
-          tagsGroups: [{ id: 4, name: "project", tags }],
-        }),
-      ).toThrow();
-    }
-  });
-
-  it("rejects malformed master-data references", () => {
-    expect(() =>
-      MasterDataSchema.parse({ ...dto, tags: [{ id: 5, name: "research" }] }),
-    ).toThrow();
+  it("rejects retired tags and tag groups instead of ignoring them", () => {
+    expect(MasterDataSchema.safeParse({ ...dto, tags: [] }).success).toBe(false);
+    expect(MasterDataSchema.safeParse({ ...dto, tagsGroups: [] }).success).toBe(false);
   });
 });

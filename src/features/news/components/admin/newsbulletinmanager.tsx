@@ -33,7 +33,7 @@ export function NewsBulletinManager({ type }: { type: "HIGHLIGHT" | "ANNOUNCEMEN
               </div>
               <div className="min-w-0 flex-1">
                 <p className="truncate font-medium">{news.title}</p>
-                <p className="text-sm text-neutral04">{news.category?.name ?? news.tag?.name}</p>
+                <p className="text-sm text-neutral04">{news.category?.name ?? "ข่าวสาร"}</p>
               </div>
               <Switch checked={enabled.has(news.id)} disabled={busy === news.id} onChange={() => void toggle(news)} inputProps={{ "aria-label": `แสดง ${news.title} ใน ${heading}` }} />
             </div>

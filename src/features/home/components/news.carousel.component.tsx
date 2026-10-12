@@ -17,15 +17,16 @@ interface NewsCarouselComponentProps {
   activeIndex: number;
   handleSetActiveIndex: (index: number) => void;
   title: string;
-  tagId: number;
+  newsCategoryCode: "ANNOUNCEMENT" | "STUDENT_ACHIEVEMENT" | "STUDENT_ACTIVITY";
+  newsCategoryId?: number;
 }
 
 type EmptyStateType = "news" | "achievement" | "activity";
 
-const EmptyStateTypeMap: Record<number, EmptyStateType> = {
-  16: "news",
-  17: "achievement",
-  18: "activity",
+const EmptyStateTypeMap: Record<NewsCarouselComponentProps["newsCategoryCode"], EmptyStateType> = {
+  ANNOUNCEMENT: "news",
+  STUDENT_ACHIEVEMENT: "achievement",
+  STUDENT_ACTIVITY: "activity",
 };
 
 const EmptyStateMap: Record<
@@ -73,11 +74,15 @@ export const NewsCarouselComponent = ({
   activeIndex,
   handleSetActiveIndex,
   title,
-  tagId,
+  newsCategoryCode,
+  newsCategoryId,
 }: NewsCarouselComponentProps) => {
-  const emptyStateType = EmptyStateTypeMap[tagId] ?? "news";
+  const emptyStateType = EmptyStateTypeMap[newsCategoryCode];
   const emptyStateConfig = EmptyStateMap[emptyStateType];
   const childrenArray = React.Children.toArray(children);
+  const newsHref = newsCategoryId === undefined
+    ? "/news"
+    : `/news?category=${encodeURIComponent(title)}&page=1&pageSize=12&newsCategoryId=${newsCategoryId}`;
 
   if (!news || news.length === 0) {
     return (
@@ -85,7 +90,7 @@ export const NewsCarouselComponent = ({
         <div className="flex items-center justify-between">
           <h3 className="text-accent04 font-bold lg:text-[24px]">{title}</h3>
           <Link
-            href={`/news?category=${title}&page=1&pageSize=12&tagId=${tagId}`}
+            href={newsHref}
             className="flex items-center gap-x-1"
           >
             อ่านทั้งหมด
@@ -115,7 +120,7 @@ export const NewsCarouselComponent = ({
       <div className="flex items-center justify-between">
         <h3 className="text-accent04 font-bold lg:text-[24px]">{title}</h3>
         <Link
-          href={`/news?category=${title}&page=1&pageSize=12&tagId=${tagId}`}
+          href={newsHref}
           className="flex items-center gap-x-1"
         >
           อ่านทั้งหมด

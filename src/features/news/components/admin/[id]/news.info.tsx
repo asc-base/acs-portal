@@ -90,7 +90,7 @@ const NewsInfo = ({ news, categories }: NewsInfoProps) => {
     handleCancel,
     startEditing,
     cancelCrop,
-  } = useUpdateNewsForm(news, categories);
+  } = useUpdateNewsForm(news);
 
   const handleFileChange = (
     event: React.ChangeEvent<HTMLInputElement>,
