@@ -25,12 +25,13 @@ export class ProjectRepository implements IProjectRepository {
     if (query.sortOrder) params.set("sortBy", query.sortOrder);
     if (query.page) params.set("page", query.page.toString());
     if (query.pageSize) params.set("pageSize", query.pageSize.toString());
-    if (query.fields && query.fields.length > 0)
-      query.fields.forEach((id) => params.append("tagID", id));
-    if (query.categories && query.categories.length > 0)
-      query.categories.forEach((id) => params.append("tagID", id));
-    if (query.types && query.types.length > 0)
-      query.types.forEach((id) => params.append("tagID", id));
+    if (query.fieldIds) query.fieldIds.forEach((id) => params.append("fieldIds", id));
+    if (query.categoryIds) query.categoryIds.forEach((id) => params.append("categoryIds", id));
+    if (query.projectTypeIds) query.projectTypeIds.forEach((id) => params.append("projectTypeIds", id));
+    query.tagID?.forEach((id) => params.append("tagID", id));
+    query.fields?.forEach((id) => params.append("tagID", id));
+    query.categories?.forEach((id) => params.append("tagID", id));
+    query.types?.forEach((id) => params.append("tagID", id));
     if (query.courses && query.courses.length > 0)
       query.courses.forEach((id) => params.append("courseID", id));
     if (query.classBooks && query.classBooks.length > 0)

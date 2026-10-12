@@ -22,11 +22,14 @@ beforeEach(() => {
   >;
   vi.mocked(createNewsServerService).mockResolvedValue(service);
   vi.mocked(createMasterDataServerService).mockResolvedValue({
-    getMasterData: async () => ({ newsCategories: [
-      { id: 1, code: "ANNOUNCEMENT", name: "Announcement" },
-      { id: 2, code: "STUDENT_ACHIEVEMENT", name: "Complete" },
-      { id: 3, code: "STUDENT_ACTIVITY", name: "Student" },
-    ] }),
+    getMasterData: async () => ({
+      newsCategories: [
+        { id: 1, code: "ANNOUNCEMENT", name: "Announcement" },
+        { id: 2, code: "STUDENT_ACHIEVEMENT", name: "Complete" },
+        { id: 3, code: "STUDENT_ACTIVITY", name: "Student" },
+      ],
+      fields: [], categories: [], projectTypes: [],
+    }),
   } as never);
   getNews.mockImplementation(async (...args) => ({
     rows: { 1: activity, 2: complete, 3: student }[args[7] as 1 | 2 | 3],

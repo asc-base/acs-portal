@@ -28,6 +28,7 @@ const data: MasterData = {
     },
   ],
   newsCategories: [{ id: 10, code: "NEWS", name: "News" }],
+  fields: [], categories: [], projectTypes: [],
 };
 
 const response = {

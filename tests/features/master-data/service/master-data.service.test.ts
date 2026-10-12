@@ -10,6 +10,7 @@ const data: MasterData = {
   tagsGroups: [],
   prefixes: [],
   newsCategories: [],
+  fields: [], categories: [], projectTypes: [],
 };
 const response = { data };
 

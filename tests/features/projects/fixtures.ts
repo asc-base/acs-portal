@@ -16,6 +16,9 @@ export const projectFixture: IProject = {
   images: [{ imageUrl: "https://example.test/asset.png", contentType: null, sortOrder: 0 }],
   techStacks: ["TypeScript"],
   tag: [{ id: 2, name: "Software", tagsGroupsId: 1 }],
+  fields: [{ id: 1, name: "Artificial intelligence" }],
+  categories: [{ id: 1, name: "Education" }],
+  projectTypes: [{ id: 1, name: "Research" }],
   member: [{
     id: 7,
     email: "student@example.test",

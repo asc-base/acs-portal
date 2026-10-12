@@ -92,6 +92,8 @@ describe("project form controllers", () => {
     const project: IProject = {
       ...projectFixture,
       tag: [...projectFixture.tag, { id: 6, name: "Old category", tagsGroupsId: 3 }],
+      categories: [{ id: 1, name: "Education" }, { id: 5, name: "Business" }],
+      projectTypes: [{ id: 1, name: "Research" }],
       member: [
         ...projectFixture.member,
         { ...projectFixture.member[0]!, id: 9, email: "advisor@example.test", role: { id: 3, name: "Advisor" } },
@@ -122,8 +124,10 @@ describe("project form controllers", () => {
     const body = fetch.mock.calls[0]?.[1]?.body as FormData;
     expect(body.get("newCoursesID")).toBe("[8]");
     expect(body.get("deletedCoursesID")).toBe("[3]");
-    expect(body.get("newtagsID")).toBe("[5]");
-    expect(body.get("deletedtagsID")).toBe("[6]");
+    expect(body.get("categoryIds")).toBe("[5]");
+    expect(body.get("projectTypeIds")).toBe("[2]");
+    expect(body.has("newtagsID")).toBe(false);
+    expect(body.has("deletedtagsID")).toBe(false);
     expect(body.get("newMembers")).toBe('[{"userID":11,"roleID":2}]');
     expect(body.get("deletedmembersID")).toBe("[7]");
     expect(body.get("thumbnailFile")).toBe(thumbnail);

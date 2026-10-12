@@ -206,7 +206,7 @@ describe("create student controller", () => {
     const image = new File(["cropped"], "profile.png", { type: "image/png" });
     const fetch = mockFetch((url, init) => {
       if (url.endsWith("/v1/master-data")) {
-        return envelope({ roles: [], typeCourses: [], tagsGroups: [], tags: [], prefixes: [], newsCategories: [] });
+        return envelope({ roles: [], typeCourses: [], tagsGroups: [], tags: [], prefixes: [], newsCategories: [], fields: [], categories: [], projectTypes: [] });
       }
       if (url.endsWith("/v1/students") && init?.method === "POST") {
         request = init.body as FormData;

@@ -5,7 +5,6 @@ import { styled } from "@mui/material/styles";
 import MenuItem from "@mui/material/MenuItem";
 import Alert from "@mui/material/Alert";
 import Image from "next/image";
-import { Tag } from "@/shared/types/list-type";
 import { RHFTextField } from "@/shared/components/form/RHFTextField";
 import { RHFSelect } from "@/shared/components/form/RHFSelect";
 import { ConfirmModal } from "@/shared/components/modal/confirmModal";
@@ -48,8 +47,8 @@ export const FormUpdateProject: FC<FormUpdateProjectProps> = ({ projectId, initi
   const courses = initialCourses;
   const students = initialStudents;
   const professors = initialProfessors;
-  const types: Tag[] = initialMasterData?.tags?.filter((t) => t.tagsGroupsId === 1) || [];
-  const categories: Tag[] = initialMasterData?.tags?.filter((t) => t.tagsGroupsId === 3) || [];
+  const types = initialMasterData.projectTypes;
+  const categories = initialMasterData.categories;
   const {
     selectedFile, imageError, assetsError, isCroping, selectedAssets,
     draggedItemIndex, dragOverItemIndex, tempThumbFile, errorMsg, isError,

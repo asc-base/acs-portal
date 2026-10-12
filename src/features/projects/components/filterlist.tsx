@@ -6,19 +6,19 @@ import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { ICourse } from "@/features/courses/domain/course";
 import Checkbox from "@mui/material/Checkbox";
 import { IClassBook } from "@/features/classbook/domain/classbook";
-import { Tag } from "@/shared/types/list-type";
+import type { ProjectLookup } from "@/shared/schema/references";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
 
 interface FilterComponentProps {
   header: string;
-  list: ICourse[] | IClassBook[] | Tag[];
+  list: ICourse[] | IClassBook[] | ProjectLookup[];
   searchBy: string;
 }
 
 interface FilterListProps {
-  categories: Tag[];
-  fields: Tag[];
-  types: Tag[];
+  categories: ProjectLookup[];
+  fields: ProjectLookup[];
+  types: ProjectLookup[];
   courses: ICourse[];
   classBooks: IClassBook[];
 }
@@ -150,17 +150,17 @@ export const FilterList = ({
           <FilterComponent
             header="ค้นหาผลงานตามประเภท"
             list={fields}
-            searchBy="fields"
+            searchBy="fieldIds"
           />
           <FilterComponent
             header="ค้นหาตามหมวดหมู่"
             list={categories}
-            searchBy="categories"
+            searchBy="categoryIds"
           />
           <FilterComponent
             header="ประเภทของชิ้นงาน"
             list={types}
-            searchBy="types"
+            searchBy="projectTypeIds"
           />
         </div>
       </div>

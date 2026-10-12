@@ -46,6 +46,20 @@ describe("project repository queries", () => {
     expect(params.get("search")).toBe("AI & systems?view=1");
   });
 
+  it("sends each classification ID in its own query namespace", async () => {
+    const http = new HttpHelper();
+    const get = vi.spyOn(http, "get").mockResolvedValue(response(page));
+    await new ProjectRepository("", http).getProjects({
+      fieldIds: ["1"], categoryIds: ["1"], projectTypeIds: ["1"],
+    });
+
+    const params = new URL(get.mock.calls[0]![0], "https://example.test").searchParams;
+    expect(params.getAll("fieldIds")).toEqual(["1"]);
+    expect(params.getAll("categoryIds")).toEqual(["1"]);
+    expect(params.getAll("projectTypeIds")).toEqual(["1"]);
+    expect(params.has("tagID")).toBe(false);
+  });
+
   it("routes list and CRUD calls to their project endpoints and returns responses", async () => {
     const http = new HttpHelper();
     const listResponse = response(page);

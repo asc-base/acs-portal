@@ -26,6 +26,7 @@ const dto = {
     },
   ],
   newsCategories: [{ id: 7, code: "NEWS", name: "News" }],
+  fields: [], categories: [], projectTypes: [],
 };
 
 describe("MasterDataSchema", () => {

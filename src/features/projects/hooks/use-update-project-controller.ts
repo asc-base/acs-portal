@@ -22,8 +22,8 @@ export function useUpdateProjectController(projectId: string, initialProject: IP
   const [isEditMode, setIsEditMode] = useState(false);
   const [previewImageUrl, setPreviewImageUrl] = useState<string | null>(null);
   const initCourses = initialProject.course.map(({ id }) => ({ value: id }));
-  const initTypes = initialProject.tag.filter(({ tagsGroupsId }) => tagsGroupsId === 1).map(({ id }) => ({ value: id }));
-  const initCategories = initialProject.tag.filter(({ tagsGroupsId }) => tagsGroupsId === 3).map(({ id }) => ({ value: id }));
+  const initTypes = initialProject.projectTypes.map(({ id }) => ({ value: id }));
+  const initCategories = initialProject.categories.map(({ id }) => ({ value: id }));
   const initTechStacks = initialProject.techStacks.map((value) => ({ value }));
   const initStudents = initialProject.member.filter(({ role }) => role.id === 2).map(({ id }) => ({ userID: id }));
   const initAdvisors = initialProject.member.filter(({ role }) => role.id === 3).map(({ id }) => ({ userID: id }));

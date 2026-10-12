@@ -15,11 +15,12 @@ function ProjectCardBase({ data }: ProjectCardProps) {
     title,
     thumbnailURL,
     member,
-    tag,
+    categories,
+    fields,
   } = data;
 
-  const projectCategories = tag?.filter((t) => t.tagsGroupsId === 3) || [];
-  const projectFields = tag?.filter((t) => t.tagsGroupsId === 2) || [];
+  const projectCategories = categories;
+  const projectFields = fields;
 
   return (
     <>

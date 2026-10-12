@@ -12,6 +12,7 @@ const data = {
   tags: [],
   prefixes: [],
   newsCategories: [],
+  fields: [], categories: [], projectTypes: [],
 };
 
 afterEach(() => vi.restoreAllMocks());

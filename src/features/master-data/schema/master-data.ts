@@ -2,6 +2,7 @@ import { z } from "zod";
 import { UserPrefixSchema } from "@/shared/schema/profile-response";
 import {
   NewsCategorySchema,
+  ProjectLookupSchema,
   RoleSchema,
   TagGroupSchema,
   TagSchema,
@@ -20,6 +21,9 @@ export const MasterDataSchema = z.object({
   tags: z.array(TagSchema),
   prefixes: z.array(UserPrefixSchema),
   newsCategories: z.array(NewsCategorySchema),
+  fields: z.array(ProjectLookupSchema),
+  categories: z.array(ProjectLookupSchema),
+  projectTypes: z.array(ProjectLookupSchema),
 });
 
 export type MasterData = z.infer<typeof MasterDataSchema>;

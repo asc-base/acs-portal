@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { CourseSchema } from "@/features/courses/schema/course";
-import { RoleSchema, TagSchema } from "@/shared/schema/references";
+import { ProjectLookupSchema, RoleSchema, TagSchema } from "@/shared/schema/references";
 import { UserResponseSchema } from "@/shared/schema/profile-response";
 import { PageMetadataSchema } from "@/shared/schema/page-metadata";
 
@@ -42,7 +42,10 @@ const projectMemberRequest = z.object({ userID: projectId, roleID: projectId });
 export const CreateProjectRequestSchema = z.object({
   ...requestFields,
   coursesID: z.array(projectId),
-  tagsID: z.array(projectId),
+  tagsID: z.array(projectId).optional(),
+  fieldIds: z.array(projectId).optional(),
+  categoryIds: z.array(projectId).optional(),
+  projectTypeIds: z.array(projectId).optional(),
   techStacks: z.array(z.string()),
   members: z.array(projectMemberRequest),
 });
@@ -52,6 +55,9 @@ export const UpdateProjectRequestSchema = z.object({
   figmaURL: z.string().nullable().optional(),
   newtagsID: z.array(projectId).optional(),
   deletedtagsID: z.array(projectId).optional(),
+  fieldIds: z.array(projectId).optional(),
+  categoryIds: z.array(projectId).optional(),
+  projectTypeIds: z.array(projectId).optional(),
   newMembers: z.array(projectMemberRequest).optional(),
   deletedmembersID: z.array(projectId).optional(),
   newCoursesID: z.array(projectId).optional(),
@@ -72,6 +78,10 @@ export const QueryProjectSchema = z.object({
   pageSize: queryPageNumber.optional(),
   sortBy: z.string().optional(),
   sortOrder: z.enum(["asc", "desc"]).optional(),
+  fieldIds: queryList.optional(),
+  categoryIds: queryList.optional(),
+  projectTypeIds: queryList.optional(),
+  tagID: queryList.optional(),
   fields: queryList.optional(),
   categories: queryList.optional(),
   types: queryList.optional(),
@@ -106,6 +116,9 @@ export const ProjectSchema = z.object({
   images: z.array(ProjectImageSchema).optional(),
   techStacks: z.array(z.string()),
   tag: z.array(TagSchema),
+  fields: z.array(ProjectLookupSchema),
+  categories: z.array(ProjectLookupSchema),
+  projectTypes: z.array(ProjectLookupSchema),
   member: z.array(UserResponseSchema.extend({ role: RoleSchema })),
   course: z.array(CourseSchema),
 });
@@ -124,7 +137,8 @@ export const ProjectPageResponseSchema = z
 
 type ProjectRelations = {
   course: { id: number }[];
-  tag: { id: number; tagsGroupsId: number }[];
+  categories: { id: number; name: string }[];
+  projectTypes: { id: number; name: string }[];
   member: { id: number; role: { id: number } }[];
 };
 
@@ -138,7 +152,8 @@ export function projectFormToCreateRequest(data: ProjectFormValues) {
     presentationURL: data.presentationURL,
     figmaURL: "",
     coursesID: data.projectCourses.map(({ value }) => Number(value)),
-    tagsID: [...data.projectTypes, ...data.projectCategories].map(({ value }) => Number(value)),
+    categoryIds: data.projectCategories.map(({ value }) => Number(value)),
+    projectTypeIds: data.projectTypes.map(({ value }) => Number(value)),
     techStacks: data.techStacks.map(({ value }) => value),
     members: [
       ...data.students.map(({ userID }) => ({ userID: Number(userID), roleID: 2 })),
@@ -154,13 +169,11 @@ export function projectFormToUpdateRequest(
   current: ProjectRelations,
 ) {
   const oldCourses = current.course.map(({ id }) => id);
-  const oldTags = current.tag
-    .filter(({ tagsGroupsId }) => tagsGroupsId === 1 || tagsGroupsId === 3)
-    .map(({ id }) => id);
   const oldStudents = current.member.filter(({ role }) => role.id === 2).map(({ id }) => id);
   const oldAdvisors = current.member.filter(({ role }) => role.id === 3).map(({ id }) => id);
   const courses = data.projectCourses.map(({ value }) => Number(value));
-  const tags = [...data.projectTypes, ...data.projectCategories].map(({ value }) => Number(value));
+  const categories = data.projectCategories.map(({ value }) => Number(value));
+  const projectTypes = data.projectTypes.map(({ value }) => Number(value));
   const students = data.students.map(({ userID }) => Number(userID));
   const advisors = data.advisors.map(({ userID }) => Number(userID));
 
@@ -172,8 +185,8 @@ export function projectFormToUpdateRequest(
     documentURL: data.documentURL,
     presentationURL: data.presentationURL,
     techStacks: data.techStacks.map(({ value }) => value).filter(Boolean),
-    newtagsID: tags.filter((id) => !oldTags.includes(id)),
-    deletedtagsID: oldTags.filter((id) => !tags.includes(id)),
+    categoryIds: categories,
+    projectTypeIds: projectTypes,
     newMembers: [
       ...students.filter((id) => !oldStudents.includes(id)).map((userID) => ({ userID, roleID: 2 })),
       ...advisors.filter((id) => !oldAdvisors.includes(id)).map((userID) => ({ userID, roleID: 3 })),

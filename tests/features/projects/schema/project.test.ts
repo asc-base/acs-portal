@@ -99,7 +99,8 @@ describe("project request mapping", () => {
       presentationURL: project.presentationURL,
       figmaURL: "",
       coursesID: [3, 8],
-      tagsID: [2, 5],
+      categoryIds: [5],
+      projectTypeIds: [2],
       techStacks: ["TypeScript"],
       members: [
         { userID: 7, roleID: 2 },
@@ -124,7 +125,8 @@ describe("project request mapping", () => {
     const current = {
       id: 17,
       course: [{ id: 3 }],
-      tag: [{ id: 2, tagsGroupsId: 1 }, { id: 6, tagsGroupsId: 3 }],
+      categories: [{ id: 6, name: "Old category" }],
+      projectTypes: [{ id: 2, name: "Research" }],
       member: [
         { id: 7, role: { id: 2 } },
         { id: 9, role: { id: 3 } },
@@ -139,8 +141,8 @@ describe("project request mapping", () => {
       documentURL: project.documentURL,
       presentationURL: project.presentationURL,
       techStacks: ["TypeScript"],
-      newtagsID: [5],
-      deletedtagsID: [6],
+      categoryIds: [5],
+      projectTypeIds: [2],
       newMembers: [
         { userID: 11, roleID: 2 },
         { userID: 10, roleID: 3 },
@@ -179,6 +181,9 @@ describe("project response schemas", () => {
     images: [{ imageUrl: "https://example.test/asset.png", contentType: null, sortOrder: 0 }],
     techStacks: ["TypeScript"],
     tag: [{ id: 2, name: "Software", tagsGroupsId: 1 }],
+    fields: [],
+    categories: [],
+    projectTypes: [],
     member: [{ id: 7, email: "student@example.test", firstNameTh: "สมชาย", lastNameTh: "ใจดี", role: { id: 2, name: "Student" } }],
     course: [{
       id: 3,

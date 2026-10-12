@@ -8,7 +8,7 @@ import FilterListRoundedIcon from "@mui/icons-material/FilterListRounded";
 import type { IProject } from "@/features/projects/domain/project";
 import { ProjectCard } from "@/features/projects/components/ProjectCard";
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import TuneIcon from "@mui/icons-material/Tune";
 import { triggerEdgeDrawer } from "tailwindcss-jun-layout";
 
@@ -27,22 +27,31 @@ const ProjectPage: FC<ProjectPageProps> = ({
   projects,
   totalRecords,
   sortBy,
+  sortOrder,
   page,
   pageSize,
 }) => {
   const router = useRouter();
-  const [order, setOrder] = useState<Order>("desc");
+  const searchParams = useSearchParams();
+  const [order, setOrder] = useState<Order>(sortOrder ?? "desc");
   const [firstClick, setFirstClick] = useState(true);
 
   const handleNextPage = (currentPage: number) => {
-    router.push(`/project?page=${currentPage}&pageSize=${pageSize}&sortBy=${sortBy || "createdAt"}&sortOrder=${order}`);
+    const params = new URLSearchParams(searchParams.toString());
+    params.set("page", String(currentPage));
+    params.set("pageSize", String(pageSize));
+    params.set("sortBy", sortBy || "createdAt");
+    params.set("sortOrder", order);
+    router.push(`/project?${params.toString()}`);
   };
 
   const toggleOrder = () => {
     const newOrder = order === "asc" ? "desc" : "asc";
-    router.push(
-      `/project?sortBy=${sortBy || "createdAt"}&sortOrder=${newOrder}`,
-    );
+    const params = new URLSearchParams(searchParams.toString());
+    params.set("sortBy", sortBy || "createdAt");
+    params.set("sortOrder", newOrder);
+    params.set("page", "1");
+    router.push(`/project?${params.toString()}`);
     setOrder(newOrder);
     if (firstClick) setFirstClick(false);
   };

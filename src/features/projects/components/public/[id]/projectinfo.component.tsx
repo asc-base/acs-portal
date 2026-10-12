@@ -27,8 +27,8 @@ interface ProjectInfoProps {
 const ProjectInfoComponent: FC<ProjectInfoProps> = ({ project }) => {
   const [index, setIndex] = useState(0);
 
-  const projectCategories = project?.tag?.filter((t) => t.tagsGroupsId === 3) || [];
-  const projectFields = project?.tag?.filter((t) => t.tagsGroupsId === 2) || [];
+  const projectCategories = project?.categories ?? [];
+  const projectFields = project?.fields ?? [];
 
   const handlePrev = () => {
     setIndex((prev) =>
