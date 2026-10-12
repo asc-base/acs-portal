@@ -5,13 +5,13 @@ const image = new File(["image"], "cover.png", { type: "image/png" });
 const createInput = {
   title: "News title",
   detail: "News details",
-  tagID: 1,
+  newsCategoryId: 1,
   startDate: "2026-10-08T08:00:00.000Z",
   thumbnail: image,
 };
 const updateInput = {
   title: "News title",
-  tag: 1,
+  newsCategoryId: 1,
   startDate: createInput.startDate,
   thumbnail: "https://example.test/cover.png",
 };
@@ -36,8 +36,8 @@ describe("CreateNewsSchema", () => {
     ["empty title", { title: "" }, "title"],
     ["missing detail", { detail: undefined }, "detail"],
     ["empty detail", { detail: "" }, "detail"],
-    ["unselected category", { tagID: 0 }, "tagID"],
-    ["string category", { tagID: "1" }, "tagID"],
+    ["unselected category", { newsCategoryId: 0 }, "newsCategoryId"],
+    ["string category", { newsCategoryId: "1" }, "newsCategoryId"],
     ["missing start date", { startDate: undefined }, "startDate"],
     ["empty start date", { startDate: "" }, "startDate"],
     ["invalid start date", { startDate: "not-a-date" }, "startDate"],
@@ -81,7 +81,7 @@ describe("UpdateNewsSchema", () => {
 
   it.each([
     ["missing title", { title: undefined }, "title"],
-    ["missing category", { tag: undefined }, "tag"],
+    ["missing category", { newsCategoryId: undefined }, "newsCategoryId"],
     ["empty start date", { startDate: "" }, "startDate"],
     ["invalid start date", { startDate: "not-a-date" }, "startDate"],
     ["missing cover", { thumbnail: undefined }, "thumbnail"],

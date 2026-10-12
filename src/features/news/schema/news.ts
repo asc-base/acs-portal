@@ -92,6 +92,7 @@ export const NewsQuerySchema = z.object({
   page: QueryNumberSchema.optional(),
   pageSize: QueryNumberSchema.optional(),
   tagID: QueryNumberSchema.optional(),
+  newsCategoryId: QueryNumberSchema.optional(),
   orderBy: z.string().optional(),
   sortBy: z.string().optional(),
   search: z.string().optional(),
@@ -109,7 +110,7 @@ export const FocalPointSchema = z.object({
 export const CreateNewsSchema = z.object({
   title: z.string().min(1, "กรุณากรอกหัวข้อ"),
   detail: z.string().min(1, "กรุณากรอกรายละเอียด"),
-  tagID: z.number().min(1, "กรุณาเลือกหมวดหมู่"),
+  newsCategoryId: z.number().min(1, "กรุณาเลือกหมวดหมู่"),
   startDate: z
     .string()
     .min(1, "กรุณาเลือกวันที่เริ่มต้น")
@@ -132,7 +133,7 @@ export const UpdateNewsSchema = z.object({
       message: "รูปแบบวันที่ไม่ถูกต้อง",
     }),
   dueDate: z.string().optional(),
-  tag: z.number(),
+  newsCategoryId: z.number().min(1, "กรุณาเลือกหมวดหมู่"),
   detail: z.string().optional(),
   thumbnail: z.union([z.string().trim().min(1), z.file()]),
   thumbnailImage: z.union([z.string().trim().min(1), z.file()]).optional(),

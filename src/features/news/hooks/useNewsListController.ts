@@ -13,7 +13,7 @@ export function useNewsListController() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const deleteMutation = useDeleteNews();
-  const [category, setCategory] = useState("all");
+  const category = searchParams.get("newsCategoryId") ?? "all";
   const [confirmModal, setConfirmModal] = useState<ConfirmModalProps | null>(null);
   const { control, reset, watch } = useForm<NewsSearch>({
     resolver: zodResolver(NewsSearchSchema),
@@ -50,10 +50,10 @@ export function useNewsListController() {
   );
 
   const handleFilterCategory = (value: string) => {
-    setCategory(value);
     const params = new URLSearchParams(searchParams.toString());
-    if (value === "all") params.delete("tagID");
-    else params.set("tagID", value);
+    params.delete("tagID");
+    if (value === "all") params.delete("newsCategoryId");
+    else params.set("newsCategoryId", value);
     params.set("page", "1");
     router.push(`${pathname}?${params.toString()}`, { scroll: false });
   };

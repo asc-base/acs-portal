@@ -21,7 +21,7 @@ export class NewsService {
     const formData = new FormData();
     formData.append("title", payload.title);
     formData.append("detail", payload.detail);
-    formData.append("newsCategoryId", String(payload.tagID));
+    formData.append("newsCategoryId", String(payload.newsCategoryId));
     formData.append("eventStartAt", new Date(payload.startDate).toISOString());
     if (payload.dueDate) {
       formData.append("eventEndAt", new Date(payload.dueDate).toISOString());
@@ -53,11 +53,13 @@ export class NewsService {
     sortBy: string = "desc",
     search?: string,
     searchBy?: string,
+    newsCategoryId?: NewsQueryInput["newsCategoryId"],
   ) {
     const query = NewsQuerySchema.parse({
       page,
       pageSize,
       tagID,
+      newsCategoryId,
       orderBy,
       sortBy,
       search,
@@ -71,6 +73,7 @@ export class NewsService {
       query.sortBy,
       query.search,
       query.searchBy,
+      query.newsCategoryId,
     );
     return response.data;
   }

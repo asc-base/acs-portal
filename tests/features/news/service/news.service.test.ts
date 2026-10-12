@@ -22,7 +22,7 @@ const image = (name: string) => new File([name], name, { type: "image/png" });
 const createInput: CreateNewsInputs = {
   title: news.title,
   detail: news.detail,
-  tagID: 1,
+  newsCategoryId: 1,
   startDate: "2026-10-08T15:00:00+07:00",
   thumbnail: image("card.png"),
 };

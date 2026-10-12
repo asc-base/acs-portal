@@ -257,7 +257,7 @@ const CreateNewsForm = ({ categories }: CreateNewsProps) => {
             )}
           </div>
           <RHFSelect
-            name="tagID"
+            name="newsCategoryId"
             control={control}
             label="หมวดหมู่"
             requiredMark

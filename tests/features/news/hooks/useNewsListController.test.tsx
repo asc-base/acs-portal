@@ -57,7 +57,7 @@ describe("news list controller", () => {
     act(() => result.current.handleFilterCategory("17"));
 
     expect(navigation.router.push).toHaveBeenCalledWith(
-      "/admin/news?page=1&search=News&searchBy=title&tab=active&tagID=17",
+      "/admin/news?page=1&search=News&searchBy=title&tab=active&newsCategoryId=17",
       { scroll: false },
     );
   });

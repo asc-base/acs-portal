@@ -175,6 +175,7 @@ describe("NewsBulletinManager", () => {
         "desc",
         undefined,
         "title",
+        undefined,
       );
       expect(service.getNewsBulletins).toHaveBeenCalledWith(type);
       expect(switches[0]).toHaveProperty("checked", true);
@@ -203,6 +204,7 @@ describe("NewsBulletinManager", () => {
         "desc",
         undefined,
         "title",
+        undefined,
       ),
     );
     const callsBeforeTyping = service.getNews.mock.calls.length;
@@ -220,6 +222,7 @@ describe("NewsBulletinManager", () => {
         "desc",
         "ข่าว A&B",
         "title",
+        undefined,
       ),
     );
     fireEvent.click(screen.getByRole("button", { name: "Go to page 2" }));
@@ -232,6 +235,7 @@ describe("NewsBulletinManager", () => {
         "desc",
         "ข่าว A&B",
         "title",
+        undefined,
       ),
     );
     fireEvent.change(screen.getByRole("textbox", { name: "ค้นหาข่าว" }), {
@@ -247,6 +251,7 @@ describe("NewsBulletinManager", () => {
         "desc",
         undefined,
         "title",
+        undefined,
       ),
     );
   });
@@ -335,6 +340,7 @@ describe("NewsBulletinManager", () => {
         "desc",
         "retry",
         "title",
+        undefined,
       );
     },
   );

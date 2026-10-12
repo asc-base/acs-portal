@@ -38,12 +38,12 @@ export class NewsRepository implements INewsRepository {
     sortBy?: string,
     search?: string,
     searchBy?: string,
+    newsCategoryId?: number,
   ): Promise<ApiResponse<Pageable<INews>>> {
     let url = `/v1/news/?page=${page}&pageSize=${pageSize}`;
 
-    if (tagID && tagID !== null) {
-      url += `&tagID=${encodeURIComponent(tagID)}`;
-    }
+    if (tagID) url += `&tagID=${encodeURIComponent(tagID)}`;
+    if (newsCategoryId !== undefined) url += `&newsCategoryId=${encodeURIComponent(newsCategoryId)}`;
 
     if (orderBy && orderBy !== "") {
       url += `&orderBy=${encodeURIComponent(orderBy)}`;

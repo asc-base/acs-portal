@@ -39,6 +39,7 @@ export function useNews(query: QueryNews, enabled = true) {
         parsed.sortBy,
         parsed.search,
         parsed.searchBy,
+        parsed.newsCategoryId,
       ),
     retry: false,
     enabled,

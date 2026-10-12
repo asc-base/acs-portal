@@ -31,7 +31,7 @@ export function useCreateNewsForm() {
       title: "",
       startDate: "",
       dueDate: "",
-      tagID: 0,
+      newsCategoryId: 0,
       detail: "",
       thumbnail: undefined,
       thumbnailImage: undefined,

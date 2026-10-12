@@ -12,6 +12,7 @@ export interface INewsRepository {
     sortBy?: string,
     search?: string,
     searchBy?: string,
+    newsCategoryId?: number,
   ): Promise<ApiResponse<Pageable<INews>>>;
   getNewsById(id: string): Promise<ApiResponse<INews | null>>;
   updateNews(id: number, news: FormData): Promise<ApiResponse<INews>>;

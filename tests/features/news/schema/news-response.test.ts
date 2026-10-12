@@ -55,10 +55,11 @@ describe("news response schemas", () => {
   });
 
   it("normalizes Next.js query strings and rejects nonnumeric pagination", () => {
-    expect(NewsQuerySchema.parse({ page: "2", pageSize: "12", tagID: "16" })).toMatchObject({
+    expect(NewsQuerySchema.parse({ page: "2", pageSize: "12", tagID: "16", newsCategoryId: "1" })).toMatchObject({
       page: 2,
       pageSize: 12,
       tagID: 16,
+      newsCategoryId: 1,
     });
     expect(NewsQuerySchema.safeParse({ page: "not-a-page" }).success).toBe(false);
   });

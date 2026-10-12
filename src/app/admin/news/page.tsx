@@ -24,6 +24,7 @@ const page = async ({ searchParams }: PageProps) => {
     search.sortBy,
     search.search,
     search.searchBy,
+    search.newsCategoryId,
   );
 
   const masterData = await masterDataService.getMasterData();

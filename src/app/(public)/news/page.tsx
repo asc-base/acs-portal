@@ -12,6 +12,8 @@ interface PageProps {
     page?: number;
     pageSize?: number;
     tagId?: number;
+    tagID?: number;
+    newsCategoryId?: number;
     category?: string;
   }>;
 }
@@ -23,7 +25,12 @@ const page = async ({ searchParams }: PageProps) => {
   const { rows, totalRecords, pageSize, page } = await newsService.getNews(
     resolvedSearchParams.page || 1,
     resolvedSearchParams.pageSize || 12,
-    resolvedSearchParams.tagId,
+    resolvedSearchParams.tagID ?? resolvedSearchParams.tagId,
+    undefined,
+    undefined,
+    undefined,
+    undefined,
+    resolvedSearchParams.newsCategoryId,
   );
 
   return (
@@ -33,7 +40,8 @@ const page = async ({ searchParams }: PageProps) => {
       pageSize={pageSize}
       page={page}
       category={resolvedSearchParams.category || ""}
-      tagId={resolvedSearchParams.tagId}
+      tagId={resolvedSearchParams.tagID ?? resolvedSearchParams.tagId}
+      newsCategoryId={resolvedSearchParams.newsCategoryId}
     />
   );
 };

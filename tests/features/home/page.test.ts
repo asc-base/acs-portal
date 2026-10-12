@@ -1,9 +1,11 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import MainPage from "@/app/(public)/home/page";
 import { createNewsServerService } from "@/features/news/server";
+import { createMasterDataServerService } from "@/features/master-data/server";
 import { bulletin, newsItem } from "./test-data";
 
 vi.mock("@/features/news/server", () => ({ createNewsServerService: vi.fn() }));
+vi.mock("@/features/master-data/server", () => ({ createMasterDataServerService: vi.fn() }));
 
 const getNews = vi.fn();
 const getNewsBulletins = vi.fn();
@@ -19,8 +21,15 @@ beforeEach(() => {
     ReturnType<typeof createNewsServerService>
   >;
   vi.mocked(createNewsServerService).mockResolvedValue(service);
-  getNews.mockImplementation(async (_page, _size, tagId) => ({
-    rows: { 16: activity, 17: complete, 18: student }[tagId as 16 | 17 | 18],
+  vi.mocked(createMasterDataServerService).mockResolvedValue({
+    getMasterData: async () => ({ newsCategories: [
+      { id: 1, code: "ANNOUNCEMENT", name: "Announcement" },
+      { id: 2, code: "STUDENT_ACHIEVEMENT", name: "Complete" },
+      { id: 3, code: "STUDENT_ACTIVITY", name: "Student" },
+    ] }),
+  } as never);
+  getNews.mockImplementation(async (...args) => ({
+    rows: { 1: activity, 2: complete, 3: student }[args[7] as 1 | 2 | 3],
   }));
   getNewsBulletins.mockImplementation(async (type) =>
     type === "ANNOUNCEMENT" ? announcement : highlight,
@@ -31,10 +40,11 @@ describe("async home page", () => {
   it("creates the service and maps the five request results to the correct props", async () => {
     const page = await MainPage();
     expect(createNewsServerService).toHaveBeenCalledOnce();
+    expect(createMasterDataServerService).toHaveBeenCalledOnce();
     expect(getNews.mock.calls).toEqual([
-      [1, 6, 16],
-      [1, 6, 17],
-      [1, 6, 18],
+      [1, 6, undefined, undefined, undefined, undefined, undefined, 1],
+      [1, 6, undefined, undefined, undefined, undefined, undefined, 2],
+      [1, 6, undefined, undefined, undefined, undefined, undefined, 3],
     ]);
     expect(getNewsBulletins.mock.calls).toEqual([
       ["ANNOUNCEMENT"],
@@ -52,13 +62,10 @@ describe("async home page", () => {
   it.each([0, 1, 2, 3, 4])(
     "isolates failure of request %s from other successful requests",
     async (failed) => {
-      getNews.mockImplementation(async (_page, _size, tagId) => {
-        if (tagId - 16 === failed) throw new Error("News unavailable");
-        return {
-          rows: { 16: activity, 17: complete, 18: student }[
-            tagId as 16 | 17 | 18
-          ],
-        };
+      getNews.mockImplementation(async (...args) => {
+        const categoryId = args[7] as 1 | 2 | 3;
+        if (categoryId - 1 === failed) throw new Error("News unavailable");
+        return { rows: { 1: activity, 2: complete, 3: student }[categoryId] };
       });
       getNewsBulletins.mockImplementation(async (type) => {
         if ((type === "ANNOUNCEMENT" ? 3 : 4) === failed)

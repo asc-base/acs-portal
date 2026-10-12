@@ -52,7 +52,7 @@ describe("create news form controller", () => {
     act(() => {
       result.current.setValue("title", "News title");
       result.current.setValue("detail", "News details");
-      result.current.setValue("tagID", 16);
+      result.current.setValue("newsCategoryId", 1);
       result.current.setValue("startDate", "2026-10-08T15:00:00+07:00");
       result.current.setValue("dueDate", "2026-10-09T15:00:00+07:00");
     });
@@ -74,7 +74,7 @@ describe("create news form controller", () => {
     expect(Object.fromEntries(body.entries())).toMatchObject({
       title: "News title",
       detail: "News details",
-      newsCategoryId: "16",
+      newsCategoryId: "1",
       eventStartAt: "2026-10-08T08:00:00.000Z",
       eventEndAt: "2026-10-09T08:00:00.000Z",
       cardImage: card,

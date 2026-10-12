@@ -93,7 +93,7 @@ const NewsListComponent = (initValue: NewsListComponentProps) => {
             renderValue={(value) => {
               if (value === "all") return "ทั้งหมด";
               return (
-                initValue.categories.find((tag) => String(tag.id) === value)?.name || "ทั้งหมด"
+                initValue.categories.find((category) => String(category.id) === value)?.name || "ทั้งหมด"
               );
             }}
             IconComponent={ExpandMoreIcon}
@@ -106,10 +106,10 @@ const NewsListComponent = (initValue: NewsListComponentProps) => {
               )}
             </MenuItem>
 
-            {initValue.categories.map((tag) => (
-              <MenuItem key={tag.id} value={String(tag.id)}>
-                {tag.name}
-                {category === String(tag.id) && (
+            {initValue.categories.map((categoryItem) => (
+              <MenuItem key={categoryItem.id} value={String(categoryItem.id)}>
+                {categoryItem.name}
+                {category === String(categoryItem.id) && (
                   <DoneIcon fontSize="small" sx={{ ml: 1 }} />
                 )}
               </MenuItem>

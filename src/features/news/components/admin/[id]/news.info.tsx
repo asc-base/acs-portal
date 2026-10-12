@@ -90,7 +90,7 @@ const NewsInfo = ({ news, categories }: NewsInfoProps) => {
     handleCancel,
     startEditing,
     cancelCrop,
-  } = useUpdateNewsForm(news);
+  } = useUpdateNewsForm(news, categories);
 
   const handleFileChange = (
     event: React.ChangeEvent<HTMLInputElement>,
@@ -366,7 +366,7 @@ const NewsInfo = ({ news, categories }: NewsInfoProps) => {
           </div>
 
           <RHFSelect
-            name="tag"
+            name="newsCategoryId"
             control={control}
             label="หมวดหมู่"
             disabled={disabled}

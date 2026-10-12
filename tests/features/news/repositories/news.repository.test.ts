@@ -46,6 +46,15 @@ describe("news query construction", () => {
     expect(params.has("x")).toBe(false);
   });
 
+  it("sends category filters separately while keeping legacy tag filters available", async () => {
+    const http = new HttpHelper();
+    const get = vi.spyOn(http, "get").mockResolvedValue({
+      data: { rows: [], totalRecords: 0, page: 1, pageSize: 12 },
+    });
+    await new NewsRepository("", http).getNews(1, 12, undefined, "", "", "", "", 1);
+    expect(get).toHaveBeenCalledWith("/v1/news/?page=1&pageSize=12&newsCategoryId=1");
+  });
+
   it.each([undefined, 0])(
     "omits empty optional filters (tagID: %s)",
     async (tagID) => {
