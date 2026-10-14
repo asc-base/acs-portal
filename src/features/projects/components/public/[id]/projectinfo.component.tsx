@@ -29,28 +29,19 @@ const ProjectInfoComponent: FC<ProjectInfoProps> = ({ project }) => {
 
   const projectCategories = project?.categories ?? [];
   const projectFields = project?.fields ?? [];
+  const gallery = project.images;
 
   const handlePrev = () => {
-    setIndex((prev) =>
-      prev === 0 ? (project?.assetsURL?.length || 1)- 1 : prev - 1,
-    );
+    if (gallery.length) setIndex((prev) => (prev === 0 ? gallery.length - 1 : prev - 1));
   };
 
   const handleNext = () => {
-    setIndex((prev) =>
-      prev === (project?.assetsURL?.length || 1) - 1 ? 0 : prev + 1,
-    );
+    if (gallery.length) setIndex((prev) => (prev + 1) % gallery.length);
   };
 
   const getVisibleImages = () => {
-    const total = project?.assetsURL?.length || 0;
-    if (total === 0) return ["https://picsum.photos/seed/acs/140/90"];
-    const count = Math.min(3, total);
-    const result = [];
-    for (let i = 0; i < count; i++) {
-      result.push(project.assetsURL[(index + i) % total]);
-    }
-    return result;
+    const count = Math.min(3, gallery.length);
+    return Array.from({ length: count }, (_, offset) => gallery[(index + offset) % gallery.length]!);
   };
 
   const getYouTubeEmbedURL = (url?: string) => {
@@ -67,7 +58,7 @@ const ProjectInfoComponent: FC<ProjectInfoProps> = ({ project }) => {
     return /\.(jpeg|jpg|gif|png|svg|webp)$/i.test(url);
   };
 
-  const currentAssetType = project?.images?.find((image) => image.sortOrder === index)?.contentType;
+  const currentAsset = gallery[index];
 
   return (
     <div className="container mx-auto px-4 py-5 md:px-16">
@@ -101,7 +92,7 @@ const ProjectInfoComponent: FC<ProjectInfoProps> = ({ project }) => {
               "Uncategorized"}
         </h5>
         <h2 className="font-bold">{project?.title}</h2>
-        <h4>{project?.details}</h4>
+        <h4>{project?.detail}</h4>
       </div>
             {/*Presentaion section*/}
       <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
@@ -125,24 +116,24 @@ const ProjectInfoComponent: FC<ProjectInfoProps> = ({ project }) => {
           <h2 className="mb-2 font-bold">ข้อมูลเพิ่มเติม</h2>
           <div className="flex flex-1 flex-col items-center justify-between">
             {/*Main Image*/}
-            {isImage(project?.assetsURL?.[index], currentAssetType) ? (
+            {currentAsset && isImage(currentAsset.imageUrl, currentAsset.contentType) ? (
               <Image
-                src={project?.assetsURL?.[index] ?? "https://picsum.photos/seed/acs/550/200"}
+                src={currentAsset.imageUrl}
                 alt="main"
                 width={550}
                 height={200}
                 className="aspect-video w-full rounded-lg bg-gray-100 object-cover"
               />
-            ) : (
+            ) : currentAsset ? (
               <a 
-                href={project?.assetsURL?.[index]} 
+                href={currentAsset.imageUrl}
                 target="_blank" 
                 className="flex w-full h-[200px] flex-col items-center justify-center rounded-lg bg-gray-200 text-gray-500 hover:bg-gray-300 transition-all"
               >
                 <InsertDriveFileIcon sx={{ fontSize: 60 }} />
                 <p className="mt-2 text-sm font-semibold text-primary05 underline">เปิดดูไฟล์เอกสาร</p>
               </a>
-            )}
+            ) : <div className="flex h-[200px] w-full items-center justify-center rounded-lg bg-gray-100" />}
 
             {/*Slider Thumbnails*/}
             <div className="mt-4 flex w-full flex-row items-center justify-between">
@@ -150,18 +141,19 @@ const ProjectInfoComponent: FC<ProjectInfoProps> = ({ project }) => {
                 <ArrowBackIos />
               </IconButton>
               <div className="flex flex-1 w-full flex-row justify-center gap-x-2 px-2">
-                {getVisibleImages().map((img, i) => (
-                  isImage(img, project?.images?.find((image) => image.sortOrder === (index + i) % (project.assetsURL.length || 1))?.contentType) ? (
+                {getVisibleImages().map((image, i) => (
+                  isImage(image.imageUrl, image.contentType) ? (
                     <Image
-                      key={i}
-                      src={img}
+                      key={image.imageID}
+                      src={image.imageUrl}
                       alt={`thumb-${i}`}
                       width={140}
                       height={90}
                       className="aspect-[140/90] w-full max-w-[140px] flex-1 rounded-lg bg-gray-100 object-cover min-w-0"
+                      onClick={() => setIndex((index + i) % gallery.length)}
                     />
                   ) : (
-                    <div key={i} className="flex aspect-[140/90] w-full max-w-[140px] flex-1 items-center justify-center rounded-lg bg-gray-200 text-gray-400 min-w-0">
+                    <div key={image.imageID} className="flex aspect-[140/90] w-full max-w-[140px] flex-1 items-center justify-center rounded-lg bg-gray-200 text-gray-400 min-w-0 cursor-pointer" onClick={() => setIndex((index + i) % gallery.length)}>
                       <InsertDriveFileIcon sx={{ fontSize: 35 }} />
                     </div>
                   )
@@ -214,16 +206,28 @@ const ProjectInfoComponent: FC<ProjectInfoProps> = ({ project }) => {
         <div className="mt-2 flex flex-row item-center gap-2">
           <h4>Techstack: </h4>
           <span className="font-semibold">
-            {project.techStacks?.join(", ")}
+            {project.techStacks.map(({ name }) => name).join(", ")}
           </span>
         </div>
+        {project.figmaURL && (
+          <div className="flex flex-row gap-1">
+            <h4>Figma: </h4>
+            <Link href={project.figmaURL} target="_blank" rel="noopener noreferrer" className="text-primary05 break-all">{project.figmaURL}</Link>
+          </div>
+        )}
       </div>
       {/*Member*/}
       {/* <StudentCard /> */}
           <div className="mt-12">
             <h2 className="mb-6 text-2xl font-bold">คณะผู้จัดทำและอาจารย์ที่ปรึกษา</h2>
             <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-              {project.member.map((member) => <StudentCard key={member.id} {...member} />)}
+              {project.members.map(({ user, memberType, position }) => (
+                <div key={user.id} className="flex flex-col gap-2">
+                  <StudentCard {...user} />
+                  <p className="text-sm font-semibold">{memberType === "STUDENT" ? "นักศึกษา" : memberType === "ADVISOR" ? "อาจารย์ที่ปรึกษา" : "อาจารย์ที่ปรึกษาร่วม"}</p>
+                  {position && <p className="text-sm text-neutral04">{position}</p>}
+                </div>
+              ))}
             </div>
           </div>
     </div>

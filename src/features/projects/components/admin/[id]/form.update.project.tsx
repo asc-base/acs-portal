@@ -1,6 +1,7 @@
 "use client";
 import React, { FC } from "react";
-import { Button, IconButton, Modal, Box, Snackbar, Dialog } from "@mui/material";
+import { Autocomplete, Button, IconButton, Modal, Box, Snackbar, Dialog, TextField } from "@mui/material";
+import { Controller } from "react-hook-form";
 import { styled } from "@mui/material/styles";
 import MenuItem from "@mui/material/MenuItem";
 import Alert from "@mui/material/Alert";
@@ -14,6 +15,8 @@ import CloseIcon from "@mui/icons-material/Close";
 import LinkIcon from "@mui/icons-material/Link";
 import DescriptionIcon from "@mui/icons-material/Description";
 import SlideshowIcon from "@mui/icons-material/Slideshow";
+import ArrowUpwardIcon from "@mui/icons-material/ArrowUpward";
+import ArrowDownwardIcon from "@mui/icons-material/ArrowDownward";
 import { ICourse } from "@/features/courses/domain/course";
 import { CropImageCard } from "@/shared/components/cropimagecard";
 import { MasterData } from "@/features/master-data/domain/master-data";
@@ -49,8 +52,10 @@ export const FormUpdateProject: FC<FormUpdateProjectProps> = ({ projectId, initi
   const professors = initialProfessors;
   const types = initialMasterData.projectTypes;
   const categories = initialMasterData.categories;
+  const fields = initialMasterData.fields;
+  const techStackNames = initialMasterData.techStacks.map(({ name }) => name);
   const {
-    selectedFile, imageError, assetsError, isCroping, selectedAssets,
+    selectedFile, imageError, assetsError, isCroping, galleryItems,
     draggedItemIndex, dragOverItemIndex, tempThumbFile, errorMsg, isError,
     setIsError, confirmModal, isEditMode, setIsEditMode, previewImageUrl,
     setPreviewImageUrl, control, handleSubmit, projectCoursesFields,
@@ -59,8 +64,9 @@ export const FormUpdateProject: FC<FormUpdateProjectProps> = ({ projectId, initi
     appendProjectCategories, removeProjectCategories, techStacksFields,
     appendTechStacks, removeTechStacks, studentsFields, appendStudents,
     removeStudents, advisorsFields, appendAdvisors, removeAdvisors,
+    coAdvisorsFields, appendCoAdvisors, removeCoAdvisors,
     handleFileChange, handleCropComplete, handleCropCancel, handleAssetsChange,
-    removeAsset, removeAllAssets, handleDragStart, handleDragEnter,
+    removeAsset, removeAllAssets, moveAsset, handleDragStart, handleDragEnter,
     handleDragEnd, handleDrop, cancelForm, onSubmit,
   } = useUpdateProjectController(projectId, initialProject);
 
@@ -138,7 +144,7 @@ export const FormUpdateProject: FC<FormUpdateProjectProps> = ({ projectId, initi
               <div className="flex-1 flex flex-col">
                 <RHFTextField disabled={!isEditMode}
                   control={control}
-                  name="details"
+                  name="detail"
                   label="รายละเอียด"
                   variant="outlined"
                   fullWidth
@@ -279,6 +285,25 @@ export const FormUpdateProject: FC<FormUpdateProjectProps> = ({ projectId, initi
             </div>
           </div>
 
+          <div className="my-8">
+            <Controller
+              control={control}
+              name="projectFields"
+              render={({ field }) => (
+                <Autocomplete
+                  multiple
+                  disabled={!isEditMode}
+                  options={fields}
+                  value={field.value.flatMap(({ value }) => fields.filter((option) => option.id === value))}
+                  getOptionLabel={(option) => option.name}
+                  isOptionEqualToValue={(option, value) => option.id === value.id}
+                  onChange={(_, values) => field.onChange(values.map(({ id }) => ({ value: id })))}
+                  renderInput={(params) => <TextField {...params} label="สาขาที่เกี่ยวข้อง" />}
+                />
+              )}
+            />
+          </div>
+
           <div className="my-10 pt-4 flex flex-col gap-4">
             <h3 className="font-bold">ลิงก์คลิปวิดีโอ</h3>
             <RHFTextField disabled={!isEditMode}
@@ -320,85 +345,69 @@ export const FormUpdateProject: FC<FormUpdateProjectProps> = ({ projectId, initi
               requiredMark
               startIcon={<SlideshowIcon fontSize="small" />}
             />
+            <RHFTextField disabled={!isEditMode}
+              control={control}
+              name="figmaURL"
+              label="Figma (ไม่บังคับ)"
+              variant="outlined"
+              fullWidth
+            />
           </div>
 
           <div className="my-10 pt-4">
             <div className="flex items-center justify-between mb-4">
               <h3 className="font-bold">
-                รูปภาพเพิ่มเติม (ลากเพื่อเปลี่ยนลำดับรูป) <span className=" text-h4 text-neutral04 font-normal ml-2">{(initialProject.assetsURL?.length || 0) + selectedAssets.length} รูป - สูงสุด 10</span>
+                รูปภาพเพิ่มเติม (ลากหรือใช้ปุ่มเลื่อนลำดับ) <span className="text-h4 text-neutral04 font-normal ml-2">{galleryItems.length} รูป - สูงสุด 10</span>
               </h3>
-              {selectedAssets.length > 0 && (
+              {isEditMode && galleryItems.length > 0 && (
                 <button type="button" onClick={removeAllAssets} className="font-bold text-h5 underline cursor-pointer text-accent04">
                   ลบทั้งหมด
                 </button>
               )}
             </div>
 
-            {(selectedAssets.length === 0 && (!initialProject.assetsURL || initialProject.assetsURL.length === 0)) ? (
-              <div className="w-full flex flex-col items-center justify-center gap-2 p-10 bg-white border-2 border-dashed border-gray-300 rounded-lg min-h-[200px]">
-                {isEditMode && <Button variant="contained" component="label">
-                  <VisuallyHiddenInput type="file" accept="image/*" multiple onChange={handleAssetsChange} />
-                  อัปโหลดรูปภาพ
-                </Button>}
-                {assetsError && (
-                  <p className="text-h5 text-accent04">กรุณาอัปโหลดรูปภาพเพิ่มเติมอย่างน้อย 1 รูป</p>
-                )}
-              </div>
-            ) : (
-              <div className="grid grid-cols-5 gap-4 items-start rounded-lg min-h-[160px]">
-                {initialProject.assetsURL?.map((url, index) => (
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-4 items-start rounded-lg min-h-[160px]">
+              {galleryItems.map((item, index) => {
+                const url = item.kind === "existing" ? item.imageUrl : URL.createObjectURL(item.file);
+                return (
                   <div
-                    key={`existing-asset-${index}`}
-                    className="relative aspect-video w-full rounded-md overflow-hidden border-2 border-gray-200 border-solid group cursor-pointer"
+                    key={item.kind === "existing" ? `image-${item.imageID}` : `${item.file.name}-${index}`}
+                    draggable={isEditMode}
+                    onDragStart={() => handleDragStart(index)}
+                    onDragEnter={() => handleDragEnter(index)}
+                    onDragOver={(event) => event.preventDefault()}
+                    onDragEnd={handleDragEnd}
+                    onDrop={() => handleDrop(index)}
                     onClick={() => setPreviewImageUrl(url)}
+                    className={`relative aspect-video w-full rounded-md overflow-hidden cursor-pointer active:cursor-grabbing transition-all border-2 ${dragOverItemIndex === index ? "border-[var(--color-primary02)] border-dashed scale-105" : "border-gray-200 border-solid"} ${draggedItemIndex === index ? "opacity-40" : "opacity-100"}`}
                   >
-                    <Image src={url} alt={`existing-asset-${index}`} fill className="object-cover pointer-events-none" draggable={false} />
+                    <Image src={url} alt={`gallery-${index + 1}`} fill className="object-cover pointer-events-none" draggable={false} />
                     {isEditMode && (
-                      <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                        <span className="text-white text-xs text-center px-2">รูปเดิม (ไม่สามารถลบได้)</span>
+                      <div className="absolute top-1 right-1 flex gap-1">
+                        <IconButton type="button" aria-label={`เลื่อนรูปที่ ${index + 1} ขึ้น`} size="small" disabled={index === 0} onClick={(event) => { event.stopPropagation(); moveAsset(index, -1); }} sx={{ backgroundColor: "rgba(0,0,0,.6)", color: "white" }}>
+                          <ArrowUpwardIcon fontSize="small" />
+                        </IconButton>
+                        <IconButton type="button" aria-label={`เลื่อนรูปที่ ${index + 1} ลง`} size="small" disabled={index === galleryItems.length - 1} onClick={(event) => { event.stopPropagation(); moveAsset(index, 1); }} sx={{ backgroundColor: "rgba(0,0,0,.6)", color: "white" }}>
+                          <ArrowDownwardIcon fontSize="small" />
+                        </IconButton>
+                        <IconButton type="button" aria-label={`ลบรูปที่ ${index + 1}`} size="small" onClick={(event) => { event.stopPropagation(); removeAsset(index); }} sx={{ backgroundColor: "rgba(0,0,0,.6)", color: "white" }}>
+                          <CloseIcon fontSize="small" />
+                        </IconButton>
                       </div>
                     )}
                   </div>
-                ))}
-                {selectedAssets.map((file, index) => (
-                  <div
-                    key={`${file.name}-${index}`}
-                    draggable
-                    onDragStart={() => handleDragStart(index)}
-                    onDragEnter={() => handleDragEnter(index)}
-                    onDragOver={(e) => e.preventDefault()}
-                    onDragEnd={handleDragEnd}
-                    onDrop={() => handleDrop(index)}
-                    onClick={() => setPreviewImageUrl(URL.createObjectURL(file))}
-                    className={`relative aspect-video w-full rounded-md overflow-hidden cursor-pointer active:cursor-grabbing transition-all border-2 
-                    ${dragOverItemIndex === index ? 'border-[var(--color-primary02)] border-dashed scale-105' : 'border-gray-200 border-solid'} 
-                    ${draggedItemIndex === index ? 'opacity-40' : 'opacity-100'} group`}
-                  >
-                    <Image src={URL.createObjectURL(file)} alt="asset" fill className="object-cover pointer-events-none" draggable={false} />
-
-                    {isEditMode && <IconButton
-                      size="small"
-                      sx={{ position: 'absolute', top: 8, right: 8, zIndex: 10, width: 24, height: 24, backgroundColor: 'rgba(0,0,0,0.6)', color: 'white', padding: 0, '&:hover': { backgroundColor: 'rgba(0,0,0,0.8)' } }}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        removeAsset(index);
-                      }}
-                    >
-                      <CloseIcon sx={{ fontSize: 16 }} />
-                    </IconButton>}
-                  </div>
-                ))}
-
-                {(((initialProject.assetsURL?.length || 0) + selectedAssets.length) < 10 && isEditMode) && (
-                  <div className="aspect-video w-full rounded-md bg-gray-50 flex items-center justify-center border border-gray-200">
-                    <Button variant="contained" component="label" sx={{ height: "40px" }}>
-                      <VisuallyHiddenInput type="file" accept="image/*" multiple onChange={handleAssetsChange} />
-                      อัปโหลดรูปภาพ
-                    </Button>
-                  </div>
-                )}
-              </div>
-            )}
+                );
+              })}
+              {isEditMode && galleryItems.length < 10 && (
+                <div className="aspect-video w-full rounded-md bg-gray-50 flex items-center justify-center border border-gray-200">
+                  <Button variant="contained" component="label" sx={{ height: "40px" }}>
+                    <VisuallyHiddenInput type="file" accept="image/*" multiple onChange={handleAssetsChange} />
+                    อัปโหลดรูปภาพ
+                  </Button>
+                </div>
+              )}
+            </div>
+            {assetsError && <p className="text-h5 text-accent04">กรุณาเพิ่มรูปภาพอย่างน้อย 1 รูป</p>}
           </div>
 
           <div className="my-10 pt-4">
@@ -416,12 +425,21 @@ export const FormUpdateProject: FC<FormUpdateProjectProps> = ({ projectId, initi
                 <div key={field.id} className="flex items-center gap-4">
                   <span className="text-neutral04 w-6 shrink-0">{index + 1}.</span>
                   <div className="flex-1">
-                    <RHFTextField disabled={!isEditMode}
+                    <Controller
                       control={control}
                       name={`techStacks.${index}.value`}
-                      variant="outlined"
-                      fullWidth
-                      requiredMark
+                      render={({ field }) => (
+                        <Autocomplete
+                          freeSolo
+                          disabled={!isEditMode}
+                          options={techStackNames}
+                          value={field.value}
+                          inputValue={field.value}
+                          onChange={(_, value) => field.onChange(typeof value === "string" ? value : "")}
+                          onInputChange={(_, value) => field.onChange(value)}
+                          renderInput={(params) => <TextField {...params} label="Tech Stack" required />}
+                        />
+                      )}
                     />
                   </div>
                   {isEditMode && <IconButton onClick={() => removeTechStacks(index)} disabled={techStacksFields.length === 1} color="error">
@@ -438,7 +456,7 @@ export const FormUpdateProject: FC<FormUpdateProjectProps> = ({ projectId, initi
             <div className="mb-8">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="font-bold">คณะผู้จัดทำ</h3>
-                {isEditMode && <IconButton
+                {isEditMode && <IconButton type="button"
                   onClick={() => appendStudents({ userID: 0 })}
                   sx={{ color: "var(--color-primary03)" }}
                 >
@@ -480,6 +498,9 @@ export const FormUpdateProject: FC<FormUpdateProjectProps> = ({ projectId, initi
                         ))}
                       </RHFSelect>
                     </div>
+                    <div className="flex-1">
+                      <RHFTextField disabled={!isEditMode} control={control} name={`students.${index}.position`} label="หน้าที่ (ไม่บังคับ)" fullWidth />
+                    </div>
                     {isEditMode && <IconButton onClick={() => removeStudents(index)} disabled={studentsFields.length === 1} color="error" sx={{ mt: 2.8 }}>
                       <DeleteIcon sx={{ fontSize: 34 }} />
                     </IconButton>}
@@ -491,7 +512,7 @@ export const FormUpdateProject: FC<FormUpdateProjectProps> = ({ projectId, initi
             <div>
               <div className="flex items-center justify-between mb-4">
                 <h3 className="font-bold">อาจารย์ที่ปรึกษา</h3>
-                {isEditMode && <IconButton
+                {isEditMode && <IconButton type="button"
                   onClick={() => appendAdvisors({ userID: 0 })}
                   sx={{ color: "var(--color-primary03)" }}
                 >
@@ -517,9 +538,32 @@ export const FormUpdateProject: FC<FormUpdateProjectProps> = ({ projectId, initi
                         ))}
                       </RHFSelect>
                     </div>
+                    <div className="flex-1">
+                      <RHFTextField disabled={!isEditMode} control={control} name={`advisors.${index}.position`} label="หน้าที่ (ไม่บังคับ)" fullWidth />
+                    </div>
                     {isEditMode && <IconButton onClick={() => removeAdvisors(index)} disabled={advisorsFields.length === 1} color="error" sx={{ mt: 2.8 }}>
                       <DeleteIcon sx={{ fontSize: 34 }} />
                     </IconButton>}
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="mt-8">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="font-bold">อาจารย์ที่ปรึกษาร่วม</h3>
+                {isEditMode && <IconButton type="button" onClick={() => appendCoAdvisors({ userID: 0, position: "" })} sx={{ color: "var(--color-primary03)" }}>
+                  <AddCircleOutlineOutlined sx={{ fontSize: 36 }} />
+                </IconButton>}
+              </div>
+              <div className="space-y-4">
+                {coAdvisorsFields.map((field, index) => (
+                  <div key={field.id} className="flex gap-4 items-start">
+                    <RHFSelect disabled={!isEditMode} control={control} name={`coAdvisors.${index}.userID`} label="อาจารย์ที่ปรึกษาร่วม" fullWidth displayEmpty>
+                      {professors.map((professor) => <MenuItem key={professor.id} value={professor.id}>{`${professor.firstNameTh} ${professor.lastNameTh}`}</MenuItem>)}
+                    </RHFSelect>
+                    <RHFTextField disabled={!isEditMode} control={control} name={`coAdvisors.${index}.position`} label="หน้าที่ (ไม่บังคับ)" fullWidth />
+                    {isEditMode && <IconButton type="button" onClick={() => removeCoAdvisors(index)} color="error"><DeleteIcon sx={{ fontSize: 34 }} /></IconButton>}
                   </div>
                 ))}
               </div>

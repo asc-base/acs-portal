@@ -1,6 +1,7 @@
 "use client";
 import React, { FC } from "react";
-import { Button, IconButton, Modal } from "@mui/material";
+import { Autocomplete, Button, IconButton, Modal, TextField } from "@mui/material";
+import { Controller } from "react-hook-form";
 import { styled } from "@mui/material/styles";
 import MenuItem from "@mui/material/MenuItem";
 import Alert from "@mui/material/Alert";
@@ -49,6 +50,8 @@ export const FormProjects: FC<FormProjectsProps> = ({ initialCourses, initialMas
   const professors = initialProfessors;
   const types = initialMasterData.projectTypes;
   const categories = initialMasterData.categories;
+  const fields = initialMasterData.fields;
+  const techStackNames = initialMasterData.techStacks.map(({ name }) => name);
   const {
     selectedFile, imageError, assetsError, isCroping, selectedAssets,
     draggedItemIndex, dragOverItemIndex, tempThumbFile, errorMsg, isError,
@@ -57,6 +60,7 @@ export const FormProjects: FC<FormProjectsProps> = ({ initialCourses, initialMas
     projectCategoriesFields, appendProjectCategories, removeProjectCategories,
     techStacksFields, appendTechStacks, removeTechStacks, studentsFields,
     appendStudents, removeStudents, advisorsFields, appendAdvisors,
+    coAdvisorsFields, appendCoAdvisors, removeCoAdvisors,
     removeAdvisors, handleFileChange, handleCropComplete, handleCropCancel,
     handleAssetsChange, removeAsset, removeAllAssets, handleDragStart,
     handleDragEnter, handleDragEnd, handleDrop, cancelForm, onSubmit, confirmModal,
@@ -109,7 +113,7 @@ export const FormProjects: FC<FormProjectsProps> = ({ initialCourses, initialMas
             <div className="flex-1 flex flex-col">
               <RHFTextField
                 control={control}
-                name="details"
+                name="detail"
                 label="รายละเอียด"
                 variant="outlined"
                 fullWidth
@@ -250,6 +254,24 @@ export const FormProjects: FC<FormProjectsProps> = ({ initialCourses, initialMas
           </div>
         </div>
 
+        <div className="my-8">
+          <Controller
+            control={control}
+            name="projectFields"
+            render={({ field }) => (
+              <Autocomplete
+                multiple
+                options={fields}
+                value={field.value.flatMap(({ value }) => fields.filter((option) => option.id === value))}
+                getOptionLabel={(option) => option.name}
+                isOptionEqualToValue={(option, value) => option.id === value.id}
+                onChange={(_, values) => field.onChange(values.map(({ id }) => ({ value: id })))}
+                renderInput={(params) => <TextField {...params} label="สาขาที่เกี่ยวข้อง" />}
+              />
+            )}
+          />
+        </div>
+
         <div className="my-10 pt-4 flex flex-col gap-4">
           <h3 className="font-bold">ลิงก์คลิปวิดีโอ</h3>
           <RHFTextField
@@ -290,6 +312,13 @@ export const FormProjects: FC<FormProjectsProps> = ({ initialCourses, initialMas
             fullWidth
             requiredMark
             startIcon={<SlideshowIcon fontSize="small" />}
+          />
+          <RHFTextField
+            control={control}
+            name="figmaURL"
+            label="Figma (ไม่บังคับ)"
+            variant="outlined"
+            fullWidth
           />
         </div>
 
@@ -369,12 +398,20 @@ export const FormProjects: FC<FormProjectsProps> = ({ initialCourses, initialMas
               <div key={field.id} className="flex items-center gap-4">
                 <span className="text-neutral04 w-6 shrink-0">{index + 1}.</span>
                 <div className="flex-1">
-                  <RHFTextField
+                  <Controller
                     control={control}
                     name={`techStacks.${index}.value`}
-                    variant="outlined"
-                    fullWidth
-                    requiredMark
+                    render={({ field }) => (
+                      <Autocomplete
+                        freeSolo
+                        options={techStackNames}
+                        value={field.value}
+                        inputValue={field.value}
+                        onChange={(_, value) => field.onChange(typeof value === "string" ? value : "")}
+                        onInputChange={(_, value) => field.onChange(value)}
+                        renderInput={(params) => <TextField {...params} label="Tech Stack" required />}
+                      />
+                    )}
                   />
                 </div>
                 <IconButton onClick={() => removeTechStacks(index)} disabled={techStacksFields.length === 1} color="error">
@@ -433,6 +470,9 @@ export const FormProjects: FC<FormProjectsProps> = ({ initialCourses, initialMas
                       ))}
                     </RHFSelect>
                   </div>
+                  <div className="flex-1">
+                    <RHFTextField control={control} name={`students.${index}.position`} label="หน้าที่ (ไม่บังคับ)" fullWidth />
+                  </div>
                   <IconButton onClick={() => removeStudents(index)} disabled={studentsFields.length === 1} color="error" sx={{ mt: 2.8 }}>
                     <DeleteIcon sx={{ fontSize: 34 }} />
                   </IconButton>
@@ -470,7 +510,32 @@ export const FormProjects: FC<FormProjectsProps> = ({ initialCourses, initialMas
                       ))}
                     </RHFSelect>
                   </div>
+                  <div className="flex-1">
+                    <RHFTextField control={control} name={`advisors.${index}.position`} label="หน้าที่ (ไม่บังคับ)" fullWidth />
+                  </div>
                   <IconButton onClick={() => removeAdvisors(index)} disabled={advisorsFields.length === 1} color="error" sx={{ mt: 2.8 }}>
+                    <DeleteIcon sx={{ fontSize: 34 }} />
+                  </IconButton>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="mt-8">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="font-bold">อาจารย์ที่ปรึกษาร่วม</h3>
+              <IconButton type="button" onClick={() => appendCoAdvisors({ userID: 0, position: "" })} sx={{ color: "var(--color-primary03)" }}>
+                <AddCircleOutlineOutlined sx={{ fontSize: 36 }} />
+              </IconButton>
+            </div>
+            <div className="space-y-4">
+              {coAdvisorsFields.map((field, index) => (
+                <div key={field.id} className="flex gap-4 items-start">
+                  <RHFSelect control={control} name={`coAdvisors.${index}.userID`} label="อาจารย์ที่ปรึกษาร่วม" fullWidth displayEmpty>
+                    {professors.map((professor) => <MenuItem key={professor.id} value={professor.id}>{`${professor.firstNameTh} ${professor.lastNameTh}`}</MenuItem>)}
+                  </RHFSelect>
+                  <RHFTextField control={control} name={`coAdvisors.${index}.position`} label="หน้าที่ (ไม่บังคับ)" fullWidth />
+                  <IconButton type="button" onClick={() => removeCoAdvisors(index)} color="error" sx={{ mt: 1 }}>
                     <DeleteIcon sx={{ fontSize: 34 }} />
                   </IconButton>
                 </div>

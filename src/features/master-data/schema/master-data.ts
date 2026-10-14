@@ -20,6 +20,7 @@ export const MasterDataSchema = z.object({
   fields: z.array(ProjectLookupSchema),
   categories: z.array(ProjectLookupSchema),
   projectTypes: z.array(ProjectLookupSchema),
+  techStacks: z.array(ProjectLookupSchema),
 }).strict();
 
 export type MasterData = z.infer<typeof MasterDataSchema>;

@@ -30,7 +30,7 @@ const image = (name: string) => new File([name], name, { type: "image/png" });
 const filesEvent = (files: File[]) => ({ target: { files } }) as unknown as ChangeEvent<HTMLInputElement>;
 const setValidForm = (form: ReturnType<typeof useCreateProjectController>["form"]) => {
   form.setValue("title", "Project");
-  form.setValue("details", "Project details");
+  form.setValue("detail", "Project details");
   form.setValue("youtubeURL", "https://youtube.com/watch?v=123");
   form.setValue("githubURL", "https://github.com/kmutt/project");
   form.setValue("documentURL", "https://example.test/document");
@@ -38,9 +38,11 @@ const setValidForm = (form: ReturnType<typeof useCreateProjectController>["form"
   form.setValue("projectCourses", [{ value: 3 }, { value: 8 }]);
   form.setValue("projectTypes", [{ value: 1 }]);
   form.setValue("projectCategories", [{ value: 2 }]);
+  form.setValue("projectFields", [{ value: 1 }]);
   form.setValue("techStacks", [{ value: "TypeScript" }]);
   form.setValue("students", [{ userID: 7 }]);
   form.setValue("advisors", [{ userID: 9 }]);
+  form.setValue("coAdvisors", []);
 };
 
 beforeEach(() => {
@@ -53,7 +55,7 @@ afterEach(() => {
 });
 
 describe("project form controllers", () => {
-  it("maps create members and focal points and caps and reorders selected assets", async () => {
+  it("maps typed members and focal points and caps and reorders gallery uploads", async () => {
     const fetch = vi.spyOn(globalThis, "fetch").mockResolvedValue(
       new Response(JSON.stringify(projectEnvelope(projectFixture)), { headers: { "content-type": "application/json" } }),
     );
@@ -77,10 +79,15 @@ describe("project form controllers", () => {
     });
 
     const body = fetch.mock.calls[0]?.[1]?.body as FormData;
-    expect(body.get("members")).toBe('[{"userID":7,"roleID":2},{"userID":9,"roleID":3}]');
-    expect(body.get("coursesID")).toBe("[3,8]");
-    expect(body.get("thumbnailFocalPointX")).toBe("0");
-    expect(body.get("thumbnailFocalPointY")).toBe("75");
+    const payload = JSON.parse(String(body.get("payload")));
+    expect(payload.members).toEqual([
+      { userID: 7, memberType: "STUDENT" },
+      { userID: 9, memberType: "ADVISOR" },
+    ]);
+    expect(payload.courseIds).toEqual([3, 8]);
+    expect(payload.gallery.slice(0, 2)).toEqual([{ fileIndex: 0 }, { fileIndex: 1 }]);
+    expect(payload.thumbnailFocalPointX).toBe(0);
+    expect(payload.thumbnailFocalPointY).toBe(75);
     expect(body.get("thumbnailFile")).toBe(thumbnail);
     expect(body.getAll("assets")).toEqual(result.current.selectedAssets);
     act(() => result.current.confirmModal?.onConfirm());
@@ -88,14 +95,14 @@ describe("project form controllers", () => {
     act(() => queryClient.clear());
   });
 
-  it("sends literal update diffs with the existing role IDs and thumbnail files", async () => {
+  it("replaces relations and reorders retained and uploaded gallery images", async () => {
     const project: IProject = {
       ...projectFixture,
       categories: [{ id: 1, name: "Education" }, { id: 5, name: "Business" }],
       projectTypes: [{ id: 1, name: "Research" }],
-      member: [
-        ...projectFixture.member,
-        { ...projectFixture.member[0]!, id: 9, email: "advisor@example.test", role: { id: 3, name: "Advisor" } },
+      members: [
+        ...projectFixture.members,
+        { user: { id: 9, email: "advisor@example.test", firstNameTh: "อาจารย์", lastNameTh: "ที่ปรึกษา" }, memberType: "ADVISOR", position: null },
       ],
     };
     const fetch = vi.spyOn(globalThis, "fetch").mockResolvedValue(
@@ -110,10 +117,17 @@ describe("project form controllers", () => {
       result.current.form.setValue("projectCourses", [{ value: 8 }]);
       result.current.form.setValue("projectTypes", [{ value: 2 }]);
       result.current.form.setValue("projectCategories", [{ value: 5 }]);
-      result.current.form.setValue("students", [{ userID: 11 }]);
-      result.current.form.setValue("advisors", [{ userID: 9 }]);
+      result.current.form.setValue("students", [{ userID: 11, position: "Backend" }]);
+      result.current.form.setValue("advisors", [{ userID: 9, position: "Advisor" }]);
+      result.current.form.setValue("coAdvisors", [{ userID: 10, position: "Co-advisor" }]);
       result.current.handleCropComplete(thumbnail, { x: -10, y: 120 });
       result.current.handleAssetsChange(filesEvent(assets));
+    });
+    act(() => {
+      result.current.handleDragStart(1);
+    });
+    act(() => {
+      result.current.handleDrop(0);
     });
     expect(result.current.selectedAssets).toHaveLength(9);
     await act(async () => {
@@ -121,22 +135,49 @@ describe("project form controllers", () => {
     });
 
     const body = fetch.mock.calls[0]?.[1]?.body as FormData;
-    expect(body.get("newCoursesID")).toBe("[8]");
-    expect(body.get("deletedCoursesID")).toBe("[3]");
-    expect(body.get("categoryIds")).toBe("[5]");
-    expect(body.get("projectTypeIds")).toBe("[2]");
-    expect(body.has("fieldIds")).toBe(false);
-    expect(body.get("newMembers")).toBe('[{"userID":11,"roleID":2}]');
-    expect(body.get("deletedmembersID")).toBe("[7]");
+    const payload = JSON.parse(String(body.get("payload")));
+    expect(payload.courseIds).toEqual([8]);
+    expect(payload.categoryIds).toEqual([5]);
+    expect(payload.projectTypeIds).toEqual([2]);
+    expect(payload.fieldIds).toBeUndefined();
+    expect(payload.members).toEqual([
+      { userID: 11, memberType: "STUDENT", position: "Backend" },
+      { userID: 9, memberType: "ADVISOR", position: "Advisor" },
+      { userID: 10, memberType: "CO_ADVISOR", position: "Co-advisor" },
+    ]);
+    expect(payload.gallery.slice(0, 2)).toEqual([{ fileIndex: 0 }, { imageID: 22 }]);
     expect(body.get("thumbnailFile")).toBe(thumbnail);
-    expect(body.has("title")).toBe(false);
-    expect(body.has("figmaURL")).toBe(false);
-    expect(body.get("thumbnailFocalPointX")).toBe("-10");
-    expect(body.get("thumbnailFocalPointY")).toBe("120");
+    expect(payload.title).toBeUndefined();
+    expect(payload.figmaURL).toBeUndefined();
+    expect(payload.thumbnailFocalPointX).toBe(-10);
+    expect(payload.thumbnailFocalPointY).toBe(120);
     expect(body.getAll("assets")).toEqual(result.current.selectedAssets);
     act(() => result.current.confirmModal?.onConfirm());
     expect(router.push).toHaveBeenCalledWith("/admin/projects");
     act(() => queryClient.clear());
+  });
+
+  it("restores the original gallery when an edit is canceled", () => {
+    const { wrapper } = createWrapper();
+    const { result } = renderHook(() => useUpdateProjectController("17", projectFixture), { wrapper });
+
+    act(() => {
+      result.current.setIsEditMode(true);
+      result.current.handleAssetsChange(filesEvent([image("new.png")]));
+    });
+    expect(result.current.galleryItems).toHaveLength(2);
+
+    act(() => result.current.cancelForm());
+    expect(result.current.confirmModal?.type).toBe("warning");
+    act(() => result.current.confirmModal?.onConfirm());
+
+    expect(result.current.galleryItems).toEqual([{
+      kind: "existing",
+      imageID: 22,
+      imageUrl: "https://example.test/asset.png",
+      contentType: "image/png",
+    }]);
+    expect(result.current.isEditMode).toBe(false);
   });
 });
 

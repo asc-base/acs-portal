@@ -43,7 +43,7 @@ const ProjectContent: FC<{ project: IProject }> = ({ project }) => {
       </p>
       <h4 className="line-clamp-2 font-bold">{project.title}</h4>
 
-      {project.member.length > 0 && (
+      {project.members.length > 0 && (
         <AvatarGroup
           max={4}
           sx={{
@@ -51,11 +51,11 @@ const ProjectContent: FC<{ project: IProject }> = ({ project }) => {
             "& .MuiAvatar-root": { width: 24, height: 24 },
           }}
         >
-          {project.member.map((member, idx) => (
+          {project.members.map(({ user }, idx) => (
             <Avatar
-              key={idx}
-              alt={member.firstNameTh}
-              src={member.imageUrl ?? undefined}
+              key={`${user.id}-${idx}`}
+              alt={user.firstNameTh}
+              src={user.imageUrl ?? undefined}
             />
           ))}
         </AvatarGroup>

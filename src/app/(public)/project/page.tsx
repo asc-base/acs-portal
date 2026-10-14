@@ -52,8 +52,10 @@ const Page = async ({ searchParams }: LocalPageProps) => {
   const categories = masterData.categories;
   const fields = masterData.fields;
   const types = masterData.projectTypes;
+  const sortByParam = resolvedSearchParams.sortBy;
+  const sortBy = Array.isArray(sortByParam) ? sortByParam[0] : sortByParam;
   const queryFilters: QueryProject = {
-    sortBy: resolvedSearchParams.sortBy,
+    sortBy: sortBy === "title" || sortBy === "createdAt" || sortBy === "updatedAt" ? sortBy : undefined,
     sortOrder: resolvedSearchParams.sortOrder,
     page: resolvedSearchParams.page || 1,
     pageSize: resolvedSearchParams.pageSize || 9,

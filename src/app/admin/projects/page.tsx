@@ -21,7 +21,7 @@ const page = async ({ searchParams }: PageProps) => {
   const query = {
     page: resolvedSearchParams.page || 1,
     pageSize: resolvedSearchParams.pageSize || 10,
-    sortBy: "createdAt",
+    sortBy: "createdAt" as const,
     sortOrder: resolvedSearchParams.sortOrder ?? "desc",
     search: resolvedSearchParams.search ?? "",
   };

@@ -12,154 +12,107 @@ import {
   projectFormToUpdateRequest,
 } from "@/features/projects/schema/project";
 
-const project = {
+const form = {
   title: "Senior design project",
-  details: "A project description",
+  detail: "A project description",
   youtubeURL: "https://youtube.com/watch?v=123",
   githubURL: "https://github.com/kmutt/project",
   documentURL: "https://example.test/document",
   presentationURL: "https://example.test/presentation",
+  figmaURL: "",
   projectCourses: [{ value: 1 }],
   projectTypes: [{ value: 1 }],
   projectCategories: [{ value: 1 }],
+  projectFields: [],
   techStacks: [{ value: "TypeScript" }],
-  students: [{ userID: 1 }],
-  advisors: [{ userID: 1 }],
+  students: [{ userID: 7, position: "Frontend" }],
+  advisors: [{ userID: 9, position: "" }],
+  coAdvisors: [],
 };
+const gallery = { gallery: [{ fileIndex: 0 }], assets: [new File(["image"], "project.png", { type: "image/png" })] };
 
 describe("project form schemas", () => {
-  it("accepts required metadata, valid URLs, and one entry in each required list", () => {
-    expect(CreateProjectFormSchema.parse(project)).toEqual(project);
-    expect(UpdateProjectFormSchema.parse(project)).toEqual(project);
+  it("accepts required metadata, URL values, and the required member groups", () => {
+    expect(CreateProjectFormSchema.parse(form)).toEqual(form);
+    expect(UpdateProjectFormSchema.parse(form)).toEqual(form);
   });
 
-  it.each(Object.keys(project))("requires %s", (field) => {
-    expect(
-      CreateProjectFormSchema.safeParse({ ...project, [field]: undefined }).success,
-    ).toBe(false);
-  });
+  it.each(["projectCourses", "projectTypes", "projectCategories", "techStacks", "students", "advisors"])(
+    "requires at least one %s entry",
+    (field) => expect(CreateProjectFormSchema.safeParse({ ...form, [field]: [] }).success).toBe(false),
+  );
 
-  it.each([
-    "projectCourses",
-    "projectTypes",
-    "projectCategories",
-    "techStacks",
-    "students",
-    "advisors",
-  ])("requires at least one %s entry", (field) => {
-    expect(
-      CreateProjectFormSchema.safeParse({ ...project, [field]: [] }).success,
-    ).toBe(false);
-  });
+  it.each(["youtubeURL", "githubURL", "documentURL", "presentationURL"])(
+    "rejects an invalid %s",
+    (field) => expect(CreateProjectFormSchema.safeParse({ ...form, [field]: "not a URL" }).success).toBe(false),
+  );
 
-  it.each([
-    "youtubeURL",
-    "githubURL",
-    "documentURL",
-    "presentationURL",
-  ])("rejects an invalid %s", (field) => {
-    expect(
-      CreateProjectFormSchema.safeParse({ ...project, [field]: "not a URL" })
-        .success,
-    ).toBe(false);
-  });
-
-  it.each([
-    ["title", "   "],
-    ["details", "   "],
-  ])("rejects a blank %s", (field, value) => {
-    expect(
-      CreateProjectFormSchema.safeParse({ ...project, [field]: value }).success,
-    ).toBe(false);
-  });
-
-  it("keeps focal-point coordinates optional", () => {
-    expect(CreateProjectFormSchema.safeParse(project).success).toBe(true);
+  it.each([["title", "   "], ["detail", "   "]])("rejects a blank %s", (field, value) => {
+    expect(CreateProjectFormSchema.safeParse({ ...form, [field]: value }).success).toBe(false);
   });
 });
 
 describe("project request mapping", () => {
-  it("keeps create member roles, selected IDs, and thumbnail focal points", () => {
-    const form = {
-      ...project,
+  it("maps cohorts, classifications, member types, tech stacks, gallery order, and focal points", () => {
+    const data = {
+      ...form,
       projectCourses: [{ value: 3 }, { value: 8 }],
       projectTypes: [{ value: 2 }],
       projectCategories: [{ value: 5 }],
-      students: [{ userID: 7 }],
-      advisors: [{ userID: 9 }],
+      projectFields: [{ value: 4 }],
+      students: [{ userID: 7, position: "Backend" }],
+      advisors: [{ userID: 9, position: "" }],
+      coAdvisors: [{ userID: 10, position: "Research" }],
       thumbnailFocalPointX: 0,
       thumbnailFocalPointY: 75,
     };
 
-    expect(projectFormToCreateRequest(form)).toEqual({
-      title: project.title,
-      details: project.details,
-      youtubeURL: project.youtubeURL,
-      githubURL: project.githubURL,
-      documentURL: project.documentURL,
-      presentationURL: project.presentationURL,
-      figmaURL: "",
-      coursesID: [3, 8],
+    expect(projectFormToCreateRequest(data, gallery)).toEqual({
+      title: form.title,
+      detail: form.detail,
+      youtubeURL: form.youtubeURL,
+      githubURL: form.githubURL,
+      documentURL: form.documentURL,
+      presentationURL: form.presentationURL,
+      figmaURL: null,
+      courseIds: [3, 8],
+      fieldIds: [4],
       categoryIds: [5],
       projectTypeIds: [2],
       techStacks: ["TypeScript"],
       members: [
-        { userID: 7, roleID: 2 },
-        { userID: 9, roleID: 3 },
+        { userID: 7, memberType: "STUDENT", position: "Backend" },
+        { userID: 9, memberType: "ADVISOR" },
+        { userID: 10, memberType: "CO_ADVISOR", position: "Research" },
       ],
+      gallery: [{ fileIndex: 0 }],
       thumbnailFocalPointX: 0,
       thumbnailFocalPointY: 75,
     });
   });
 
-  it("creates only literal add/delete diffs for changed memberships", () => {
-    const form = {
-      ...project,
-      projectCourses: [{ value: 8 }],
-      projectTypes: [{ value: 2 }],
-      projectCategories: [{ value: 5 }],
-      students: [{ userID: 11 }],
-      advisors: [{ userID: 10 }],
-      thumbnailFocalPointX: 20,
-      thumbnailFocalPointY: 80,
-    };
-    const current = {
-      id: 17,
-      course: [{ id: 3 }],
-      categories: [{ id: 6, name: "Old category" }],
-      projectTypes: [{ id: 2, name: "Research" }],
-      member: [
-        { id: 7, role: { id: 2 } },
-        { id: 9, role: { id: 3 } },
+  it("replaces relations on update and permits clearing the optional Figma link", () => {
+    const request = projectFormToUpdateRequest(
+      { ...form, figmaURL: "", students: [{ userID: 11 }], advisors: [{ userID: 9 }], coAdvisors: [] },
+      { gallery: [{ imageID: 41 }, { fileIndex: 0 }], assets: gallery.assets },
+    );
+    expect(request).toMatchObject({
+      detail: form.detail,
+      figmaURL: null,
+      members: [
+        { userID: 11, memberType: "STUDENT" },
+        { userID: 9, memberType: "ADVISOR" },
       ],
-    };
-
-    expect(projectFormToUpdateRequest(form, current)).toEqual({
-      title: project.title,
-      details: project.details,
-      youtubeURL: project.youtubeURL,
-      githubURL: project.githubURL,
-      documentURL: project.documentURL,
-      presentationURL: project.presentationURL,
-      techStacks: ["TypeScript"],
-      categoryIds: [5],
-      newMembers: [
-        { userID: 11, roleID: 2 },
-        { userID: 10, roleID: 3 },
-      ],
-      deletedmembersID: [7, 9],
-      newCoursesID: [8],
-      deletedCoursesID: [3],
-      thumbnailFocalPointX: 20,
-      thumbnailFocalPointY: 80,
+      gallery: [{ imageID: 41 }, { fileIndex: 0 }],
     });
+    expect(UpdateProjectRequestSchema.safeParse({ figmaURL: null, members: [], gallery: [] }).success).toBe(false);
   });
 
-  it("rejects malformed request IDs without imposing focal-point bounds", () => {
-    const request = projectFormToCreateRequest(project);
-    expect(CreateProjectRequestSchema.safeParse({ ...request, coursesID: [0] }).success).toBe(false);
-    expect(CreateProjectRequestSchema.safeParse({ ...request, thumbnailFocalPointX: -20 }).success).toBe(true);
-    expect(UpdateProjectRequestSchema.safeParse({ newMembers: [{ userID: 1, roleID: 0 }] }).success).toBe(false);
+  it("rejects invalid relation IDs and duplicate or out-of-range gallery sources", () => {
+    const request = projectFormToCreateRequest(form, gallery);
+    expect(CreateProjectRequestSchema.safeParse({ ...request, courseIds: [0] }).success).toBe(false);
+    expect(CreateProjectRequestSchema.safeParse({ ...request, gallery: [{ fileIndex: 1 }] }).success).toBe(true);
+    expect(UpdateProjectRequestSchema.safeParse({ members: [{ userID: 1, memberType: "ADMIN" }] }).success).toBe(false);
   });
 });
 
@@ -167,7 +120,7 @@ describe("project response schemas", () => {
   const projectDTO = {
     id: 17,
     title: "Senior design project",
-    details: "A project description",
+    detail: "A project description",
     youtubeURL: "https://youtube.com/watch?v=123",
     githubURL: "https://github.com/kmutt/project",
     documentURL: "https://example.test/document",
@@ -175,16 +128,16 @@ describe("project response schemas", () => {
     figmaURL: null,
     thumbnailURL: "https://example.test/project.png",
     thumbnailContentType: null,
+    imageID: 8,
     thumbnailFocalPointX: null,
     thumbnailFocalPointY: 75,
-    assetsURL: ["https://example.test/asset.png"],
-    images: [{ imageUrl: "https://example.test/asset.png", contentType: null, sortOrder: 0 }],
-    techStacks: ["TypeScript"],
+    images: [{ imageID: 4, imageUrl: "https://example.test/asset.png", contentType: "image/png", sortOrder: 0 }],
+    techStacks: [{ id: 3, name: "TypeScript" }],
     fields: [],
     categories: [],
     projectTypes: [],
-    member: [{ id: 7, email: "student@example.test", firstNameTh: "สมชาย", lastNameTh: "ใจดี", role: { id: 2, name: "Student" } }],
-    course: [{
+    members: [{ user: { id: 7, email: "student@example.test", firstNameTh: "สมชาย", lastNameTh: "ใจดี" }, memberType: "STUDENT", position: null }],
+    courses: [{
       id: 3,
       courseCode: "CPE101",
       courseNameTh: "การเขียนโปรแกรม",
@@ -197,28 +150,17 @@ describe("project response schemas", () => {
     }],
   };
 
-  it("accepts the current project DTO with lookup arrays", () => {
+  it("accepts project lookup relations and parses the page envelope", () => {
     expect(ProjectSchema.parse(projectDTO)).toEqual(projectDTO);
     expect(ProjectResponseSchema.parse({ status: 200, statusCode: 200, data: projectDTO }).data).toEqual(projectDTO);
-    expect(ProjectPageResponseSchema.parse({
-      status: 200,
-      data: { rows: [projectDTO], totalRecords: 1, page: 1, pageSize: 10 },
-      msg: "Success",
-      err: null,
-      statusCode: 200,
-    }).data.rows[0]).toEqual(projectDTO);
+    expect(ProjectPageResponseSchema.parse({ status: 200, data: { rows: [projectDTO], totalRecords: 1, page: 1, pageSize: 10 } }).data.rows[0]).toEqual(projectDTO);
   });
 
-  it("rejects a malformed member and malformed pagination", () => {
-    expect(ProjectSchema.safeParse({ ...projectDTO, member: [{ id: 7 }] }).success).toBe(false);
+  it("rejects malformed members, pagination, and retired project filters", () => {
+    expect(ProjectSchema.safeParse({ ...projectDTO, members: [{ user: { id: 7 }, memberType: "STUDENT" }] }).success).toBe(false);
     expect(ProjectPageResponseSchema.safeParse({ status: 200, data: { rows: [], totalRecords: "1", page: 1, pageSize: 10 } }).success).toBe(false);
-  });
-
-  it("rejects legacy tag payloads and project filters", () => {
-    const request = projectFormToCreateRequest(project);
-    expect(CreateProjectRequestSchema.safeParse({ ...request, tagsID: [16] }).success).toBe(false);
-    expect(UpdateProjectRequestSchema.safeParse({ newtagsID: [16] }).success).toBe(false);
     expect(QueryProjectSchema.safeParse({ fields: "16" }).success).toBe(false);
     expect(QueryProjectSchema.safeParse({ tagID: "16" }).success).toBe(false);
+    expect(QueryProjectSchema.parse({ classBooks: "3" }).classBooks).toEqual(["3"]);
   });
 });

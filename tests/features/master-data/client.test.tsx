@@ -10,7 +10,7 @@ const data = {
   typeCourses: [],
   prefixes: [],
   newsCategories: [],
-  fields: [], categories: [], projectTypes: [],
+  fields: [], categories: [], projectTypes: [], techStacks: [],
 };
 
 afterEach(() => vi.restoreAllMocks());

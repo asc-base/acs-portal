@@ -10,6 +10,7 @@ import {
   projectFormToUpdateRequest,
 } from "@/features/projects/schema/project";
 import type { IProject, ProjectFormInput } from "@/features/projects/schema/project";
+import type { ProjectGalleryRequest } from "@/features/projects/schema/project";
 import { useProjectImages } from "@/features/projects/hooks/use-project-images";
 import { changedFields } from "@/shared/lib/changed-fields";
 
@@ -21,44 +22,47 @@ export function useUpdateProjectController(projectId: string, initialProject: IP
   const [confirmModal, setConfirmModal] = useState<ConfirmModalProps | null>(null);
   const [isEditMode, setIsEditMode] = useState(false);
   const [previewImageUrl, setPreviewImageUrl] = useState<string | null>(null);
-  const initCourses = initialProject.course.map(({ id }) => ({ value: id }));
+  const initCourses = initialProject.courses.map(({ id }) => ({ value: id }));
   const initTypes = initialProject.projectTypes.map(({ id }) => ({ value: id }));
   const initCategories = initialProject.categories.map(({ id }) => ({ value: id }));
-  const initTechStacks = initialProject.techStacks.map((value) => ({ value }));
-  const initStudents = initialProject.member.filter(({ role }) => role.id === 2).map(({ id }) => ({ userID: id }));
-  const initAdvisors = initialProject.member.filter(({ role }) => role.id === 3).map(({ id }) => ({ userID: id }));
+  const initTechStacks = initialProject.techStacks.map(({ name }) => ({ value: name }));
+  const initStudents = initialProject.members.filter(({ memberType }) => memberType === "STUDENT").map(({ user, position }) => ({ userID: user.id, position: position ?? "" }));
+  const initAdvisors = initialProject.members.filter(({ memberType }) => memberType === "ADVISOR").map(({ user, position }) => ({ userID: user.id, position: position ?? "" }));
+  const initCoAdvisors = initialProject.members.filter(({ memberType }) => memberType === "CO_ADVISOR").map(({ user, position }) => ({ userID: user.id, position: position ?? "" }));
   const defaultValues: ProjectFormInput = {
     title: initialProject.title,
-    details: initialProject.details,
+    detail: initialProject.detail ?? "",
     youtubeURL: initialProject.youtubeURL,
     githubURL: initialProject.githubURL,
     documentURL: initialProject.documentURL,
     presentationURL: initialProject.presentationURL,
+    figmaURL: initialProject.figmaURL ?? "",
     projectCourses: initCourses.length > 0 ? initCourses : [{ value: 0 }],
     projectTypes: initTypes.length > 0 ? initTypes : [{ value: 0 }],
     projectCategories: initCategories.length > 0 ? initCategories : [{ value: 0 }],
+    projectFields: initialProject.fields.map(({ id }) => ({ value: id })),
     techStacks: initTechStacks.length > 0 ? initTechStacks : [{ value: "" }],
-    students: initStudents.length > 0 ? initStudents : [{ userID: 0 }],
-    advisors: initAdvisors.length > 0 ? initAdvisors : [{ userID: 0 }],
+    students: initStudents.length > 0 ? initStudents : [{ userID: 0, position: "" }],
+    advisors: initAdvisors.length > 0 ? initAdvisors : [{ userID: 0, position: "" }],
+    coAdvisors: initCoAdvisors,
   };
   const form = useForm<ProjectFormInput>({
     resolver: zodResolver(UpdateProjectFormSchema),
     defaultValues,
     mode: "onChange",
   });
-  const projectImages = useProjectImages(
-    form.setValue,
-    Math.max(0, 10 - initialProject.assetsURL.length),
-  );
+  const projectImages = useProjectImages(form.setValue, initialProject.images);
   const projectCourses = useFieldArray({ control: form.control, name: "projectCourses" });
   const projectTypes = useFieldArray({ control: form.control, name: "projectTypes" });
   const projectCategories = useFieldArray({ control: form.control, name: "projectCategories" });
+  const projectFields = useFieldArray({ control: form.control, name: "projectFields" });
   const techStacks = useFieldArray({ control: form.control, name: "techStacks" });
   const students = useFieldArray({ control: form.control, name: "students" });
   const advisors = useFieldArray({ control: form.control, name: "advisors" });
+  const coAdvisors = useFieldArray({ control: form.control, name: "coAdvisors" });
 
   const cancelForm = () => {
-    if (form.formState.isDirty || projectImages.selectedFile || projectImages.selectedAssets.length > 0) {
+    if (form.formState.isDirty || projectImages.selectedFile || projectImages.hasGalleryChanges) {
       setConfirmModal({
         isOpen: true,
         type: "warning",
@@ -67,7 +71,7 @@ export function useUpdateProjectController(projectId: string, initialProject: IP
           setConfirmModal(null);
           form.reset();
           projectImages.setSelectedFile(null);
-          projectImages.setSelectedAssets([]);
+          projectImages.resetGallery();
           setIsEditMode(false);
         },
       });
@@ -78,15 +82,24 @@ export function useUpdateProjectController(projectId: string, initialProject: IP
 
   const onSubmit: SubmitHandler<ProjectFormInput> = async (data) => {
     try {
+      const gallery = projectImages.galleryRequest();
+      if (gallery.gallery.length === 0) {
+        projectImages.setAssetsError(true);
+        return;
+      }
+      const originalGallery: ProjectGalleryRequest = {
+        gallery: initialProject.images.map(({ imageID }) => ({ imageID })),
+        assets: [],
+      };
       const request = UpdateProjectRequestSchema.parse(
         changedFields(
-          projectFormToUpdateRequest(data, initialProject),
-          projectFormToUpdateRequest(defaultValues, initialProject),
+          projectFormToUpdateRequest(data, gallery),
+          projectFormToUpdateRequest(defaultValues, originalGallery),
         ),
       );
       const files = {
         thumbnailFile: projectImages.selectedFile,
-        assets: projectImages.selectedAssets.length > 0 ? projectImages.selectedAssets : undefined,
+        assets: gallery.assets.length > 0 ? gallery.assets : undefined,
       };
       if (
         Object.keys(request).length === 0 &&
@@ -133,6 +146,9 @@ export function useUpdateProjectController(projectId: string, initialProject: IP
     projectCategoriesFields: projectCategories.fields,
     appendProjectCategories: projectCategories.append,
     removeProjectCategories: projectCategories.remove,
+    projectFieldsFields: projectFields.fields,
+    appendProjectFields: projectFields.append,
+    removeProjectFields: projectFields.remove,
     techStacksFields: techStacks.fields,
     appendTechStacks: techStacks.append,
     removeTechStacks: techStacks.remove,
@@ -142,6 +158,9 @@ export function useUpdateProjectController(projectId: string, initialProject: IP
     advisorsFields: advisors.fields,
     appendAdvisors: advisors.append,
     removeAdvisors: advisors.remove,
+    coAdvisorsFields: coAdvisors.fields,
+    appendCoAdvisors: coAdvisors.append,
+    removeCoAdvisors: coAdvisors.remove,
     errorMsg,
     isError,
     setIsError,

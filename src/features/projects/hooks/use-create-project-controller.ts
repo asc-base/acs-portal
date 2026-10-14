@@ -18,17 +18,20 @@ export function useCreateProjectController() {
     resolver: zodResolver(CreateProjectFormSchema),
     defaultValues: {
       title: "",
-      details: "",
+      detail: "",
       youtubeURL: "",
       githubURL: "",
       documentURL: "",
       presentationURL: "",
+      figmaURL: "",
       projectCourses: [{ value: 0 }],
       projectTypes: [{ value: 0 }],
       projectCategories: [{ value: 0 }],
+      projectFields: [],
       techStacks: [{ value: "" }],
       students: [{ userID: 0 }],
       advisors: [{ userID: 0 }],
+      coAdvisors: [],
     },
     mode: "onChange",
   });
@@ -36,12 +39,14 @@ export function useCreateProjectController() {
   const projectCourses = useFieldArray({ control: form.control, name: "projectCourses" });
   const projectTypes = useFieldArray({ control: form.control, name: "projectTypes" });
   const projectCategories = useFieldArray({ control: form.control, name: "projectCategories" });
+  const projectFields = useFieldArray({ control: form.control, name: "projectFields" });
   const techStacks = useFieldArray({ control: form.control, name: "techStacks" });
   const students = useFieldArray({ control: form.control, name: "students" });
   const advisors = useFieldArray({ control: form.control, name: "advisors" });
+  const coAdvisors = useFieldArray({ control: form.control, name: "coAdvisors" });
 
   const cancelForm = () => {
-    if (form.formState.isDirty || projectImages.selectedFile || projectImages.selectedAssets.length > 0) {
+    if (form.formState.isDirty || projectImages.selectedFile || projectImages.galleryItems.length > 0) {
       setConfirmModal({
         isOpen: true,
         type: "warning",
@@ -58,17 +63,18 @@ export function useCreateProjectController() {
       projectImages.setImageError(true);
       return;
     }
-    if (projectImages.selectedAssets.length === 0) {
+    const gallery = projectImages.galleryRequest();
+    if (gallery.gallery.length === 0) {
       projectImages.setAssetsError(true);
       return;
     }
 
     try {
       await createProject.mutateAsync({
-        payload: projectFormToCreateRequest(data),
+        payload: projectFormToCreateRequest(data, gallery),
         files: {
           thumbnailFile: projectImages.selectedFile,
-          assets: projectImages.selectedAssets,
+          assets: gallery.assets,
         },
       });
       setConfirmModal({
@@ -99,6 +105,9 @@ export function useCreateProjectController() {
     projectCategoriesFields: projectCategories.fields,
     appendProjectCategories: projectCategories.append,
     removeProjectCategories: projectCategories.remove,
+    projectFieldsFields: projectFields.fields,
+    appendProjectFields: projectFields.append,
+    removeProjectFields: projectFields.remove,
     techStacksFields: techStacks.fields,
     appendTechStacks: techStacks.append,
     removeTechStacks: techStacks.remove,
@@ -108,6 +117,9 @@ export function useCreateProjectController() {
     advisorsFields: advisors.fields,
     appendAdvisors: advisors.append,
     removeAdvisors: advisors.remove,
+    coAdvisorsFields: coAdvisors.fields,
+    appendCoAdvisors: coAdvisors.append,
+    removeCoAdvisors: coAdvisors.remove,
     errorMsg,
     isError,
     setIsError,

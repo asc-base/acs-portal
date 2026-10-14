@@ -9,6 +9,7 @@ const dto = {
   fields: [{ id: 1, name: "AI" }],
   categories: [{ id: 1, name: "Education" }],
   projectTypes: [{ id: 1, name: "Research" }],
+  techStacks: [{ id: 1, name: "TypeScript" }],
 };
 
 describe("MasterDataSchema", () => {

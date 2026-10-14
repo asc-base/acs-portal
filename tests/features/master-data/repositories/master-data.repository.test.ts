@@ -20,7 +20,7 @@ const data: MasterData = {
     },
   ],
   newsCategories: [{ id: 10, code: "NEWS", name: "News" }],
-  fields: [], categories: [], projectTypes: [],
+  fields: [], categories: [], projectTypes: [], techStacks: [],
 };
 
 const response = {

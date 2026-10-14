@@ -8,6 +8,7 @@ const data: MasterData = {
   typeCourses: [],
   prefixes: [],
   newsCategories: [],
+  techStacks: [],
   fields: [], categories: [], projectTypes: [],
 };
 const response = { data };

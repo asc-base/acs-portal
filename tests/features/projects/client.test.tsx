@@ -9,17 +9,22 @@ import { projectEnvelope, projectFixture, projectPageFixture } from "./fixtures"
 
 const request = {
   title: "Project",
-  details: "Project details",
+  detail: "Project details",
   youtubeURL: "https://youtube.com/watch?v=123",
   githubURL: "https://github.com/kmutt/project",
   documentURL: "https://example.test/document",
   presentationURL: "https://example.test/presentation",
-  figmaURL: "",
-  coursesID: [3],
+  figmaURL: null,
+  courseIds: [3],
+  fieldIds: [],
   categoryIds: [1],
   projectTypeIds: [1],
   techStacks: ["TypeScript"],
-  members: [{ userID: 7, roleID: 2 }],
+  members: [
+    { userID: 7, memberType: "STUDENT" as const },
+    { userID: 9, memberType: "ADVISOR" as const },
+  ],
+  gallery: [{ fileIndex: 0 }],
   thumbnailFocalPointX: 0,
   thumbnailFocalPointY: 75,
 };
@@ -74,7 +79,9 @@ describe("project data hooks", () => {
     const [url, init] = fetch.mock.calls.find(([, options]) => options?.method === "POST")!;
     expect(url).toBe("/api/v1/project");
     expect(init?.body).toBeInstanceOf(FormData);
-    expect((init?.body as FormData).get("thumbnailFocalPointX")).toBe("0");
+    const body = init?.body as FormData;
+    expect(JSON.parse(String(body.get("payload")))).toMatchObject({ courseIds: [3], members: request.members, gallery: [{ fileIndex: 0 }], thumbnailFocalPointX: 0 });
+    expect(body.get("thumbnailFocalPointX")).toBeNull();
     expect(queryClient.getQueryState(["projects", "list", { page: 2 }])?.isInvalidated).toBe(true);
   });
 

@@ -14,7 +14,7 @@ function ProjectCardBase({ data }: ProjectCardProps) {
     id,
     title,
     thumbnailURL,
-    member,
+    members,
     categories,
     fields,
   } = data;
@@ -59,13 +59,13 @@ function ProjectCardBase({ data }: ProjectCardProps) {
               "& .MuiAvatar-root": { width: 28, height: 28, fontSize: 12 },
             }}
           >
-            {member.slice(0, 3).map((member, i) => (
+            {members.slice(0, 3).map(({ user }, i) => (
               <Avatar
-                key={`${member.id}-${i}`}
-                alt={member.email}
+                key={`${user.id}-${i}`}
+                alt={user.email}
                 src={
-                  member.imageUrl
-                    ? member.imageUrl
+                  user.imageUrl
+                    ? user.imageUrl
                     : `https://i.pravatar.cc/80?img=${(i + id) % 70}`
                 }
                 imgProps={{ referrerPolicy: "no-referrer" }}

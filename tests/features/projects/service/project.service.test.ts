@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import type { CreateProjectRequest } from "@/features/projects/schema/project";
+import type { CreateProjectRequest, UpdateProjectRequest } from "@/features/projects/schema/project";
 import { ProjectRepository } from "@/features/projects/repositories/project.repository";
 import { ProjectService } from "@/features/projects/service/project.service";
 import { projectEnvelope, projectFixture, projectPageFixture } from "../fixtures";
@@ -9,88 +9,63 @@ const image = (name: string) => new File([name], name, { type: "image/png" });
 
 afterEach(() => vi.restoreAllMocks());
 
-describe("project create multipart payload", () => {
-  it("JSON-encodes array fields, repeats assets, and retains focal points", async () => {
+describe("project multipart payloads", () => {
+  it("stores the contract once as JSON while repeating ordered asset files", async () => {
     const repository = new ProjectRepository("");
     const create = vi.spyOn(repository, "createProject").mockResolvedValue(response);
     const service = new ProjectService(repository);
     const thumbnailFile = image("thumbnail.png");
     const assets = [image("first.png"), image("second.png")];
-
-    await expect(service.createProject({
+    const payload: CreateProjectRequest = {
       title: "Project",
-      details: "Project details",
+      detail: "Project details",
       youtubeURL: "https://youtube.com/watch?v=123",
       githubURL: "https://github.com/kmutt/project",
       documentURL: "https://example.test/document",
       presentationURL: "https://example.test/presentation",
-      figmaURL: "",
-      coursesID: [3, 8],
+      figmaURL: null,
+      courseIds: [3, 8],
       fieldIds: [1],
       categoryIds: [2],
       projectTypeIds: [3],
       techStacks: ["TypeScript", "React"],
-      members: [{ userID: 7, roleID: 2 }],
+      members: [
+        { userID: 7, memberType: "STUDENT" },
+        { userID: 9, memberType: "ADVISOR" },
+      ],
+      gallery: [{ fileIndex: 0 }, { fileIndex: 1 }],
       thumbnailFocalPointX: 0,
       thumbnailFocalPointY: 75,
-    }, { thumbnailFile, assets })).resolves.toBe(projectFixture);
+    };
+
+    await expect(service.createProject(payload, { thumbnailFile, assets })).resolves.toBe(projectFixture);
 
     const form = create.mock.calls[0]![0];
-    expect(form.get("title")).toBe("Project");
-    expect(form.get("youtubeURL")).toBe("https://youtube.com/watch?v=123");
-    expect(form.get("figmaURL")).toBe("");
-    expect(form.get("thumbnailFocalPointX")).toBe("0");
-    expect(form.get("thumbnailFocalPointY")).toBe("75");
-    expect(form.get("coursesID")).toBe("[3,8]");
-    expect(form.get("fieldIds")).toBe("[1]");
-    expect(form.get("categoryIds")).toBe("[2]");
-    expect(form.get("projectTypeIds")).toBe("[3]");
-    expect(form.get("techStacks")).toBe('["TypeScript","React"]');
-    expect(form.get("members")).toBe('[{"userID":7,"roleID":2}]');
+    expect(JSON.parse(String(form.get("payload")))).toEqual(payload);
     expect(form.get("thumbnailFile")).toBe(thumbnailFile);
     expect(form.getAll("assets")).toEqual(assets);
   });
-});
 
-describe("project update multipart payload", () => {
-  it("omits an optional thumbnail, repeats new assets, and retains focal points", async () => {
+  it("retains gallery order across existing image IDs and uploaded files on update", async () => {
     const repository = new ProjectRepository("");
     const update = vi.spyOn(repository, "updateProject").mockResolvedValue(response);
     const service = new ProjectService(repository);
-    const assets = [image("first.png"), image("second.png")];
-
-    await expect(service.updateProject("17", {
-      title: "Updated project",
-      details: "Updated details",
-      youtubeURL: "https://youtube.com/watch?v=456",
-      githubURL: "https://github.com/kmutt/project",
-      documentURL: "https://example.test/document",
-      presentationURL: "https://example.test/presentation",
+    const assets = [image("new.png")];
+    const payload: UpdateProjectRequest = {
+      detail: "Updated details",
       figmaURL: null,
       techStacks: ["TypeScript"],
-      categoryIds: [5],
-      projectTypeIds: [2],
-      newMembers: [{ userID: 8, roleID: 2 }],
-      deletedmembersID: [7],
-      newCoursesID: [9],
-      deletedCoursesID: [3],
-      thumbnailFocalPointX: -10,
-      thumbnailFocalPointY: 120,
-    }, { thumbnailFile: null, assets })).resolves.toBe(projectFixture);
+      members: [
+        { userID: 8, memberType: "STUDENT", position: "Backend" },
+        { userID: 9, memberType: "ADVISOR" },
+      ],
+      gallery: [{ imageID: 41 }, { fileIndex: 0 }],
+    };
 
-    expect(update).toHaveBeenCalledWith("17", expect.any(FormData));
+    await expect(service.updateProject("17", payload, { thumbnailFile: null, assets })).resolves.toBe(projectFixture);
+
     const form = update.mock.calls[0]![1];
-    expect(form.get("title")).toBe("Updated project");
-    expect(form.get("techStacks")).toBe('["TypeScript"]');
-    expect(form.get("categoryIds")).toBe("[5]");
-    expect(form.get("projectTypeIds")).toBe("[2]");
-    expect(form.get("newMembers")).toBe('[{"userID":8,"roleID":2}]');
-    expect(form.get("deletedmembersID")).toBe("[7]");
-    expect(form.get("newCoursesID")).toBe("[9]");
-    expect(form.get("deletedCoursesID")).toBe("[3]");
-    expect(form.get("thumbnailFocalPointX")).toBe("-10");
-    expect(form.get("thumbnailFocalPointY")).toBe("120");
-    expect(form.has("figmaURL")).toBe(false);
+    expect(JSON.parse(String(form.get("payload")))).toEqual(payload);
     expect(form.has("thumbnailFile")).toBe(false);
     expect(form.getAll("assets")).toEqual(assets);
   });
@@ -106,24 +81,30 @@ describe("project service request parsing", () => {
     expect(getProjects).toHaveBeenCalledWith({ page: 2, pageSize: 5, fieldIds: ["1"] });
   });
 
-  it("rejects malformed request IDs before making a repository call", async () => {
+  it("rejects malformed IDs before making a repository call", async () => {
     const repository = new ProjectRepository("");
     const create = vi.spyOn(repository, "createProject");
     const service = new ProjectService(repository);
     const request: CreateProjectRequest = {
       title: "Project",
-      details: "Details",
+      detail: "Details",
       youtubeURL: "youtube",
       githubURL: "github",
       documentURL: "document",
       presentationURL: "presentation",
-      coursesID: [0],
-      fieldIds: [0],
+      courseIds: [0],
+      fieldIds: [],
+      categoryIds: [],
+      projectTypeIds: [],
       techStacks: ["TypeScript"],
-      members: [{ userID: 7, roleID: 2 }],
+      members: [
+        { userID: 7, memberType: "STUDENT" },
+        { userID: 9, memberType: "ADVISOR" },
+      ],
+      gallery: [{ fileIndex: 0 }],
     };
 
-    await expect(service.createProject(request, { thumbnailFile: image("thumbnail.png"), assets: [] })).rejects.toThrow();
+    await expect(service.createProject(request, { thumbnailFile: image("thumbnail.png"), assets: [image("asset.png")] })).rejects.toThrow();
     expect(create).not.toHaveBeenCalled();
   });
 });
