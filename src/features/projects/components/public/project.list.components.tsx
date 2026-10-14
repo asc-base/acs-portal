@@ -11,6 +11,7 @@ import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import TuneIcon from "@mui/icons-material/Tune";
 import { triggerEdgeDrawer } from "tailwindcss-jun-layout";
+import EmptyState from "@/shared/components/emptyState";
 
 type Order = "asc" | "desc";
 
@@ -132,26 +133,37 @@ const ProjectPage: FC<ProjectPageProps> = ({
 
       {/* grid */}
       <div className="flex w-full flex-col items-center justify-center gap-5">
-        <div className="grid w-full gap-6 md:grid-cols-2 md:gap-8 xl:grid-cols-3">
-          {projects.map((project) => (
-            <Link
-              key={project.id}
-              href={`/project/${project.id}`}
-              aria-label={project.title}
-              className="group border-neutral03 focus:ring-primary01/40 block w-full rounded-2xl border bg-white shadow-sm transition hover:shadow-md focus:ring-2 focus:outline-none"
-            >
-              <ProjectCard key={project.id} data={project} />
-            </Link>
-          ))}
-        </div>
-        <Pagination
-          shape="rounded"
-          count={Math.ceil((totalRecords || 0) / pageSize)}
-          page={page}
-          onChange={(_, currentPage) => handleNextPage(currentPage)}
-          color="primary"
-          size="large"
-        />
+        {projects.length === 0 ? (
+          <div className="flex min-h-[24rem] w-full items-center justify-center">
+            <EmptyState
+              title="ไม่พบข้อมูลผลงานในขณะนี้"
+              description="ยังไม่มีผลงาน หรือไม่พบผลงานตามตัวกรองที่เลือก"
+            />
+          </div>
+        ) : (
+          <>
+            <div className="grid w-full gap-6 md:grid-cols-2 md:gap-8 xl:grid-cols-3">
+              {projects.map((project) => (
+                <Link
+                  key={project.id}
+                  href={`/project/${project.id}`}
+                  aria-label={project.title}
+                  className="group border-neutral03 focus:ring-primary01/40 block w-full rounded-2xl border bg-white shadow-sm transition hover:shadow-md focus:ring-2 focus:outline-none"
+                >
+                  <ProjectCard data={project} />
+                </Link>
+              ))}
+            </div>
+            <Pagination
+              shape="rounded"
+              count={Math.ceil((totalRecords || 0) / pageSize)}
+              page={page}
+              onChange={(_, currentPage) => handleNextPage(currentPage)}
+              color="primary"
+              size="large"
+            />
+          </>
+        )}
       </div>
     </main>
   );

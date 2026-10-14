@@ -40,8 +40,14 @@ const MenuBar = () => {
   const [isOpenSubMenu, setIsOpenSubMenu] = useState(0);
   const pathname = usePathname();
   const { data: masterData } = useMasterData();
-  const newsCategories = ["ANNOUNCEMENT", "STUDENT_ACHIEVEMENT", "STUDENT_ACTIVITY"]
-    .map((code) => masterData?.newsCategories.find((category) => category.code === code))
+  const newsCategories = [
+    "ANNOUNCEMENT",
+    "STUDENT_ACHIEVEMENT",
+    "STUDENT_ACTIVITY",
+  ]
+    .map((code) =>
+      masterData?.newsCategories.find((category) => category.code === code),
+    )
     .filter((category) => category !== undefined);
 
   function isActiveMenu(item: MenuItem): boolean {
@@ -99,7 +105,7 @@ const MenuBar = () => {
     {
       id: 5,
       label: "ผลงานนักศึกษา",
-      // href: "/project?sortBy=createdAt&sortOrder=desc",
+      href: "/project?sortBy=createdAt&sortOrder=desc",
       submenu: [],
     },
     {
@@ -224,7 +230,7 @@ export const NavbarMain = () => {
   const session = useCurrentUser();
   const userAuth =
     session.isFetchedAfterMount && !session.isFetching && !session.isError
-      ? session.data ?? null
+      ? (session.data ?? null)
       : null;
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const openMenu = Boolean(anchorEl);
