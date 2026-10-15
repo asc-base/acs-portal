@@ -5,7 +5,7 @@ import Image from "next/image";
 import { useNewsBulletinManager } from "@/features/news/hooks/useNewsBulletinManager";
 
 export function NewsBulletinManager({ type }: { type: "HIGHLIGHT" | "ANNOUNCEMENT" }) {
-  const { rows, enabled, busy, error, page, query, totalPages, setPage, setQuery, submitSearch, clearError, toggle } = useNewsBulletinManager(type);
+  const { rows, enabled, bulletinByNewsId, busy, error, page, query, totalPages, setPage, setQuery, submitSearch, clearError, toggle } = useNewsBulletinManager(type);
   const imageType = type === "HIGHLIGHT" ? "THUMBNAIL" : "CARD";
   const heading = type === "HIGHLIGHT" ? "ข่าว Highlight" : "ข่าวประชาสัมพันธ์สำคัญ";
 
@@ -24,12 +24,15 @@ export function NewsBulletinManager({ type }: { type: "HIGHLIGHT" | "ANNOUNCEMEN
       </form>
       <div className="flex flex-col gap-3">
         {rows.map((news) => {
+          const bulletin = bulletinByNewsId.get(news.id);
           const image = news.images?.find((item) => item.imageType === imageType);
-          const imageUrl = image?.imageUrl ?? news.thumbnailURL;
+          const imageUrl = bulletin?.imageUrl ?? bulletin?.thumbnailURL ?? image?.imageUrl ?? news.thumbnailURL;
+          const focalPointX = bulletin?.thumbnailFocalPointX ?? image?.focalPointX ?? news.thumbnailFocalPointX ?? 50;
+          const focalPointY = bulletin?.thumbnailFocalPointY ?? image?.focalPointY ?? news.thumbnailFocalPointY ?? 50;
           return (
             <div key={news.id} className="flex items-center gap-4 rounded-lg border border-neutral03 p-3">
               <div className="relative h-16 w-24 shrink-0 overflow-hidden rounded bg-neutral02">
-                {imageUrl ? <Image src={imageUrl} alt="" fill className="object-cover" style={{ objectPosition: `${image?.focalPointX ?? 50}% ${image?.focalPointY ?? 50}%` }} /> : null}
+                {imageUrl ? <Image src={imageUrl} alt="" fill className="object-cover" style={{ objectPosition: `${focalPointX}% ${focalPointY}%` }} /> : null}
               </div>
               <div className="min-w-0 flex-1">
                 <p className="truncate font-medium">{news.title}</p>

@@ -30,7 +30,8 @@ export function useNewsBulletinManager(type: "HIGHLIGHT" | "ANNOUNCEMENT") {
     page,
     query,
     totalPages: Math.max(1, Math.ceil((news.data?.totalRecords ?? 0) / pageSize)),
-    enabled: new Set(bulletins.data?.map((bulletin) => bulletin.news.id) ?? []),
+    bulletinByNewsId: new Map(bulletins.data?.map((bulletin) => [bulletin.newsID, bulletin]) ?? []),
+    enabled: new Set(bulletins.data?.map((bulletin) => bulletin.newsID) ?? []),
     busy: toggleMutation.isPending ? (toggleMutation.variables?.id ?? null) : null,
     error:
       !errorDismissed &&

@@ -55,6 +55,10 @@ export const NewsBulletinSchema = z.object({
   id: z.number(),
   newsID: z.number(),
   type: NewsBulletinTypeSchema,
+  imageUrl: z.string().nullable().optional(),
+  createdAt: z.string().optional(),
+  updatedAt: z.string().optional(),
+  deletedAt: z.string().nullable().optional(),
   news: NewsResponseSchema,
 }).strict();
 export const NewsBulletinsSchema = z.array(NewsBulletinSchema);

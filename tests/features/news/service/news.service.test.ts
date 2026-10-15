@@ -239,6 +239,19 @@ describe("bulletin presentation rules", () => {
     },
   ];
 
+  it("prefers the bulletin image returned by core", async () => {
+    const imageUrl = "https://example.test/bulletin.png";
+    vi.spyOn(repository, "getNewsBulletins").mockResolvedValue({
+      status: 200,
+      statusCode: 200,
+      data: [{ id: 91, newsID: news.id, type: "HIGHLIGHT", imageUrl, news }],
+    });
+
+    expect(await service.getNewsBulletins("HIGHLIGHT")).toMatchObject([
+      { imageUrl, thumbnailURL: imageUrl },
+    ]);
+  });
+
   it.each([
     ["HIGHLIGHT", "thumbnail.png", 100, 0],
     ["ANNOUNCEMENT", "card.png", 0, 100],
@@ -257,6 +270,7 @@ describe("bulletin presentation rules", () => {
           newsID: news.id,
           type,
           news: nestedNews,
+          imageUrl: url,
           thumbnailURL: url,
           thumbnailFocalPointX: x,
           thumbnailFocalPointY: y,
@@ -281,6 +295,7 @@ describe("bulletin presentation rules", () => {
         ],
       });
       expect((await service.getNewsBulletins(type))[0]).toMatchObject({
+        imageUrl: news.thumbnailURL,
         thumbnailURL: news.thumbnailURL,
         thumbnailFocalPointX: 21,
         thumbnailFocalPointY: 79,

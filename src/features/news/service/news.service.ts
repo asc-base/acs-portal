@@ -140,15 +140,18 @@ export class NewsService {
     type: "HIGHLIGHT" | "ANNOUNCEMENT",
   ): Promise<INewsBulletin[]> {
     const response = await this.newsRepository.getNewsBulletins(type);
-    return response.data.map(({ id, type, news }) => {
+    return response.data.map((bulletin) => {
+      const { id, type, news } = bulletin;
       const imageType = type === "HIGHLIGHT" ? "THUMBNAIL" : "CARD";
       const image = news.images?.find((row) => row.imageType === imageType);
+      const imageUrl = bulletin.imageUrl ?? image?.imageUrl ?? news.thumbnailURL;
       return {
         id,
         newsID: news.id,
         type,
+        imageUrl,
         news,
-        thumbnailURL: image?.imageUrl ?? news.thumbnailURL,
+        thumbnailURL: imageUrl,
         thumbnailFocalPointX: image?.focalPointX ?? news.thumbnailFocalPointX,
         thumbnailFocalPointY: image?.focalPointY ?? news.thumbnailFocalPointY,
       };

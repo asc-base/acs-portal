@@ -27,6 +27,18 @@ describe("news response schemas", () => {
     expect(NewsBulletinsSchema.parse(bulletins)).toEqual(bulletins);
   });
 
+  it("accepts bulletin images and legacy core timestamps during rollout", () => {
+    const legacy = {
+      ...bulletins[0],
+      createdAt: "2026-10-08T08:00:00.000Z",
+      updatedAt: "2026-10-08T08:00:00.000Z",
+      deletedAt: null,
+    };
+    const current = { ...legacy, imageUrl: "https://example.test/bulletin.png" };
+
+    expect(NewsBulletinsSchema.parse([legacy, current])).toEqual([legacy, current]);
+  });
+
   it("validates paginated response metadata and rows", () => {
     expect(
       NewsPageSchema.parse({

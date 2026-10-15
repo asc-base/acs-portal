@@ -95,13 +95,19 @@ beforeEach(() => {
   vi.spyOn(NewsServiceClass.prototype, "setNewsBulletin").mockImplementation((...args) => service.setNewsBulletin(...args));
   service.getNews.mockResolvedValue(page);
   service.getNewsBulletins.mockImplementation(async (type) =>
-    Array.from(enabled, (newsID) => ({
-      id: 91,
-      newsID,
-      type,
-      news: newsID === firstNews.id ? firstNews : secondNews,
-      thumbnailURL: firstNews.thumbnailURL,
-    })),
+    Array.from(enabled, (newsID) => {
+      const news = newsID === firstNews.id ? firstNews : secondNews;
+      const imageType = type === "HIGHLIGHT" ? "THUMBNAIL" : "CARD";
+      const imageUrl = news.images?.find((image) => image.imageType === imageType)?.imageUrl ?? news.thumbnailURL;
+      return {
+        id: 91,
+        newsID,
+        type,
+        news,
+        imageUrl,
+        thumbnailURL: imageUrl,
+      };
+    }),
   );
   service.setNewsBulletin.mockImplementation(async (id, _type, next) => {
     if (next) enabled.add(id);
@@ -138,13 +144,13 @@ describe("NewsBulletinManager", () => {
     [
       "HIGHLIGHT",
       "ข่าว Highlight",
-      "https://example.test/thumbnail.png",
+      "https://example.test/bulletin-highlight.png",
       "100% 0%",
     ],
     [
       "ANNOUNCEMENT",
       "ข่าวประชาสัมพันธ์สำคัญ",
-      "https://example.test/card.png",
+      "https://example.test/bulletin-announcement.png",
       "0% 100%",
     ],
   ] as const)(
@@ -163,7 +169,8 @@ describe("NewsBulletinManager", () => {
             newsID: firstNews.id,
             type,
             news: firstNews,
-            thumbnailURL: firstNews.thumbnailURL,
+            imageUrl: imageURL,
+            thumbnailURL: imageURL,
           },
         ]);
       });
