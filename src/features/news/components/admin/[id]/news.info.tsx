@@ -1,9 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
 import { INews, NewsCategory } from "@/features/news/domain/news";
-import dayjs from "dayjs";
-import "dayjs/locale/th";
-import buddhistEra from "dayjs/plugin/buddhistEra";
 import { RHFTextField } from "@/shared/components/form/RHFTextField";
 import Image from "next/image";
 import { RHFSelect } from "@/shared/components/form/RHFSelect";
@@ -17,9 +14,6 @@ import {
 import { CropImageCard } from "@/shared/components/cropimagecard";
 import { useUpdateNewsForm } from "@/features/news/hooks/useUpdateNewsForm";
 
-
-dayjs.extend(buddhistEra);
-dayjs.locale("th");
 
 interface NewsInfoProps {
   news: INews;
@@ -385,7 +379,7 @@ const NewsInfo = ({ news, categories }: NewsInfoProps) => {
               name="startDate"
               control={control}
               label="วันที่เริ่มต้น"
-              format="D MMMM YYYY"
+              format="D MMMM BBBB"
               placeholder="เลือกวันที่เริ่มต้น"
               disabled={disabled}
               requiredMark
@@ -394,7 +388,7 @@ const NewsInfo = ({ news, categories }: NewsInfoProps) => {
               name="dueDate"
               control={control}
               label="วันที่สิ้นสุด"
-              format="D MMMM YYYY"
+              format="D MMMM BBBB"
               placeholder="เลือกวันที่สิ้นสุด"
               disabled={disabled}
             />

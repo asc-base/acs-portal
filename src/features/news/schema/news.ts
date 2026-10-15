@@ -82,6 +82,13 @@ export const FocalPointSchema = z.object({
   cardFocalPointY: z.number().min(0).max(100).optional(),
 });
 
+const OptionalDateSchema = z
+  .string()
+  .refine((value) => value === "" || dayjs(value).isValid(), {
+    message: "รูปแบบวันที่ไม่ถูกต้อง",
+  })
+  .optional();
+
 export const CreateNewsSchema = z.object({
   title: z.string().min(1, "กรุณากรอกหัวข้อ"),
   detail: z.string().min(1, "กรุณากรอกรายละเอียด"),
@@ -92,7 +99,7 @@ export const CreateNewsSchema = z.object({
     .refine((val) => dayjs(val).isValid(), {
       message: "รูปแบบวันที่ไม่ถูกต้อง",
     }),
-  dueDate: z.string().optional(),
+  dueDate: OptionalDateSchema,
   thumbnail: z.file({ message: "กรุณาอัปโหลดภาพหน้าปก" }),
   thumbnailImage: z.file().optional(),
   additionalImages: z.array(z.file()).max(10).optional(),
@@ -107,7 +114,7 @@ export const UpdateNewsSchema = z.object({
     .refine((val) => dayjs(val).isValid(), {
       message: "รูปแบบวันที่ไม่ถูกต้อง",
     }),
-  dueDate: z.string().optional(),
+  dueDate: OptionalDateSchema,
   newsCategoryId: z.number().min(1, "กรุณาเลือกหมวดหมู่"),
   detail: z.string().optional(),
   thumbnail: z.union([z.string().trim().min(1), z.file()]),

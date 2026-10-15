@@ -29,6 +29,12 @@ describe("curriculum schemas", () => {
     }
   });
 
+  it("accepts a Gregorian year and rejects invalid date picker values", () => {
+    expect(CreateCurriculumSchema.safeParse({ ...validCurriculum, year: "2026" }).success).toBe(true);
+    expect(CreateCurriculumSchema.safeParse({ ...validCurriculum, year: "Invalid Date" }).success).toBe(false);
+    expect(UpdateCurriculumSchema.safeParse({ year: "Invalid Date" }).success).toBe(false);
+  });
+
   it("requires the thumbnail file on a create request", () => {
     const request = {
       ...validCurriculum,

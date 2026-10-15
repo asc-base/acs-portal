@@ -31,6 +31,11 @@ describe("CreateNewsSchema", () => {
     expect(CreateNewsSchema.parse(input)).toEqual(input);
   });
 
+  it("allows a cleared optional end date and rejects invalid picker values", () => {
+    expect(CreateNewsSchema.safeParse({ ...createInput, dueDate: "" }).success).toBe(true);
+    expect(CreateNewsSchema.safeParse({ ...createInput, dueDate: "Invalid Date" }).success).toBe(false);
+  });
+
   it.each([
     ["missing title", { title: undefined }, "title"],
     ["empty title", { title: "" }, "title"],
@@ -77,6 +82,10 @@ describe("UpdateNewsSchema", () => {
       thumbnailImage: image,
     };
     expect(UpdateNewsSchema.parse(input)).toEqual(input);
+  });
+
+  it("rejects invalid optional end date values", () => {
+    expect(UpdateNewsSchema.safeParse({ ...updateInput, dueDate: "Invalid Date" }).success).toBe(false);
   });
 
   it.each([

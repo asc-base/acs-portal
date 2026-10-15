@@ -1,4 +1,5 @@
 import { z } from "zod";
+import dayjs from "dayjs";
 import { PageMetadataSchema } from "@/shared/schema/page-metadata";
 
 const documentURLField = z
@@ -9,7 +10,10 @@ const documentURLField = z
 
 const CommonCurriculumSchema = z.object({
   title: z.string().trim().min(1, "กรุณาระบุชื่อหลักสูตร"),
-  year: z.string().min(1, "กรุณาระบุปีการศึกษา"),
+  year: z
+    .string()
+    .min(1, "กรุณาระบุปีการศึกษา")
+    .refine((value) => dayjs(value).isValid(), "กรุณาระบุปีที่ถูกต้อง"),
   documentURL: documentURLField,
   description: z.string().trim().min(1, "กรุณาระบุรายละเอียด"),
   thumbnailFocalPointX: z.number().optional(),
