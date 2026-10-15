@@ -30,7 +30,7 @@ export function useStudentLoginForm() {
 
     try {
       await login({ email: data.email, password: data.password });
-      router.push("/home");
+      router.push("/");
     } catch (error) {
       form.setError("password", {
         type: "manual",

@@ -55,7 +55,7 @@ const MenuBar = () => {
 
     const cleanPath = pathname.replace(/\/$/, "");
 
-    if (item.href === "/" && (cleanPath === "/" || cleanPath === "/home"))
+    if (item.href === "/" && cleanPath === "/")
       return true;
 
     if (item.href && item.href !== "/") {

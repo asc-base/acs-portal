@@ -52,7 +52,8 @@ describe("home news navigation", () => {
   ])("moves by %s-width step in both directions and wraps", (width, step) => {
     resize(width);
     render(<HomePage {...props} />);
-    const [previous, next] = section(titles[0]).getAllByRole("button");
+    const previous = section(titles[0]).getByRole("button", { name: "ข่าวก่อนหน้า" });
+    const next = section(titles[0]).getByRole("button", { name: "ข่าวถัดไป" });
     fireEvent.click(previous);
     expect(firstImage(titles[0])).toBe(`News ${7 - step}`);
     fireEvent.click(next);
@@ -66,7 +67,7 @@ describe("home news navigation", () => {
   it("updates the step when the mounted page resizes", () => {
     resize(767);
     render(<HomePage {...props} />);
-    const next = section(titles[0]).getAllByRole("button")[1];
+    const next = section(titles[0]).getByRole("button", { name: "ข่าวถัดไป" });
     fireEvent.click(next);
     expect(firstImage(titles[0])).toBe("News 2");
     act(() => resize(768));
@@ -82,7 +83,7 @@ describe("home news navigation", () => {
     (title) => {
       resize(767);
       render(<HomePage {...props} />);
-      fireEvent.click(section(title).getAllByRole("button")[1]);
+      fireEvent.click(section(title).getByRole("button", { name: "ข่าวถัดไป" }));
       titles.forEach((name, i) => {
         expect(firstImage(name)).toBe(
           `News ${i * 10 + 1 + Number(name === title)}`,
@@ -153,9 +154,35 @@ describe("home news navigation", () => {
     const add = vi.spyOn(window, "addEventListener");
     const remove = vi.spyOn(window, "removeEventListener");
     const { unmount } = render(<HomePage {...props} />);
-    const listener = add.mock.calls.find(([event]) => event === "resize")?.[1];
-    expect(listener).toBeTypeOf("function");
+    const listeners = add.mock.calls
+      .filter(([event]) => event === "resize")
+      .map(([, listener]) => listener);
+    expect(listeners).toHaveLength(3);
     unmount();
-    expect(remove).toHaveBeenCalledWith("resize", listener);
+    listeners.forEach((listener) => expect(remove).toHaveBeenCalledWith("resize", listener));
+  });
+
+  it.each(titles)("selects slide indicators independently for %s", (title) => {
+    render(<HomePage {...props} />);
+    const indicator = section(title).getByRole("button", { name: "Go to slide 3" });
+    fireEvent.click(indicator);
+    expect(firstImage(title)).toBe(`News ${titles.indexOf(title) * 10 + 3}`);
+    expect(indicator.getAttribute("aria-current")).toBe("true");
+  });
+
+  it.each([1, 2])("renders %s item carousels without navigation", (count) => {
+    render(
+      <HomePage
+        {...props}
+        initNewsActivity={props.initNewsActivity.slice(0, count)}
+        initNewsComplete={props.initNewsComplete.slice(0, count)}
+        initNewsActivityStudent={props.initNewsActivityStudent.slice(0, count)}
+      />,
+    );
+    titles.forEach((title) => {
+      expect(section(title).getAllByRole("img")).toHaveLength(count);
+      expect(section(title).queryByRole("button", { name: "ข่าวก่อนหน้า" })).toBeNull();
+      expect(section(title).queryByRole("button", { name: "ข่าวถัดไป" })).toBeNull();
+    });
   });
 });

@@ -125,7 +125,7 @@ test("the production build rewrites public images using runtime RustFS settings"
           assert.equal(admin.status, 307);
           const location = admin.headers.get("location");
           assert.ok(location);
-          assert.equal(new URL(location, origin).pathname, "/home");
+          assert.equal(new URL(location, origin).pathname, "/");
         });
       } finally {
         await closeServer(upstream);
@@ -135,6 +135,11 @@ test("the production build rewrites public images using runtime RustFS settings"
 
   await t.test("rejects invalid paths and methods", async () => {
     await withPortal({ endpoint: "http://127.0.0.1:9" }, async (origin) => {
+      const root = await fetch(`${origin}/`, { redirect: "manual" });
+      assert.equal(root.status, 200);
+      const legacyHome = await fetch(`${origin}/home`, { redirect: "manual" });
+      assert.equal(legacyHome.status, 308);
+      assert.equal(new URL(legacyHome.headers.get("location")!, origin).pathname, "/");
       assert.equal((await fetch(`${origin}/media/other-bucket/public/profiles/id`)).status, 404);
       assert.equal((await fetch(`${origin}/media/acs-bucket-staging/private/profiles/id`)).status, 404);
       assert.equal((await fetch(`${origin}/media/acs-bucket-staging/public/secrets/id`)).status, 404);

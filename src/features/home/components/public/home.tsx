@@ -2,35 +2,12 @@
 import { HeroCard } from "@/shared/components/herocard";
 import { INews, INewsBulletin } from "@/features/news/domain/news";
 import heroImage from "../../../../../public/hero.jpg";
-import { NewsCard } from "@/features/news/components/newscard";
 import Link from "next/link";
-import { useEffect, useState } from "react";
 import { NewsCarouselComponent } from "@/features/home/components/news.carousel.component";
 import { ActivityCard } from "@/features/home/components/activitycard";
 import { Carousel } from "@/features/home/components/carousel";
 // import { useAuthStore } from "@/features/auth/store/auth";
 import NewsHighlightCarousel from "@/features/home/components/newshighlightcarousel";
-
-const useCarouselStep = () => {
-  const [step, setStep] = useState(1);
-
-  useEffect(() => {
-    const calculateStep = () => {
-      const width = window.innerWidth;
-      if (width >= 1280) return 3;
-      if (width >= 768) return 2;
-      return 1;
-    };
-
-    setStep(calculateStep());
-
-    const handleResize = () => setStep(calculateStep());
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
-
-  return step;
-};
 
 interface HomePageProps {
   initNewsActivity: INews[];
@@ -42,16 +19,6 @@ interface HomePageProps {
   // apibase: string;
 }
 
-const moveCarouselIndex = (
-  currentIndex: number,
-  length: number,
-  direction: 1 | -1,
-  step: number,
-) => {
-  const safeStep = Math.min(step, length);
-  return (currentIndex + direction * safeStep + length) % length;
-};
-
 const HomePage = ({
   initNewsActivity,
   initNewsComplete,
@@ -60,66 +27,29 @@ const HomePage = ({
   initNewsHighlight,
   newsCategoryIds,
 }: HomePageProps) => {
-  const carouselStep = useCarouselStep();
-  const [newsActivityActive, setNewsActivityActive] = useState(0);
-  const [newsCompleteActive, setNewsCompleteActive] = useState(0);
-  const [newsActivityStudentActive, setNewsActivityStudentActive] = useState(0);
-
   // const user = useAuthStore((state) => state.user);
-
-  const handleNextNewsActivity = () => {
-  if (initNewsActivity.length === 0) return;
-  setNewsActivityActive((prevItem) =>
-    moveCarouselIndex(prevItem, initNewsActivity.length, 1, carouselStep),
-  );
-};
-  const handlePrevNewsActivity = () => {
-    if (initNewsActivity.length === 0) return;
-    setNewsActivityActive((prevItem) =>
-      moveCarouselIndex(prevItem, initNewsActivity.length, -1, carouselStep),
-    );
-  };
-
-  const handleSetNewsActivity = (index: number) => {
-    setNewsActivityActive(index);
-  };
-
-  const handleNextNewsComplete = () => {
-    if (initNewsComplete.length === 0) return;
-    setNewsCompleteActive((prevItem) =>
-      moveCarouselIndex(prevItem, initNewsComplete.length, 1, carouselStep),
-    );
-  };
-  const handlePrevNewsComplete = () => {
-    if (initNewsComplete.length === 0) return;
-    setNewsCompleteActive((prevItem) =>
-      moveCarouselIndex(prevItem, initNewsComplete.length, -1, carouselStep),
-    );
-  };
-
-  const handleSetNewsComplete = (index: number) => {
-    setNewsCompleteActive(index);
-  };
-
-  const handleNextNewsActivityStudent = () => {
-    if (initNewsActivityStudent.length === 0) return;
-    setNewsActivityStudentActive((prevItem) =>
-      moveCarouselIndex(prevItem, initNewsActivityStudent.length, 1, carouselStep),
-    );
-  };
-  const handlePrevNewsActivityStudent = () => {
-    if (initNewsActivityStudent.length === 0) return;
-    setNewsActivityStudentActive((prevItem) =>
-      moveCarouselIndex(prevItem, initNewsActivityStudent.length, -1, carouselStep),
-    );
-  };
-
-  const handleSetNewsActivityStudent = (index: number) => {
-    setNewsActivityStudentActive(index);
-  };
-
   const showActivitySection = initNewsActivity && initNewsActivity.length > 0;
   const showAnnouncementSection = initAnnoucement;
+  const newsCarousels = [
+    {
+      title: "ข่าวประชาสัมพันธ์",
+      news: initNewsActivity,
+      newsCategoryCode: "ANNOUNCEMENT" as const,
+      newsCategoryId: newsCategoryIds.ANNOUNCEMENT,
+    },
+    {
+      title: "ความสำเร็จนักศึกษา",
+      news: initNewsComplete,
+      newsCategoryCode: "STUDENT_ACHIEVEMENT" as const,
+      newsCategoryId: newsCategoryIds.STUDENT_ACHIEVEMENT,
+    },
+    {
+      title: "งานกิจกรรมนักศึกษา",
+      news: initNewsActivityStudent,
+      newsCategoryCode: "STUDENT_ACTIVITY" as const,
+      newsCategoryId: newsCategoryIds.STUDENT_ACTIVITY,
+    },
+  ];
 
   return (
     <div>
@@ -175,120 +105,9 @@ const HomePage = ({
             </div>
           )}
 
-          <NewsCarouselComponent
-            title="ข่าวประชาสัมพันธ์"
-            news={initNewsActivity}
-            handleNextNews={handleNextNewsActivity}
-            handlePrevNews={handlePrevNewsActivity}
-            activeIndex={newsActivityActive}
-            handleSetActiveIndex={handleSetNewsActivity}
-            newsCategoryCode="ANNOUNCEMENT"
-            newsCategoryId={newsCategoryIds.ANNOUNCEMENT}
-          >
-            {Array.from(
-              { length: Math.min(4, initNewsActivity.length) },
-              (_, i) => {
-                const index =
-                  (newsActivityActive + i) % initNewsActivity.length;
-                const news = initNewsActivity[index];
-                return (
-                  <div
-                    key={`${news.id}-${i}`}
-                    className="transform transition-all duration-300 ease-in-out hover:scale-105 "
-                    style={{
-                      opacity: 1,
-                      transform: "translateX(0)",
-                      transitionDelay: `${i * 100}ms`,
-                    }}
-                  >
-                    <Link
-                      href={`/news/${news.id}`}
-                      className="w-fit transition-colors duration-200 ease-in-out"
-                    >
-                      <NewsCard news={news} />
-                    </Link>
-                  </div>
-                );
-              },
-            )}
-          </NewsCarouselComponent>
-
-          <NewsCarouselComponent
-            title="ความสำเร็จนักศึกษา"
-            news={initNewsComplete}
-            handleNextNews={handleNextNewsComplete}
-            handlePrevNews={handlePrevNewsComplete}
-            activeIndex={newsCompleteActive}
-            handleSetActiveIndex={handleSetNewsComplete}
-            newsCategoryCode="STUDENT_ACHIEVEMENT"
-            newsCategoryId={newsCategoryIds.STUDENT_ACHIEVEMENT}
-          >
-            {Array.from(
-              { length: Math.min(4, initNewsComplete.length) },
-              (_, i) => {
-                const index =
-                  (newsCompleteActive + i) % initNewsComplete.length;
-                const news = initNewsComplete[index];
-                return (
-                  <div
-                    key={`${news.id}-${i}`}
-                    className="transform transition-all duration-300 ease-in-out hover:scale-105 hover:shadow-lg"
-                    style={{
-                      opacity: 1,
-                      transform: "translateX(0)",
-                      transitionDelay: `${i * 100}ms`,
-                    }}
-                  >
-                    <Link
-                      href={`/news/${news.id}`}
-                      className="w-fit transition-colors duration-200 ease-in-out"
-                    >
-                      <NewsCard news={news} />
-                    </Link>
-                  </div>
-                );
-              },
-            )}
-          </NewsCarouselComponent>
-
-          <NewsCarouselComponent
-            title="งานกิจกรรมนักศึกษา"
-            news={initNewsActivityStudent}
-            handleNextNews={handleNextNewsActivityStudent}
-            handlePrevNews={handlePrevNewsActivityStudent}
-            activeIndex={newsActivityStudentActive}
-            handleSetActiveIndex={handleSetNewsActivityStudent}
-            newsCategoryCode="STUDENT_ACTIVITY"
-            newsCategoryId={newsCategoryIds.STUDENT_ACTIVITY}
-          >
-            {Array.from(
-              { length: Math.min(4, initNewsActivityStudent.length) },
-              (_, i) => {
-                const index =
-                  (newsActivityStudentActive + i) %
-                  initNewsActivityStudent.length;
-                const news = initNewsActivityStudent[index];
-                return (
-                  <div
-                    key={`${news.id}-${i}`}
-                    className="transform transition-all duration-300 ease-in-out hover:scale-105 hover:shadow-lg"
-                    style={{
-                      opacity: 1,
-                      transform: "translateX(0)",
-                      transitionDelay: `${i * 100}ms`,
-                    }}
-                  >
-                    <Link
-                      href={`/news/${news.id}`}
-                      className="w-fit transition-colors duration-200 ease-in-out"
-                    >
-                      <NewsCard news={news} />
-                    </Link>
-                  </div>
-                );
-              },
-            )}
-          </NewsCarouselComponent>
+          {newsCarousels.map((carousel) => (
+            <NewsCarouselComponent key={carousel.newsCategoryCode} {...carousel} />
+          ))}
         </div>
       </div>
     </div>

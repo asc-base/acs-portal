@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import MainPage from "@/app/(public)/home/page";
+import MainPage from "@/app/(public)/page";
 import { createNewsServerService } from "@/features/news/server";
 import { createMasterDataServerService } from "@/features/master-data/server";
 import { bulletin, newsItem } from "./test-data";
