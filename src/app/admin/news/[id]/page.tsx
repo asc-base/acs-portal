@@ -5,7 +5,6 @@ import { createNewsServerService } from "@/features/news/server";
 
 
 
-export const dynamic = "force-dynamic";
 
 interface PageProps {
   params: Promise<{

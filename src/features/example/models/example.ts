@@ -4,7 +4,7 @@ import type { IExample } from "@/features/example/types/example";
 const BASE_URL = "https://jsonplaceholder.typicode.com";
 
 export const getExampleData = async (): Promise<IExample[] | Error> => {
-  const response = await fetch(`${BASE_URL}/posts`);
+  const response = await fetch(`${BASE_URL}/posts`, { cache: "no-store" });
   if (!response.ok) {
     return new Error("Failed to fetch example data");
   }

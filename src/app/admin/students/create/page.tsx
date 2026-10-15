@@ -1,7 +1,6 @@
 import { CreateStudentForm } from "@/features/students/components/admin/create/create.student.form";
 
 
-export const dynamic = "force-dynamic";
 
 interface PageProps {
   searchParams: Promise<{

@@ -1,7 +1,6 @@
 import React from "react";
 import AdminLoginLandingPage from "@/features/auth/components/admin/admin.login.landingpage";
 
-export const dynamic = "force-dynamic";
 
 export default function Page() {
   // ไม่มีการเรียกหลังบ้าน ใส่ UI-only

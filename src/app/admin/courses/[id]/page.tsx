@@ -3,7 +3,6 @@ import { CourseInfo } from "@/features/courses/components/admin/[id]/course.info
 import { createCourseServerService } from "@/features/courses/server";
 
 
-export const dynamic = "force-dynamic";
 
 interface PageProps {
   params: Promise<{

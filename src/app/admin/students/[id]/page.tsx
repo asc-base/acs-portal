@@ -3,7 +3,6 @@ import { createStudentServerService } from "@/features/students/server";
 
 
 
-export const dynamic = "force-dynamic";
 
 interface PageProps {
   params: Promise<{

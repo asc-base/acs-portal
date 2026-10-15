@@ -6,7 +6,6 @@ import { createClassBookServerService } from "@/features/classbook/server";
 
 
 
-export const dynamic = "force-dynamic";
 
 interface PageProps {
   searchParams: Promise<QueryClassBookInput>;

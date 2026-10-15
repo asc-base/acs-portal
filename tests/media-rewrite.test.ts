@@ -189,12 +189,17 @@ test("the production build rewrites public images using runtime RustFS settings"
 
     try {
       await withPortal({ apiUrl: `http://127.0.0.1:${apiPort}` }, async (origin) => {
-        const [alice, bob, publicNews] = await Promise.all([
+        const [alice, bob, publicNews, adminDashboard] = await Promise.all([
           fetch(`${origin}/admin/news`, { headers: { Cookie: "session=alice", Authorization: "Bearer app-secret" } }),
           fetch(`${origin}/admin/news`, { headers: { Cookie: "session=bob", Authorization: "Bearer app-secret" } }),
           fetch(`${origin}/news`),
+          fetch(`${origin}/admin`, { headers: { Cookie: "session=alice" } }),
         ]);
-        assert.deepEqual([alice.status, bob.status, publicNews.status], [200, 200, 200]);
+        assert.deepEqual(
+          [alice.status, bob.status, publicNews.status, adminDashboard.status],
+          [200, 200, 200, 200],
+        );
+        assert.match(await adminDashboard.text(), /welcome acs admin dashboard/);
 
         for (const session of ["alice", "bob"]) {
           assert.ok(received.some((request) => request.url.startsWith("/api/v1/users/profile") && request.cookie === `session=${session}`));

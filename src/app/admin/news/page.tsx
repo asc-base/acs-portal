@@ -6,7 +6,6 @@ import { createNewsServerService } from "@/features/news/server";
 import { createMasterDataServerService } from "@/features/master-data/server";
 
 
-export const dynamic = "force-dynamic";
 
 interface PageProps {
   searchParams: Promise<NewsQueryInput>;

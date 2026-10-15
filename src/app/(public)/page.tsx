@@ -4,8 +4,6 @@ import { createMasterDataServerService } from "@/features/master-data/server";
 
 
 
-// Force dynamic rendering to avoid build-time API calls
-export const dynamic = "force-dynamic";
 
 export const metadata = {
   title: "ACS website",

@@ -1,5 +1,6 @@
 "use client";
 import AccountCircleRoundedIcon from "@mui/icons-material/AccountCircleRounded";
+import DashboardIcon from "@mui/icons-material/Dashboard";
 import PersonIcon from "@mui/icons-material/Person";
 import HailIcon from "@mui/icons-material/Hail";
 import DescriptionIcon from "@mui/icons-material/Description";
@@ -15,6 +16,12 @@ import { useLogout } from "@/features/auth/client";
 import Image from "next/image";
 
 const sidebarItems = [
+  {
+    name: "Dashboard",
+    href: "/admin",
+    icon: <DashboardIcon />,
+    disabled: false,
+  },
   {
     name: "ข้อมูลนักศึกษา",
     href: "/admin/classbook",
@@ -115,7 +122,9 @@ export const EdgeSidebarAdmin = ({
                 pathName === basePath || pathName.startsWith(`${basePath}/`);
 
               const isActive =
-                isPathMatch(item.href) ||
+                (item.href === "/admin"
+                  ? pathName === item.href
+                  : isPathMatch(item.href)) ||
                 item.activePaths?.some((path) => isPathMatch(path));
 
               return (

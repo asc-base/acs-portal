@@ -2,8 +2,6 @@ import React from "react";
 import { notFound } from "next/navigation";
 import ProjectList from "@/features/projects/components/public/project.list.components";
 
-export const dynamic = "force-dynamic";
-export const revalidate = 0;
 
 import { FilterList } from "@/features/projects/components/filterlist";
 import { QueryProject } from "@/features/projects/domain/project";
