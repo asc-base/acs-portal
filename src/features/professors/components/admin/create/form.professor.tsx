@@ -1,8 +1,9 @@
 "use client";
 import type { FC } from "react";
-import { Button, Modal, Typography } from "@mui/material";
+import { Button, IconButton, Modal, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import AddIcon from "@mui/icons-material/Add";
+import { Delete } from "@mui/icons-material";
 import MenuItem from "@mui/material/MenuItem";
 import Alert from "@mui/material/Alert";
 import Snackbar from "@mui/material/Snackbar";
@@ -44,8 +45,10 @@ export const FormProfesssors: FC = () => {
     clearError,
     educationFields,
     appendEducation,
+    removeEducation,
     expertFields,
     appendExpert,
+    removeExpert,
     handleFileChange,
     handleCropComplete,
     handleCropCancel,
@@ -316,8 +319,11 @@ export const FormProfesssors: FC = () => {
         </div>
         <div>
           {educationFields.map((field, index) => (
-            <div key={field.id} className="mt-2 flex flex-row gap-x-4">
-              <div className="flex-2">
+            <div
+              key={field.id}
+              className="mt-2 flex flex-row items-end gap-x-2"
+            >
+              <div className="flex-1">
                 <RHFTextField
                   control={control}
                   name={`educations.${index}.value`}
@@ -326,6 +332,13 @@ export const FormProfesssors: FC = () => {
                   placeholder="ระบุลำดับการศึกษา เช่น B.Sc. Mathematics King Mongkut's University of Technology Thonburi"
                 />
               </div>
+              <IconButton
+                onClick={() => removeEducation(index)}
+                sx={{ color: "#d32f2f" }}
+                aria-label="ลบระดับการศึกษา"
+              >
+                <Delete />
+              </IconButton>
             </div>
           ))}
         </div>
@@ -346,11 +359,13 @@ export const FormProfesssors: FC = () => {
               <AddIcon />
             </AddCircleOutlineRoundedIcon>
           </div>
-          {expertFields.map((field, index) => {
-            return (
-              <div className="mt-2" key={index}>
+          {expertFields.map((field, index) => (
+            <div
+              key={field.id}
+              className="mt-2 flex flex-row items-end gap-x-2"
+            >
+              <div className="flex-1">
                 <RHFTextField
-                  key={field.id}
                   control={control}
                   name={`expertFields.${index}.value`}
                   label="สาขาที่เชี่ยวชาญ"
@@ -358,8 +373,15 @@ export const FormProfesssors: FC = () => {
                   placeholder="ระบุสาขาที่เชี่ยวชาญ"
                 />
               </div>
-            );
-          })}
+              <IconButton
+                onClick={() => removeExpert(index)}
+                sx={{ color: "#d32f2f" }}
+                aria-label="ลบสาขาที่เชี่ยวชาญ"
+              >
+                <Delete />
+              </IconButton>
+            </div>
+          ))}
         </div>
       </div>
       <div className="flex flex-row justify-end gap-x-4">
