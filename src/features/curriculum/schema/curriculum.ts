@@ -15,7 +15,7 @@ const documentURLField = z
     } catch {
       return false;
     }
-  }, "กรุณาระบุลิงก์ Google Drive หรือ OneDrive ที่ถูกต้อง");
+  }, "กรุณาระบุลิงก์ Google Drive หรือ OneDrive");
 
 const CommonCurriculumSchema = z.object({
   title: z.string().trim().min(1, "กรุณาระบุชื่อหลักสูตร"),
