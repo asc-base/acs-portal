@@ -6,7 +6,16 @@ const documentURLField = z
   .string()
   .trim()
   .min(1, "กรุณาระบุลิงก์ไฟล์หลักสูตร")
-  .pipe(z.url("กรุณาระบุลิงก์ที่ถูกต้อง"));
+  .pipe(z.url("กรุณาระบุลิงก์ที่ถูกต้อง"))
+  .refine((val) => {
+    try {
+      const host = new URL(val).hostname.toLowerCase();
+      const allowedHosts = ["drive.google.com", "docs.google.com", "onedrive.live.com", "1drv.ms"];
+      return allowedHosts.includes(host) || host.endsWith(".sharepoint.com");
+    } catch {
+      return false;
+    }
+  }, "กรุณาระบุลิงก์ Google Drive หรือ OneDrive ที่ถูกต้อง");
 
 const CommonCurriculumSchema = z.object({
   title: z.string().trim().min(1, "กรุณาระบุชื่อหลักสูตร"),
