@@ -7,8 +7,9 @@ import {
   CreateCurriculumSchema,
   type CreateCurriculumInputs,
 } from "@/features/curriculum/schema/curriculum";
-import { useCreateCurriculum } from "@/features/curriculum/client";
+import { useCreateCurriculum, curriculumService } from "@/features/curriculum/client";
 import type { ConfirmModalProps } from "@/shared/components/modal/confirmModal";
+import { HttpError } from "@/shared/lib/http";
 
 export function useCreateCurriculumController() {
   const router = useRouter();
@@ -67,9 +68,28 @@ export function useCreateCurriculumController() {
     }
     setFileError(null);
 
+    const targetYear = dayjs(data.year).year().toString();
+
     try {
+      const checkResult = await curriculumService.getCurriculum({
+        year: targetYear,
+        page: 1,
+        pageSize: 1,
+      });
+
+      const isDuplicate =
+        checkResult.totalRecords > 0 &&
+        checkResult.rows.some((item) => item.year === targetYear);
+      if (isDuplicate) {
+        form.setError("year", {
+          type: "manual",
+          message: "ปีการศึกษานี้มีอยู่ในระบบแล้ว",
+        });
+        return;
+      }
+
       await createCurriculum.mutateAsync({
-        data: { ...data, year: dayjs(data.year).year().toString() },
+        data: { ...data, year: targetYear },
         thumbnailFile: selectedFile,
       });
       setConfirmModal({
@@ -80,6 +100,19 @@ export function useCreateCurriculumController() {
       });
     } catch (error) {
       console.error("Submit Error:", error);
+      if (error instanceof HttpError && (error.status === 409 || error.status === 400)) {
+        form.setError("year", {
+          type: "manual",
+          message: "ปีการศึกษานี้มีอยู่ในระบบแล้ว",
+        });
+      } else {
+        setConfirmModal({
+          isOpen: true,
+          type: "warning",
+          onClose: () => setConfirmModal(null),
+          onConfirm: () => setConfirmModal(null),
+        });
+      }
     }
   };
 
