@@ -1,5 +1,5 @@
 "use client";
-import { Button, Modal } from "@mui/material";
+import { Button, Modal, Snackbar, Alert } from "@mui/material";
 import Image from "next/image";
 import { styled } from "@mui/material/styles";
 import { RHFTextField } from "@/shared/components/form/RHFTextField";
@@ -32,11 +32,15 @@ export const CurriculumForm = () => {
     handleCancel,
     handleCropCancel,
     onSubmit,
+    isError,
+    setIsError,
+    errorMessage,
   } = useCreateCurriculumController();
   const { handleSubmit, control } = form;
 
   return (
     <div className="p-8">
+
       <h3 className="mb-6 font-bold">เพิ่มหลักสูตร</h3>
       <form className="space-y-4" onSubmit={handleSubmit(onSubmit)}>
         <div className="flex gap-x-10 gap-y-2">
@@ -150,6 +154,21 @@ export const CurriculumForm = () => {
 
         {confirmModal && <ConfirmModal {...confirmModal} />}
       </form>
+
+      <Snackbar
+        anchorOrigin={{ vertical: "top", horizontal: "right" }}
+        open={isError}
+        autoHideDuration={4000}
+        onClose={() => setIsError(false)}
+      >
+        <Alert
+          severity="error"
+          onClose={() => setIsError(false)}
+          sx={{ width: "100%" }}
+        >
+          {errorMessage || "เกิดข้อผิดพลาดในการบันทึกข้อมูล"}
+        </Alert>
+      </Snackbar>
     </div>
   );
 };
