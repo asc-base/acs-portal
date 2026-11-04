@@ -9,7 +9,12 @@ const documentURLField = z
   .pipe(z.url("กรุณาระบุลิงก์ที่ถูกต้อง"))
   .refine((val) => {
     try {
-      const host = new URL(val).hostname.toLowerCase();
+      const parsed = new URL(val);
+      if (parsed.protocol !== "https:" && parsed.protocol !== "http:") {
+        return false;
+      }
+
+      const host = parsed.hostname.toLowerCase();
       const allowedHosts = ["drive.google.com", "docs.google.com", "onedrive.live.com", "1drv.ms"];
       return allowedHosts.includes(host) || host.endsWith(".sharepoint.com");
     } catch {
