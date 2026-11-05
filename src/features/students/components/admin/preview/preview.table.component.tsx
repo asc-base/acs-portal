@@ -18,6 +18,7 @@ import {
 } from "@mui/material";
 import { Delete, Done, Edit } from "@mui/icons-material";
 import { ConfirmModal } from "@/shared/components/modal/confirmModal";
+import { UploadProgressModal } from "@/features/students/components/admin/uploadStudentFileModal";
 import { useStudentCsvPreviewController } from "@/features/students/hooks/use-student-csv-preview-controller";
 
 interface PreviewStudentsProps {
@@ -33,6 +34,8 @@ export default function Preview_table_component({ classBookID }: PreviewStudents
     alert,
     confirmModal,
     editingIndex,
+    isImportErrorOpen,
+    closeImportError,
     onSubmit,
     onCloseAlert,
     onBack,
@@ -192,6 +195,13 @@ export default function Preview_table_component({ classBookID }: PreviewStudents
         </Button>
       </div>
       {confirmModal && <ConfirmModal {...confirmModal} />}
+      <UploadProgressModal
+        isOpen={isImportErrorOpen}
+        status="error"
+        onClose={closeImportError}
+        onConfirm={closeImportError}
+        onRetry={onBack}
+      />
     </div>
   );
 }
