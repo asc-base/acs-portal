@@ -17,6 +17,7 @@ export function useStudentCsvPreviewController(classBookID: number) {
   const [alert, setAlert] = useState({ open: false, message: "", severity: "error" as const });
   const [confirmModal, setConfirmModal] = useState<ConfirmModalProps | null>(null);
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
+  const [isImportErrorOpen, setIsImportErrorOpen] = useState(false);
   const submitting = useRef(false);
 
   const duplicateIds = useMemo(() => {
@@ -109,7 +110,7 @@ export function useStudentCsvPreviewController(classBookID: number) {
         },
       });
     } catch {
-      setAlert({ open: true, message: "ไม่สามารถเพิ่มข้อมูลนักศึกษาได้", severity: "error" });
+      setIsImportErrorOpen(true);
     } finally {
       submitting.current = false;
     }
@@ -123,6 +124,8 @@ export function useStudentCsvPreviewController(classBookID: number) {
     alert,
     confirmModal,
     editingIndex,
+    isImportErrorOpen,
+    closeImportError: () => setIsImportErrorOpen(false),
     onSubmit,
     onCloseAlert: () => setAlert((previous) => ({ ...previous, open: false })),
     onBack: () => router.push(`/admin/students?classBookID=${classBookID}`),
