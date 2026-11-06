@@ -6,21 +6,14 @@ const documentURLField = z
   .string()
   .trim()
   .min(1, "กรุณาระบุลิงก์ไฟล์หลักสูตร")
-  .pipe(z.url("กรุณาระบุลิงก์ที่ถูกต้อง"))
-  .refine((val) => {
-    try {
-      const parsed = new URL(val);
-      if (parsed.protocol !== "https:" && parsed.protocol !== "http:") {
-        return false;
-      }
-
-      const host = parsed.hostname.toLowerCase();
-      const allowedHosts = ["drive.google.com", "docs.google.com", "onedrive.live.com", "1drv.ms"];
-      return allowedHosts.includes(host) || host.endsWith(".sharepoint.com");
-    } catch {
-      return false;
-    }
-  }, "กรุณาระบุลิงก์ Google Drive หรือ OneDrive");
+  .pipe(
+    z.url({
+      protocol: /^https?$/,
+      hostname:
+        /^(drive\.google\.com|docs\.google\.com|onedrive\.live\.com|1drv\.ms|[\w-]+\.sharepoint\.com)$/,
+      error: "กรุณาระบุลิงก์ Google Drive หรือ OneDrive",
+    }),
+  );
 
 const CommonCurriculumSchema = z.object({
   title: z.string().trim().min(1, "กรุณาระบุชื่อหลักสูตร"),
