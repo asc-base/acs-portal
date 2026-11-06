@@ -1,4 +1,4 @@
-import StudentAuthLandingPage from "./student.auth.landingpage";
+import StudentAuthLandingPage from "@/features/auth/components/public/student/student.auth.landingpage";
 
 export const dynamic = "force-dynamic";
 

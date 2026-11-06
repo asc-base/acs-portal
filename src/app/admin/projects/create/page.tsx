@@ -1,16 +1,20 @@
 import React from "react";
-import { FormProjects } from "./form.projects";
-import { 
-  baseUrl, 
-  courseService, 
-  masterDataService, 
-  studentService, 
-  professorService 
-} from "@/infra/container";
+import { FormProjects } from "@/features/projects/components/admin/create/form.projects";
+import { createCourseServerService } from "@/features/courses/server";
+import { createMasterDataServerService } from "@/features/master-data/server";
+import { createStudentServerService } from "@/features/students/server";
+import { createProfessorServerService } from "@/features/professors/server";
+
+
 
 export const dynamic = "force-dynamic";
 
 export default async function page() {
+  const courseService = await createCourseServerService();
+  const masterDataService = await createMasterDataServerService();
+  const studentService = await createStudentServerService();
+  const professorService = await createProfessorServerService();
+
 
   const [coursesRes, masterData, studentsRes, professorsRes] = await Promise.all([
   courseService.getCourse({}),
@@ -25,7 +29,6 @@ export default async function page() {
 
   return (
     <FormProjects 
-      apiBase={baseUrl} 
       initialCourses={coursesRes.rows || []}
       initialMasterData={masterData}
       initialStudents={studentsRes.rows || []}

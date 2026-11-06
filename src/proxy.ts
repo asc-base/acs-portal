@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import { isAdminUser } from "@/lib/admin-access";
-import { UserProfile } from "@/core/domain/user";
-import { ApiResponse } from "@/interface/response";
+import { isAdminUser } from "@/features/auth/lib/admin-access";
+import { UserProfile } from "@/shared/domain/user";
+import { ApiResponse } from "@/shared/types/response";
 
 /**
  * Stops unauthenticated and non-Admin requests before Next.js renders an

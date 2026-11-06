@@ -1,6 +1,8 @@
 import React from "react";
-import { courseService } from "@/infra/container";
-import CourseListComponents from "./course.list.components";
+
+import CourseListComponents from "@/features/courses/components/public/course.list.components";
+import { createCourseServerService } from "@/features/courses/server";
+
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -17,6 +19,8 @@ interface PageProps {
 }
 
 const page = async ({ searchParams }: PageProps) => {
+  const courseService = await createCourseServerService();
+
   const resolvedSearchParams = await searchParams;
   const { rows, totalRecords } = await courseService.getCourse({
     curriculumID: resolvedSearchParams.curriculumId,

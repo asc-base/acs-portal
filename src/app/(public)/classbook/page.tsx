@@ -1,6 +1,8 @@
 import React from "react";
-import ClassBookLandingPage from "./classbook.landingpage";
-import { classBookService } from "@/infra/container";
+import ClassBookLandingPage from "@/features/classbook/components/public/classbook.landingpage";
+import { createClassBookServerService } from "@/features/classbook/server";
+
+
 
 // Force dynamic to avoid build-time fetch when API might be unavailable
 export const dynamic = "force-dynamic";
@@ -12,6 +14,8 @@ export const metadata = {
 };
 
 const Page = async () => {
+  const classBookService = await createClassBookServerService();
+
   const { rows } = await classBookService.getClassBooks({
     orderBy: "createdAt",
     sortBy: "desc",

@@ -1,5 +1,7 @@
-import { baseUrl, courseService } from "@/infra/container";
-import { CourseInfo } from "./course.info";
+
+import { CourseInfo } from "@/features/courses/components/admin/[id]/course.info";
+import { createCourseServerService } from "@/features/courses/server";
+
 
 export const dynamic = "force-dynamic";
 
@@ -13,6 +15,8 @@ interface PageProps {
 }
 
 export default async function Page({ params, searchParams }: PageProps) {
+  const courseService = await createCourseServerService();
+
   const { id } = await params;
   const queryParams = await searchParams;
   
@@ -32,7 +36,6 @@ export default async function Page({ params, searchParams }: PageProps) {
   return (
     <div className="w-full">
       <CourseInfo
-        apiBase={baseUrl}
         curriculumID={curriculumID}
         course={course}
       />

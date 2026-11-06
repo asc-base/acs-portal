@@ -1,8 +1,10 @@
 import React from "react";
-import CurriculumListComponents from "./curriculum.list.component";
-import { QueryCurriculum } from "@/core/domain/curriculum";
-import { curriculumService } from "@/infra/container";
-import { baseUrl } from "@/infra/container";
+import CurriculumListComponents from "@/features/curriculum/components/admin/curriculum.list.component";
+import { QueryCurriculum } from "@/features/curriculum/domain/curriculum";
+import { createCurriculumServerService } from "@/features/curriculum/server";
+
+
+
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -12,6 +14,8 @@ interface PageProps {
 }
 
 const page = async ({ searchParams }: PageProps) => {
+  const curriculumService = await createCurriculumServerService();
+
   const search = await searchParams;
 
   const query: QueryCurriculum = {
@@ -28,7 +32,6 @@ const page = async ({ searchParams }: PageProps) => {
       totalRecords={totalRecords}
       pageSize={pageSize}
       page={page}
-      apiBase={baseUrl}
     />
   );
 };

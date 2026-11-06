@@ -1,0 +1,70 @@
+import { IProjectRepository } from "@/features/projects/ports/project.repository";
+import type { IProject, QueryProject } from "@/features/projects/domain/project";
+import { Pageable } from "@/shared/types/response";
+import { HttpHelper } from "@/shared/lib/http";
+import { ApiResponse } from "@/shared/types/response";
+import {
+  ProjectPageSchema,
+  ProjectSchema,
+} from "@/features/projects/schema/project";
+export class ProjectRepository implements IProjectRepository {
+  private http: HttpHelper;
+  private baseUrl: string;
+
+  constructor(baseUrl: string, http = new HttpHelper(baseUrl)) {
+    this.baseUrl = baseUrl;
+    this.http = http;
+  }
+
+  async getProjects(
+    query: QueryProject,
+  ): Promise<ApiResponse<Pageable<IProject>>> {
+    const params = new URLSearchParams();
+
+    if (query.sortBy) params.set("orderBy", query.sortBy);
+    if (query.sortOrder) params.set("sortBy", query.sortOrder);
+    if (query.page) params.set("page", query.page.toString());
+    if (query.pageSize) params.set("pageSize", query.pageSize.toString());
+    if (query.fields && query.fields.length > 0)
+      query.fields.forEach((id) => params.append("tagID", id));
+    if (query.categories && query.categories.length > 0)
+      query.categories.forEach((id) => params.append("tagID", id));
+    if (query.types && query.types.length > 0)
+      query.types.forEach((id) => params.append("tagID", id));
+    if (query.courses && query.courses.length > 0)
+      query.courses.forEach((id) => params.append("courseID", id));
+    if (query.classBooks && query.classBooks.length > 0)
+      query.classBooks.forEach((id) => params.append("classBookID", id));
+    if (query.search) params.set("search", query.search);
+
+    const queryString = params.toString() ? `?${params.toString()}` : "";
+    const url = `/v1/project${queryString}`;
+    const response = await this.http.get<ApiResponse<unknown>>(url);
+    return { ...response, data: ProjectPageSchema.parse(response.data) };
+  }
+
+  async getProjectById(id: string): Promise<ApiResponse<IProject>> {
+    const url = `/v1/project/${id}`;
+    const response = await this.http.get<ApiResponse<unknown>>(url);
+    return { ...response, data: ProjectSchema.parse(response.data) };
+  }
+
+  async createProject(formData: FormData): Promise<ApiResponse<IProject>> {
+    const url = `/v1/project`;
+    const response = await this.http.post<ApiResponse<unknown>>(url, formData);
+
+    return { ...response, data: ProjectSchema.parse(response.data) };
+  }
+
+  async deleteProject(id: number): Promise<ApiResponse<IProject>> {
+    const url = `/v1/project/${id}`;
+    const response = await this.http.delete<ApiResponse<unknown>>(url);
+    return { ...response, data: ProjectSchema.parse(response.data) };
+  }
+  async updateProject(id: string, formData: FormData): Promise<ApiResponse<IProject>> {
+    const url = `/v1/project/${id}`;
+    const response = await this.http.put<ApiResponse<unknown>>(url, formData);
+
+    return { ...response, data: ProjectSchema.parse(response.data) };
+  }
+}

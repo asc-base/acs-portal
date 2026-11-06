@@ -1,33 +1,36 @@
 import React from "react";
-import StudentsListComponent from "./students.list.component";
-import { studentService, classBookService } from "@/infra/container";
+import StudentsListComponent from "@/features/students/components/public/students.list.component";
+import { createStudentServerService } from "@/features/students/server";
+import { createClassBookServerService } from "@/features/classbook/server";
+import { QueryStudentSchema } from "@/features/students/schema/student";
+import type { QueryStudentInput } from "@/features/students/schema/student";
+
+
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
 interface PageProps {
-  searchParams: Promise<{
-    page?: number;
-    pageSize?: number;
-    classBookID?: number;
-    orderBy?: string;
-    sortBy?: "asc" | "desc";
-  }>;
+  searchParams: Promise<QueryStudentInput>;
 }
 
 const page = async ({ searchParams }: PageProps) => {
+  const studentService = await createStudentServerService();
+  const classBookService = await createClassBookServerService();
+
   const resolvedSearchParams = await searchParams;
+  const query = QueryStudentSchema.parse({
+    page: resolvedSearchParams.page || 1,
+    pageSize: resolvedSearchParams.pageSize || 10,
+    classBookID: resolvedSearchParams.classBookID || 1,
+    orderBy: resolvedSearchParams.orderBy || "studentCode",
+    sortBy: resolvedSearchParams.sortBy || "asc",
+  });
   const { rows, pageSize, page, totalRecords } =
-    await studentService.getStudents({
-      page: resolvedSearchParams.page || 1,
-      pageSize: resolvedSearchParams.pageSize || 10,
-      classBookID: resolvedSearchParams.classBookID || 1,
-      orderBy: resolvedSearchParams.orderBy || "studentCode",
-      sortBy: resolvedSearchParams.sortBy || "asc",
-    });
+    await studentService.getStudents(query);
 
   const classBook = await classBookService.getClassBookById(
-    resolvedSearchParams.classBookID || 1,
+    query.classBookID ?? 1,
   );
 
   return (
@@ -36,7 +39,7 @@ const page = async ({ searchParams }: PageProps) => {
       totalRecords={totalRecords}
       pageSize={pageSize}
       page={page}
-      classBookId={resolvedSearchParams.classBookID || 1}
+      classBookId={query.classBookID ?? 1}
       classBook={classBook}
     />
   );

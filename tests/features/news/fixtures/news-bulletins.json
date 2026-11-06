@@ -1,0 +1,16 @@
+[
+  {
+    "id": 91,
+    "newsID": 7,
+    "type": "ANNOUNCEMENT",
+    "news": {
+      "id": 7,
+      "title": "News title",
+      "thumbnailURL": null,
+      "detail": "News details",
+      "startDate": "2026-10-08T08:00:00.000Z",
+      "dueDate": null,
+      "images": []
+    }
+  }
+]

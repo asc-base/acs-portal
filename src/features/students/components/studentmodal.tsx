@@ -1,0 +1,270 @@
+import React, { useState } from "react";
+import Modal from "@mui/material/Modal";
+import Box from "@mui/material/Box";
+import IconButton from "@mui/material/IconButton";
+import FacebookIcon from "@mui/icons-material/Facebook";
+import LinkedInIcon from "@mui/icons-material/LinkedIn";
+import InstagramIcon from "@mui/icons-material/Instagram";
+import GitHubIcon from "@mui/icons-material/GitHub";
+import CloseIcon from "@mui/icons-material/Close";
+import { Typography, Chip } from "@mui/material";
+import Image from "next/image";
+import { IStudent } from "@/features/students/domain/student";
+import { IClassBook } from "@/features/classbook/domain/classbook";
+import { StudentDefaultAvatar } from "@/features/students/components/student-default-avatar";
+
+interface StudentModalProps {
+  student: IStudent;
+  Open: boolean;
+  onClose: () => void;
+  classBook: IClassBook | null;
+}
+
+export const StudentModal: React.FC<StudentModalProps> = ({
+  student,
+  Open,
+  onClose,
+  classBook,
+}) => {
+  const [activeTab, setActiveTab] = useState<"course" | "other">("course");
+
+  const courseProjectsMock = [
+    "Parking management program “Peter Parking” from Database and Object-Oriented Programming courses as a Project Manager and UI/UX Designer.",
+    "Web E-commerce semester project (from Web Programming course) as a Full-stack Developer",
+    "Mobile Application “X-culture” (from Software Engineering course) as a Project Manager",
+    "Website for Digital Illustration Portfolio and Marketplace (Senior Project collaboration with Dek-D interactive Co.,Ltd) as a Project manager, Business Analyst and UX/UI Designer",
+    "IdentityV Wiki” as a Project manager, UX/UI Designer and Swift Developer (from Mobile application development course)",
+    "DD Coach” Website (Internship project At Dek-D interactive Co.,Ltd) as a UX/UI Designer.",
+    "IdentityV Wiki” as a Project manager, UX/UI Designer and Swift",
+  ];
+
+  const otherProjectsMock = [
+    "Personal portfolio website built with Next.js and Tailwind CSS.",
+    "Contribution to open-source React libraries.",
+    "Participation in local hackathons.",
+  ];
+
+  return (
+    <Modal open={Open} onClose={onClose}>
+      <Box
+        sx={{
+          position: "absolute",
+          top: "50%",
+          left: "50%",
+          transform: "translate(-50%, -50%)",
+          width: { xs: "95%", sm: "85%", md: "80%", lg: "70%" },
+          maxWidth: 1000,
+          bgcolor: "var(--color-neutral01)",
+          borderRadius: "24px",
+          boxShadow: "0px 10px 30px rgba(0, 0, 0, 0.08)",
+          p: { xs: 3, sm: 4, md: 5 },
+          outline: "none",
+          maxHeight: "90vh",
+          overflowY: "auto",
+        }}
+      >
+        {/* Close Button */}
+        <IconButton
+          onClick={onClose}
+          sx={{
+            position: "absolute",
+            top: 20,
+            right: 20,
+            color: "var(--color-neutral05)",
+            "&:hover": {
+              color: "var(--color-primary01)",
+            },
+          }}
+        >
+          <CloseIcon sx={{ fontSize: 24 }} />
+        </IconButton>
+
+        {/* Two-Column Grid */}
+        <div className="flex flex-col gap-8 md:flex-row pt-4 mt-6 md:mt-0">
+
+          {/* Left Panel: Profile and Skills */}
+          <div className="flex w-full flex-col gap-6 md:w-65.5 md:shrink-0">
+
+            {/* Profile Card */}
+            <div className="flex w-full flex-row items-center justify-center gap-4 rounded-2xl border border-neutral02 bg-white p-4 shadow-sm md:h-112.5 md:flex-col md:items-center md:p-6">
+              {/* Avatar */}
+              <div className="shrink-0 md:mb-4 md:w-full md:flex md:justify-center">
+                {student.imageUrl ? (
+                  <>
+                    {/* Mobile */}
+                    <Image
+                      src={student.imageUrl}
+                      alt={`${student.firstNameTh} ${student.lastNameTh}`}
+                      width={220}
+                      height={230}
+                      className="h-20 w-20 rounded-full object-cover md:hidden"
+                    />
+                    {/* Desktop */}
+                    <Image
+                      src={student.imageUrl}
+                      alt={`${student.firstNameTh} ${student.lastNameTh}`}
+                      width={220}
+                      height={230}
+                      className="hidden h-57.5 w-full max-w-55 rounded-2xl object-cover md:block"
+                    />
+                  </>
+                ) : (
+                  <>
+                    {/* Mobile */}
+                    <div className="h-20 w-20 overflow-hidden rounded-full md:hidden">
+                      <StudentDefaultAvatar
+                        prefix={student.prefix}
+                        alt={`${student.firstNameTh} ${student.lastNameTh}`}
+                        variant="circle"
+                        sx={{ width: "100%", height: "100%" }}
+                      />
+                    </div>
+                    {/* Desktop */}
+                    <div className="hidden h-57.5 w-full max-w-55 overflow-hidden rounded-2xl md:block">
+                      <StudentDefaultAvatar
+                        prefix={student.prefix}
+                        alt={`${student.firstNameTh} ${student.lastNameTh}`}
+                        variant="square"
+                        sx={{ width: "100%", height: "100%" }}
+                      />
+                    </div>
+                  </>
+                )}
+              </div>
+
+              {/* Info */}
+              <div className="flex flex-col items-center md:items-center">
+                <Typography className="!text-base !font-bold !text-neutral05 md:!text-lg text-center mb-0.5 md:mb-1">
+                  {student.firstNameTh} {student.lastNameTh}
+                </Typography>
+                <Typography className="!text-xs !text-neutral04 md:!text-sm text-center mb-2 md:mb-4">
+                  {student.nickName?.trim() && `(${student.nickName.trim()}) `}
+                  {student.student.studentCode} รุ่น {classBook?.classof || "-"}
+                </Typography>
+
+                {/* Social Links */}
+                <div className="flex gap-0.5 md:gap-1.5 justify-center">
+                  {student.student.facebook && (
+                    <IconButton
+                      component="a"
+                      href={student.student.facebook}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      sx={{ p: 0.25, color: "var(--color-neutral04)", "&:hover": { color: "#1877F2" } }}
+                    >
+                      <FacebookIcon sx={{ fontSize: { xs: 18, md: 22 } }} />
+                    </IconButton>
+                  )}
+                  {student.student.linkedin && (
+                    <IconButton
+                      component="a"
+                      href={student.student.linkedin}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      sx={{ p: 0.25, color: "var(--color-neutral04)", "&:hover": { color: "#0A66C2" } }}
+                    >
+                      <LinkedInIcon sx={{ fontSize: { xs: 18, md: 22 } }} />
+                    </IconButton>
+                  )}
+                  {student.student.github && (
+                    <IconButton
+                      component="a"
+                      href={student.student.github}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      sx={{ p: 0.25, color: "var(--color-neutral04)", "&:hover": { color: "#181717" } }}
+                    >
+                      <GitHubIcon sx={{ fontSize: { xs: 18, md: 22 } }} />
+                    </IconButton>
+                  )}
+                  {student.student.instagram && (
+                    <IconButton
+                      component="a"
+                      href={student.student.instagram}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      sx={{ p: 0.25, color: "var(--color-neutral04)", "&:hover": { color: "#E1306C" } }}
+                    >
+                      <InstagramIcon sx={{ fontSize: { xs: 18, md: 22 } }} />
+                    </IconButton>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Skills Card */}
+            {student.student.skills.length > 0 && (
+              <div className="rounded-2xl border border-neutral02 bg-white p-6 shadow-sm">
+                <Typography className="!text-sm !font-bold !text-neutral05 !mb-3">
+                  Skills
+                </Typography>
+                <div className="flex flex-wrap gap-2">
+                  {student.student.skills.map((skill) => (
+                    <Chip
+                      key={skill}
+                      label={skill}
+                      sx={{
+                        backgroundColor: "var(--color-neutral02)",
+                        color: "var(--color-neutral05)",
+                        borderRadius: "8px",
+                        fontSize: "0.75rem",
+                        height: "26px",
+                        fontWeight: 500,
+                        border: "1px solid var(--color-neutral03)",
+                      }}
+                    />
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Right Panel: Project Tabs and Scrollable List */}
+          <div className="flex-1 flex flex-col md:w-[65%] w-full">
+
+            {/* Tab Headers */}
+            <div className="flex border-b border-neutral02 mb-6">
+              <button
+                onClick={() => setActiveTab("course")}
+                className={`flex-1 pb-3 text-center font-bold text-sm transition-colors border-b-2 ${activeTab === "course"
+                  ? "border-primary01 text-primary01"
+                  : "border-transparent text-neutral04 hover:text-neutral05"
+                  }`}
+              >
+                โปรเจกต์ในหลักสูตร
+              </button>
+              <button
+                onClick={() => setActiveTab("other")}
+                className={`flex-1 pb-3 text-center font-bold text-sm transition-colors border-b-2 ${activeTab === "other"
+                  ? "border-primary01 text-primary01"
+                  : "border-transparent text-neutral04 hover:text-neutral05"
+                  }`}
+              >
+                โปรเจกต์อื่นๆ
+              </button>
+            </div>
+
+            {/* Scrollable Project List */}
+            <div className="flex-1 max-h-105 overflow-y-auto pr-3 custom-scrollbar">
+              <ul className="list-disc pl-5 text-neutral05 space-y-4">
+                {activeTab === "course" ? (
+                  courseProjectsMock.map((project, idx) => (
+                    <li key={idx} className="leading-relaxed text-sm">
+                      {project}
+                    </li>
+                  ))
+                ) : (
+                  otherProjectsMock.map((project, idx) => (
+                    <li key={idx} className="leading-relaxed text-sm">
+                      {project}
+                    </li>
+                  ))
+                )}
+              </ul>
+            </div>
+          </div>
+        </div>
+      </Box>
+    </Modal>
+  );
+};

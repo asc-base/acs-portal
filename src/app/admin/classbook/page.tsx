@@ -1,19 +1,23 @@
 import React from "react";
-import { classBookService, baseUrl } from "@/infra/container";
-import ClassBookListComponents from "./classbook.list.component";
-import { QueryClassBook } from "@/core/domain/classbook";
+
+import ClassBookListComponents from "@/features/classbook/components/admin/classbook.list.component";
+import type { QueryClassBookInput } from "@/features/classbook/domain/classbook";
+import { createClassBookServerService } from "@/features/classbook/server";
+
 
 
 export const dynamic = "force-dynamic";
 
 interface PageProps {
-  searchParams: Promise<QueryClassBook>;
+  searchParams: Promise<QueryClassBookInput>;
 }
 
 const page = async ({ searchParams }: PageProps) => {
+  const classBookService = await createClassBookServerService();
+
   const resolvedSearchParams = await searchParams;
 
-  const query: QueryClassBook = {
+  const query: QueryClassBookInput = {
     page: resolvedSearchParams.page || 1,
     pageSize: resolvedSearchParams.pageSize || 12,
     orderBy: "createdAt",
@@ -30,7 +34,7 @@ const page = async ({ searchParams }: PageProps) => {
       pageSize={pageSize}
       page={page}
       sortBy={query.sortBy}
-      apiBase={baseUrl}
+      search={query.search}
     />
   );
 };

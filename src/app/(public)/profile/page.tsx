@@ -1,11 +1,11 @@
-import ProfileForm from "./profileform";
-import { baseUrl } from "@/infra/container";
+import ProfileForm from "@/features/students/components/public/profileform";
+
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
 const page = async () => {
-  return <ProfileForm apiBase={baseUrl} />;
+  return <ProfileForm />;
 };
 
 export default page;

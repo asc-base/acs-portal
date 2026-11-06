@@ -1,16 +1,16 @@
 import React from "react";
-import ProjectList from "./project.list.components";
+import ProjectList from "@/features/projects/components/public/project.list.components";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
-import {
-  projectService,
-  masterDataService,
-  courseService,
-  classBookService,
-} from "@/infra/container";
-import { FilterList } from "@/components/filterlist";
-import { QueryProject } from "@/core/domain/project";
+
+import { FilterList } from "@/features/projects/components/filterlist";
+import { QueryProject } from "@/features/projects/domain/project";
+import { createProjectServerService } from "@/features/projects/server";
+import { createMasterDataServerService } from "@/features/master-data/server";
+import { createCourseServerService } from "@/features/courses/server";
+import { createClassBookServerService } from "@/features/classbook/server";
+
 
 interface LocalPageProps {
   searchParams?: Promise<{
@@ -34,6 +34,11 @@ const ensureArray = (
 };
 
 const Page = async ({ searchParams }: LocalPageProps) => {
+  const projectService = await createProjectServerService();
+  const masterDataService = await createMasterDataServerService();
+  const courseService = await createCourseServerService();
+  const classBookService = await createClassBookServerService();
+
   const resolvedSearchParams = (await searchParams) || {};
 
   const queryFilters: QueryProject = {

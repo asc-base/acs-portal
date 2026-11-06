@@ -32,6 +32,7 @@
   "baseUrl": ".",
   "include": [
     "next-env.d.ts",
+    "**/*.mts",
     "**/*.ts",
     "**/*.tsx",
     "**/*.d.ts",

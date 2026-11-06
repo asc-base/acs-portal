@@ -1,18 +1,22 @@
-import { professorService, baseUrl } from "@/infra/container";
-import ProfessorLandingpage from "./professors.landingpage";
+
+import ProfessorLandingpage from "@/features/professors/components/admin/professors.landingpage";
+import { createProfessorServerService } from "@/features/professors/server";
+
 
 export const dynamic = "force-dynamic";
 
 interface PageProps {
   searchParams: Promise<{
-    page?: number;
-    pageSize?: number;
+    page?: string;
+    pageSize?: string;
     search?: string;
     searchBy?: string;
   }>;
 }
 
 const page = async ({ searchParams }: PageProps) => {
+  const professorService = await createProfessorServerService();
+
   const resolvedSearchParams = await searchParams;
 
   const query = {
@@ -30,7 +34,6 @@ const page = async ({ searchParams }: PageProps) => {
       totalRecords={totalRecords}
       pageSize={pageSize}
       page={page}
-      apiBase={baseUrl}
     />
   );
 };

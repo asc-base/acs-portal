@@ -1,7 +1,10 @@
 import React, { FC } from "react";
-import { curriculumService, masterDataService } from "@/infra/container";
-import CurriculumListComponents from "./curriculum.landingpage";
-import { QueryCurriculum } from "@/core/domain/curriculum";
+
+import CurriculumListComponents from "@/features/curriculum/components/public/curriculum.landingpage";
+import { QueryCurriculum } from "@/features/curriculum/domain/curriculum";
+import { createCurriculumServerService } from "@/features/curriculum/server";
+import { createMasterDataServerService } from "@/features/master-data/server";
+
 
 // Force this route to be dynamic to avoid build-time prerender fetches
 export const dynamic = "force-dynamic";
@@ -12,6 +15,9 @@ interface CurriculumPageProps {
 }
 
 const Page: FC<CurriculumPageProps> = async ({ searchParams }) => {
+  const curriculumService = await createCurriculumServerService();
+  const masterDataService = await createMasterDataServerService();
+
   const search = await searchParams;
 
   const query: QueryCurriculum = {

@@ -1,5 +1,5 @@
 import React from "react";
-import { getExampleData } from "@/app/(public)/example/action";
+import { getExampleData } from "@/features/example/components/public/action";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
