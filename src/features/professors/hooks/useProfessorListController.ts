@@ -63,6 +63,9 @@ export function useProfessorListController() {
   };
 
   useEffect(() => {
+    if ((watchedSearch || "") === (searchParams.get("search") || "")) {
+      return;
+    }
     const delayDebounceFn = setTimeout(() => {
       const params = new URLSearchParams(searchParams.toString());
       if (watchedSearch) {
