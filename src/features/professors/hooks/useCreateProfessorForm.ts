@@ -42,11 +42,11 @@ export function useCreateProfessorForm() {
     mode: "onBlur",
     reValidateMode: "onChange",
   });
-  const { fields: educationFields, append: appendEducation } = useFieldArray({
+  const { fields: educationFields, append: appendEducation, remove: removeEducation } = useFieldArray({
     control,
     name: "educations",
   });
-  const { fields: expertFields, append: appendExpert } = useFieldArray({
+  const { fields: expertFields, append: appendExpert, remove: removeExpert } = useFieldArray({
     control,
     name: "expertFields",
   });
@@ -103,8 +103,10 @@ export function useCreateProfessorForm() {
     isValid,
     educationFields,
     appendEducation,
+    removeEducation,
     expertFields,
     appendExpert,
+    removeExpert,
     selectedFile,
     isCropping,
     confirmModal,
