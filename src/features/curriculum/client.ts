@@ -9,7 +9,7 @@ import {
 import { CurriculumService } from "@/features/curriculum/service/curriculum.service";
 import { baseUrl } from "@/shared/config/api.client";
 
-export const curriculumService = new CurriculumService(
+const curriculumService = new CurriculumService(
   new CurriculumRepository(baseUrl),
 );
 const curriculumKeys = {

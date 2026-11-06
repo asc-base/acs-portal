@@ -70,11 +70,9 @@ export function useCreateCurriculumController() {
     }
     setFileError(null);
 
-    const targetYear = dayjs(data.year).year().toString();
-
     try {
       await createCurriculum.mutateAsync({
-        data: { ...data, year: targetYear },
+        data: { ...data, year: dayjs(data.year).year().toString() },
         thumbnailFile: selectedFile,
       });
       setConfirmModal({
