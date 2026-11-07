@@ -10,7 +10,7 @@ Set `API_URL` to the backend origin and run:
 npm run dev
 ```
 
-Browser requests use `/api`; the development rewrite forwards them to `API_URL`. Server entrypoints call the backend directly.
+Browser requests use `/api`; the Next.js route handler forwards them to `API_URL`. Server entrypoints call the backend directly.
 
 ## Source layout
 
