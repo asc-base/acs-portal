@@ -16,6 +16,7 @@ export function useCreateProfessorForm() {
   const router = useRouter();
   const mutation = useCreateProfessor();
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [fileError, setFileError] = useState("");
   const [isCropping, setIsCropping] = useState(false);
   const [confirmModal, setConfirmModal] = useState<ConfirmModalProps | null>(null);
   const {
@@ -111,10 +112,19 @@ export function useCreateProfessorForm() {
     isCropping,
     confirmModal,
     isPending: mutation.isPending,
-    isError: mutation.isError,
-    clearError: mutation.reset,
+    fileError,
+    isError: mutation.isError || Boolean(fileError),
+    clearError: () => {
+      setFileError("");
+      mutation.reset();
+    },
     handleFileChange: (file: File | null) => {
       if (file) {
+        if (!file.type.startsWith("image/")) {
+          setFileError("รองรับเฉพาะไฟล์รูปภาพเท่านั้น");
+          return;
+        }
+        setFileError("");
         setSelectedFile(file);
         setIsCropping(true);
       }

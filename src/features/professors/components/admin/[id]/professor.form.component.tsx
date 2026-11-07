@@ -52,6 +52,7 @@ const ProfessorFormComponent = ({ professor, prefixes }: ProfessorFormComponentP
     confirmModal,
     isPending,
     isError,
+    fileError,
     clearError,
     handleFileChange,
     handleCropComplete,
@@ -72,7 +73,7 @@ const ProfessorFormComponent = ({ professor, prefixes }: ProfessorFormComponentP
           onClose={clearError}
           sx={{ width: "100%" }}
         >
-          ไม่สามารถแก้ไขข้อมูลอาจารย์ได้
+          {fileError || "ไม่สามารถแก้ไขข้อมูลอาจารย์ได้"}
         </Alert>
       </Snackbar>
 
@@ -102,9 +103,10 @@ const ProfessorFormComponent = ({ professor, prefixes }: ProfessorFormComponentP
                     <VisuallyHiddenInput
                       type="file"
                       accept="image/*"
-                      onChange={(event) =>
-                        handleFileChange(event.target.files?.[0] ?? null)
-                      }
+                      onChange={(event) => {
+                        handleFileChange(event.target.files?.[0] ?? null);
+                        event.target.value = "";
+                      }}
                     />
                     อัปโหลดรูปภาพ
                   </Button>
@@ -115,9 +117,10 @@ const ProfessorFormComponent = ({ professor, prefixes }: ProfessorFormComponentP
                 <VisuallyHiddenInput
                   type="file"
                   accept="image/*"
-                  onChange={(event) =>
-                    handleFileChange(event.target.files?.[0] ?? null)
-                  }
+                  onChange={(event) => {
+                    handleFileChange(event.target.files?.[0] ?? null);
+                    event.target.value = "";
+                  }}
                 />
                 อัปโหลดรูปภาพ
               </Button>
