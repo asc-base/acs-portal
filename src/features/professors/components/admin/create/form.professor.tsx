@@ -42,6 +42,7 @@ export const FormProfesssors: FC = () => {
     confirmModal,
     isPending,
     isError,
+    fileError,
     clearError,
     educationFields,
     appendEducation,
@@ -68,7 +69,7 @@ export const FormProfesssors: FC = () => {
           onClose={clearError}
           sx={{ width: "100%" }}
         >
-          ไม่สามารถเพิ่มข้อมูลอาจารย์ได้
+          {fileError || "ไม่สามารถเพิ่มข้อมูลอาจารย์ได้"}
         </Alert>
       </Snackbar>
 
@@ -95,9 +96,10 @@ export const FormProfesssors: FC = () => {
                     <VisuallyHiddenInput
                       type="file"
                       accept="image/*"
-                      onChange={(event) =>
-                        handleFileChange(event.target.files?.[0] ?? null)
-                      }
+                      onChange={(event) => {
+                        handleFileChange(event.target.files?.[0] ?? null);
+                        event.target.value = "";
+                      }}
                     />
                     อัปโหลดรูปภาพ
                   </Button>
@@ -108,9 +110,10 @@ export const FormProfesssors: FC = () => {
                 <VisuallyHiddenInput
                   type="file"
                   accept="image/*"
-                  onChange={(event) =>
-                    handleFileChange(event.target.files?.[0] ?? null)
-                  }
+                  onChange={(event) => {
+                    handleFileChange(event.target.files?.[0] ?? null);
+                    event.target.value = "";
+                  }}
                 />
                 อัปโหลดรูปภาพ
               </Button>
