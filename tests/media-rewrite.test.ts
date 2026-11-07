@@ -202,4 +202,37 @@ test("the production build rewrites public images using runtime RustFS settings"
       await closeServer(api);
     }
   });
+
+  await t.test("streams API requests to the runtime origin", async () => {
+    for (const marker of ["first", "second"]) {
+      const api = createServer(async (request, response) => {
+        let size = 0;
+        for await (const chunk of request) size += chunk.length;
+        response.setHeader("Set-Cookie", ["session=one; Path=/", "other=two; Path=/"]);
+        response.setHeader("Content-Type", "application/json");
+        response.end(JSON.stringify({ marker, url: request.url, method: request.method, cookie: request.headers.cookie, size }));
+      });
+      const apiPort = await startServer(api);
+      try {
+        await withPortal({ apiUrl: `http://127.0.0.1:${apiPort}` }, async (origin) => {
+          const response = await fetch(`${origin}/api/upload?value=1`, {
+            method: "POST", headers: { Cookie: "session=test" }, body: Buffer.alloc(11 * 1024 * 1024),
+          });
+          assert.equal(response.status, 200);
+          assert.equal(response.headers.getSetCookie().length, 2);
+          assert.deepEqual(await response.json(), { marker, url: "/api/upload?value=1", method: "POST", cookie: "session=test", size: 11 * 1024 * 1024 });
+          assert.equal((await fetch(`${origin}/api`)).status, 200);
+        });
+      } finally {
+        await closeServer(api);
+      }
+    }
+    await withPortal({ apiUrl: "http://127.0.0.1:1" }, async (origin) => {
+      assert.equal((await fetch(`${origin}/api/test`)).status, 502);
+    });
+    await withPortal({ apiUrl: "invalid" }, async (origin) => {
+      assert.equal((await fetch(`${origin}/api/test`)).status, 503);
+    });
+  });
+
 });
