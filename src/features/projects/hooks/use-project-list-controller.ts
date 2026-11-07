@@ -43,11 +43,12 @@ export function useProjectListController({
   );
 
   useEffect(() => {
+    if ((watchedSearch ?? "") === (search ?? "")) return;
     const handler = setTimeout(() => {
       router.push(searchProjectUrl({ page: 1, search: watchedSearch }));
     }, 300);
     return () => clearTimeout(handler);
-  }, [watchedSearch, searchProjectUrl, router]);
+  }, [watchedSearch, search, searchProjectUrl, router]);
 
   const onDelete = async (id: number) => {
     try {
