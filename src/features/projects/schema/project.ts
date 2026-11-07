@@ -16,7 +16,7 @@ const projectFormSchema = z.object({
   projectTypes: z.array(z.object({ value: z.number().min(1, "กรุณาเลือกประเภท") })).min(1, "กรุณาเลือกอย่างน้อย 1 ประเภท"),
   projectCategories: z.array(z.object({ value: z.number().min(1, "กรุณาเลือกหมวดหมู่") })).min(1, "กรุณาเลือกอย่างน้อย 1 หมวดหมู่"),
   projectFields: z.array(z.object({ value: z.number().min(1) })),
-  techStacks: z.array(z.object({ value: z.string().trim().min(1, "ระบุ Tech Stack") })).min(1, "ระบุอย่างน้อย 1 Tech Stack"),
+  techStacks: z.array(z.object({ value: z.string().trim().min(1, "กรุณาระบุ Tech Stack") })).min(1, "กรุณาระบุอย่างน้อย 1 Tech Stack"),
   students: z.array(z.object({ userID: z.number().min(1, "กรุณาเลือกนักศึกษา"), position: z.string().trim().optional() })).min(1, "กรุณาเพิ่มผู้จัดทำอย่างน้อย 1 คน"),
   advisors: z.array(z.object({ userID: z.number().min(1, "กรุณาเลือกอาจารย์"), position: z.string().trim().optional() })).min(1, "กรุณาเพิ่มอาจารย์ที่ปรึกษาอย่างน้อย 1 คน"),
   coAdvisors: z.array(z.object({ userID: z.number().min(1, "กรุณาเลือกอาจารย์"), position: z.string().trim().optional() })),

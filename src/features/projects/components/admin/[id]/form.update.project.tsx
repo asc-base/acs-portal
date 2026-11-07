@@ -345,13 +345,6 @@ export const FormUpdateProject: FC<FormUpdateProjectProps> = ({ projectId, initi
               requiredMark
               startIcon={<SlideshowIcon fontSize="small" />}
             />
-            <RHFTextField disabled={!isEditMode}
-              control={control}
-              name="figmaURL"
-              label="Figma (ไม่บังคับ)"
-              variant="outlined"
-              fullWidth
-            />
           </div>
 
           <div className="my-10 pt-4">
@@ -437,7 +430,7 @@ export const FormUpdateProject: FC<FormUpdateProjectProps> = ({ projectId, initi
                           inputValue={field.value}
                           onChange={(_, value) => field.onChange(typeof value === "string" ? value : "")}
                           onInputChange={(_, value) => field.onChange(value)}
-                          renderInput={(params) => <TextField {...params} label="Tech Stack" required />}
+                          renderInput={(params) => <TextField {...params} label="Tech Stack" />}
                         />
                       )}
                     />

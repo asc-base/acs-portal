@@ -313,13 +313,6 @@ export const FormProjects: FC<FormProjectsProps> = ({ initialCourses, initialMas
             requiredMark
             startIcon={<SlideshowIcon fontSize="small" />}
           />
-          <RHFTextField
-            control={control}
-            name="figmaURL"
-            label="Figma (ไม่บังคับ)"
-            variant="outlined"
-            fullWidth
-          />
         </div>
 
         <div className="my-10 pt-4">
@@ -355,8 +348,8 @@ export const FormProjects: FC<FormProjectsProps> = ({ initialCourses, initialMas
                   onDragOver={(e) => e.preventDefault()}
                   onDragEnd={handleDragEnd}
                   onDrop={() => handleDrop(index)}
-                  className={`relative aspect-video w-full rounded-md overflow-hidden cursor-grab active:cursor-grabbing transition-all border-2 
-                    ${dragOverItemIndex === index ? 'border-[var(--color-primary02)] border-dashed scale-105' : 'border-gray-200 border-solid'} 
+                  className={`relative aspect-video w-full rounded-md overflow-hidden cursor-grab active:cursor-grabbing transition-all border-2
+                    ${dragOverItemIndex === index ? 'border-[var(--color-primary02)] border-dashed scale-105' : 'border-gray-200 border-solid'}
                     ${draggedItemIndex === index ? 'opacity-40' : 'opacity-100'} group`}
                 >
                   <Image src={URL.createObjectURL(file)} alt="asset" fill className="object-cover pointer-events-none" draggable={false} />
@@ -409,7 +402,7 @@ export const FormProjects: FC<FormProjectsProps> = ({ initialCourses, initialMas
                         inputValue={field.value}
                         onChange={(_, value) => field.onChange(typeof value === "string" ? value : "")}
                         onInputChange={(_, value) => field.onChange(value)}
-                        renderInput={(params) => <TextField {...params} label="Tech Stack" required />}
+                        renderInput={(params) => <TextField {...params} label="Tech Stack"/>}
                       />
                     )}
                   />
