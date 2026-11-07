@@ -36,6 +36,7 @@ export function useUpdateProfessorForm(professor: IProfessor) {
   const mutation = useUpdateProfessor();
   const [isEdit, setIsEdit] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [fileError, setFileError] = useState("");
   const [isCropping, setIsCropping] = useState(false);
   const [previewUrl, setPreviewUrl] = useState<string | null>(
     professor.imageUrl ?? null,
@@ -155,10 +156,19 @@ export function useUpdateProfessorForm(professor: IProfessor) {
     isCropping,
     confirmModal,
     isPending: mutation.isPending,
-    isError: mutation.isError,
-    clearError: mutation.reset,
+    fileError,
+    isError: mutation.isError || Boolean(fileError),
+    clearError: () => {
+      setFileError("");
+      mutation.reset();
+    },
     handleFileChange: (file: File | null) => {
       if (file) {
+        if (!file.type.startsWith("image/")) {
+          setFileError("รองรับเฉพาะไฟล์รูปภาพเท่านั้น");
+          return;
+        }
+        setFileError("");
         setSelectedFile(file);
         setIsCropping(true);
       }
