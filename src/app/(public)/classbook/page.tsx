@@ -4,9 +4,6 @@ import { createClassBookServerService } from "@/features/classbook/server";
 
 
 
-// Force dynamic to avoid build-time fetch when API might be unavailable
-export const dynamic = "force-dynamic";
-export const revalidate = 0;
 
 export const metadata = {
   title: "หลักสูตร | ACS website",

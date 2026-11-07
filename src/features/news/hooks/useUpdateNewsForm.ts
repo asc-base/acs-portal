@@ -28,7 +28,7 @@ const formValues = (news: INews): UpdateNewsInputs => ({
   title: news.title,
   startDate: dayjs(news.startDate).toISOString(),
   dueDate: news.dueDate ? dayjs(news.dueDate).toISOString() : "",
-  tag: news.category?.id ?? news.tag?.id ?? 0,
+  newsCategoryId: news.category?.id ?? 0,
   detail: news.detail,
   thumbnail: news.thumbnailURL ?? "",
   thumbnailImage:
@@ -134,7 +134,7 @@ export function useUpdateNewsForm(news: INews) {
 
     const payload: UpdateNewsPayload = {
       ...(changed.title !== undefined && { title: data.title }),
-      ...(changed.tag !== undefined && { newsCategoryId: data.tag }),
+      ...(changed.newsCategoryId !== undefined && { newsCategoryId: data.newsCategoryId }),
       ...(changed.detail !== undefined && { detail: data.detail }),
       ...(changed.thumbnail instanceof File && { thumbnail: data.thumbnail }),
       ...(changed.thumbnailImage instanceof File && {

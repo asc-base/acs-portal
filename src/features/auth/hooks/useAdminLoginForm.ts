@@ -37,7 +37,7 @@ export function useAdminLoginForm() {
         return;
       }
 
-      router.replace("/admin/classbook");
+      router.replace("/admin");
     } catch (error) {
       form.setError("password", {
         type: "manual",

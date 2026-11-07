@@ -8,7 +8,6 @@ import { createProjectServerService } from "@/features/projects/server";
 
 
 
-export const dynamic = "force-dynamic";
 
 interface PageProps {
   params: Promise<{ id: string }>;

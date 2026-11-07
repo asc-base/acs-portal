@@ -18,6 +18,7 @@ const news = {
   detail: "News details",
   startDate: "2026-10-08T08:00:00.000Z",
   dueDate: null,
+  category: null,
   images: [],
 };
 const bulletin = {
@@ -59,13 +60,13 @@ describe("news data hooks", () => {
       ),
     );
     const { result } = renderHook(
-      () => useNews({ page: 1, pageSize: 12, tagID: 16 }),
+      () => useNews({ page: 1, pageSize: 12, newsCategoryId: 1 }),
       { wrapper },
     );
 
     await waitFor(() => expect(result.current.data?.rows).toEqual([news]));
     expect(fetch).toHaveBeenCalledWith(
-      "/api/v1/news/?page=1&pageSize=12&tagID=16&orderBy=startDate&sortBy=desc",
+      "/api/v1/news/?page=1&pageSize=12&newsCategoryId=1&orderBy=startDate&sortBy=desc",
       expect.objectContaining({ method: "GET" }),
     );
   });

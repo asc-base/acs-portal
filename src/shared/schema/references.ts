@@ -5,18 +5,6 @@ export const RoleSchema = z.object({
   name: z.string(),
 });
 
-export const TagSchema = z.object({
-  id: z.number(),
-  name: z.string(),
-  tagsGroupsId: z.number(),
-});
-
-export const TagGroupSchema = z.object({
-  id: z.number(),
-  name: z.string(),
-  tags: z.array(TagSchema).default([]),
-});
-
 export const NewsCategorySchema = z.object({
   id: z.number(),
   code: z.string(),
@@ -24,6 +12,7 @@ export const NewsCategorySchema = z.object({
 });
 
 export type Role = z.infer<typeof RoleSchema>;
-export type Tag = z.infer<typeof TagSchema>;
-export type TagsGroup = z.infer<typeof TagGroupSchema>;
 export type NewsCategory = z.infer<typeof NewsCategorySchema>;
+
+export const ProjectLookupSchema = z.object({ id: z.number(), name: z.string() });
+export type ProjectLookup = z.infer<typeof ProjectLookupSchema>;

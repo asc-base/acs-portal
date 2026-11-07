@@ -45,7 +45,10 @@ export function useCreateProject() {
       payload: CreateProjectRequest;
       files: { thumbnailFile: File; assets: File[] };
     }) => projectService.createProject(payload, files),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: projectKeys.lists() }),
+    onSuccess: () => Promise.all([
+      queryClient.invalidateQueries({ queryKey: projectKeys.lists() }),
+      queryClient.invalidateQueries({ queryKey: ["master-data"] }),
+    ]),
     retry: false,
   });
 }
@@ -66,6 +69,7 @@ export function useUpdateProject() {
       Promise.all([
         queryClient.invalidateQueries({ queryKey: projectKeys.lists() }),
         queryClient.invalidateQueries({ queryKey: projectKeys.detail(id) }),
+        queryClient.invalidateQueries({ queryKey: ["master-data"] }),
       ]),
     retry: false,
   });

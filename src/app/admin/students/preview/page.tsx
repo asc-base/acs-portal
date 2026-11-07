@@ -1,7 +1,6 @@
 import Preview_table_component from "@/features/students/components/admin/preview/preview.table.component";
 
 
-export const dynamic = "force-dynamic";
 
 interface PageProps {
   searchParams: Promise<{

@@ -7,7 +7,6 @@ import { createMasterDataServerService } from "@/features/master-data/server";
 
 
 
-export const dynamic = "force-dynamic";
 
 interface PageProps {
   params: Promise<{ id: string }>;

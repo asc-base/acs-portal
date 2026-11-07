@@ -2,9 +2,8 @@ import { z } from "zod";
 import { UserPrefixSchema } from "@/shared/schema/profile-response";
 import {
   NewsCategorySchema,
+  ProjectLookupSchema,
   RoleSchema,
-  TagGroupSchema,
-  TagSchema,
 } from "@/shared/schema/references";
 
 export const TypeCourseSchema = z.object({
@@ -16,11 +15,13 @@ export const TypeCourseSchema = z.object({
 export const MasterDataSchema = z.object({
   roles: z.array(RoleSchema),
   typeCourses: z.array(TypeCourseSchema),
-  tagsGroups: z.array(TagGroupSchema),
-  tags: z.array(TagSchema),
   prefixes: z.array(UserPrefixSchema),
   newsCategories: z.array(NewsCategorySchema),
-});
+  fields: z.array(ProjectLookupSchema),
+  categories: z.array(ProjectLookupSchema),
+  projectTypes: z.array(ProjectLookupSchema),
+  techStacks: z.array(ProjectLookupSchema),
+}).strict();
 
 export type MasterData = z.infer<typeof MasterDataSchema>;
 export type TypeCourse = z.infer<typeof TypeCourseSchema>;

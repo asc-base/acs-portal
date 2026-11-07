@@ -16,7 +16,6 @@ const news: INews = {
   detail: "News details",
   startDate: "2026-10-08T08:00:00.000Z",
   dueDate: null,
-  tag: { id: 1, name: "News", tagsGroupsId: 1 },
   category: { id: 2, code: "NEWS", name: "News" },
   images: [
     { id: 1, imageID: 1, imageType: "CARD", imageUrl: "https://example.test/card.png", focalPointX: 50, focalPointY: 50, sortOrder: 0 },

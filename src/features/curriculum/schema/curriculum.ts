@@ -1,15 +1,26 @@
 import { z } from "zod";
+import dayjs from "dayjs";
 import { PageMetadataSchema } from "@/shared/schema/page-metadata";
 
 const documentURLField = z
   .string()
   .trim()
   .min(1, "กรุณาระบุลิงก์ไฟล์หลักสูตร")
-  .pipe(z.url("กรุณาระบุลิงก์ที่ถูกต้อง"));
+  .pipe(
+    z.url({
+      protocol: /^https?$/,
+      hostname:
+        /^(drive\.google\.com|docs\.google\.com|onedrive\.live\.com|1drv\.ms|[\w-]+\.sharepoint\.com)$/,
+      error: "กรุณาระบุลิงก์ Google Drive หรือ OneDrive",
+    }),
+  );
 
 const CommonCurriculumSchema = z.object({
   title: z.string().trim().min(1, "กรุณาระบุชื่อหลักสูตร"),
-  year: z.string().min(1, "กรุณาระบุปีการศึกษา"),
+  year: z
+    .string()
+    .min(1, "กรุณาระบุปีการศึกษา")
+    .refine((value) => dayjs(value).isValid(), "กรุณาระบุปีที่ถูกต้อง"),
   documentURL: documentURLField,
   description: z.string().trim().min(1, "กรุณาระบุรายละเอียด"),
   thumbnailFocalPointX: z.number().optional(),

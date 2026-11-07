@@ -89,7 +89,7 @@ export async function proxy(request: NextRequest) {
   const apiUrl = process.env.API_URL?.replace(/\/+$/, "");
 
   if (!cookie || !apiUrl) {
-    return NextResponse.redirect(new URL("/home", request.url));
+    return NextResponse.redirect(new URL("/", request.url));
   }
 
   try {
@@ -102,15 +102,15 @@ export async function proxy(request: NextRequest) {
     );
 
     if (!response.ok) {
-      return NextResponse.redirect(new URL("/home", request.url));
+      return NextResponse.redirect(new URL("/", request.url));
     }
 
     const result = (await response.json()) as ApiResponse<UserProfile>;
     if (!isAdminUser(result.data)) {
-      return NextResponse.redirect(new URL("/home", request.url));
+      return NextResponse.redirect(new URL("/", request.url));
     }
   } catch {
-    return NextResponse.redirect(new URL("/home", request.url));
+    return NextResponse.redirect(new URL("/", request.url));
   }
 
   return NextResponse.next();

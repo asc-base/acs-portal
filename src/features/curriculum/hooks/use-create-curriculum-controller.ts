@@ -9,6 +9,7 @@ import {
 } from "@/features/curriculum/schema/curriculum";
 import { useCreateCurriculum } from "@/features/curriculum/client";
 import type { ConfirmModalProps } from "@/shared/components/modal/confirmModal";
+import { HttpError } from "@/shared/lib/http";
 
 export function useCreateCurriculumController() {
   const router = useRouter();
@@ -19,6 +20,8 @@ export function useCreateCurriculumController() {
   const [confirmModal, setConfirmModal] = useState<ConfirmModalProps | null>(
     null,
   );
+  const [isError, setIsError] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
   const form = useForm<CreateCurriculumInputs>({
     resolver: zodResolver(CreateCurriculumSchema),
     mode: "onChange",
@@ -80,6 +83,15 @@ export function useCreateCurriculumController() {
       });
     } catch (error) {
       console.error("Submit Error:", error);
+      if (error instanceof HttpError && error.status === 409) {
+        form.setError("year", {
+          type: "manual",
+          message: "ปีการศึกษานี้มีอยู่ในระบบแล้ว",
+        });
+      } else {
+        setErrorMessage("ไม่สามารถบันทึกข้อมูลได้ กรุณาลองใหม่อีกครั้ง");
+        setIsError(true);
+      }
     }
   };
 
@@ -95,5 +107,8 @@ export function useCreateCurriculumController() {
     handleCancel,
     handleCropCancel,
     onSubmit,
+    isError,
+    setIsError,
+    errorMessage,
   };
 }

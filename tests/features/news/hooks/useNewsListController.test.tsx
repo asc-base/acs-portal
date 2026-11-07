@@ -57,7 +57,7 @@ describe("news list controller", () => {
     act(() => result.current.handleFilterCategory("17"));
 
     expect(navigation.router.push).toHaveBeenCalledWith(
-      "/admin/news?page=1&search=News&searchBy=title&tab=active&tagID=17",
+      "/admin/news?page=1&search=News&searchBy=title&tab=active&newsCategoryId=17",
       { scroll: false },
     );
   });
@@ -72,6 +72,7 @@ describe("news list controller", () => {
           detail: "News details",
           startDate: "2026-10-08T08:00:00.000Z",
           dueDate: null,
+          category: null,
         },
         status: 200,
       }), { headers: { "content-type": "application/json" } }),

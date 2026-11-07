@@ -4,8 +4,8 @@ import { getServerApiOrigin } from "@/shared/config/api.server";
 import { HttpHelper } from "@/shared/lib/http";
 
 export async function createServerHttp() {
-  const baseUrl = `${getServerApiOrigin()}/api`;
   const cookie = (await headers()).get("cookie");
+  const baseUrl = `${getServerApiOrigin()}/api`;
   const requestHeaders: HeadersInit = cookie ? { Cookie: cookie } : {};
 
   return {

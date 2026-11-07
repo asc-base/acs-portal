@@ -126,6 +126,27 @@ describe("auth form controllers", () => {
     expect(useAuthStore.getState().user).toBeNull();
   });
 
+  it("redirects an admin to the admin dashboard after login", async () => {
+    const admin = { ...profile, roles: [{ id: 1, name: "Admin" }] };
+    vi.spyOn(globalThis, "fetch").mockImplementation((input) =>
+      Promise.resolve(
+        String(input).endsWith("/v1/auth/login")
+          ? response({ accessToken: "a", refreshToken: "r" })
+          : response(admin),
+      ),
+    );
+    const { result } = renderHook(() => useAdminLoginForm(), { wrapper });
+    act(() => {
+      result.current.setValue("email", "admin@example.com");
+      result.current.setValue("password", "secret1");
+    });
+
+    await act(async () => result.current.submit(submitEvent()));
+
+    expect(mocks.router.replace).toHaveBeenCalledWith("/admin");
+    expect(useAuthStore.getState().user).toEqual(admin);
+  });
+
   it("maps the forget form email and clears pending state after success", async () => {
     const fetch = vi.spyOn(globalThis, "fetch").mockResolvedValue(
       new Response(JSON.stringify({ data: null, status: 200 }), {

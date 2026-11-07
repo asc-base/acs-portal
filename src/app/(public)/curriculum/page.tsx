@@ -6,9 +6,6 @@ import { createCurriculumServerService } from "@/features/curriculum/server";
 import { createMasterDataServerService } from "@/features/master-data/server";
 
 
-// Force this route to be dynamic to avoid build-time prerender fetches
-export const dynamic = "force-dynamic";
-export const revalidate = 0;
 
 interface CurriculumPageProps {
   searchParams: Promise<QueryCurriculum>;

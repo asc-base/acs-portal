@@ -125,7 +125,7 @@ test("the production build rewrites public images using runtime RustFS settings"
           assert.equal(admin.status, 307);
           const location = admin.headers.get("location");
           assert.ok(location);
-          assert.equal(new URL(location, origin).pathname, "/home");
+          assert.equal(new URL(location, origin).pathname, "/");
         });
       } finally {
         await closeServer(upstream);
@@ -135,6 +135,11 @@ test("the production build rewrites public images using runtime RustFS settings"
 
   await t.test("rejects invalid paths and methods", async () => {
     await withPortal({ endpoint: "http://127.0.0.1:9" }, async (origin) => {
+      const root = await fetch(`${origin}/`, { redirect: "manual" });
+      assert.equal(root.status, 200);
+      const legacyHome = await fetch(`${origin}/home`, { redirect: "manual" });
+      assert.equal(legacyHome.status, 308);
+      assert.equal(new URL(legacyHome.headers.get("location")!, origin).pathname, "/");
       assert.equal((await fetch(`${origin}/media/other-bucket/public/profiles/id`)).status, 404);
       assert.equal((await fetch(`${origin}/media/acs-bucket-staging/private/profiles/id`)).status, 404);
       assert.equal((await fetch(`${origin}/media/acs-bucket-staging/public/secrets/id`)).status, 404);
@@ -171,7 +176,8 @@ test("the production build rewrites public images using runtime RustFS settings"
         } }));
       } else if (path === "/api/v1/master-data") {
         response.end(JSON.stringify({ data: {
-          roles: [], typeCourses: [], tagsGroups: [], tags: [], prefixes: [], newsCategories: [],
+          roles: [], typeCourses: [], prefixes: [], newsCategories: [],
+          fields: [], categories: [], projectTypes: [],
         } }));
       } else if (path.startsWith("/api/v1/news/") || path.startsWith("/api/v1/curriculums")) {
         response.end(JSON.stringify({ data: { rows: [], totalRecords: 0, page: 1, pageSize: 12 } }));
@@ -183,12 +189,17 @@ test("the production build rewrites public images using runtime RustFS settings"
 
     try {
       await withPortal({ apiUrl: `http://127.0.0.1:${apiPort}` }, async (origin) => {
-        const [alice, bob, publicNews] = await Promise.all([
+        const [alice, bob, publicNews, adminDashboard] = await Promise.all([
           fetch(`${origin}/admin/news`, { headers: { Cookie: "session=alice", Authorization: "Bearer app-secret" } }),
           fetch(`${origin}/admin/news`, { headers: { Cookie: "session=bob", Authorization: "Bearer app-secret" } }),
           fetch(`${origin}/news`),
+          fetch(`${origin}/admin`, { headers: { Cookie: "session=alice" } }),
         ]);
-        assert.deepEqual([alice.status, bob.status, publicNews.status], [200, 200, 200]);
+        assert.deepEqual(
+          [alice.status, bob.status, publicNews.status, adminDashboard.status],
+          [200, 200, 200, 200],
+        );
+        assert.match(await adminDashboard.text(), /welcome acs admin dashboard/);
 
         for (const session of ["alice", "bob"]) {
           assert.ok(received.some((request) => request.url.startsWith("/api/v1/users/profile") && request.cookie === `session=${session}`));

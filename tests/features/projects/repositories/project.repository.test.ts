@@ -16,13 +16,13 @@ describe("project repository queries", () => {
     const get = vi.spyOn(http, "get").mockResolvedValue(payload);
     const repository = new ProjectRepository("", http);
     const query: QueryProject = {
-      sortBy: "title & date",
+      sortBy: "title",
       sortOrder: "desc",
       page: 2,
       pageSize: 15,
-      fields: ["field one", "field&two"],
-      categories: ["category?"],
-      types: ["type one"],
+      fieldIds: ["1", "2"],
+      categoryIds: ["3"],
+      projectTypeIds: ["4"],
       courses: ["course 1", "course&2"],
       classBooks: ["book 1", "book&2"],
       search: "AI & systems?view=1",
@@ -32,18 +32,28 @@ describe("project repository queries", () => {
 
     const url = get.mock.calls[0]![0];
     expect(url).toBe(
-      "/v1/project?orderBy=title+%26+date&sortBy=desc&page=2&pageSize=15&tagID=field+one&tagID=field%26two&tagID=category%3F&tagID=type+one&courseID=course+1&courseID=course%262&classBookID=book+1&classBookID=book%262&search=AI+%26+systems%3Fview%3D1",
+      "/v1/project?orderBy=title&sortBy=desc&page=2&pageSize=15&fieldIds=1&fieldIds=2&categoryIds=3&projectTypeIds=4&courseID=course+1&courseID=course%262&classBookID=book+1&classBookID=book%262&search=AI+%26+systems%3Fview%3D1",
     );
     const params = new URL(url, "https://example.test").searchParams;
-    expect(params.getAll("tagID")).toEqual([
-      "field one",
-      "field&two",
-      "category?",
-      "type one",
-    ]);
+    expect(params.getAll("fieldIds")).toEqual(["1", "2"]);
+    expect(params.getAll("categoryIds")).toEqual(["3"]);
+    expect(params.getAll("projectTypeIds")).toEqual(["4"]);
     expect(params.getAll("courseID")).toEqual(["course 1", "course&2"]);
     expect(params.getAll("classBookID")).toEqual(["book 1", "book&2"]);
     expect(params.get("search")).toBe("AI & systems?view=1");
+  });
+
+  it("sends each classification ID in its own query namespace", async () => {
+    const http = new HttpHelper();
+    const get = vi.spyOn(http, "get").mockResolvedValue(response(page));
+    await new ProjectRepository("", http).getProjects({
+      fieldIds: ["1"], categoryIds: ["1"], projectTypeIds: ["1"],
+    });
+
+    const params = new URL(get.mock.calls[0]![0], "https://example.test").searchParams;
+    expect(params.getAll("fieldIds")).toEqual(["1"]);
+    expect(params.getAll("categoryIds")).toEqual(["1"]);
+    expect(params.getAll("projectTypeIds")).toEqual(["1"]);
   });
 
   it("routes list and CRUD calls to their project endpoints and returns responses", async () => {

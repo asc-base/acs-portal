@@ -257,7 +257,7 @@ const CreateNewsForm = ({ categories }: CreateNewsProps) => {
             )}
           </div>
           <RHFSelect
-            name="tagID"
+            name="newsCategoryId"
             control={control}
             label="หมวดหมู่"
             requiredMark
@@ -277,7 +277,7 @@ const CreateNewsForm = ({ categories }: CreateNewsProps) => {
               name="startDate"
               control={control}
               label="วันที่เริ่มต้น"
-              format="D MMMM YYYY"
+              format="D MMMM BBBB"
               placeholder="เลือกวันที่เริ่มต้น"
               requiredMark
             />
@@ -285,7 +285,7 @@ const CreateNewsForm = ({ categories }: CreateNewsProps) => {
               name="dueDate"
               control={control}
               label="วันที่สิ้นสุด"
-              format="D MMMM YYYY"
+              format="D MMMM BBBB"
               placeholder="เลือกวันที่สิ้นสุด"
             />
           </div>

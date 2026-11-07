@@ -15,14 +15,14 @@ const news: INews = {
   dueDate: null,
   createdDate: "2026-10-08T08:00:00.000Z",
   updatedDate: "2026-10-08T08:00:00.000Z",
-  tag: { id: 1, name: "News", tagsGroupsId: 1 },
+  category: null,
 };
 const response = { data: news, status: 200, statusCode: 200 };
 const image = (name: string) => new File([name], name, { type: "image/png" });
 const createInput: CreateNewsInputs = {
   title: news.title,
   detail: news.detail,
-  tagID: 1,
+  newsCategoryId: 1,
   startDate: "2026-10-08T15:00:00+07:00",
   thumbnail: image("card.png"),
 };
@@ -239,6 +239,19 @@ describe("bulletin presentation rules", () => {
     },
   ];
 
+  it("prefers the bulletin image returned by core", async () => {
+    const imageUrl = "https://example.test/bulletin.png";
+    vi.spyOn(repository, "getNewsBulletins").mockResolvedValue({
+      status: 200,
+      statusCode: 200,
+      data: [{ id: 91, newsID: news.id, type: "HIGHLIGHT", imageUrl, news }],
+    });
+
+    expect(await service.getNewsBulletins("HIGHLIGHT")).toMatchObject([
+      { imageUrl, thumbnailURL: imageUrl },
+    ]);
+  });
+
   it.each([
     ["HIGHLIGHT", "thumbnail.png", 100, 0],
     ["ANNOUNCEMENT", "card.png", 0, 100],
@@ -254,8 +267,10 @@ describe("bulletin presentation rules", () => {
       expect(await service.getNewsBulletins(type)).toEqual([
         {
           id: 91,
+          newsID: news.id,
           type,
           news: nestedNews,
+          imageUrl: url,
           thumbnailURL: url,
           thumbnailFocalPointX: x,
           thumbnailFocalPointY: y,
@@ -280,6 +295,7 @@ describe("bulletin presentation rules", () => {
         ],
       });
       expect((await service.getNewsBulletins(type))[0]).toMatchObject({
+        imageUrl: news.thumbnailURL,
         thumbnailURL: news.thumbnailURL,
         thumbnailFocalPointX: 21,
         thumbnailFocalPointY: 79,

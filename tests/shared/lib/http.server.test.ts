@@ -12,6 +12,14 @@ afterEach(() => {
 });
 
 describe("server HTTP transport", () => {
+  it("reads request headers before requiring API_URL", async () => {
+    const requestContextError = new Error("request context unavailable");
+    vi.stubEnv("API_URL", "");
+    vi.mocked(headers).mockRejectedValueOnce(requestContextError);
+
+    await expect(createServerHttp()).rejects.toBe(requestContextError);
+  });
+
   it("requires API_URL and removes trailing slashes", () => {
     vi.stubEnv("API_URL", "");
     expect(() => getServerApiOrigin()).toThrow(

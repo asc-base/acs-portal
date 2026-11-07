@@ -2,7 +2,6 @@
 import { CourseForm } from "@/features/courses/components/admin/create/courses.form.component";
 
 
-export const dynamic = "force-dynamic";
 
 interface PageProps {
   searchParams: Promise<{

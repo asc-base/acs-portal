@@ -43,7 +43,7 @@ export const AdminRouteGuard = ({ children }: AdminRouteGuardProps) => {
     } else {
       setUser(user);
     }
-    router.replace("/home");
+    router.replace("/");
   }, [
     clearUser,
     data,

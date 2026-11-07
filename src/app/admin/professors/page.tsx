@@ -3,7 +3,6 @@ import ProfessorLandingpage from "@/features/professors/components/admin/profess
 import { createProfessorServerService } from "@/features/professors/server";
 
 
-export const dynamic = "force-dynamic";
 
 interface PageProps {
   searchParams: Promise<{

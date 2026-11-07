@@ -22,6 +22,7 @@ describe("getExampleData", () => {
     await expect(getExampleData()).resolves.toEqual(posts);
     expect(fetchMock).toHaveBeenCalledExactlyOnceWith(
       "https://jsonplaceholder.typicode.com/posts",
+      { cache: "no-store" },
     );
   });
 

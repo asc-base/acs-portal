@@ -6,10 +6,10 @@ import { MasterDataService } from "@/features/master-data/service/master-data.se
 const data: MasterData = {
   roles: [],
   typeCourses: [],
-  tags: [],
-  tagsGroups: [],
   prefixes: [],
   newsCategories: [],
+  techStacks: [],
+  fields: [], categories: [], projectTypes: [],
 };
 const response = { data };
 

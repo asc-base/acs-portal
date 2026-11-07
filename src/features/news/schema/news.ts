@@ -1,6 +1,6 @@
 import { z } from "zod";
 import dayjs from "dayjs";
-import { NewsCategorySchema, TagSchema } from "@/shared/schema/references";
+import { NewsCategorySchema } from "@/shared/schema/references";
 import { PageMetadataSchema } from "@/shared/schema/page-metadata";
 
 export const NewsImageSchema = z.object({
@@ -29,8 +29,7 @@ export const NewsResponseSchema = z.object({
   dueDate: z.string().nullable().optional(),
   eventStartAt: z.string().nullable().optional(),
   eventEndAt: z.string().nullable().optional(),
-  category: NewsCategorySchema.nullable().optional(),
-  tag: TagSchema.nullable().optional(),
+  category: NewsCategorySchema.nullable(),
   images: z.array(NewsImageSchema).optional(),
   newsAdditionalImages: z.array(NewsAdditionalImageSchema).optional(),
   cardFocalPointX: z.number().nullable().optional(),
@@ -39,7 +38,7 @@ export const NewsResponseSchema = z.object({
   thumbnailFocalPointY: z.number().nullable().optional(),
   createdDate: z.string().optional(),
   updatedDate: z.string().optional(),
-});
+}).strict();
 
 export const NewsPageSchema = z.object({
   rows: z.array(NewsResponseSchema),
@@ -56,32 +55,13 @@ export const NewsBulletinSchema = z.object({
   id: z.number(),
   newsID: z.number(),
   type: NewsBulletinTypeSchema,
+  imageUrl: z.string().nullable().optional(),
+  createdAt: z.string().optional(),
+  updatedAt: z.string().optional(),
+  deletedAt: z.string().nullable().optional(),
   news: NewsResponseSchema,
-});
+}).strict();
 export const NewsBulletinsSchema = z.array(NewsBulletinSchema);
-
-export const NewsInformationSchema = z.object({
-  id: z.number(),
-  newsID: z.number().optional(),
-  tagID: z.number().optional(),
-  thumbnailURL: z.string().nullable(),
-  highlightURL: z.string().nullable().optional(),
-  news: NewsResponseSchema,
-  thumbnailFocalPointX: z.number().nullable().optional(),
-  thumbnailFocalPointY: z.number().nullable().optional(),
-  type: NewsBulletinTypeSchema.optional(),
-});
-
-export const NewsFeatureResponseSchema = NewsInformationSchema.extend({
-  newsID: z.number(),
-  tagID: z.number(),
-  thumbnailURL: z.string(),
-});
-
-export const NewsInformationsPageSchema = z.object({
-  rows: z.array(NewsFeatureResponseSchema),
-  ...PageMetadataSchema.shape,
-});
 
 const QueryNumberSchema = z.union([
   z.number(),
@@ -91,12 +71,12 @@ const QueryNumberSchema = z.union([
 export const NewsQuerySchema = z.object({
   page: QueryNumberSchema.optional(),
   pageSize: QueryNumberSchema.optional(),
-  tagID: QueryNumberSchema.optional(),
+  newsCategoryId: QueryNumberSchema.optional(),
   orderBy: z.string().optional(),
   sortBy: z.string().optional(),
   search: z.string().optional(),
   searchBy: z.string().optional(),
-});
+}).strict();
 export const NewsSearchSchema = z.object({ search: z.string().optional() });
 
 export const FocalPointSchema = z.object({
@@ -106,22 +86,29 @@ export const FocalPointSchema = z.object({
   cardFocalPointY: z.number().min(0).max(100).optional(),
 });
 
+const OptionalDateSchema = z
+  .string()
+  .refine((value) => value === "" || dayjs(value).isValid(), {
+    message: "รูปแบบวันที่ไม่ถูกต้อง",
+  })
+  .optional();
+
 export const CreateNewsSchema = z.object({
   title: z.string().min(1, "กรุณากรอกหัวข้อ"),
   detail: z.string().min(1, "กรุณากรอกรายละเอียด"),
-  tagID: z.number().min(1, "กรุณาเลือกหมวดหมู่"),
+  newsCategoryId: z.number().min(1, "กรุณาเลือกหมวดหมู่"),
   startDate: z
     .string()
     .min(1, "กรุณาเลือกวันที่เริ่มต้น")
     .refine((val) => dayjs(val).isValid(), {
       message: "รูปแบบวันที่ไม่ถูกต้อง",
     }),
-  dueDate: z.string().optional(),
+  dueDate: OptionalDateSchema,
   thumbnail: z.file({ message: "กรุณาอัปโหลดภาพหน้าปก" }),
   thumbnailImage: z.file().optional(),
   additionalImages: z.array(z.file()).max(10).optional(),
   ...FocalPointSchema.shape,
-});
+}).strict();
 
 export const UpdateNewsSchema = z.object({
   title: z.string(),
@@ -131,17 +118,16 @@ export const UpdateNewsSchema = z.object({
     .refine((val) => dayjs(val).isValid(), {
       message: "รูปแบบวันที่ไม่ถูกต้อง",
     }),
-  dueDate: z.string().optional(),
-  tag: z.number(),
+  dueDate: OptionalDateSchema,
+  newsCategoryId: z.number().min(1, "กรุณาเลือกหมวดหมู่"),
   detail: z.string().optional(),
   thumbnail: z.union([z.string().trim().min(1), z.file()]),
   thumbnailImage: z.union([z.string().trim().min(1), z.file()]).optional(),
   ...FocalPointSchema.shape,
-});
+}).strict();
 
 export const UpdateNewsPayloadSchema = z.object({
   title: z.string().optional(),
-  tagID: z.number().optional(),
   thumbnail: z.union([z.string().trim().min(1), z.file()]).optional(),
   thumbnailImage: z.union([z.string().trim().min(1), z.file()]).optional(),
   startDate: z.string().optional(),
@@ -157,24 +143,18 @@ export const UpdateNewsPayloadSchema = z.object({
   eventStartAt: z.string().optional(),
   eventEndAt: z.string().nullable().optional(),
   cardImage: z.file().optional(),
-});
+}).strict();
 
 export const CreateNewsPayloadSchema = CreateNewsSchema;
 
-export const CreateNewsInformationSchema = (type: string) =>
-  z.object({
-    thumbnail: z.instanceof(File, { message: "กรุณาอัปโหลดรูปภาพ" }),
-    highlight:
-      type === "newshighlight"
-        ? z.instanceof(File, { message: "กรุณาอัปโหลดรูปภาพ" })
-        : z.instanceof(File).optional(),
-    newsID: z.number().min(1, "กรุณาเลือกข่าว"),
-  });
-
 export type INews = z.infer<typeof NewsResponseSchema>;
 export type INewsImage = z.infer<typeof NewsImageSchema>;
-export type INewsInformation = z.infer<typeof NewsInformationSchema>;
 export type NewsBulletin = z.infer<typeof NewsBulletinSchema>;
+export type INewsBulletin = NewsBulletin & {
+  thumbnailURL: string | null;
+  thumbnailFocalPointX?: number | null;
+  thumbnailFocalPointY?: number | null;
+};
 export type SetNewsBulletin = z.infer<typeof SetNewsBulletinSchema>;
 export type QueryNews = z.output<typeof NewsQuerySchema>;
 export type NewsQueryInput = z.input<typeof NewsQuerySchema>;
@@ -183,6 +163,3 @@ export type CreateNewsInputs = z.input<typeof CreateNewsSchema>;
 export type CreateNewsPayload = z.output<typeof CreateNewsPayloadSchema>;
 export type UpdateNewsInputs = z.input<typeof UpdateNewsSchema>;
 export type UpdateNewsPayload = z.output<typeof UpdateNewsPayloadSchema>;
-export type CreateNewsInformationInputs = z.infer<
-  ReturnType<typeof CreateNewsInformationSchema>
->;

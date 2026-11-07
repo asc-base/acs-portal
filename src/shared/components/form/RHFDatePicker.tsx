@@ -1,11 +1,11 @@
-// RHFDatePickerDayjs.tsx
+import { useState } from "react";
 import { Controller, Control, FieldPath, FieldValues } from "react-hook-form";
 import {
   DatePicker,
   LocalizationProvider,
   DatePickerProps,
 } from "@mui/x-date-pickers";
-import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import { AdapterDayjsBuddhist } from "@/shared/lib/adapter-dayjs-buddhist";
 import dayjs from "dayjs";
 import Stack from "@mui/material/Stack";
 import FormLabel from "@mui/material/FormLabel";
@@ -30,6 +30,8 @@ export function RHFDatePickerDayjs<T extends FieldValues>({
   required,
   ...props
 }: RHFDatePickerProps<T>) {
+  const [pickerError, setPickerError] = useState(false);
+
   return (
     <Controller
       name={name}
@@ -44,21 +46,32 @@ export function RHFDatePickerDayjs<T extends FieldValues>({
           )}
 
           <LocalizationProvider
-            dateAdapter={AdapterDayjs}
+            dateAdapter={AdapterDayjsBuddhist}
             adapterLocale={adapterLocale}
           >
             <DatePicker
               {...props}
               value={field.value ? dayjs(field.value) : null}
-              onChange={(val) => field.onChange(val ? val.toISOString() : "")}
+              onError={(error) => setPickerError(error !== null)}
+              onChange={(val) =>
+                field.onChange(
+                  val === null
+                    ? ""
+                    : val.isValid()
+                      ? val.toISOString()
+                      : "Invalid Date",
+                )
+              }
               slotProps={{
                 textField: {
                   required: required,
                   placeholder,
                   fullWidth: true,
                   variant: "outlined",
-                  error: !!fieldState.error,
-                  helperText: fieldState.error?.message,
+                  error: !!fieldState.error || pickerError,
+                  helperText:
+                    fieldState.error?.message ||
+                    (pickerError ? "รูปแบบวันที่ไม่ถูกต้อง" : undefined),
                   size: "small",
                 },
               }}

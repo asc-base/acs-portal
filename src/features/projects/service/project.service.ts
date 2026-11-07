@@ -30,16 +30,7 @@ export class ProjectService {
   ): Promise<IProject> {
     const formData = new FormData();
     const request = CreateProjectRequestSchema.parse(payload);
-
-    Object.entries(request).forEach(([key, value]) => {
-      if (value === null || value === undefined) return;
-      if (Array.isArray(value) || typeof value === 'object') {
-        formData.append(key, JSON.stringify(value));
-      } else {
-        formData.append(key, value.toString());
-      }
-    });
-
+    formData.append("payload", JSON.stringify(request));
     formData.append("thumbnailFile", files.thumbnailFile);
     files.assets.forEach((file) => formData.append("assets", file));
 
@@ -56,15 +47,7 @@ export class ProjectService {
   async updateProject(id: string, payload: UpdateProjectRequest, files?: { thumbnailFile?: File | null; assets?: File[] }): Promise<IProject> {
     const formData = new FormData();
     const request = UpdateProjectRequestSchema.parse(payload);
-
-    Object.entries(request).forEach(([key, value]) => {
-      if (value === null || value === undefined) return;
-      if (Array.isArray(value) || typeof value === 'object') {
-        formData.append(key, JSON.stringify(value));
-      } else {
-        formData.append(key, value.toString());
-      }
-    });
+    formData.append("payload", JSON.stringify(request));
 
     if (files?.thumbnailFile) {
       formData.append("thumbnailFile", files.thumbnailFile);

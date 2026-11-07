@@ -5,8 +5,6 @@ import { createNewsServerService } from "@/features/news/server";
 
 
 
-export const dynamic = "force-dynamic";
-export const revalidate = 0;
 
 interface PageProps {
   params: Promise<{
@@ -21,7 +19,11 @@ const page = async ({ params }: PageProps) => {
 
   const newsInfo = await newsService.getNewsById(id);
   if (!newsInfo) notFound();
-  const recommendNews = await newsService.getNews(1, 6, newsInfo.tag?.id);
+  const recommendNews = await newsService.getNews(
+    1,
+    6,
+    newsInfo.category?.id,
+  );
 
   return (
     <div>

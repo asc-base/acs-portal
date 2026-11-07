@@ -21,6 +21,7 @@ import Tooltip from "@mui/material/Tooltip";
 import Logout from "@mui/icons-material/Logout";
 import { usePathname } from "next/navigation";
 import { useRouter } from "next/navigation";
+import { useMasterData } from "@/features/master-data/client";
 
 type SubMenuItem = {
   id: number;
@@ -38,13 +39,23 @@ type MenuItem = {
 const MenuBar = () => {
   const [isOpenSubMenu, setIsOpenSubMenu] = useState(0);
   const pathname = usePathname();
+  const { data: masterData } = useMasterData();
+  const newsCategories = [
+    "ANNOUNCEMENT",
+    "STUDENT_ACHIEVEMENT",
+    "STUDENT_ACTIVITY",
+  ]
+    .map((code) =>
+      masterData?.newsCategories.find((category) => category.code === code),
+    )
+    .filter((category) => category !== undefined);
 
   function isActiveMenu(item: MenuItem): boolean {
     if (!pathname) return false;
 
     const cleanPath = pathname.replace(/\/$/, "");
 
-    if (item.href === "/" && (cleanPath === "/" || cleanPath === "/home"))
+    if (item.href === "/" && cleanPath === "/")
       return true;
 
     if (item.href && item.href !== "/") {
@@ -85,28 +96,16 @@ const MenuBar = () => {
       id: 4,
       label: "ประชาสัมพันธ์",
       href: "",
-      submenu: [
-        {
-          id: 1,
-          label: "ข่าวประชาสัมพันธ์",
-          href: "/news?category=ข่าวประชาสัมพันธ์&page=1&pageSize=12&tagId=16",
-        },
-        {
-          id: 2,
-          label: "ความสำเร็จนักศึกษา",
-          href: "/news?category=ความสำเร็จนักศึกษา&page=1&pageSize=12&tagId=17",
-        },
-        {
-          id: 3,
-          label: "งานกิจกรรมนักศึกษา",
-          href: "/news?category=งานกิจกรรมนักศึกษา&page=1&pageSize=12&tagId=18",
-        },
-      ],
+      submenu: newsCategories.map((category) => ({
+        id: category.id,
+        label: category.name,
+        href: `/news?category=${encodeURIComponent(category.name)}&page=1&pageSize=12&newsCategoryId=${category.id}`,
+      })),
     },
     {
       id: 5,
       label: "ผลงานนักศึกษา",
-      // href: "/project?sortBy=createdAt&sortOrder=desc",
+      href: "/project?sortBy=createdAt&sortOrder=desc",
       submenu: [],
     },
     {
@@ -231,7 +230,7 @@ export const NavbarMain = () => {
   const session = useCurrentUser();
   const userAuth =
     session.isFetchedAfterMount && !session.isFetching && !session.isError
-      ? session.data ?? null
+      ? (session.data ?? null)
       : null;
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const openMenu = Boolean(anchorEl);

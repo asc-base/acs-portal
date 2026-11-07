@@ -6,8 +6,6 @@ import { createCurriculumServerService } from "@/features/curriculum/server";
 
 
 
-export const dynamic = "force-dynamic";
-export const revalidate = 0;
 
 interface PageProps {
   searchParams: Promise<QueryCurriculum>;

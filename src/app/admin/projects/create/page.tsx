@@ -7,7 +7,6 @@ import { createProfessorServerService } from "@/features/professors/server";
 
 
 
-export const dynamic = "force-dynamic";
 
 export default async function page() {
   const courseService = await createCourseServerService();

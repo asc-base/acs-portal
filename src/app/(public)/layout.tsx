@@ -6,7 +6,6 @@ import { QueryCurriculum, ICurriculum } from "@/features/curriculum/domain/curri
 import { createCurriculumServerService } from "@/features/curriculum/server";
 
 
-export const dynamic = "force-dynamic";
 
 const query: QueryCurriculum = {
   page: 1,

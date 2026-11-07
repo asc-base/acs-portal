@@ -1,8 +1,6 @@
 import React from "react";
 import { getExampleData } from "@/features/example/components/public/action";
 
-export const dynamic = "force-dynamic";
-export const revalidate = 0;
 
 export default async function Example() {
   const result = await getExampleData();

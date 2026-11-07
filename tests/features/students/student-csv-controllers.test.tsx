@@ -160,12 +160,27 @@ describe("student CSV preview controller", () => {
     const { result } = renderHook(() => useStudentCsvPreviewController(3), { wrapper });
 
     await act(async () => result.current.onSubmit());
-    await waitFor(() => expect(result.current.alert.message).toBe("ไม่สามารถเพิ่มข้อมูลนักศึกษาได้"));
+    await waitFor(() => expect(result.current.isImportErrorOpen).toBe(true));
     expect(useImportStudentStore.getState().importData).toEqual([validStudent]);
 
-    act(() => result.current.onCloseAlert());
+    act(() => result.current.closeImportError());
+    expect(result.current.isImportErrorOpen).toBe(false);
     await act(async () => result.current.onSubmit());
     await waitFor(() => expect(result.current.confirmModal?.type).toBe("success"));
     expect(fetch).toHaveBeenCalledTimes(2);
+  });
+
+  it("opens the CSV import error modal when the backend rejects a duplicate student code", async () => {
+    useImportStudentStore.getState().setImportData([validStudent]);
+    vi.spyOn(globalThis, "fetch").mockResolvedValueOnce(
+      envelope({ message: "Student codes already exist: 64000000001" }, 409),
+    );
+    const { result } = renderHook(() => useStudentCsvPreviewController(3), { wrapper });
+
+    await act(async () => result.current.onSubmit());
+
+    await waitFor(() => expect(result.current.isImportErrorOpen).toBe(true));
+    expect(result.current.confirmModal?.type).not.toBe("success");
+    expect(useImportStudentStore.getState().importData).toEqual([validStudent]);
   });
 });

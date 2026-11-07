@@ -130,7 +130,7 @@ describe("AdminRouteGuard", () => {
       );
     });
     await waitFor(() =>
-      expect(mocks.router.replace).toHaveBeenCalledWith("/home"),
+      expect(mocks.router.replace).toHaveBeenCalledWith("/"),
     );
     expect(screen.queryByText("Protected admin content")).toBeNull();
     expect(useAuthStore.getState().user).toBe(student);
@@ -163,7 +163,7 @@ describe("AdminRouteGuard", () => {
     });
 
     await waitFor(() =>
-      expect(mocks.router.replace).toHaveBeenCalledWith("/home"),
+      expect(mocks.router.replace).toHaveBeenCalledWith("/"),
     );
     expect(screen.queryByText("Protected admin content")).toBeNull();
     expect(useAuthStore.getState().user).toBeNull();
@@ -181,7 +181,7 @@ describe("AdminRouteGuard", () => {
 
     renderGuard();
     await waitFor(() =>
-      expect(mocks.router.replace).toHaveBeenCalledWith("/home"),
+      expect(mocks.router.replace).toHaveBeenCalledWith("/"),
     );
     expect(useAuthStore.getState().user).toBe(student);
     expect(screen.queryByText("Protected admin content")).toBeNull();
@@ -200,7 +200,7 @@ describe("AdminRouteGuard", () => {
 
       renderGuard();
       await waitFor(() =>
-        expect(mocks.router.replace).toHaveBeenCalledWith("/home"),
+        expect(mocks.router.replace).toHaveBeenCalledWith("/"),
       );
       expect(useAuthStore.getState().user).toBeNull();
       expect(screen.queryByText("Protected admin content")).toBeNull();

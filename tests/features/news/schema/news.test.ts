@@ -5,13 +5,13 @@ const image = new File(["image"], "cover.png", { type: "image/png" });
 const createInput = {
   title: "News title",
   detail: "News details",
-  tagID: 1,
+  newsCategoryId: 1,
   startDate: "2026-10-08T08:00:00.000Z",
   thumbnail: image,
 };
 const updateInput = {
   title: "News title",
-  tag: 1,
+  newsCategoryId: 1,
   startDate: createInput.startDate,
   thumbnail: "https://example.test/cover.png",
 };
@@ -31,13 +31,18 @@ describe("CreateNewsSchema", () => {
     expect(CreateNewsSchema.parse(input)).toEqual(input);
   });
 
+  it("allows a cleared optional end date and rejects invalid picker values", () => {
+    expect(CreateNewsSchema.safeParse({ ...createInput, dueDate: "" }).success).toBe(true);
+    expect(CreateNewsSchema.safeParse({ ...createInput, dueDate: "Invalid Date" }).success).toBe(false);
+  });
+
   it.each([
     ["missing title", { title: undefined }, "title"],
     ["empty title", { title: "" }, "title"],
     ["missing detail", { detail: undefined }, "detail"],
     ["empty detail", { detail: "" }, "detail"],
-    ["unselected category", { tagID: 0 }, "tagID"],
-    ["string category", { tagID: "1" }, "tagID"],
+    ["unselected category", { newsCategoryId: 0 }, "newsCategoryId"],
+    ["string category", { newsCategoryId: "1" }, "newsCategoryId"],
     ["missing start date", { startDate: undefined }, "startDate"],
     ["empty start date", { startDate: "" }, "startDate"],
     ["invalid start date", { startDate: "not-a-date" }, "startDate"],
@@ -79,9 +84,13 @@ describe("UpdateNewsSchema", () => {
     expect(UpdateNewsSchema.parse(input)).toEqual(input);
   });
 
+  it("rejects invalid optional end date values", () => {
+    expect(UpdateNewsSchema.safeParse({ ...updateInput, dueDate: "Invalid Date" }).success).toBe(false);
+  });
+
   it.each([
     ["missing title", { title: undefined }, "title"],
-    ["missing category", { tag: undefined }, "tag"],
+    ["missing category", { newsCategoryId: undefined }, "newsCategoryId"],
     ["empty start date", { startDate: "" }, "startDate"],
     ["invalid start date", { startDate: "not-a-date" }, "startDate"],
     ["missing cover", { thumbnail: undefined }, "thumbnail"],
@@ -99,6 +108,13 @@ describe("UpdateNewsSchema", () => {
         true,
       );
     }
+  });
+});
+
+describe("retired tag payloads", () => {
+  it("rejects tagID on both create and update", () => {
+    expect(CreateNewsSchema.safeParse({ ...createInput, tagID: 16 }).success).toBe(false);
+    expect(UpdateNewsSchema.safeParse({ ...updateInput, tagID: 16 }).success).toBe(false);
   });
 });
 
