@@ -110,7 +110,7 @@ const StudentTableComponents = ({ students, onSort, sortBy, orderBy, control, wa
                 <span style={{ width: "24px" }} />
               )
             }
-            placeholder="ค้นหารุ่นนักศึกษา"
+            placeholder="ค้นหานักศึกษา"
             size="small"
           />
           <Button variant="contained" size="large">
