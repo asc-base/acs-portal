@@ -58,13 +58,11 @@ const CreateNewsForm = ({ categories }: CreateNewsProps) => {
   } = useCreateNewsForm();
 
   const thumbnailFile = watch("thumbnail");
-  const detailThumbnailFile = watch("thumbnailImage");
   const handleFileChange = (
     event: React.ChangeEvent<HTMLInputElement>,
-    target: "card" | "thumbnail" = "card",
   ) => {
     const file = event.target.files?.[0];
-    if (file) handleFileSelection(file, target);
+    if (file) handleFileSelection(file);
     event.target.value = "";
   };
   const handleUploadComplete = handleCropComplete;
@@ -98,7 +96,7 @@ const CreateNewsForm = ({ categories }: CreateNewsProps) => {
               <div className="text-neutral04 text-h4 font-medium">
                 ภาพการ์ด
               </div>
-             <div className="group border-neutral03 bg-neutral02 relative flex aspect-[382/254] w-full items-center justify-center overflow-hidden rounded-xl border">
+              <div className="group border-neutral03 bg-neutral02 relative flex aspect-[382/254] w-full items-center justify-center overflow-hidden rounded-xl border">
                 {thumbnailFile ? (
                   <>
                     <Image
@@ -128,16 +126,6 @@ const CreateNewsForm = ({ categories }: CreateNewsProps) => {
                     />
                   </Button>
                 )}
-              </div>
-              <div className="mt-3 text-neutral04 text-h4 font-medium">ภาพหน้าปก/Highlight (ไม่บังคับ)</div>
-              <div className="relative flex aspect-[382/254] w-full items-center justify-center overflow-hidden rounded-xl border border-neutral03 bg-neutral02">
-                {detailThumbnailFile ? (
-                  <Image src={URL.createObjectURL(detailThumbnailFile)} alt="ภาพหน้าปก" fill className="object-cover" />
-                ) : <span className="text-neutral04">ใช้ภาพการ์ดเป็นค่าเริ่มต้น</span>}
-                <Button variant="contained" component="label" className="absolute">
-                  {detailThumbnailFile ? "เปลี่ยนรูป" : "อัปโหลดรูป"}
-                  <VisuallyHiddenInput type="file" accept="image/*" onChange={(event) => handleFileChange(event, "thumbnail")} />
-                </Button>
               </div>
             </div>
 
