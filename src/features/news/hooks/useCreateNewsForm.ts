@@ -14,7 +14,6 @@ export function useCreateNewsForm() {
   const mutation = useCreateNews();
   const [confirmModal, setConfirmModal] = useState<ConfirmModalProps | null>(null);
   const [croppingFile, setCroppingFile] = useState<File | null>(null);
-  const [cropTarget, setCropTarget] = useState<"card" | "thumbnail">("card");
   const [selectedAssets, setSelectedAssets] = useState<File[]>([]);
   const [draggedItemIndex, setDraggedItemIndex] = useState<number | null>(null);
   const [dragOverItemIndex, setDragOverItemIndex] = useState<number | null>(null);
@@ -34,11 +33,8 @@ export function useCreateNewsForm() {
       newsCategoryId: 0,
       detail: "",
       thumbnail: undefined,
-      thumbnailImage: undefined,
       cardFocalPointX: 50,
       cardFocalPointY: 50,
-      thumbnailFocalPointX: 50,
-      thumbnailFocalPointY: 50,
       additionalImages: [],
     },
   });
@@ -69,18 +65,10 @@ export function useCreateNewsForm() {
     file: File,
     focalPoint?: { x: number; y: number },
   ) => {
-    if (cropTarget === "card") {
-      setValue("thumbnail", file, { shouldDirty: true, shouldValidate: true });
-      if (focalPoint) {
-        setValue("cardFocalPointX", focalPoint.x, { shouldDirty: true });
-        setValue("cardFocalPointY", focalPoint.y, { shouldDirty: true });
-      }
-    } else {
-      setValue("thumbnailImage", file, { shouldDirty: true, shouldValidate: true });
-      if (focalPoint) {
-        setValue("thumbnailFocalPointX", focalPoint.x, { shouldDirty: true });
-        setValue("thumbnailFocalPointY", focalPoint.y, { shouldDirty: true });
-      }
+    setValue("thumbnail", file, { shouldDirty: true, shouldValidate: true });
+    if (focalPoint) {
+      setValue("cardFocalPointX", focalPoint.x, { shouldDirty: true });
+      setValue("cardFocalPointY", focalPoint.y, { shouldDirty: true });
     }
     setCroppingFile(null);
   };
@@ -139,9 +127,8 @@ export function useCreateNewsForm() {
     dragOverItemIndex,
     isError: mutation.isError,
     clearError: mutation.reset,
-    handleFileSelection: (file: File, target: "card" | "thumbnail") => {
+    handleFileSelection: (file: File) => {
       setCroppingFile(file);
-      setCropTarget(target);
     },
     cancelCrop: () => setCroppingFile(null),
     handleCropComplete,
