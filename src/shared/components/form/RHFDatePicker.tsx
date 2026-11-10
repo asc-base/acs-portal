@@ -64,6 +64,7 @@ export function RHFDatePickerDayjs<T extends FieldValues>({
               }
               slotProps={{
                 textField: {
+                  onBlur: field.onBlur,
                   required: required,
                   placeholder,
                   fullWidth: true,
