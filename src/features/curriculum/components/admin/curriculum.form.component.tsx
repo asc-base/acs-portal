@@ -94,7 +94,7 @@ export const CurriculumForm = () => {
               label="ปี"
               views={["year"]}
               openTo="year"
-              required
+              requiredMark
             />
             <RHFTextField
               control={control}
