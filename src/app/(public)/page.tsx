@@ -4,6 +4,7 @@ import { createMasterDataServerService } from "@/features/master-data/server";
 
 
 
+const HOME_NEWS_LIMIT = 18;
 
 export const metadata = {
   title: "ACS website",
@@ -25,9 +26,9 @@ const MainPage = async () => {
     initAnnoucement,
     initNewsHighlight,
   ] = await Promise.all([
-    categoryId("ANNOUNCEMENT") === undefined ? Promise.resolve({ rows: [] }) : newsService.getNews(1, 6, categoryId("ANNOUNCEMENT")).catch(() => ({ rows: [] })),
-    categoryId("STUDENT_ACHIEVEMENT") === undefined ? Promise.resolve({ rows: [] }) : newsService.getNews(1, 6, categoryId("STUDENT_ACHIEVEMENT")).catch(() => ({ rows: [] })),
-    categoryId("STUDENT_ACTIVITY") === undefined ? Promise.resolve({ rows: [] }) : newsService.getNews(1, 6, categoryId("STUDENT_ACTIVITY")).catch(() => ({ rows: [] })),
+    categoryId("ANNOUNCEMENT") === undefined ? Promise.resolve({ rows: [] }) : newsService.getNews(1, HOME_NEWS_LIMIT, categoryId("ANNOUNCEMENT")).catch(() => ({ rows: [] })),
+    categoryId("STUDENT_ACHIEVEMENT") === undefined ? Promise.resolve({ rows: [] }) : newsService.getNews(1, HOME_NEWS_LIMIT, categoryId("STUDENT_ACHIEVEMENT")).catch(() => ({ rows: [] })),
+    categoryId("STUDENT_ACTIVITY") === undefined ? Promise.resolve({ rows: [] }) : newsService.getNews(1, HOME_NEWS_LIMIT, categoryId("STUDENT_ACTIVITY")).catch(() => ({ rows: [] })),
     newsService.getNewsBulletins("ANNOUNCEMENT").catch(() => []),
     newsService.getNewsBulletins("HIGHLIGHT").catch(() => []),
   ]);

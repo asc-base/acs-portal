@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, type ElementType } from "react";
+import { useEffect, useRef, useState, type ElementType, type RefObject } from "react";
 import Link from "next/link";
 import { Button } from "@mui/material";
 import { INews } from "@/features/news/domain/news";
@@ -57,34 +57,73 @@ const getCardWrapperClass = (index: number) => {
       return "hidden";
   }
 };
+const DESKTOP_QUERY = "(min-width: 1024px)";
+const TABLET_QUERY = "(min-width: 768px)";
+const STEP_BY_BREAKPOINT = { desktop: 3, tablet: 2, mobile: 1 } as const;
 
-const useNewsCarousel = (newsLength: number) => {
-  const [activeIndex, setActiveIndex] = useState(0);
-  const [step, setStep] = useState(1);
+const VISIBLE_CARD_COUNT = 4;
+
+const getStep = (isDesktop: boolean, isTablet: boolean) => {
+  if (isDesktop) return STEP_BY_BREAKPOINT.desktop;
+  if (isTablet) return STEP_BY_BREAKPOINT.tablet;
+  return STEP_BY_BREAKPOINT.mobile;
+};
+
+const TRACK_LEFT_OFFSET = 24;
+
+const useNewsCarousel = (newsLength: number, trackRef: RefObject<HTMLDivElement | null>) => {
+  const [firstIndex, setFirstIndex] = useState(0);
+  const [breakpointStep, setBreakpointStep] = useState<number>(STEP_BY_BREAKPOINT.desktop);
+  const [fitCount, setFitCount] = useState(Infinity);
 
   useEffect(() => {
-    const calculateStep = () => {
-      if (window.innerWidth >= 1280) return 3;
-      if (window.innerWidth >= 768) return 2;
-      return 1;
-    };
-    const handleResize = () => setStep(calculateStep());
+    const desktop = window.matchMedia(DESKTOP_QUERY);
+    const tablet = window.matchMedia(TABLET_QUERY);
+    const updateStep = () => setBreakpointStep(getStep(desktop.matches, tablet.matches));
 
-    handleResize();
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
+    updateStep();
+    desktop.addEventListener("change", updateStep);
+    tablet.addEventListener("change", updateStep);
+    return () => {
+      desktop.removeEventListener("change", updateStep);
+      tablet.removeEventListener("change", updateStep);
+    };
   }, []);
 
-  const move = (direction: 1 | -1) => {
-    if (!newsLength) return;
-    const safeStep = Math.min(step, newsLength);
-    setActiveIndex((current) => (current + direction * safeStep + newsLength) % newsLength);
+  useEffect(() => {
+    const track = trackRef.current;
+    if (!track || typeof ResizeObserver === "undefined") return;
+
+    const measure = () => {
+      const row = track.firstElementChild as HTMLElement | null;
+      const cardWidth = track.querySelector<HTMLElement>("[data-carousel-card]")?.offsetWidth ?? 0;
+      if (!row || !cardWidth) {
+        setFitCount(Infinity);
+        return;
+      }
+      const gap = parseFloat(getComputedStyle(row).columnGap) || 0;
+      const available = track.clientWidth - TRACK_LEFT_OFFSET;
+      setFitCount(Math.max(1, Math.floor((available + gap) / (cardWidth + gap))));
+    };
+
+    measure();
+    const observer = new ResizeObserver(measure);
+    observer.observe(track);
+    return () => observer.disconnect();
+  }, [trackRef, newsLength]);
+
+  const step = Math.min(breakpointStep, fitCount);
+  const pageCount = Math.ceil(newsLength / step);
+  const currentPage = pageCount ? Math.min(Math.floor(firstIndex / step), pageCount - 1) : 0;
+  const goToPage = (page: number) => {
+    setFirstIndex(Math.max(0, Math.min(page, pageCount - 1)) * step);
   };
 
   return {
-    currentIndex: newsLength ? activeIndex % newsLength : 0,
-    move,
-    setActiveIndex,
+    pageCount,
+    currentPage,
+    firstVisibleIndex: currentPage * step,
+    goToPage,
   };
 };
 
@@ -94,7 +133,12 @@ export const NewsCarouselComponent = ({
   newsCategoryCode,
   newsCategoryId,
 }: NewsCarouselComponentProps) => {
-  const { currentIndex, move, setActiveIndex } = useNewsCarousel(news.length);
+  const trackRef = useRef<HTMLDivElement>(null);
+  const { pageCount, currentPage, firstVisibleIndex, goToPage } = useNewsCarousel(news.length, trackRef);
+  const hasMultiplePages = pageCount > 1;
+  const cardHoverClass = newsCategoryCode === "ANNOUNCEMENT"
+    ? "hover:scale-105"
+    : "hover:scale-105 hover:shadow-lg";
   const emptyStateConfig = EmptyStateMap[EmptyStateTypeMap[newsCategoryCode]];
   const newsHref = newsCategoryId === undefined
     ? "/news"
@@ -119,25 +163,24 @@ export const NewsCarouselComponent = ({
         />
       ) : (
         <div className="flex items-center justify-between">
-          {news.length >= 3 && (
+          {hasMultiplePages && (
             <div className="hidden items-center justify-between sm:flex">
-              <Button aria-label="ข่าวก่อนหน้า" onClick={() => move(-1)}>
+              <Button
+                aria-label="ข่าวก่อนหน้า"
+                disabled={currentPage === 0}
+                onClick={() => goToPage(currentPage - 1)}
+              >
                 <ChevronLeftIcon fontSize="large" />
               </Button>
             </div>
           )}
-          <div className="w-full min-w-0 [overflow-x:clip] px-3 lg:max-w-6xl">
+          <div ref={trackRef} data-carousel-track className="w-full min-w-0 [overflow-x:clip] px-3 lg:max-w-6xl">
             <div className="my-3 flex justify-center gap-x-[15px] px-3 py-5 transition-all duration-300 ease-in-out md:justify-start">
-              {Array.from({ length: Math.min(4, news.length) }, (_, i) => {
-                const item = news[(currentIndex + i) % news.length];
-                const hoverClass = newsCategoryCode === "ANNOUNCEMENT"
-                  ? "hover:scale-105"
-                  : "hover:scale-105 hover:shadow-lg";
-
+              {news.slice(firstVisibleIndex, firstVisibleIndex + VISIBLE_CARD_COUNT).map((item, i) => {
                 return (
-                  <div key={`${item.id}-${i}`} className={getCardWrapperClass(i)}>
+                  <div key={`${item.id}-${i}`} data-carousel-card className={getCardWrapperClass(i)}>
                     <div
-                      className={`transform ${hoverClass} transition-all duration-300 ease-in-out`}
+                      className={`transform ${cardHoverClass} transition-all duration-300 ease-in-out`}
                       style={{ opacity: 1, transform: "translateX(0)", transitionDelay: `${i * 100}ms` }}
                     >
                       <Link href={`/news/${item.id}`} className="w-fit transition-colors duration-200 ease-in-out">
@@ -148,22 +191,28 @@ export const NewsCarouselComponent = ({
                 );
               })}
             </div>
-            <div className="hidden justify-center gap-x-3 sm:flex">
-              {news.map((item, index) => (
-                <button
-                  key={item.id}
-                  type="button"
-                  aria-label={`Go to slide ${index + 1}`}
-                  aria-current={index === currentIndex ? "true" : undefined}
-                  onClick={() => setActiveIndex(index)}
-                  className={`${index === currentIndex ? "bg-primary02" : "bg-primary06"} h-[8px] w-[36px] cursor-pointer rounded-xs transition-colors duration-300 ease-in-out`}
-                />
-              ))}
-            </div>
+            {hasMultiplePages && (
+              <div className="hidden flex-wrap justify-center gap-x-3 gap-y-2 sm:flex">
+                {Array.from({ length: pageCount }, (_, page) => (
+                  <button
+                    key={page}
+                    type="button"
+                    aria-label={`Go to slide ${page + 1}`}
+                    aria-current={page === currentPage ? "true" : undefined}
+                    onClick={() => goToPage(page)}
+                    className={`${page === currentPage ? "bg-primary02" : "bg-primary06"} h-[8px] w-[36px] cursor-pointer rounded-xs transition-colors duration-300 ease-in-out`}
+                  />
+                ))}
+              </div>
+            )}
           </div>
-          {news.length >= 3 && (
+          {hasMultiplePages && (
             <div className="hidden items-center justify-between sm:flex">
-              <Button aria-label="ข่าวถัดไป" onClick={() => move(1)}>
+              <Button
+                aria-label="ข่าวถัดไป"
+                disabled={currentPage === pageCount - 1}
+                onClick={() => goToPage(currentPage + 1)}
+              >
                 <ChevronRightIcon fontSize="large" />
               </Button>
             </div>
