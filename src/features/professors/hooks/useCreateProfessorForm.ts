@@ -11,6 +11,7 @@ import {
 } from "@/features/professors/schema/professor";
 import { useCreateProfessor } from "@/features/professors/client";
 import type { ConfirmModalProps } from "@/shared/components/modal/confirmModal";
+import { DUPLICATE_EMAIL_MESSAGE, isDuplicateEmailError } from "@/shared/lib/http";
 
 export function useCreateProfessorForm() {
   const router = useRouter();
@@ -23,6 +24,7 @@ export function useCreateProfessorForm() {
     control,
     handleSubmit,
     setValue,
+    setError,
     formState: { isValid, isDirty },
   } = useForm<CreateProfessorInputs>({
     resolver: zodResolver(CreateProfessorSchema),
@@ -71,8 +73,11 @@ export function useCreateProfessorForm() {
     });
     try {
       await mutation.mutateAsync({ data: payload, imageFile: selectedFile });
-    } catch {
-      // The mutation state drives the form error alert.
+    } catch (error) {
+      if (isDuplicateEmailError(error)) {
+        mutation.reset();
+        setError("email", { type: "server", message: DUPLICATE_EMAIL_MESSAGE }, { shouldFocus: true });
+      }
       return;
     }
     setConfirmModal({

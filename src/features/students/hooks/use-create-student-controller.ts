@@ -10,6 +10,7 @@ import {
   CreateStudentRequestSchema,
 } from "@/features/students/schema/student";
 import type { CreateStudentFormInput } from "@/features/students/schema/student";
+import { DUPLICATE_EMAIL_MESSAGE, isDuplicateEmailError } from "@/shared/lib/http";
 
 export function useCreateStudentController(classBookID: number) {
   const router = useRouter();
@@ -81,6 +82,10 @@ export function useCreateStudentController(classBookID: number) {
         onConfirm: () => router.push(`/admin/students?page=1&pageSize=10&classBookID=${classBookID}`),
       });
     } catch (error) {
+      if (isDuplicateEmailError(error)) {
+        form.setError("email", { type: "server", message: DUPLICATE_EMAIL_MESSAGE }, { shouldFocus: true });
+        return;
+      }
       console.error("Create Student Error:", error);
       setIsError(true);
     }

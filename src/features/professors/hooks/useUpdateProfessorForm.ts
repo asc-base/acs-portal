@@ -13,6 +13,7 @@ import {
 import { useUpdateProfessor } from "@/features/professors/client";
 import type { ConfirmModalProps } from "@/shared/components/modal/confirmModal";
 import { changedFields } from "@/shared/lib/changed-fields";
+import { DUPLICATE_EMAIL_MESSAGE, isDuplicateEmailError } from "@/shared/lib/http";
 
 const formValues = (professor: IProfessor): UpdateProfessorInputs => ({
   personnelType: professor.professor.personnelType ?? "LECTURER",
@@ -47,6 +48,7 @@ export function useUpdateProfessorForm(professor: IProfessor) {
     handleSubmit,
     reset,
     setValue,
+    setError,
     formState: { isDirty },
   } = useForm<UpdateProfessorInputs>({
     resolver: zodResolver(UpdateProfessorSchema),
@@ -108,8 +110,11 @@ export function useUpdateProfessorForm(professor: IProfessor) {
         data: payload,
         imageFile: selectedFile,
       });
-    } catch {
-      // The mutation state drives the form error alert.
+    } catch (error) {
+      if (isDuplicateEmailError(error)) {
+        mutation.reset();
+        setError("email", { type: "server", message: DUPLICATE_EMAIL_MESSAGE }, { shouldFocus: true });
+      }
       return;
     }
     setConfirmModal({

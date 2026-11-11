@@ -152,3 +152,13 @@ export class HttpHelper {
 }
 
 export default HttpHelper;
+
+export const DUPLICATE_EMAIL_MESSAGE = "อีเมลนี้มีอยู่ในระบบแล้ว กรุณาใช้อีเมลอื่น";
+
+export function isDuplicateEmailError(error: unknown): boolean {
+  if (!(error instanceof HttpError)) return false;
+  const data = error.data as { err?: unknown; field?: unknown } | undefined;
+  if (data?.err !== "DUPLICATE_DATA_ERROR") return false;
+  if (typeof data.field === "string") return data.field === "email";
+  return error.status === 400;
+}

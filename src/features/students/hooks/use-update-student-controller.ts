@@ -12,6 +12,7 @@ import {
 } from "@/features/students/schema/student";
 import type { UpdateStudentFormInput } from "@/features/students/schema/student";
 import { changedFields } from "@/shared/lib/changed-fields";
+import { DUPLICATE_EMAIL_MESSAGE, isDuplicateEmailError } from "@/shared/lib/http";
 
 const formValues = (student: IStudent): UpdateStudentFormInput => ({
   prefixID: student.prefix?.id ?? null,
@@ -106,6 +107,10 @@ export function useUpdateStudentController(classBookID: number, student: IStuden
         onConfirm: () => router.push(`/admin/students?classBookID=${classBookID}`),
       });
     } catch (error) {
+      if (isDuplicateEmailError(error)) {
+        form.setError("email", { type: "server", message: DUPLICATE_EMAIL_MESSAGE }, { shouldFocus: true });
+        return;
+      }
       console.error("Update Student Error:", error);
       setIsError(true);
     }
