@@ -27,7 +27,9 @@ const CourseListComponents = ({
         </Breadcrumbs>
       </div>
       <h4 className="mt-4 mb-4 font-bold text-accent04 lg:text-2xl">
-        {typeCourseName} จำนวน {totalRecords} วิชา
+        {totalRecords > 0
+          ? `${typeCourseName} จำนวน ${totalRecords} วิชา`
+          : typeCourseName}
       </h4>
       {course.length === 0 ? (
         <div className="flex h-96 flex-col items-center justify-center">
