@@ -60,9 +60,9 @@ describe("create news form controller", () => {
     act(() => result.current.addAssets([firstDetail, secondDetail]));
     act(() => result.current.moveAsset(0, 1));
     act(() => result.current.removeAsset(1));
-    act(() => result.current.handleFileSelection(card, "card"));
+    act(() => result.current.handleFileSelection(card));
     act(() => result.current.handleCropComplete(card, { x: 0, y: 100 }));
-    act(() => result.current.handleFileSelection(thumbnail, "thumbnail"));
+    act(() => result.current.handleFileSelection(thumbnail));
     act(() => result.current.handleCropComplete(thumbnail, { x: 100, y: 0 }));
 
     await act(async () => result.current.submit({ preventDefault: vi.fn(), persist: vi.fn() } as never));
@@ -78,13 +78,11 @@ describe("create news form controller", () => {
       newsCategoryId: "1",
       eventStartAt: "2026-10-08T08:00:00.000Z",
       eventEndAt: "2026-10-09T08:00:00.000Z",
-      cardImage: card,
-      thumbnailImage: thumbnail,
-      cardFocalPointX: "0",
-      cardFocalPointY: "100",
-      thumbnailFocalPointX: "100",
-      thumbnailFocalPointY: "0",
+      cardImage: thumbnail,
+      cardFocalPointX: "100",
+      cardFocalPointY: "0",
     });
+    expect(body.has("thumbnailImage")).toBe(false);
     expect(body.getAll("detailImages")).toEqual([secondDetail]);
     await waitFor(() => expect(result.current.confirmModal?.type).toBe("success"));
   });
