@@ -11,6 +11,7 @@ import {
 } from "@/features/curriculum/schema/curriculum";
 import type { ConfirmModalProps } from "@/shared/components/modal/confirmModal";
 import { changedFields } from "@/shared/lib/changed-fields";
+import { HttpError } from "@/shared/lib/http";
 
 export function useUpdateCurriculumController(curriculum: ICurriculum) {
   const router = useRouter();
@@ -86,7 +87,11 @@ export function useUpdateCurriculumController(curriculum: ICurriculum) {
       { ...data, year },
       { ...defaultValues, year: initialYear },
     );
-    if (Object.keys(changed).length === 0 && !selectedFile) return;
+    if (Object.keys(changed).length === 0 && !selectedFile) {
+      setIsEdit(false);
+      form.reset();
+      return;
+    }
     try {
       await updateCurriculum.mutateAsync({
         id: curriculum.id,
@@ -107,6 +112,15 @@ export function useUpdateCurriculumController(curriculum: ICurriculum) {
       });
     } catch (error) {
       console.error("Update Error:", error);
+
+      if (error instanceof HttpError && error.status === 409) {
+        form.setError("year", {
+          type: "manual",
+          message: "ปีการศึกษานี้มีอยู่ในระบบแล้ว",
+        });
+        return;
+      }
+
       setIsError(true);
     }
   };

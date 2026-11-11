@@ -45,7 +45,11 @@ export const CurriculumInfoComponent = ({ curriculum }: CurriculumInfoProps) => 
     handleCancel,
     onSubmit,
   } = useUpdateCurriculumController(curriculum);
-  const { control, handleSubmit, formState: { isValid } } = form;
+  const {
+    control,
+    handleSubmit,
+    formState: { isValid, isDirty },
+  } = form;
 
   const previewSrc = useMemo(() => {
     if (selectedFile) {
@@ -171,7 +175,7 @@ export const CurriculumInfoComponent = ({ curriculum }: CurriculumInfoProps) => 
                     type="submit"
                     variant="contained"
                     size="large"
-                    disabled={!isValid}
+                    disabled={!isValid || (!isDirty && !selectedFile)}
                   >
                     บันทึกข้อมูล
                   </Button>
