@@ -1,5 +1,5 @@
-import { useState, type ChangeEvent } from "react";
-import { useForm, type SubmitHandler } from "react-hook-form";
+import { useState, useMemo, type ChangeEvent } from "react";
+import { useForm, useWatch, type SubmitHandler } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import dayjs from "dayjs";
 import { useRouter } from "next/navigation";
@@ -38,6 +38,20 @@ export function useUpdateCurriculumController(curriculum: ICurriculum) {
     reValidateMode: "onChange",
   });
   const { isDirty } = form.formState;
+  const currentValues = useWatch({ control: form.control });
+  const changed = useMemo(() => {
+    const year = currentValues?.year
+      ? dayjs(currentValues.year).year().toString()
+      : "";
+    const initialYear = defaultValues.year
+      ? dayjs(defaultValues.year).year().toString()
+      : "";
+    return changedFields(
+      { ...defaultValues, ...currentValues, year },
+      { ...defaultValues, year: initialYear },
+    );
+  }, [currentValues]);
+  const hasChanges = Object.keys(changed).length > 0 || Boolean(selectedFile);
 
   const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -81,13 +95,15 @@ export function useUpdateCurriculumController(curriculum: ICurriculum) {
   };
 
   const onSubmit: SubmitHandler<UpdateCurriculumInputs> = async (data) => {
-    const year = dayjs(data.year).year().toString();
-    const initialYear = dayjs(defaultValues.year).year().toString();
-    const changed = changedFields(
+    const year = data.year ? dayjs(data.year).year().toString() : "";
+    const initialYear = defaultValues.year
+      ? dayjs(defaultValues.year).year().toString()
+      : "";
+    const changedData = changedFields(
       { ...data, year },
       { ...defaultValues, year: initialYear },
     );
-    if (Object.keys(changed).length === 0 && !selectedFile) {
+    if (Object.keys(changedData).length === 0 && !selectedFile) {
       setIsEdit(false);
       form.reset();
       return;
@@ -95,7 +111,7 @@ export function useUpdateCurriculumController(curriculum: ICurriculum) {
     try {
       await updateCurriculum.mutateAsync({
         id: curriculum.id,
-        data: changed,
+        data: changedData,
         thumbnailFile: selectedFile,
       });
       setConfirmModal({
@@ -128,6 +144,7 @@ export function useUpdateCurriculumController(curriculum: ICurriculum) {
   return {
     form,
     selectedFile,
+    hasChanges,
     isEdit,
     setIsEdit,
     croppingFile,

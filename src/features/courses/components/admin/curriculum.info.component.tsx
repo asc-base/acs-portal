@@ -33,6 +33,7 @@ export const CurriculumInfoComponent = ({ curriculum }: CurriculumInfoProps) => 
   const {
     form,
     selectedFile,
+    hasChanges,
     isEdit,
     setIsEdit,
     croppingFile,
@@ -48,7 +49,7 @@ export const CurriculumInfoComponent = ({ curriculum }: CurriculumInfoProps) => 
   const {
     control,
     handleSubmit,
-    formState: { isValid, isDirty },
+    formState: { isValid },
   } = form;
 
   const previewSrc = useMemo(() => {
@@ -175,7 +176,7 @@ export const CurriculumInfoComponent = ({ curriculum }: CurriculumInfoProps) => 
                     type="submit"
                     variant="contained"
                     size="large"
-                    disabled={!isValid || (!isDirty && !selectedFile)}
+                    disabled={!isValid || !hasChanges}
                   >
                     บันทึกข้อมูล
                   </Button>
