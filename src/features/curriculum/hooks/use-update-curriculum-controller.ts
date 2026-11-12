@@ -38,19 +38,23 @@ export function useUpdateCurriculumController(curriculum: ICurriculum) {
     reValidateMode: "onChange",
   });
   const { isDirty } = form.formState;
-  const currentValues = useWatch({ control: form.control });
-  const changed = useMemo(() => {
-    const year = currentValues?.year
-      ? dayjs(currentValues.year).year().toString()
+
+  const getChangedFields = (values: UpdateCurriculumInputs) => {
+    const year = values.year
+      ? dayjs(values.year).year().toString()
       : "";
     const initialYear = defaultValues.year
       ? dayjs(defaultValues.year).year().toString()
       : "";
+
     return changedFields(
-      { ...defaultValues, ...currentValues, year },
+      { ...values, year },
       { ...defaultValues, year: initialYear },
     );
-  }, [currentValues]);
+  };
+
+  const currentValues = useWatch({ control: form.control });
+  const changed = getChangedFields(currentValues ?? form.getValues());
   const hasChanges = Object.keys(changed).length > 0 || Boolean(selectedFile);
 
   const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
