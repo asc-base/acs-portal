@@ -28,7 +28,7 @@ const layout = async ({ children }: Readonly<{ children: ReactNode }>) => {
       <header className="jun-header jun-layout-h-[7.375rem] h-full">
         <NavbarMain />
       </header>
-      <main className="jun-content">{children}</main>
+      <main className="jun-content isolate">{children}</main>
       <footer className="jun-footer">
         <Footer curriculums={rows} />
       </footer>
