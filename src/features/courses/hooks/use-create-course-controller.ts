@@ -8,6 +8,7 @@ import {
   CreateCourseFormSchema,
   CreateCourseRequestSchema,
 } from "@/features/courses/schema/course";
+import { HttpError } from "@/shared/lib/http";
 import type { CreateCourseFormInput } from "@/features/courses/schema/course";
 
 export function useCreateCourseController(curriculumID: number) {
@@ -19,6 +20,7 @@ export function useCreateCourseController(curriculumID: number) {
     sortBy: "asc",
   });
   const [isError, setIsError] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
   const [confirmModal, setConfirmModal] = useState<ConfirmModalProps | null>(
     null,
   );
@@ -60,6 +62,7 @@ export function useCreateCourseController(curriculumID: number) {
 
   const onSubmit: SubmitHandler<CreateCourseFormInput> = async (data) => {
     setIsError(false);
+    setErrorMessage("");
     try {
       const request = CreateCourseRequestSchema.parse({
         ...data,
@@ -82,6 +85,16 @@ export function useCreateCourseController(curriculumID: number) {
     } catch (error) {
       console.error("Submit Error:", error);
       setIsError(true);
+      if (error instanceof HttpError && error.status === 409) {
+        const msg = "วิชานี้มีอยู่ในหลักสูตรนี้แล้ว";
+        setErrorMessage(msg);
+        form.setError("courseCode", {
+          type: "manual",
+          message: msg,
+        });
+      } else {
+        setErrorMessage("เกิดข้อผิดพลาด ไม่สามารถเพิ่มรายวิชาได้ กรุณาลองใหม่อีกครั้ง");
+      }
     }
   };
 
@@ -93,10 +106,14 @@ export function useCreateCourseController(curriculumID: number) {
     append,
     remove,
     isError,
+    errorMessage,
     isPending: createCourse.isPending,
     confirmModal,
     onSubmit,
     handleCancel,
-    handleCloseAlert: () => setIsError(false),
+    handleCloseAlert: () => {
+      setIsError(false);
+      setErrorMessage("");
+    },
   };
 }
