@@ -8,7 +8,10 @@ import {
   CreateCourseFormSchema,
   CreateCourseRequestSchema,
 } from "@/features/courses/schema/course";
-import { HttpError } from "@/shared/lib/http";
+import {
+  isDuplicateCourseError,
+  DUPLICATE_COURSE_MESSAGE,
+} from "@/shared/lib/http";
 import type { CreateCourseFormInput } from "@/features/courses/schema/course";
 
 export function useCreateCourseController(curriculumID: number) {
@@ -85,8 +88,8 @@ export function useCreateCourseController(curriculumID: number) {
     } catch (error) {
       console.error("Submit Error:", error);
       setIsError(true);
-      if (error instanceof HttpError && error.status === 409) {
-        const msg = "วิชานี้มีอยู่ในหลักสูตรนี้แล้ว";
+      if (isDuplicateCourseError(error)) {
+        const msg = DUPLICATE_COURSE_MESSAGE;
         setErrorMessage(msg);
         form.setError("courseCode", {
           type: "manual",
