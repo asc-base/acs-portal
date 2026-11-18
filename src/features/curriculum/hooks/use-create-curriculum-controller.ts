@@ -14,8 +14,6 @@ import { HttpError } from "@/shared/lib/http";
 export function useCreateCurriculumController() {
   const router = useRouter();
   const createCurriculum = useCreateCurriculum();
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [fileError, setFileError] = useState<string | null>(null);
   const [croppingFile, setCroppingFile] = useState<File | null>(null);
   const [confirmModal, setConfirmModal] = useState<ConfirmModalProps | null>(
     null,
@@ -28,6 +26,7 @@ export function useCreateCurriculumController() {
     defaultValues: { title: "", year: "", documentURL: "", description: "" },
   });
   const { isDirty } = form.formState;
+  const selectedFile = form.watch("thumbnailFile");
 
   const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -40,7 +39,7 @@ export function useCreateCurriculumController() {
     file: File,
     focalPoint?: { x: number; y: number },
   ) => {
-    setSelectedFile(file);
+    form.setValue("thumbnailFile", file, { shouldDirty: true, shouldValidate: true });
     if (focalPoint) {
       form.setValue("thumbnailFocalPointX", focalPoint.x);
       form.setValue("thumbnailFocalPointY", focalPoint.y);
@@ -63,17 +62,11 @@ export function useCreateCurriculumController() {
     }
   };
 
-  const onSubmit: SubmitHandler<CreateCurriculumInputs> = async (data) => {
-    if (!selectedFile) {
-      setFileError("กรุณาอัปโหลดรูปภาพ");
-      return;
-    }
-    setFileError(null);
-
+  const onSubmit: SubmitHandler<CreateCurriculumInputs> = async ({ thumbnailFile, ...data }) => {
     try {
       await createCurriculum.mutateAsync({
         data: { ...data, year: dayjs(data.year).year().toString() },
-        thumbnailFile: selectedFile,
+        thumbnailFile,
       });
       setConfirmModal({
         isOpen: true,
@@ -98,7 +91,7 @@ export function useCreateCurriculumController() {
   return {
     form,
     selectedFile,
-    fileError,
+    fileError: form.formState.errors.thumbnailFile?.message,
     croppingFile,
     confirmModal,
     isPending: createCurriculum.isPending,
