@@ -27,10 +27,11 @@ const CommonCurriculumSchema = z.object({
   thumbnailFocalPointY: z.number().optional(),
 });
 
-export const CreateCurriculumSchema = CommonCurriculumSchema;
-export const CreateCurriculumRequestSchema = CreateCurriculumSchema.extend({
-  thumbnailFile: z.file(),
+export const CreateCurriculumSchema = CommonCurriculumSchema.extend({
+  thumbnailFile: z.file({ message: "กรุณาอัปโหลดรูปภาพ" })
+    .refine((file) => file.type.startsWith("image/"), "รองรับเฉพาะไฟล์รูปภาพเท่านั้น"),
 });
+export const CreateCurriculumRequestSchema = CreateCurriculumSchema;
 export const UpdateCurriculumSchema = CommonCurriculumSchema.partial();
 export const UpdateCurriculumRequestSchema = UpdateCurriculumSchema.extend({
   thumbnailFile: z.file().optional(),
@@ -78,7 +79,7 @@ export const CurriculumPageResponseSchema = z
   .passthrough();
 
 export type CreateCurriculumInputs = z.input<typeof CreateCurriculumSchema>;
-export type CreateCurriculumData = z.output<typeof CreateCurriculumSchema>;
+export type CreateCurriculumData = Omit<z.output<typeof CreateCurriculumSchema>, "thumbnailFile">;
 export type CreateCurriculumRequest = z.output<
   typeof CreateCurriculumRequestSchema
 >;
