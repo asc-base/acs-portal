@@ -8,10 +8,7 @@ import {
   CreateCourseFormSchema,
   CreateCourseRequestSchema,
 } from "@/features/courses/schema/course";
-import {
-  isDuplicateCourseError,
-  DUPLICATE_COURSE_MESSAGE,
-} from "@/shared/lib/http";
+import { useFormApiError } from "@/shared/lib/api-error";
 import type { CreateCourseFormInput } from "@/features/courses/schema/course";
 
 export function useCreateCourseController(curriculumID: number) {
@@ -22,8 +19,7 @@ export function useCreateCourseController(curriculumID: number) {
     orderBy: "courseCode",
     sortBy: "asc",
   });
-  const [isError, setIsError] = useState(false);
-  const [errorMessage, setErrorMessage] = useState("");
+  const { isError, errorMessage, handleError, clearError } = useFormApiError();
   const [confirmModal, setConfirmModal] = useState<ConfirmModalProps | null>(
     null,
   );
@@ -47,8 +43,12 @@ export function useCreateCourseController(curriculumID: number) {
   const watchedPreCourses = form.watch("preCoursesID");
 
   useEffect(() => {
-    if (coursesQuery.isError) setIsError(true);
-  }, [coursesQuery.isError]);
+    if (coursesQuery.isError) {
+      handleError(coursesQuery.error, {
+        defaultMessage: "ไม่สามารถโหลดข้อมูลรายวิชาได้",
+      });
+    }
+  }, [coursesQuery.isError, coursesQuery.error, handleError]);
 
   const handleCancel = () => {
     if (form.formState.isDirty) {
@@ -64,8 +64,7 @@ export function useCreateCourseController(curriculumID: number) {
   };
 
   const onSubmit: SubmitHandler<CreateCourseFormInput> = async (data) => {
-    setIsError(false);
-    setErrorMessage("");
+    clearError();
     try {
       const request = CreateCourseRequestSchema.parse({
         ...data,
@@ -86,18 +85,14 @@ export function useCreateCourseController(curriculumID: number) {
           ),
       });
     } catch (error) {
-      console.error("Submit Error:", error);
-      setIsError(true);
-      if (isDuplicateCourseError(error)) {
-        const msg = DUPLICATE_COURSE_MESSAGE;
-        setErrorMessage(msg);
-        form.setError("courseCode", {
-          type: "manual",
-          message: msg,
-        });
-      } else {
-        setErrorMessage("เกิดข้อผิดพลาด ไม่สามารถเพิ่มรายวิชาได้ กรุณาลองใหม่อีกครั้ง");
-      }
+      handleError(error, {
+        setError: form.setError,
+        duplicateField: {
+          name: "courseCode",
+          message: "วิชานี้มีอยู่ในหลักสูตรนี้แล้ว",
+        },
+        defaultMessage: "เกิดข้อผิดพลาด ไม่สามารถเพิ่มรายวิชาได้ กรุณาลองใหม่อีกครั้ง",
+      });
     }
   };
 
@@ -114,9 +109,6 @@ export function useCreateCourseController(curriculumID: number) {
     confirmModal,
     onSubmit,
     handleCancel,
-    handleCloseAlert: () => {
-      setIsError(false);
-      setErrorMessage("");
-    },
+    handleCloseAlert: clearError,
   };
 }

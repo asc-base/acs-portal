@@ -189,6 +189,66 @@ describe("course form controllers", () => {
     expect(fetch).toHaveBeenCalledTimes(2);
     act(() => queryClient.clear());
   });
+
+  it("sets courseCode form error and duplicate message when create fails with duplicate course", async () => {
+    let finishRequest!: (response: Response) => void;
+    let requestStarted!: () => void;
+    const started = new Promise<void>((resolve) => (requestStarted = resolve));
+    const fetch = vi.spyOn(globalThis, "fetch").mockImplementation(
+      async (_input, init) => {
+        if (init?.method === "POST") {
+          requestStarted();
+          return new Promise<Response>((resolve) => (finishRequest = resolve));
+        }
+        return new Response(envelope(page), {
+          headers: { "content-type": "application/json" },
+        });
+      },
+    );
+    vi.spyOn(console, "error").mockImplementation(() => undefined);
+    const { queryClient, wrapper } = createWrapper();
+    const { result } = renderHook(() => useCreateCourseController(2), {
+      wrapper,
+    });
+    await waitFor(() => expect(result.current.courses).toEqual([course]));
+    act(() => {
+      result.current.form.setValue("typeCourseID", 1);
+      result.current.form.setValue("courseCode", "CS101");
+      result.current.form.setValue("credits", "3");
+      result.current.form.setValue("courseNameEn", "Programming");
+      result.current.form.setValue("courseNameTh", "การเขียนโปรแกรม");
+      result.current.form.setValue("detail", "Intro");
+      result.current.form.setValue("preCoursesID", []);
+    });
+    let submission!: Promise<void>;
+    act(() => {
+      submission = result.current.form.handleSubmit(result.current.onSubmit)();
+    });
+    await started;
+    await act(async () => {
+      finishRequest(
+        new Response(
+          JSON.stringify({
+            status: 400,
+            err: "DUPLICATE_DATA_ERROR",
+            field: "courseCode",
+          }),
+          {
+            status: 400,
+            statusText: "Bad Request",
+            headers: { "content-type": "application/json" },
+          },
+        ),
+      );
+      await submission;
+    });
+    expect(result.current.isError).toBe(true);
+    expect(result.current.errorMessage).toBe("วิชานี้มีอยู่ในหลักสูตรนี้แล้ว");
+    expect(result.current.form.formState.errors.courseCode?.message).toBe(
+      "วิชานี้มีอยู่ในหลักสูตรนี้แล้ว",
+    );
+    act(() => queryClient.clear());
+  });
 });
 
 describe("course list controller", () => {
