@@ -56,9 +56,9 @@ export const FormClassbook: FC = () => {
         </Alert>
       </Snackbar>
       <h3 className="font-bold">เพิ่มรุ่นการศึกษา</h3>
-      <div className="mt-[28px] flex w-full justify-between gap-x-10">
-        <div className="flex w-[400px] shrink-0 flex-col gap-2">
-          <div className="bg-neutral02 group relative flex h-[284px] w-full items-center justify-center rounded-xl">
+      <div className="mt-7 flex w-full flex-col justify-between gap-6 md:flex-row md:gap-x-10">
+        <div className="flex w-full shrink-0 flex-col gap-2 md:w-96">
+          <div className="bg-neutral02 group relative flex h-72 w-full items-center justify-center rounded-xl">
             {selectedFile ? (
               <>
                 <Image
