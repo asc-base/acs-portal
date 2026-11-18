@@ -16,11 +16,11 @@ const validClassbook = {
 };
 
 describe.each([
-  ["create", createClassbookSchema],
-  ["update", updateClassBookSchema],
-])("%s classbook schema", (_name, schema) => {
+  ["create", createClassbookSchema, { ...validClassbook, thumbnailFile: new File(["image"], "classbook.png", { type: "image/png" }) }],
+  ["update", updateClassBookSchema, validClassbook],
+])("%s classbook schema", (_name, schema, values) => {
   it("accepts valid class and academic year values", () => {
-    expect(schema.parse(validClassbook)).toEqual(validClassbook);
+    expect(schema.parse(values)).toEqual(values);
   });
 
   it.each([
@@ -31,7 +31,7 @@ describe.each([
     ["zero curriculum ID", { curriculumID: 0 }, "curriculumID"],
     ["negative curriculum ID", { curriculumID: -1 }, "curriculumID"],
   ])("rejects %s", (_description, change, field) => {
-    const result = schema.safeParse({ ...validClassbook, ...change });
+    const result = schema.safeParse({ ...values, ...change });
 
     expect(result.success).toBe(false);
     if (!result.success) {
@@ -43,6 +43,12 @@ describe.each([
 });
 
 describe("classbook boundary schemas", () => {
+  it.each([undefined, null])("shows the required image message for %s", (image) => {
+    const result = createClassbookSchema.safeParse({ ...validClassbook, thumbnailFile: image });
+    expect(result.error?.issues.find((issue) => issue.path[0] === "thumbnailFile")?.message)
+      .toBe("กรุณาอัปโหลดรูปภาพ");
+  });
+
   it("requires the thumbnail on create and preserves the optional update file", () => {
     const thumbnailFile = new File(["image"], "classbook.png", {
       type: "image/png",

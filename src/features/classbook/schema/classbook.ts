@@ -22,12 +22,14 @@ const classbookFormFields = {
   ...CommonFocalPointSchema.shape,
 };
 
-export const createClassbookSchema = z.object(classbookFormFields);
+export const createClassbookSchema = z.object({
+  ...classbookFormFields,
+  thumbnailFile: z.file({ message: "กรุณาอัปโหลดรูปภาพ" })
+    .refine((file) => file.type.startsWith("image/"), "รองรับเฉพาะไฟล์รูปภาพเท่านั้น"),
+});
 export const updateClassBookSchema = z.object(classbookFormFields);
 
-export const CreateClassbookRequestSchema = createClassbookSchema.extend({
-  thumbnailFile: z.file(),
-});
+export const CreateClassbookRequestSchema = createClassbookSchema;
 export const UpdateClassbookDataSchema = updateClassBookSchema.partial();
 export const UpdateClassbookRequestSchema = UpdateClassbookDataSchema.extend({
   thumbnailFile: z.file().optional(),
@@ -72,7 +74,7 @@ export const ClassBookPageResponseSchema = z
   .passthrough();
 
 export type CreateClassbookInputs = z.input<typeof createClassbookSchema>;
-export type CreateClassbookData = z.output<typeof createClassbookSchema>;
+export type CreateClassbookData = Omit<z.output<typeof createClassbookSchema>, "thumbnailFile">;
 export type UpdateClassbookInputs = z.input<typeof updateClassBookSchema>;
 export type UpdateClassbookData = z.output<typeof UpdateClassbookDataSchema>;
 export type CreateClassbookRequest = z.output<

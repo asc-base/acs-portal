@@ -18,7 +18,6 @@ export function useCreateClassbookController() {
     sortBy: "desc",
   });
   const curriculums = curriculumPage?.rows ?? [];
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [croppingFile, setCroppingFile] = useState<File | null>(null);
   const [isError, setIsError] = useState(false);
   const [confirmModal, setConfirmModal] = useState<ConfirmModalProps | null>(
@@ -30,6 +29,7 @@ export function useCreateClassbookController() {
     mode: "onChange",
     reValidateMode: "onChange",
   });
+  const selectedFile = form.watch("thumbnailFile");
 
   const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -40,7 +40,7 @@ export function useCreateClassbookController() {
     file: File,
     focalPoint?: { x: number; y: number },
   ) => {
-    setSelectedFile(file);
+    form.setValue("thumbnailFile", file, { shouldDirty: true, shouldValidate: true });
     if (focalPoint) {
       form.setValue("imageFocalPointX", focalPoint.x, { shouldDirty: true });
       form.setValue("imageFocalPointY", focalPoint.y, { shouldDirty: true });
@@ -50,7 +50,6 @@ export function useCreateClassbookController() {
 
   const handleCropCancel = () => {
     setCroppingFile(null);
-    setSelectedFile(null);
   };
 
   const handleCancel = () => {
@@ -66,10 +65,10 @@ export function useCreateClassbookController() {
     }
   };
 
-  const onSubmit: SubmitHandler<CreateClassbookInputs> = async (data) => {
+  const onSubmit: SubmitHandler<CreateClassbookInputs> = async ({ thumbnailFile, ...data }) => {
     setIsError(false);
     try {
-      await createClassBook.mutateAsync({ data, thumbnailFile: selectedFile! });
+      await createClassBook.mutateAsync({ data, thumbnailFile });
       setConfirmModal({
         isOpen: true,
         type: "success",
