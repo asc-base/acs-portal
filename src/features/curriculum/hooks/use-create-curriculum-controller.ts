@@ -4,8 +4,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import dayjs from "dayjs";
 import { useRouter } from "next/navigation";
 import {
-  CreateCurriculumSchema,
-  type CreateCurriculumInputs,
+  CreateCurriculumRequestSchema,
+  type CreateCurriculumRequest,
 } from "@/features/curriculum/schema/curriculum";
 import { useCreateCurriculum } from "@/features/curriculum/client";
 import type { ConfirmModalProps } from "@/shared/components/modal/confirmModal";
@@ -20,8 +20,8 @@ export function useCreateCurriculumController() {
   );
   const [isError, setIsError] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
-  const form = useForm<CreateCurriculumInputs>({
-    resolver: zodResolver(CreateCurriculumSchema),
+  const form = useForm<CreateCurriculumRequest>({
+    resolver: zodResolver(CreateCurriculumRequestSchema),
     mode: "onChange",
     defaultValues: { title: "", year: "", documentURL: "", description: "" },
   });
@@ -62,7 +62,7 @@ export function useCreateCurriculumController() {
     }
   };
 
-  const onSubmit: SubmitHandler<CreateCurriculumInputs> = async ({ thumbnailFile, ...data }) => {
+  const onSubmit: SubmitHandler<CreateCurriculumRequest> = async ({ thumbnailFile, ...data }) => {
     try {
       await createCurriculum.mutateAsync({
         data: { ...data, year: dayjs(data.year).year().toString() },

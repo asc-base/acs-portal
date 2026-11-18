@@ -46,6 +46,19 @@ describe("curriculum schemas", () => {
     expect(
       CreateCurriculumRequestSchema.safeParse(validCurriculum).success,
     ).toBe(false);
+    expect(
+      CreateCurriculumRequestSchema.safeParse(validCurriculum).error?.issues.find(
+        (issue) => issue.path[0] === "thumbnailFile",
+      )?.message,
+    ).toBe("กรุณาอัปโหลดรูปภาพ");
+    const nonImage = new File(["text"], "doc.txt", { type: "text/plain" });
+    expect(
+      CreateCurriculumRequestSchema.safeParse({
+        ...validCurriculum,
+        thumbnailFile: nonImage,
+      }).error?.issues.find((issue) => issue.path[0] === "thumbnailFile")
+        ?.message,
+    ).toBe("รองรับเฉพาะไฟล์รูปภาพเท่านั้น");
   });
 
   it.each(["", "not a URL", "/curriculum.pdf", "https://"]) (
