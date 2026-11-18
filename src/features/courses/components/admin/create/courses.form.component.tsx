@@ -30,6 +30,7 @@ export const CourseForm: FC<CoursesFormProps> = ({ curriculumID }) => {
     form,
     courses,
     isError,
+    errorMessage,
     confirmModal,
     watchedPreCourses,
     fields,
@@ -45,7 +46,7 @@ export const CourseForm: FC<CoursesFormProps> = ({ curriculumID }) => {
     <form className="space-y-4 p-8" onSubmit={handleSubmit(onSubmit)}>
       <Snackbar
         anchorOrigin={{ vertical: "top", horizontal: "right" }}
-        open={isError}
+        open={isError || !!errorMessage}
         autoHideDuration={4000}
         onClose={handleCloseAlert}
       >
@@ -54,7 +55,7 @@ export const CourseForm: FC<CoursesFormProps> = ({ curriculumID }) => {
           onClose={handleCloseAlert}
           sx={{ width: "100%" }}
         >
-          เกิดข้อผิดพลาด ไม่สามารถเพิ่มรายวิชาได้
+          {errorMessage || "เกิดข้อผิดพลาด ไม่สามารถเพิ่มรายวิชาได้"}
         </Alert>
       </Snackbar>
 

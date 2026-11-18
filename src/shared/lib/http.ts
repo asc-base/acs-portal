@@ -18,7 +18,7 @@ export class HttpHelper {
     private baseUrl: string = "",
     private defaultHeaders: HeadersInit = {},
     private defaultCache?: RequestCache,
-  ) {}
+  ) { }
 
   private joinUrl(path: string) {
     if (!this.baseUrl) return path;
@@ -106,8 +106,7 @@ export class HttpHelper {
 
         // Create custom error with status and data
         const error = new HttpError(
-          `HTTP ${res.status} ${res.statusText} @ ${fullUrl}${
-            details ? ` | ${details}` : ""
+          `HTTP ${res.status} ${res.statusText} @ ${fullUrl}${details ? ` | ${details}` : ""
           }`,
           res.status,
           errorData,
