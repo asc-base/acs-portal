@@ -23,7 +23,7 @@ const VisuallyHiddenInput = styled("input")({
 
 export const FormClassbook: FC = () => {
   const {
-    form: { control, handleSubmit },
+    form: { control, handleSubmit, formState: { errors } },
     curriculums,
     selectedFile,
     croppingFile,
@@ -57,8 +57,8 @@ export const FormClassbook: FC = () => {
       </Snackbar>
       <h3 className="font-bold">เพิ่มรุ่นการศึกษา</h3>
       <div className="mt-[28px] flex w-full justify-between gap-x-10">
-        <div className="flex h-[284px] w-[400px] items-center justify-center">
-          <div className="bg-neutral02 group relative flex h-full w-full items-center justify-center rounded-xl">
+        <div className="flex w-[400px] shrink-0 flex-col gap-2">
+          <div className="bg-neutral02 group relative flex h-[284px] w-full items-center justify-center rounded-xl">
             {selectedFile ? (
               <>
                 <Image
@@ -91,6 +91,9 @@ export const FormClassbook: FC = () => {
               </Button>
             )}
           </div>
+          {errors.thumbnailFile && (
+            <p className="text-accent04 text-sm">{errors.thumbnailFile.message}</p>
+          )}
         </div>
         <div className="flex w-full flex-col justify-between">
           <RHFTextField
