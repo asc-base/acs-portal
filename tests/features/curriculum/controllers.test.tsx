@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { act, renderHook } from "@testing-library/react";
+import { act, renderHook, waitFor } from "@testing-library/react";
 import { useCreateCurriculumController } from "@/features/curriculum/hooks/use-create-curriculum-controller";
 import { useCurriculumListController } from "@/features/curriculum/hooks/use-curriculum-list-controller";
 import { useUpdateCurriculumController } from "@/features/curriculum/hooks/use-update-curriculum-controller";
@@ -83,6 +83,42 @@ describe("curriculum form and list controllers", () => {
     expect(body.get("thumbnailFile")).toBe(thumbnailFile);
     act(() => result.current.confirmModal?.onConfirm());
     expect(router.push).toHaveBeenCalledWith("/admin/curriculum");
+    act(() => queryClient.clear());
+  });
+
+  it("shows an inline thumbnail error when submitting without an image and clears it after cropping", async () => {
+    const fetch = vi.spyOn(globalThis, "fetch").mockResolvedValue(
+      new Response(JSON.stringify(envelope(curriculum)), {
+        headers: { "content-type": "application/json" },
+      }),
+    );
+    const { queryClient, wrapper } = createWrapper();
+    const { result } = renderHook(() => useCreateCurriculumController(), {
+      wrapper,
+    });
+    const thumbnailFile = new File(["image"], "curriculum.png", {
+      type: "image/png",
+    });
+
+    act(() => {
+      result.current.form.setValue("title", curriculum.title);
+      result.current.form.setValue("year", "2025-01-01");
+      result.current.form.setValue("documentURL", curriculum.documentURL);
+      result.current.form.setValue("description", curriculum.description);
+    });
+    await act(async () => {
+      await result.current.form.handleSubmit(result.current.onSubmit)();
+    });
+
+    expect(result.current.fileError).toBe("กรุณาอัปโหลดรูปภาพ");
+    expect(fetch).not.toHaveBeenCalled();
+
+    act(() => {
+      result.current.handleUploadComplete(thumbnailFile, { x: 0, y: 75 });
+    });
+
+    await waitFor(() => expect(result.current.fileError).toBeUndefined());
+    expect(result.current.selectedFile).toBe(thumbnailFile);
     act(() => queryClient.clear());
   });
 
