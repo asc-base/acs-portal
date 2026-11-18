@@ -18,7 +18,7 @@ export class HttpHelper {
     private baseUrl: string = "",
     private defaultHeaders: HeadersInit = {},
     private defaultCache?: RequestCache,
-  ) {}
+  ) { }
 
   private joinUrl(path: string) {
     if (!this.baseUrl) return path;
@@ -106,8 +106,7 @@ export class HttpHelper {
 
         // Create custom error with status and data
         const error = new HttpError(
-          `HTTP ${res.status} ${res.statusText} @ ${fullUrl}${
-            details ? ` | ${details}` : ""
+          `HTTP ${res.status} ${res.statusText} @ ${fullUrl}${details ? ` | ${details}` : ""
           }`,
           res.status,
           errorData,
@@ -154,21 +153,11 @@ export class HttpHelper {
 export default HttpHelper;
 
 export const DUPLICATE_EMAIL_MESSAGE = "อีเมลนี้มีอยู่ในระบบแล้ว กรุณาใช้อีเมลอื่น";
-export const DUPLICATE_COURSE_MESSAGE = "วิชานี้มีอยู่ในหลักสูตรนี้แล้ว";
 
 export function isDuplicateEmailError(error: unknown): boolean {
   if (!(error instanceof HttpError)) return false;
   const data = error.data as { err?: unknown; field?: unknown } | undefined;
   if (data?.err !== "DUPLICATE_DATA_ERROR") return false;
   if (typeof data.field === "string") return data.field === "email";
-  return error.status === 400;
-}
-
-export function isDuplicateCourseError(error: unknown): boolean {
-  if (!(error instanceof HttpError)) return false;
-  if (error.status === 409) return true;
-  const data = error.data as { err?: unknown; field?: unknown } | undefined;
-  if (data?.err !== "DUPLICATE_DATA_ERROR") return false;
-  if (typeof data.field === "string") return data.field === "courseCode";
   return error.status === 400;
 }
