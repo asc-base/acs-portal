@@ -104,7 +104,12 @@ export const CreateNewsSchema = z.object({
       message: "รูปแบบวันที่ไม่ถูกต้อง",
     }),
   dueDate: OptionalDateSchema,
-  thumbnail: z.file({ message: "กรุณาอัปโหลดภาพหน้าปก" }),
+  thumbnail: z
+    .file({ message: "กรุณาอัปโหลดรูปภาพ" })
+    .refine(
+      (file) => file.type.startsWith("image/"),
+      "รองรับเฉพาะไฟล์รูปภาพเท่านั้น",
+    ),
   thumbnailImage: z.file().optional(),
   additionalImages: z.array(z.file()).max(10).optional(),
   ...FocalPointSchema.shape,

@@ -36,6 +36,19 @@ describe("CreateNewsSchema", () => {
     expect(CreateNewsSchema.safeParse({ ...createInput, dueDate: "Invalid Date" }).success).toBe(false);
   });
 
+  it.each([undefined, null])("shows the required image message for %s", (thumbnail) => {
+    const result = CreateNewsSchema.safeParse({ ...createInput, thumbnail });
+    expect(result.error?.issues.find((issue) => issue.path[0] === "thumbnail")?.message)
+      .toBe("กรุณาอัปโหลดรูปภาพ");
+  });
+
+  it("rejects non-image thumbnail files on create", () => {
+    const nonImage = new File(["text"], "doc.txt", { type: "text/plain" });
+    const result = CreateNewsSchema.safeParse({ ...createInput, thumbnail: nonImage });
+    expect(result.error?.issues.find((issue) => issue.path[0] === "thumbnail")?.message)
+      .toBe("รองรับเฉพาะไฟล์รูปภาพเท่านั้น");
+  });
+
   it.each([
     ["missing title", { title: undefined }, "title"],
     ["empty title", { title: "" }, "title"],
