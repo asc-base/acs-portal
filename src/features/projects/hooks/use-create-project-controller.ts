@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import type { ConfirmModalProps } from "@/shared/components/modal/confirmModal";
 import { useCreateProject } from "@/features/projects/client";
 import { CreateProjectFormSchema, projectFormToCreateRequest } from "@/features/projects/schema/project";
-import type { ProjectFormInput } from "@/features/projects/schema/project";
+import type { CreateProjectFormInput } from "@/features/projects/schema/project";
 import { useProjectImages } from "@/features/projects/hooks/use-project-images";
 
 export function useCreateProjectController() {
@@ -14,7 +14,7 @@ export function useCreateProjectController() {
   const [errorMsg, setErrorMsg] = useState("");
   const [isError, setIsError] = useState(false);
   const [confirmModal, setConfirmModal] = useState<ConfirmModalProps | null>(null);
-  const form = useForm<ProjectFormInput>({
+  const form = useForm<CreateProjectFormInput>({
     resolver: zodResolver(CreateProjectFormSchema),
     defaultValues: {
       title: "",
@@ -36,6 +36,8 @@ export function useCreateProjectController() {
     mode: "onChange",
   });
   const projectImages = useProjectImages(form.setValue);
+  const selectedFile = form.watch("thumbnailFile");
+  const imageError = form.formState.errors.thumbnailFile?.message;
   const projectCourses = useFieldArray({ control: form.control, name: "projectCourses" });
   const projectTypes = useFieldArray({ control: form.control, name: "projectTypes" });
   const projectCategories = useFieldArray({ control: form.control, name: "projectCategories" });
@@ -45,8 +47,13 @@ export function useCreateProjectController() {
   const advisors = useFieldArray({ control: form.control, name: "advisors" });
   const coAdvisors = useFieldArray({ control: form.control, name: "coAdvisors" });
 
+  const handleCropComplete = (croppedFile: File, focalPoint?: { x: number; y: number }) => {
+    projectImages.handleCropComplete(croppedFile, focalPoint);
+    form.setValue("thumbnailFile", croppedFile, { shouldDirty: true, shouldValidate: true });
+  };
+
   const cancelForm = () => {
-    if (form.formState.isDirty || projectImages.selectedFile || projectImages.galleryItems.length > 0) {
+    if (form.formState.isDirty || selectedFile || projectImages.galleryItems.length > 0) {
       setConfirmModal({
         isOpen: true,
         type: "warning",
@@ -58,11 +65,7 @@ export function useCreateProjectController() {
     }
   };
 
-  const onSubmit: SubmitHandler<ProjectFormInput> = async (data) => {
-    if (!projectImages.selectedFile) {
-      projectImages.setImageError(true);
-      return;
-    }
+  const onSubmit: SubmitHandler<CreateProjectFormInput> = async ({ thumbnailFile, ...data }) => {
     const gallery = projectImages.galleryRequest();
     if (gallery.gallery.length === 0) {
       projectImages.setAssetsError(true);
@@ -73,7 +76,7 @@ export function useCreateProjectController() {
       await createProject.mutateAsync({
         payload: projectFormToCreateRequest(data, gallery),
         files: {
-          thumbnailFile: projectImages.selectedFile,
+          thumbnailFile,
           assets: gallery.assets,
         },
       });
@@ -92,6 +95,9 @@ export function useCreateProjectController() {
 
   return {
     ...projectImages,
+    selectedFile,
+    imageError,
+    handleCropComplete,
     form,
     control: form.control,
     handleSubmit: form.handleSubmit,

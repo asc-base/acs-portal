@@ -95,6 +95,34 @@ describe("project form controllers", () => {
     act(() => queryClient.clear());
   });
 
+  it("shows an inline thumbnail error when submitting without an image and clears it after cropping", async () => {
+    const fetch = vi.spyOn(globalThis, "fetch").mockResolvedValue(
+      new Response(JSON.stringify(projectEnvelope(projectFixture)), { headers: { "content-type": "application/json" } }),
+    );
+    const { queryClient, wrapper } = createWrapper();
+    const { result } = renderHook(() => useCreateProjectController(), { wrapper });
+    const thumbnail = image("thumbnail.png");
+
+    act(() => {
+      setValidForm(result.current.form);
+      result.current.handleAssetsChange(filesEvent([image("asset-0.png")]));
+    });
+    await act(async () => {
+      await result.current.form.handleSubmit(result.current.onSubmit)();
+    });
+
+    expect(result.current.imageError).toBe("กรุณาอัปโหลดรูปภาพ");
+    expect(fetch).not.toHaveBeenCalled();
+
+    act(() => {
+      result.current.handleCropComplete(thumbnail, { x: 0, y: 75 });
+    });
+
+    await waitFor(() => expect(result.current.imageError).toBeUndefined());
+    expect(result.current.selectedFile).toBe(thumbnail);
+    act(() => queryClient.clear());
+  });
+
   it("replaces relations and reorders retained and uploaded gallery images", async () => {
     const project: IProject = {
       ...projectFixture,
