@@ -86,4 +86,27 @@ describe("create news form controller", () => {
     expect(body.getAll("detailImages")).toEqual([secondDetail]);
     await waitFor(() => expect(result.current.confirmModal?.type).toBe("success"));
   });
+
+  it("shows an inline thumbnail error when submitting without an image and clears it after cropping", async () => {
+    const fetch = vi.spyOn(globalThis, "fetch").mockResolvedValue(response());
+    const { result } = renderHook(() => useCreateNewsForm(), { wrapper });
+    const card = new File(["card"], "card.png", { type: "image/png" });
+
+    act(() => {
+      result.current.setValue("title", "News title");
+      result.current.setValue("detail", "News details");
+      result.current.setValue("newsCategoryId", 1);
+      result.current.setValue("startDate", "2026-10-08T15:00:00+07:00");
+    });
+
+    await act(async () => result.current.submit({ preventDefault: vi.fn(), persist: vi.fn() } as never));
+
+    expect(result.current.errors.thumbnail?.message).toBe("กรุณาอัปโหลดรูปภาพ");
+    expect(fetch).not.toHaveBeenCalled();
+
+    act(() => result.current.handleCropComplete(card, { x: 50, y: 50 }));
+
+    await waitFor(() => expect(result.current.errors.thumbnail).toBeUndefined());
+    expect(result.current.watch("thumbnail")).toBe(card);
+  });
 });

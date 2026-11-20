@@ -92,7 +92,7 @@ const CreateNewsForm = ({ categories }: CreateNewsProps) => {
       <form className="gap-4 p-4" onSubmit={submit}>
         <div className="flex flex-col gap-4">
           <div className="flex flex-col gap-6 md:flex-row md:items-stretch">
-            <div className="flex w-full md:w-[400px] flex-col gap-2 shrink-0">
+            <div className="flex w-full shrink-0 flex-col gap-2 md:w-96">
               <div className="text-neutral04 text-h4 font-medium">
                 ภาพการ์ด
               </div>
@@ -127,6 +127,9 @@ const CreateNewsForm = ({ categories }: CreateNewsProps) => {
                   </Button>
                 )}
               </div>
+              {errors.thumbnail && (
+                <p className="text-accent04 text-sm">{errors.thumbnail.message}</p>
+              )}
             </div>
 
             <div className="flex flex-1 flex-col gap-4">
@@ -277,9 +280,6 @@ const CreateNewsForm = ({ categories }: CreateNewsProps) => {
               placeholder="เลือกวันที่สิ้นสุด"
             />
           </div>
-          {!thumbnailFile && errors.thumbnail && (
-            <p className="text-accent04 text-sm">{errors.thumbnail.message}</p>
-          )}
         </div>
         <div className="mt-4 flex justify-end">
           <div className="flex gap-x-4">
