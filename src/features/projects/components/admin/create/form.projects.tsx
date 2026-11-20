@@ -74,9 +74,9 @@ export const FormProjects: FC<FormProjectsProps> = ({ initialCourses, initialMas
 
       <div>
         <h3 className="font-bold">ข้อมูลผลงาน</h3>
-        <div className="mt-6 mb-8 flex flex-row items-stretch gap-x-8 h-auto">
-          <div className="w-[400px] shrink-0 flex flex-col gap-2">
-            <div className="bg-gray-50 rounded-xl overflow-hidden border border-gray-300 relative flex flex-col justify-center items-center group h-full">
+        <div className="mt-6 mb-8 flex flex-col items-stretch gap-6 md:flex-row md:gap-x-8">
+          <div className="flex w-full shrink-0 flex-col gap-2 md:w-96">
+            <div className="bg-gray-50 group relative flex min-h-72 flex-1 flex-col items-center justify-center overflow-hidden rounded-xl border border-gray-300">
               {selectedFile ? (
                 <>
                   <Image src={URL.createObjectURL(selectedFile)} alt="Preview" fill className="absolute inset-0 z-0 object-cover" />
@@ -96,7 +96,7 @@ export const FormProjects: FC<FormProjectsProps> = ({ initialCourses, initialMas
             </div>
 
             {imageError && (
-              <p className="text-h5 text-accent04">กรุณาอัปโหลดรูปภาพหลัก</p>
+              <p className="text-sm text-accent04">{imageError}</p>
             )}
 
           </div>

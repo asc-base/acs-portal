@@ -1,16 +1,20 @@
 import { useState } from "react";
 import type { ChangeEvent } from "react";
-import type { UseFormSetValue } from "react-hook-form";
-import type { ProjectFormInput, ProjectGalleryRequest } from "@/features/projects/schema/project";
+import type { ProjectGalleryRequest } from "@/features/projects/schema/project";
 
 export type ProjectGalleryItem =
   | { kind: "existing"; imageID: number; imageUrl: string; contentType: string | null }
   | { kind: "new"; file: File };
 
 type ExistingProjectImage = { imageID: number; imageUrl: string; contentType: string | null; sortOrder: number };
+type SetFocalPointValue = (
+  name: "thumbnailFocalPointX" | "thumbnailFocalPointY",
+  value: number,
+  options?: { shouldDirty?: boolean },
+) => void;
 
 export function useProjectImages(
-  setValue: UseFormSetValue<ProjectFormInput>,
+  setValue: SetFocalPointValue,
   initialGallery: ExistingProjectImage[] = [],
   maxGallery = 10,
 ) {

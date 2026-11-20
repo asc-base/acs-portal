@@ -29,26 +29,41 @@ const form = {
   advisors: [{ userID: 9, position: "" }],
   coAdvisors: [],
 };
+const thumbnailFile = new File(["image"], "thumbnail.png", { type: "image/png" });
+const createForm = { ...form, thumbnailFile };
 const gallery = { gallery: [{ fileIndex: 0 }], assets: [new File(["image"], "project.png", { type: "image/png" })] };
 
 describe("project form schemas", () => {
   it("accepts required metadata, URL values, and the required member groups", () => {
-    expect(CreateProjectFormSchema.parse(form)).toEqual(form);
+    expect(CreateProjectFormSchema.parse(createForm)).toEqual(createForm);
     expect(UpdateProjectFormSchema.parse(form)).toEqual(form);
+  });
+
+  it.each([undefined, null])("shows the required image message for %s on create", (image) => {
+    const result = CreateProjectFormSchema.safeParse({ ...form, thumbnailFile: image });
+    expect(result.error?.issues.find((issue) => issue.path[0] === "thumbnailFile")?.message)
+      .toBe("กรุณาอัปโหลดรูปภาพ");
+  });
+
+  it("rejects non-image thumbnail files on create", () => {
+    const nonImage = new File(["text"], "doc.txt", { type: "text/plain" });
+    const result = CreateProjectFormSchema.safeParse({ ...form, thumbnailFile: nonImage });
+    expect(result.error?.issues.find((issue) => issue.path[0] === "thumbnailFile")?.message)
+      .toBe("รองรับเฉพาะไฟล์รูปภาพเท่านั้น");
   });
 
   it.each(["projectCourses", "projectTypes", "projectCategories", "techStacks", "students", "advisors"])(
     "requires at least one %s entry",
-    (field) => expect(CreateProjectFormSchema.safeParse({ ...form, [field]: [] }).success).toBe(false),
+    (field) => expect(CreateProjectFormSchema.safeParse({ ...createForm, [field]: [] }).success).toBe(false),
   );
 
   it.each(["youtubeURL", "githubURL", "documentURL", "presentationURL"])(
     "rejects an invalid %s",
-    (field) => expect(CreateProjectFormSchema.safeParse({ ...form, [field]: "not a URL" }).success).toBe(false),
+    (field) => expect(CreateProjectFormSchema.safeParse({ ...createForm, [field]: "not a URL" }).success).toBe(false),
   );
 
   it.each([["title", "   "], ["detail", "   "]])("rejects a blank %s", (field, value) => {
-    expect(CreateProjectFormSchema.safeParse({ ...form, [field]: value }).success).toBe(false);
+    expect(CreateProjectFormSchema.safeParse({ ...createForm, [field]: value }).success).toBe(false);
   });
 });
 

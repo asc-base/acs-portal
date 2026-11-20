@@ -24,7 +24,14 @@ const projectFormSchema = z.object({
   thumbnailFocalPointY: z.number().optional(),
 });
 
-export const CreateProjectFormSchema = projectFormSchema;
+export const CreateProjectFormSchema = projectFormSchema.extend({
+  thumbnailFile: z
+    .file({ message: "กรุณาอัปโหลดรูปภาพ" })
+    .refine(
+      (file) => file.type.startsWith("image/"),
+      "รองรับเฉพาะไฟล์รูปภาพเท่านั้น",
+    ),
+});
 export const UpdateProjectFormSchema = projectFormSchema;
 export const updateProjectSchema = UpdateProjectFormSchema;
 
@@ -189,6 +196,8 @@ export function projectFormToUpdateRequest(
 
 export type ProjectFormInput = z.input<typeof projectFormSchema>;
 export type ProjectFormValues = z.output<typeof projectFormSchema>;
+export type CreateProjectFormInput = z.input<typeof CreateProjectFormSchema>;
+export type CreateProjectFormValues = z.output<typeof CreateProjectFormSchema>;
 export type CreateProjectRequest = z.output<typeof CreateProjectRequestSchema>;
 export type UpdateProjectRequest = z.output<typeof UpdateProjectRequestSchema>;
 export type QueryProjectInput = z.input<typeof QueryProjectSchema>;
