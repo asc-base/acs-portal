@@ -116,6 +116,35 @@ describe("professor form controllers", () => {
     expect(result.current.confirmModal?.type).toBe("success");
   });
 
+  it("shows an inline image error when submitting without an image and clears it after cropping", async () => {
+    const fetch = vi.spyOn(globalThis, "fetch").mockResolvedValue(response());
+    const { result } = renderHook(() => useCreateProfessorForm(), { wrapper });
+    const image = new File(["cropped"], "portrait.png", { type: "image/png" });
+
+    act(() => {
+      result.current.setValue("prefixID", 2);
+      result.current.setValue("firstNameTh", "สมชาย");
+      result.current.setValue("lastNameTh", "ใจดี");
+      result.current.setValue("firstNameEn", "");
+      result.current.setValue("lastNameEn", "");
+      result.current.setValue("email", "somchai@example.test");
+      result.current.setValue("phone", "0812345678");
+      result.current.setValue("profRoom", "A201");
+      result.current.setValue("personnelType", "CURRICULUM_STAFF");
+    });
+    await act(async () => result.current.submit(submitEvent()));
+
+    expect(result.current.imageError).toBe("กรุณาอัปโหลดรูปภาพ");
+    expect(fetch).not.toHaveBeenCalled();
+
+    act(() => {
+      result.current.handleCropComplete(image, { x: 0.25, y: 0.75 });
+    });
+
+    await waitFor(() => expect(result.current.imageError).toBeUndefined());
+    expect(result.current.selectedFile).toBe(image);
+  });
+
   it("resets edit fields from the profile and maps updated arrays with the crop file", async () => {
     const fetch = vi.spyOn(globalThis, "fetch").mockResolvedValue(response());
     const { result } = renderHook(() => useUpdateProfessorForm(professor), {

@@ -19,83 +19,85 @@ const validProfessor = {
   profRoom: "A201",
 };
 
+const validImage = new File(["image"], "portrait.png", { type: "image/png" });
+
 describe.each([
-  ["create", CreateProfessorSchema],
-  ["update", UpdateProfessorSchema],
-])("%s professor schema", (_name, schema) => {
+  ["create", CreateProfessorSchema, { ...validProfessor, imageFile: validImage }],
+  ["update", UpdateProfessorSchema, validProfessor],
+])("%s professor schema", (_name, schema, values) => {
   it.each([undefined, "CURRICULUM_HEAD", "LECTURER", "CURRICULUM_STAFF"])(
     "accepts optional personnel type %s", (personnelType) => {
-      expect(schema.safeParse({ ...validProfessor, personnelType }).success).toBe(true);
+      expect(schema.safeParse({ ...values, personnelType }).success).toBe(true);
     },
   );
 
   it("rejects an unknown personnel type", () => {
-    expect(schema.safeParse({ ...validProfessor, personnelType: "ADMIN" }).success).toBe(false);
+    expect(schema.safeParse({ ...values, personnelType: "ADMIN" }).success).toBe(false);
   });
 
   it("requires a prefix, education and expert field", () => {
-    expect(schema.safeParse(validProfessor).success).toBe(true);
-    expect(schema.safeParse({ ...validProfessor, prefixID: null }).success).toBe(
+    expect(schema.safeParse(values).success).toBe(true);
+    expect(schema.safeParse({ ...values, prefixID: null }).success).toBe(
       false,
     );
-    expect(schema.safeParse({ ...validProfessor, educations: undefined }).success).toBe(
+    expect(schema.safeParse({ ...values, educations: undefined }).success).toBe(
       false,
     );
-    expect(schema.safeParse({ ...validProfessor, expertFields: undefined }).success).toBe(
+    expect(schema.safeParse({ ...values, expertFields: undefined }).success).toBe(
       false,
     );
     expect(
-      schema.safeParse({ ...validProfessor, educations: [{ value: " " }] })
+      schema.safeParse({ ...values, educations: [{ value: " " }] })
         .success,
     ).toBe(false);
     expect(
-      schema.safeParse({ ...validProfessor, expertFields: [{ value: " " }] })
+      schema.safeParse({ ...values, expertFields: [{ value: " " }] })
         .success,
     ).toBe(false);
   });
 
   it("accepts Thai names and English names, including blank optional English names", () => {
-    expect(schema.safeParse(validProfessor).success).toBe(true);
+    expect(schema.safeParse(values).success).toBe(true);
     expect(
       schema.safeParse({
-        ...validProfessor,
+        ...values,
         firstNameEn: "",
         lastNameEn: "",
       }).success,
     ).toBe(true);
-    expect(schema.safeParse({ ...validProfessor, firstNameTh: "Somchai" }).success).toBe(
+    expect(schema.safeParse({ ...values, firstNameTh: "Somchai" }).success).toBe(
       false,
     );
-    expect(schema.safeParse({ ...validProfessor, firstNameEn: "สมชาย" }).success).toBe(
+    expect(schema.safeParse({ ...values, firstNameEn: "สมชาย" }).success).toBe(
       false,
     );
   });
 
   it.each(["0812345678", "021234567"])("accepts phone %s", (phone) => {
-    expect(schema.safeParse({ ...validProfessor, phone }).success).toBe(true);
+    expect(schema.safeParse({ ...values, phone }).success).toBe(true);
   });
 
   it.each(["123456789", "08123456", "08123456789", "08-1234-5678"])(
     "rejects phone %s",
     (phone) => {
-      expect(schema.safeParse({ ...validProfessor, phone }).success).toBe(false);
+      expect(schema.safeParse({ ...values, phone }).success).toBe(false);
     },
   );
 
   it("allows an omitted or blank research URL and accepts HTTP(S) URLs", () => {
-    expect(schema.safeParse(validProfessor).success).toBe(true);
+    expect(schema.safeParse(values).success).toBe(true);
     expect(
-      schema.safeParse({ ...validProfessor, research_profile: " " }).success,
+      schema.safeParse({ ...values, research_profile: " " }).success,
     ).toBe(true);
     expect(
       schema.safeParse({
-        ...validProfessor,
+        ...values,
         research_profile: "http://example.test/profile",
       }).success,
     ).toBe(true);
     expect(
       schema.safeParse({
-        ...validProfessor,
+        ...values,
         research_profile: "https://example.test/profile",
       }).success,
     ).toBe(true);
@@ -105,10 +107,25 @@ describe.each([
     "rejects research URL %s",
     (research_profile) => {
       expect(
-        schema.safeParse({ ...validProfessor, research_profile }).success,
+        schema.safeParse({ ...values, research_profile }).success,
       ).toBe(false);
     },
   );
+});
+
+describe("professor create image validation", () => {
+  it.each([undefined, null])("shows the required image message for %s", (imageFile) => {
+    const result = CreateProfessorSchema.safeParse({ ...validProfessor, imageFile });
+    expect(result.error?.issues.find((issue) => issue.path[0] === "imageFile")?.message)
+      .toBe("กรุณาอัปโหลดรูปภาพ");
+  });
+
+  it("rejects non-image files on create", () => {
+    const nonImage = new File(["text"], "doc.txt", { type: "text/plain" });
+    const result = CreateProfessorSchema.safeParse({ ...validProfessor, imageFile: nonImage });
+    expect(result.error?.issues.find((issue) => issue.path[0] === "imageFile")?.message)
+      .toBe("รองรับเฉพาะไฟล์รูปภาพเท่านั้น");
+  });
 });
 
 describe("professor request and query schemas", () => {

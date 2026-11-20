@@ -36,13 +36,14 @@ export const FormProfesssors: FC = () => {
   const {
     control,
     submit,
-    isValid,
     selectedFile,
+    croppingFile,
     isCropping,
     confirmModal,
     isPending,
     isError,
     fileError,
+    imageError,
     clearError,
     educationFields,
     appendEducation,
@@ -57,7 +58,7 @@ export const FormProfesssors: FC = () => {
   } = useCreateProfessorForm();
 
   return (
-    <form className="space-y-4 p-8" onSubmit={submit}>
+    <form className="space-y-4 p-8" onSubmit={submit} noValidate>
       <Snackbar
         anchorOrigin={{ vertical: "top", horizontal: "right" }}
         open={isError}
@@ -79,47 +80,52 @@ export const FormProfesssors: FC = () => {
         <Typography variant="h6" fontWeight="bold">
           ข้อมูลส่วนตัว
         </Typography>
-        <div className="mt-6 mb-16 flex flex-row items-center gap-x-8">
-          <div className="bg-neutral02 group relative flex h-[182px] w-[268px] items-center justify-center rounded-xl">
-            {selectedFile ? (
-              <>
-                <Image
-                  src={URL.createObjectURL(selectedFile)}
-                  alt="Preview"
-                  width={384}
-                  height={192}
-                  style={{ objectFit: "cover" }}
-                  className="h-full w-full rounded-xl object-cover"
-                />
-                <div className="bg-opacity-40 absolute inset-0 flex items-center justify-center bg-black/60 opacity-0 transition-opacity group-hover:opacity-100">
-                  <Button variant="contained" component="label">
-                    <VisuallyHiddenInput
-                      type="file"
-                      accept="image/*"
-                      onChange={(event) => {
-                        handleFileChange(event.target.files?.[0] ?? null);
-                        event.target.value = "";
-                      }}
-                    />
-                    อัปโหลดรูปภาพ
-                  </Button>
-                </div>
-              </>
-            ) : (
-              <Button variant="contained" component="label">
-                <VisuallyHiddenInput
-                  type="file"
-                  accept="image/*"
-                  onChange={(event) => {
-                    handleFileChange(event.target.files?.[0] ?? null);
-                    event.target.value = "";
-                  }}
-                />
-                อัปโหลดรูปภาพ
-              </Button>
+        <div className="mt-6 mb-16 flex flex-col items-start gap-6 md:flex-row md:gap-x-8">
+          <div className="flex w-full shrink-0 flex-col gap-2 md:w-64">
+            <div className="bg-neutral02 group relative flex h-44 w-full items-center justify-center overflow-hidden rounded-xl">
+              {selectedFile ? (
+                <>
+                  <Image
+                    src={URL.createObjectURL(selectedFile)}
+                    alt="Preview"
+                    width={384}
+                    height={192}
+                    style={{ objectFit: "cover" }}
+                    className="h-full w-full rounded-xl object-cover"
+                  />
+                  <div className="bg-opacity-40 absolute inset-0 flex items-center justify-center bg-black/60 opacity-0 transition-opacity group-hover:opacity-100">
+                    <Button variant="contained" component="label">
+                      <VisuallyHiddenInput
+                        type="file"
+                        accept="image/*"
+                        onChange={(event) => {
+                          handleFileChange(event.target.files?.[0] ?? null);
+                          event.target.value = "";
+                        }}
+                      />
+                      อัปโหลดรูปภาพ
+                    </Button>
+                  </div>
+                </>
+              ) : (
+                <Button variant="contained" component="label">
+                  <VisuallyHiddenInput
+                    type="file"
+                    accept="image/*"
+                    onChange={(event) => {
+                      handleFileChange(event.target.files?.[0] ?? null);
+                      event.target.value = "";
+                    }}
+                  />
+                  อัปโหลดรูปภาพ
+                </Button>
+              )}
+            </div>
+            {imageError && (
+              <p className="text-accent04 text-sm">{imageError}</p>
             )}
           </div>
-          <div className="flex h-[176px] flex-1 flex-col justify-between">
+          <div className="flex min-h-44 w-full flex-1 flex-col justify-between gap-4">
             <div className="flex flex-row gap-x-4">
               <div className="flex-2">
                 <RHFSelect
@@ -395,16 +401,16 @@ export const FormProfesssors: FC = () => {
           type="submit"
           variant="contained"
           size="large"
-          disabled={!isValid || isPending}
+          disabled={isPending}
         >
           {isPending ? "กำลังบันทึก..." : "บันทึกข้อมูล"}
         </Button>
       </div>
       {confirmModal && <ConfirmModal {...confirmModal} />}
-      {isCropping && selectedFile && (
+      {isCropping && croppingFile && (
         <Modal open={isCropping} onClose={handleCropCancel} closeAfterTransition>
           <CropImageCard
-            file={selectedFile}
+            file={croppingFile}
             width={512}
             height={512}
             onUploadComplete={handleCropComplete}
