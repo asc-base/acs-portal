@@ -16,16 +16,16 @@ import { DUPLICATE_EMAIL_MESSAGE, isDuplicateEmailError } from "@/shared/lib/htt
 export function useCreateProfessorForm() {
   const router = useRouter();
   const mutation = useCreateProfessor();
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [croppingFile, setCroppingFile] = useState<File | null>(null);
   const [fileError, setFileError] = useState("");
-  const [isCropping, setIsCropping] = useState(false);
   const [confirmModal, setConfirmModal] = useState<ConfirmModalProps | null>(null);
   const {
     control,
     handleSubmit,
     setValue,
     setError,
-    formState: { isValid, isDirty },
+    watch,
+    formState: { isValid, isDirty, errors },
   } = useForm<CreateProfessorInputs>({
     resolver: zodResolver(CreateProfessorSchema),
     defaultValues: {
@@ -45,6 +45,9 @@ export function useCreateProfessorForm() {
     mode: "onBlur",
     reValidateMode: "onChange",
   });
+  const selectedFile = watch("imageFile");
+  const imageError = errors.imageFile?.message;
+  const isCropping = Boolean(croppingFile);
   const { fields: educationFields, append: appendEducation, remove: removeEducation } = useFieldArray({
     control,
     name: "educations",
@@ -72,7 +75,7 @@ export function useCreateProfessorForm() {
       imageFocalPointY: data.imageFocalPointY,
     });
     try {
-      await mutation.mutateAsync({ data: payload, imageFile: selectedFile });
+      await mutation.mutateAsync({ data: payload, imageFile: data.imageFile });
     } catch (error) {
       if (isDuplicateEmailError(error)) {
         mutation.reset();
@@ -107,6 +110,7 @@ export function useCreateProfessorForm() {
     setValue,
     submit: handleSubmit(onSubmit),
     isValid,
+    errors,
     educationFields,
     appendEducation,
     removeEducation,
@@ -114,10 +118,12 @@ export function useCreateProfessorForm() {
     appendExpert,
     removeExpert,
     selectedFile,
+    croppingFile,
     isCropping,
     confirmModal,
     isPending: mutation.isPending,
     fileError,
+    imageError,
     isError: mutation.isError || Boolean(fileError),
     clearError: () => {
       setFileError("");
@@ -130,24 +136,23 @@ export function useCreateProfessorForm() {
           return;
         }
         setFileError("");
-        setSelectedFile(file);
-        setIsCropping(true);
+        setCroppingFile(file);
       }
     },
     handleCropComplete: (
       file: File,
       focalPoint?: { x: number; y: number },
     ) => {
-      setSelectedFile(file);
+      setValue("imageFile", file, { shouldDirty: true, shouldValidate: true });
       if (focalPoint) {
         setValue("imageFocalPointX", focalPoint.x, { shouldDirty: true });
         setValue("imageFocalPointY", focalPoint.y, { shouldDirty: true });
       }
-      setIsCropping(false);
+      setFileError("");
+      setCroppingFile(null);
     },
     handleCropCancel: () => {
-      setIsCropping(false);
-      setSelectedFile(null);
+      setCroppingFile(null);
     },
     cancelForm,
   };

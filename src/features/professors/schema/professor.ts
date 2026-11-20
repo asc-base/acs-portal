@@ -33,7 +33,14 @@ const ProfessorFormSchema = z.object({
   ...CommonProfessorSchema.shape,
 });
 
-export const CreateProfessorSchema = ProfessorFormSchema;
+export const CreateProfessorSchema = ProfessorFormSchema.extend({
+  imageFile: z
+    .file({ message: "กรุณาอัปโหลดรูปภาพ" })
+    .refine(
+      (file) => file.type.startsWith("image/"),
+      "รองรับเฉพาะไฟล์รูปภาพเท่านั้น",
+    ),
+});
 export const UpdateProfessorSchema = ProfessorFormSchema;
 
 export const CreateProfessorPayloadSchema = z.object({
